@@ -24,6 +24,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld/Builder.hxx>
+#include <vcl/mapconvert.hxx>
 
 #include <editeng/lrspitem.hxx>
 #include <tabstpge.hxx>
@@ -192,7 +193,7 @@ bool SvxTabulatorTabPage::FillItemSet(SfxItemSet* rSet)
         for (sal_uInt16 i = 0; i < aNewTabs->Count(); ++i)
         {
             SvxTabStop aTmpStop = (*aNewTabs)[i];
-            aTmpStop.GetTabPos() = OutputDevice::LogicToLogic(aTmpStop.GetTabPos(), MapUnit::Map100thMM, eUnit);
+            aTmpStop.GetTabPos() = ::LogicToLogic(aTmpStop.GetTabPos(), MapUnit::Map100thMM, eUnit);
             aTmp->Insert(aTmpStop);
         }
 
@@ -234,7 +235,7 @@ void SvxTabulatorTabPage::Reset(const SfxItemSet* rSet)
             for (sal_uInt16 i = 0; i < aTmp->Count(); ++i)
             {
                 SvxTabStop aTmpStop = (*aTmp)[i];
-                aTmpStop.GetTabPos() = OutputDevice::LogicToLogic(aTmpStop.GetTabPos(), eUnit, MapUnit::Map100thMM);
+                aTmpStop.GetTabPos() = ::LogicToLogic(aTmpStop.GetTabPos(), eUnit, MapUnit::Map100thMM);
                 aNewTabs->Insert(aTmpStop);
             }
         }
@@ -253,7 +254,7 @@ void SvxTabulatorTabPage::Reset(const SfxItemSet* rSet)
     pItem = GetItem(*rSet, SID_ATTR_TABSTOP_DEFAULTS);
 
     if (pItem)
-        nDefDist = OutputDevice::LogicToLogic(tools::Long(static_cast<const SfxUInt16Item*>(pItem)->GetValue()), eUnit, MapUnit::Map100thMM);
+        nDefDist = ::LogicToLogic(tools::Long(static_cast<const SfxUInt16Item*>(pItem)->GetValue()), eUnit, MapUnit::Map100thMM);
 
     // Tab pos currently selected
     sal_uInt16 nTabPos = 0;
@@ -324,7 +325,7 @@ void SvxTabulatorTabPage::InitTabPos_Impl( sal_uInt16 nTabPos )
     {
         nOffset = pOffSetItem->GetValue();
         MapUnit eUnit = GetItemSet().GetPool()->GetMetric(GetWhich(SID_ATTR_TABSTOP));
-        nOffset = OutputDevice::LogicToLogic(nOffset, eUnit, MapUnit::Map100thMM);
+        nOffset = ::LogicToLogic(nOffset, eUnit, MapUnit::Map100thMM);
     }
 
     // Correct current TabPos and default tabs
@@ -438,7 +439,7 @@ void SvxTabulatorTabPage::NewHdl_Impl(const weld::Button* pBtn)
     {
         nOffset = pOffsetItem->GetValue();
         MapUnit eUnit = GetItemSet().GetPool()->GetMetric( GetWhich( SID_ATTR_TABSTOP ) );
-        nOffset = OutputDevice::LogicToLogic( nOffset, eUnit, MapUnit::Map100thMM  );
+        nOffset = ::LogicToLogic( nOffset, eUnit, MapUnit::Map100thMM  );
     }
     const tools::Long nReal = nVal - nOffset;
     sal_Int32 nSize = m_xTabBox->get_count();

@@ -35,6 +35,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/commandevent.hxx>
+#include <vcl/mapconvert.hxx>
 
 #define EMPTY_PAPER_SIZE    0x7FFFFFFF
 
@@ -569,8 +570,8 @@ namespace frm
         }
         else
         {
-            aPos = OutputDevice::LogicToLogic( _rPos, aOriginalMapMode, aNormalizedMapMode );
-            aSize = OutputDevice::LogicToLogic( _rSize, aOriginalMapMode, aNormalizedMapMode );
+            aPos = ::LogicToLogic( _rPos, aOriginalMapMode, aNormalizedMapMode );
+            aSize = ::LogicToLogic( _rSize, aOriginalMapMode, aNormalizedMapMode );
         }
 
         tools::Rectangle aPlayground( aPos, aSize );

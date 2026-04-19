@@ -25,6 +25,7 @@
 #include <tools/poly.hxx>
 #include <comphelper/diagnose_ex.hxx>
 #include <utility>
+#include <vcl/mapconvert.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/gdimtf.hxx>
@@ -1297,7 +1298,7 @@ void PDFExport::ImplExportPage( vcl::pdf::PDFWriter& rWriter, vcl::PDFExtOutDevD
 {
     //Rectangle(Point, Size) creates a rectangle off by 1, use Rectangle(long, long, long, long) instead
     basegfx::B2DPolygon aSize(tools::Polygon(tools::Rectangle(0, 0, rMtf.GetPrefSize().Width(), rMtf.GetPrefSize().Height())).getB2DPolygon());
-    basegfx::B2DPolygon aSizePDF(OutputDevice::LogicToLogic(aSize, rMtf.GetPrefMapMode(), MapMode(MapUnit::MapPoint)));
+    basegfx::B2DPolygon aSizePDF(::LogicToLogic(aSize, rMtf.GetPrefMapMode(), MapMode(MapUnit::MapPoint)));
     basegfx::B2DRange aRangePDF(aSizePDF.getB2DRange());
     tools::Rectangle       aPageRect( Point(), rMtf.GetPrefSize() );
 

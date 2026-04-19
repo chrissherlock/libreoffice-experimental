@@ -51,6 +51,7 @@
 #include "svgfilter.hxx"
 
 #include <svx/unopage.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <vcl/vectorgraphicdata.hxx>
 #include <vcl/window.hxx>
@@ -373,8 +374,8 @@ bool SVGFilter::filterImpressOrDraw( const Sequence< PropertyValue >& rDescripto
         if (eDestUnit != eSrcUnit)
         {
             aGraphicSize = Size(
-                OutputDevice::LogicToLogic(aGraphicSize.Width(), eSrcUnit, eDestUnit),
-                OutputDevice::LogicToLogic(aGraphicSize.Height(), eSrcUnit, eDestUnit));
+                ::LogicToLogic(aGraphicSize.Width(), eSrcUnit, eDestUnit),
+                ::LogicToLogic(aGraphicSize.Height(), eSrcUnit, eDestUnit));
         }
 
         // Based on GraphicSize, set size of Page. Do not forget to adapt PageBorders,

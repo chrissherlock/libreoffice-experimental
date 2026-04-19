@@ -39,6 +39,7 @@
 #include <svtools/embedhlp.hxx>
 #include <utility>
 #include <vcl/svapp.hxx>
+#include <vcl/mapconvert.hxx>
 
 #include <ChartTools.hxx>
 #include <chartuno.hxx>
@@ -198,7 +199,7 @@ void SAL_CALL ScChartsObj::addNewByName( const OUString& rName,
     sal_Int64 nAspect(embed::Aspects::MSOLE_CONTENT);
     MapUnit aMapUnit(VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( nAspect ) ));
     Size aSize(aInsRect.GetSize());
-    aSize = OutputDevice::LogicToLogic( aSize, MapMode( MapUnit::Map100thMM ), MapMode( aMapUnit ) );
+    aSize = ::LogicToLogic( aSize, MapMode( MapUnit::Map100thMM ), MapMode( aMapUnit ) );
     awt::Size aSz;
     aSz.Width = aSize.Width();
     aSz.Height = aSize.Height();

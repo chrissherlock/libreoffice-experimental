@@ -36,6 +36,7 @@
 #include <editeng/justifyitem.hxx>
 
 #include <vcl/svapp.hxx>
+#include <vcl/mapconvert.hxx>
 #include <rtl/math.hxx>
 #include <sal/log.hxx>
 
@@ -1716,7 +1717,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
         {
             Size aGridSize(nGridWidthPx, nGridHeightPx);
             const MapMode& rWinMapMode = GetLogicMode();
-            aGridSize = OutputDevice::LogicToLogic(
+            aGridSize = ::LogicToLogic(
                 pWin->PixelToLogic(aGridSize, rWinMapMode),
                 rWinMapMode, MapMode(MapUnit::MapTwip));
             nGridWidthTwips = aGridSize.Width();
@@ -2055,7 +2056,7 @@ void ScViewData::EditGrowX()
                 tools::Long nGridWidthPx = pView->GetGridWidth(eHWhich);
                 Size aGridSize{ nGridWidthPx, 1 };
                 aGridSize
-                    = OutputDevice::LogicToLogic(pWin->PixelToLogic(aGridSize, GetLogicMode()),
+                    = ::LogicToLogic(pWin->PixelToLogic(aGridSize, GetLogicMode()),
                                                  GetLogicMode(), MapMode{ MapUnit::MapTwip });
 
                 Size aPaperSize = pEngine->GetLOKSpecialPaperSize();

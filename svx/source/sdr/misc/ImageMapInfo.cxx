@@ -22,6 +22,7 @@
 #include <svx/svdobj.hxx>
 #include <svx/svdograf.hxx>
 #include <svx/svdoole2.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/imapobj.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/outdev.hxx>
@@ -93,8 +94,8 @@ IMapObject* SvxIMapInfo::GetHitIMapObject(const SdrObject* pObj, const Point& rW
                 aGraphSize = Application::GetDefaultDevice()->PixelToLogic(
                     pGrafObj->GetGrafPrefSize(), aMap100);
             else
-                aGraphSize = OutputDevice::LogicToLogic(pGrafObj->GetGrafPrefSize(),
-                                                        pGrafObj->GetGrafPrefMapMode(), aMap100);
+                aGraphSize = ::LogicToLogic(pGrafObj->GetGrafPrefSize(),
+                                            pGrafObj->GetGrafPrefMapMode(), aMap100);
 
             bObjSupported = true;
         }

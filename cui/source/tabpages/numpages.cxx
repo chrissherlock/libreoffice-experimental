@@ -19,6 +19,7 @@
 
 #include <com/sun/star/text/VertOrientation.hpp>
 
+#include <vcl/mapconvert.hxx>
 #include <numpages.hxx>
 #include <dialmgr.hxx>
 #include <o3tl/untaint.hxx>
@@ -1000,7 +1001,7 @@ IMPL_LINK_NOARG(SvxBitmapPickTabPage, NumSelectHdl_Impl, ValueSet*, void)
             {
                 Size aSize = SvxNumberFormat::GetGraphicSizeMM100(&aGraphic);
                 sal_Int16 eOrient = text::VertOrientation::LINE_CENTER;
-                aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(eCoreUnit));
+                aSize = ::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(eCoreUnit));
                 SvxBrushItem aBrush(aGraphic, GPOS_AREA, SID_ATTR_BRUSH );
                 aFmt.SetGraphicBrush( &aBrush, &aSize, &eOrient );
             }
@@ -2010,7 +2011,7 @@ IMPL_LINK(SvxNumOptionsTabPage, GraphicHdl_Impl, const OUString&, rIdent, void)
     if(!bSucc)
         return;
 
-    aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(m_eCoreUnit));
+    aSize = ::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(m_eCoreUnit));
 
     sal_uInt16 nMask = 1;
     for (sal_uInt16 i = 0; i < m_pActNum->GetLevelCount(); i++)
@@ -2166,8 +2167,10 @@ IMPL_LINK( SvxNumOptionsTabPage, SizeHdl_Impl, weld::MetricSpinButton&, rField, 
     bool bRatio = m_xRatioCB->get_active();
     tools::Long nWidthVal = static_cast<tools::Long>(m_xWidthMF->denormalize(m_xWidthMF->get_value(FieldUnit::MM_100TH)));
     tools::Long nHeightVal = static_cast<tools::Long>(m_xHeightMF->denormalize(m_xHeightMF->get_value(FieldUnit::MM_100TH)));
-    nWidthVal = OutputDevice::LogicToLogic(nWidthVal, MapUnit::Map100thMM, m_eCoreUnit);
-    nHeightVal = OutputDevice::LogicToLogic(nHeightVal, MapUnit::Map100thMM, m_eCoreUnit);
+    nWidthVal = ::LogicToLogic( nWidthVal ,
+                                                MapUnit::Map100thMM, m_eCoreUnit );
+    nHeightVal = ::LogicToLogic( nHeightVal,
+                                                MapUnit::Map100thMM, m_eCoreUnit);
     double  fSizeRatio;
 
     bool bRepaint = false;
@@ -2194,13 +2197,10 @@ IMPL_LINK( SvxNumOptionsTabPage, SizeHdl_Impl, weld::MetricSpinButton&, rField, 
                     aSize.setWidth( nWidthVal );
                     if (bRatio)
                     {
-                        aSize.setHeight(
-                            m_aInitSize[i].Height()
-                            + static_cast<tools::Long>(static_cast<double>(nDelta) / fSizeRatio));
-                        m_xHeightMF->set_value(
-                            m_xHeightMF->normalize(OutputDevice::LogicToLogic(
-                                aSize.Height(), m_eCoreUnit, MapUnit::Map100thMM)),
-                            FieldUnit::MM_100TH);
+                        aSize.setHeight( m_aInitSize[i].Height() + static_cast<tools::Long>(static_cast<double>(nDelta) / fSizeRatio) );
+                        m_xHeightMF->set_value(m_xHeightMF->normalize(
+                            ::LogicToLogic( aSize.Height(), m_eCoreUnit, MapUnit::Map100thMM )),
+                                FieldUnit::MM_100TH);
                     }
                 }
                 else
@@ -2209,12 +2209,10 @@ IMPL_LINK( SvxNumOptionsTabPage, SizeHdl_Impl, weld::MetricSpinButton&, rField, 
                     aSize.setHeight( nHeightVal );
                     if (bRatio)
                     {
-                        aSize.setWidth(
-                            m_aInitSize[i].Width()
-                            + static_cast<tools::Long>(static_cast<double>(nDelta) * fSizeRatio));
-                        m_xWidthMF->set_value(m_xWidthMF->normalize(OutputDevice::LogicToLogic(
-                                                  aSize.Width(), m_eCoreUnit, MapUnit::Map100thMM)),
-                                              FieldUnit::MM_100TH);
+                        aSize.setWidth( m_aInitSize[i].Width() + static_cast<tools::Long>(static_cast<double>(nDelta) * fSizeRatio) );
+                        m_xWidthMF->set_value(m_xWidthMF->normalize(
+                            ::LogicToLogic( aSize.Width(), m_eCoreUnit, MapUnit::Map100thMM )),
+                                FieldUnit::MM_100TH);
                     }
                 }
                 const SvxBrushItem* pBrushItem =  aNumFmt.GetBrush();

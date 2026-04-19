@@ -26,6 +26,7 @@
 #include <tools/urlobj.hxx>
 #include <toolkit/helper/vclunohelper.hxx>
 #include <sal/log.hxx>
+#include <vcl/mapconvert.hxx>
 
 #include <drawview.hxx>
 #include <global.hxx>
@@ -460,7 +461,7 @@ void ScDrawView::SetMarkedOriginalSize()
                     try
                     {
                         awt::Size aSz = xObj->getVisualAreaSize( static_cast<SdrOle2Obj*>(pObj)->GetAspect() );
-                        aOriginalSize = OutputDevice::LogicToLogic(
+                        aOriginalSize = ::LogicToLogic(
                                             Size( aSz.Width, aSz.Height ),
                                             MapMode(aUnit),
                                             MapMode(MapUnit::Map100thMM));

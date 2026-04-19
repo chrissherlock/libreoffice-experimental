@@ -23,6 +23,7 @@
 #include <tools/long.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/mapconvert.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
 
@@ -153,7 +154,7 @@ public:
 
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
-    ImplMapRes ResolveMapRes(const MapMode* pMode);
+    ImplMapRes ResolveMapRes(const MapMode* pMode) const;
 
     /** Invalidate the view transformation.
 
@@ -325,6 +326,20 @@ public:
 
     template <TransformableB2DGeometry T>
     T WindowToLogicUnits(const T& rWindowGeometry, const MapMode& rMapMode) const;
+
+    // ========================================================================
+    // MASTER STAGES / LOGIC-TO-LOGIC CONVERSIONS
+    // ========================================================================
+    // Pure mathematical transformations between arbitrary MapModes.
+    // These do not traverse the VCL device pipeline.
+
+    Point LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
+                       const MapMode* pMapModeDest) const;
+    SAL_DLLPRIVATE Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
+                                     const MapMode* pMapModeDest) const;
+    SAL_DLLPRIVATE tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
+                                                 const MapMode* pMapModeSource,
+                                                 const MapMode* pMapModeDest) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)

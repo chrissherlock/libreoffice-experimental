@@ -26,6 +26,7 @@
 #include <vcl/errinf.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld/MessageDialog.hxx>
+#include <vcl/mapconvert.hxx>
 #include <sfx2/app.hxx>
 #include <toolkit/helper/vclunohelper.hxx>
 #include <svx/svxdlg.hxx>
@@ -200,7 +201,7 @@ void ScTabViewShell::ActivateObject(SdrOle2Obj* pObj, sal_Int32 nVerb)
                 if ( aDrawSize != aOleSize )
                 {
                     MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( pClient->GetAspect() ) );
-                    aOleSize = OutputDevice::LogicToLogic( aDrawSize,
+                    aOleSize = ::LogicToLogic( aDrawSize,
                                 MapMode(MapUnit::Map100thMM), MapMode(aUnit));
                     awt::Size aSz( aOleSize.Width(), aOleSize.Height() );
                     xObj->setVisualAreaSize( pClient->GetAspect(), aSz );

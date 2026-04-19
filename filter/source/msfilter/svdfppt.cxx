@@ -21,6 +21,7 @@
 
 #include <osl/endian.h>
 #include <utility>
+#include <vcl/mapconvert.hxx>
 #include <vcl/svapp.hxx>
 #include <unotools/tempfile.hxx>
 #include <comphelper/diagnose_ex.hxx>
@@ -2189,7 +2190,7 @@ rtl::Reference<SdrObject> SdrPowerPointImport::ImportOLE( sal_uInt32 nOLEId,
                                         if ( rVisArea.IsEmpty() )
                                         {
                                             MapUnit aMapUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( rOe.nAspect ) );
-                                            Size aSize( OutputDevice::LogicToLogic( aGraphic.GetPrefSize(),
+                                            Size aSize( ::LogicToLogic( aGraphic.GetPrefSize(),
                                                 aGraphic.GetPrefMapMode(), MapMode( aMapUnit ) ) );
 
                                             awt::Size aSz;

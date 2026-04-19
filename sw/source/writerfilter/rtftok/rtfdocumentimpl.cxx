@@ -55,6 +55,7 @@
 #include <vcl/graph.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/mapconvert.hxx>
 #include "rtfsdrimport.hxx"
 #include "rtfreferenceproperties.hxx"
 #include "rtfskipdestination.hxx"
@@ -1060,7 +1061,7 @@ void RTFDocumentImpl::resolvePict(bool const bInline, uno::Reference<drawing::XS
         if (aGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
             aSize = Application::GetDefaultDevice()->PixelToLogic(aSize, aMap);
         else
-            aSize = OutputDevice::LogicToLogic(aSize, aGraphic.GetPrefMapMode(), aMap);
+            aSize = ::LogicToLogic(aSize, aGraphic.GetPrefMapMode(), aMap);
         m_aStates.top().getPicture().nWidth = aSize.Width();
         m_aStates.top().getPicture().nHeight = aSize.Height();
     }

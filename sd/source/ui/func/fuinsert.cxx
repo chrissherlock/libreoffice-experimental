@@ -50,6 +50,7 @@
 #include <comphelper/classids.hxx>
 #include <svtools/sfxecode.hxx>
 #include <vcl/transfer.hxx>
+#include <vcl/mapconvert.hxx>
 #include <svl/urlbmk.hxx>
 #include <svx/svdobj.hxx>
 #include <svx/svdograf.hxx>
@@ -367,14 +368,14 @@ void FuInsertOLE::DoExecute( SfxRequest& rReq )
                     // rectangle with balanced edge ratio
                     aSize.setWidth( 14100 );
                     aSize.setHeight( 10000 );
-                    Size aTmp = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aUnit));
+                    Size aTmp = ::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aUnit));
                     aSz.Width = aTmp.Width();
                     aSz.Height = aTmp.Height();
                     xObj->setVisualAreaSize( nAspect, aSz );
                 }
                 else
                 {
-                    aSize = OutputDevice::LogicToLogic(aSize, MapMode(aUnit), MapMode(MapUnit::Map100thMM));
+                    aSize = ::LogicToLogic(aSize, MapMode(aUnit), MapMode(MapUnit::Map100thMM));
                 }
 
                 Point aPos = mpWindow->GetVisibleCenter();
@@ -433,7 +434,7 @@ void FuInsertOLE::DoExecute( SfxRequest& rReq )
                 }
 
                 pOleObj->SetLogicRect(aRect);
-                Size aTmp( OutputDevice::LogicToLogic(aRect.GetSize(), MapMode(MapUnit::Map100thMM), MapMode(aUnit)) );
+                Size aTmp( ::LogicToLogic(aRect.GetSize(), MapMode(MapUnit::Map100thMM), MapMode(aUnit)) );
                 awt::Size aVisualSize;
                 aVisualSize.Width = aTmp.Width();
                 aVisualSize.Height = aTmp.Height();
@@ -551,14 +552,14 @@ void FuInsertOLE::DoExecute( SfxRequest& rReq )
                         // rectangle with balanced edge ratio
                         aSize.setWidth( 14100 );
                         aSize.setHeight( 10000 );
-                        Size aTmp = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
+                        Size aTmp = ::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
                         aSz.Width = aTmp.Width();
                         aSz.Height = aTmp.Height();
                         xObj->setVisualAreaSize( nAspect, aSz );
                     }
                     else
                     {
-                        aSize = OutputDevice::LogicToLogic(aSize, MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
+                        aSize = ::LogicToLogic(aSize, MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
                     }
                 }
 
@@ -594,7 +595,7 @@ void FuInsertOLE::DoExecute( SfxRequest& rReq )
                                 }
                                 else
                                 {
-                                    Size aTmp = OutputDevice::LogicToLogic(aRect.GetSize(), MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
+                                    Size aTmp = ::LogicToLogic(aRect.GetSize(), MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
                                     awt::Size aSz( aTmp.Width(), aTmp.Height() );
                                     xObj->setVisualAreaSize( nAspect, aSz );
                                 }
@@ -639,7 +640,7 @@ void FuInsertOLE::DoExecute( SfxRequest& rReq )
                             {
                                 awt::Size aSz = xObj->getVisualAreaSize( nAspect );
 
-                                Size aNewSize = OutputDevice::LogicToLogic( Size( aSz.Width, aSz.Height ),
+                                Size aNewSize = ::LogicToLogic( Size( aSz.Width, aSz.Height ),
                                     MapMode( aMapUnit ), MapMode( MapUnit::Map100thMM ) );
                                 if ( aNewSize != aSize )
                                 {
@@ -657,7 +658,7 @@ void FuInsertOLE::DoExecute( SfxRequest& rReq )
 
                             if ( nAspect != embed::Aspects::MSOLE_ICON )
                             {
-                                Size aTmp = OutputDevice::LogicToLogic(aRect.GetSize(), MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
+                                Size aTmp = ::LogicToLogic(aRect.GetSize(), MapMode(MapUnit::Map100thMM), MapMode(aMapUnit));
                                 awt::Size aSz( aTmp.Width(), aTmp.Height() );
                                 xObj->setVisualAreaSize( nAspect, aSz );
                             }

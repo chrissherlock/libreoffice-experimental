@@ -26,6 +26,7 @@
 #include <tools/stream.hxx>
 #include <sot/exchange.hxx>
 #include <sot/formats.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/GraphicObject.hxx>
 #include <vcl/svapp.hxx>
 
@@ -611,7 +612,7 @@ Size SdrGrafObj::getOriginalSize() const
     if (GetGrafPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
         aSize = Application::GetDefaultDevice()->PixelToLogic(aSize, MapMode(getSdrModelFromSdrObject().GetScaleUnit()));
     else
-        aSize = OutputDevice::LogicToLogic(aSize, GetGrafPrefMapMode(), MapMode(getSdrModelFromSdrObject().GetScaleUnit()));
+        aSize = ::LogicToLogic(aSize, GetGrafPrefMapMode(), MapMode(getSdrModelFromSdrObject().GetScaleUnit()));
 
     const SfxItemSet& rSet = GetObjectItemSet();
     const SdrGrafCropItem&  rCrop = rSet.Get( SDRATTR_GRAFCROP );
@@ -1220,7 +1221,7 @@ void SdrGrafObj::AdjustToMaxRect( const tools::Rectangle& rMaxRect, bool bShrink
     if (mpGraphicObject->GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
         aSize = Application::GetDefaultDevice()->PixelToLogic(mpGraphicObject->GetPrefSize(), MapMode(MapUnit::Map100thMM));
     else
-        aSize = OutputDevice::LogicToLogic( mpGraphicObject->GetPrefSize(),
+        aSize = ::LogicToLogic( mpGraphicObject->GetPrefSize(),
                                             mpGraphicObject->GetPrefMapMode(),
                                             MapMode( MapUnit::Map100thMM ) );
 

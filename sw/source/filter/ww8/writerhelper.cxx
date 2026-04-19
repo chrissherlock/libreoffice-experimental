@@ -52,6 +52,7 @@
 #include <numrule.hxx>
 #include <utility>
 #include <vcl/svapp.hxx>
+#include <vcl/mapconvert.hxx>
 #include <IDocumentDrawModelAccess.hxx>
 #include <IDocumentLayoutAccess.hxx>
 #include <IDocumentRedlineAccess.hxx>
@@ -174,7 +175,7 @@ namespace ww8
         }
         else
         {
-            aSize = OutputDevice::LogicToLogic( aSize,rGrf.GetPrefMapMode(), aMap100mm );
+            aSize = ::LogicToLogic( aSize,rGrf.GetPrefMapMode(), aMap100mm );
         }
         maSize = aSize;
         maLayoutSize = maSize;

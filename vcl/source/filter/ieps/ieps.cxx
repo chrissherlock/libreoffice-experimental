@@ -21,6 +21,7 @@
 #include <filter/EpsReader.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/graph.hxx>
@@ -138,7 +139,7 @@ static void MakeAsMeta(Graphic &rGraphic)
         aSize = Application::GetDefaultDevice()->PixelToLogic(
             rGraphic.GetSizePixel(), MapMode(MapUnit::Map100thMM));
     else
-        aSize = OutputDevice::LogicToLogic( aSize,
+        aSize = ::LogicToLogic( aSize,
             rGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
 
     pVDev->EnableOutput( false );
@@ -755,7 +756,7 @@ bool ImportEpsGraphic( SvStream & rStream, Graphic & rGraphic)
                                 Size            aSize( nWidth, nHeight );
                                 pVDev->EnableOutput( false );
                                 aMtf.Record( pVDev );
-                                aSize = OutputDevice::LogicToLogic(aSize, MapMode(), MapMode(MapUnit::Map100thMM));
+                                aSize = ::LogicToLogic(aSize, MapMode(), MapMode(MapUnit::Map100thMM));
                                 pVDev->DrawBitmap( Point(), aSize, vcl::bitmap::CreateFromData(std::move(aBitmap)) );
                                 aMtf.Stop();
                                 aMtf.WindStart();

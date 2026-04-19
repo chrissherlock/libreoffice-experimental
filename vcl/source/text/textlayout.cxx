@@ -25,6 +25,7 @@
 #include <tools/mapunit.hxx>
 #include <tools/fract.hxx>
 
+#include <vcl/mapconvert.hxx>
 #include <vcl/ctrl.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/unohelp.hxx>
@@ -574,13 +575,13 @@ namespace vcl
 
         // now that the Zoom is part of the map mode, reset the target device's font to the "unzoomed" version
         Font aDrawFont( aUnzoomedPointFont );
-        aDrawFont.SetFontSize( OutputDevice::LogicToLogic(aDrawFont.GetFontSize(), MapMode(MapUnit::MapPoint), MapMode(eTargetMapUnit)) );
+        aDrawFont.SetFontSize( ::LogicToLogic(aDrawFont.GetFontSize(), MapMode(MapUnit::MapPoint), MapMode(eTargetMapUnit)) );
         _rTargetDevice.SetFont( aDrawFont );
 
         // transfer font to the reference device
         m_rReferenceDevice.Push( PushFlags::FONT | PushFlags::TEXTLAYOUTMODE );
         Font aRefFont( aUnzoomedPointFont );
-        aRefFont.SetFontSize( OutputDevice::LogicToLogic(
+        aRefFont.SetFontSize( ::LogicToLogic(
             aRefFont.GetFontSize(), MapMode(MapUnit::MapPoint), m_rReferenceDevice.GetMapMode()) );
         m_rReferenceDevice.SetFont( aRefFont );
     }

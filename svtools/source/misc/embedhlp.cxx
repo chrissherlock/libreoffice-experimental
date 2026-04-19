@@ -20,6 +20,7 @@
 #include <libxml/xmlwriter.h>
 
 #include <svtools/embedhlp.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <vcl/gdimtf.hxx>
@@ -566,7 +567,7 @@ Size EmbeddedObjectRef::GetSize( MapMode const * pTargetMapMode ) const
     }
 
     if ( pTargetMapMode )
-        aResult = OutputDevice::LogicToLogic( aResult, aSourceMapMode, *pTargetMapMode );
+        aResult = ::LogicToLogic( aResult, aSourceMapMode, *pTargetMapMode );
 
     return aResult;
 }

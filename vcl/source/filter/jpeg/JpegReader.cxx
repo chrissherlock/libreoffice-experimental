@@ -26,6 +26,7 @@
 #include "JpegReader.hxx"
 #include <vcl/graphicfilter.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/mapconvert.hxx>
 #include <tools/fract.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
@@ -225,7 +226,7 @@ bool JPEGReader::CreateBitmap(JPEGCreateBitmapParam const & rParam)
             double      fFractX = 1.0 / rParam.X_density;
             double      fFractY = 1.0 / rParam.Y_density;
             MapMode     aMapMode( nUnit == 1 ? MapUnit::MapInch : MapUnit::MapCM, Point(), fFractX, fFractY );
-            Size        aPrefSize = OutputDevice::LogicToLogic(aSize, aMapMode, MapMode(MapUnit::Map100thMM));
+            Size        aPrefSize = ::LogicToLogic(aSize, aMapMode, MapMode(MapUnit::Map100thMM));
 
             mpBitmap->SetPrefSize(aPrefSize);
             mpBitmap->SetPrefMapMode(MapMode(MapUnit::Map100thMM));
