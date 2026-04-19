@@ -26,7 +26,15 @@
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
 
+#include <concepts>
+
 class LineInfo;
+
+template <typename T>
+concept TransformableB2DGeometry = requires(T a, const basegfx::B2DHomMatrix& rMatrix)
+{
+    a.transform(rMatrix);
+};
 
 class CoordinateMapper
 {
@@ -304,15 +312,16 @@ public:
 
     vcl::Region WindowToLogicUnits(const vcl::Region& rWindowRegion) const;
     Point WindowToLogicUnits(const Point& rWindowPt) const;
+    tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect) const;
     tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly) const;
-    tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rRect) const;
-    tools::PolyPolygon WindowToLogicUnits(const tools::PolyPolygon& rPolyPoly) const;
-    basegfx::B2DPolyPolygon
-    WindowToLogicUnits(const basegfx::B2DPolyPolygon& rPolyPoly) const;
+    tools::PolyPolygon
+    WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) const;
     Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const;
     Size WindowToLogicUnits(const Size& rWindowSize) const;
     tools::Long WindowSubPixelToLogicIntX(double fX) const;
     tools::Long WindowSubPixelToLogicIntY(double fY) const;
+    template <TransformableB2DGeometry T>
+    T WindowToLogicUnits(const T& rWindowGeometry) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)

@@ -348,20 +348,14 @@ tools::PolyPolygon OutputDevice::PixelToLogic(const tools::PolyPolygon& rDeviceP
     return mpMapper->WindowToLogicUnits(rDevicePolyPoly);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygon& rPixelPolyPoly ) const
-{
-    basegfx::B2DPolyPolygon aTransformedPoly = rPixelPolyPoly;
-    const basegfx::B2DHomMatrix aTransformationMatrix = mpMapper->GetInverseViewTransformation();
-    aTransformedPoly.transform( aTransformationMatrix );
-    return aTransformedPoly;
-}
-
 basegfx::B2DRectangle OutputDevice::PixelToLogic(const basegfx::B2DRectangle& rDeviceRect) const
 {
-    basegfx::B2DRectangle aTransformedRect = rDeviceRect;
-    const basegfx::B2DHomMatrix aTransformationMatrix = mpMapper->GetInverseViewTransformation();
-    aTransformedRect.transform(aTransformationMatrix);
-    return aTransformedRect;
+    return mpMapper->WindowToLogicUnits(rDeviceRect);
+}
+
+basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygon& rPixelPolyPoly ) const
+{
+    return mpMapper->WindowToLogicUnits(rPixelPolyPoly);
 }
 
 Point OutputDevice::PixelToLogic( const Point& rDevicePt,
