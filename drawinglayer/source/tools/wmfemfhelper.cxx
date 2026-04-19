@@ -22,6 +22,7 @@
 #include <wmfemfhelper.hxx>
 #include <drawinglayer/primitive2d/pointarrayprimitive2d.hxx>
 #include <vcl/alpha.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/BitmapColor.hxx>
 #include <vcl/fntstyle.hxx>
 #include <vcl/lineinfo.hxx>
@@ -2495,7 +2496,7 @@ namespace wmfemfhelper
                         aFontSize = Size(0, 16);
 
                         // convert to target MapUnit if not pixels
-                        aFontSize = OutputDevice::LogicToLogic(
+                        aFontSize = ::LogicToLogic(
                             aFontSize, MapMode(MapUnit::MapPixel), MapMode(rPropertyHolders.Current().getMapUnit()));
 
                         aCorrectedFont.SetFontSize(aFontSize);

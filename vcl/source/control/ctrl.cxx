@@ -24,6 +24,7 @@
 #include <vcl/ctrl.hxx>
 #include <vcl/decoview.hxx>
 #include <vcl/event.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/mnemonic.hxx>
 
 #include <svdata.hxx>
@@ -501,7 +502,7 @@ void Control::LogicInvalidate(const tools::Rectangle* pRectangle)
     }
     else
     {
-        aResultRectangle = OutputDevice::LogicToLogic(*pRectangle, GetMapMode(), MapMode(MapUnit::MapTwip));
+        aResultRectangle = ::LogicToLogic(*pRectangle, GetMapMode(), MapMode(MapUnit::MapTwip));
     }
 
     pParent->GetLOKNotifier()->notifyInvalidation(&aResultRectangle);

@@ -46,6 +46,7 @@
 #include <sfx2/linkmgr.hxx>
 #include <tools/urlobj.hxx>
 #include <vcl/weld/MessageDialog.hxx>
+#include <vcl/mapconvert.hxx>
 #include <sfx2/dispatch.hxx>
 #include <sfx2/viewfrm.hxx>
 #include <svl/stritem.hxx>
@@ -2509,7 +2510,7 @@ bool SwTransferable::PasteOLE( const TransferableDataHelper& rData, SwWrtShell& 
             {
                 aSize = aObjDesc.maSize;    //always 100TH_MM
                 MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( aObjDesc.mnViewAspect ) );
-                aSize = OutputDevice::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aUnit));
+                aSize = ::LogicToLogic(aSize, MapMode(MapUnit::Map100thMM), MapMode(aUnit));
                 awt::Size aSz;
                 try
                 {

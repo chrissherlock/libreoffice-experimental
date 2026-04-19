@@ -49,6 +49,7 @@
 #include <svl/intitem.hxx>
 #include <svl/numformat.hxx>
 #include <svl/zforlist.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/outdev.hxx>
 #include <tools/fract.hxx>
 #include <tools/UnitConversion.hxx>
@@ -782,7 +783,7 @@ void ScPatternAttr::fillFontOnly(
             double fFractOne(1.0);
             aDestMode.SetScaleX( fFractOne );
             aDestMode.SetScaleY( fFractOne );
-            aEffSize = OutputDevice::LogicToLogic( aSize, aSrcMode, aDestMode );
+            aEffSize = ::LogicToLogic( aSize, aSrcMode, aDestMode );
         }
         rFont.SetFontSize( aEffSize );
     }

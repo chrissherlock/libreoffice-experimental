@@ -67,6 +67,7 @@
 #include <tools/UnitConversion.hxx>
 #include <tools/zcodec.hxx>
 #include <unotools/configmgr.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/bitmap.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/cvtgrf.hxx>
@@ -3260,7 +3261,7 @@ Font PDFWriterImpl::replaceFont( const vcl::Font& rControlFont, const vcl::Font&
     {
         Size aFontSize = aFont.GetFontSize();
         OutputDevice* pDefDev = Application::GetDefaultDevice();
-        aFontSize = OutputDevice::LogicToLogic( aFontSize, pDefDev->GetMapMode(), getMapMode() );
+        aFontSize = ::LogicToLogic( aFontSize, pDefDev->GetMapMode(), getMapMode() );
         aFont.SetFontSize( aFontSize );
     }
     return aFont;
@@ -9736,7 +9737,7 @@ void PDFWriterImpl::moveClipRegion( sal_Int32 nX, sal_Int32 nY )
     }
     else
     {
-        aConvertA = LogicToLogic(m_aGraphicsStack.front().m_aMapMode, m_aMapMode);
+        aConvertA = ::LogicToLogic(m_aGraphicsStack.front().m_aMapMode, m_aMapMode);
     }
 
     basegfx::B2DPoint aB2DPointA(nX, nY);

@@ -27,6 +27,7 @@
 #include <unotools/resmgr.hxx>
 #include <vcl/alpha.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/graph.hxx>
@@ -448,7 +449,7 @@ void PSWriter::ImplWriteProlog( const Graphic* pPreview )
     mpPS->WriteOString( "%%BoundingBox: " );                         // BoundingBox
     ImplWriteLong( 0 );
     ImplWriteLong( 0 );
-    Size aSizePoint = OutputDevice::LogicToLogic( pMTF->GetPrefSize(),
+    Size aSizePoint = ::LogicToLogic( pMTF->GetPrefSize(),
                         pMTF->GetPrefMapMode(), MapMode(MapUnit::MapPoint));
     ImplWriteLong( aSizePoint.Width() );
     ImplWriteLong( aSizePoint.Height() ,PS_RET );
@@ -1131,8 +1132,8 @@ void PSWriter::ImplWriteActions( const GDIMetaFile& rMtf, VirtualDevice& rVDev )
                         Size    aSize = static_cast<const MetaEPSAction*>(pMA)->GetSize();
 
                         MapMode aMapMode( aSubstitute.GetPrefMapMode() );
-                        Size aOutSize( OutputDevice::LogicToLogic( aSize, rVDev.GetMapMode(), aMapMode ) );
-                        Point aOrigin( OutputDevice::LogicToLogic( aPoint, rVDev.GetMapMode(), aMapMode ) );
+                        Size aOutSize( ::LogicToLogic( aSize, rVDev.GetMapMode(), aMapMode ) );
+                        Point aOrigin( ::LogicToLogic( aPoint, rVDev.GetMapMode(), aMapMode ) );
                         aOrigin.AdjustY(aOutSize.Height() );
                         aMapMode.SetOrigin( aOrigin );
                         aMapMode.SetScaleX( aOutSize.Width() / ( nBoundingBox[ 2 ] - nBoundingBox[ 0 ] ) );

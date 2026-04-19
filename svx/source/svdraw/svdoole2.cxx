@@ -60,6 +60,7 @@
 
 #include <vcl/svapp.hxx>
 #include <vcl/unohelp.hxx>
+#include <vcl/mapconvert.hxx>
 
 #include <svx/svdmodel.hxx>
 #include <svx/dialmgr.hxx>
@@ -261,7 +262,7 @@ void SAL_CALL SdrLightEmbeddedClient_Impl::notifyEvent( const document::EventObj
         }
 
         aVisArea.SetSize( Size( aSz.Width, aSz.Height ) );
-        aVisArea = OutputDevice::LogicToLogic(aVisArea, MapMode(aObjMapUnit), MapMode(aContainerMapUnit));
+        aVisArea = ::LogicToLogic(aVisArea, MapMode(aObjMapUnit), MapMode(aContainerMapUnit));
         Size aScaledSize( static_cast< tools::Long >( m_aScaleWidth * aVisArea.GetWidth() ),
                             static_cast< tools::Long >( m_aScaleHeight * aVisArea.GetHeight() ) );
         tools::Rectangle aLogicRect( mpObj->GetLogicRect() );
@@ -1642,7 +1643,7 @@ void SdrOle2Obj::ImpSetVisAreaSize()
                 aVisSize = Size( static_cast<tools::Long>( getRectangle().GetWidth() / fScaleWidth ),
                                  static_cast<tools::Long>( getRectangle().GetHeight() / fScaleHeight ) );
 
-            aVisSize = OutputDevice::LogicToLogic(
+            aVisSize = ::LogicToLogic(
                 aVisSize,
                 MapMode(getSdrModelFromSdrObject().GetScaleUnit()),
                 MapMode(aMapUnit));
@@ -1666,7 +1667,7 @@ void SdrOle2Obj::ImpSetVisAreaSize()
                 // server changed VisArea to its liking and the VisArea is different than the suggested one
                 // store the new value as given by the object
                 MapUnit aNewMapUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( mpImpl->mxObjRef->getMapUnit( GetAspect() ) );
-                auto aSize = OutputDevice::LogicToLogic(aAcceptedVisArea.GetSize(), MapMode(aNewMapUnit), MapMode(getSdrModelFromSdrObject().GetScaleUnit()));
+                auto aSize = ::LogicToLogic(aAcceptedVisArea.GetSize(), MapMode(aNewMapUnit), MapMode(getSdrModelFromSdrObject().GetScaleUnit()));
                 setRectangleSize(aSize.Width(), aSize.Height());
             }
 
@@ -1719,12 +1720,12 @@ void SdrOle2Obj::ImpSetVisAreaSize()
             const Point aTL( getRectangle().TopLeft() );
             const Point aBR( getRectangle().BottomRight() );
             const Point aTL2(
-                OutputDevice::LogicToLogic(
+                ::LogicToLogic(
                     aTL,
                     MapMode(getSdrModelFromSdrObject().GetScaleUnit()),
                     MapMode(aMapUnit)));
             const Point aBR2(
-                OutputDevice::LogicToLogic(
+                ::LogicToLogic(
                     aBR,
                     MapMode(getSdrModelFromSdrObject().GetScaleUnit()),
                     MapMode(aMapUnit)));

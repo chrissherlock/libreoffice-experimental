@@ -26,6 +26,7 @@
 
 #include <utility>
 #include <tools/mapunit.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/wmfexternal.hxx>
@@ -160,7 +161,7 @@ namespace emfio::emfreader
                     }
                     else
                     {
-                        aSize = OutputDevice::LogicToLogic(aSize, aMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
+                        aSize = ::LogicToLogic(aSize, aMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
                     }
 
                     // use size

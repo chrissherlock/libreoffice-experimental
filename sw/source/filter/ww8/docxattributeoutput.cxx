@@ -155,6 +155,7 @@
 #include <utility>
 #include <vcl/embeddedfontsmanager.hxx>
 #include <vcl/vectorgraphicdata.hxx>
+#include <vcl/mapconvert.hxx>
 #include <i18npool/breakiterator.hxx>
 
 #include <com/sun/star/i18n/ScriptType.hpp>
@@ -6365,7 +6366,7 @@ void DocxAttributeOutput::WriteOLE( SwOLENode& rNode, const Size& rSize, const S
             awt::Size aSize = xObj->getVisualAreaSize( rNode.GetAspect() );
 
             MapUnit aUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( rNode.GetAspect() ) );
-            Size aOriginalSize( OutputDevice::LogicToLogic(Size( aSize.Width, aSize.Height),
+            Size aOriginalSize( ::LogicToLogic(Size( aSize.Width, aSize.Height),
                                                 MapMode(aUnit), MapMode(MapUnit::MapTwip)));
 
             m_pSerializer->startElementNS( XML_w, XML_object,

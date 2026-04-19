@@ -76,6 +76,7 @@
 #include <comphelper/memorystream.hxx>
 #include <sot/exchange.hxx>
 #include <utility>
+#include <vcl/mapconvert.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/outdev.hxx>
 #include <filter/msfilter/escherex.hxx>
@@ -344,7 +345,7 @@ void ShapeExport::SetURLTranslator(const std::shared_ptr<URLTransformer>& pTrans
 
 awt::Size ShapeExport::MapSize( const awt::Size& rSize ) const
 {
-    Size aRetSize( OutputDevice::LogicToLogic( Size( rSize.Width, rSize.Height ), maMapModeSrc, maMapModeDest ) );
+    Size aRetSize( ::LogicToLogic( Size( rSize.Width, rSize.Height ), maMapModeSrc, maMapModeDest ) );
 
     if ( !aRetSize.Width() )
         aRetSize.AdjustWidth( 1 );
