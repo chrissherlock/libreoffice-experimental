@@ -289,6 +289,8 @@ public:
     WindowToLogicUnits(const basegfx::B2DPolyPolygon& rPolyPoly) const;
     SAL_DLLPRIVATE Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const;
     SAL_DLLPRIVATE Size WindowToLogicUnits(const Size& rWindowSize) const;
+    SAL_DLLPRIVATE tools::Long WindowSubPixelToLogicIntX(double fX) const;
+    SAL_DLLPRIVATE tools::Long WindowSubPixelToLogicIntY(double fY) const;
 
     // Window <-> View subpixel
     double WindowToViewSubPixelX(double fX) const;
