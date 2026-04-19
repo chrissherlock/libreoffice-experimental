@@ -317,18 +317,23 @@ public:
                                                          const ImplMapRes& rMapRes) const;
     vcl::Region WindowToLogicUnits(const vcl::Region& rWindowRegion) const;
     Point WindowToLogicUnits(const Point& rWindowPt) const;
+    Point WindowToLogicUnits(const Point& rWindowPt,
+                                            const ImplMapRes& rMapRes) const;
+    Point WindowToLogicUnits(const Point& rWindowPt, const MapMode& rMapMode) const;
+
     tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect) const;
     tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly) const;
     tools::PolyPolygon
     WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) const;
     Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const;
+
     Size WindowToLogicUnits(const Size& rWindowSize) const;
+    Size WindowToLogicUnits(const Size& rWindowSize,
+                                           const ImplMapRes& rMapRes) const;
+    Size WindowToLogicUnits(const Size& rWindowSize, const MapMode& rMapMode) const;
+
     template <TransformableB2DGeometry T>
     T WindowToLogicUnits(const T& rWindowGeometry) const;
-
-    Point WindowToLogicUnits(const Point& rWindowPt,
-                                            const ImplMapRes& rMapRes) const;
-    Point WindowToLogicUnits(const Point& rWindowPt, const MapMode& rMapMode) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
