@@ -38,6 +38,7 @@
 #include <vcl/builder.hxx>
 #include <o3tl/string_view.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <window.h>
 #include <svdata.hxx>
 #include <salgdi.hxx>
@@ -163,7 +164,7 @@ void Window::HideTracking()
 void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlags )
 {
     OutputDevice *pOutDev = GetOutDev();
-    tools::Rectangle aRect(pOutDev->LogicToDevicePixel(rRect));
+    tools::Rectangle aRect(pOutDev->GetMapper().LogicToDevicePixel(rRect));
 
     if ( aRect.IsEmpty() )
         return;

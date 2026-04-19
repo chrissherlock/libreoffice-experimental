@@ -32,6 +32,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <impglyphitem.hxx>
@@ -983,7 +984,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     if (!InitFont())
         return;
 
-    Point aPos = LogicToDevicePixel(rPos);
+    Point aPos = mpMapper->LogicToDevicePixel(rPos);
     double fWidth = LogicWidthToDeviceSubPixel(nWidth);
     aPos += Point( mnTextOffX, mnTextOffY );
     ImplDrawTextLine( aPos.X(), aPos.X(), 0, fWidth, fWidth, eStrikeout, eUnderline, eOverline, /*bUnderlineAbove*/false );
@@ -1010,8 +1011,8 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
     if (!InitFont())
         return;
 
-    Point aStartPt = LogicToDevicePixel(rStartPos);
-    Point aEndPt = LogicToDevicePixel(rEndPos);
+    Point aStartPt = mpMapper->LogicToDevicePixel(rStartPos);
+    Point aEndPt = mpMapper->LogicToDevicePixel(rEndPos);
 
     tools::Long nStartX = aStartPt.X();
     tools::Long nStartY = aStartPt.Y();

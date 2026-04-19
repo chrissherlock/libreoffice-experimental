@@ -22,6 +22,7 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 
+#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 
 bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
@@ -43,7 +44,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
     if( mbOutputClipped )
         return true;
 
-    tools::Rectangle aRect(LogicToDevicePixel(tools::Rectangle(rPoint, rSize)));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(tools::Rectangle(rPoint, rSize)));
 
     if (aRect.IsEmpty())
         return true;

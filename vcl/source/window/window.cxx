@@ -2957,7 +2957,7 @@ void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll,
                      const tools::Rectangle& rRect, ScrollFlags nFlags )
 {
     OutputDevice *pOutDev = GetOutDev();
-    tools::Rectangle aRect = pOutDev->LogicToDevicePixel(rRect);
+    tools::Rectangle aRect = pOutDev->GetMapper().LogicToDevicePixel(rRect);
     aRect.Intersection( GetOutputRectPixel() );
     if ( !aRect.IsEmpty() )
         ImplScroll( aRect, nHorzScroll, nVertScroll, nFlags );
