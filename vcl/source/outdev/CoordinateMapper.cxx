@@ -907,6 +907,15 @@ CoordinateMapper::WindowToLogicUnits(const basegfx::B2DPolyPolygon& rWindowPolyP
     return aTransformedPoly;
 }
 
+Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize) const
+{
+    if (!IsMapModeEnabled())
+        return rWindowSize;
+
+    return Size(ViewToLogicDistanceX(rWindowSize.Width()),
+                ViewToLogicDistanceY(rWindowSize.Height()));
+}
+
 // ========================================================================
 // DISTANCE SCALING (Raw Scalar Conversion)
 // ========================================================================
@@ -1094,6 +1103,20 @@ double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
     const double fLogicU = ViewSubPixelToLogicUnitsX(fViewX);
 
     return fLogicU - static_cast<double>(mnLogicToAbsoluteOffsetX);
+}
+
+Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const
+{
+    if (!IsMapModeEnabled())
+    {
+        // Assert that the sub-pixel coordinates are actually exact integers when no map mode is applied
+        assert(floor(rWindowPt.getX()) == rWindowPt.getX()
+               && floor(rWindowPt.getY()) == rWindowPt.getY());
+        return Point(rWindowPt.getX(), rWindowPt.getY());
+    }
+
+    return Point(ViewSubPixelToLogicIntX(rWindowPt.getX()),
+                 ViewSubPixelToLogicIntY(rWindowPt.getY()));
 }
 
 double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
