@@ -18,6 +18,9 @@
  */
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/range/b2drectangle.hxx>
+#include <basegfx/polygon/b2dpolygon.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <tools/gen.hxx>
 
 #include <vcl/lineinfo.hxx>
@@ -915,18 +918,22 @@ CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) 
     return aPolyPoly;
 }
 
-basegfx::B2DPolyPolygon
-CoordinateMapper::WindowToLogicUnits(const basegfx::B2DPolyPolygon& rWindowPolyPoly) const
+template <TransformableB2DGeometry T>
+T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry) const
 {
     if (!IsMapModeEnabled())
-        return rWindowPolyPoly;
+        return rWindowGeometry;
 
-    basegfx::B2DPolyPolygon aTransformedPoly = rWindowPolyPoly;
-    const basegfx::B2DHomMatrix aTransformationMatrix
-        = GetInverseViewTransformation(); // Or however you grab the inverse matrix
-    aTransformedPoly.transform(aTransformationMatrix);
-    return aTransformedPoly;
+    T aTransformedGeometry = rWindowGeometry;
+    aTransformedGeometry.transform(GetInverseViewTransformation());
+    return aTransformedGeometry;
 }
+
+template SAL_DLLPRIVATE basegfx::B2DRectangle
+CoordinateMapper::WindowToLogicUnits<basegfx::B2DRectangle>(const basegfx::B2DRectangle&) const;
+
+template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&) const;
 
 Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize) const
 {
