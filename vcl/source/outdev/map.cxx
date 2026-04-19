@@ -473,23 +473,11 @@ Size OutputDevice::LogicToLogic(const Size& rSzSource,
     return mpMapper->LogicToLogic(rSzSource, pMapModeSource, pMapModeDest);
 }
 
-tools::Rectangle OutputDevice::LogicToLogic( const tools::Rectangle& rRectSource,
-                                      const MapMode* pMapModeSource,
-                                      const MapMode* pMapModeDest ) const
+tools::Rectangle OutputDevice::LogicToLogic(const tools::Rectangle& rRectSource,
+                                            const MapMode* pMapModeSource,
+                                            const MapMode* pMapModeDest) const
 {
-    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &mpMapper->GetMapMode();
-    const MapMode* pDst = pMapModeDest ? pMapModeDest : &mpMapper->GetMapMode();
-
-    if (*pSrc == *pDst)
-        return rRectSource;
-
-    ImplMapRes aMapResSource = mpMapper->ResolveMapRes(pMapModeSource);
-    ImplMapRes aMapResDest   = mpMapper->ResolveMapRes(pMapModeDest);
-
-    return tools::Rectangle(aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest),
-                            aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest),
-                            aMapResSource.TransformPointX(rRectSource.Right(), aMapResDest),
-                            aMapResSource.TransformPointY(rRectSource.Bottom(), aMapResDest));
+    return mpMapper->LogicToLogic(rRectSource, pMapModeSource, pMapModeDest);
 }
 
 Point OutputDevice::LogicToLogic( const Point& rPtSource,
