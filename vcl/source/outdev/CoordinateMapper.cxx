@@ -973,6 +973,26 @@ CoordinateMapper::WindowToLogicUnits<basegfx::B2DRectangle>(const basegfx::B2DRe
 template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
 CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&) const;
 
+template <TransformableB2DGeometry T>
+T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry, const MapMode& rMapMode) const
+{
+    // Fast-path: Route to the optimized default-mode template
+    if (rMapMode.IsDefault())
+        return WindowToLogicUnits(rWindowGeometry);
+
+    T aTransformedGeometry = rWindowGeometry;
+    aTransformedGeometry.transform(GetInverseViewTransformation(rMapMode));
+    return aTransformedGeometry;
+}
+
+template SAL_DLLPRIVATE basegfx::B2DPolygon
+CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&,
+                                                          const MapMode&) const;
+
+template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&,
+                                                              const MapMode&) const;
+
 Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize) const
 {
     if (!IsMapModeEnabled())

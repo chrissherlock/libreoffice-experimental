@@ -346,6 +346,9 @@ public:
     template <TransformableB2DGeometry T>
     T WindowToLogicUnits(const T& rWindowGeometry) const;
 
+    template <TransformableB2DGeometry T>
+    SAL_DLLPRIVATE T WindowToLogicUnits(const T& rWindowGeometry, const MapMode& rMapMode) const;
+
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
     // ========================================================================

@@ -378,22 +378,14 @@ tools::Polygon OutputDevice::PixelToLogic(const tools::Polygon& rDevicePoly, con
     return mpMapper->WindowToLogicUnits(rDevicePoly, rMapMode);
 }
 
-basegfx::B2DPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolygon& rPixelPoly,
-                                                const MapMode& rMapMode ) const
+basegfx::B2DPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolygon& rPixelPoly, const MapMode& rMapMode) const
 {
-    basegfx::B2DPolygon aTransformedPoly = rPixelPoly;
-    const basegfx::B2DHomMatrix aTransformationMatrix = mpMapper->GetInverseViewTransformation( rMapMode );
-    aTransformedPoly.transform( aTransformationMatrix );
-    return aTransformedPoly;
+    return mpMapper->WindowToLogicUnits(rPixelPoly, rMapMode);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygon& rPixelPolyPoly,
-                                                    const MapMode& rMapMode ) const
+basegfx::B2DPolyPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly, const MapMode& rMapMode) const
 {
-    basegfx::B2DPolyPolygon aTransformedPoly = rPixelPolyPoly;
-    const basegfx::B2DHomMatrix aTransformationMatrix = mpMapper->GetInverseViewTransformation( rMapMode );
-    aTransformedPoly.transform( aTransformationMatrix );
-    return aTransformedPoly;
+    return mpMapper->WindowToLogicUnits(rPixelPolyPoly, rMapMode);
 }
 
 static void lcl_verifyUnitSourceDest( MapUnit eUnitSource, MapUnit eUnitDest )
