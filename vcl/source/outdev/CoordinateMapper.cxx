@@ -849,15 +849,38 @@ Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt) const
     return Point(WindowToLogicX(rWindowPt.X()), WindowToLogicY(rWindowPt.Y()));
 }
 
+tools::Long CoordinateMapper::WindowSubPixelToLogicIntX(double fX) const
+{
+    return std::round(WindowToLogicSubPixelX(fX));
+}
+
+tools::Long CoordinateMapper::WindowSubPixelToLogicIntY(double fY) const
+{
+    return std::round(WindowToLogicSubPixelY(fY));
+}
+
+Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const
+{
+    if (!IsMapModeEnabled())
+    {
+        assert(std::floor(rWindowPt.getX()) == rWindowPt.getX()
+               && std::floor(rWindowPt.getY()) == rWindowPt.getY());
+        return Point(rWindowPt.getX(), rWindowPt.getY());
+    }
+
+    return Point(WindowSubPixelToLogicIntX(rWindowPt.getX()),
+                 WindowSubPixelToLogicIntY(rWindowPt.getY()));
+}
+
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect) const
 {
     if (!IsMapModeEnabled())
         return rWindowRect;
 
-    tools::Rectangle aRetval(WindowToLogicX(rWindowRect.Left()), WindowToLogicY(rWindowRect.Top()),
-                             rWindowRect.IsWidthEmpty() ? 0 : WindowToLogicX(rWindowRect.Right()),
-                             rWindowRect.IsHeightEmpty() ? 0
-                                                         : WindowToLogicY(rWindowRect.Bottom()));
+    tools::Rectangle aRetval(
+        WindowSubPixelToLogicIntX(rWindowRect.Left()), WindowSubPixelToLogicIntY(rWindowRect.Top()),
+        rWindowRect.IsWidthEmpty() ? 0 : WindowSubPixelToLogicIntX(rWindowRect.Right()),
+        rWindowRect.IsHeightEmpty() ? 0 : WindowSubPixelToLogicIntY(rWindowRect.Bottom()));
 
     lcl_ApplyEmptyState(aRetval, rWindowRect);
 
