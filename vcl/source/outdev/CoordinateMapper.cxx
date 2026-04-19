@@ -123,7 +123,7 @@ void CoordinateMapper::CalcMapResolution(const MapMode& rMapMode, tools::Long nD
     maMapRes.CalcMapResolution(rMapMode, nDPIX, nDPIY);
 }
 
-ImplMapRes CoordinateMapper::ResolveMapRes(const MapMode* pMode)
+ImplMapRes CoordinateMapper::ResolveMapRes(const MapMode* pMode) const
 {
     return maMapRes.ResolveMapRes(pMode, maMapMode, mbMap, mnDPIX, mnDPIY);
 }
@@ -1394,6 +1394,22 @@ double CoordinateMapper::LogicToViewSubPixelY(double fY) const
 {
     const double fLogicUnits = fY + static_cast<double>(mnLogicToAbsoluteOffsetY);
     return LogicUnitsToViewSubPixelY(fLogicUnits);
+}
+
+Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
+                                     const MapMode* pMapModeDest) const
+{
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &GetMapMode();
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : &GetMapMode();
+
+    if (*pSrc == *pDst)
+        return rPtSource;
+
+    ImplMapRes aMapResSource = ResolveMapRes(pMapModeSource);
+    ImplMapRes aMapResDest = ResolveMapRes(pMapModeDest);
+
+    return Point(aMapResSource.TransformPointX(rPtSource.X(), aMapResDest),
+                 aMapResSource.TransformPointY(rPtSource.Y(), aMapResDest));
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
