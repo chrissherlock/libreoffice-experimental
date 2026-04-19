@@ -139,7 +139,7 @@ void ImplMapRes::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, t
 }
 
 ImplMapRes ImplMapRes::ResolveMapRes(const MapMode* pMode, const MapMode& rDefaultMapMode,
-                                     bool bMap, tools::Long nDPIX, tools::Long nDPIY)
+                                     bool bMap, tools::Long nDPIX, tools::Long nDPIY) const
 {
     const MapMode* pEffectiveMode = pMode ? pMode : &rDefaultMapMode;
 
