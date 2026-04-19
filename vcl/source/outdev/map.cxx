@@ -333,7 +333,7 @@ Size OutputDevice::PixelToLogic(const Size& rDeviceSize) const
     return mpMapper->WindowToLogicUnits(rDeviceSize);
 }
 
-tools::Rectangle OutputDevice::PixelToLogic( const tools::Rectangle& rDeviceRect ) const
+tools::Rectangle OutputDevice::PixelToLogic(const tools::Rectangle& rDeviceRect) const
 {
     return mpMapper->WindowToLogicUnits(rDeviceRect);
 }
@@ -353,7 +353,7 @@ basegfx::B2DRectangle OutputDevice::PixelToLogic(const basegfx::B2DRectangle& rD
     return mpMapper->WindowToLogicUnits(rDeviceRect);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolyPolygon& rPixelPolyPoly ) const
+basegfx::B2DPolyPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly) const
 {
     return mpMapper->WindowToLogicUnits(rPixelPolyPoly);
 }
@@ -373,27 +373,9 @@ tools::Rectangle OutputDevice::PixelToLogic(const tools::Rectangle& rDeviceRect,
     return mpMapper->WindowToLogicUnits(rDeviceRect, rMapMode);
 }
 
-tools::Polygon OutputDevice::PixelToLogic( const tools::Polygon& rDevicePoly,
-                                           const MapMode& rMapMode ) const
+tools::Polygon OutputDevice::PixelToLogic(const tools::Polygon& rDevicePoly, const MapMode& rMapMode) const
 {
-    // calculate nothing if default-MapMode
-    if ( rMapMode.IsDefault() )
-        return rDevicePoly;
-
-    // calculate MapMode-resolution
-    ImplMapRes aMapRes(rMapMode, mpMapper->GetDPIX(), mpMapper->GetDPIY());
-
-    tools::Polygon aPoly(rDevicePoly);
-
-    for (auto& rPoint : aPoly)
-    {
-        rPoint = Point(
-            mpMapper->ViewSubPixelToLogicIntX(rPoint.X(), aMapRes),
-            mpMapper->ViewSubPixelToLogicIntY(rPoint.Y(), aMapRes)
-        );
-    }
-
-    return aPoly;
+    return mpMapper->WindowToLogicUnits(rDevicePoly, rMapMode);
 }
 
 basegfx::B2DPolygon OutputDevice::PixelToLogic( const basegfx::B2DPolygon& rPixelPoly,

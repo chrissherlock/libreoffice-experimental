@@ -916,6 +916,30 @@ tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindo
     return aPoly;
 }
 
+tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
+                                                    const ImplMapRes& rMapRes) const
+{
+    tools::Polygon aPoly(rWindowPoly);
+
+    for (auto& rPoint : aPoly)
+    {
+        rPoint = WindowToLogicUnits(rPoint, rMapRes);
+    }
+
+    return aPoly;
+}
+
+tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
+                                                    const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rWindowPoly;
+
+    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
+
+    return WindowToLogicUnits(rWindowPoly, aMapRes);
+}
+
 tools::PolyPolygon
 CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) const
 {
