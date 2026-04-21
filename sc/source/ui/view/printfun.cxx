@@ -30,6 +30,7 @@
 #include <editeng/editstat.hxx>
 #include <svx/fmview.hxx>
 #include <vcl/pdfextoutdevdata.hxx>
+#include <vcl/mapconvert.hxx>
 #include <editeng/frmdiritem.hxx>
 #include <editeng/lrspitem.hxx>
 #include <editeng/paperinf.hxx>
@@ -1164,7 +1165,7 @@ static void lcl_DrawGraphic( const SvxBrushItem &rBrush, vcl::RenderContext& rOu
         if ( pGraphic->GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
             aGrfSize = pRefDev->PixelToLogic( pGraphic->GetPrefSize(), aMapMM );
         else
-            aGrfSize = OutputDevice::LogicToLogic( pGraphic->GetPrefSize(),
+            aGrfSize = ::LogicToLogic( pGraphic->GetPrefSize(),
                                     pGraphic->GetPrefMapMode(), aMapMM );
         ePos = rBrush.GetGraphicPos();
     }
@@ -1551,7 +1552,7 @@ void ScPrintFunc::LocateArea( SCCOL nX1, SCROW nY1, SCCOL nX2, SCROW nY2,
 {
     //  get MapMode for drawing objects (same MapMode as in ScOutputData::PrintDrawingLayer)
 
-    Point aLogPos = OutputDevice::LogicToLogic(Point(nScrX,nScrY), aOffsetMode, aLogicMode);
+    Point aLogPos = ::LogicToLogic(Point(nScrX,nScrY), aOffsetMode, aLogicMode);
     tools::Long nLogStX = aLogPos.X();
     tools::Long nLogStY = aLogPos.Y();
 
@@ -1604,7 +1605,7 @@ void ScPrintFunc::PrintArea( SCCOL nX1, SCROW nY1, SCCOL nX2, SCROW nY2,
         rDoc.ResetEmbedded();
     }
 
-    Point aPos = OutputDevice::LogicToLogic(Point(nScrX,nScrY), aOffsetMode, aLogicMode);
+    Point aPos = ::LogicToLogic(Point(nScrX,nScrY), aOffsetMode, aLogicMode);
     tools::Long nLogStX = aPos.X();
     tools::Long nLogStY = aPos.Y();
 

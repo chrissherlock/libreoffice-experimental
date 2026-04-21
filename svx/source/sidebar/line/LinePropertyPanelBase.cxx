@@ -28,6 +28,7 @@
 #include <svx/xtable.hxx>
 #include <tools/fldunit.hxx>
 #include <vcl/weld/Builder.hxx>
+#include <vcl/mapconvert.hxx>
 #include <bitmaps.hlst>
 
 using namespace css;
@@ -234,7 +235,7 @@ void LinePropertyPanelBase::SetWidthIcon()
         return;
     }
 
-    tools::Long nVal = OutputDevice::LogicToLogic(mnWidthCoreValue * 10, meMapUnit, MapUnit::MapPoint);
+    tools::Long nVal = ::LogicToLogic(mnWidthCoreValue * 10, meMapUnit, MapUnit::MapPoint);
 
     Graphic aGraf;
     if(nVal <= 6)

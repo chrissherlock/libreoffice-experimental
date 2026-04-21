@@ -17,11 +17,15 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/range/b2drectangle.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <tools/bigint.hxx>
+#include <tools/debug.hxx>
 #include <tools/gen.hxx>
+#include <tools/mapunit.hxx>
 
 #include <vcl/lineinfo.hxx>
 #include <vcl/rendercontext/ImplMapRes.hxx>
@@ -1441,6 +1445,246 @@ tools::Rectangle CoordinateMapper::LogicToLogic(const tools::Rectangle& rRectSou
                             aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest),
                             aMapResSource.TransformPointX(rRectSource.Right(), aMapResDest),
                             aMapResSource.TransformPointY(rRectSource.Bottom(), aMapResDest));
+}
+
+static void lcl_verifyUnitSourceDest(MapUnit eUnitSource, MapUnit eUnitDest)
+{
+    DBG_ASSERT(eUnitSource != MapUnit::MapSysFont && eUnitSource != MapUnit::MapAppFont
+                   && eUnitSource != MapUnit::MapRelative,
+               "Source MapUnit is not permitted");
+    DBG_ASSERT(eUnitDest != MapUnit::MapSysFont && eUnitDest != MapUnit::MapAppFont
+                   && eUnitDest != MapUnit::MapRelative,
+               "Destination MapUnit is not permitted");
+}
+
+static auto lcl_getCorrectedUnit(MapUnit eMapSrc, MapUnit eMapDst)
+{
+    o3tl::Length eSrc = o3tl::Length::invalid;
+    o3tl::Length eDst = o3tl::Length::invalid;
+
+    if (eMapSrc > MapUnit::MapPixel)
+    {
+        SAL_WARN("vcl.gdi", "Invalid source map unit");
+    }
+    else if (eMapDst > MapUnit::MapPixel)
+    {
+        SAL_WARN("vcl.gdi", "Invalid destination map unit");
+    }
+    else if (eMapSrc != eMapDst)
+    {
+        // Here 72 PPI is assumed for MapPixel
+        eSrc = MapToO3tlLength(eMapSrc, o3tl::Length::pt);
+        eDst = MapToO3tlLength(eMapDst, o3tl::Length::pt);
+    }
+
+    return std::make_pair(eSrc, eDst);
+}
+
+static std::pair<ImplMapRes, ImplMapRes> lcl_calcConversionMapRes(const MapMode& rMMSource,
+                                                                  const MapMode& rMMDest)
+{
+    std::pair<ImplMapRes, ImplMapRes> result;
+    result.first.CalcMapResolution(rMMSource, 72, 72);
+    result.second.CalcMapResolution(rMMDest, 72, 72);
+    return result;
+}
+
+static tools::Long lcl_convertLogicValue(const tools::Long nSourceValue,
+                                         const o3tl::Length eSourceUnit,
+                                         const o3tl::Length eDestUnit)
+{
+    if (nSourceValue == 0 || eSourceUnit == o3tl::Length::invalid
+        || eDestUnit == o3tl::Length::invalid)
+        return 0;
+
+    bool bOverflow;
+    const auto nResult = o3tl::convert(nSourceValue, eSourceUnit, eDestUnit, bOverflow);
+
+    // Fast path: conversion succeeded without integer overflow
+    if (!bOverflow)
+        return nResult;
+
+    // Fallback: Use BigInt to prevent overflow during intermediate multiplication
+    const auto[nMultiplier, nDivisor] = o3tl::getConversionMulDiv(eSourceUnit, eDestUnit);
+    BigInt aBigValue = nSourceValue;
+    aBigValue *= nMultiplier;
+
+    // Manual rounding: standard integer division truncates towards zero.
+    // We add or subtract half the divisor before dividing to achieve round-to-nearest.
+    if (aBigValue.IsNeg())
+        aBigValue -= nDivisor / 2;
+    else
+        aBigValue += nDivisor / 2;
+
+    aBigValue /= nDivisor;
+
+    return static_cast<tools::Long>(aBigValue);
+}
+
+Point LogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource,
+                   const MapMode& rMapModeDest)
+{
+    if (rMapModeSource == rMapModeDest)
+        return rPtSource;
+
+    MapUnit eUnitSource = rMapModeSource.GetMapUnit();
+    MapUnit eUnitDest = rMapModeDest.GetMapUnit();
+    lcl_verifyUnitSourceDest(eUnitSource, eUnitDest);
+
+    if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
+    {
+        const auto[eFrom, eTo] = lcl_getCorrectedUnit(eUnitSource, eUnitDest);
+        return Point(lcl_convertLogicValue(rPtSource.X(), eFrom, eTo),
+                     lcl_convertLogicValue(rPtSource.Y(), eFrom, eTo));
+    }
+
+    const auto[aMapResSource, aMapResDest] = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
+
+    return Point(aMapResSource.TransformPointX(rPtSource.X(), aMapResDest),
+                 aMapResSource.TransformPointY(rPtSource.Y(), aMapResDest));
+}
+
+Size LogicToLogic(const Size& rSzSource, const MapMode& rMapModeSource, const MapMode& rMapModeDest)
+{
+    if (rMapModeSource == rMapModeDest)
+        return rSzSource;
+
+    MapUnit eUnitSource = rMapModeSource.GetMapUnit();
+    MapUnit eUnitDest = rMapModeDest.GetMapUnit();
+    lcl_verifyUnitSourceDest(eUnitSource, eUnitDest);
+
+    if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
+    {
+        const auto[eFrom, eTo] = lcl_getCorrectedUnit(eUnitSource, eUnitDest);
+        return Size(lcl_convertLogicValue(rSzSource.Width(), eFrom, eTo),
+                    lcl_convertLogicValue(rSzSource.Height(), eFrom, eTo));
+    }
+
+    const auto[aMapResSource, aMapResDest] = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
+
+    return Size(aMapResSource.ScaleDistanceX(rSzSource.Width(), aMapResDest),
+                aMapResSource.ScaleDistanceY(rSzSource.Height(), aMapResDest));
+}
+
+tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource, const MapMode& rMapModeSource,
+                              const MapMode& rMapModeDest)
+{
+    if (rMapModeSource == rMapModeDest)
+        return rRectSource;
+
+    MapUnit eUnitSource = rMapModeSource.GetMapUnit();
+    MapUnit eUnitDest = rMapModeDest.GetMapUnit();
+    lcl_verifyUnitSourceDest(eUnitSource, eUnitDest);
+
+    tools::Rectangle aRetval;
+
+    if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
+    {
+        const auto[eFrom, eTo] = lcl_getCorrectedUnit(eUnitSource, eUnitDest);
+
+        const auto left = lcl_convertLogicValue(rRectSource.Left(), eFrom, eTo);
+        const auto top = lcl_convertLogicValue(rRectSource.Top(), eFrom, eTo);
+
+        // tdf#141761 see comments above, IsEmpty() removed
+        const auto right = rRectSource.IsWidthEmpty()
+                               ? 0
+                               : lcl_convertLogicValue(rRectSource.Right(), eFrom, eTo);
+        const auto bottom = rRectSource.IsHeightEmpty()
+                                ? 0
+                                : lcl_convertLogicValue(rRectSource.Bottom(), eFrom, eTo);
+
+        aRetval = tools::Rectangle(left, top, right, bottom);
+    }
+    else
+    {
+        const auto[aMapResSource, aMapResDest]
+            = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
+
+        const auto left = aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest);
+        const auto top = aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest);
+
+        // tdf#141761 see comments above, IsEmpty() removed
+        const auto right = rRectSource.IsWidthEmpty()
+                               ? 0
+                               : aMapResSource.TransformPointX(rRectSource.Right(), aMapResDest);
+        const auto bottom = rRectSource.IsHeightEmpty()
+                                ? 0
+                                : aMapResSource.TransformPointY(rRectSource.Bottom(), aMapResDest);
+
+        aRetval = tools::Rectangle(left, top, right, bottom);
+    }
+
+    lcl_ApplyEmptyState(aRetval, rRectSource);
+
+    return aRetval;
+}
+
+tools::Long LogicToLogic(tools::Long nLongSource, MapUnit eUnitSource, MapUnit eUnitDest)
+{
+    if (eUnitSource == eUnitDest)
+        return nLongSource;
+
+    lcl_verifyUnitSourceDest(eUnitSource, eUnitDest);
+    const auto[eFrom, eTo] = lcl_getCorrectedUnit(eUnitSource, eUnitDest);
+
+    return lcl_convertLogicValue(nLongSource, eFrom, eTo);
+}
+
+basegfx::B2DPolygon LogicToLogic(const basegfx::B2DPolygon& rPolySource,
+                                 const MapMode& rMapModeSource, const MapMode& rMapModeDest)
+{
+    if (rMapModeSource == rMapModeDest)
+    {
+        return rPolySource;
+    }
+
+    const basegfx::B2DHomMatrix aTransform(::LogicToLogic(rMapModeSource, rMapModeDest));
+    basegfx::B2DPolygon aPoly(rPolySource);
+
+    aPoly.transform(aTransform);
+    return aPoly;
+}
+
+basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest)
+{
+    basegfx::B2DHomMatrix aTransform;
+
+    if (rMapModeSource == rMapModeDest)
+    {
+        return aTransform;
+    }
+
+    MapUnit eUnitSource = rMapModeSource.GetMapUnit();
+    MapUnit eUnitDest = rMapModeDest.GetMapUnit();
+    lcl_verifyUnitSourceDest(eUnitSource, eUnitDest);
+
+    if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
+    {
+        const auto[eFrom, eTo] = lcl_getCorrectedUnit(eUnitSource, eUnitDest);
+        const double fScaleFactor(eFrom == o3tl::Length::invalid || eTo == o3tl::Length::invalid
+                                      ? std::numeric_limits<double>::quiet_NaN()
+                                      : o3tl::convert(1.0, eFrom, eTo));
+        aTransform.set(0, 0, fScaleFactor);
+        aTransform.set(1, 1, fScaleFactor);
+
+        return aTransform;
+    }
+
+    const auto[aMapResSource, aMapResDest] = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
+
+    const double fScaleFactorX(aMapResSource.mfMapScX / aMapResDest.mfMapScX);
+    const double fScaleFactorY(aMapResSource.mfMapScY / aMapResDest.mfMapScY);
+    const double fZeroPointX(double(aMapResSource.mnMapOfsX) * fScaleFactorX
+                             - double(aMapResDest.mnMapOfsX));
+    const double fZeroPointY(double(aMapResSource.mnMapOfsY) * fScaleFactorY
+                             - double(aMapResDest.mnMapOfsY));
+
+    aTransform.set(0, 0, fScaleFactorX);
+    aTransform.set(1, 1, fScaleFactorY);
+    aTransform.set(0, 2, fZeroPointX);
+    aTransform.set(1, 2, fZeroPointY);
+
+    return aTransform;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

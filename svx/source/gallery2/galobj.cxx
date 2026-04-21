@@ -27,6 +27,7 @@
 #include <tools/vcompat.hxx>
 #include <tools/helpers.hxx>
 #include <tools/stream.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/virdev.hxx>
 #include <svx/fmmodel.hxx>
 #include <svx/fmview.hxx>
@@ -112,7 +113,7 @@ bool SgaObject::CreateThumb( const Graphic& rGraphic )
                 aBmp.GetPrefSize().Width() > 0 &&
                 aBmp.GetPrefSize().Height() > 0 )
             {
-                Size aLogSize( OutputDevice::LogicToLogic(aBmp.GetPrefSize(), aBmp.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
+                Size aLogSize( ::LogicToLogic(aBmp.GetPrefSize(), aBmp.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
 
                 if( !aLogSize.IsEmpty() )
                 {

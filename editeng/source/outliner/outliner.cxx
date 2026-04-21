@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/mapconvert.hxx>
 #include <comphelper/string.hxx>
 #include <svl/eitem.hxx>
 #include <svl/intitem.hxx>
@@ -1343,7 +1344,7 @@ Size Outliner::ImplGetBulletSize( sal_Int32 nPara )
         }
         else
         {
-            aSize = OutputDevice::LogicToLogic(pFmt->GetGraphicSize(),
+            aSize = ::LogicToLogic(pFmt->GetGraphicSize(),
                     MapMode(MapUnit::Map100thMM),
                     pEditEngine->GetRefDevice()->GetMapMode());
         }

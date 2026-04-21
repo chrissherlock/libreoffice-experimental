@@ -31,6 +31,7 @@
 #include <sfx2/docfile.hxx>
 #include <sfx2/sfxsids.hrc>
 #include <tools/stream.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/gfxlink.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/pdfread.hxx>
@@ -198,7 +199,7 @@ SdrGrafObj* View::InsertGraphic( const Graphic& rGraphic, sal_Int8& rAction,
         }
         else
         {
-            aSize = OutputDevice::LogicToLogic( rGraphic.GetPrefSize(),
+            aSize = ::LogicToLogic( rGraphic.GetPrefSize(),
                                                 rGraphic.GetPrefMapMode(),
                                                 MapMode( MapUnit::Map100thMM ) );
         }

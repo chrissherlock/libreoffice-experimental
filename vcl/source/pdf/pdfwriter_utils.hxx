@@ -24,6 +24,7 @@
 
 #include <vcl/outdev.hxx>
 #include <vcl/mapmod.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/pdfwriter.hxx>
 
 #include <com/sun/star/util/DateTime.hpp>
@@ -100,7 +101,7 @@ GEOMETRY convert(const MapMode& _rSource, const MapMode& _rDest, OutputDevice* _
     }
     else
     {
-        aPoint = OutputDevice::LogicToLogic(_rObject, _rSource, _rDest);
+        aPoint = ::LogicToLogic(_rObject, _rSource, _rDest);
     }
     return aPoint;
 }

@@ -93,6 +93,7 @@
 #include <vcl/filter/SvmWriter.hxx>
 #include <vcl/salctype.hxx>
 #include <vcl/gdimtf.hxx>
+#include <vcl/mapconvert.hxx>
 #include <comphelper/fileformat.h>
 #include <comphelper/servicehelper.hxx>
 #include <comphelper/storagehelper.hxx>
@@ -906,7 +907,7 @@ sal_Bool SAL_CALL SfxBaseModel::attachResource( const   OUString&               
             if (rProp.Name == "WinExtent" && (rProp.Value >>= aWinExtent) && ( aWinExtent.getLength() == 4 ) )
             {
                 tools::Rectangle aVisArea( aWinExtent[0], aWinExtent[1], aWinExtent[2], aWinExtent[3] );
-                aVisArea = OutputDevice::LogicToLogic(aVisArea, MapMode(MapUnit::Map100thMM), MapMode(pObjectShell->GetMapUnit()));
+                aVisArea = ::LogicToLogic(aVisArea, MapMode(MapUnit::Map100thMM), MapMode(pObjectShell->GetMapUnit()));
                 pObjectShell->SetVisArea( aVisArea );
             }
             bool bBreakMacroSign = false;
@@ -1023,7 +1024,7 @@ Sequence< beans::PropertyValue > SAL_CALL SfxBaseModel::getArgs2(const Sequence<
             // We can store it now to overwrite an old value
             // since it is not from ItemSet
             tools::Rectangle aTmpRect = m_pData->m_pObjectShell->GetVisArea( ASPECT_CONTENT );
-            aTmpRect = OutputDevice::LogicToLogic(aTmpRect, MapMode(m_pData->m_pObjectShell->GetMapUnit()), MapMode(MapUnit::Map100thMM));
+            aTmpRect = ::LogicToLogic(aTmpRect, MapMode(m_pData->m_pObjectShell->GetMapUnit()), MapMode(MapUnit::Map100thMM));
 
             Sequence< sal_Int32 > aRectSeq
             {
@@ -2090,7 +2091,7 @@ Any SAL_CALL SfxBaseModel::getTransferData( const datatransfer::DataFlavor& aFla
             Size aSize = m_pData->m_pObjectShell->GetVisArea().GetSize();
 
             MapUnit aMapUnit = m_pData->m_pObjectShell->GetMapUnit();
-            aDesc.maSize = OutputDevice::LogicToLogic(aSize, MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
+            aDesc.maSize = ::LogicToLogic(aSize, MapMode(aMapUnit), MapMode(MapUnit::Map100thMM));
             aDesc.maDragStartPos = Point();
             aDesc.maDisplayName.clear();
 

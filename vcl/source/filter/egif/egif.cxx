@@ -21,6 +21,7 @@
 #include <tools/stream.hxx>
 #include <tools/debug.hxx>
 #include <tools/mapunit.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/animate/Animation.hxx>
 #include <vcl/animate/AnimationFrame.hxx>
 #include <vcl/BitmapReadAccess.hxx>
@@ -108,7 +109,7 @@ bool GIFWriter::WriteGIF(const Graphic& rGraphic, FilterConfigItem* pFilterConfi
     bool            bLogSize = ( aMap.GetMapUnit() != MapUnit::MapPixel );
 
     if( bLogSize )
-        aSize100 = OutputDevice::LogicToLogic(rGraphic.GetPrefSize(), aMap, MapMode(MapUnit::Map100thMM));
+        aSize100 = ::LogicToLogic(rGraphic.GetPrefSize(), aMap, MapMode(MapUnit::Map100thMM));
 
     bStatus = true;
     nLastPercent = 0;

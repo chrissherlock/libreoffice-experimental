@@ -35,6 +35,7 @@
 #include <svx/sdr/contact/objectcontact.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <sdr/primitive2d/sdrgrafprimitive2d.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/settings.hxx>
@@ -103,7 +104,7 @@ namespace sdr::contact
             }
             else
             {
-                aPrefSize = OutputDevice::LogicToLogic(aPrefSize, GetGrafObject().GetGrafPrefMapMode(), MapMode(MapUnit::Map100thMM));
+                aPrefSize = ::LogicToLogic(aPrefSize, GetGrafObject().GetGrafPrefMapMode(), MapMode(MapUnit::Map100thMM));
             }
 
             // decompose object matrix to get single values
@@ -200,7 +201,7 @@ namespace sdr::contact
                 }
                 else
                 {
-                    aPrefSize = OutputDevice::LogicToLogic(aPrefSize, aDraftBitmap.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
+                    aPrefSize = ::LogicToLogic(aPrefSize, aDraftBitmap.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
                 }
 
                 const double fBitmapScaling(2.0);
