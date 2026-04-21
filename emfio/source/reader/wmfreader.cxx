@@ -31,6 +31,7 @@
 #include <sal/log.hxx>
 #include <tools/mapunit.hxx>
 #include <osl/endian.h>
+#include <vcl/mapconvert.hxx>
 #include <vcl/gdimtf.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/dibtools.hxx>
@@ -1631,7 +1632,7 @@ namespace emfio
         {
             const double    fFrac = 1.0 / mnUnitsPerInch;
             MapMode         aWMFMap( MapUnit::MapInch, Point(), fFrac, fFrac );
-            Size            aSize100(OutputDevice::LogicToLogic(aWMFSize, aWMFMap, MapMode(MapUnit::Map100thMM)));
+            Size            aSize100(::LogicToLogic(aWMFSize, aWMFMap, MapMode(MapUnit::Map100thMM)));
             aDevExt = Size( std::abs( aSize100.Width() ), std::abs( aSize100.Height() ) );
         }
         SetDevExt( aDevExt );

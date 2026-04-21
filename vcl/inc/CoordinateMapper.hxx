@@ -23,6 +23,7 @@
 #include <tools/long.hxx>
 
 #include <vcl/dllapi.h>
+#include <vcl/mapconvert.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
 

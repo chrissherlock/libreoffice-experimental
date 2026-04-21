@@ -33,6 +33,7 @@
 #include <com/sun/star/task/XInteractionContinuation.hpp>
 #include <com/sun/star/uno/XComponentContext.hpp>
 
+#include <vcl/mapconvert.hxx>
 #include <boost/property_tree/json_parser/error.hpp>
 #include <tools/debug.hxx>
 #include <comphelper/diagnose_ex.hxx>
@@ -1294,7 +1295,7 @@ Bitmap GetBitmapFromMetaFile(const GDIMetaFile& rMtf, const Size* pSize)
     else
     {
         // use 100th mm for primitive bitmap converter tool
-        const Size aSize100th(OutputDevice::LogicToLogic(rMtf.GetPrefSize(), rMtf.GetPrefMapMode(),
+        const Size aSize100th(::LogicToLogic(rMtf.GetPrefSize(), rMtf.GetPrefMapMode(),
                                                          MapMode(MapUnit::Map100thMM)));
 
         aRange.expand(basegfx::B2DPoint(aSize100th.Width(), aSize100th.Height()));

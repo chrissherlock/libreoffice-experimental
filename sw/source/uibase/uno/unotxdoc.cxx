@@ -26,6 +26,7 @@
 #include <AnnotationWin.hxx>
 #include <o3tl/any.hxx>
 #include <utility>
+#include <vcl/mapconvert.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/ptrstyle.hxx>
 #include <vcl/sysdata.hxx>
@@ -2948,7 +2949,7 @@ uno::Sequence< beans::PropertyValue > SAL_CALL SwXTextDocument::getRenderer(
             {
                 // HTML source view and prospect adapt to the printer's paper size
                 aTmpSize = pPrinter->GetPaperSize();
-                aTmpSize = OutputDevice::LogicToLogic( aTmpSize,
+                aTmpSize = ::LogicToLogic( aTmpSize,
                             pPrinter->GetMapMode(), MapMode( MapUnit::Map100thMM ));
                 aPageSize = awt::Size( aTmpSize.Width(), aTmpSize.Height() );
 #ifdef MACOSX

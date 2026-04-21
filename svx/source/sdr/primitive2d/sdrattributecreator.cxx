@@ -59,6 +59,7 @@
 #include <sdr/attribute/sdrtextattribute.hxx>
 #include <svx/xbtmpit.hxx>
 #include <svl/itempool.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/GraphicLoader.hxx>
 #include <basegfx/range/b2drange.hxx>
@@ -757,7 +758,7 @@ namespace drawinglayer::primitive2d
                 }
                 else
                 {
-                    aNewSize = OutputDevice::LogicToLogic(
+                    aNewSize = ::LogicToLogic(
                         aGraphic.GetPrefSize(),
                         aGraphic.GetPrefMapMode(),
                         MapMode(aDestinationMapUnit));

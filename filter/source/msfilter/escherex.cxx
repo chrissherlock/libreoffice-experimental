@@ -32,6 +32,7 @@
 #include <svx/sdtfsitm.hxx>
 #include <editeng/outlobj.hxx>
 #include <utility>
+#include <vcl/mapconvert.hxx>
 #include <vcl/gfxlink.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/cvtgrf.hxx>
@@ -1202,7 +1203,7 @@ static Size lcl_SizeToEmu(Size aPrefSize, const MapMode& aPrefMapMode)
     if (aPrefMapMode.GetMapUnit() == MapUnit::MapPixel)
         aRetSize = Application::GetDefaultDevice()->PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
     else
-        aRetSize = OutputDevice::LogicToLogic(aPrefSize, aPrefMapMode, MapMode(MapUnit::Map100thMM));
+        aRetSize = ::LogicToLogic(aPrefSize, aPrefMapMode, MapMode(MapUnit::Map100thMM));
     return aRetSize;
 }
 

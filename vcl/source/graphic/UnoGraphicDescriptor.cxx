@@ -23,6 +23,7 @@
 #include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
 #include <unotools/ucbstreamhelper.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/gfxlink.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <cppuhelper/supportsservice.hxx>
@@ -343,7 +344,7 @@ void GraphicDescriptor::_getPropertyValues( const comphelper::PropertyMapEntry**
                 {
                     if( mpGraphic->GetPrefMapMode().GetMapUnit() != MapUnit::MapPixel )
                     {
-                        const Size aSizeLog( OutputDevice::LogicToLogic(
+                        const Size aSizeLog( ::LogicToLogic(
                             mpGraphic->GetPrefSize(),
                             mpGraphic->GetPrefMapMode(),
                             MapMode(MapUnit::Map100thMM)) );

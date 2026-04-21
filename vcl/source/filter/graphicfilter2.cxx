@@ -23,6 +23,7 @@
 #include <tools/fract.hxx>
 #include <tools/urlobj.hxx>
 #include <tools/zcodec.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/graphicfilter.hxx>
 #include <unotools/ucbstreamhelper.hxx>
@@ -231,7 +232,7 @@ bool GraphicDescriptor::ImpDetectJPG( SvStream& rStm,  bool bExtendedInfo )
                                                 aMap.SetMapUnit( nUnits == 1 ? MapUnit::MapInch : MapUnit::MapCM );
                                                 aMap.SetScaleX( 1.0 / nHorizontalResolution );
                                                 aMap.SetScaleY( 1.0 / nVerticalResolution );
-                                                aMetadata.maLogSize = OutputDevice::LogicToLogic( aMetadata.maPixSize, aMap, MapMode( MapUnit::Map100thMM ) );
+                                                aMetadata.maLogSize = ::LogicToLogic( aMetadata.maPixSize, aMap, MapMode( MapUnit::Map100thMM ) );
                                             }
                                         }
                                     }
@@ -281,7 +282,7 @@ bool GraphicDescriptor::ImpDetectJPG( SvStream& rStm,  bool bExtendedInfo )
                                         // We already know the DPI, but the
                                         // pixel size arrived later, so do the
                                         // conversion again.
-                                        aMetadata.maLogSize = OutputDevice::LogicToLogic(
+                                        aMetadata.maLogSize = ::LogicToLogic(
                                             aMetadata.maPixSize, aMap, MapMode(MapUnit::Map100thMM));
 
                                     bScanFinished = true;

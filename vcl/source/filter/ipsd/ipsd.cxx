@@ -22,6 +22,7 @@
 #include <vcl/BitmapTools.hxx>
 #include <vcl/RawBitmap.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/mapconvert.hxx>
 #include <sal/log.hxx>
 #include <tools/fract.hxx>
 #include <tools/helpers.hxx>
@@ -150,7 +151,7 @@ bool PSDReader::ReadPSD(Graphic & rGraphic )
             double      fFractX = 1.0 / (mnXResFixed >> 16);
             double      fFractY = 1.0 / (mnYResFixed >> 16);
             MapMode     aMapMode( MapUnit::MapInch, Point(), fFractX, fFractY );
-            Size        aPrefSize = OutputDevice::LogicToLogic(aBitmapSize, aMapMode, MapMode(MapUnit::Map100thMM));
+            Size        aPrefSize = ::LogicToLogic(aBitmapSize, aMapMode, MapMode(MapUnit::Map100thMM));
             rGraphic.SetPrefSize( aPrefSize );
             rGraphic.SetPrefMapMode( MapMode( MapUnit::Map100thMM ) );
         }

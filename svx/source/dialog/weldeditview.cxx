@@ -19,6 +19,7 @@
 
 #include <config_wasm_strip.h>
 
+#include <vcl/mapconvert.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
 #include <com/sun/star/accessibility/AccessibleStateType.hpp>
@@ -893,7 +894,7 @@ Point WeldViewForwarder::LogicToPixel(const Point& rPoint, const MapMode& rMapMo
         return Point();
     OutputDevice& rOutDev = pEditView->GetOutputDevice();
     MapMode aMapMode(rOutDev.GetMapMode());
-    Point aPoint(OutputDevice::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
+    Point aPoint(::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
     aMapMode.SetOrigin(Point());
     return rOutDev.LogicToPixel(aPoint, aMapMode);
 }
@@ -907,7 +908,7 @@ Point WeldViewForwarder::PixelToLogic(const Point& rPoint, const MapMode& rMapMo
     MapMode aMapMode(rOutDev.GetMapMode());
     aMapMode.SetOrigin(Point());
     Point aPoint(rOutDev.PixelToLogic(rPoint, aMapMode));
-    return OutputDevice::LogicToLogic(aPoint, MapMode(aMapMode.GetMapUnit()), rMapMode);
+    return ::LogicToLogic(aPoint, MapMode(aMapMode.GetMapUnit()), rMapMode);
 }
 
 WeldTextForwarder::WeldTextForwarder(WeldEditAccessible& rAcc, WeldEditSource& rSource)
@@ -1487,7 +1488,7 @@ Point WeldEditViewForwarder::LogicToPixel(const Point& rPoint, const MapMode& rM
         return Point();
     OutputDevice& rOutDev = pEditView->GetOutputDevice();
     MapMode aMapMode(rOutDev.GetMapMode());
-    Point aPoint(OutputDevice::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
+    Point aPoint(::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
     aMapMode.SetOrigin(Point());
     return rOutDev.LogicToPixel(aPoint, aMapMode);
 }
@@ -1501,7 +1502,7 @@ Point WeldEditViewForwarder::PixelToLogic(const Point& rPoint, const MapMode& rM
     MapMode aMapMode(rOutDev.GetMapMode());
     aMapMode.SetOrigin(Point());
     Point aPoint(rOutDev.PixelToLogic(rPoint, aMapMode));
-    return OutputDevice::LogicToLogic(aPoint, MapMode(aMapMode.GetMapUnit()), rMapMode);
+    return ::LogicToLogic(aPoint, MapMode(aMapMode.GetMapUnit()), rMapMode);
 }
 
 bool WeldEditViewForwarder::GetSelection(ESelection& rSelection) const

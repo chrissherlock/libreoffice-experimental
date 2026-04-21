@@ -57,6 +57,7 @@
 #include <docsh.hxx>
 #include <sfx2/docfile.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/mapconvert.hxx>
 #include <toolkit/helper/vclunohelper.hxx>
 #include <svtools/embedhlp.hxx>
 #include <svl/urihelper.hxx>
@@ -117,7 +118,7 @@ static void lcl_setObjectVisualArea( const uno::Reference< embed::XEmbeddedObjec
 
     // convert the visual area to the objects units
     MapUnit aObjUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xObj->getMapUnit( nAspect ) );
-    Size aObjVisSize = OutputDevice::LogicToLogic(aVisSize, MapMode(aUnit), MapMode(aObjUnit));
+    Size aObjVisSize = ::LogicToLogic(aVisSize, MapMode(aUnit), MapMode(aObjUnit));
     awt::Size aSz;
     aSz.Width = aObjVisSize.Width();
     aSz.Height = aObjVisSize.Height();

@@ -32,6 +32,7 @@
 #include <vcl/pdf/PDFTextRenderMode.hxx>
 #include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/vectorgraphicdata.hxx>
+#include <vcl/mapconvert.hxx>
 
 #include <editeng/eeitem.hxx>
 #include <editeng/fhgtitem.hxx>
@@ -1832,8 +1833,8 @@ void ImpSdrPdfImport::ImportText(std::unique_ptr<vcl::pdf::PDFiumPageObject> con
     // twips here and LogicToLogic so we don't end up using a value that cannot
     // be roundtripped back.
     const Size aFontSizeTwips(dFontSizeH * 20, dFontSizeV * 20);
-    const Size aFontSize(OutputDevice::LogicToLogic(aFontSizeTwips, MapMode(MapUnit::MapTwip),
-                                                    MapMode(MapUnit::Map100thMM)));
+    const Size aFontSize(
+        ::LogicToLogic(aFontSizeTwips, MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM)));
     vcl::Font aFnt = mpVD->GetFont();
     aFnt.SetFontSize(aFontSize);
 
