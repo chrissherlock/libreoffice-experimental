@@ -21,6 +21,8 @@
 
 #include <utility>
 #include <vcl/errinf.hxx>
+#include <vcl/weld/weld.hxx>
+#include <vcl/mapconvert.hxx>
 #include <sfx2/sfxsids.hrc>
 #include <sfx2/docfile.hxx>
 #include <sfx2/docfilt.hxx>
@@ -191,7 +193,7 @@ void SdGRFFilter::InsertSdrGrafObj(const Graphic& rGraphic, SdPage* pPage)
 {
     Point aPos;
     Size aPagSize(pPage->GetSize());
-    Size aGrfSize(OutputDevice::LogicToLogic(rGraphic.GetPrefSize(), rGraphic.GetPrefMapMode(),
+    Size aGrfSize(::LogicToLogic(rGraphic.GetPrefSize(), rGraphic.GetPrefMapMode(),
                                              MapMode(MapUnit::Map100thMM)));
 
     aPagSize.AdjustWidth(-(pPage->GetLeftBorder() + pPage->GetRightBorder()));

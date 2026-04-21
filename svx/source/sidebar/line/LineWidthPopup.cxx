@@ -25,6 +25,7 @@
 #include <tools/fldunit.hxx>
 #include <unotools/localedatawrapper.hxx>
 #include <unotools/viewoptions.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld/Builder.hxx>
@@ -94,9 +95,9 @@ IMPL_LINK_NOARG(LineWidthPopup, VSSelectHdl, ValueSet*, void)
     sal_uInt16 iPos = m_xVSWidth->GetSelectedItemId();
     if (iPos >= 1 && iPos <= 8)
     {
-        sal_IntPtr nVal = OutputDevice::LogicToLogic(
-            reinterpret_cast<sal_IntPtr>(m_xVSWidth->GetItemData(iPos)), MapUnit::MapPoint,
-            m_eMapUnit);
+        sal_IntPtr nVal
+            = ::LogicToLogic(reinterpret_cast<sal_IntPtr>(m_xVSWidth->GetItemData(iPos)),
+                             MapUnit::MapPoint, m_eMapUnit);
         nVal = m_xMFWidth->denormalize(nVal);
         XLineWidthItem aWidthItem(nVal);
         m_rParent.setLineWidth(aWidthItem);
@@ -108,8 +109,7 @@ IMPL_LINK_NOARG(LineWidthPopup, VSSelectHdl, ValueSet*, void)
         //modified
         if (m_bCustom)
         {
-            tools::Long nVal
-                = OutputDevice::LogicToLogic(m_nCustomWidth, MapUnit::MapPoint, m_eMapUnit);
+            tools::Long nVal = ::LogicToLogic(m_nCustomWidth, MapUnit::MapPoint, m_eMapUnit);
             nVal = m_xMFWidth->denormalize(nVal);
             XLineWidthItem aWidthItem(nVal);
             m_rParent.setLineWidth(aWidthItem);
@@ -139,7 +139,7 @@ IMPL_LINK_NOARG(LineWidthPopup, MFModifyHdl, weld::MetricSpinButton&, void)
         m_xVSWidth->Invalidate();
     }
     tools::Long nTmp = static_cast<tools::Long>(m_xMFWidth->get_value(FieldUnit::NONE));
-    tools::Long nVal = OutputDevice::LogicToLogic(nTmp, MapUnit::MapPoint, m_eMapUnit);
+    tools::Long nVal = ::LogicToLogic(nTmp, MapUnit::MapPoint, m_eMapUnit);
     sal_Int32 nNewWidth = static_cast<short>(m_xMFWidth->denormalize(nVal));
     XLineWidthItem aWidthItem(nNewWidth);
     m_rParent.setLineWidth(aWidthItem);
@@ -177,7 +177,7 @@ void LineWidthPopup::SetWidthSelect(tools::Long lValue, bool bValuable, MapUnit 
 
     if (bValuable)
     {
-        sal_Int64 nVal = OutputDevice::LogicToLogic(lValue, eMapUnit, MapUnit::Map100thMM);
+        sal_Int64 nVal = ::LogicToLogic(lValue, eMapUnit, MapUnit::Map100thMM);
         nVal = m_xMFWidth->normalize(nVal);
         m_xMFWidth->set_value(nVal, FieldUnit::MM_100TH);
     }

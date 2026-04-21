@@ -37,6 +37,7 @@
 #include <svl/whiter.hxx>
 #include <svl/style.hxx>
 #include <svx/sdrpagewindow.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/svapp.hxx>
 #include <svx/sdr/contact/objectcontact.hxx>
 #include <svx/sdr/animation/objectanimator.hxx>
@@ -347,8 +348,8 @@ void SdrPaintView::TheresNewMapMode()
     if (mpActualOutDev) {
         if (comphelper::LibreOfficeKit::isActive())
         {
-            mnHitTolLog=static_cast<sal_uInt16>(OutputDevice::LogicToLogic(Size(mnHitTolPix,0), MapMode(MapUnit::MapPixel), mpActualOutDev->GetMapMode()).Width());
-            mnMinMovLog=static_cast<sal_uInt16>(OutputDevice::LogicToLogic(Size(mnMinMovPix,0), MapMode(MapUnit::MapPixel), mpActualOutDev->GetMapMode()).Width());
+            mnHitTolLog=static_cast<sal_uInt16>(::LogicToLogic(Size(mnHitTolPix,0), MapMode(MapUnit::MapPixel), mpActualOutDev->GetMapMode()).Width());
+            mnMinMovLog=static_cast<sal_uInt16>(::LogicToLogic(Size(mnMinMovPix,0), MapMode(MapUnit::MapPixel), mpActualOutDev->GetMapMode()).Width());
         }
         else
         {

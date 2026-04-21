@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/mapconvert.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/window.hxx>
 
@@ -63,7 +64,7 @@ Point SvxDrawOutlinerViewForwarder::LogicToPixel( const Point& rPoint, const Map
         aPoint1.AdjustY(aTextOffset.Y() );
 
         MapMode aMapMode(pOutDev->GetMapMode());
-        Point aPoint2( OutputDevice::LogicToLogic( aPoint1, rMapMode,
+        Point aPoint2( ::LogicToLogic( aPoint1, rMapMode,
                                                MapMode(aMapMode.GetMapUnit())));
         aMapMode.SetOrigin(Point());
         return pOutDev->LogicToPixel( aPoint2, aMapMode );
@@ -81,7 +82,7 @@ Point SvxDrawOutlinerViewForwarder::PixelToLogic( const Point& rPoint, const Map
         MapMode aMapMode(pOutDev->GetMapMode());
         aMapMode.SetOrigin(Point());
         Point aPoint1( pOutDev->PixelToLogic( rPoint, aMapMode ) );
-        Point aPoint2( OutputDevice::LogicToLogic( aPoint1,
+        Point aPoint2( ::LogicToLogic( aPoint1,
                                                MapMode(aMapMode.GetMapUnit()),
                                                    rMapMode ) );
         Point aTextOffset( GetTextOffset() );

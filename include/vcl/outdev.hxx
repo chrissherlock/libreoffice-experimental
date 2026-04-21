@@ -1665,27 +1665,6 @@ public:
     SAL_WARN_UNUSED_RESULT tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
                                                          const MapMode* pMapModeSource,
                                                          const MapMode* pMapModeDest) const;
-    SAL_WARN_UNUSED_RESULT static Point LogicToLogic(const Point& rPtSource,
-                                                     const MapMode& rMapModeSource,
-                                                     const MapMode& rMapModeDest);
-    SAL_WARN_UNUSED_RESULT static Size LogicToLogic(const Size& rSzSource,
-                                                    const MapMode& rMapModeSource,
-                                                    const MapMode& rMapModeDest);
-    SAL_WARN_UNUSED_RESULT static tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
-                                                                const MapMode& rMapModeSource,
-                                                                const MapMode& rMapModeDest);
-    SAL_WARN_UNUSED_RESULT static tools::Long LogicToLogic(tools::Long nLongSource,
-                                                           MapUnit eUnitSource,
-                                                           MapUnit eUnitDest);
-
-    SAL_WARN_UNUSED_RESULT static basegfx::B2DPolygon LogicToLogic(const basegfx::B2DPolygon& rPoly,
-                                                                   const MapMode& rMapModeSource,
-                                                                   const MapMode& rMapModeDest);
-
-    // create a mapping transformation from rMapModeSource to rMapModeDest (the above methods
-    // for B2DPoly/Polygons use this internally anyway to transform the B2DPolygon)
-    SAL_WARN_UNUSED_RESULT static basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource,
-                                                                     const MapMode& rMapModeDest);
 
     SAL_DLLPRIVATE basegfx::B2DPoint LogicToDeviceSubPixel(const Point& rLogicPt) const;
 

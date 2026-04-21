@@ -20,6 +20,7 @@
 
 #include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/animate/Animation.hxx>
 #include <vcl/animate/AnimationFrame.hxx>
 #include <vcl/graph.hxx>
@@ -198,7 +199,7 @@ bool TIFFWriter::WriteTIFF( const Graphic& rGraphic, FilterConfigItem const * pF
                     if ( aMapMode.GetMapUnit() != MapUnit::MapPixel )
                     {
                         const Size aPrefSize( rGraphic.GetPrefSize() );
-                        aDestMapSize = OutputDevice::LogicToLogic(aPrefSize, aMapMode, MapMode(MapUnit::MapInch));
+                        aDestMapSize = ::LogicToLogic(aPrefSize, aMapMode, MapMode(MapUnit::MapInch));
                     }
                     ImplWriteResolution( mnXResPos, aDestMapSize.Width() );
                     ImplWriteResolution( mnYResPos, aDestMapSize.Height() );

@@ -24,6 +24,7 @@
 #include <vcl/ptrstyle.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld/Dialog.hxx>
+#include <vcl/mapconvert.hxx>
 
 #include <svx/graphctl.hxx>
 #include <svx/sdr/overlay/overlaymanager.hxx>
@@ -162,7 +163,7 @@ void GraphCtrl::SetGraphic( const Graphic& rGraphic, bool bNewModel )
     if ( maGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
         maGraphSize = Application::GetDefaultDevice()->PixelToLogic( maGraphic.GetPrefSize(), maMap100 );
     else
-        maGraphSize = OutputDevice::LogicToLogic( maGraphic.GetPrefSize(), maGraphic.GetPrefMapMode(), maMap100 );
+        maGraphSize = ::LogicToLogic( maGraphic.GetPrefSize(), maGraphic.GetPrefMapMode(), maMap100 );
 
     if ( mbSdrMode && bNewModel )
         InitSdrModel();
@@ -221,7 +222,7 @@ void GraphCtrl::Resize()
         aDisplayMap.SetScaleX( double(aNewSize.Width()) / maGraphSize.Width() );
         aDisplayMap.SetScaleY( double(aNewSize.Height()) / maGraphSize.Height() );
 
-        aDisplayMap.SetOrigin( OutputDevice::LogicToLogic( aNewPos, maMap100, aDisplayMap ) );
+        aDisplayMap.SetOrigin( ::LogicToLogic( aNewPos, maMap100, aDisplayMap ) );
         rDevice.SetMapMode( aDisplayMap );
         mxVD->SetMapMode( aDisplayMap );
     }

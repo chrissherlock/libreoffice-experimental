@@ -51,6 +51,7 @@
 #include <tools/debug.hxx>
 #include <memory>
 #include <vector>
+#include <vcl/mapconvert.hxx>
 #include <vcl/graph.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/vectorgraphicdata.hxx>
@@ -1070,7 +1071,7 @@ void SdrEditView::MergeMarkedObjects(SdrMergeMode eMode)
                 if (MapUnit::MapPixel == pGraphicObject->GetPrefMapMode().GetMapUnit())
                     aGraphicSize = Application::GetDefaultDevice()->PixelToLogic(aGraphicSize, aMapMode100thmm);
                 else
-                    aGraphicSize = OutputDevice::LogicToLogic(aGraphicSize, pGraphicObject->GetPrefMapMode(), aMapMode100thmm);
+                    aGraphicSize = ::LogicToLogic(aGraphicSize, pGraphicObject->GetPrefMapMode(), aMapMode100thmm);
 
                 if (aGraphicSize.IsEmpty() || aGrafRect.GetWidth() == 0 || aGrafRect.GetHeight() == 0)
                     continue;

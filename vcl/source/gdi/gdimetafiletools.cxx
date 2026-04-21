@@ -19,6 +19,7 @@
 
 #include <vcl/alpha.hxx>
 #include <vcl/gdimetafiletools.hxx>
+#include <vcl/mapconvert.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/canvastools.hxx>
@@ -720,7 +721,7 @@ void clipMetafileContentAgainstOwnRegions(GDIMetaFile& rSource)
                     }
                     else
                     {
-                        aLogicalSize = OutputDevice::LogicToLogic(aLogicalSize, rBitmap.GetPrefMapMode(), aMapModes.back());
+                        aLogicalSize = ::LogicToLogic(aLogicalSize, rBitmap.GetPrefMapMode(), aMapModes.back());
                     }
 
                     bDone = handleBitmapContent(
@@ -747,7 +748,7 @@ void clipMetafileContentAgainstOwnRegions(GDIMetaFile& rSource)
                     }
                     else
                     {
-                        aLogicalSize = OutputDevice::LogicToLogic(aLogicalSize, rBitmap.GetPrefMapMode(), aMapModes.back());
+                        aLogicalSize = ::LogicToLogic(aLogicalSize, rBitmap.GetPrefMapMode(), aMapModes.back());
                     }
 
                     bDone = handleBitmapContent(
