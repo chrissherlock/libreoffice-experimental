@@ -830,6 +830,23 @@ tools::PolyPolygon CoordinateMapper::LogicToWindowUnits(const tools::PolyPolygon
     return aPolyPoly;
 }
 
+double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth) const
+{
+    if (!IsMapModeEnabled())
+        return nWidth;
+
+    // View distance == Window distance, so this is perfectly safe
+    return LogicToViewDistanceSubPixelX(nWidth);
+}
+
+double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight) const
+{
+    if (!IsMapModeEnabled())
+        return nHeight;
+
+    return LogicToViewDistanceSubPixelY(nHeight);
+}
+
 basegfx::B2DPolyPolygon
 CoordinateMapper::LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                                      const MapMode& rMapMode) const

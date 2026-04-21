@@ -263,6 +263,8 @@ public:
     double LogicToWindowSubPixelY(double fY) const;
     tools::Long LogicToWindowX(tools::Long nX) const;
     tools::Long LogicToWindowY(tools::Long nY) const;
+    double LogicWidthToWindowSubPixel(tools::Long nWidth) const;
+    double LogicHeightToWindowSubPixel(tools::Long nHeight) const;
     Size LogicToWindowUnits(const Size& rLogicSize) const;
 
     // View <-> Absolute Logic (Includes mnLogicToAbsoluteOffsetX/Y)
@@ -356,9 +358,9 @@ public:
 
     Point LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
                                       const MapMode* pMapModeDest) const;
-    SAL_DLLPRIVATE Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
+    Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
                                      const MapMode* pMapModeDest) const;
-    SAL_DLLPRIVATE tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
+    tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
                                                  const MapMode* pMapModeSource,
                                                  const MapMode* pMapModeDest) const;
 
