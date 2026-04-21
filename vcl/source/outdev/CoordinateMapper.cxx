@@ -1092,26 +1092,40 @@ tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rW
 
 tools::Long CoordinateMapper::LogicToViewDistanceX(tools::Long n, double fScale) const
 {
-    assert(GetDPIX() > 0);
+    if (GetDPIX() <= 0)
+    {
+        SAL_WARN("vcl.gdi", "CoordinateMapper::LogicToViewDistanceX: Invalid DPIX");
+        return 0;
+    }
+
     return std::llround(n * fScale * GetDPIX());
 }
 
 tools::Long CoordinateMapper::LogicToViewDistanceY(tools::Long n, double fScale) const
 {
-    assert(GetDPIY() > 0);
+    if (GetDPIY() <= 0)
+    {
+        SAL_WARN("vcl.gdi", "CoordinateMapper::LogicToViewDistanceY: Invalid DPIY");
+        return 0;
+    }
+
     return std::llround(n * fScale * GetDPIY());
 }
 
 tools::Long CoordinateMapper::ViewToLogicDistanceX(tools::Long n, double fScale) const
 {
-    assert(GetDPIX() > 0);
-    return (fScale == 0) ? 0 : std::llround(n / fScale / GetDPIX());
+    if (fScale == 0.0 || GetDPIX() <= 0)
+        return 0;
+
+    return std::llround(n / fScale / GetDPIX());
 }
 
 tools::Long CoordinateMapper::ViewToLogicDistanceY(tools::Long n, double fScale) const
 {
-    assert(GetDPIY() > 0);
-    return (fScale == 0) ? 0 : std::llround(n / fScale / GetDPIY());
+    if (fScale == 0.0 || GetDPIY() <= 0)
+        return 0;
+
+    return std::llround(n / fScale / GetDPIY());
 }
 
 tools::Long CoordinateMapper::LogicToViewDistanceX(tools::Long n) const
@@ -1143,13 +1157,17 @@ double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n) const
 
 double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n, double fScale) const
 {
-    assert(GetDPIX() > 0);
+    if (GetDPIX() <= 0)
+        return 0.0;
+
     return static_cast<double>(n) * fScale * GetDPIX();
 }
 
 double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n, double fScale) const
 {
-    assert(GetDPIY() > 0);
+    if (GetDPIY() <= 0)
+        return 0.0;
+
     return static_cast<double>(n) * fScale * GetDPIY();
 }
 
@@ -1165,14 +1183,18 @@ double CoordinateMapper::ViewToLogicDistanceDoubleY(double n) const
 
 double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fScale) const
 {
-    assert(GetDPIX() > 0);
-    return (fScale == 0) ? 0.0 : (n / fScale / GetDPIX());
+    if (fScale == 0.0 || GetDPIX() <= 0)
+        return 0.0;
+
+    return n / fScale / GetDPIX();
 }
 
 double CoordinateMapper::ViewToLogicDistanceDoubleY(double n, double fScale) const
 {
-    assert(GetDPIY() > 0);
-    return (fScale == 0) ? 0.0 : (n / fScale / GetDPIY());
+    if (fScale == 0.0 || GetDPIY() <= 0)
+        return 0.0;
+
+    return n / fScale / GetDPIY();
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceX(double n) const
@@ -1506,7 +1528,9 @@ static tools::Long lcl_convertLogicValue(const tools::Long nSourceValue,
 {
     if (nSourceValue == 0 || eSourceUnit == o3tl::Length::invalid
         || eDestUnit == o3tl::Length::invalid)
+    {
         return 0;
+    }
 
     bool bOverflow;
     const auto nResult = o3tl::convert(nSourceValue, eSourceUnit, eDestUnit, bOverflow);
@@ -1683,8 +1707,12 @@ basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode&
 
     const auto[aMapResSource, aMapResDest] = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
 
-    const double fScaleFactorX(aMapResSource.mfMapScX / aMapResDest.mfMapScX);
-    const double fScaleFactorY(aMapResSource.mfMapScY / aMapResDest.mfMapScY);
+    // Guard against division by zero if MapResDest has an invalid scale
+    const double fDestScX = (aMapResDest.mfMapScX != 0.0) ? aMapResDest.mfMapScX : 1.0;
+    const double fDestScY = (aMapResDest.mfMapScY != 0.0) ? aMapResDest.mfMapScY : 1.0;
+
+    const double fScaleFactorX(aMapResSource.mfMapScX / fDestScX);
+    const double fScaleFactorY(aMapResSource.mfMapScY / fDestScY);
     const double fZeroPointX(double(aMapResSource.mnMapOfsX) * fScaleFactorX
                              - double(aMapResDest.mnMapOfsX));
     const double fZeroPointY(double(aMapResSource.mnMapOfsY) * fScaleFactorY
