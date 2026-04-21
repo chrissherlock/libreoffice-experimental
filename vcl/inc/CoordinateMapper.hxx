@@ -37,6 +37,55 @@ concept TransformableB2DGeometry = requires(T a, const basegfx::B2DHomMatrix& rM
     a.transform(rMatrix);
 };
 
+/**
+ * @class CoordinateMapper
+ * @brief Centralized mapping engine for VCL coordinate transformations.
+ *
+ * The CoordinateMapper decouples pure mathematical mapping and spatial translation
+ * logic from the physical OutputDevice. It provides a strict, layered pipeline
+ * to convert geometry between physical pixels and mathematical document units.
+ *
+ * Coordinate Spaces
+ * -----------------
+ * The mapper manages transitions across four distinct coordinate domains:
+ * 1. Device Space: Absolute physical pixels on the monitor or printer.
+ * 2. Window Space: Client area pixels. Relates to Device Space via
+ * DeviceToWindowOffset.
+ * 3. View Space: Scrollable viewport pixels. Relates to Window Space via
+ * WindowToViewOffset (the scroll position).
+ * 4. Logic Space: Document coordinates defined by a MapMode (e.g., Twips,
+ * 100th mm). Includes the MapMode's origin and scaling.
+ *
+ * Architecture & API Groupings
+ * ----------------------------
+ * - State Management: Maintains DPI, scaling percentages, MapModes, and
+ * cached resolution structures (ImplMapRes), as well as the active offset
+ * values bridging the coordinate spaces.
+ *
+ * - Pipeline Stages (Atomic): Single-step transitions bridging exactly two
+ * adjacent spaces (e.g., WindowToViewUnits, ViewToLogicUnits). These
+ * form the building blocks for all complex mappings.
+ *
+ * - Master Wrappers (Full Journey): High-level API functions that chain
+ * multiple pipeline stages together (e.g., LogicToDevicePixel,
+ * WindowToLogicUnits). Overloaded for various geometry types (Point,
+ * Size, Rectangle, Polygon, Region).
+ *
+ * - Master Stages / Logic-To-Logic: Pure mathematical transformations between
+ * two distinct MapModes. These bypass the device/pixel pipeline entirely.
+ *
+ * - Distance Scaling: Specialized scalar functions (e.g., LogicToViewDistanceX)
+ * that apply MapMode scaling *without* applying translational offsets. Used
+ * strictly for Size widths/heights, which must ignore origins and scrollbars.
+ *
+ * Sub-pixel Precision & Modern Geometry
+ * -------------------------------------
+ * In addition to legacy tools::Long integer grids, the mapper fully supports
+ * sub-pixel precision (double, basegfx::B2DPoint). It utilizes the C++20
+ * TransformableB2DGeometry concept to efficiently batch-transform modern
+ * basegfx geometry using pre-calculated B2DHomMatrix view transformations.
+ */
+
 class CoordinateMapper
 {
 private:
