@@ -135,17 +135,8 @@ ImplMapRes CoordinateMapper::ResolveMapRes(const MapMode* pMode) const
 // #i75163#
 void CoordinateMapper::InvalidateViewTransform()
 {
-    if (mpViewTransform)
-    {
-        delete mpViewTransform;
-        mpViewTransform = nullptr;
-    }
-
-    if (mpInverseViewTransform)
-    {
-        delete mpInverseViewTransform;
-        mpInverseViewTransform = nullptr;
-    }
+    maViewTransform.reset();
+    maInverseViewTransform.reset();
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetDeviceTransformation() const
@@ -164,10 +155,8 @@ basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation() const
     if (!IsMapModeEnabled())
         return basegfx::B2DHomMatrix();
 
-    if (mpViewTransform)
-        return *mpViewTransform;
-
-    mpViewTransform = new basegfx::B2DHomMatrix;
+    if (maViewTransform)
+        return *maViewTransform;
 
     const double fScaleFactorX(static_cast<double>(GetDPIX()) * maMapRes.mfMapScX);
     const double fScaleFactorY(static_cast<double>(GetDPIY()) * maMapRes.mfMapScY);
@@ -176,12 +165,14 @@ basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation() const
     const double fZeroPointY((static_cast<double>(maMapRes.mnMapOfsY) * fScaleFactorY)
                              + static_cast<double>(GetWindowToViewOffsetY()));
 
-    mpViewTransform->set(0, 0, fScaleFactorX);
-    mpViewTransform->set(1, 1, fScaleFactorY);
-    mpViewTransform->set(0, 2, fZeroPointX);
-    mpViewTransform->set(1, 2, fZeroPointY);
+    basegfx::B2DHomMatrix aTransform;
+    aTransform.set(0, 0, fScaleFactorX);
+    aTransform.set(1, 1, fScaleFactorY);
+    aTransform.set(0, 2, fZeroPointX);
+    aTransform.set(1, 2, fZeroPointY);
 
-    return *mpViewTransform;
+    maViewTransform = aTransform;
+    return *maViewTransform;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation() const
@@ -189,15 +180,14 @@ basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation() const
     if (!IsMapModeEnabled())
         return basegfx::B2DHomMatrix();
 
-    if (mpInverseViewTransform)
-        return *mpInverseViewTransform;
+    if (maInverseViewTransform)
+        return *maInverseViewTransform;
 
-    GetViewTransformation();
+    basegfx::B2DHomMatrix aInverse(GetViewTransformation());
+    aInverse.invert();
 
-    mpInverseViewTransform = new basegfx::B2DHomMatrix(*mpViewTransform);
-    mpInverseViewTransform->invert();
-
-    return *mpInverseViewTransform;
+    maInverseViewTransform = aInverse;
+    return *maInverseViewTransform;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rMapMode) const
