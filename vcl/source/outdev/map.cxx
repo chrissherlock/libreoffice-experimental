@@ -416,18 +416,12 @@ tools::Rectangle OutputDevice::LogicToLogic(const tools::Rectangle& rRectSource,
 
 double OutputDevice::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
 {
-    if (!mpMapper->IsMapModeEnabled())
-        return nWidth;
-
-    return mpMapper->LogicToViewDistanceSubPixelX(nWidth);
+    return mpMapper->LogicWidthToWindowSubPixel(nWidth);
 }
 
 double OutputDevice::LogicHeightToDeviceSubPixel(tools::Long nHeight) const
 {
-    if (!mpMapper->IsMapModeEnabled())
-        return nHeight;
-
-    return mpMapper->LogicToViewDistanceSubPixelY(nHeight);
+    return mpMapper->LogicHeightToWindowSubPixel(nHeight);
 }
 
 basegfx::B2DHomMatrix OutputDevice::GetViewTransformation() const
