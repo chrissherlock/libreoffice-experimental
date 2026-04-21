@@ -27,6 +27,7 @@
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
 
+#include <optional>
 #include <concepts>
 
 class LineInfo;
@@ -94,8 +95,8 @@ private:
     ImplMapRes maMapRes;
 
     // #i75163#
-    mutable basegfx::B2DHomMatrix* mpViewTransform = nullptr;
-    mutable basegfx::B2DHomMatrix* mpInverseViewTransform = nullptr;
+    mutable std::optional<basegfx::B2DHomMatrix> maViewTransform;
+    mutable std::optional<basegfx::B2DHomMatrix> maInverseViewTransform;
 
     sal_Int32 mnDPIX = 0;
     sal_Int32 mnDPIY = 0;
