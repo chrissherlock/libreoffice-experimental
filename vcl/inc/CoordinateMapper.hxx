@@ -98,8 +98,8 @@ private:
     mutable std::optional<basegfx::B2DHomMatrix> maViewTransform;
     mutable std::optional<basegfx::B2DHomMatrix> maInverseViewTransform;
 
-    sal_Int32 mnDPIX = 0;
-    sal_Int32 mnDPIY = 0;
+    sal_Int32 mnDPIX = 72;
+    sal_Int32 mnDPIY = 72;
     sal_Int32 mnDPIScalePercentage = 100;
 
     tools::Long mnDeviceToWindowOffsetX = 0;
