@@ -33,11 +33,16 @@
 #include <CoordinateMapper.hxx>
 #include <cmath>
 
+// Conceptual Pipeline Separation (Mathematical Invariant):
+// Logic -> View: Scaled transformations (Scale * Logic) + Scaled Offsets ((MapOfs + LogicOfs) * Scale)
+// View -> Window: Pure translation (WindowOfs)
+// Window -> Device: Pure translation (DeviceOfs)
+// We explicitly isolate the scaled offsets (fTrans) from unscaled offsets here.
 void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
                                              double& rTransY) const
 {
-    // Use IsMapModeEnabled() for class-wide consistency
-    if (!IsMapModeEnabled() || mnDPIX <= 0 || mnDPIY <= 0)
+    // Use IsMappingActive() for class-wide consistency
+    if (!IsMappingActive())
     {
         rScaleX = 1.0;
         rScaleY = 1.0;
@@ -78,6 +83,7 @@ sal_Int32 CoordinateMapper::GetDPIScalePercentage() const { return mnDPIScalePer
 void CoordinateMapper::SetDPIScalePercentage(sal_Int32 nPercent)
 {
     mnDPIScalePercentage = nPercent;
+    InvalidateViewTransform();
 }
 
 float CoordinateMapper::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
@@ -119,7 +125,7 @@ Point CoordinateMapper::GetDeviceToWindowOffset() const
 
 Size CoordinateMapper::LogicToViewDistance(const Size& rLogicSize) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rLogicSize;
 
     return Size(LogicToViewDistanceX(rLogicSize.Width()),
@@ -186,7 +192,7 @@ basegfx::B2DHomMatrix CoordinateMapper::GetDeviceTransformation() const
 
 basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation() const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return basegfx::B2DHomMatrix();
 
     if (maViewTransform)
@@ -210,7 +216,7 @@ basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation() const
 
 basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation() const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return basegfx::B2DHomMatrix();
 
     if (maInverseViewTransform)
@@ -287,26 +293,33 @@ double CoordinateMapper::WindowToDeviceSubPixelY(double fY) const
 // View <-> Absolute Logic (Map Scale & Map Offset)
 double CoordinateMapper::ViewSubPixelToLogicUnitsX(double fX) const
 {
-    if (!mbMap || maMapRes.mfMapScX == 0.0 || mnDPIX <= 0)
+    if (!IsMappingActive() || maMapRes.mfMapScX == 0.0)
         return fX;
+
     return (fX / (maMapRes.mfMapScX * mnDPIX)) - static_cast<double>(maMapRes.mnMapOfsX);
 }
+
 double CoordinateMapper::ViewSubPixelToLogicUnitsY(double fY) const
 {
-    if (!mbMap || maMapRes.mfMapScY == 0.0 || mnDPIY <= 0)
+    if (!IsMappingActive() || maMapRes.mfMapScY == 0.0)
         return fY;
+
     return (fY / (maMapRes.mfMapScY * mnDPIY)) - static_cast<double>(maMapRes.mnMapOfsY);
 }
+
 double CoordinateMapper::LogicUnitsToViewSubPixelX(double fX) const
 {
-    if (!mbMap || mnDPIX <= 0)
+    if (!IsMappingActive())
         return fX;
+
     return (fX + static_cast<double>(maMapRes.mnMapOfsX)) * maMapRes.mfMapScX * mnDPIX;
 }
+
 double CoordinateMapper::LogicUnitsToViewSubPixelY(double fY) const
 {
-    if (!mbMap || mnDPIY <= 0)
+    if (!IsMappingActive())
         return fY;
+
     return (fY + static_cast<double>(maMapRes.mnMapOfsY)) * maMapRes.mfMapScY * mnDPIY;
 }
 
@@ -343,14 +356,14 @@ tools::Long CoordinateMapper::LogicUnitsToViewUnitsY(tools::Long nY, const ImplM
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicUnitsIntX(double fX) const
 {
-    // Uses the version that rounds the distance BEFORE the offset shift
-    return ViewSubPixelToLogicDistanceX(fX) - maMapRes.mnMapOfsX;
+    // Fix: Round only at the end of the full pipeline stage
+    return lcl_RoundToLong(ViewSubPixelToLogicUnitsX(fX));
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicUnitsIntY(double fY) const
 {
-    // Uses the version that rounds the distance BEFORE the offset shift
-    return ViewSubPixelToLogicDistanceY(fY) - maMapRes.mnMapOfsY;
+    // Fix: Round only at the end of the full pipeline stage
+    return lcl_RoundToLong(ViewSubPixelToLogicUnitsY(fY));
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX, const ImplMapRes& rRes) const
@@ -375,7 +388,7 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY, const ImplMapRe
 
 double CoordinateMapper::WindowToLogicSubPixelX(double fX) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return fX;
 
     double fView = WindowToViewSubPixelX(fX);
@@ -385,7 +398,7 @@ double CoordinateMapper::WindowToLogicSubPixelX(double fX) const
 
 double CoordinateMapper::WindowToLogicSubPixelY(double fY) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return fY;
 
     double fView = WindowToViewSubPixelY(fY);
@@ -405,7 +418,7 @@ tools::Long CoordinateMapper::WindowToLogicY(tools::Long nY) const
 
 Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rLogicSize;
 
     // Distances ignore offsets, so Window == View
@@ -418,7 +431,7 @@ double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
 {
     double fVal = fX - static_cast<double>(mnDeviceToWindowOffsetX + mnWindowToViewOffsetX);
 
-    if (!mbMap)
+    if (!IsMappingActive())
         return fVal;
 
     double fScaleX, fScaleY, fTransX, fTransY;
@@ -437,7 +450,7 @@ double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
 {
     double fVal = fY - static_cast<double>(mnDeviceToWindowOffsetY + mnWindowToViewOffsetY);
 
-    if (!mbMap)
+    if (!IsMappingActive())
         return fVal;
 
     double fScaleX, fScaleY, fTransX, fTransY;
@@ -459,7 +472,7 @@ double CoordinateMapper::LogicToDeviceSubPixelX(double fX) const
 
     double fVal = fX;
 
-    if (mbMap)
+    if (IsMappingActive())
         fVal = (fVal * fScaleX) + fTransX;
 
     // Add Window and Device offsets (Screen-space translations)
@@ -473,7 +486,7 @@ double CoordinateMapper::LogicToDeviceSubPixelY(double fY) const
 
     double fVal = fY;
 
-    if (mbMap)
+    if (IsMappingActive())
         fVal = (fVal * fScaleY) + fTransY;
 
     return fVal + static_cast<double>(mnWindowToViewOffsetY + mnDeviceToWindowOffsetY);
@@ -547,14 +560,14 @@ Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt) const
 // Note: Width/Height use Distances, not Positions!
 tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return nWidth;
     return LogicToViewDistanceX(nWidth);
 }
 
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return nHeight;
     return LogicToViewDistanceY(nHeight);
 }
@@ -583,7 +596,7 @@ tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rL
 
 tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogicPoly) const
 {
-    if (!IsMapModeEnabled() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+    if (!IsMappingActive() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
         return rLogicPoly;
 
     tools::Polygon aPoly(rLogicPoly);
@@ -599,7 +612,7 @@ tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogic
 tools::PolyPolygon
 CoordinateMapper::LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly) const
 {
-    if (!IsMapModeEnabled() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+    if (!IsMappingActive() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
         return rLogicPolyPoly;
 
     tools::PolyPolygon aPolyPoly(rLogicPolyPoly);
@@ -642,7 +655,7 @@ LineInfo CoordinateMapper::LogicToDevicePixel(const LineInfo& rLineInfo) const
 basegfx::B2DPolygon
 CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) const
 {
-    if (!IsMapModeEnabled() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+    if (!IsMappingActive() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
         return rLogicPoly;
 
     const sal_uInt32 nPoints = rLogicPoly.count();
@@ -676,7 +689,7 @@ CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) cons
 
 tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return nX;
 
     return ViewToWindowUnitsX(LogicUnitsToViewUnitsX(nX + mnLogicToAbsoluteOffsetX));
@@ -684,7 +697,7 @@ tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX) const
 
 tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return nY;
 
     return ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY + mnLogicToAbsoluteOffsetY));
@@ -711,14 +724,14 @@ tools::Long CoordinateMapper::ViewToLogicY(tools::Long nY) const
 
 tools::Long CoordinateMapper::LogicToWindowUnitsX(tools::Long nX) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return nX;
     return ViewToWindowUnitsX(LogicUnitsToViewUnitsX(nX));
 }
 
 tools::Long CoordinateMapper::LogicToWindowUnitsY(tools::Long nY) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return nY;
     return ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY));
 }
@@ -735,7 +748,7 @@ tools::Long CoordinateMapper::LogicToWindowUnitsY(tools::Long nY, const ImplMapR
 
 Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rLogicPt;
 
     return Point(LogicToWindowUnitsX(rLogicPt.X()), LogicToWindowUnitsY(rLogicPt.Y()));
@@ -798,7 +811,7 @@ static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle&
 
 tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rRect;
 
     tools::Rectangle aRetval(LogicToWindowUnitsX(rRect.Left()), LogicToWindowUnitsY(rRect.Top()),
@@ -888,7 +901,7 @@ static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc
 
 vcl::Region CoordinateMapper::LogicToWindowUnits(const vcl::Region& rLogicRegion) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rLogicRegion;
 
     return lcl_TransformRegion(rLogicRegion,
@@ -897,7 +910,7 @@ vcl::Region CoordinateMapper::LogicToWindowUnits(const vcl::Region& rLogicRegion
 
 tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rPoly) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rPoly;
 
     tools::Polygon aPoly(rPoly);
@@ -913,7 +926,7 @@ tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rPoly)
 
 tools::PolyPolygon CoordinateMapper::LogicToWindowUnits(const tools::PolyPolygon& rPolyPoly) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rPolyPoly;
 
     tools::PolyPolygon aPolyPoly(rPolyPoly);
@@ -928,7 +941,7 @@ tools::PolyPolygon CoordinateMapper::LogicToWindowUnits(const tools::PolyPolygon
 
 double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return nWidth;
 
     // View distance == Window distance, so this is perfectly safe
@@ -937,7 +950,7 @@ double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth) const
 
 double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return nHeight;
 
     return LogicToViewDistanceSubPixelY(nHeight);
@@ -955,7 +968,7 @@ CoordinateMapper::LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPo
 
 vcl::Region CoordinateMapper::WindowToLogicUnits(const vcl::Region& rWindowRegion) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rWindowRegion;
 
     return lcl_TransformRegion(rWindowRegion,
@@ -964,7 +977,7 @@ vcl::Region CoordinateMapper::WindowToLogicUnits(const vcl::Region& rWindowRegio
 
 Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rWindowPt;
 
     return Point(WindowToLogicX(rWindowPt.X()), WindowToLogicY(rWindowPt.Y()));
@@ -992,7 +1005,7 @@ tools::Long CoordinateMapper::WindowSubPixelToLogicIntY(double fY, const ImplMap
 
 Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
     {
         assert(std::floor(rWindowPt.getX()) == rWindowPt.getX()
                && std::floor(rWindowPt.getY()) == rWindowPt.getY());
@@ -1005,7 +1018,7 @@ Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWin
 
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rWindowRect;
 
     tools::Rectangle aRetval(
@@ -1020,7 +1033,7 @@ tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rW
 
 tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rWindowPoly;
 
     tools::Polygon aPoly(rWindowPoly);
@@ -1061,7 +1074,7 @@ tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindo
 tools::PolyPolygon
 CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rWindowPolyPoly;
 
     tools::PolyPolygon aPolyPoly(rWindowPolyPoly);
@@ -1077,7 +1090,7 @@ CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly) 
 template <TransformableB2DGeometry T>
 T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rWindowGeometry;
 
     T aTransformedGeometry = rWindowGeometry;
@@ -1113,7 +1126,7 @@ CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(const basegfx::B2D
 
 Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return rWindowSize;
 
     return Size(ViewToLogicDistanceX(rWindowSize.Width()),
@@ -1374,7 +1387,7 @@ double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
 
 tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return nWidth;
 
     return ViewToLogicDistanceX(nWidth);
@@ -1382,7 +1395,7 @@ tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth) const
 
 tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight) const
 {
-    if (!IsMapModeEnabled())
+    if (!IsMappingActive())
         return nHeight;
 
     return ViewToLogicDistanceY(nHeight);
