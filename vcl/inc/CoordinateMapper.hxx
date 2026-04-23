@@ -483,10 +483,8 @@ public:
     tools::Long ViewSubPixelToLogicDistanceY(double n, double fScale) const;
 
 private:
-    void GetSubPixelWeights(double& rScaleX, double& rScaleY, double& rTransX,
-                            double& rTransY) const;
-    tools::Long ImplCalcDevicePixelX(tools::Long nX) const;
-    tools::Long ImplCalcDevicePixelY(tools::Long nY) const;
+    void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
+                               double& rTransY) const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
