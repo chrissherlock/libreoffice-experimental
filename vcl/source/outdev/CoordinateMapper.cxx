@@ -32,6 +32,30 @@
 
 #include <CoordinateMapper.hxx>
 
+void CoordinateMapper::GetSubPixelWeights(double& rScaleX, double& rScaleY, double& rTransX,
+                                          double& rTransY) const
+{
+    if (!mbMap || mnDPIX <= 0 || mnDPIY <= 0)
+    {
+        rScaleX = 1.0;
+        rScaleY = 1.0;
+        rTransX = 0.0;
+        rTransY = 0.0;
+        return;
+    }
+
+    rScaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
+    rScaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
+
+    // Total Translation = (MapOffset + AbsoluteLogicOffset) * Scale
+    rTransX
+        = (static_cast<double>(maMapRes.mnMapOfsX) + static_cast<double>(mnLogicToAbsoluteOffsetX))
+          * rScaleX;
+    rTransY
+        = (static_cast<double>(maMapRes.mnMapOfsY) + static_cast<double>(mnLogicToAbsoluteOffsetY))
+          * rScaleY;
+}
+
 sal_Int32 CoordinateMapper::GetDPIX() const { return mnDPIX; }
 
 sal_Int32 CoordinateMapper::GetDPIY() const { return mnDPIY; }
@@ -158,18 +182,15 @@ basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation() const
     if (maViewTransform)
         return *maViewTransform;
 
-    const double fScaleFactorX(static_cast<double>(GetDPIX()) * maMapRes.mfMapScX);
-    const double fScaleFactorY(static_cast<double>(GetDPIY()) * maMapRes.mfMapScY);
-    const double fZeroPointX((static_cast<double>(maMapRes.mnMapOfsX) * fScaleFactorX)
-                             + static_cast<double>(GetWindowToViewOffsetX()));
-    const double fZeroPointY((static_cast<double>(maMapRes.mnMapOfsY) * fScaleFactorY)
-                             + static_cast<double>(GetWindowToViewOffsetY()));
+    double fScaleX, fScaleY, fTransX, fTransY;
+    GetSubPixelWeights(fScaleX, fScaleY, fTransX, fTransY);
 
     basegfx::B2DHomMatrix aTransform;
-    aTransform.set(0, 0, fScaleFactorX);
-    aTransform.set(1, 1, fScaleFactorY);
-    aTransform.set(0, 2, fZeroPointX);
-    aTransform.set(1, 2, fZeroPointY);
+    aTransform.set(0, 0, fScaleX);
+    aTransform.set(1, 1, fScaleY);
+    // Translation = Scaled Offsets + Window Scroll
+    aTransform.set(0, 2, fTransX + static_cast<double>(mnWindowToViewOffsetX));
+    aTransform.set(1, 2, fTransY + static_cast<double>(mnWindowToViewOffsetY));
 
     maViewTransform = aTransform;
     return *maViewTransform;
@@ -197,8 +218,10 @@ basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rMa
 
     basegfx::B2DHomMatrix aTransform;
 
-    const double fScaleFactorX(static_cast<double>(GetDPIX()) * aMapRes.mfMapScX);
-    const double fScaleFactorY(static_cast<double>(GetDPIY()) * aMapRes.mfMapScY);
+    const double fScaleFactorX(static_cast<double>(GetDPIX())
+                               * static_cast<double>(aMapRes.mfMapScX));
+    const double fScaleFactorY(static_cast<double>(GetDPIY())
+                               * static_cast<double>(aMapRes.mfMapScY));
     const double fZeroPointX((static_cast<double>(aMapRes.mnMapOfsX) * fScaleFactorX)
                              + static_cast<double>(GetWindowToViewOffsetX()));
     const double fZeroPointY((static_cast<double>(aMapRes.mnMapOfsY) * fScaleFactorY)
@@ -393,8 +416,10 @@ double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
 {
     if (!IsMapModeEnabled())
         return DeviceToWindowSubPixelX(fX);
+
     double fWindow = DeviceToWindowSubPixelX(fX);
     double fView = WindowToViewSubPixelX(fWindow);
+
     return ViewSubPixelToLogicUnitsX(fView) - static_cast<double>(mnLogicToAbsoluteOffsetX);
 }
 
@@ -402,27 +427,38 @@ double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
 {
     if (!IsMapModeEnabled())
         return DeviceToWindowSubPixelY(fY);
+
     double fWindow = DeviceToWindowSubPixelY(fY);
     double fView = WindowToViewSubPixelY(fWindow);
+
     return ViewSubPixelToLogicUnitsY(fView) - static_cast<double>(mnLogicToAbsoluteOffsetY);
 }
 
 double CoordinateMapper::LogicToDeviceSubPixelX(double fX) const
 {
-    if (!IsMapModeEnabled())
-        return fX + static_cast<double>(mnDeviceToWindowOffsetX);
-    double fView = LogicUnitsToViewSubPixelX(fX + static_cast<double>(mnLogicToAbsoluteOffsetX));
-    double fWindow = ViewToWindowSubPixelX(fView);
-    return WindowToDeviceSubPixelX(fWindow);
+    double fScaleX, fScaleY, fTransX, fTransY;
+    GetSubPixelWeights(fScaleX, fScaleY, fTransX, fTransY);
+
+    double fVal = fX;
+
+    if (mbMap)
+        fVal = (fVal * fScaleX) + fTransX;
+
+    // Add Window and Device offsets (Screen-space translations)
+    return fVal + static_cast<double>(mnWindowToViewOffsetX + mnDeviceToWindowOffsetX);
 }
 
 double CoordinateMapper::LogicToDeviceSubPixelY(double fY) const
 {
-    if (!IsMapModeEnabled())
-        return fY + static_cast<double>(mnDeviceToWindowOffsetY);
-    double fView = LogicUnitsToViewSubPixelY(fY + static_cast<double>(mnLogicToAbsoluteOffsetY));
-    double fWindow = ViewToWindowSubPixelY(fView);
-    return WindowToDeviceSubPixelY(fWindow);
+    double fScaleX, fScaleY, fTransX, fTransY;
+    GetSubPixelWeights(fScaleX, fScaleY, fTransX, fTransY);
+
+    double fVal = fY;
+
+    if (mbMap)
+        fVal = (fVal * fScaleY) + fTransY;
+
+    return fVal + static_cast<double>(mnWindowToViewOffsetY + mnDeviceToWindowOffsetY);
 }
 
 basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint) const
