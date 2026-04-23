@@ -31,6 +31,7 @@
 #include <vcl/rendercontext/ImplMapRes.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <cmath>
 
 void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
                                              double& rTransY) const
@@ -60,9 +61,17 @@ sal_Int32 CoordinateMapper::GetDPIX() const { return mnDPIX; }
 
 sal_Int32 CoordinateMapper::GetDPIY() const { return mnDPIY; }
 
-void CoordinateMapper::SetDPIX(sal_Int32 nDPIX) { mnDPIX = nDPIX; }
+void CoordinateMapper::SetDPIX(sal_Int32 nDPIX)
+{
+    mnDPIX = nDPIX;
+    InvalidateViewTransform();
+}
 
-void CoordinateMapper::SetDPIY(sal_Int32 nDPIY) { mnDPIY = nDPIY; }
+void CoordinateMapper::SetDPIY(sal_Int32 nDPIY)
+{
+    mnDPIY = nDPIY;
+    InvalidateViewTransform();
+}
 
 sal_Int32 CoordinateMapper::GetDPIScalePercentage() const { return mnDPIScalePercentage; }
 
@@ -77,12 +86,14 @@ void CoordinateMapper::SetPixelOffset(const Size& rSize)
 {
     mnLogicToAbsoluteOffsetX = rSize.getWidth();
     mnLogicToAbsoluteOffsetY = rSize.getHeight();
+    InvalidateViewTransform();
 }
 
 void CoordinateMapper::SetWindowToViewOffset(const Size& rWindowPixelOffset)
 {
     mnWindowToViewOffsetX = rWindowPixelOffset.Width();
     mnWindowToViewOffsetY = rWindowPixelOffset.Height();
+    InvalidateViewTransform();
 }
 
 tools::Long CoordinateMapper::GetDeviceToWindowOffsetX() const { return mnDeviceToWindowOffsetX; }
@@ -92,11 +103,13 @@ tools::Long CoordinateMapper::GetDeviceToWindowOffsetY() const { return mnDevice
 void CoordinateMapper::SetDeviceToWindowOffsetX(tools::Long nDeviceToWindowOffsetX)
 {
     mnDeviceToWindowOffsetX = nDeviceToWindowOffsetX;
+    InvalidateViewTransform();
 }
 
 void CoordinateMapper::SetDeviceToWindowOffsetY(tools::Long nDeviceToWindowOffsetY)
 {
     mnDeviceToWindowOffsetY = nDeviceToWindowOffsetY;
+    InvalidateViewTransform();
 }
 
 Point CoordinateMapper::GetDeviceToWindowOffset() const
@@ -138,12 +151,14 @@ void CoordinateMapper::SetLogicToAbsoluteOffset(Size const& rOffset)
 {
     mnLogicToAbsoluteOffsetX = rOffset.getWidth();
     mnLogicToAbsoluteOffsetY = rOffset.getHeight();
+    InvalidateViewTransform();
 }
 
 void CoordinateMapper::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX,
                                          tools::Long nDPIY)
 {
     maMapRes.CalcMapResolution(rMapMode, nDPIX, nDPIY);
+    InvalidateViewTransform();
 }
 
 ImplMapRes CoordinateMapper::ResolveMapRes(const MapMode* pMode) const
@@ -466,8 +481,21 @@ double CoordinateMapper::LogicToDeviceSubPixelY(double fY) const
 
 basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint) const
 {
-    return basegfx::B2DPoint(LogicToDeviceSubPixelX(static_cast<double>(rPoint.X())),
-                             LogicToDeviceSubPixelY(static_cast<double>(rPoint.Y())));
+    basegfx::B2DPoint aScalarResult(LogicToDeviceSubPixelX(static_cast<double>(rPoint.X())),
+                                    LogicToDeviceSubPixelY(static_cast<double>(rPoint.Y())));
+
+#if defined(DBG_UTIL)
+    // Architectural Cross-Check: Ensure manual pipeline never diverges from authoritative matrix
+    basegfx::B2DPoint aMatrixResult(rPoint.X(), rPoint.Y());
+    aMatrixResult *= GetDeviceTransformation();
+
+    // Allow for microscopic FP accumulation differences
+    assert(std::abs(aScalarResult.getX() - aMatrixResult.getX()) < 0.0001
+           && std::abs(aScalarResult.getY() - aMatrixResult.getY()) < 0.0001
+           && "CoordinateMapper: Scalar and Matrix transformation pipelines have diverged!");
+#endif
+
+    return aScalarResult;
 }
 
 // Integer Boundary (this is the only place rounding occurs)
@@ -1256,6 +1284,8 @@ double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n) const
 
 double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n, double fScale) const
 {
+    SAL_WARN_IF(GetDPIX() <= 0, "vcl.gdi",
+                "CoordinateMapper: Invalid DPI X, falling back to identity");
     if (GetDPIX() <= 0)
         return static_cast<double>(n); // Identity fallback, not 0.0
 
@@ -1264,6 +1294,8 @@ double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n, double fSca
 
 double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n, double fScale) const
 {
+    SAL_WARN_IF(GetDPIY() <= 0, "vcl.gdi",
+                "CoordinateMapper: Invalid DPI Y, falling back to identity");
     if (GetDPIY() <= 0)
         return static_cast<double>(n); // Identity fallback, not 0.0
 
@@ -1282,6 +1314,8 @@ double CoordinateMapper::ViewToLogicDistanceDoubleY(double n) const
 
 double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fScale) const
 {
+    SAL_WARN_IF(fScale == 0.0 || GetDPIX() <= 0, "vcl.gdi",
+                "CoordinateMapper: Zero scale or invalid DPI X, falling back to identity");
     if (fScale == 0.0 || GetDPIX() <= 0)
         return n; // Identity fallback, not 0.0
 
@@ -1290,6 +1324,8 @@ double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fScale) con
 
 double CoordinateMapper::ViewToLogicDistanceDoubleY(double n, double fScale) const
 {
+    SAL_WARN_IF(fScale == 0.0 || GetDPIY() <= 0, "vcl.gdi",
+                "CoordinateMapper: Zero scale or invalid DPI Y, falling back to identity");
     if (fScale == 0.0 || GetDPIY() <= 0)
         return n; // Identity fallback, not 0.0
 
