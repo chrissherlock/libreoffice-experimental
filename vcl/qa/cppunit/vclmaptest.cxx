@@ -619,6 +619,23 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testMatrixVsScalarParity)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Matrix and Scalar pipelines have diverged (Y)", aScalarDevice.Y(),
                                  nMatrixDeviceY);
 }
+
+CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testSubpixelStability)
+{
+    double fBaseX = 100.0;
+
+    // Sweep X from 100.0 to 101.0 in 0.1 increments
+    for (int i = 0; i <= 10; ++i)
+    {
+        double fCurrentX = fBaseX + (i * 0.1);
+        double fPixel = mpMapper->LogicToDeviceSubPixelX(fCurrentX);
+        double fRestored = mpMapper->DevicePixelToLogicSubPixelX(fPixel);
+
+        CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Subpixel drift detected in sweep", fCurrentX,
+                                             fRestored, 0.0001);
+    }
+}
+
 } // end anonymous namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
