@@ -181,7 +181,11 @@ private:
 
 public:
     bool IsMapModeEnabled() const { return mbMap; }
-    void EnableMapMode(bool bEnable = true) { mbMap = bEnable; }
+    void EnableMapMode(bool bEnable = true)
+    {
+        mbMap = bEnable;
+        InvalidateViewTransform();
+    }
 
     sal_Int32 GetDPIX() const;
     sal_Int32 GetDPIY() const;
@@ -202,6 +206,7 @@ public:
 
     tools::Long GetWindowToViewOffsetX() const { return mnWindowToViewOffsetX; }
     tools::Long GetWindowToViewOffsetY() const { return mnWindowToViewOffsetY; }
+
     Size GetWindowToViewOffset() const
     {
         return Size(mnWindowToViewOffsetX, mnWindowToViewOffsetY);
@@ -209,6 +214,7 @@ public:
 
     tools::Long GetLogicToAbsoluteOffsetX() const { return mnLogicToAbsoluteOffsetX; }
     tools::Long GetLogicToAbsoluteOffsetY() const { return mnLogicToAbsoluteOffsetY; }
+
     Size GetLogicToAbsoluteOffset() const
     {
         return Size(mnLogicToAbsoluteOffsetX, mnLogicToAbsoluteOffsetY);
@@ -218,10 +224,12 @@ public:
     {
         return mnDeviceToWindowOffsetX + mnWindowToViewOffsetX;
     }
+
     tools::Long GetDeviceToViewOffsetY() const
     {
         return mnDeviceToWindowOffsetY + mnWindowToViewOffsetY;
     }
+
     Size GetDeviceToViewOffset() const
     {
         return Size(GetDeviceToViewOffsetX(), GetDeviceToViewOffsetY());
@@ -243,26 +251,70 @@ public:
 
     const MapMode& GetMapMode() const { return maMapMode; }
     bool IsDefaultMapMode() const { return maMapMode.IsDefault(); }
-    void ResetMapMode() { maMapMode = MapMode(); }
-    void ResetMapMode(const MapMode& rMapMode) { maMapMode = rMapMode; }
+
+    void ResetMapMode()
+    {
+        maMapMode = MapMode();
+        InvalidateViewTransform();
+    }
+
+    void ResetMapMode(const MapMode& rMapMode)
+    {
+        maMapMode = rMapMode;
+        InvalidateViewTransform();
+    }
+
     MapUnit GetMapUnit() const { return maMapMode.GetMapUnit(); }
 
     double GetScaleX() const { return maMapMode.GetScaleX(); }
     double GetScaleY() const { return maMapMode.GetScaleY(); }
-    void SetScaleX(double nX) { maMapMode.SetScaleX(nX); }
-    void SetScaleY(double nY) { maMapMode.SetScaleY(nY); }
 
-    void SetOrigin(const Point& rPt) { maMapMode.SetOrigin(rPt); }
+    void SetScaleX(double nX)
+    {
+        maMapMode.SetScaleX(nX);
+        InvalidateViewTransform();
+    }
+
+    void SetScaleY(double nY)
+    {
+        maMapMode.SetScaleY(nY);
+        InvalidateViewTransform();
+    }
+
+    void SetOrigin(const Point& rPt)
+    {
+        maMapMode.SetOrigin(rPt);
+        InvalidateViewTransform();
+    }
 
     tools::Long GetMappingXOffset() const { return maMapRes.mnMapOfsX; }
     tools::Long GetMappingYOffset() const { return maMapRes.mnMapOfsY; }
     double GetMapResolutionScaleX() const { return maMapRes.mfMapScX; }
     double GetMapResolutionScaleY() const { return maMapRes.mfMapScY; }
 
-    void SetMappingXOffset(tools::Long nOffset) { maMapRes.mnMapOfsX = nOffset; }
-    void SetMappingYOffset(tools::Long nOffset) { maMapRes.mnMapOfsY = nOffset; }
-    void SetMapResolutionScaleX(double fX) { maMapRes.mfMapScX = fX; }
-    void SetMapResolutionScaleY(double fY) { maMapRes.mfMapScY = fY; }
+    void SetMappingXOffset(tools::Long nOffset)
+    {
+        maMapRes.mnMapOfsX = nOffset;
+        InvalidateViewTransform();
+    }
+
+    void SetMappingYOffset(tools::Long nOffset)
+    {
+        maMapRes.mnMapOfsY = nOffset;
+        InvalidateViewTransform();
+    }
+
+    void SetMapResolutionScaleX(double fX)
+    {
+        maMapRes.mfMapScX = fX;
+        InvalidateViewTransform();
+    }
+
+    void SetMapResolutionScaleY(double fY)
+    {
+        maMapRes.mfMapScY = fY;
+        InvalidateViewTransform();
+    }
 
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
