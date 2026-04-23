@@ -1695,9 +1695,15 @@ basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode&
     if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
     {
         const auto[eFrom, eTo] = lcl_getCorrectedUnit(eUnitSource, eUnitDest);
-        const double fScaleFactor(eFrom == o3tl::Length::invalid || eTo == o3tl::Length::invalid
-                                      ? std::numeric_limits<double>::quiet_NaN()
-                                      : o3tl::convert(1.0, eFrom, eTo));
+
+        if (eFrom == o3tl::Length::invalid || eTo == o3tl::Length::invalid)
+        {
+            SAL_WARN("vcl.gdi", "CoordinateMapper: Invalid MapUnit conversion requested. Falling "
+                                "back to identity matrix to prevent NaN poisoning.");
+            return aTransform; // Return default identity matrix
+        }
+
+        const double fScaleFactor = o3tl::convert(1.0, eFrom, eTo);
         aTransform.set(0, 0, fScaleFactor);
         aTransform.set(1, 1, fScaleFactor);
 
