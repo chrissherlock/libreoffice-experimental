@@ -35,7 +35,8 @@
 void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
                                              double& rTransY) const
 {
-    if (!mbMap || mnDPIX <= 0 || mnDPIY <= 0)
+    // Use IsMapModeEnabled() for class-wide consistency
+    if (!IsMapModeEnabled() || mnDPIX <= 0 || mnDPIY <= 0)
     {
         rScaleX = 1.0;
         rScaleY = 1.0;
@@ -47,7 +48,6 @@ void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, d
     rScaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
     rScaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
 
-    // Total Translation = (MapOffset + AbsoluteLogicOffset) * Scale
     rTransX
         = (static_cast<double>(maMapRes.mnMapOfsX) + static_cast<double>(mnLogicToAbsoluteOffsetX))
           * rScaleX;
@@ -409,6 +409,9 @@ double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
     double fScaleX, fScaleY, fTransX, fTransY;
     GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
 
+    SAL_WARN_IF(fScaleX == 0.0, "vcl.gdi",
+                "CoordinateMapper: Zero X scale encountered during inverse transformation!");
+
     if (fScaleX != 0.0)
         fVal = (fVal - fTransX) / fScaleX;
 
@@ -424,6 +427,9 @@ double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
 
     double fScaleX, fScaleY, fTransX, fTransY;
     GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
+
+    SAL_WARN_IF(fScaleY == 0.0, "vcl.gdi",
+                "CoordinateMapper: Zero Y scale encountered during inverse transformation!");
 
     if (fScaleY != 0.0)
         fVal = (fVal - fTransY) / fScaleY;
