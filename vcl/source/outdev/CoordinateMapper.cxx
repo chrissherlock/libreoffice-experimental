@@ -1123,40 +1123,22 @@ tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rW
 
 tools::Long CoordinateMapper::LogicToViewDistanceX(tools::Long n, double fScale) const
 {
-    if (GetDPIX() <= 0)
-    {
-        SAL_WARN("vcl.gdi", "CoordinateMapper::LogicToViewDistanceX: Invalid DPIX");
-        return 0;
-    }
-
-    return std::llround(n * fScale * GetDPIX());
+    return lcl_RoundToLong(LogicToViewDistanceSubPixelX(n, fScale));
 }
 
 tools::Long CoordinateMapper::LogicToViewDistanceY(tools::Long n, double fScale) const
 {
-    if (GetDPIY() <= 0)
-    {
-        SAL_WARN("vcl.gdi", "CoordinateMapper::LogicToViewDistanceY: Invalid DPIY");
-        return 0;
-    }
-
-    return std::llround(n * fScale * GetDPIY());
+    return lcl_RoundToLong(LogicToViewDistanceSubPixelY(n, fScale));
 }
 
 tools::Long CoordinateMapper::ViewToLogicDistanceX(tools::Long n, double fScale) const
 {
-    if (fScale == 0.0 || GetDPIX() <= 0)
-        return 0;
-
-    return std::llround(n / fScale / GetDPIX());
+    return lcl_RoundToLong(ViewToLogicDistanceDoubleX(static_cast<double>(n), fScale));
 }
 
 tools::Long CoordinateMapper::ViewToLogicDistanceY(tools::Long n, double fScale) const
 {
-    if (fScale == 0.0 || GetDPIY() <= 0)
-        return 0;
-
-    return std::llround(n / fScale / GetDPIY());
+    return lcl_RoundToLong(ViewToLogicDistanceDoubleY(static_cast<double>(n), fScale));
 }
 
 tools::Long CoordinateMapper::LogicToViewDistanceX(tools::Long n) const
@@ -1283,12 +1265,12 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n) const
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceX(double n, double fScale) const
 {
-    return std::llround(ViewToLogicDistanceDoubleX(n, fScale));
+    return lcl_RoundToLong(ViewToLogicDistanceDoubleX(n, fScale));
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n, double fScale) const
 {
-    return std::llround(ViewToLogicDistanceDoubleY(n, fScale));
+    return lcl_RoundToLong(ViewToLogicDistanceDoubleY(n, fScale));
 }
 
 double CoordinateMapper::WindowToViewSubPixelX(double fX) const
