@@ -148,7 +148,7 @@ concept TransformableB2DGeometry = requires(T a, const basegfx::B2DHomMatrix& rM
  * ========================================================================
  */
 
-class CoordinateMapper
+class VCL_DLLPUBLIC CoordinateMapper
 {
 private:
     bool mbMap = false;
@@ -447,12 +447,11 @@ public:
     // These do not traverse the VCL device pipeline.
 
     Point LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
-                                      const MapMode* pMapModeDest) const;
+                       const MapMode* pMapModeDest) const;
     Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
-                                     const MapMode* pMapModeDest) const;
+                      const MapMode* pMapModeDest) const;
     tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
-                                                 const MapMode* pMapModeSource,
-                                                 const MapMode* pMapModeDest) const;
+                                  const MapMode* pMapModeSource, const MapMode* pMapModeDest) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
@@ -483,6 +482,8 @@ public:
     tools::Long ViewSubPixelToLogicDistanceY(double n, double fScale) const;
 
 private:
+    void GetSubPixelWeights(double& rScaleX, double& rScaleY, double& rTransX,
+                            double& rTransY) const;
     tools::Long ImplCalcDevicePixelX(tools::Long nX) const;
     tools::Long ImplCalcDevicePixelY(tools::Long nY) const;
 };

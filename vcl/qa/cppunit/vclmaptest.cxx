@@ -19,6 +19,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/print.hxx>
 #include <vcl/mapconvert.hxx>
+#include <CoordinateMapper.hxx>
 
 namespace
 {
@@ -538,6 +539,86 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModeInvalidation)
     CPPUNIT_ASSERT_EQUAL(aPixelPt1.Y(), aPixelPt3.Y());
 }
 
+class CoordinateMapperContractTest : public CppUnit::TestFixture
+{
+public:
+    void setUp() override
+    {
+        mpMapper = std::make_unique<CoordinateMapper>();
+
+        // Set up a hostile fractional scaling environment to force drift
+        // 125% zoom, non-zero origin
+        MapMode aHostileMapMode(MapUnit::Map100thMM, Point(15, -33), 1.25, 1.25);
+        mpMapper->EnableMapMode(true);
+        mpMapper->ResetMapMode(aHostileMapMode);
+        mpMapper->CalcMapResolution(aHostileMapMode, 96, 96); // Standard DPI
+
+        // Add weird scroll offsets
+        mpMapper->SetWindowToViewOffset(Size(13, 7));
+        mpMapper->InvalidateViewTransform();
+    }
+
+    void tearDown() override { mpMapper.reset(); }
+
+protected:
+    std::unique_ptr<CoordinateMapper> mpMapper;
+};
+
+CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testRoundTripSymmetry)
+{
+    Point aOriginal(1045, -882);
+
+    // Forward journey
+    Point aDevice = mpMapper->LogicToDevicePixel(aOriginal);
+    // Inverse journey
+    Point aRestored = mpMapper->DevicePixelToLogic(aDevice);
+
+    // Due to integer pixel snapping, the restored point might not be bitwise identical,
+    // but transforming it FORWARD again must yield the exact same device pixels. (Idempotency)
+    Point aDeviceAgain = mpMapper->LogicToDevicePixel(aRestored);
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Idempotency violated: Round-trip drift detected (X)", aDevice.X(),
+                                 aDeviceAgain.X());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Idempotency violated: Round-trip drift detected (Y)", aDevice.Y(),
+                                 aDeviceAgain.Y());
+}
+
+CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testRectangleAdjacency)
+{
+    // Two logical rectangles sharing a perfect vertical border at X=2000
+    tools::Rectangle aLeftRect(1000, 500, 2000, 1500);
+    tools::Rectangle aRightRect(2000, 500, 3000, 1500);
+
+    tools::Rectangle aDeviceLeft = mpMapper->LogicToDevicePixel(aLeftRect);
+    tools::Rectangle aDeviceRight = mpMapper->LogicToDevicePixel(aRightRect);
+
+    // The transformed right edge of A MUST exactly equal the transformed left edge of B
+    CPPUNIT_ASSERT_EQUAL_MESSAGE(
+        "Adjacency violated: Seam gap or overlap detected between rectangles", aDeviceLeft.Right(),
+        aDeviceRight.Left());
+}
+
+CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testMatrixVsScalarParity)
+{
+    Point aLogicPoint(3333, 4444);
+
+    // 1. Scalar Path
+    Point aScalarDevice = mpMapper->LogicToDevicePixel(aLogicPoint);
+
+    // 2. Matrix Path
+    basegfx::B2DHomMatrix aMatrix = mpMapper->GetDeviceTransformation();
+    basegfx::B2DPoint aB2DPoint(aLogicPoint.X(), aLogicPoint.Y());
+    aB2DPoint *= aMatrix;
+
+    // Manual static_cast/llround to match the contract boundary exactly
+    tools::Long nMatrixDeviceX = static_cast<tools::Long>(std::llround(aB2DPoint.getX()));
+    tools::Long nMatrixDeviceY = static_cast<tools::Long>(std::llround(aB2DPoint.getY()));
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Matrix and Scalar pipelines have diverged (X)", aScalarDevice.X(),
+                                 nMatrixDeviceX);
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Matrix and Scalar pipelines have diverged (Y)", aScalarDevice.Y(),
+                                 nMatrixDeviceY);
+}
 } // end anonymous namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
