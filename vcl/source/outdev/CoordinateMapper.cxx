@@ -32,8 +32,8 @@
 
 #include <CoordinateMapper.hxx>
 
-void CoordinateMapper::GetSubPixelWeights(double& rScaleX, double& rScaleY, double& rTransX,
-                                          double& rTransY) const
+void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
+                                             double& rTransY) const
 {
     if (!mbMap || mnDPIX <= 0 || mnDPIY <= 0)
     {
@@ -81,13 +81,8 @@ void CoordinateMapper::SetPixelOffset(const Size& rSize)
 
 void CoordinateMapper::SetWindowToViewOffset(const Size& rWindowPixelOffset)
 {
-    // Store the physical scroll offset
     mnWindowToViewOffsetX = rWindowPixelOffset.Width();
     mnWindowToViewOffsetY = rWindowPixelOffset.Height();
-
-    // Safely auto-sync the logical document origin
-    SetLogicToAbsoluteOffset(Size(ViewToLogicDistanceX(mnWindowToViewOffsetX),
-                                  ViewToLogicDistanceY(mnWindowToViewOffsetY)));
 }
 
 tools::Long CoordinateMapper::GetDeviceToWindowOffsetX() const { return mnDeviceToWindowOffsetX; }
@@ -183,12 +178,14 @@ basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation() const
         return *maViewTransform;
 
     double fScaleX, fScaleY, fTransX, fTransY;
-    GetSubPixelWeights(fScaleX, fScaleY, fTransX, fTransY);
+    GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
 
+    // Construct the Linear Transformation Matrix (y = mx + b).
+    // fTrans already includes (MapOffset + AbsoluteLogicOffset) * Scale.
+    // We only need to add the physical Window Scroll offset here.
     basegfx::B2DHomMatrix aTransform;
     aTransform.set(0, 0, fScaleX);
     aTransform.set(1, 1, fScaleY);
-    // Translation = Scaled Offsets + Window Scroll
     aTransform.set(0, 2, fTransX + static_cast<double>(mnWindowToViewOffsetX));
     aTransform.set(1, 2, fTransY + static_cast<double>(mnWindowToViewOffsetY));
 
@@ -240,16 +237,6 @@ basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMo
     basegfx::B2DHomMatrix aMatrix(GetViewTransformation(rMapMode));
     aMatrix.invert();
     return aMatrix;
-}
-
-tools::Long CoordinateMapper::ImplCalcDevicePixelX(tools::Long nX) const
-{
-    return LogicUnitsToViewUnitsX(nX) + mnDeviceToWindowOffsetX + mnWindowToViewOffsetX;
-}
-
-tools::Long CoordinateMapper::ImplCalcDevicePixelY(tools::Long nY) const
-{
-    return LogicUnitsToViewUnitsY(nY) + mnDeviceToWindowOffsetY + mnWindowToViewOffsetY;
 }
 
 // ========================================================================
@@ -414,30 +401,40 @@ Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize) const
 // --- Sub-Pixel Full Journey ---
 double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
 {
-    if (!IsMapModeEnabled())
-        return DeviceToWindowSubPixelX(fX);
+    double fVal = fX - static_cast<double>(mnDeviceToWindowOffsetX + mnWindowToViewOffsetX);
 
-    double fWindow = DeviceToWindowSubPixelX(fX);
-    double fView = WindowToViewSubPixelX(fWindow);
+    if (!mbMap)
+        return fVal;
 
-    return ViewSubPixelToLogicUnitsX(fView) - static_cast<double>(mnLogicToAbsoluteOffsetX);
+    double fScaleX, fScaleY, fTransX, fTransY;
+    GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
+
+    if (fScaleX != 0.0)
+        fVal = (fVal - fTransX) / fScaleX;
+
+    return fVal;
 }
 
 double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
 {
-    if (!IsMapModeEnabled())
-        return DeviceToWindowSubPixelY(fY);
+    double fVal = fY - static_cast<double>(mnDeviceToWindowOffsetY + mnWindowToViewOffsetY);
 
-    double fWindow = DeviceToWindowSubPixelY(fY);
-    double fView = WindowToViewSubPixelY(fWindow);
+    if (!mbMap)
+        return fVal;
 
-    return ViewSubPixelToLogicUnitsY(fView) - static_cast<double>(mnLogicToAbsoluteOffsetY);
+    double fScaleX, fScaleY, fTransX, fTransY;
+    GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
+
+    if (fScaleY != 0.0)
+        fVal = (fVal - fTransY) / fScaleY;
+
+    return fVal;
 }
 
 double CoordinateMapper::LogicToDeviceSubPixelX(double fX) const
 {
     double fScaleX, fScaleY, fTransX, fTransY;
-    GetSubPixelWeights(fScaleX, fScaleY, fTransX, fTransY);
+    GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
 
     double fVal = fX;
 
@@ -451,7 +448,7 @@ double CoordinateMapper::LogicToDeviceSubPixelX(double fX) const
 double CoordinateMapper::LogicToDeviceSubPixelY(double fY) const
 {
     double fScaleX, fScaleY, fTransX, fTransY;
-    GetSubPixelWeights(fScaleX, fScaleY, fTransX, fTransY);
+    GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
 
     double fVal = fY;
 
