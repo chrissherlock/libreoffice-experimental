@@ -155,7 +155,6 @@ private:
     MapMode maMapMode;
     ImplMapRes maMapRes;
 
-    // #i75163#
     struct ViewTransformComponents
     {
         double fScaleX;
@@ -163,6 +162,8 @@ private:
         double fTransX;
         double fTransY;
     };
+
+    // #i75163#
 
     mutable std::optional<basegfx::B2DHomMatrix> maViewTransform;
     mutable std::optional<basegfx::B2DHomMatrix> maInverseViewTransform;
