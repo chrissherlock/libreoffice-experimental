@@ -31,6 +31,7 @@
 #include <vcl/rendercontext/ImplMapRes.hxx>
 
 #include <CoordinateMapper.hxx>
+
 #include <cmath>
 
 // Conceptual Pipeline Separation (Mathematical Invariant):
@@ -41,23 +42,22 @@
 void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
                                              double& rTransY) const
 {
-    if (!maViewWeights)
+    rScaleX = 1.0;
+    rScaleY = 1.0;
+    rTransX = 0.0;
+    rTransY = 0.0;
+
+    if (IsMappingActive())
     {
-        ViewTransformComponents aWeights{ 1.0, 1.0, 0.0, 0.0 };
+        rScaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
+        rScaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
 
-        if (IsMappingActive())
-        {
-            aWeights.fScaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
-            aWeights.fScaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
-
-            aWeights.fTransX = (static_cast<double>(maMapRes.mnMapOfsX)
-                                + static_cast<double>(mnLogicToAbsoluteOffsetX))
-                               * aWeights.fScaleX;
-            aWeights.fTransY = (static_cast<double>(maMapRes.mnMapOfsY)
-                                + static_cast<double>(mnLogicToAbsoluteOffsetY))
-                               * aWeights.fScaleY;
-        }
-        maViewWeights = aWeights;
+        rTransX = (static_cast<double>(maMapRes.mnMapOfsX)
+                   + static_cast<double>(mnLogicToAbsoluteOffsetX))
+                  * rScaleX;
+        rTransY = (static_cast<double>(maMapRes.mnMapOfsY)
+                   + static_cast<double>(mnLogicToAbsoluteOffsetY))
+                  * rScaleY;
     }
 
     rScaleX = maViewWeights->fScaleX;
@@ -182,7 +182,6 @@ void CoordinateMapper::InvalidateViewTransform()
     maViewTransform.reset();
     maInverseViewTransform.reset();
     maDeviceTransform.reset();
-    maViewWeights.reset();
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetDeviceTransformation() const
@@ -463,8 +462,8 @@ double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
     double fScaleX, fScaleY, fTransX, fTransY;
     GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
 
-    SAL_WARN_IF(fScaleY == 0.0, "vcl.gdi",
-                "CoordinateMapper: Zero Y scale encountered during inverse transformation!");
+    assert(fScaleY != 0.0
+           && "CoordinateMapper: Zero Y scale encountered during inverse transformation!");
 
     if (fScaleY != 0.0)
         fVal = (fVal - fTransY) / fScaleY;
@@ -1326,8 +1325,7 @@ double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n) const
 
 double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n, double fScale) const
 {
-    SAL_WARN_IF(GetDPIX() <= 0, "vcl.gdi",
-                "CoordinateMapper: Invalid DPI X, falling back to identity");
+    assert(GetDPIX() > 0 && "CoordinateMapper: Invalid DPI X, falling back to identity");
     if (GetDPIX() <= 0)
         return static_cast<double>(n); // Identity fallback, not 0.0
 
@@ -1336,8 +1334,7 @@ double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n, double fSca
 
 double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n, double fScale) const
 {
-    SAL_WARN_IF(GetDPIY() <= 0, "vcl.gdi",
-                "CoordinateMapper: Invalid DPI Y, falling back to identity");
+    assert(GetDPIY() > 0 && "CoordinateMapper: Invalid DPI Y, falling back to identity");
     if (GetDPIY() <= 0)
         return static_cast<double>(n); // Identity fallback, not 0.0
 
@@ -1356,8 +1353,8 @@ double CoordinateMapper::ViewToLogicDistanceDoubleY(double n) const
 
 double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fScale) const
 {
-    SAL_WARN_IF(fScale == 0.0 || GetDPIX() <= 0, "vcl.gdi",
-                "CoordinateMapper: Zero scale or invalid DPI X, falling back to identity");
+    assert(fScale != 0.0 && GetDPIX() > 0
+           && "CoordinateMapper: Zero scale or invalid DPI X, falling back to identity");
     if (fScale == 0.0 || GetDPIX() <= 0)
         return n; // Identity fallback, not 0.0
 
@@ -1366,8 +1363,8 @@ double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fScale) con
 
 double CoordinateMapper::ViewToLogicDistanceDoubleY(double n, double fScale) const
 {
-    SAL_WARN_IF(fScale == 0.0 || GetDPIY() <= 0, "vcl.gdi",
-                "CoordinateMapper: Zero scale or invalid DPI Y, falling back to identity");
+    assert(fScale != 0.0 && GetDPIY() > 0
+           && "CoordinateMapper: Zero scale or invalid DPI Y, falling back to identity");
     if (fScale == 0.0 || GetDPIY() <= 0)
         return n; // Identity fallback, not 0.0
 
