@@ -156,18 +156,10 @@ private:
     ImplMapRes maMapRes;
 
     // #i75163#
-    struct ViewTransformComponents
-    {
-        double fScaleX;
-        double fScaleY;
-        double fTransX;
-        double fTransY;
-    };
 
     mutable std::optional<basegfx::B2DHomMatrix> maViewTransform;
     mutable std::optional<basegfx::B2DHomMatrix> maInverseViewTransform;
     mutable std::optional<basegfx::B2DHomMatrix> maDeviceTransform;
-    mutable std::optional<ViewTransformComponents> maViewWeights;
 
     sal_Int32 mnDPIX = 72;
     sal_Int32 mnDPIY = 72;
