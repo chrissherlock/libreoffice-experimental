@@ -330,15 +330,18 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicUnitsIntY(double fY) const
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX, const ImplMapRes& rRes) const
 {
-    // Round distance (using custom scale), strip custom MapOfs, then strip internal OutOffLogic
-    return ViewToLogicDistanceX(std::llround(fX), rRes.mfMapScX) - rRes.mnMapOfsX
-           - mnLogicToAbsoluteOffsetX;
+    // Use pure double distance, apply offsets, and round the final result
+    double fLogicDist = ViewToLogicDistanceDoubleX(fX, rRes.mfMapScX);
+    return lcl_RoundToLong(fLogicDist - static_cast<double>(rRes.mnMapOfsX)
+                           - static_cast<double>(mnLogicToAbsoluteOffsetX));
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY, const ImplMapRes& rRes) const
 {
-    return ViewToLogicDistanceY(std::llround(fY), rRes.mfMapScY) - rRes.mnMapOfsY
-           - mnLogicToAbsoluteOffsetY;
+    // Use pure double distance, apply offsets, and round the final result
+    double fLogicDist = ViewToLogicDistanceDoubleY(fY, rRes.mfMapScY);
+    return lcl_RoundToLong(fLogicDist - static_cast<double>(rRes.mnMapOfsY)
+                           - static_cast<double>(mnLogicToAbsoluteOffsetY));
 }
 
 // ========================================================================
@@ -902,12 +905,12 @@ Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt) const
 
 tools::Long CoordinateMapper::WindowSubPixelToLogicIntX(double fX) const
 {
-    return std::round(WindowToLogicSubPixelX(fX));
+    return lcl_RoundToLong(WindowToLogicSubPixelX(fX));
 }
 
 tools::Long CoordinateMapper::WindowSubPixelToLogicIntY(double fY) const
 {
-    return std::round(WindowToLogicSubPixelY(fY));
+    return lcl_RoundToLong(WindowToLogicSubPixelY(fY));
 }
 
 tools::Long CoordinateMapper::WindowSubPixelToLogicIntX(double fX, const ImplMapRes& rMapRes) const
@@ -1215,7 +1218,7 @@ double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n) const
 double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n, double fScale) const
 {
     if (GetDPIX() <= 0)
-        return 0.0;
+        return static_cast<double>(n); // Identity fallback, not 0.0
 
     return static_cast<double>(n) * fScale * GetDPIX();
 }
@@ -1223,7 +1226,7 @@ double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n, double fSca
 double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n, double fScale) const
 {
     if (GetDPIY() <= 0)
-        return 0.0;
+        return static_cast<double>(n); // Identity fallback, not 0.0
 
     return static_cast<double>(n) * fScale * GetDPIY();
 }
@@ -1241,7 +1244,7 @@ double CoordinateMapper::ViewToLogicDistanceDoubleY(double n) const
 double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fScale) const
 {
     if (fScale == 0.0 || GetDPIX() <= 0)
-        return 0.0;
+        return n; // Identity fallback, not 0.0
 
     return n / fScale / GetDPIX();
 }
@@ -1249,7 +1252,7 @@ double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fScale) con
 double CoordinateMapper::ViewToLogicDistanceDoubleY(double n, double fScale) const
 {
     if (fScale == 0.0 || GetDPIY() <= 0)
-        return 0.0;
+        return n; // Identity fallback, not 0.0
 
     return n / fScale / GetDPIY();
 }
