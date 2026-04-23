@@ -237,40 +237,56 @@ tools::Long CoordinateMapper::ImplCalcDevicePixelY(tools::Long nY) const
 // PIPELINE STAGES (Coordinate Transitions)
 // ========================================================================
 
-// Device <-> Window (Apply/Strip Screen Origin: mnDeviceToWindowOffsetX/Y)
-tools::Long CoordinateMapper::DeviceToWindowUnitsX(tools::Long nX) const
+static inline tools::Long lcl_RoundToLong(double fVal)
 {
-    return nX - mnDeviceToWindowOffsetX;
-}
-tools::Long CoordinateMapper::DeviceToWindowUnitsY(tools::Long nY) const
-{
-    return nY - mnDeviceToWindowOffsetY;
-}
-tools::Long CoordinateMapper::WindowToDeviceUnitsX(tools::Long nX) const
-{
-    return nX + mnDeviceToWindowOffsetX;
-}
-tools::Long CoordinateMapper::WindowToDeviceUnitsY(tools::Long nY) const
-{
-    return nY + mnDeviceToWindowOffsetY;
+    return static_cast<tools::Long>(std::llround(fVal));
 }
 
-// Window <-> View (Apply/Strip Internal Pixel Offset: mnWindowToViewOffsetX/Y)
-tools::Long CoordinateMapper::WindowToViewUnitsX(tools::Long nX) const
+// Device <-> Window (Screen Origin)
+double CoordinateMapper::DeviceToWindowSubPixelX(double fX) const
 {
-    return nX - mnWindowToViewOffsetX;
+    return fX - static_cast<double>(mnDeviceToWindowOffsetX);
 }
-tools::Long CoordinateMapper::WindowToViewUnitsY(tools::Long nY) const
+
+double CoordinateMapper::DeviceToWindowSubPixelY(double fY) const
 {
-    return nY - mnWindowToViewOffsetY;
+    return fY - static_cast<double>(mnDeviceToWindowOffsetY);
 }
-tools::Long CoordinateMapper::ViewToWindowUnitsX(tools::Long nX) const
+
+double CoordinateMapper::WindowToDeviceSubPixelX(double fX) const
 {
-    return nX + mnWindowToViewOffsetX;
+    return fX + static_cast<double>(mnDeviceToWindowOffsetX);
 }
-tools::Long CoordinateMapper::ViewToWindowUnitsY(tools::Long nY) const
+
+double CoordinateMapper::WindowToDeviceSubPixelY(double fY) const
 {
-    return nY + mnWindowToViewOffsetY;
+    return fY + static_cast<double>(mnDeviceToWindowOffsetY);
+}
+
+// View <-> Absolute Logic (Map Scale & Map Offset)
+double CoordinateMapper::ViewSubPixelToLogicUnitsX(double fX) const
+{
+    if (!mbMap || maMapRes.mfMapScX == 0.0 || mnDPIX <= 0)
+        return fX;
+    return (fX / (maMapRes.mfMapScX * mnDPIX)) - static_cast<double>(maMapRes.mnMapOfsX);
+}
+double CoordinateMapper::ViewSubPixelToLogicUnitsY(double fY) const
+{
+    if (!mbMap || maMapRes.mfMapScY == 0.0 || mnDPIY <= 0)
+        return fY;
+    return (fY / (maMapRes.mfMapScY * mnDPIY)) - static_cast<double>(maMapRes.mnMapOfsY);
+}
+double CoordinateMapper::LogicUnitsToViewSubPixelX(double fX) const
+{
+    if (!mbMap || mnDPIX <= 0)
+        return fX;
+    return (fX + static_cast<double>(maMapRes.mnMapOfsX)) * maMapRes.mfMapScX * mnDPIX;
+}
+double CoordinateMapper::LogicUnitsToViewSubPixelY(double fY) const
+{
+    if (!mbMap || mnDPIY <= 0)
+        return fY;
+    return (fY + static_cast<double>(maMapRes.mnMapOfsY)) * maMapRes.mfMapScY * mnDPIY;
 }
 
 // View <-> LogicUnits (Scale and Mapping Offset: mnMapOfsX/Y)
@@ -304,17 +320,6 @@ tools::Long CoordinateMapper::LogicUnitsToViewUnitsY(tools::Long nY, const ImplM
     return LogicToViewDistanceY(nY + rRes.mnMapOfsY, rRes.mfMapScY);
 }
 
-// Sub-Pixel Pipeline Stages
-double CoordinateMapper::ViewSubPixelToLogicUnitsX(double fX) const
-{
-    return ViewToLogicDistanceDoubleX(fX, maMapRes.mfMapScX) - maMapRes.mnMapOfsX;
-}
-
-double CoordinateMapper::ViewSubPixelToLogicUnitsY(double fY) const
-{
-    return ViewToLogicDistanceDoubleY(fY, maMapRes.mfMapScY) - maMapRes.mnMapOfsY;
-}
-
 tools::Long CoordinateMapper::ViewSubPixelToLogicUnitsIntX(double fX) const
 {
     // Uses the version that rounds the distance BEFORE the offset shift
@@ -340,78 +345,38 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY, const ImplMapRe
            - mnLogicToAbsoluteOffsetY;
 }
 
-double CoordinateMapper::LogicUnitsToViewSubPixelX(double fX) const
-{
-    return LogicToViewDistanceSubPixelX(std::llround(fX + maMapRes.mnMapOfsX), maMapRes.mfMapScX);
-}
-
-double CoordinateMapper::LogicUnitsToViewSubPixelY(double fY) const
-{
-    return LogicToViewDistanceSubPixelY(std::llround(fY + maMapRes.mnMapOfsY), maMapRes.mfMapScY);
-}
-
 // ========================================================================
 // MASTER WRAPPERS (Multi-space Positional Transformations)
 // ========================================================================
 
-tools::Long CoordinateMapper::DevicePixelToLogicX(tools::Long nX) const
+double CoordinateMapper::WindowToLogicSubPixelX(double fX) const
 {
     if (!IsMapModeEnabled())
-        return DeviceToWindowUnitsX(nX);
+        return fX;
 
-    return ViewToLogicX(WindowToViewUnitsX(DeviceToWindowUnitsX(nX)));
+    double fView = WindowToViewSubPixelX(fX);
+
+    return ViewSubPixelToLogicUnitsX(fView) - static_cast<double>(mnLogicToAbsoluteOffsetX);
 }
 
-tools::Long CoordinateMapper::DevicePixelToLogicY(tools::Long nY) const
+double CoordinateMapper::WindowToLogicSubPixelY(double fY) const
 {
     if (!IsMapModeEnabled())
-        return DeviceToWindowUnitsY(nY);
+        return fY;
 
-    return ViewToLogicY(WindowToViewUnitsY(DeviceToWindowUnitsY(nY)));
+    double fView = WindowToViewSubPixelY(fY);
+
+    return ViewSubPixelToLogicUnitsY(fView) - static_cast<double>(mnLogicToAbsoluteOffsetY);
 }
 
-tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rPixelRect) const
+tools::Long CoordinateMapper::WindowToLogicX(tools::Long nX) const
 {
-    tools::Rectangle aRetval;
-
-    if (!IsMapModeEnabled())
-    {
-        aRetval = tools::Rectangle(
-            DeviceToWindowUnitsX(rPixelRect.Left()), DeviceToWindowUnitsY(rPixelRect.Top()),
-            rPixelRect.IsWidthEmpty() ? 0 : DeviceToWindowUnitsX(rPixelRect.Right()),
-            rPixelRect.IsHeightEmpty() ? 0 : DeviceToWindowUnitsY(rPixelRect.Bottom()));
-    }
-    else
-    {
-        aRetval = tools::Rectangle(
-            DevicePixelToLogicX(rPixelRect.Left()), DevicePixelToLogicY(rPixelRect.Top()),
-            rPixelRect.IsWidthEmpty() ? 0 : DevicePixelToLogicX(rPixelRect.Right()),
-            rPixelRect.IsHeightEmpty() ? 0 : DevicePixelToLogicY(rPixelRect.Bottom()));
-    }
-
-    if (rPixelRect.IsWidthEmpty())
-        aRetval.SetWidthEmpty();
-
-    if (rPixelRect.IsHeightEmpty())
-        aRetval.SetHeightEmpty();
-
-    return aRetval;
+    return lcl_RoundToLong(WindowToLogicSubPixelX(static_cast<double>(nX)));
 }
 
-tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth) const
+tools::Long CoordinateMapper::WindowToLogicY(tools::Long nY) const
 {
-    if (!IsMapModeEnabled())
-        return nWidth;
-
-    return LogicToViewDistanceX(nWidth);
-}
-
-tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight) const
-{
-    if (!IsMapModeEnabled())
-        return nHeight;
-
-    return LogicToViewDistanceY(nHeight);
+    return lcl_RoundToLong(WindowToLogicSubPixelY(static_cast<double>(nY)));
 }
 
 Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize) const
@@ -419,13 +384,113 @@ Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize) const
     if (!IsMapModeEnabled())
         return rLogicSize;
 
+    // Distances ignore offsets, so Window == View
     return Size(LogicToViewDistanceX(rLogicSize.Width()),
                 LogicToViewDistanceY(rLogicSize.Height()));
+}
+
+// --- Sub-Pixel Full Journey ---
+double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
+{
+    if (!IsMapModeEnabled())
+        return DeviceToWindowSubPixelX(fX);
+    double fWindow = DeviceToWindowSubPixelX(fX);
+    double fView = WindowToViewSubPixelX(fWindow);
+    return ViewSubPixelToLogicUnitsX(fView) - static_cast<double>(mnLogicToAbsoluteOffsetX);
+}
+
+double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
+{
+    if (!IsMapModeEnabled())
+        return DeviceToWindowSubPixelY(fY);
+    double fWindow = DeviceToWindowSubPixelY(fY);
+    double fView = WindowToViewSubPixelY(fWindow);
+    return ViewSubPixelToLogicUnitsY(fView) - static_cast<double>(mnLogicToAbsoluteOffsetY);
+}
+
+double CoordinateMapper::LogicToDeviceSubPixelX(double fX) const
+{
+    if (!IsMapModeEnabled())
+        return fX + static_cast<double>(mnDeviceToWindowOffsetX);
+    double fView = LogicUnitsToViewSubPixelX(fX + static_cast<double>(mnLogicToAbsoluteOffsetX));
+    double fWindow = ViewToWindowSubPixelX(fView);
+    return WindowToDeviceSubPixelX(fWindow);
+}
+
+double CoordinateMapper::LogicToDeviceSubPixelY(double fY) const
+{
+    if (!IsMapModeEnabled())
+        return fY + static_cast<double>(mnDeviceToWindowOffsetY);
+    double fView = LogicUnitsToViewSubPixelY(fY + static_cast<double>(mnLogicToAbsoluteOffsetY));
+    double fWindow = ViewToWindowSubPixelY(fView);
+    return WindowToDeviceSubPixelY(fWindow);
+}
+
+basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint) const
+{
+    return basegfx::B2DPoint(LogicToDeviceSubPixelX(static_cast<double>(rPoint.X())),
+                             LogicToDeviceSubPixelY(static_cast<double>(rPoint.Y())));
+}
+
+// Integer Boundary (this is the only place rounding occurs)
+
+tools::Long CoordinateMapper::DevicePixelToLogicX(tools::Long nX) const
+{
+    return lcl_RoundToLong(DevicePixelToLogicSubPixelX(static_cast<double>(nX)));
+}
+
+tools::Long CoordinateMapper::DevicePixelToLogicY(tools::Long nY) const
+{
+    return lcl_RoundToLong(DevicePixelToLogicSubPixelY(static_cast<double>(nY)));
+}
+
+Point CoordinateMapper::DevicePixelToLogic(const Point& rDevicePt) const
+{
+    return Point(DevicePixelToLogicX(rDevicePt.X()), DevicePixelToLogicY(rDevicePt.Y()));
+}
+
+tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rPixelRect) const
+{
+    tools::Rectangle aRetval(
+        DevicePixelToLogicX(rPixelRect.Left()), DevicePixelToLogicY(rPixelRect.Top()),
+        rPixelRect.IsWidthEmpty() ? 0 : DevicePixelToLogicX(rPixelRect.Right()),
+        rPixelRect.IsHeightEmpty() ? 0 : DevicePixelToLogicY(rPixelRect.Bottom()));
+
+    if (rPixelRect.IsWidthEmpty())
+        aRetval.SetWidthEmpty();
+    if (rPixelRect.IsHeightEmpty())
+        aRetval.SetHeightEmpty();
+    return aRetval;
+}
+
+tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX) const
+{
+    return lcl_RoundToLong(LogicToDeviceSubPixelX(static_cast<double>(nX)));
+}
+
+tools::Long CoordinateMapper::LogicToDevicePixelY(tools::Long nY) const
+{
+    return lcl_RoundToLong(LogicToDeviceSubPixelY(static_cast<double>(nY)));
 }
 
 Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt) const
 {
     return Point(LogicToDevicePixelX(rLogicPt.X()), LogicToDevicePixelY(rLogicPt.Y()));
+}
+
+// Note: Width/Height use Distances, not Positions!
+tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth) const
+{
+    if (!IsMapModeEnabled())
+        return nWidth;
+    return LogicToViewDistanceX(nWidth);
+}
+
+tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight) const
+{
+    if (!IsMapModeEnabled())
+        return nHeight;
+    return LogicToViewDistanceY(nHeight);
 }
 
 Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize) const
@@ -536,40 +601,6 @@ CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly) cons
     }
 
     return aPoly;
-}
-
-tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX) const
-{
-    if (!IsMapModeEnabled())
-        return nX + mnDeviceToWindowOffsetX;
-
-    return WindowToDeviceUnitsX(
-        ViewToWindowUnitsX(LogicUnitsToViewUnitsX(nX + mnLogicToAbsoluteOffsetX)));
-}
-
-tools::Long CoordinateMapper::LogicToDevicePixelY(tools::Long nY) const
-{
-    if (!IsMapModeEnabled())
-        return nY + mnDeviceToWindowOffsetY;
-
-    return WindowToDeviceUnitsY(
-        ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY + mnLogicToAbsoluteOffsetY)));
-}
-
-tools::Long CoordinateMapper::WindowToLogicX(tools::Long nX) const
-{
-    if (!IsMapModeEnabled())
-        return nX;
-
-    return ViewToLogicX(WindowToViewUnitsX(nX));
-}
-
-tools::Long CoordinateMapper::WindowToLogicY(tools::Long nY) const
-{
-    if (!IsMapModeEnabled())
-        return nY;
-
-    return ViewToLogicY(WindowToViewUnitsY(nY));
 }
 
 tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX) const
@@ -1132,17 +1163,60 @@ tools::Long CoordinateMapper::LogicToViewDistanceX(tools::Long n) const
 {
     return LogicToViewDistanceX(n, maMapRes.mfMapScX);
 }
+
 tools::Long CoordinateMapper::LogicToViewDistanceY(tools::Long n) const
 {
     return LogicToViewDistanceY(n, maMapRes.mfMapScY);
 }
+
 tools::Long CoordinateMapper::ViewToLogicDistanceX(tools::Long n) const
 {
     return ViewToLogicDistanceX(n, maMapRes.mfMapScX);
 }
+
 tools::Long CoordinateMapper::ViewToLogicDistanceY(tools::Long n) const
 {
     return ViewToLogicDistanceY(n, maMapRes.mfMapScY);
+}
+
+tools::Long CoordinateMapper::ViewToWindowUnitsX(tools::Long nX) const
+{
+    return nX + mnWindowToViewOffsetX;
+}
+
+tools::Long CoordinateMapper::ViewToWindowUnitsY(tools::Long nY) const
+{
+    return nY + mnWindowToViewOffsetY;
+}
+
+tools::Long CoordinateMapper::WindowToViewUnitsX(tools::Long nX) const
+{
+    return nX - mnWindowToViewOffsetX;
+}
+
+tools::Long CoordinateMapper::WindowToViewUnitsY(tools::Long nY) const
+{
+    return nY - mnWindowToViewOffsetY;
+}
+
+tools::Long CoordinateMapper::DeviceToWindowUnitsX(tools::Long nX) const
+{
+    return nX - mnDeviceToWindowOffsetX;
+}
+
+tools::Long CoordinateMapper::DeviceToWindowUnitsY(tools::Long nY) const
+{
+    return nY - mnDeviceToWindowOffsetY;
+}
+
+tools::Long CoordinateMapper::WindowToDeviceUnitsX(tools::Long nX) const
+{
+    return nX + mnDeviceToWindowOffsetX;
+}
+
+tools::Long CoordinateMapper::WindowToDeviceUnitsY(tools::Long nY) const
+{
+    return nY + mnDeviceToWindowOffsetY;
 }
 
 double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n) const
@@ -1217,26 +1291,6 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n, double fSca
     return std::llround(ViewToLogicDistanceDoubleY(n, fScale));
 }
 
-double CoordinateMapper::DeviceToWindowSubPixelX(double fX) const
-{
-    return fX - static_cast<double>(mnDeviceToWindowOffsetX);
-}
-
-double CoordinateMapper::DeviceToWindowSubPixelY(double fY) const
-{
-    return fY - static_cast<double>(mnDeviceToWindowOffsetY);
-}
-
-double CoordinateMapper::WindowToDeviceSubPixelX(double fX) const
-{
-    return fX + static_cast<double>(mnDeviceToWindowOffsetX);
-}
-
-double CoordinateMapper::WindowToDeviceSubPixelY(double fY) const
-{
-    return fY + static_cast<double>(mnDeviceToWindowOffsetY);
-}
-
 double CoordinateMapper::WindowToViewSubPixelX(double fX) const
 {
     return fX - static_cast<double>(mnWindowToViewOffsetX);
@@ -1273,160 +1327,10 @@ tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight) cons
     return ViewToLogicDistanceY(nHeight);
 }
 
-Point CoordinateMapper::DevicePixelToLogic(const Point& rDevicePt) const
-{
-    return Point(DevicePixelToLogicX(rDevicePt.X()), DevicePixelToLogicY(rDevicePt.Y()));
-}
-
 Size CoordinateMapper::DevicePixelToLogic(const Size& rDeviceSize) const
 {
     return Size(DevicePixelToLogicWidth(rDeviceSize.Width()),
                 DevicePixelToLogicHeight(rDeviceSize.Height()));
-}
-
-// Device -> Logic (Inverse Path: Strip Screen -> Strip Pixel -> Strip Mapping -> Strip Logical)
-double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
-{
-    if (!IsMapModeEnabled())
-        return fX - static_cast<double>(mnDeviceToWindowOffsetX);
-
-    const double fWindowX = DeviceToWindowSubPixelX(fX);
-    const double fViewX = WindowToViewSubPixelX(fWindowX);
-    const double fLogicU = ViewSubPixelToLogicUnitsX(fViewX);
-
-    return fLogicU - static_cast<double>(mnLogicToAbsoluteOffsetX);
-}
-
-double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
-{
-    if (!IsMapModeEnabled())
-        return fY - static_cast<double>(mnDeviceToWindowOffsetY);
-
-    const double fWindowY = DeviceToWindowSubPixelY(fY);
-    const double fViewY = WindowToViewSubPixelY(fWindowY);
-    const double fLogicU = ViewSubPixelToLogicUnitsY(fViewY);
-
-    return fLogicU - static_cast<double>(mnLogicToAbsoluteOffsetY);
-}
-
-// Logic -> Device (Forward Path: Add Logical -> Add Mapping/Scale -> Add Pixel -> Add Screen)
-double CoordinateMapper::LogicToDeviceSubPixelX(double fX) const
-{
-    if (!IsMapModeEnabled())
-        return fX + static_cast<double>(mnDeviceToWindowOffsetX);
-
-    const double fViewX
-        = LogicUnitsToViewSubPixelX(fX + static_cast<double>(mnLogicToAbsoluteOffsetX));
-    const double fWindowX = ViewToWindowSubPixelX(fViewX);
-
-    return WindowToDeviceSubPixelX(fWindowX);
-}
-
-double CoordinateMapper::LogicToDeviceSubPixelY(double fY) const
-{
-    if (!IsMapModeEnabled())
-        return fY + static_cast<double>(mnDeviceToWindowOffsetY);
-
-    const double fViewY
-        = LogicUnitsToViewSubPixelY(fY + static_cast<double>(mnLogicToAbsoluteOffsetY));
-    const double fWindowY = ViewToWindowSubPixelY(fViewY);
-
-    return WindowToDeviceSubPixelY(fWindowY);
-}
-
-basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint) const
-{
-    if (!IsMapModeEnabled())
-    {
-        // Using your explicit pipeline offsets instead of legacy VCL names
-        return basegfx::B2DPoint(rPoint.X() + GetDeviceToViewOffsetX(),
-                                 rPoint.Y() + GetDeviceToViewOffsetY());
-    }
-
-    return basegfx::B2DPoint(LogicToDeviceSubPixelX(rPoint.X()),
-                             LogicToDeviceSubPixelY(rPoint.Y()));
-}
-
-// Window -> Logic (Inverse Path)
-double CoordinateMapper::WindowToLogicSubPixelX(double fX) const
-{
-    if (!IsMapModeEnabled())
-        return fX;
-
-    const double fViewX = WindowToViewSubPixelX(fX);
-    return ViewSubPixelToLogicUnitsX(fViewX) - static_cast<double>(mnLogicToAbsoluteOffsetX);
-}
-
-double CoordinateMapper::WindowToLogicSubPixelY(double fY) const
-{
-    if (!IsMapModeEnabled())
-        return fY;
-
-    const double fViewY = WindowToViewSubPixelY(fY);
-    return ViewSubPixelToLogicUnitsY(fViewY) - static_cast<double>(mnLogicToAbsoluteOffsetY);
-}
-
-// Logic -> Window (Forward Path)
-double CoordinateMapper::LogicToWindowSubPixelX(double fX) const
-{
-    if (!IsMapModeEnabled())
-        return fX;
-
-    const double fViewX
-        = LogicUnitsToViewSubPixelX(fX + static_cast<double>(mnLogicToAbsoluteOffsetX));
-    return ViewToWindowSubPixelX(fViewX);
-}
-
-double CoordinateMapper::LogicToWindowSubPixelY(double fY) const
-{
-    if (!IsMapModeEnabled())
-        return fY;
-
-    const double fViewY
-        = LogicUnitsToViewSubPixelY(fY + static_cast<double>(mnLogicToAbsoluteOffsetY));
-    return ViewToWindowSubPixelY(fViewY);
-}
-
-// View -> Absolute Logic (Inverse: Strip Scale/Mapping -> Strip Logical)
-double CoordinateMapper::ViewSubPixelToLogicX(double fX) const
-{
-    const double fLogicUnits = ViewSubPixelToLogicUnitsX(fX);
-    return fLogicUnits - static_cast<double>(mnLogicToAbsoluteOffsetX);
-}
-
-double CoordinateMapper::ViewSubPixelToLogicY(double fY) const
-{
-    const double fLogicUnits = ViewSubPixelToLogicUnitsY(fY);
-    return fLogicUnits - static_cast<double>(mnLogicToAbsoluteOffsetY);
-}
-
-tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX) const
-{
-    // Move from View to Logic Units (Rounds distance, then strips mnMapOfs)
-    const tools::Long nLogicUnits = ViewSubPixelToLogicUnitsIntX(fX);
-
-    return nLogicUnits - mnLogicToAbsoluteOffsetX;
-}
-
-tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY) const
-{
-    // Move from View to Logic Units (Rounds distance, then strips mnMapOfs)
-    const tools::Long nLogicUnits = ViewSubPixelToLogicUnitsIntY(fY);
-
-    return nLogicUnits - mnLogicToAbsoluteOffsetY;
-}
-
-// Absolute Logic -> View (Forward: Add Logical -> Add Mapping/Scale)
-double CoordinateMapper::LogicToViewSubPixelX(double fX) const
-{
-    const double fLogicUnits = fX + static_cast<double>(mnLogicToAbsoluteOffsetX);
-    return LogicUnitsToViewSubPixelX(fLogicUnits);
-}
-
-double CoordinateMapper::LogicToViewSubPixelY(double fY) const
-{
-    const double fLogicUnits = fY + static_cast<double>(mnLogicToAbsoluteOffsetY);
-    return LogicUnitsToViewSubPixelY(fLogicUnits);
 }
 
 Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
