@@ -156,8 +156,18 @@ private:
     ImplMapRes maMapRes;
 
     // #i75163#
+    struct ViewTransformComponents
+    {
+        double fScaleX;
+        double fScaleY;
+        double fTransX;
+        double fTransY;
+    };
+
     mutable std::optional<basegfx::B2DHomMatrix> maViewTransform;
     mutable std::optional<basegfx::B2DHomMatrix> maInverseViewTransform;
+    mutable std::optional<basegfx::B2DHomMatrix> maDeviceTransform;
+    mutable std::optional<ViewTransformComponents> maViewWeights;
 
     sal_Int32 mnDPIX = 72;
     sal_Int32 mnDPIY = 72;
@@ -406,6 +416,7 @@ public:
     tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect) const;
     double DevicePixelToLogicSubPixelX(double fX) const;
     double DevicePixelToLogicSubPixelY(double fY) const;
+    basegfx::B2DPoint DevicePixelToLogicSubPixel(const Point& rDevicePt) const;
 
     // Window <-> Logic
     tools::Long WindowToLogicX(tools::Long nX) const;
