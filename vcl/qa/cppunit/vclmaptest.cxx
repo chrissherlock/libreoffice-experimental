@@ -636,6 +636,51 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testSubpixelStability)
     }
 }
 
+CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testInverseMatrixVsScalarParity)
+{
+    Point aDevicePoint(1234, 5678);
+
+    // Scalar Inverse Path (Full Device -> Logic)
+    double fScalarLogicX = mpMapper->DevicePixelToLogicSubPixelX(aDevicePoint.X());
+    double fScalarLogicY = mpMapper->DevicePixelToLogicSubPixelY(aDevicePoint.Y());
+
+    // Matrix Inverse Path (Window -> Logic)
+    // We must manually strip the Device offset because GetInverseViewTransformation operates on Window coordinates
+    double fWindowX = aDevicePoint.X() - mpMapper->GetDeviceToWindowOffsetX();
+    double fWindowY = aDevicePoint.Y() - mpMapper->GetDeviceToWindowOffsetY();
+
+    basegfx::B2DHomMatrix aInverseMatrix = mpMapper->GetInverseViewTransformation();
+    basegfx::B2DPoint aB2DWindowPoint(fWindowX, fWindowY);
+    aB2DWindowPoint *= aInverseMatrix;
+
+    // Assert absolute algebraic parity between scalar and matrix inversion
+    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Inverse Matrix and Scalar pipelines have diverged (X)",
+                                         fScalarLogicX, aB2DWindowPoint.getX(), 0.0001);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Inverse Matrix and Scalar pipelines have diverged (Y)",
+                                         fScalarLogicY, aB2DWindowPoint.getY(), 0.0001);
+}
+
+CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testSubpixelRoundTripSymmetry)
+{
+    // test irrational-ish fractions and extremely large coordinates
+    const double aEvilBases[] = { 0.3, 100.0, 1000000.11 };
+
+    for (double fBaseX : aEvilBases)
+    {
+        // Sweep X from fBaseX to fBaseX + 1.0 in 0.1 increments
+        for (int i = 0; i <= 10; ++i)
+        {
+            double fCurrentX = fBaseX + (i * 0.1);
+            double fPixel = mpMapper->LogicToDeviceSubPixelX(fCurrentX);
+            double fRestored = mpMapper->DevicePixelToLogicSubPixelX(fPixel);
+
+            // Tight tolerance ensures floating-point accumulation doesn't break algebraic symmetry
+            CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Subpixel drift detected in evil sweep", fCurrentX,
+                                                 fRestored, 0.0001);
+        }
+    }
+}
+
 } // end anonymous namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
