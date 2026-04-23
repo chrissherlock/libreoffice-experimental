@@ -501,13 +501,18 @@ Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize) const
 
 tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect) const
 {
-    if (rLogicRect.IsEmpty())
-        return rLogicRect;
+    tools::Rectangle aRetval(
+        LogicToDevicePixelX(rLogicRect.Left()), LogicToDevicePixelY(rLogicRect.Top()),
+        rLogicRect.IsWidthEmpty() ? 0 : LogicToDevicePixelX(rLogicRect.Right()),
+        rLogicRect.IsHeightEmpty() ? 0 : LogicToDevicePixelY(rLogicRect.Bottom()));
 
-    Point aTopLeft = LogicToDevicePixel(rLogicRect.TopLeft());
-    Size aSize = LogicToDevicePixel(rLogicRect.GetSize());
+    if (rLogicRect.IsWidthEmpty())
+        aRetval.SetWidthEmpty();
 
-    return tools::Rectangle(aTopLeft, aSize);
+    if (rLogicRect.IsHeightEmpty())
+        aRetval.SetHeightEmpty();
+
+    return aRetval;
 }
 
 tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogicPoly) const
