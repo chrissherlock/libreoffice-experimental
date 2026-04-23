@@ -85,6 +85,67 @@ concept TransformableB2DGeometry = requires(T a, const basegfx::B2DHomMatrix& rM
  * sub-pixel precision (double, basegfx::B2DPoint). It utilizes the C++20
  * TransformableB2DGeometry concept to efficiently batch-transform modern
  * basegfx geometry using pre-calculated B2DHomMatrix view transformations.
+ *
+ * ========================================================================
+ * CoordinateMapper Rounding and Transformation Contract
+ * ========================================================================
+ *
+ * This class strictly adheres to the following contract to guarantee
+ * subpixel accuracy, idempotency, and coordinate symmetry across VCL.
+ *
+ * 1. Core Principle & Subpixel Authority
+ * All coordinate transformations must be performed in double precision.
+ * Conversion to integer must occur exactly once, only at the final API
+ * boundary. All integer-based APIs must be implemented as rounded
+ * versions of their subpixel (double) equivalents. No separate logic
+ * paths for integer vs. double transformations are permitted.
+ *
+ * 2. Single Source of Truth
+ * All transformations must conceptually follow a single pipeline:
+ * Logic <-> View <-> Window <-> Device
+ * The Logic <-> View stage is the *only* stage that performs scaling.
+ * All other stages are pure translations.
+ *
+ * 3. Rounding Policy & Order
+ * A single rounding method (std::llround via lcl_RoundToLong) must be
+ * used everywhere. Rounding must occur only once, after all scaling and
+ * offsets are applied. No transformation stage may perform rounding
+ * internally.
+ *
+ * 4. Offset Responsibilities
+ * Each offset belongs to exactly one stage and must not be coupled:
+ * - Device <-> Window: Device offset (Screen origin)
+ * - Window <-> View: Window offset (Scroll offset)
+ * - View <-> Logic: Map offset (Logical mapping origin)
+ * - Logic origin: Absolute logical offset
+ *
+ * 5. Distance vs. Position
+ * Distance (Size) transformations must apply scaling only and must
+ * never include offsets. Position (Point) transformations include both
+ * scaling and offsets.
+ *
+ * 6. Forward/Inverse Symmetry & Idempotency
+ * For every transformation A -> B, the inverse B -> A must return the
+ * original value. This must hold exactly for integer inputs and within
+ * ±0.5 for intermediate double values. Transforming a value to another
+ * space and back must not introduce drift.
+ *
+ * 7. Compound Geometry Consistency
+ * Rectangle and Polygon transformations must treat all edges/points
+ * consistently using the same transform and rounding rules. Width/Height
+ * must not be used to calculate Right/Bottom coordinates, as that mixes
+ * Distance and Position pipelines. Empty state flags must be preserved
+ * separately from coordinate values.
+ *
+ * 8. Negative Coordinate Consistency
+ * Rounding behavior must be consistent for both positive and negative
+ * values (no implicit truncation towards zero).
+ *
+ * 9. No Mixed Precision Inputs
+ * Integer outputs must never be fed back into transformation pipelines
+ * as inputs. All transformations must originate from the original
+ * high-precision values.
+ * ========================================================================
  */
 
 class CoordinateMapper
