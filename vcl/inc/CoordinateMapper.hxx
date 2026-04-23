@@ -181,6 +181,7 @@ private:
 
 public:
     bool IsMapModeEnabled() const { return mbMap; }
+    bool IsMappingActive() const { return mbMap && mnDPIX > 0 && mnDPIY > 0; }
     void EnableMapMode(bool bEnable = true)
     {
         mbMap = bEnable;
