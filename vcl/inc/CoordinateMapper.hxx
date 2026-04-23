@@ -155,20 +155,10 @@ private:
     MapMode maMapMode;
     ImplMapRes maMapRes;
 
-    struct ViewTransformComponents
-    {
-        double fScaleX;
-        double fScaleY;
-        double fTransX;
-        double fTransY;
-    };
-
     // #i75163#
 
-    mutable std::optional<basegfx::B2DHomMatrix> maViewTransform;
-    mutable std::optional<basegfx::B2DHomMatrix> maInverseViewTransform;
-    mutable std::optional<basegfx::B2DHomMatrix> maDeviceTransform;
-    mutable std::optional<ViewTransformComponents> maViewWeights;
+    mutable std::optional<basegfx::B2DHomMatrix> maLogicToDevice;
+    mutable std::optional<basegfx::B2DHomMatrix> maDeviceToLogic;
 
     sal_Int32 mnDPIX = 72;
     sal_Int32 mnDPIY = 72;
@@ -547,8 +537,7 @@ public:
     tools::Long ViewSubPixelToLogicDistanceY(double n, double fScale) const;
 
 private:
-    void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
-                               double& rTransY) const;
+    void UpdateTransforms() const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
