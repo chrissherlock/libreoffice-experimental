@@ -157,9 +157,8 @@ private:
 
     // #i75163#
 
-    mutable std::optional<basegfx::B2DHomMatrix> maViewTransform;
-    mutable std::optional<basegfx::B2DHomMatrix> maInverseViewTransform;
-    mutable std::optional<basegfx::B2DHomMatrix> maDeviceTransform;
+    mutable std::optional<basegfx::B2DHomMatrix> maLogicToDevice;
+    mutable std::optional<basegfx::B2DHomMatrix> maDeviceToLogic;
 
     sal_Int32 mnDPIX = 72;
     sal_Int32 mnDPIY = 72;
@@ -541,6 +540,7 @@ public:
     tools::Long ViewSubPixelToLogicDistanceY(double n, double fScale) const;
 
 private:
+    void UpdateTransforms() const;
     void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
                                double& rTransY) const;
 };
