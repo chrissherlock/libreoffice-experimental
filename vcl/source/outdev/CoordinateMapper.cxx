@@ -174,59 +174,88 @@ ImplMapRes CoordinateMapper::ResolveMapRes(const MapMode* pMode) const
 // #i75163#
 void CoordinateMapper::InvalidateViewTransform()
 {
-    maViewTransform.reset();
-    maInverseViewTransform.reset();
-    maDeviceTransform.reset();
+    maLogicToDevice.reset();
+    maDeviceToLogic.reset();
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetDeviceTransformation() const
 {
-    if (maDeviceTransform)
-        return *maDeviceTransform;
+    UpdateTransforms();
+    return *maLogicToDevice;
+}
 
-    basegfx::B2DHomMatrix aTransformation = GetViewTransformation();
+void CoordinateMapper::UpdateTransforms() const
+{
+    if (maLogicToDevice)
+        return; // Already cached
 
-    if (mnDeviceToWindowOffsetX || mnDeviceToWindowOffsetY)
-        aTransformation.translate(mnDeviceToWindowOffsetX, mnDeviceToWindowOffsetY);
+    basegfx::B2DHomMatrix aTransform;
 
-    maDeviceTransform = aTransformation;
-    return *maDeviceTransform;
+    if (IsMappingActive())
+    {
+        // 1. Scale
+        double fScaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
+        double fScaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
+
+        // 2. Translation (Combine all offsets into a single translation vector)
+        // Note: Logical offsets are scaled. Physical offsets are not.
+        double fTransX = (static_cast<double>(maMapRes.mnMapOfsX)
+                          + static_cast<double>(mnLogicToAbsoluteOffsetX))
+                             * fScaleX
+                         + static_cast<double>(mnWindowToViewOffsetX)
+                         + static_cast<double>(mnDeviceToWindowOffsetX);
+
+        double fTransY = (static_cast<double>(maMapRes.mnMapOfsY)
+                          + static_cast<double>(mnLogicToAbsoluteOffsetY))
+                             * fScaleY
+                         + static_cast<double>(mnWindowToViewOffsetY)
+                         + static_cast<double>(mnDeviceToWindowOffsetY);
+
+        aTransform.set(0, 0, fScaleX);
+        aTransform.set(1, 1, fScaleY);
+        aTransform.set(0, 2, fTransX);
+        aTransform.set(1, 2, fTransY);
+    }
+    else
+    {
+        // Identity fallback for non-mapped, but screen offsets ALWAYS apply
+        aTransform.translate(static_cast<double>(mnWindowToViewOffsetX + mnDeviceToWindowOffsetX),
+                             static_cast<double>(mnWindowToViewOffsetY + mnDeviceToWindowOffsetY));
+    }
+
+    maLogicToDevice = aTransform;
+
+    basegfx::B2DHomMatrix aInverse = aTransform;
+    aInverse.invert();
+    maDeviceToLogic = aInverse;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation() const
 {
+    // Maintain legacy behavior: inactive mapping returns a pure identity matrix
     if (!IsMappingActive())
         return basegfx::B2DHomMatrix();
 
-    if (maViewTransform)
-        return *maViewTransform;
+    // Ensure our Single Source of Truth is built
+    UpdateTransforms();
+    basegfx::B2DHomMatrix aTransform = *maLogicToDevice;
 
-    double fScaleX, fScaleY, fTransX, fTransY;
-    GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
+    // maLogicToDevice includes physical screen offsets (Device space).
+    // View space conceptually does not, so we subtract them back out.
+    if (mnDeviceToWindowOffsetX != 0 || mnDeviceToWindowOffsetY != 0)
+    {
+        aTransform.translate(-static_cast<double>(mnDeviceToWindowOffsetX),
+                             -static_cast<double>(mnDeviceToWindowOffsetY));
+    }
 
-    basegfx::B2DHomMatrix aTransform;
-    aTransform.set(0, 0, fScaleX);
-    aTransform.set(1, 1, fScaleY);
-    aTransform.set(0, 2, fTransX + static_cast<double>(mnWindowToViewOffsetX));
-    aTransform.set(1, 2, fTransY + static_cast<double>(mnWindowToViewOffsetY));
-
-    maViewTransform = aTransform;
-    return *maViewTransform;
+    return aTransform;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation() const
 {
-    if (!IsMappingActive())
-        return basegfx::B2DHomMatrix();
-
-    if (maInverseViewTransform)
-        return *maInverseViewTransform;
-
     basegfx::B2DHomMatrix aInverse(GetViewTransformation());
     aInverse.invert();
-
-    maInverseViewTransform = aInverse;
-    return *maInverseViewTransform;
+    return aInverse;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rMapMode) const
@@ -430,108 +459,49 @@ Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize) const
 // --- Sub-Pixel Full Journey ---
 double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
 {
-    double fVal = fX - static_cast<double>(GetDeviceToViewOffsetX());
-
-    if (!IsMappingActive())
-        return fVal;
-
-    double fScaleX, fScaleY, fTransX, fTransY;
-    GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
-
-    SAL_WARN_IF(fScaleX == 0.0, "vcl.gdi",
-                "CoordinateMapper: Zero X scale encountered during inverse transformation!");
-
-    if (fScaleX != 0.0)
-        fVal = (fVal - fTransX) / fScaleX;
-
-    return fVal;
+    UpdateTransforms();
+    basegfx::B2DPoint aPt(fX, 0.0);
+    aPt *= *maDeviceToLogic;
+    return aPt.getX();
 }
 
 double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
 {
-    double fVal = fY - static_cast<double>(GetDeviceToViewOffsetY());
-
-    if (!IsMappingActive())
-        return fVal;
-
-    double fScaleX, fScaleY, fTransX, fTransY;
-    GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
-
-    assert(fScaleY != 0.0
-           && "CoordinateMapper: Zero Y scale encountered during inverse transformation!");
-
-    if (fScaleY != 0.0)
-        fVal = (fVal - fTransY) / fScaleY;
-
-    return fVal;
+    UpdateTransforms();
+    basegfx::B2DPoint aPt(0.0, fY);
+    aPt *= *maDeviceToLogic;
+    return aPt.getY();
 }
 
 double CoordinateMapper::LogicToDeviceSubPixelX(double fX) const
 {
-    double fScaleX, fScaleY, fTransX, fTransY;
-    GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
-
-    double fVal = fX;
-
-    if (IsMappingActive())
-        fVal = (fVal * fScaleX) + fTransX;
-
-    // Add Window and Device offsets (Screen-space translations)
-    return fVal + static_cast<double>(GetDeviceToViewOffsetX());
+    UpdateTransforms();
+    basegfx::B2DPoint aPt(fX, 0.0);
+    aPt *= *maLogicToDevice;
+    return aPt.getX();
 }
 
 double CoordinateMapper::LogicToDeviceSubPixelY(double fY) const
 {
-    double fScaleX, fScaleY, fTransX, fTransY;
-    GetLogicToViewWeights(fScaleX, fScaleY, fTransX, fTransY);
-
-    double fVal = fY;
-
-    if (IsMappingActive())
-        fVal = (fVal * fScaleY) + fTransY;
-
-    return fVal + static_cast<double>(GetDeviceToViewOffsetY());
+    UpdateTransforms();
+    basegfx::B2DPoint aPt(0.0, fY);
+    aPt *= *maLogicToDevice;
+    return aPt.getY();
 }
 
 basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint) const
 {
-    basegfx::B2DPoint aScalarResult(LogicToDeviceSubPixelX(static_cast<double>(rPoint.X())),
-                                    LogicToDeviceSubPixelY(static_cast<double>(rPoint.Y())));
-
-#if defined(DBG_UTIL)
-    // Architectural Cross-Check: Ensure manual pipeline never diverges from authoritative matrix
-    basegfx::B2DPoint aMatrixResult(rPoint.X(), rPoint.Y());
-    aMatrixResult *= GetDeviceTransformation();
-
-    // Allow for microscopic FP accumulation differences
-    assert(std::abs(aScalarResult.getX() - aMatrixResult.getX()) < 0.0001
-           && std::abs(aScalarResult.getY() - aMatrixResult.getY()) < 0.0001
-           && "CoordinateMapper: Scalar and Matrix transformation pipelines have diverged!");
-#endif
-
-    return aScalarResult;
+    UpdateTransforms();
+    basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
+    aPt *= *maLogicToDevice;
+    return aPt;
 }
 basegfx::B2DPoint CoordinateMapper::DevicePixelToLogicSubPixel(const Point& rPoint) const
 {
-    basegfx::B2DPoint aScalarResult(DevicePixelToLogicSubPixelX(static_cast<double>(rPoint.X())),
-                                    DevicePixelToLogicSubPixelY(static_cast<double>(rPoint.Y())));
-
-#if defined(DBG_UTIL)
-    // Architectural Cross-Check: Inverse manual pipeline vs authoritative matrix
-    double fWindowX = static_cast<double>(rPoint.X() - GetDeviceToWindowOffsetX());
-    double fWindowY = static_cast<double>(rPoint.Y() - GetDeviceToWindowOffsetY());
-
-    basegfx::B2DPoint aMatrixResult(fWindowX, fWindowY);
-    aMatrixResult *= GetInverseViewTransformation();
-
-    // Allow for microscopic FP accumulation differences
-    assert(
-        std::abs(aScalarResult.getX() - aMatrixResult.getX()) < 0.0001
-        && std::abs(aScalarResult.getY() - aMatrixResult.getY()) < 0.0001
-        && "CoordinateMapper: Inverse Scalar and Matrix transformation pipelines have diverged!");
-#endif
-
-    return aScalarResult;
+    UpdateTransforms();
+    basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
+    aPt *= *maDeviceToLogic;
+    return aPt;
 }
 
 // Integer Boundary (this is the only place rounding occurs)
