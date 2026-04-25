@@ -50,6 +50,7 @@
 #include <TextLayoutCache.hxx>
 #include <font/PhysicalFontFace.hxx>
 
+#include <cmath>
 #include <memory>
 #include <optional>
 
@@ -1598,9 +1599,14 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
                         sal_Int32 lc_x2 = aDXArray[nPos];
                         double nMnemonicWidth = rTargetDevice.LogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2));
 
-                        Point       aTempPos = rTargetDevice.LogicToPixel( aPos );
-                        nMnemonicX = rTargetDevice.GetDeviceOriginX() + aTempPos.X() + rTargetDevice.LogicWidthToDevicePixel(std::min(lc_x1, lc_x2));
-                        nMnemonicY = rTargetDevice.GetDeviceOriginY() + aTempPos.Y() + rTargetDevice.LogicWidthToDevicePixel(rTargetDevice.GetFontMetric().GetAscent());
+                        // Extract exact subpixel scale factors from the SSoT matrix
+                        const basegfx::B2DHomMatrix aTransform = rTargetDevice.GetMapper().GetDeviceTransformation();
+                        const double fScaleX = aTransform.get(0, 0);
+                        const double fScaleY = aTransform.get(1, 1);
+
+                        Point aTempPos = rTargetDevice.LogicToPixel( aPos );
+                        nMnemonicX = std::round(rTargetDevice.GetDeviceOriginX() + aTempPos.X() + (std::min(lc_x1, lc_x2) * fScaleX));
+                        nMnemonicY = std::round(rTargetDevice.GetDeviceOriginY() + aTempPos.Y() + (rTargetDevice.GetFontMetric().GetAscent() * fScaleY));
                         rTargetDevice.ImplDrawMnemonicLine( nMnemonicX, nMnemonicY, nMnemonicWidth );
                     }
                 }
@@ -1666,9 +1672,14 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
             tools::Long lc_x2 = aDXArray[nMnemonicPos];
             nMnemonicWidth = rTargetDevice.LogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2));
 
+            // Extract exact subpixel scale factors from the SSoT matrix
+            const basegfx::B2DHomMatrix aTransform = rTargetDevice.GetMapper().GetDeviceTransformation();
+            const double fScaleX = aTransform.get(0, 0);
+            const double fScaleY = aTransform.get(1, 1);
+
             Point aTempPos = rTargetDevice.LogicToPixel( aPos );
-            nMnemonicX = rTargetDevice.GetDeviceOriginX() + aTempPos.X() + rTargetDevice.LogicWidthToDevicePixel( std::min(lc_x1, lc_x2) );
-            nMnemonicY = rTargetDevice.GetDeviceOriginY() + aTempPos.Y() + rTargetDevice.LogicWidthToDevicePixel( rTargetDevice.GetFontMetric().GetAscent() );
+            nMnemonicX = std::round(rTargetDevice.GetDeviceOriginX() + aTempPos.X() + (std::min(lc_x1, lc_x2) * fScaleX));
+            nMnemonicY = std::round(rTargetDevice.GetDeviceOriginY() + aTempPos.Y() + (rTargetDevice.GetFontMetric().GetAscent() * fScaleY));
         }
 
         if ( nStyle & DrawTextFlags::Clip )
