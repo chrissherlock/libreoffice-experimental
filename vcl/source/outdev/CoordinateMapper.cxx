@@ -182,34 +182,70 @@ vcl::detail::TransformSnapshotScalar CoordinateMapper::FillSnapshot() const
 {
     vcl::detail::TransformSnapshotScalar aScalar;
 
-    if (IsMappingActive())
-    {
-        aScalar.mfScaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
-        aScalar.mfScaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
-
-        const double fBaseX = static_cast<double>(maMapRes.mnMapOfsX)
-                              + static_cast<double>(mnLogicToAbsoluteOffsetX);
-
-        const double fBaseY = static_cast<double>(maMapRes.mnMapOfsY)
-                              + static_cast<double>(mnLogicToAbsoluteOffsetY);
-
-        aScalar.mfTransX = (fBaseX * aScalar.mfScaleX) + static_cast<double>(mnWindowToViewOffsetX)
-                           + static_cast<double>(mnDeviceToWindowOffsetX);
-
-        aScalar.mfTransY = (fBaseY * aScalar.mfScaleY) + static_cast<double>(mnWindowToViewOffsetY)
-                           + static_cast<double>(mnDeviceToWindowOffsetY);
-    }
-    else
+    // Identity fallback
+    if (!IsMappingActive())
     {
         aScalar.mfScaleX = 1.0;
         aScalar.mfScaleY = 1.0;
 
-        aScalar.mfTransX = static_cast<double>(mnWindowToViewOffsetX)
-                           + static_cast<double>(mnDeviceToWindowOffsetX);
+        // Only screen-space offsets remain
+        const double dx = static_cast<double>(mnWindowToViewOffsetX)
+                          + static_cast<double>(mnDeviceToWindowOffsetX);
 
-        aScalar.mfTransY = static_cast<double>(mnWindowToViewOffsetY)
-                           + static_cast<double>(mnDeviceToWindowOffsetY);
+        const double dy = static_cast<double>(mnWindowToViewOffsetY)
+                          + static_cast<double>(mnDeviceToWindowOffsetY);
+
+        aScalar.mfTransX = dx;
+        aScalar.mfTransY = dy;
+
+        aScalar.maLogicToDevice = basegfx::B2DHomMatrix(1.0, 0.0, 0.0, 1.0, dx, dy);
+
+        aScalar.maView = aScalar.maLogicToDevice;
+        aScalar.maDeviceToLogic = aScalar.maLogicToDevice;
+        aScalar.maInvView = aScalar.maLogicToDevice;
+
+        aScalar.maDeviceToLogic.invert();
+        aScalar.maInvView.invert();
+
+        return aScalar;
     }
+
+    // Canonical scale (Logic → Device space)
+    const double scaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
+    const double scaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
+
+    aScalar.mfScaleX = scaleX;
+    aScalar.mfScaleY = scaleY;
+
+    // Logic-space translation only
+    //    (NO window/device mixing here)
+    const double logicOffsetX
+        = static_cast<double>(maMapRes.mnMapOfsX) + static_cast<double>(mnLogicToAbsoluteOffsetX);
+
+    const double logicOffsetY
+        = static_cast<double>(maMapRes.mnMapOfsY) + static_cast<double>(mnLogicToAbsoluteOffsetY);
+
+    const double tx = logicOffsetX * scaleX;
+    const double ty = logicOffsetY * scaleY;
+
+    aScalar.mfTransX = tx;
+    aScalar.mfTransY = ty;
+
+    // Build canonical transform (ONLY Logic → Device)
+    aScalar.maLogicToDevice = basegfx::B2DHomMatrix(scaleX, 0.0, 0.0, scaleY, tx, ty);
+
+    // Derived transforms (no new math, just reuse)
+    aScalar.maView = aScalar.maLogicToDevice;
+
+    aScalar.maDeviceToLogic = aScalar.maLogicToDevice;
+    bool ok = aScalar.maDeviceToLogic.invert();
+    if (!ok)
+        aScalar.maDeviceToLogic = basegfx::B2DHomMatrix();
+
+    aScalar.maInvView = aScalar.maView;
+    ok = aScalar.maInvView.invert();
+    if (!ok)
+        aScalar.maInvView = basegfx::B2DHomMatrix();
 
     return aScalar;
 }
@@ -218,48 +254,34 @@ std::shared_ptr<const CoordinateMapper::TransformSnapshot> CoordinateMapper::Acq
 {
     while (true)
     {
+        // Capture version BEFORE reading snapshot
         const uint64_t nStartVersion = mnStateCounter.load(std::memory_order_acquire);
 
         auto pSnap = std::atomic_load_explicit(&mpSnapshot, std::memory_order_acquire);
 
+        // Fast path: snapshot is valid
         if (pSnap && pSnap->mnVersion == nStartVersion)
             return pSnap;
 
+        // Build new snapshot (single source of truth)
         auto pNew = std::make_shared<TransformSnapshot>();
 
-        // Build scalar transform FIRST (single source of truth)
         const auto aScalar = FillSnapshot();
+
+        // Store scalar representation
         pNew->maTransform = aScalar;
 
-        // Build logic -> device matrix directly from scalar
-        if (IsMappingActive())
-        {
-            pNew->maLogicToDevice = basegfx::B2DHomMatrix(
-                aScalar.mfScaleX, 0.0, 0.0, aScalar.mfScaleY, aScalar.mfTransX, aScalar.mfTransY);
-        }
-        else
-        {
-            pNew->maLogicToDevice
-                = basegfx::B2DHomMatrix(1.0, 0.0, 0.0, 1.0, aScalar.mfTransX, aScalar.mfTransY);
-        }
+        // Copy canonical matrices (already consistent in FillSnapshot)
+        pNew->maLogicToDevice = aScalar.maLogicToDevice;
+        pNew->maView = aScalar.maView;
+        pNew->maDeviceToLogic = aScalar.maDeviceToLogic;
+        pNew->maInvView = aScalar.maInvView;
 
-        // Inverse is derived ONLY from final matrix
-        pNew->maDeviceToLogic = pNew->maLogicToDevice;
-        if (!pNew->maDeviceToLogic.invert())
-            pNew->maDeviceToLogic = basegfx::B2DHomMatrix();
-
-        // View is now explicitly defined (no longer identity)
-        pNew->maView = pNew->maLogicToDevice;
-
-        pNew->maInvView = pNew->maView;
-        if (!pNew->maInvView.invert())
-            pNew->maInvView = basegfx::B2DHomMatrix();
-
-        // Version check (lock-free consistency)
+        // Version check (lock-free consistency guard)
         const uint64_t nEndVersion = mnStateCounter.load(std::memory_order_acquire);
 
         if (nStartVersion != nEndVersion)
-            continue;
+            continue; // state changed mid-build → retry
 
         pNew->mnVersion = nStartVersion;
 
@@ -521,6 +543,7 @@ basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint) c
     aPt *= snap->maLogicToDevice;
     return aPt;
 }
+
 basegfx::B2DPoint CoordinateMapper::DevicePixelToLogicSubPixel(const Point& rPoint) const
 {
     auto snap = AcquireSnapshot();

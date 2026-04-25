@@ -121,10 +121,22 @@ template <typename T> concept B2DGeometry = B2DTransformable<T> || B2DMultipliab
 
 struct TransformSnapshotScalar
 {
+    // Scalar representation (for quick math / debugging)
     double mfScaleX = 1.0;
     double mfScaleY = 1.0;
+
     double mfTransX = 0.0;
     double mfTransY = 0.0;
+
+    // Canonical transforms
+    basegfx::B2DHomMatrix maLogicToDevice;
+    basegfx::B2DHomMatrix maView;
+
+    basegfx::B2DHomMatrix maDeviceToLogic;
+    basegfx::B2DHomMatrix maInvView;
+
+    // Default constructor ensures identity state
+    TransformSnapshotScalar() = default;
 };
 }
 
