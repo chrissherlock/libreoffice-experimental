@@ -195,6 +195,8 @@ private:
     tools::Long mnOutWidth = 0;
     tools::Long mnOutHeight = 0;
 
+    mutable bool mbTransformsDirty = true;
+
 public:
     bool IsMapModeEnabled() const { return mbMap; }
     bool IsMappingActive() const { return mbMap && mnDPIX > 0 && mnDPIY > 0; }

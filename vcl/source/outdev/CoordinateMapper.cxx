@@ -155,6 +155,7 @@ ImplMapRes CoordinateMapper::ResolveMapRes(const MapMode* pMode) const
 // #i75163#
 void CoordinateMapper::InvalidateViewTransform()
 {
+    mbTransformsDirty = true;
     maLogicToDevice.reset();
     maDeviceToLogic.reset();
 }
@@ -167,7 +168,7 @@ basegfx::B2DHomMatrix CoordinateMapper::GetDeviceTransformation() const
 
 void CoordinateMapper::UpdateTransforms() const
 {
-    if (maLogicToDevice)
+    if (!mbTransformsDirty && maLogicToDevice)
         return; // Already cached
 
     basegfx::B2DHomMatrix aTransform;
@@ -209,6 +210,7 @@ void CoordinateMapper::UpdateTransforms() const
     basegfx::B2DHomMatrix aInverse = aTransform;
     aInverse.invert();
     maDeviceToLogic = aInverse;
+    mbTransformsDirty = false;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation() const
@@ -1315,12 +1317,22 @@ tools::Long CoordinateMapper::WindowToDeviceUnitsY(tools::Long nY) const
 
 double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n) const
 {
-    return LogicToViewDistanceSubPixelX(n, maMapRes.mfMapScX);
+    if (!IsMappingActive())
+        return static_cast<double>(n);
+
+    UpdateTransforms();
+
+    return static_cast<double>(n) * maLogicToDevice->get(0, 0);
 }
 
 double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n) const
 {
-    return LogicToViewDistanceSubPixelY(n, maMapRes.mfMapScY);
+    if (!IsMappingActive())
+        return static_cast<double>(n);
+
+    UpdateTransforms();
+
+    return static_cast<double>(n) * maLogicToDevice->get(1, 1);
 }
 
 double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n, double fScale) const
@@ -1343,12 +1355,22 @@ double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n, double fSca
 
 double CoordinateMapper::ViewToLogicDistanceDoubleX(double n) const
 {
-    return ViewToLogicDistanceDoubleX(n, maMapRes.mfMapScX);
+    if (!IsMappingActive())
+        return n;
+
+    UpdateTransforms();
+
+    return n * maDeviceToLogic->get(0, 0);
 }
 
 double CoordinateMapper::ViewToLogicDistanceDoubleY(double n) const
 {
-    return ViewToLogicDistanceDoubleY(n, maMapRes.mfMapScY);
+    if (!IsMappingActive())
+        return n;
+
+    UpdateTransforms();
+
+    return n * maDeviceToLogic->get(1, 1);
 }
 
 double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fScale) const
