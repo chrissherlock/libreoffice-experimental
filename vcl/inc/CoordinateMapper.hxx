@@ -114,6 +114,14 @@ template <typename T> concept B2DMultipliable = requires(T a, const basegfx::B2D
 };
 
 template <typename T> concept B2DGeometry = B2DTransformable<T> || B2DMultipliable<T>;
+
+struct MapConversion
+{
+    double mfScaleX = 1.0;
+    double mfScaleY = 1.0;
+    tools::Long mnOffsetX = 0;
+    tools::Long mnOffsetY = 0;
+};
 }
 
 class VCL_DLLPUBLIC CoordinateMapper
@@ -122,6 +130,7 @@ private:
     bool mbMap = false;
     MapMode maMapMode;
     ImplMapRes maMapRes;
+    vcl::detail::MapConversion maMapConversion;
 
     // #i75163#
     struct TransformSnapshot
@@ -275,30 +284,35 @@ public:
     void SetMappingXOffset(tools::Long nOffset)
     {
         maMapRes.mnMapOfsX = nOffset;
+        maMapConversion.mnOffsetX = nOffset; // <-- SYNC THE FIREWALL
         InvalidateViewTransform();
     }
 
     void SetMappingYOffset(tools::Long nOffset)
     {
         maMapRes.mnMapOfsY = nOffset;
+        maMapConversion.mnOffsetY = nOffset; // <-- SYNC THE FIREWALL
         InvalidateViewTransform();
     }
 
     void SetMapResolutionScaleX(double fX)
     {
         maMapRes.mfMapScX = fX;
+        maMapConversion.mfScaleX = fX; // <-- SYNC THE FIREWALL
         InvalidateViewTransform();
     }
 
     void SetMapResolutionScaleY(double fY)
     {
         maMapRes.mfMapScY = fY;
+        maMapConversion.mfScaleY = fY; // <-- SYNC THE FIREWALL
         InvalidateViewTransform();
     }
 
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
     ImplMapRes ResolveMapRes(const MapMode* pMode) const;
+    vcl::detail::MapConversion ResolveMap(const MapMode& rMapMode) const;
 
     /** Invalidate the view transformation.
 
