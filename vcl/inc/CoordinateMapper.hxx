@@ -28,6 +28,8 @@
 #include <vcl/region.hxx>
 
 #include <optional>
+#include <mutex>
+#include <memory>
 #include <concepts>
 
 class LineInfo;
@@ -171,9 +173,25 @@ private:
     ImplMapRes maMapRes;
 
     // #i75163#
+    struct TransformSnapshot
+    {
+        basegfx::B2DHomMatrix maLogicToDevice;
+        basegfx::B2DHomMatrix maDeviceToLogic;
+        basegfx::B2DHomMatrix maView;
+        basegfx::B2DHomMatrix maInvView;
+        double mfScaleX = 1.0;
+        double mfScaleY = 1.0;
+        double mfTransX = 0.0;
+        double mfTransY = 0.0;
+    };
+    mutable std::shared_ptr<const TransformSnapshot> mpSnapshot;
+    mutable std::mutex mSnapshotMutex;
 
-    mutable std::optional<basegfx::B2DHomMatrix> maLogicToDevice;
-    mutable std::optional<basegfx::B2DHomMatrix> maDeviceToLogic;
+    // Hot-path scalar accessors (Projected from the current immutable snapshot)
+    double GetSnapshotScaleX() const { return mpSnapshot->mfScaleX; }
+    double GetSnapshotScaleY() const { return mpSnapshot->mfScaleY; }
+    double GetSnapshotTransX() const { return mpSnapshot->mfTransX; }
+    double GetSnapshotTransY() const { return mpSnapshot->mfTransY; }
 
     sal_Int32 mnDPIX = 72;
     sal_Int32 mnDPIY = 72;
@@ -560,9 +578,9 @@ public:
     {
         UpdateTransforms();
         if constexpr (vcl::detail::B2DTransformable<T>)
-            aObj.transform(*maLogicToDevice);
+            aObj.transform(mpSnapshot->maLogicToDevice);
         else
-            aObj *= *maLogicToDevice;
+            aObj *= mpSnapshot->maLogicToDevice;
         return aObj;
     }
 
@@ -571,9 +589,9 @@ public:
     {
         UpdateTransforms();
         if constexpr (vcl::detail::B2DTransformable<T>)
-            aObj.transform(*maDeviceToLogic);
+            aObj.transform(mpSnapshot->maDeviceToLogic);
         else
-            aObj *= *maDeviceToLogic;
+            aObj *= mpSnapshot->maDeviceToLogic;
         return aObj;
     }
 
