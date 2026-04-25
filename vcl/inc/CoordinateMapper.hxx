@@ -118,6 +118,14 @@ template <typename T> concept B2DMultipliable = requires(T a, const basegfx::B2D
 };
 
 template <typename T> concept B2DGeometry = B2DTransformable<T> || B2DMultipliable<T>;
+
+struct TransformSnapshotScalar
+{
+    double mfScaleX = 1.0;
+    double mfScaleY = 1.0;
+    double mfTransX = 0.0;
+    double mfTransY = 0.0;
+};
 }
 
 class VCL_DLLPUBLIC CoordinateMapper
@@ -134,10 +142,7 @@ private:
         basegfx::B2DHomMatrix maDeviceToLogic;
         basegfx::B2DHomMatrix maView;
         basegfx::B2DHomMatrix maInvView;
-        double mfScaleX = 1.0;
-        double mfScaleY = 1.0;
-        double mfTransX = 0.0;
-        double mfTransY = 0.0;
+        vcl::detail::TransformSnapshotScalar maTransform;
         uint64_t mnVersion = 0;
     };
 
