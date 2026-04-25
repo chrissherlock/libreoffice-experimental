@@ -457,36 +457,28 @@ Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize) const
 }
 
 // --- Sub-Pixel Full Journey ---
-double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
-{
-    UpdateTransforms();
-    basegfx::B2DPoint aPt(fX, 0.0);
-    aPt *= *maDeviceToLogic;
-    return aPt.getX();
-}
-
-double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
-{
-    UpdateTransforms();
-    basegfx::B2DPoint aPt(0.0, fY);
-    aPt *= *maDeviceToLogic;
-    return aPt.getY();
-}
-
 double CoordinateMapper::LogicToDeviceSubPixelX(double fX) const
 {
     UpdateTransforms();
-    basegfx::B2DPoint aPt(fX, 0.0);
-    aPt *= *maLogicToDevice;
-    return aPt.getX();
+    return (fX * maLogicToDevice->get(0, 0)) + maLogicToDevice->get(0, 2);
 }
 
 double CoordinateMapper::LogicToDeviceSubPixelY(double fY) const
 {
     UpdateTransforms();
-    basegfx::B2DPoint aPt(0.0, fY);
-    aPt *= *maLogicToDevice;
-    return aPt.getY();
+    return (fY * maLogicToDevice->get(1, 1)) + maLogicToDevice->get(1, 2);
+}
+
+double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
+{
+    UpdateTransforms();
+    return (fX * maDeviceToLogic->get(0, 0)) + maDeviceToLogic->get(0, 2);
+}
+
+double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
+{
+    UpdateTransforms();
+    return (fY * maDeviceToLogic->get(1, 1)) + maDeviceToLogic->get(1, 2);
 }
 
 basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint) const
