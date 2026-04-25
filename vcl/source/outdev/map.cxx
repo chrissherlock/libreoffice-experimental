@@ -284,28 +284,28 @@ vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
 
 Point OutputDevice::LogicToPixel(const Point& rLogicPt, const MapMode& rMapMode) const
 {
-    return mpMapper->LogicToWindowUnits(rLogicPt, rMapMode);
+    return mpMapper->LogicToWindowUnits(rLogicPt, mpMapper->ResolveMap(rMapMode));
 }
 
 Size OutputDevice::LogicToPixel(const Size& rLogicSize, const MapMode& rMapMode) const
 {
-    return mpMapper->LogicToWindowUnits(rLogicSize, rMapMode);
+    return mpMapper->LogicToWindowUnits(rLogicSize, mpMapper->ResolveMap(rMapMode));
 }
 
 tools::Rectangle OutputDevice::LogicToPixel(const tools::Rectangle& rLogicRect, const MapMode& rMapMode) const
 {
-    return mpMapper->LogicToWindowUnits(rLogicRect, rMapMode);
+    return mpMapper->LogicToWindowUnits(rLogicRect, mpMapper->ResolveMap(rMapMode));
 }
 
 tools::Polygon OutputDevice::LogicToPixel(const tools::Polygon& rLogicPoly, const MapMode& rMapMode) const
 {
-    return mpMapper->LogicToWindowUnits(rLogicPoly, rMapMode);
+    return mpMapper->LogicToWindowUnits(rLogicPoly, mpMapper->ResolveMap(rMapMode));
 }
 
 basegfx::B2DPolyPolygon OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                                                    const MapMode& rMapMode) const
 {
-    return mpMapper->LogicToWindowUnits(rLogicPolyPoly, rMapMode);
+    return mpMapper->LogicToWindowUnits(rLogicPolyPoly, mpMapper->ResolveMap(rMapMode));
 }
 
 tools::Long OutputDevice::DevicePixelToLogicWidth(tools::Long nWidth) const
@@ -365,32 +365,32 @@ basegfx::B2DPolyPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolyPolygon
 
 Point OutputDevice::PixelToLogic(const Point& rDevicePt, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rDevicePt, rMapMode);
+    return mpMapper->WindowToLogicUnits(rDevicePt, mpMapper->ResolveMap(rMapMode));
 }
 
 Size OutputDevice::PixelToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rDeviceSize, rMapMode);
+    return mpMapper->WindowToLogicUnits(rDeviceSize, mpMapper->ResolveMap(rMapMode));
 }
 
 tools::Rectangle OutputDevice::PixelToLogic(const tools::Rectangle& rDeviceRect, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rDeviceRect, rMapMode);
+    return mpMapper->WindowToLogicUnits(rDeviceRect, mpMapper->ResolveMap(rMapMode));
 }
 
 tools::Polygon OutputDevice::PixelToLogic(const tools::Polygon& rDevicePoly, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rDevicePoly, rMapMode);
+    return mpMapper->WindowToLogicUnits(rDevicePoly, mpMapper->ResolveMap(rMapMode));
 }
 
 basegfx::B2DPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolygon& rPixelPoly, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rPixelPoly, rMapMode);
+    return mpMapper->WindowToLogicUnits(rPixelPoly, mpMapper->ResolveMap(rMapMode));
 }
 
 basegfx::B2DPolyPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rPixelPolyPoly, rMapMode);
+    return mpMapper->WindowToLogicUnits(rPixelPolyPoly, mpMapper->ResolveMap(rMapMode));
 }
 
 Point OutputDevice::LogicToLogic(const Point& rPtSource,
