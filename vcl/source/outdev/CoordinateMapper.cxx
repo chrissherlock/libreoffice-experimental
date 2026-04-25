@@ -178,6 +178,42 @@ void CoordinateMapper::InvalidateViewTransform()
     mnStateCounter.fetch_add(1, std::memory_order_release);
 }
 
+vcl::detail::TransformSnapshotScalar CoordinateMapper::FillSnapshot() const
+{
+    vcl::detail::TransformSnapshotScalar aScalar;
+
+    if (IsMappingActive())
+    {
+        aScalar.mfScaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
+        aScalar.mfScaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
+
+        const double fBaseX = static_cast<double>(maMapRes.mnMapOfsX)
+                              + static_cast<double>(mnLogicToAbsoluteOffsetX);
+
+        const double fBaseY = static_cast<double>(maMapRes.mnMapOfsY)
+                              + static_cast<double>(mnLogicToAbsoluteOffsetY);
+
+        aScalar.mfTransX = (fBaseX * aScalar.mfScaleX) + static_cast<double>(mnWindowToViewOffsetX)
+                           + static_cast<double>(mnDeviceToWindowOffsetX);
+
+        aScalar.mfTransY = (fBaseY * aScalar.mfScaleY) + static_cast<double>(mnWindowToViewOffsetY)
+                           + static_cast<double>(mnDeviceToWindowOffsetY);
+    }
+    else
+    {
+        aScalar.mfScaleX = 1.0;
+        aScalar.mfScaleY = 1.0;
+
+        aScalar.mfTransX = static_cast<double>(mnWindowToViewOffsetX)
+                           + static_cast<double>(mnDeviceToWindowOffsetX);
+
+        aScalar.mfTransY = static_cast<double>(mnWindowToViewOffsetY)
+                           + static_cast<double>(mnDeviceToWindowOffsetY);
+    }
+
+    return aScalar;
+}
+
 std::shared_ptr<const CoordinateMapper::TransformSnapshot> CoordinateMapper::AcquireSnapshot() const
 {
     while (true)
@@ -191,61 +227,35 @@ std::shared_ptr<const CoordinateMapper::TransformSnapshot> CoordinateMapper::Acq
 
         auto pNew = std::make_shared<TransformSnapshot>();
 
-        double fScaleX = 1.0;
-        double fScaleY = 1.0;
-        double fTransX = 0.0;
-        double fTransY = 0.0;
+        // Build scalar transform FIRST (single source of truth)
+        const auto aScalar = FillSnapshot();
+        pNew->maTransform = aScalar;
 
+        // Build logic -> device matrix directly from scalar
         if (IsMappingActive())
         {
-            fScaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
-            fScaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
-
-            fTransX = (static_cast<double>(maMapRes.mnMapOfsX)
-                       + static_cast<double>(mnLogicToAbsoluteOffsetX))
-                          * fScaleX
-                      + static_cast<double>(mnWindowToViewOffsetX)
-                      + static_cast<double>(mnDeviceToWindowOffsetX);
-
-            fTransY = (static_cast<double>(maMapRes.mnMapOfsY)
-                       + static_cast<double>(mnLogicToAbsoluteOffsetY))
-                          * fScaleY
-                      + static_cast<double>(mnWindowToViewOffsetY)
-                      + static_cast<double>(mnDeviceToWindowOffsetY);
-
-            pNew->maLogicToDevice.set(0, 0, fScaleX);
-            pNew->maLogicToDevice.set(1, 1, fScaleY);
-            pNew->maLogicToDevice.set(0, 2, fTransX);
-            pNew->maLogicToDevice.set(1, 2, fTransY);
+            pNew->maLogicToDevice = basegfx::B2DHomMatrix(
+                aScalar.mfScaleX, 0.0, 0.0, aScalar.mfScaleY, aScalar.mfTransX, aScalar.mfTransY);
         }
         else
         {
-            fTransX = static_cast<double>(mnWindowToViewOffsetX)
-                      + static_cast<double>(mnDeviceToWindowOffsetX);
-
-            fTransY = static_cast<double>(mnWindowToViewOffsetY)
-                      + static_cast<double>(mnDeviceToWindowOffsetY);
-
-            pNew->maLogicToDevice.translate(fTransX, fTransY);
+            pNew->maLogicToDevice
+                = basegfx::B2DHomMatrix(1.0, 0.0, 0.0, 1.0, aScalar.mfTransX, aScalar.mfTransY);
         }
 
-        pNew->maTransform.mfScaleX = fScaleX;
-        pNew->maTransform.mfScaleY = fScaleY;
-        pNew->maTransform.mfTransX = fTransX;
-        pNew->maTransform.mfTransY = fTransY;
-
+        // Inverse is derived ONLY from final matrix
         pNew->maDeviceToLogic = pNew->maLogicToDevice;
         if (!pNew->maDeviceToLogic.invert())
             pNew->maDeviceToLogic = basegfx::B2DHomMatrix();
 
+        // View is now explicitly defined (no longer identity)
         pNew->maView = pNew->maLogicToDevice;
-        pNew->maView.translate(-static_cast<double>(mnDeviceToWindowOffsetX),
-                               -static_cast<double>(mnDeviceToWindowOffsetY));
 
         pNew->maInvView = pNew->maView;
         if (!pNew->maInvView.invert())
             pNew->maInvView = basegfx::B2DHomMatrix();
 
+        // Version check (lock-free consistency)
         const uint64_t nEndVersion = mnStateCounter.load(std::memory_order_acquire);
 
         if (nStartVersion != nEndVersion)
