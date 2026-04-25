@@ -16,6 +16,7 @@ $(eval $(call gb_CppunitTest_set_include,vcl_map,\
 
 $(eval $(call gb_CppunitTest_add_exception_objects,vcl_map, \
 	vcl/qa/cppunit/vclmaptest \
+	vcl/qa/cppunit/CoordinateContractTest \
 ))
 
 $(eval $(call gb_CppunitTest_use_libraries,vcl_map, \
