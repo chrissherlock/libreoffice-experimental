@@ -425,16 +425,6 @@ tools::Long CoordinateMapper::LogicUnitsToViewUnitsY(tools::Long nY) const
     return lcl_RoundToLong(LogicUnitsToViewSubPixelY(static_cast<double>(nY)));
 }
 
-tools::Long CoordinateMapper::LogicUnitsToViewUnitsX(tools::Long nX, const ImplMapRes& rRes) const
-{
-    return LogicToViewDistanceX(nX + rRes.mnMapOfsX, rRes.mfMapScX);
-}
-
-tools::Long CoordinateMapper::LogicUnitsToViewUnitsY(tools::Long nY, const ImplMapRes& rRes) const
-{
-    return LogicToViewDistanceY(nY + rRes.mnMapOfsY, rRes.mfMapScY);
-}
-
 tools::Long CoordinateMapper::ViewSubPixelToLogicUnitsIntX(double fX) const
 {
     return lcl_RoundToLong(ViewSubPixelToLogicUnitsX(fX));
@@ -445,18 +435,108 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicUnitsIntY(double fY) const
     return lcl_RoundToLong(ViewSubPixelToLogicUnitsY(fY));
 }
 
-tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX, const ImplMapRes& rRes) const
+tools::Long CoordinateMapper::LogicUnitsToViewUnitsX(tools::Long nX,
+                                                     const vcl::detail::MapConversion& rConv) const
 {
-    double fLogicDist = ViewToLogicDistanceDoubleX(fX, rRes.mfMapScX);
-    return lcl_RoundToLong(fLogicDist - static_cast<double>(rRes.mnMapOfsX)
-                           - static_cast<double>(mnLogicToAbsoluteOffsetX));
+    return LogicToViewDistanceX(nX + rConv.mnOffsetX, rConv.mfScaleX);
 }
 
-tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY, const ImplMapRes& rRes) const
+tools::Long CoordinateMapper::LogicUnitsToViewUnitsY(tools::Long nY,
+                                                     const vcl::detail::MapConversion& rConv) const
 {
-    double fLogicDist = ViewToLogicDistanceDoubleY(fY, rRes.mfMapScY);
-    return lcl_RoundToLong(fLogicDist - static_cast<double>(rRes.mnMapOfsY)
-                           - static_cast<double>(mnLogicToAbsoluteOffsetY));
+    return LogicToViewDistanceY(nY + rConv.mnOffsetY, rConv.mfScaleY);
+}
+
+tools::Long CoordinateMapper::LogicToWindowUnitsX(tools::Long nX,
+                                                  const vcl::detail::MapConversion& rConv) const
+{
+    auto mat = GetViewTransformation(rConv);
+    return lcl_RoundToLong(static_cast<double>(nX) * mat.get(0, 0) + mat.get(0, 2));
+}
+
+tools::Long CoordinateMapper::LogicToWindowUnitsY(tools::Long nY,
+                                                  const vcl::detail::MapConversion& rConv) const
+{
+    auto mat = GetViewTransformation(rConv);
+    return lcl_RoundToLong(static_cast<double>(nY) * mat.get(1, 1) + mat.get(1, 2));
+}
+
+Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt, const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rLogicPt;
+    return LogicToWindowUnits(rLogicPt, ResolveMap(rMapMode));
+}
+
+Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rLogicSize;
+    return LogicToWindowUnits(rLogicSize, ResolveMap(rMapMode));
+}
+
+tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rLogicRect,
+                                                      const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rLogicRect;
+    return LogicToWindowUnits(rLogicRect, ResolveMap(rMapMode));
+}
+
+tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rLogicPoly,
+                                                    const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rLogicPoly;
+    return LogicToWindowUnits(rLogicPoly, ResolveMap(rMapMode));
+}
+
+Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt,
+                                           const vcl::detail::MapConversion& rConv) const
+{
+    basegfx::B2DPoint aPt(rLogicPt.X(), rLogicPt.Y());
+    aPt *= GetViewTransformation(rConv);
+    return Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
+}
+
+Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize,
+                                          const vcl::detail::MapConversion& rConv) const
+{
+    auto mat = GetViewTransformation(rConv);
+    return Size(lcl_RoundToLong(std::abs(rLogicSize.Width() * mat.get(0, 0))),
+                lcl_RoundToLong(std::abs(rLogicSize.Height() * mat.get(1, 1))));
+}
+
+static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
+{
+    if (rSrc.IsWidthEmpty())
+        rDest.SetWidthEmpty();
+
+    if (rSrc.IsHeightEmpty())
+        rDest.SetHeightEmpty();
+}
+
+tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect,
+                                                      const vcl::detail::MapConversion& rConv) const
+{
+    tools::Rectangle aRetval(
+        LogicToWindowUnitsX(rRect.Left(), rConv), LogicToWindowUnitsY(rRect.Top(), rConv),
+        rRect.IsWidthEmpty() ? 0 : LogicToWindowUnitsX(rRect.Right(), rConv),
+        rRect.IsHeightEmpty() ? 0 : LogicToWindowUnitsY(rRect.Bottom(), rConv));
+    lcl_ApplyEmptyState(aRetval, rRect);
+    return aRetval;
+}
+
+tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rLogicPoly,
+                                                    const vcl::detail::MapConversion& rConv) const
+{
+    tools::Polygon aPoly(rLogicPoly);
+    for (auto& rPoint : aPoly)
+    {
+        rPoint.setX(LogicToWindowUnitsX(rPoint.X(), rConv));
+        rPoint.setY(LogicToWindowUnitsY(rPoint.Y(), rConv));
+    }
+    return aPoly;
 }
 
 // ========================================================================
@@ -788,60 +868,12 @@ tools::Long CoordinateMapper::LogicToWindowUnitsY(tools::Long nY) const
     return lcl_RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY)));
 }
 
-tools::Long CoordinateMapper::LogicToWindowUnitsX(tools::Long nX, const ImplMapRes& rRes) const
-{
-    return ViewToWindowUnitsX(LogicUnitsToViewUnitsX(nX, rRes));
-}
-
-tools::Long CoordinateMapper::LogicToWindowUnitsY(tools::Long nY, const ImplMapRes& rRes) const
-{
-    return ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY, rRes));
-}
-
 Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt) const
 {
     if (!IsMappingActive())
         return rLogicPt;
 
     return Point(LogicToWindowUnitsX(rLogicPt.X()), LogicToWindowUnitsY(rLogicPt.Y()));
-}
-
-Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt, const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rLogicPt;
-
-    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
-    return LogicToWindowUnits(rLogicPt, aMapRes);
-}
-
-Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt, const ImplMapRes& rRes) const
-{
-    return Point(LogicToWindowUnitsX(rLogicPt.X(), rRes), LogicToWindowUnitsY(rLogicPt.Y(), rRes));
-}
-
-Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rLogicSize;
-
-    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
-    return LogicToWindowUnits(rLogicSize, aMapRes);
-}
-
-Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, const ImplMapRes& rRes) const
-{
-    return Size(LogicToViewDistanceX(rLogicSize.Width(), rRes.mfMapScX),
-                LogicToViewDistanceY(rLogicSize.Height(), rRes.mfMapScY));
-}
-
-static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
-{
-    if (rSrc.IsWidthEmpty())
-        rDest.SetWidthEmpty();
-
-    if (rSrc.IsHeightEmpty())
-        rDest.SetHeightEmpty();
 }
 
 tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect) const
@@ -856,53 +888,6 @@ tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rR
     lcl_ApplyEmptyState(aRetval, rRect);
 
     return aRetval;
-}
-
-tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rLogicRect,
-                                                      const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rLogicRect;
-
-    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
-    return LogicToWindowUnits(rLogicRect, aMapRes);
-}
-
-tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rLogicRect,
-                                                      const ImplMapRes& rRes) const
-{
-    tools::Rectangle aRetval(
-        LogicToWindowUnitsX(rLogicRect.Left(), rRes), LogicToWindowUnitsY(rLogicRect.Top(), rRes),
-        rLogicRect.IsWidthEmpty() ? 0 : LogicToWindowUnitsX(rLogicRect.Right(), rRes),
-        rLogicRect.IsHeightEmpty() ? 0 : LogicToWindowUnitsY(rLogicRect.Bottom(), rRes));
-
-    lcl_ApplyEmptyState(aRetval, rLogicRect);
-
-    return aRetval;
-}
-
-tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rLogicPoly,
-                                                    const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rLogicPoly;
-
-    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
-    return LogicToWindowUnits(rLogicPoly, aMapRes);
-}
-
-tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rLogicPoly,
-                                                    const ImplMapRes& rRes) const
-{
-    tools::Polygon aPoly(rLogicPoly);
-
-    for (auto& rPoint : aPoly)
-    {
-        rPoint.setX(LogicToWindowUnitsX(rPoint.X(), rRes));
-        rPoint.setY(LogicToWindowUnitsY(rPoint.Y(), rRes));
-    }
-
-    return aPoly;
 }
 
 template <typename TransformFunc>
@@ -1026,16 +1011,6 @@ tools::Long CoordinateMapper::WindowSubPixelToLogicIntY(double fY) const
     return lcl_RoundToLong(WindowToLogicSubPixelY(fY));
 }
 
-tools::Long CoordinateMapper::WindowSubPixelToLogicIntX(double fX, const ImplMapRes& rMapRes) const
-{
-    return ViewSubPixelToLogicIntX(WindowToViewSubPixelX(fX), rMapRes);
-}
-
-tools::Long CoordinateMapper::WindowSubPixelToLogicIntY(double fY, const ImplMapRes& rMapRes) const
-{
-    return ViewSubPixelToLogicIntY(WindowToViewSubPixelY(fY), rMapRes);
-}
-
 Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const
 {
     if (!IsMappingActive())
@@ -1078,30 +1053,6 @@ tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindo
     }
 
     return aPoly;
-}
-
-tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
-                                                    const ImplMapRes& rMapRes) const
-{
-    tools::Polygon aPoly(rWindowPoly);
-
-    for (auto& rPoint : aPoly)
-    {
-        rPoint = WindowToLogicUnits(rPoint, rMapRes);
-    }
-
-    return aPoly;
-}
-
-tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
-                                                    const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rWindowPoly;
-
-    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
-
-    return WindowToLogicUnits(rWindowPoly, aMapRes);
 }
 
 tools::PolyPolygon
@@ -1165,47 +1116,77 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize) const
                 ViewToLogicDistanceY(rWindowSize.Height()));
 }
 
-Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, const ImplMapRes& rMapRes) const
+tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX,
+                                                      const vcl::detail::MapConversion& rConv) const
 {
-    return Point(WindowSubPixelToLogicIntX(rWindowPt.X(), rMapRes),
-                 WindowSubPixelToLogicIntY(rWindowPt.Y(), rMapRes));
+    double fLogicDist = ViewToLogicDistanceDoubleX(fX, rConv.mfScaleX);
+    return lcl_RoundToLong(fLogicDist - static_cast<double>(rConv.mnOffsetX)
+                           - static_cast<double>(mnLogicToAbsoluteOffsetX));
+}
+
+tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY,
+                                                      const vcl::detail::MapConversion& rConv) const
+{
+    double fLogicDist = ViewToLogicDistanceDoubleY(fY, rConv.mfScaleY);
+    return lcl_RoundToLong(fLogicDist - static_cast<double>(rConv.mnOffsetY)
+                           - static_cast<double>(mnLogicToAbsoluteOffsetY));
+}
+
+tools::Long
+CoordinateMapper::WindowSubPixelToLogicIntX(double fX,
+                                            const vcl::detail::MapConversion& rConv) const
+{
+    auto mat = GetInverseViewTransformation(rConv);
+    return lcl_RoundToLong(fX * mat.get(0, 0) + mat.get(0, 2));
+}
+
+tools::Long
+CoordinateMapper::WindowSubPixelToLogicIntY(double fY,
+                                            const vcl::detail::MapConversion& rConv) const
+{
+    auto mat = GetInverseViewTransformation(rConv);
+    return lcl_RoundToLong(fY * mat.get(1, 1) + mat.get(1, 2));
+}
+
+Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt,
+                                           const vcl::detail::MapConversion& rConv) const
+{
+    basegfx::B2DPoint aPt(rWindowPt.X(), rWindowPt.Y());
+    aPt *= GetInverseViewTransformation(rConv);
+    return Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
 }
 
 Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, const MapMode& rMapMode) const
 {
     if (rMapMode.IsDefault())
         return rWindowPt;
+    return WindowToLogicUnits(rWindowPt, ResolveMap(rMapMode));
+}
 
-    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
-    return WindowToLogicUnits(rWindowPt, aMapRes);
+Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize,
+                                          const vcl::detail::MapConversion& rConv) const
+{
+    auto mat = GetInverseViewTransformation(rConv);
+    return Size(lcl_RoundToLong(std::abs(rWindowSize.Width() * mat.get(0, 0))),
+                lcl_RoundToLong(std::abs(rWindowSize.Height() * mat.get(1, 1))));
 }
 
 Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, const MapMode& rMapMode) const
 {
     if (rMapMode.IsDefault())
         return rWindowSize;
-
-    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
-    return WindowToLogicUnits(rWindowSize, aMapRes);
-}
-
-Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, const ImplMapRes& rMapRes) const
-{
-    return Size(ViewToLogicDistanceX(rWindowSize.Width(), rMapRes.mfMapScX),
-                ViewToLogicDistanceY(rWindowSize.Height(), rMapRes.mfMapScY));
+    return WindowToLogicUnits(rWindowSize, ResolveMap(rMapMode));
 }
 
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
-                                                      const ImplMapRes& rMapRes) const
+                                                      const vcl::detail::MapConversion& rConv) const
 {
     tools::Rectangle aRetval(
-        WindowSubPixelToLogicIntX(rWindowRect.Left(), rMapRes),
-        WindowSubPixelToLogicIntY(rWindowRect.Top(), rMapRes),
-        rWindowRect.IsWidthEmpty() ? 0 : WindowSubPixelToLogicIntX(rWindowRect.Right(), rMapRes),
-        rWindowRect.IsHeightEmpty() ? 0 : WindowSubPixelToLogicIntY(rWindowRect.Bottom(), rMapRes));
-
+        WindowSubPixelToLogicIntX(rWindowRect.Left(), rConv),
+        WindowSubPixelToLogicIntY(rWindowRect.Top(), rConv),
+        rWindowRect.IsWidthEmpty() ? 0 : WindowSubPixelToLogicIntX(rWindowRect.Right(), rConv),
+        rWindowRect.IsHeightEmpty() ? 0 : WindowSubPixelToLogicIntY(rWindowRect.Bottom(), rConv));
     lcl_ApplyEmptyState(aRetval, rWindowRect);
-
     return aRetval;
 }
 
@@ -1214,9 +1195,26 @@ tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rW
 {
     if (rMapMode.IsDefault())
         return rWindowRect;
+    return WindowToLogicUnits(rWindowRect, ResolveMap(rMapMode));
+}
 
-    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
-    return WindowToLogicUnits(rWindowRect, aMapRes);
+tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
+                                                    const vcl::detail::MapConversion& rConv) const
+{
+    tools::Polygon aPoly(rWindowPoly);
+    for (auto& rPoint : aPoly)
+    {
+        rPoint = WindowToLogicUnits(rPoint, rConv);
+    }
+    return aPoly;
+}
+
+tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
+                                                    const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return rWindowPoly;
+    return WindowToLogicUnits(rWindowPoly, ResolveMap(rMapMode));
 }
 
 // ========================================================================
