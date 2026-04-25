@@ -461,36 +461,6 @@ tools::Long CoordinateMapper::LogicToWindowUnitsY(tools::Long nY,
     return lcl_RoundToLong(static_cast<double>(nY) * mat.get(1, 1) + mat.get(1, 2));
 }
 
-Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt, const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rLogicPt;
-    return LogicToWindowUnits(rLogicPt, ResolveMap(rMapMode));
-}
-
-Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rLogicSize;
-    return LogicToWindowUnits(rLogicSize, ResolveMap(rMapMode));
-}
-
-tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rLogicRect,
-                                                      const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rLogicRect;
-    return LogicToWindowUnits(rLogicRect, ResolveMap(rMapMode));
-}
-
-tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rLogicPoly,
-                                                    const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rLogicPoly;
-    return LogicToWindowUnits(rLogicPoly, ResolveMap(rMapMode));
-}
-
 Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt,
                                            const vcl::detail::MapConversion& rConv) const
 {
@@ -523,7 +493,9 @@ tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rR
         LogicToWindowUnitsX(rRect.Left(), rConv), LogicToWindowUnitsY(rRect.Top(), rConv),
         rRect.IsWidthEmpty() ? 0 : LogicToWindowUnitsX(rRect.Right(), rConv),
         rRect.IsHeightEmpty() ? 0 : LogicToWindowUnitsY(rRect.Bottom(), rConv));
+
     lcl_ApplyEmptyState(aRetval, rRect);
+
     return aRetval;
 }
 
@@ -531,13 +503,32 @@ tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rLogic
                                                     const vcl::detail::MapConversion& rConv) const
 {
     tools::Polygon aPoly(rLogicPoly);
+
     for (auto& rPoint : aPoly)
     {
         rPoint.setX(LogicToWindowUnitsX(rPoint.X(), rConv));
         rPoint.setY(LogicToWindowUnitsY(rPoint.Y(), rConv));
     }
+
     return aPoly;
 }
+
+template <TransformableB2DGeometry T>
+T CoordinateMapper::LogicToWindowUnits(const T& rLogicGeometry,
+                                       const vcl::detail::MapConversion& rConv) const
+{
+    T aTransformedGeometry = rLogicGeometry;
+    aTransformedGeometry.transform(GetViewTransformation(rConv));
+    return aTransformedGeometry;
+}
+
+template SAL_DLLPRIVATE basegfx::B2DPolygon
+CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&,
+                                                          const vcl::detail::MapConversion&) const;
+
+template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolyPolygon>(
+    const basegfx::B2DPolyPolygon&, const vcl::detail::MapConversion&) const;
 
 // ========================================================================
 // MASTER WRAPPERS (Multi-space Positional Transformations)
@@ -834,14 +825,6 @@ tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY) const
     return lcl_RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY)));
 }
 
-basegfx::B2DPolyPolygon
-CoordinateMapper::LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const
-{
-    basegfx::B2DPolyPolygon aTransformedPoly = rLogicPolyPoly;
-    aTransformedPoly.transform(GetViewTransformation());
-    return aTransformedPoly;
-}
-
 tools::Long CoordinateMapper::ViewToLogicX(tools::Long nX) const
 {
     return ViewToLogicUnitsX(nX) - mnLogicToAbsoluteOffsetX;
@@ -958,6 +941,23 @@ tools::PolyPolygon CoordinateMapper::LogicToWindowUnits(const tools::PolyPolygon
     return aPolyPoly;
 }
 
+template <TransformableB2DGeometry T>
+T CoordinateMapper::LogicToWindowUnits(const T& rLogicGeometry) const
+{
+    T aTransformedGeometry = rLogicGeometry;
+    aTransformedGeometry.transform(GetViewTransformation());
+    return aTransformedGeometry;
+}
+
+template SAL_DLLPRIVATE basegfx::B2DRectangle
+CoordinateMapper::LogicToWindowUnits<basegfx::B2DRectangle>(const basegfx::B2DRectangle&) const;
+
+template SAL_DLLPRIVATE basegfx::B2DPolygon
+CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&) const;
+
+template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&) const;
+
 double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth) const
 {
     if (!IsMappingActive())
@@ -972,16 +972,6 @@ double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight) const
         return nHeight;
 
     return LogicToViewDistanceSubPixelY(nHeight);
-}
-
-basegfx::B2DPolyPolygon
-CoordinateMapper::LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
-                                     const MapMode& rMapMode) const
-{
-    basegfx::B2DPolyPolygon aTransformedPoly = rLogicPolyPoly;
-    const basegfx::B2DHomMatrix aTransformationMatrix = GetViewTransformation(rMapMode);
-    aTransformedPoly.transform(aTransformationMatrix);
-    return aTransformedPoly;
 }
 
 vcl::Region CoordinateMapper::WindowToLogicUnits(const vcl::Region& rWindowRegion) const
@@ -1022,6 +1012,15 @@ Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWin
 
     return Point(WindowSubPixelToLogicIntX(rWindowPt.getX()),
                  WindowSubPixelToLogicIntY(rWindowPt.getY()));
+}
+
+Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize) const
+{
+    if (!IsMappingActive())
+        return rWindowSize;
+
+    return Size(ViewToLogicDistanceX(rWindowSize.Width()),
+                ViewToLogicDistanceY(rWindowSize.Height()));
 }
 
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect) const
@@ -1089,32 +1088,21 @@ template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
 CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&) const;
 
 template <TransformableB2DGeometry T>
-T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry, const MapMode& rMapMode) const
+T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry,
+                                       const vcl::detail::MapConversion& rConv) const
 {
-    if (rMapMode.IsDefault())
-        return WindowToLogicUnits(rWindowGeometry);
-
     T aTransformedGeometry = rWindowGeometry;
-    aTransformedGeometry.transform(GetInverseViewTransformation(rMapMode));
+    aTransformedGeometry.transform(GetInverseViewTransformation(rConv));
     return aTransformedGeometry;
 }
 
 template SAL_DLLPRIVATE basegfx::B2DPolygon
 CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&,
-                                                          const MapMode&) const;
+                                                          const vcl::detail::MapConversion&) const;
 
 template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
-CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&,
-                                                              const MapMode&) const;
-
-Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize) const
-{
-    if (!IsMappingActive())
-        return rWindowSize;
-
-    return Size(ViewToLogicDistanceX(rWindowSize.Width()),
-                ViewToLogicDistanceY(rWindowSize.Height()));
-}
+CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(
+    const basegfx::B2DPolyPolygon&, const vcl::detail::MapConversion&) const;
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX,
                                                       const vcl::detail::MapConversion& rConv) const
@@ -1156,26 +1144,12 @@ Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt,
     return Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
 }
 
-Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rWindowPt;
-    return WindowToLogicUnits(rWindowPt, ResolveMap(rMapMode));
-}
-
 Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize,
                                           const vcl::detail::MapConversion& rConv) const
 {
     auto mat = GetInverseViewTransformation(rConv);
     return Size(lcl_RoundToLong(std::abs(rWindowSize.Width() * mat.get(0, 0))),
                 lcl_RoundToLong(std::abs(rWindowSize.Height() * mat.get(1, 1))));
-}
-
-Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rWindowSize;
-    return WindowToLogicUnits(rWindowSize, ResolveMap(rMapMode));
 }
 
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
@@ -1190,14 +1164,6 @@ tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rW
     return aRetval;
 }
 
-tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
-                                                      const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rWindowRect;
-    return WindowToLogicUnits(rWindowRect, ResolveMap(rMapMode));
-}
-
 tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
                                                     const vcl::detail::MapConversion& rConv) const
 {
@@ -1207,14 +1173,6 @@ tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindo
         rPoint = WindowToLogicUnits(rPoint, rConv);
     }
     return aPoly;
-}
-
-tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
-                                                    const MapMode& rMapMode) const
-{
-    if (rMapMode.IsDefault())
-        return rWindowPoly;
-    return WindowToLogicUnits(rWindowPoly, ResolveMap(rMapMode));
 }
 
 // ========================================================================
