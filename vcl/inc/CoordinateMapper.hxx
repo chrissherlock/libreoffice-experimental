@@ -320,9 +320,14 @@ public:
      */
     void InvalidateViewTransform();
     basegfx::B2DHomMatrix GetViewTransformation() const;
+    basegfx::B2DHomMatrix GetViewTransformation(const vcl::detail::MapConversion& rConv) const;
     basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rMapMode) const;
+
     basegfx::B2DHomMatrix GetInverseViewTransformation() const;
+    basegfx::B2DHomMatrix
+    GetInverseViewTransformation(const vcl::detail::MapConversion& rConv) const;
     basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rMapMode) const;
+
     basegfx::B2DHomMatrix GetDeviceTransformation() const;
 
     // ========================================================================

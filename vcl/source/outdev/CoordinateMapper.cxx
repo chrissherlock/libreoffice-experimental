@@ -302,20 +302,21 @@ basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation() const
     return AcquireSnapshot()->maInvView;
 }
 
-basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rMapMode) const
+basegfx::B2DHomMatrix
+CoordinateMapper::GetViewTransformation(const vcl::detail::MapConversion& rConv) const
 {
-    ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
     basegfx::B2DHomMatrix aTransform;
 
-    const double fScaleFactorX = static_cast<double>(GetDPIX()) * aMapRes.mfMapScX;
-    const double fScaleFactorY = static_cast<double>(GetDPIY()) * aMapRes.mfMapScY;
+    // STRANGLER STEP 2: The math now operates entirely on the firewall struct
+    const double fScaleFactorX = static_cast<double>(GetDPIX()) * rConv.mfScaleX;
+    const double fScaleFactorY = static_cast<double>(GetDPIY()) * rConv.mfScaleY;
 
     const double fZeroPointX
-        = (static_cast<double>(aMapRes.mnMapOfsX) + static_cast<double>(mnLogicToAbsoluteOffsetX))
+        = (static_cast<double>(rConv.mnOffsetX) + static_cast<double>(mnLogicToAbsoluteOffsetX))
               * fScaleFactorX
           + static_cast<double>(GetWindowToViewOffsetX());
     const double fZeroPointY
-        = (static_cast<double>(aMapRes.mnMapOfsY) + static_cast<double>(mnLogicToAbsoluteOffsetY))
+        = (static_cast<double>(rConv.mnOffsetY) + static_cast<double>(mnLogicToAbsoluteOffsetY))
               * fScaleFactorY
           + static_cast<double>(GetWindowToViewOffsetY());
 
@@ -327,11 +328,27 @@ basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rMa
     return aTransform;
 }
 
-basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMode& rMapMode) const
+basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rMapMode) const
 {
-    basegfx::B2DHomMatrix aMatrix(GetViewTransformation(rMapMode));
+    // STRANGLER STEP 2: The legacy API is now just a routing shim
+    if (rMapMode.IsDefault())
+        return GetViewTransformation();
+    return GetViewTransformation(ResolveMap(rMapMode));
+}
+
+basegfx::B2DHomMatrix
+CoordinateMapper::GetInverseViewTransformation(const vcl::detail::MapConversion& rConv) const
+{
+    basegfx::B2DHomMatrix aMatrix(GetViewTransformation(rConv));
     aMatrix.invert();
     return aMatrix;
+}
+
+basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMode& rMapMode) const
+{
+    if (rMapMode.IsDefault())
+        return GetInverseViewTransformation();
+    return GetInverseViewTransformation(ResolveMap(rMapMode));
 }
 
 // ========================================================================
