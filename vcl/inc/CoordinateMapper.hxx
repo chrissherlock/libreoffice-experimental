@@ -148,6 +148,21 @@ concept TransformableB2DGeometry = requires(T a, const basegfx::B2DHomMatrix& rM
  * ========================================================================
  */
 
+namespace vcl::detail
+{
+template <typename T> concept B2DTransformable = requires(T a, const basegfx::B2DHomMatrix& m)
+{
+    { a.transform(m) };
+};
+
+template <typename T> concept B2DMultipliable = requires(T a, const basegfx::B2DHomMatrix& m)
+{
+    { a *= m };
+};
+
+template <typename T> concept B2DGeometry = B2DTransformable<T> || B2DMultipliable<T>;
+}
+
 class VCL_DLLPUBLIC CoordinateMapper
 {
 private:
@@ -538,6 +553,28 @@ public:
     tools::Long ViewSubPixelToLogicDistanceY(double n) const;
     tools::Long ViewSubPixelToLogicDistanceX(double n, double fScale) const;
     tools::Long ViewSubPixelToLogicDistanceY(double n, double fScale) const;
+
+    // Universal basegfx pipeline
+    template <vcl::detail::B2DGeometry T> T LogicToDeviceSubPixel(T aObj) const
+    {
+        UpdateTransforms();
+        if constexpr (vcl::detail::B2DTransformable<T>)
+            aObj.transform(*maLogicToDevice);
+        else
+            aObj *= *maLogicToDevice;
+        return aObj;
+    }
+
+    // Universal inverse basegfx pipeline
+    template <vcl::detail::B2DGeometry T> T DevicePixelToLogicSubPixel(T aObj) const
+    {
+        UpdateTransforms();
+        if constexpr (vcl::detail::B2DTransformable<T>)
+            aObj.transform(*maDeviceToLogic);
+        else
+            aObj *= *maDeviceToLogic;
+        return aObj;
+    }
 
 private:
     void UpdateTransforms() const;
