@@ -543,6 +543,13 @@ Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt) const
 }
 
 // Note: Width/Height use Distances, not Positions!
+double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
+{
+    if (!IsMappingActive())
+        return static_cast<double>(nWidth);
+    return LogicToViewDistanceSubPixelX(nWidth);
+}
+
 tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth) const
 {
     if (!IsMappingActive())
