@@ -557,6 +557,7 @@ private:
     void UpdateTransforms() const;
     void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
                                double& rTransY) const;
+    vcl::detail::TransformSnapshotScalar FillSnapshot() const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
