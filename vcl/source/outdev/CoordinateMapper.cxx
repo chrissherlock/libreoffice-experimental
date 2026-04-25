@@ -157,13 +157,28 @@ void CoordinateMapper::SetLogicToAbsoluteOffset(Size const& rOffset)
 void CoordinateMapper::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX,
                                          tools::Long nDPIY)
 {
+    // 1. Let the legacy accumulator do its complex state math
     maMapRes.CalcMapResolution(rMapMode, nDPIX, nDPIY);
+
+    // 2. Copy the pure math into our firewall struct
+    maMapConversion.mfScaleX = maMapRes.mfMapScX;
+    maMapConversion.mfScaleY = maMapRes.mfMapScY;
+    maMapConversion.mnOffsetX = maMapRes.mnMapOfsX;
+    maMapConversion.mnOffsetY = maMapRes.mnMapOfsY;
+
     InvalidateViewTransform();
 }
 
 ImplMapRes CoordinateMapper::ResolveMapRes(const MapMode* pMode) const
 {
     return maMapRes.ResolveMapRes(pMode, maMapMode, mbMap, mnDPIX, mnDPIY);
+}
+
+vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rMapMode) const
+{
+    // Evaluates a temporary MapMode against the current accumulated state
+    ImplMapRes aRes = maMapRes.ResolveMapRes(&rMapMode, maMapMode, mbMap, mnDPIX, mnDPIY);
+    return { aRes.mfMapScX, aRes.mfMapScY, aRes.mnMapOfsX, aRes.mnMapOfsY };
 }
 
 void CoordinateMapper::InvalidateViewTransform()
@@ -196,13 +211,15 @@ std::shared_ptr<CoordinateMapper::TransformSnapshot> CoordinateMapper::BuildSnap
     else
     {
         // Canonical scale (Logic -> Device space)
-        const double scaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
-        const double scaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
+        // STRANGLER STEP 1: Read scale from the pure math firewall, not the state accumulator
+        const double scaleX = static_cast<double>(mnDPIX) * maMapConversion.mfScaleX;
+        const double scaleY = static_cast<double>(mnDPIY) * maMapConversion.mfScaleY;
 
         // Logic-space translation only
-        const double logicOffsetX = static_cast<double>(maMapRes.mnMapOfsX)
+        // STRANGLER STEP 1: Read offsets from the pure math firewall, not the state accumulator
+        const double logicOffsetX = static_cast<double>(maMapConversion.mnOffsetX)
                                     + static_cast<double>(mnLogicToAbsoluteOffsetX);
-        const double logicOffsetY = static_cast<double>(maMapRes.mnMapOfsY)
+        const double logicOffsetY = static_cast<double>(maMapConversion.mnOffsetY)
                                     + static_cast<double>(mnLogicToAbsoluteOffsetY);
 
         // View Space (Logic -> Window)
