@@ -302,12 +302,6 @@ static inline tools::Long lcl_RoundToLong(double fVal)
     return static_cast<tools::Long>(std::llround(fVal));
 }
 
-// Centralized rounding policy for final device pixel boundaries
-static inline tools::Long lcl_ToDevicePixel(double fVal)
-{
-    return static_cast<tools::Long>(std::llround(fVal));
-}
-
 // Device <-> Window (Screen Origin)
 double CoordinateMapper::DeviceToWindowSubPixelX(double fX) const
 {
@@ -542,15 +536,14 @@ tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX) const
         return nX + GetDeviceToWindowOffsetX();
 
     UpdateTransforms();
-    double fX = (static_cast<double>(nX) * maLogicToDevice->get(0, 0)) + maLogicToDevice->get(0, 2);
-
-    tools::Long nRes = lcl_ToDevicePixel(fX);
-
-    return nRes;
+    // Discretise ONLY at the final rasterisation boundary to prevent rounding drift
+    return lcl_RoundToLong((static_cast<double>(nX) * maLogicToDevice->get(0, 0))
+                           + maLogicToDevice->get(0, 2));
 }
 
 tools::Long CoordinateMapper::LogicToDevicePixelY(tools::Long nY) const
 {
+    // Discretise ONLY at the final rasterisation boundary to prevent rounding drift
     return lcl_RoundToLong(LogicToDeviceSubPixelY(static_cast<double>(nY)));
 }
 
@@ -562,7 +555,7 @@ Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt) const
     UpdateTransforms();
     basegfx::B2DPoint aPt(rLogicPt.X(), rLogicPt.Y());
     aPt *= *maLogicToDevice;
-    return Point(lcl_ToDevicePixel(aPt.getX()), lcl_ToDevicePixel(aPt.getY()));
+    return Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
 }
 
 // Note: Width/Height use Distances, not Positions!
@@ -579,9 +572,7 @@ tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth) const
         return nWidth;
 
     UpdateTransforms();
-    double fW = static_cast<double>(nWidth) * maLogicToDevice->get(0, 0);
-    tools::Long nRes = lcl_ToDevicePixel(std::abs(fW));
-    return nRes;
+    return lcl_RoundToLong(std::abs(static_cast<double>(nWidth) * maLogicToDevice->get(0, 0)));
 }
 
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight) const
@@ -599,7 +590,7 @@ Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize) const
     UpdateTransforms();
     basegfx::B2DVector aVec(rLogicSize.Width(), rLogicSize.Height());
     aVec *= *maLogicToDevice;
-    return Size(lcl_ToDevicePixel(aVec.getX()), lcl_ToDevicePixel(aVec.getY()));
+    return Size(lcl_RoundToLong(aVec.getX()), lcl_RoundToLong(aVec.getY()));
 }
 
 tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect) const
@@ -647,16 +638,22 @@ tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogic
         return rLogicPoly;
 
     UpdateTransforms();
-    const basegfx::B2DHomMatrix& rMat = *maLogicToDevice;
 
-    tools::Polygon aPoly(rLogicPoly);
+    // Convert to B2DPolygon for mathematically pure transformation
+    basegfx::B2DPolygon aB2DPoly(rLogicPoly.getB2DPolygon());
+    aB2DPoly.transform(*maLogicToDevice);
 
-    // Transform points directly to avoid hidden recursive coupling with the Point overload
-    for (auto& rPoint : aPoly)
+    // Explicitly control the rounding boundary back to integer space
+    // All geometric transformations are performed in floating-point
+    // space and discretised ONLY at final rasterisation boundary.
+    tools::Polygon aPoly;
+
+    // Some versions of tools::Polygon might require SetSize or a position parameter for Insert.
+    // If aPoly.Insert(Point) throws a compile error, adapt to: aPoly.Insert(POLY_APPEND, Point(...))
+    for (sal_uInt32 i = 0; i < aB2DPoly.count(); ++i)
     {
-        basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
-        aPt *= rMat;
-        rPoint = Point(lcl_ToDevicePixel(aPt.getX()), lcl_ToDevicePixel(aPt.getY()));
+        const auto& p = aB2DPoly.getB2DPoint(i);
+        aPoly.Insert(POLY_APPEND, Point(lcl_RoundToLong(p.getX()), lcl_RoundToLong(p.getY())));
     }
 
     return aPoly;
