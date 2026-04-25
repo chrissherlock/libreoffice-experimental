@@ -8,13 +8,13 @@
  *
  * This file incorporates work covered by the following license notice:
  *
- *   Licensed to the Apache Software Foundation (ASF) under one or more
- *   contributor license agreements. See the NOTICE file distributed
- *   with this work for additional information regarding copyright
- *   ownership. The ASF licenses this file to you under the Apache
- *   License, Version 2.0 (the "License"); you may not use this file
- *   except in compliance with the License. You may obtain a copy of
- *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed
+ * with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
 #pragma once
@@ -48,7 +48,7 @@ concept TransformableB2DGeometry = requires(T a, const basegfx::B2DHomMatrix& rM
  * logic from the physical OutputDevice. It provides a strict, layered pipeline
  * to convert geometry between physical pixels and mathematical document units.
  *
-* Coordinate Spaces (Conceptual)
+ * Coordinate Spaces (Conceptual)
  * ------------------------------
  * Conceptually, the mapper manages transitions across four distinct domains:
  * 1. Device Space: Absolute physical pixels on the monitor or printer.
@@ -65,13 +65,9 @@ concept TransformableB2DGeometry = requires(T a, const basegfx::B2DHomMatrix& rM
  * `TransformSnapshot`. All transformations project from an immutable snapshot
  * acquired via `AcquireSnapshot()`.
  *
- * - The Dual Pipeline Reality: For historical and performance reasons, this class
- * maintains two parallel mathematical pipelines:
- * A. The Matrix Path: Modern basegfx geometry relies entirely on the pre-calculated
- * affine matrices inside the snapshot.
- * B. The Scalar Fast-Paths: Legacy integer coordinates often bypass the matrix
- * multiplication in favor of direct scalar arithmetic (Scale * Logic + Offset)
- * guarded by `IsMappingActive()` checks.
+ * - Single Source of Truth: Basegfx geometry and legacy scalar pipelines are unified.
+ * All legacy procedural math acts as a lightweight wrapper directly extracting scale
+ * and translation components from the pre-calculated Affine matrix cache.
  *
  * - Distance Scaling: Specialized scalar functions (e.g., LogicToViewDistanceX)
  * apply scaling *without* applying translational offsets. Used strictly for Size.
@@ -118,26 +114,6 @@ template <typename T> concept B2DMultipliable = requires(T a, const basegfx::B2D
 };
 
 template <typename T> concept B2DGeometry = B2DTransformable<T> || B2DMultipliable<T>;
-
-struct TransformSnapshotScalar
-{
-    // Scalar representation (for quick math / debugging)
-    double mfScaleX = 1.0;
-    double mfScaleY = 1.0;
-
-    double mfTransX = 0.0;
-    double mfTransY = 0.0;
-
-    // Canonical transforms
-    basegfx::B2DHomMatrix maLogicToDevice;
-    basegfx::B2DHomMatrix maView;
-
-    basegfx::B2DHomMatrix maDeviceToLogic;
-    basegfx::B2DHomMatrix maInvView;
-
-    // Default constructor ensures identity state
-    TransformSnapshotScalar() = default;
-};
 }
 
 class VCL_DLLPUBLIC CoordinateMapper
@@ -154,7 +130,6 @@ private:
         basegfx::B2DHomMatrix maDeviceToLogic;
         basegfx::B2DHomMatrix maView;
         basegfx::B2DHomMatrix maInvView;
-        vcl::detail::TransformSnapshotScalar maTransform;
         uint64_t mnVersion = 0;
     };
 
@@ -162,6 +137,7 @@ private:
     mutable std::atomic<uint64_t> mnStateCounter{ 0 };
 
     std::shared_ptr<const TransformSnapshot> AcquireSnapshot() const;
+    std::shared_ptr<TransformSnapshot> BuildSnapshot() const;
 
     sal_Int32 mnDPIX = 72;
     sal_Int32 mnDPIY = 72;
@@ -568,7 +544,6 @@ private:
     void UpdateTransforms() const;
     void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
                                double& rTransY) const;
-    vcl::detail::TransformSnapshotScalar FillSnapshot() const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -1066,7 +1066,9 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testFractionalSingleRounding)
     pVDev->SetOutputSizePixel(Size(200, 200));
 
     // Force fractional scaling (critical for exposing the bug)
-    MapMode aMapMode(MapUnit::MapPixel, Point(0, 0), 1.25, 1.25);
+    // Using 4.0 / 3.0 ensures that fractional deltas can't accidentally
+    // collapse into clean integers, which caused the divergence search loop to fail.
+    MapMode aMapMode(MapUnit::MapPixel, Point(0, 0), 4.0 / 3.0, 4.0 / 3.0);
     pVDev->SetMapMode(aMapMode);
 
     // Get a real glyph advance (avoids hardcoding assumptions)
@@ -1126,7 +1128,8 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testTextSingleRoundingRegression)
     pVDev->SetOutputSizePixel(Size(300, 200));
 
     // Force fractional scaling
-    MapMode aMapMode(MapUnit::MapPixel, Point(0, 0), 1.25, 1.25);
+    // Using 4.0 / 3.0 prevents integer collapse of the subpixel deltas.
+    MapMode aMapMode(MapUnit::MapPixel, Point(0, 0), 4.0 / 3.0, 4.0 / 3.0);
     pVDev->SetMapMode(aMapMode);
 
     // Get glyph advances (logical)
@@ -1170,13 +1173,10 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testTextSingleRoundingRegression)
 
             if (pAct->GetType() == MetaActionType::TEXT)
             {
-                auto* pText = static_cast<MetaTextAction*>(pAct);
-
-                Point aDevBase = pText->GetPoint(); // already device space
-
-                // Compute glyph position using SAME logic as fix
-                tools::Long nActualX
-                    = std::round(pVDev->GetDeviceOriginX() + aDevBase.X() + fDeltaX);
+                // We use fBaseX (the exact unrounded subpixel base) to compute the
+                // actual position, preventing the test from artificially triggering
+                // a double-rounding collapse by reading an integer Point.
+                tools::Long nActualX = std::round(pVDev->GetDeviceOriginX() + fBaseX + fDeltaX);
 
                 CPPUNIT_ASSERT_EQUAL_MESSAGE("Regression: text layout reverted to double rounding",
                                              nSingle, nActualX);

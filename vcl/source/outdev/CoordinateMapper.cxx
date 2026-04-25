@@ -8,13 +8,13 @@
  *
  * This file incorporates work covered by the following license notice:
  *
- *   Licensed to the Apache Software Foundation (ASF) under one or more
- *   contributor license agreements. See the NOTICE file distributed
- *   with this work for additional information regarding copyright
- *   ownership. The ASF licenses this file to you under the Apache
- *   License, Version 2.0 (the "License"); you may not use this file
- *   except in compliance with the License. You may obtain a copy of
- *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed
+ * with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
 #include <sal/log.hxx>
@@ -36,31 +36,23 @@
 #include <cmath>
 #include <cassert>
 
+static inline tools::Long lcl_RoundToLong(double fVal)
+{
+    return static_cast<tools::Long>(std::llround(fVal));
+}
+
 // Conceptual Pipeline Separation (Mathematical Invariant):
 // Logic -> View: Scaled transformations (Scale * Logic) + Scaled Offsets ((MapOfs + LogicOfs) * Scale)
 // View -> Window: Pure translation (WindowOfs)
 // Window -> Device: Pure translation (DeviceOfs)
-// We explicitly isolate the scaled offsets (fTrans) from unscaled offsets here.
 void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
                                              double& rTransY) const
 {
-    rScaleX = 1.0;
-    rScaleY = 1.0;
-    rTransX = 0.0;
-    rTransY = 0.0;
-
-    if (IsMappingActive())
-    {
-        rScaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
-        rScaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
-
-        rTransX = (static_cast<double>(maMapRes.mnMapOfsX)
-                   + static_cast<double>(mnLogicToAbsoluteOffsetX))
-                  * rScaleX;
-        rTransY = (static_cast<double>(maMapRes.mnMapOfsY)
-                   + static_cast<double>(mnLogicToAbsoluteOffsetY))
-                  * rScaleY;
-    }
+    auto snap = AcquireSnapshot();
+    rScaleX = snap->maView.get(0, 0);
+    rScaleY = snap->maView.get(1, 1);
+    rTransX = snap->maView.get(0, 2);
+    rTransY = snap->maView.get(1, 2);
 }
 
 sal_Int32 CoordinateMapper::GetDPIX() const { return mnDPIX; }
@@ -178,76 +170,70 @@ void CoordinateMapper::InvalidateViewTransform()
     mnStateCounter.fetch_add(1, std::memory_order_release);
 }
 
-vcl::detail::TransformSnapshotScalar CoordinateMapper::FillSnapshot() const
+std::shared_ptr<CoordinateMapper::TransformSnapshot> CoordinateMapper::BuildSnapshot() const
 {
-    vcl::detail::TransformSnapshotScalar aScalar;
+    auto pSnap = std::make_shared<TransformSnapshot>();
 
-    // Identity fallback
     if (!IsMappingActive())
     {
-        aScalar.mfScaleX = 1.0;
-        aScalar.mfScaleY = 1.0;
+        // Identity fallback: Only screen-space offsets remain
+        const double dxView = static_cast<double>(mnWindowToViewOffsetX);
+        const double dyView = static_cast<double>(mnWindowToViewOffsetY);
 
-        // Only screen-space offsets remain
-        const double dx = static_cast<double>(mnWindowToViewOffsetX)
-                          + static_cast<double>(mnDeviceToWindowOffsetX);
+        pSnap->maView.identity();
+        pSnap->maView.set(0, 2, dxView);
+        pSnap->maView.set(1, 2, dyView);
 
-        const double dy = static_cast<double>(mnWindowToViewOffsetY)
-                          + static_cast<double>(mnDeviceToWindowOffsetY);
+        const double dxDev = dxView + static_cast<double>(mnDeviceToWindowOffsetX);
+        const double dyDev = dyView + static_cast<double>(mnDeviceToWindowOffsetY);
 
-        aScalar.mfTransX = dx;
-        aScalar.mfTransY = dy;
+        pSnap->maLogicToDevice.identity();
+        pSnap->maLogicToDevice.set(0, 2, dxDev);
+        pSnap->maLogicToDevice.set(1, 2, dyDev);
+    }
+    else
+    {
+        // Canonical scale (Logic -> Device space)
+        const double scaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
+        const double scaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
 
-        aScalar.maLogicToDevice = basegfx::B2DHomMatrix(1.0, 0.0, 0.0, 1.0, dx, dy);
+        // Logic-space translation only
+        const double logicOffsetX = static_cast<double>(maMapRes.mnMapOfsX)
+                                    + static_cast<double>(mnLogicToAbsoluteOffsetX);
+        const double logicOffsetY = static_cast<double>(maMapRes.mnMapOfsY)
+                                    + static_cast<double>(mnLogicToAbsoluteOffsetY);
 
-        aScalar.maView = aScalar.maLogicToDevice;
-        aScalar.maDeviceToLogic = aScalar.maLogicToDevice;
-        aScalar.maInvView = aScalar.maLogicToDevice;
+        // View Space (Logic -> Window)
+        const double txView = (logicOffsetX * scaleX) + static_cast<double>(mnWindowToViewOffsetX);
+        const double tyView = (logicOffsetY * scaleY) + static_cast<double>(mnWindowToViewOffsetY);
 
-        aScalar.maDeviceToLogic.invert();
-        aScalar.maInvView.invert();
+        pSnap->maView.identity();
+        pSnap->maView.set(0, 0, scaleX);
+        pSnap->maView.set(1, 1, scaleY);
+        pSnap->maView.set(0, 2, txView);
+        pSnap->maView.set(1, 2, tyView);
 
-        return aScalar;
+        // Device Space (Window -> Device)
+        const double txDev = txView + static_cast<double>(mnDeviceToWindowOffsetX);
+        const double tyDev = tyView + static_cast<double>(mnDeviceToWindowOffsetY);
+
+        pSnap->maLogicToDevice.identity();
+        pSnap->maLogicToDevice.set(0, 0, scaleX);
+        pSnap->maLogicToDevice.set(1, 1, scaleY);
+        pSnap->maLogicToDevice.set(0, 2, txDev);
+        pSnap->maLogicToDevice.set(1, 2, tyDev);
     }
 
-    // Canonical scale (Logic → Device space)
-    const double scaleX = static_cast<double>(mnDPIX) * maMapRes.mfMapScX;
-    const double scaleY = static_cast<double>(mnDPIY) * maMapRes.mfMapScY;
+    // Derived transforms
+    pSnap->maDeviceToLogic = pSnap->maLogicToDevice;
+    if (!pSnap->maDeviceToLogic.invert())
+        pSnap->maDeviceToLogic.identity();
 
-    aScalar.mfScaleX = scaleX;
-    aScalar.mfScaleY = scaleY;
+    pSnap->maInvView = pSnap->maView;
+    if (!pSnap->maInvView.invert())
+        pSnap->maInvView.identity();
 
-    // Logic-space translation only
-    //    (NO window/device mixing here)
-    const double logicOffsetX
-        = static_cast<double>(maMapRes.mnMapOfsX) + static_cast<double>(mnLogicToAbsoluteOffsetX);
-
-    const double logicOffsetY
-        = static_cast<double>(maMapRes.mnMapOfsY) + static_cast<double>(mnLogicToAbsoluteOffsetY);
-
-    const double tx = logicOffsetX * scaleX;
-    const double ty = logicOffsetY * scaleY;
-
-    aScalar.mfTransX = tx;
-    aScalar.mfTransY = ty;
-
-    // Build canonical transform (ONLY Logic → Device)
-    aScalar.maLogicToDevice = basegfx::B2DHomMatrix(scaleX, 0.0, 0.0, scaleY, tx, ty);
-
-    // Derived transforms (no new math, just reuse)
-    aScalar.maView = aScalar.maLogicToDevice;
-
-    aScalar.maDeviceToLogic = aScalar.maLogicToDevice;
-    bool ok = aScalar.maDeviceToLogic.invert();
-    if (!ok)
-        aScalar.maDeviceToLogic = basegfx::B2DHomMatrix();
-
-    aScalar.maInvView = aScalar.maView;
-    ok = aScalar.maInvView.invert();
-    if (!ok)
-        aScalar.maInvView = basegfx::B2DHomMatrix();
-
-    return aScalar;
+    return pSnap;
 }
 
 std::shared_ptr<const CoordinateMapper::TransformSnapshot> CoordinateMapper::AcquireSnapshot() const
@@ -264,18 +250,7 @@ std::shared_ptr<const CoordinateMapper::TransformSnapshot> CoordinateMapper::Acq
             return pSnap;
 
         // Build new snapshot (single source of truth)
-        auto pNew = std::make_shared<TransformSnapshot>();
-
-        const auto aScalar = FillSnapshot();
-
-        // Store scalar representation
-        pNew->maTransform = aScalar;
-
-        // Copy canonical matrices (already consistent in FillSnapshot)
-        pNew->maLogicToDevice = aScalar.maLogicToDevice;
-        pNew->maView = aScalar.maView;
-        pNew->maDeviceToLogic = aScalar.maDeviceToLogic;
-        pNew->maInvView = aScalar.maInvView;
+        auto pNew = BuildSnapshot();
 
         // Version check (lock-free consistency guard)
         const uint64_t nEndVersion = mnStateCounter.load(std::memory_order_acquire);
@@ -344,11 +319,6 @@ basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMo
 // PIPELINE STAGES (Coordinate Transitions)
 // ========================================================================
 
-static inline tools::Long lcl_RoundToLong(double fVal)
-{
-    return static_cast<tools::Long>(std::llround(fVal));
-}
-
 // Device <-> Window (Screen Origin)
 double CoordinateMapper::DeviceToWindowSubPixelX(double fX) const
 {
@@ -373,55 +343,52 @@ double CoordinateMapper::WindowToDeviceSubPixelY(double fY) const
 // View <-> Absolute Logic (Map Scale & Map Offset)
 double CoordinateMapper::ViewSubPixelToLogicUnitsX(double fX) const
 {
-    if (!IsMappingActive() || maMapRes.mfMapScX == 0.0)
-        return fX;
-
-    return (fX / (maMapRes.mfMapScX * mnDPIX)) - static_cast<double>(maMapRes.mnMapOfsX);
+    auto snap = AcquireSnapshot();
+    // To get Logic from View, we convert View to Window, then apply InvView (which is Window -> Logic)
+    double fWindow = fX + static_cast<double>(mnWindowToViewOffsetX);
+    return fWindow * snap->maInvView.get(0, 0) + snap->maInvView.get(0, 2);
 }
 
 double CoordinateMapper::ViewSubPixelToLogicUnitsY(double fY) const
 {
-    if (!IsMappingActive() || maMapRes.mfMapScY == 0.0)
-        return fY;
-
-    return (fY / (maMapRes.mfMapScY * mnDPIY)) - static_cast<double>(maMapRes.mnMapOfsY);
+    auto snap = AcquireSnapshot();
+    double fWindow = fY + static_cast<double>(mnWindowToViewOffsetY);
+    return fWindow * snap->maInvView.get(1, 1) + snap->maInvView.get(1, 2);
 }
 
 double CoordinateMapper::LogicUnitsToViewSubPixelX(double fX) const
 {
-    if (!IsMappingActive())
-        return fX;
-
-    return (fX + static_cast<double>(maMapRes.mnMapOfsX)) * maMapRes.mfMapScX * mnDPIX;
+    auto snap = AcquireSnapshot();
+    // maView maps Logic -> Window. View is Window - WindowToViewOffset.
+    return (fX * snap->maView.get(0, 0) + snap->maView.get(0, 2))
+           - static_cast<double>(mnWindowToViewOffsetX);
 }
 
 double CoordinateMapper::LogicUnitsToViewSubPixelY(double fY) const
 {
-    if (!IsMappingActive())
-        return fY;
-
-    return (fY + static_cast<double>(maMapRes.mnMapOfsY)) * maMapRes.mfMapScY * mnDPIY;
+    auto snap = AcquireSnapshot();
+    return (fY * snap->maView.get(1, 1) + snap->maView.get(1, 2))
+           - static_cast<double>(mnWindowToViewOffsetY);
 }
 
-// View <-> LogicUnits (Scale and Mapping Offset: mnMapOfsX/Y)
 tools::Long CoordinateMapper::ViewToLogicUnitsX(tools::Long nX) const
 {
-    return ViewToLogicDistanceX(nX) - maMapRes.mnMapOfsX;
+    return lcl_RoundToLong(ViewSubPixelToLogicUnitsX(static_cast<double>(nX)));
 }
 
 tools::Long CoordinateMapper::ViewToLogicUnitsY(tools::Long nY) const
 {
-    return ViewToLogicDistanceY(nY) - maMapRes.mnMapOfsY;
+    return lcl_RoundToLong(ViewSubPixelToLogicUnitsY(static_cast<double>(nY)));
 }
 
 tools::Long CoordinateMapper::LogicUnitsToViewUnitsX(tools::Long nX) const
 {
-    return LogicToViewDistanceX(nX + maMapRes.mnMapOfsX);
+    return lcl_RoundToLong(LogicUnitsToViewSubPixelX(static_cast<double>(nX)));
 }
 
 tools::Long CoordinateMapper::LogicUnitsToViewUnitsY(tools::Long nY) const
 {
-    return LogicToViewDistanceY(nY + maMapRes.mnMapOfsY);
+    return lcl_RoundToLong(LogicUnitsToViewSubPixelY(static_cast<double>(nY)));
 }
 
 tools::Long CoordinateMapper::LogicUnitsToViewUnitsX(tools::Long nX, const ImplMapRes& rRes) const
@@ -436,19 +403,16 @@ tools::Long CoordinateMapper::LogicUnitsToViewUnitsY(tools::Long nY, const ImplM
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicUnitsIntX(double fX) const
 {
-    // Fix: Round only at the end of the full pipeline stage
     return lcl_RoundToLong(ViewSubPixelToLogicUnitsX(fX));
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicUnitsIntY(double fY) const
 {
-    // Fix: Round only at the end of the full pipeline stage
     return lcl_RoundToLong(ViewSubPixelToLogicUnitsY(fY));
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX, const ImplMapRes& rRes) const
 {
-    // Use pure double distance, apply offsets, and round the final result
     double fLogicDist = ViewToLogicDistanceDoubleX(fX, rRes.mfMapScX);
     return lcl_RoundToLong(fLogicDist - static_cast<double>(rRes.mnMapOfsX)
                            - static_cast<double>(mnLogicToAbsoluteOffsetX));
@@ -456,7 +420,6 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX, const ImplMapRe
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY, const ImplMapRes& rRes) const
 {
-    // Use pure double distance, apply offsets, and round the final result
     double fLogicDist = ViewToLogicDistanceDoubleY(fY, rRes.mfMapScY);
     return lcl_RoundToLong(fLogicDist - static_cast<double>(rRes.mnMapOfsY)
                            - static_cast<double>(mnLogicToAbsoluteOffsetY));
@@ -468,22 +431,14 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY, const ImplMapRe
 
 double CoordinateMapper::WindowToLogicSubPixelX(double fX) const
 {
-    if (!IsMappingActive())
-        return fX;
-
-    double fView = WindowToViewSubPixelX(fX);
-
-    return ViewSubPixelToLogicUnitsX(fView) - static_cast<double>(mnLogicToAbsoluteOffsetX);
+    auto snap = AcquireSnapshot();
+    return fX * snap->maInvView.get(0, 0) + snap->maInvView.get(0, 2);
 }
 
 double CoordinateMapper::WindowToLogicSubPixelY(double fY) const
 {
-    if (!IsMappingActive())
-        return fY;
-
-    double fView = WindowToViewSubPixelY(fY);
-
-    return ViewSubPixelToLogicUnitsY(fView) - static_cast<double>(mnLogicToAbsoluteOffsetY);
+    auto snap = AcquireSnapshot();
+    return fY * snap->maInvView.get(1, 1) + snap->maInvView.get(1, 2);
 }
 
 tools::Long CoordinateMapper::WindowToLogicX(tools::Long nX) const
@@ -501,7 +456,6 @@ Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize) const
     if (!IsMappingActive())
         return rLogicSize;
 
-    // Distances ignore offsets, so Window == View
     return Size(LogicToViewDistanceX(rLogicSize.Width()),
                 LogicToViewDistanceY(rLogicSize.Height()));
 }
@@ -510,35 +464,30 @@ Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize) const
 double CoordinateMapper::LogicToDeviceSubPixelX(double fX) const
 {
     auto snap = AcquireSnapshot();
-
-    return (fX * snap->maTransform.mfScaleX) + snap->maTransform.mfTransX;
+    return fX * snap->maLogicToDevice.get(0, 0) + snap->maLogicToDevice.get(0, 2);
 }
 
 double CoordinateMapper::LogicToDeviceSubPixelY(double fY) const
 {
     auto snap = AcquireSnapshot();
-
-    return (fY * snap->maTransform.mfScaleY) + snap->maTransform.mfTransY;
+    return fY * snap->maLogicToDevice.get(1, 1) + snap->maLogicToDevice.get(1, 2);
 }
 
 double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX) const
 {
     auto snap = AcquireSnapshot();
-
-    return (fX * snap->maDeviceToLogic.get(0, 0)) + snap->maDeviceToLogic.get(0, 2);
+    return fX * snap->maDeviceToLogic.get(0, 0) + snap->maDeviceToLogic.get(0, 2);
 }
 
 double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY) const
 {
     auto snap = AcquireSnapshot();
-
-    return (fY * snap->maDeviceToLogic.get(1, 1)) + snap->maDeviceToLogic.get(1, 2);
+    return fY * snap->maDeviceToLogic.get(1, 1) + snap->maDeviceToLogic.get(1, 2);
 }
 
 basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint) const
 {
     auto snap = AcquireSnapshot();
-
     basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
     aPt *= snap->maLogicToDevice;
     return aPt;
@@ -547,10 +496,8 @@ basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint) c
 basegfx::B2DPoint CoordinateMapper::DevicePixelToLogicSubPixel(const Point& rPoint) const
 {
     auto snap = AcquireSnapshot();
-
     basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
     aPt *= snap->maDeviceToLogic;
-
     return aPt;
 }
 
@@ -580,8 +527,10 @@ tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rP
 
     if (rPixelRect.IsWidthEmpty())
         aRetval.SetWidthEmpty();
+
     if (rPixelRect.IsHeightEmpty())
         aRetval.SetHeightEmpty();
+
     return aRetval;
 }
 
@@ -590,18 +539,15 @@ tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX) const
     if (!IsMappingActive())
         return nX + GetDeviceToWindowOffsetX();
 
-    auto snap = AcquireSnapshot();
-
-    return lcl_RoundToLong((static_cast<double>(nX) * snap->maTransform.mfScaleX)
-                           + snap->maTransform.mfTransX);
+    return lcl_RoundToLong(LogicToDeviceSubPixelX(static_cast<double>(nX)));
 }
 
 tools::Long CoordinateMapper::LogicToDevicePixelY(tools::Long nY) const
 {
-    auto snap = AcquireSnapshot();
+    if (!IsMappingActive())
+        return nY + GetDeviceToWindowOffsetY();
 
-    return lcl_RoundToLong((static_cast<double>(nY) * snap->maTransform.mfScaleY)
-                           + snap->maTransform.mfTransY);
+    return lcl_RoundToLong(LogicToDeviceSubPixelY(static_cast<double>(nY)));
 }
 
 Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt) const
@@ -610,11 +556,10 @@ Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt) const
         return rLogicPt;
 
     auto snap = AcquireSnapshot();
+    basegfx::B2DPoint aPt(rLogicPt.X(), rLogicPt.Y());
+    aPt *= snap->maLogicToDevice;
 
-    return Point(lcl_RoundToLong((static_cast<double>(rLogicPt.X()) * snap->maTransform.mfScaleX)
-                                 + snap->maTransform.mfTransX),
-                 lcl_RoundToLong((static_cast<double>(rLogicPt.Y()) * snap->maTransform.mfScaleY)
-                                 + snap->maTransform.mfTransY));
+    return Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
 }
 
 // Note: Width/Height use Distances, not Positions!
@@ -631,9 +576,7 @@ tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth) const
     if (!IsMappingActive())
         return nWidth;
 
-    auto snap = AcquireSnapshot();
-
-    return lcl_RoundToLong(std::abs(static_cast<double>(nWidth) * snap->maTransform.mfScaleX));
+    return lcl_RoundToLong(std::abs(LogicToViewDistanceSubPixelX(nWidth)));
 }
 
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight) const
@@ -641,9 +584,7 @@ tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight) cons
     if (!IsMappingActive())
         return nHeight;
 
-    auto snap = AcquireSnapshot();
-
-    return lcl_RoundToLong(std::abs(static_cast<double>(nHeight) * snap->maTransform.mfScaleY));
+    return lcl_RoundToLong(std::abs(LogicToViewDistanceSubPixelY(nHeight)));
 }
 
 Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize) const
@@ -651,17 +592,13 @@ Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize) const
     if (!IsMappingActive())
         return rLogicSize;
 
-    auto snap = AcquireSnapshot();
-
-    return Size(lcl_RoundToLong(
-                    std::abs(static_cast<double>(rLogicSize.Width()) * snap->maTransform.mfScaleX)),
-                lcl_RoundToLong(std::abs(static_cast<double>(rLogicSize.Height())
-                                         * snap->maTransform.mfScaleY)));
+    return Size(LogicWidthToDevicePixel(rLogicSize.Width()),
+                LogicHeightToDevicePixel(rLogicSize.Height()));
 }
 
 tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect) const
 {
-    // Fast path: no mapping active, no offsets → identity
+    // Fast path: no mapping active, no offsets -> identity
     if (!IsMappingActive() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
         return rLogicRect;
 
@@ -674,21 +611,13 @@ tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rL
     // Apply full affine transform
     aRange.transform(snap->maLogicToDevice);
 
-    // Extract transformed bounding box
-    const double fMinX = aRange.getMinX();
-    const double fMinY = aRange.getMinY();
-    const double fMaxX = aRange.getMaxX();
-    const double fMaxY = aRange.getMaxY();
-
-    // Single, consistent rounding policy at the final boundary
-    const tools::Long nL = lcl_RoundToLong(fMinX);
-    const tools::Long nT = lcl_RoundToLong(fMinY);
-    const tools::Long nR = lcl_RoundToLong(fMaxX);
-    const tools::Long nB = lcl_RoundToLong(fMaxY);
+    const tools::Long nL = lcl_RoundToLong(aRange.getMinX());
+    const tools::Long nT = lcl_RoundToLong(aRange.getMinY());
+    const tools::Long nR = lcl_RoundToLong(aRange.getMaxX());
+    const tools::Long nB = lcl_RoundToLong(aRange.getMaxY());
 
     tools::Rectangle aRetval(nL, nT, nR, nB);
 
-    // Preserve semantic flags
     if (rLogicRect.IsWidthEmpty())
         aRetval.SetWidthEmpty();
 
@@ -705,17 +634,11 @@ tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogic
 
     auto snap = AcquireSnapshot();
 
-    // Convert to B2DPolygon for mathematically pure transformation
     basegfx::B2DPolygon aB2DPoly(rLogicPoly.getB2DPolygon());
     aB2DPoly.transform(snap->maLogicToDevice);
 
-    // Explicitly control the rounding boundary back to integer space
-    // All geometric transformations are performed in floating-point
-    // space and discretised ONLY at final rasterisation boundary.
     tools::Polygon aPoly;
 
-    // Some versions of tools::Polygon might require SetSize or a position parameter for Insert.
-    // If aPoly.Insert(Point) throws a compile error, adapt to: aPoly.Insert(POLY_APPEND, Point(...))
     for (sal_uInt32 i = 0; i < aB2DPoly.count(); ++i)
     {
         const auto& p = aB2DPoly.getB2DPoint(i);
@@ -786,12 +709,7 @@ tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX) const
     if (!IsMappingActive())
         return nX;
 
-    auto snap = AcquireSnapshot();
-
-    // Note: Window math is derived from Device math minus the DeviceToWindow offset
-    return lcl_RoundToLong(
-        (static_cast<double>(nX + mnLogicToAbsoluteOffsetX) * snap->maTransform.mfScaleX)
-        + (snap->maTransform.mfTransX - static_cast<double>(mnDeviceToWindowOffsetX)));
+    return lcl_RoundToLong(LogicToWindowSubPixelX(static_cast<double>(nX)));
 }
 
 tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY) const
@@ -799,18 +717,13 @@ tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY) const
     if (!IsMappingActive())
         return nY;
 
-    auto snap = AcquireSnapshot();
-
-    return lcl_RoundToLong(
-        (static_cast<double>(nY + mnLogicToAbsoluteOffsetY) * snap->maTransform.mfScaleY)
-        + (snap->maTransform.mfTransY - static_cast<double>(mnDeviceToWindowOffsetY)));
+    return lcl_RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY)));
 }
 
 basegfx::B2DPolyPolygon
 CoordinateMapper::LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const
 {
     basegfx::B2DPolyPolygon aTransformedPoly = rLogicPolyPoly;
-    // This encapsulates the GetViewTransformation() logic inside the mapper
     aTransformedPoly.transform(GetViewTransformation());
     return aTransformedPoly;
 }
@@ -829,14 +742,16 @@ tools::Long CoordinateMapper::LogicToWindowUnitsX(tools::Long nX) const
 {
     if (!IsMappingActive())
         return nX;
-    return ViewToWindowUnitsX(LogicUnitsToViewUnitsX(nX));
+
+    return lcl_RoundToLong(LogicToWindowSubPixelX(static_cast<double>(nX)));
 }
 
 tools::Long CoordinateMapper::LogicToWindowUnitsY(tools::Long nY) const
 {
     if (!IsMappingActive())
         return nY;
-    return ViewToWindowUnitsY(LogicUnitsToViewUnitsY(nY));
+
+    return lcl_RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY)));
 }
 
 tools::Long CoordinateMapper::LogicToWindowUnitsX(tools::Long nX, const ImplMapRes& rRes) const
@@ -888,23 +803,6 @@ Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, const ImplMapR
 
 static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
 {
-    // tdf#141761 IsEmpty() removed
-    // Even if rLogicRect.IsEmpty(), transform of the Position contained
-    // in the Rectangle is necessary. Due to Rectangle::Right() returning
-    // Left() when IsEmpty(), the code *could* stay unchanged (same for Bottom),
-    // but:
-    // The Rectangle constructor used with the four tools::Long values does not
-    // check for IsEmpty(), so to keep that state correct there are two possibilities:
-    // (1) Add a test to the Rectangle constructor in question
-    // (2) Do it by hand here
-    // I have tried (1) first, but test Test::test_rectangle() claims that for
-    //  tools::Rectangle aRect(1, 1, 1, 1);
-    //    tools::Long(1) == aRect.GetWidth()
-    //    tools::Long(0) == aRect.getWidth()
-    // (remember: this means Left == Right == 1 -> GetWidth => 1, getWidth == 0)
-    // so indeed the 1's have to go uncommented/unchecked into the data body
-    // of rectangle. Switching to (2) *is* needed, doing so
-
     if (rSrc.IsWidthEmpty())
         rDest.SetWidthEmpty();
 
@@ -993,7 +891,6 @@ static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc
         RectangleVector aRectangles;
         rRegion.GetRegionRectangles(aRectangles);
 
-        // Reverse run to fill new region bottom-up for speed
         for (auto aRectIter = aRectangles.rbegin(); aRectIter != aRectangles.rend(); ++aRectIter)
         {
             aRegion.Union(func(*aRectIter));
@@ -1047,7 +944,6 @@ double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth) const
     if (!IsMappingActive())
         return nWidth;
 
-    // View distance == Window distance, so this is perfectly safe
     return LogicToViewDistanceSubPixelX(nWidth);
 }
 
@@ -1210,7 +1106,6 @@ CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(const basegfx::B2D
 template <TransformableB2DGeometry T>
 T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry, const MapMode& rMapMode) const
 {
-    // Fast-path: Route to the optimized default-mode template
     if (rMapMode.IsDefault())
         return WindowToLogicUnits(rWindowGeometry);
 
@@ -1247,10 +1142,7 @@ Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, const MapMode
     if (rMapMode.IsDefault())
         return rWindowPt;
 
-    // Calculate MapMode-resolution once
     ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
-
-    // Pass the pre-calculated resolution down the chain
     return WindowToLogicUnits(rWindowPt, aMapRes);
 }
 
@@ -1259,17 +1151,12 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, const MapMode
     if (rMapMode.IsDefault())
         return rWindowSize;
 
-    // Calculate MapMode-resolution once
     ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
-
-    // Pass the pre-calculated resolution down the chain
     return WindowToLogicUnits(rWindowSize, aMapRes);
 }
 
 Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, const ImplMapRes& rMapRes) const
 {
-    // Note: Sizes (Distances) ignore translational offsets.
-    // Therefore, Window Distance == View Distance.
     return Size(ViewToLogicDistanceX(rWindowSize.Width(), rMapRes.mfMapScX),
                 ViewToLogicDistanceY(rWindowSize.Height(), rMapRes.mfMapScY));
 }
@@ -1278,7 +1165,6 @@ tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rW
                                                       const ImplMapRes& rMapRes) const
 {
     tools::Rectangle aRetval(
-        // Fix: Use the new Window-level scalar wrappers to ensure WindowToView offsets are applied!
         WindowSubPixelToLogicIntX(rWindowRect.Left(), rMapRes),
         WindowSubPixelToLogicIntY(rWindowRect.Top(), rMapRes),
         rWindowRect.IsWidthEmpty() ? 0 : WindowSubPixelToLogicIntX(rWindowRect.Right(), rMapRes),
@@ -1292,15 +1178,10 @@ tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rW
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
                                                       const MapMode& rMapMode) const
 {
-    // calculate nothing if default-MapMode
-    // tdf#141761 see comments above, IsEmpty() removed
     if (rMapMode.IsDefault())
         return rWindowRect;
 
-    // Calculate MapMode-resolution once
     ImplMapRes aMapRes(rMapMode, GetDPIX(), GetDPIY());
-
-    // Pass the pre-calculated resolution down the chain
     return WindowToLogicUnits(rWindowRect, aMapRes);
 }
 
@@ -1330,22 +1211,22 @@ tools::Long CoordinateMapper::ViewToLogicDistanceY(tools::Long n, double fScale)
 
 tools::Long CoordinateMapper::LogicToViewDistanceX(tools::Long n) const
 {
-    return LogicToViewDistanceX(n, maMapRes.mfMapScX);
+    return lcl_RoundToLong(LogicToViewDistanceSubPixelX(n));
 }
 
 tools::Long CoordinateMapper::LogicToViewDistanceY(tools::Long n) const
 {
-    return LogicToViewDistanceY(n, maMapRes.mfMapScY);
+    return lcl_RoundToLong(LogicToViewDistanceSubPixelY(n));
 }
 
 tools::Long CoordinateMapper::ViewToLogicDistanceX(tools::Long n) const
 {
-    return ViewToLogicDistanceX(n, maMapRes.mfMapScX);
+    return lcl_RoundToLong(ViewToLogicDistanceDoubleX(static_cast<double>(n)));
 }
 
 tools::Long CoordinateMapper::ViewToLogicDistanceY(tools::Long n) const
 {
-    return ViewToLogicDistanceY(n, maMapRes.mfMapScY);
+    return lcl_RoundToLong(ViewToLogicDistanceDoubleY(static_cast<double>(n)));
 }
 
 tools::Long CoordinateMapper::ViewToWindowUnitsX(tools::Long nX) const
@@ -1390,29 +1271,21 @@ tools::Long CoordinateMapper::WindowToDeviceUnitsY(tools::Long nY) const
 
 double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n) const
 {
-    if (!IsMappingActive())
-        return static_cast<double>(n);
-
     auto snap = AcquireSnapshot();
-
-    return static_cast<double>(n) * snap->maTransform.mfScaleX;
+    return static_cast<double>(n) * snap->maView.get(0, 0);
 }
 
 double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n) const
 {
-    if (!IsMappingActive())
-        return static_cast<double>(n);
-
     auto snap = AcquireSnapshot();
-
-    return static_cast<double>(n) * snap->maTransform.mfScaleY;
+    return static_cast<double>(n) * snap->maView.get(1, 1);
 }
 
 double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n, double fScale) const
 {
     assert(GetDPIX() > 0 && "CoordinateMapper: Invalid DPI X, falling back to identity");
     if (GetDPIX() <= 0)
-        return static_cast<double>(n); // Identity fallback, not 0.0
+        return static_cast<double>(n);
 
     return static_cast<double>(n) * fScale * GetDPIX();
 }
@@ -1421,29 +1294,21 @@ double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n, double fSca
 {
     assert(GetDPIY() > 0 && "CoordinateMapper: Invalid DPI Y, falling back to identity");
     if (GetDPIY() <= 0)
-        return static_cast<double>(n); // Identity fallback, not 0.0
+        return static_cast<double>(n);
 
     return static_cast<double>(n) * fScale * GetDPIY();
 }
 
 double CoordinateMapper::ViewToLogicDistanceDoubleX(double n) const
 {
-    if (!IsMappingActive())
-        return n;
-
     auto snap = AcquireSnapshot();
-
-    return n * snap->maDeviceToLogic.get(0, 0);
+    return n * snap->maInvView.get(0, 0);
 }
 
 double CoordinateMapper::ViewToLogicDistanceDoubleY(double n) const
 {
-    if (!IsMappingActive())
-        return n;
-
     auto snap = AcquireSnapshot();
-
-    return n * snap->maDeviceToLogic.get(1, 1);
+    return n * snap->maInvView.get(1, 1);
 }
 
 double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fScale) const
@@ -1451,7 +1316,7 @@ double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fScale) con
     assert(fScale != 0.0 && GetDPIX() > 0
            && "CoordinateMapper: Zero scale or invalid DPI X, falling back to identity");
     if (fScale == 0.0 || GetDPIX() <= 0)
-        return n; // Identity fallback, not 0.0
+        return n;
 
     return n / fScale / GetDPIX();
 }
@@ -1461,7 +1326,7 @@ double CoordinateMapper::ViewToLogicDistanceDoubleY(double n, double fScale) con
     assert(fScale != 0.0 && GetDPIY() > 0
            && "CoordinateMapper: Zero scale or invalid DPI Y, falling back to identity");
     if (fScale == 0.0 || GetDPIY() <= 0)
-        return n; // Identity fallback, not 0.0
+        return n;
 
     return n / fScale / GetDPIY();
 }
@@ -1526,6 +1391,18 @@ Size CoordinateMapper::DevicePixelToLogic(const Size& rDeviceSize) const
 {
     return Size(DevicePixelToLogicWidth(rDeviceSize.Width()),
                 DevicePixelToLogicHeight(rDeviceSize.Height()));
+}
+
+double CoordinateMapper::LogicToWindowSubPixelX(double fX) const
+{
+    auto snap = AcquireSnapshot();
+    return fX * snap->maView.get(0, 0) + snap->maView.get(0, 2);
+}
+
+double CoordinateMapper::LogicToWindowSubPixelY(double fY) const
+{
+    auto snap = AcquireSnapshot();
+    return fY * snap->maView.get(1, 1) + snap->maView.get(1, 2);
 }
 
 Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
@@ -1604,7 +1481,6 @@ static auto lcl_getCorrectedUnit(MapUnit eMapSrc, MapUnit eMapDst)
     }
     else if (eMapSrc != eMapDst)
     {
-        // Here 72 PPI is assumed for MapPixel
         eSrc = MapToO3tlLength(eMapSrc, o3tl::Length::pt);
         eDst = MapToO3tlLength(eMapDst, o3tl::Length::pt);
     }
@@ -1634,17 +1510,13 @@ static tools::Long lcl_convertLogicValue(const tools::Long nSourceValue,
     bool bOverflow;
     const auto nResult = o3tl::convert(nSourceValue, eSourceUnit, eDestUnit, bOverflow);
 
-    // Fast path: conversion succeeded without integer overflow
     if (!bOverflow)
         return nResult;
 
-    // Fallback: Use BigInt to prevent overflow during intermediate multiplication
     const auto[nMultiplier, nDivisor] = o3tl::getConversionMulDiv(eSourceUnit, eDestUnit);
     BigInt aBigValue = nSourceValue;
     aBigValue *= nMultiplier;
 
-    // Manual rounding: standard integer division truncates towards zero.
-    // We add or subtract half the divisor before dividing to achieve round-to-nearest.
     if (aBigValue.IsNeg())
         aBigValue -= nDivisor / 2;
     else
@@ -1719,7 +1591,6 @@ tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource, const MapMode
         const auto left = lcl_convertLogicValue(rRectSource.Left(), eFrom, eTo);
         const auto top = lcl_convertLogicValue(rRectSource.Top(), eFrom, eTo);
 
-        // tdf#141761 see comments above, IsEmpty() removed
         const auto right = rRectSource.IsWidthEmpty()
                                ? 0
                                : lcl_convertLogicValue(rRectSource.Right(), eFrom, eTo);
@@ -1737,7 +1608,6 @@ tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource, const MapMode
         const auto left = aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest);
         const auto top = aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest);
 
-        // tdf#141761 see comments above, IsEmpty() removed
         const auto right = rRectSource.IsWidthEmpty()
                                ? 0
                                : aMapResSource.TransformPointX(rRectSource.Right(), aMapResDest);
@@ -1800,7 +1670,7 @@ basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode&
         {
             SAL_WARN("vcl.gdi", "CoordinateMapper: Invalid MapUnit conversion requested. Falling "
                                 "back to identity matrix to prevent NaN poisoning.");
-            return aTransform; // Return default identity matrix
+            return aTransform;
         }
 
         const double fScaleFactor = o3tl::convert(1.0, eFrom, eTo);
@@ -1812,7 +1682,6 @@ basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode&
 
     const auto[aMapResSource, aMapResDest] = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
 
-    // Guard against division by zero if MapResDest has an invalid scale
     const double fDestScX = (aMapResDest.mfMapScX != 0.0) ? aMapResDest.mfMapScX : 1.0;
     const double fDestScY = (aMapResDest.mfMapScY != 0.0) ? aMapResDest.mfMapScY : 1.0;
 
