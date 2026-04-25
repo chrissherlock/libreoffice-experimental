@@ -28,7 +28,7 @@
 #include <vcl/region.hxx>
 
 #include <optional>
-#include <mutex>
+#include <atomic>
 #include <memory>
 #include <concepts>
 
@@ -48,105 +48,60 @@ concept TransformableB2DGeometry = requires(T a, const basegfx::B2DHomMatrix& rM
  * logic from the physical OutputDevice. It provides a strict, layered pipeline
  * to convert geometry between physical pixels and mathematical document units.
  *
- * Coordinate Spaces
- * -----------------
- * The mapper manages transitions across four distinct coordinate domains:
+* Coordinate Spaces (Conceptual)
+ * ------------------------------
+ * Conceptually, the mapper manages transitions across four distinct domains:
  * 1. Device Space: Absolute physical pixels on the monitor or printer.
- * 2. Window Space: Client area pixels. Relates to Device Space via
- * DeviceToWindowOffset.
- * 3. View Space: Scrollable viewport pixels. Relates to Window Space via
- * WindowToViewOffset (the scroll position).
- * 4. Logic Space: Document coordinates defined by a MapMode (e.g., Twips,
- * 100th mm). Includes the MapMode's origin and scaling.
+ * 2. Window Space: Client area pixels (Device minus DeviceToWindowOffset).
+ * 3. View Space: Scrollable viewport pixels (Window minus WindowToViewOffset).
+ * 4. Logic Space: Document coordinates defined by a MapMode and MapOffset.
+ * * NOTE: While these spaces exist conceptually, the actual implementation squashes
+ * them into a single, unified Affine Transformation Matrix for performance.
  *
  * Architecture & API Groupings
  * ----------------------------
- * - State Management: Maintains DPI, scaling percentages, MapModes, and
- * cached resolution structures (ImplMapRes), as well as the active offset
- * values bridging the coordinate spaces.
+ * - Lock-Free Snapshots (Core): Because coordinate state (DPI, MapModes, offsets)
+ * can be mutated concurrently, the mapper uses a lock-free, version-stamped
+ * `TransformSnapshot`. All transformations project from an immutable snapshot
+ * acquired via `AcquireSnapshot()`.
  *
- * - Pipeline Stages (Atomic): Single-step transitions bridging exactly two
- * adjacent spaces (e.g., WindowToViewUnits, ViewToLogicUnits). These
- * form the building blocks for all complex mappings.
- *
- * - Master Wrappers (Full Journey): High-level API functions that chain
- * multiple pipeline stages together (e.g., LogicToDevicePixel,
- * WindowToLogicUnits). Overloaded for various geometry types (Point,
- * Size, Rectangle, Polygon, Region).
- *
- * - Master Stages / Logic-To-Logic: Pure mathematical transformations between
- * two distinct MapModes. These bypass the device/pixel pipeline entirely.
+ * - The Dual Pipeline Reality: For historical and performance reasons, this class
+ * maintains two parallel mathematical pipelines:
+ * A. The Matrix Path: Modern basegfx geometry relies entirely on the pre-calculated
+ * affine matrices inside the snapshot.
+ * B. The Scalar Fast-Paths: Legacy integer coordinates often bypass the matrix
+ * multiplication in favor of direct scalar arithmetic (Scale * Logic + Offset)
+ * guarded by `IsMappingActive()` checks.
  *
  * - Distance Scaling: Specialized scalar functions (e.g., LogicToViewDistanceX)
- * that apply MapMode scaling *without* applying translational offsets. Used
- * strictly for Size widths/heights, which must ignore origins and scrollbars.
- *
- * Sub-pixel Precision & Modern Geometry
- * -------------------------------------
- * In addition to legacy tools::Long integer grids, the mapper fully supports
- * sub-pixel precision (double, basegfx::B2DPoint). It utilizes the C++20
- * TransformableB2DGeometry concept to efficiently batch-transform modern
- * basegfx geometry using pre-calculated B2DHomMatrix view transformations.
+ * apply scaling *without* applying translational offsets. Used strictly for Size.
  *
  * ========================================================================
- * CoordinateMapper Rounding and Transformation Contract
+ * CoordinateMapper Transformation Contract
  * ========================================================================
  *
- * This class strictly adheres to the following contract to guarantee
- * subpixel accuracy, idempotency, and coordinate symmetry across VCL.
+ * 1. Concurrency and State Coherence
+ * Transformation functions must never read mutable state (DPI, offsets) directly.
+ * They must acquire a localized, immutable `TransformSnapshot` once per function
+ * boundary to guarantee mathematical coherence and avoid torn reads.
  *
- * 1. Core Principle & Subpixel Authority
- * All coordinate transformations must be performed in double precision.
- * Conversion to integer must occur exactly once, only at the final API
- * boundary. All integer-based APIs must be implemented as rounded
- * versions of their subpixel (double) equivalents. No separate logic
- * paths for integer vs. double transformations are permitted.
+ * 2. Subpixel Authority
+ * All geometric transformations must be performed in double precision
+ * (basegfx::B2DHomMatrix). Conversion to integer occurs at the final API boundary.
  *
- * 2. Single Source of Truth
- * All transformations must conceptually follow a single pipeline:
- * Logic <-> View <-> Window <-> Device
- * The Logic <-> View stage is the *only* stage that performs scaling.
- * All other stages are pure translations.
+ * 3. Fast-Path Semantic Guards
+ * If `IsMappingActive()` is false, scalar legacy pipelines must bypass MapMode
+ * scaling *and* intermediate View/Window offsets, acting as a pure translation
+ * to device space.
  *
- * 3. Rounding Policy & Order
- * A single rounding method (std::llround via lcl_RoundToLong) must be
- * used everywhere. Rounding must occur only once, after all scaling and
- * offsets are applied. No transformation stage may perform rounding
- * internally.
+ * 4. Distance vs. Position
+ * Distance (Size) transformations apply scaling only. Position (Point/Geometry)
+ * transformations include both scaling and offsets. Width/Height must not be
+ * used to calculate geometric boundaries.
  *
- * 4. Offset Responsibilities
- * Each offset belongs to exactly one stage and must not be coupled:
- * - Device <-> Window: Device offset (Screen origin)
- * - Window <-> View: Window offset (Scroll offset)
- * - View <-> Logic: Map offset (Logical mapping origin)
- * - Logic origin: Absolute logical offset
- *
- * 5. Distance vs. Position
- * Distance (Size) transformations must apply scaling only and must
- * never include offsets. Position (Point) transformations include both
- * scaling and offsets.
- *
- * 6. Forward/Inverse Symmetry & Idempotency
- * For every transformation A -> B, the inverse B -> A must return the
- * original value. This must hold exactly for integer inputs and within
- * ±0.5 for intermediate double values. Transforming a value to another
- * space and back must not introduce drift.
- *
- * 7. Compound Geometry Consistency
- * Rectangle and Polygon transformations must treat all edges/points
- * consistently using the same transform and rounding rules. Width/Height
- * must not be used to calculate Right/Bottom coordinates, as that mixes
- * Distance and Position pipelines. Empty state flags must be preserved
- * separately from coordinate values.
- *
- * 8. Negative Coordinate Consistency
- * Rounding behavior must be consistent for both positive and negative
- * values (no implicit truncation towards zero).
- *
- * 9. No Mixed Precision Inputs
- * Integer outputs must never be fed back into transformation pipelines
- * as inputs. All transformations must originate from the original
- * high-precision values.
+ * 5. Forward/Inverse Symmetry
+ * For every transformation A -> B, the inverse B -> A must return the original
+ * value within ±0.5 drift for intermediate floating-point values.
  * ========================================================================
  */
 
@@ -183,15 +138,13 @@ private:
         double mfScaleY = 1.0;
         double mfTransX = 0.0;
         double mfTransY = 0.0;
+        uint64_t mnVersion = 0;
     };
-    mutable std::shared_ptr<const TransformSnapshot> mpSnapshot;
-    mutable std::mutex mSnapshotMutex;
 
-    // Hot-path scalar accessors (Projected from the current immutable snapshot)
-    double GetSnapshotScaleX() const { return mpSnapshot->mfScaleX; }
-    double GetSnapshotScaleY() const { return mpSnapshot->mfScaleY; }
-    double GetSnapshotTransX() const { return mpSnapshot->mfTransX; }
-    double GetSnapshotTransY() const { return mpSnapshot->mfTransY; }
+    mutable std::shared_ptr<const TransformSnapshot> mpSnapshot;
+    mutable std::atomic<uint64_t> mnStateCounter{ 0 };
+
+    std::shared_ptr<const TransformSnapshot> AcquireSnapshot() const;
 
     sal_Int32 mnDPIX = 72;
     sal_Int32 mnDPIY = 72;
@@ -212,8 +165,6 @@ private:
 
     tools::Long mnOutWidth = 0;
     tools::Long mnOutHeight = 0;
-
-    mutable bool mbTransformsDirty = true;
 
 public:
     bool IsMapModeEnabled() const { return mbMap; }
@@ -575,22 +526,22 @@ public:
     // Universal basegfx pipeline
     template <vcl::detail::B2DGeometry T> T LogicToDeviceSubPixel(T aObj) const
     {
-        UpdateTransforms();
+        auto snap = AcquireSnapshot();
         if constexpr (vcl::detail::B2DTransformable<T>)
-            aObj.transform(mpSnapshot->maLogicToDevice);
+            aObj.transform(snap->maLogicToDevice);
         else
-            aObj *= mpSnapshot->maLogicToDevice;
+            aObj *= snap->maLogicToDevice;
         return aObj;
     }
 
     // Universal inverse basegfx pipeline
     template <vcl::detail::B2DGeometry T> T DevicePixelToLogicSubPixel(T aObj) const
     {
-        UpdateTransforms();
+        auto snap = AcquireSnapshot();
         if constexpr (vcl::detail::B2DTransformable<T>)
-            aObj.transform(mpSnapshot->maDeviceToLogic);
+            aObj.transform(snap->maDeviceToLogic);
         else
-            aObj *= mpSnapshot->maDeviceToLogic;
+            aObj *= snap->maDeviceToLogic;
         return aObj;
     }
 
