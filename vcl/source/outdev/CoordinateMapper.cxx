@@ -19,6 +19,7 @@
 
 #include <sal/log.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/vector/b2dvector.hxx>
 #include <basegfx/range/b2drectangle.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
@@ -33,6 +34,13 @@
 #include <CoordinateMapper.hxx>
 
 #include <cmath>
+#include <cassert>
+
+// Conceptual Pipeline Separation (Mathematical Invariant):
+// Logic -> View: Scaled transformations (Scale * Logic) + Scaled Offsets ((MapOfs + LogicOfs) * Scale)
+// View -> Window: Pure translation (WindowOfs)
+// Window -> Device: Pure translation (DeviceOfs)
+// We explicitly isolate the scaled offsets (fTrans) from unscaled offsets here.
 
 sal_Int32 CoordinateMapper::GetDPIX() const { return mnDPIX; }
 
@@ -272,6 +280,12 @@ static inline tools::Long lcl_RoundToLong(double fVal)
     return static_cast<tools::Long>(std::llround(fVal));
 }
 
+// Centralized rounding policy for final device pixel boundaries
+static inline tools::Long lcl_ToDevicePixel(double fVal)
+{
+    return static_cast<tools::Long>(std::llround(fVal));
+}
+
 // Device <-> Window (Screen Origin)
 double CoordinateMapper::DeviceToWindowSubPixelX(double fX) const
 {
@@ -502,7 +516,15 @@ tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rP
 
 tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX) const
 {
-    return lcl_RoundToLong(LogicToDeviceSubPixelX(static_cast<double>(nX)));
+    if (!IsMappingActive())
+        return nX + GetDeviceToWindowOffsetX();
+
+    UpdateTransforms();
+    double fX = (static_cast<double>(nX) * maLogicToDevice->get(0, 0)) + maLogicToDevice->get(0, 2);
+
+    tools::Long nRes = lcl_ToDevicePixel(fX);
+
+    return nRes;
 }
 
 tools::Long CoordinateMapper::LogicToDevicePixelY(tools::Long nY) const
@@ -512,15 +534,32 @@ tools::Long CoordinateMapper::LogicToDevicePixelY(tools::Long nY) const
 
 Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt) const
 {
-    return Point(LogicToDevicePixelX(rLogicPt.X()), LogicToDevicePixelY(rLogicPt.Y()));
+    if (!IsMappingActive() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rLogicPt;
+
+    UpdateTransforms();
+    basegfx::B2DPoint aPt(rLogicPt.X(), rLogicPt.Y());
+    aPt *= *maLogicToDevice;
+    return Point(lcl_ToDevicePixel(aPt.getX()), lcl_ToDevicePixel(aPt.getY()));
 }
 
 // Note: Width/Height use Distances, not Positions!
+double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
+{
+    if (!IsMappingActive())
+        return static_cast<double>(nWidth);
+    return LogicToViewDistanceSubPixelX(nWidth);
+}
+
 tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth) const
 {
     if (!IsMappingActive())
         return nWidth;
-    return LogicToViewDistanceX(nWidth);
+
+    UpdateTransforms();
+    double fW = static_cast<double>(nWidth) * maLogicToDevice->get(0, 0);
+    tools::Long nRes = lcl_ToDevicePixel(std::abs(fW));
+    return nRes;
 }
 
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight) const
@@ -532,17 +571,45 @@ tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight) cons
 
 Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize) const
 {
-    return Size(LogicWidthToDevicePixel(rLogicSize.Width()),
-                LogicHeightToDevicePixel(rLogicSize.Height()));
+    if (!IsMappingActive())
+        return rLogicSize;
+
+    UpdateTransforms();
+    basegfx::B2DVector aVec(rLogicSize.Width(), rLogicSize.Height());
+    aVec *= *maLogicToDevice;
+    return Size(lcl_ToDevicePixel(aVec.getX()), lcl_ToDevicePixel(aVec.getY()));
 }
 
 tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect) const
 {
-    tools::Rectangle aRetval(
-        LogicToDevicePixelX(rLogicRect.Left()), LogicToDevicePixelY(rLogicRect.Top()),
-        rLogicRect.IsWidthEmpty() ? 0 : LogicToDevicePixelX(rLogicRect.Right()),
-        rLogicRect.IsHeightEmpty() ? 0 : LogicToDevicePixelY(rLogicRect.Bottom()));
+    // Fast path: no mapping active, no offsets → identity
+    if (!IsMappingActive() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rLogicRect;
 
+    UpdateTransforms();
+
+    // Treat rectangle as geometric range (continuous space)
+    basegfx::B2DRange aRange(rLogicRect.Left(), rLogicRect.Top(), rLogicRect.Right(),
+                             rLogicRect.Bottom());
+
+    // Apply full affine transform
+    aRange.transform(*maLogicToDevice);
+
+    // Extract transformed bounding box
+    const double fMinX = aRange.getMinX();
+    const double fMinY = aRange.getMinY();
+    const double fMaxX = aRange.getMaxX();
+    const double fMaxY = aRange.getMaxY();
+
+    // Single, consistent rounding policy at the final boundary
+    const tools::Long nL = lcl_RoundToLong(fMinX);
+    const tools::Long nT = lcl_RoundToLong(fMinY);
+    const tools::Long nR = lcl_RoundToLong(fMaxX);
+    const tools::Long nB = lcl_RoundToLong(fMaxY);
+
+    tools::Rectangle aRetval(nL, nT, nR, nB);
+
+    // Preserve semantic flags
     if (rLogicRect.IsWidthEmpty())
         aRetval.SetWidthEmpty();
 
@@ -557,11 +624,17 @@ tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogic
     if (!IsMappingActive() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
         return rLogicPoly;
 
+    UpdateTransforms();
+    const basegfx::B2DHomMatrix& rMat = *maLogicToDevice;
+
     tools::Polygon aPoly(rLogicPoly);
 
+    // Transform points directly to avoid hidden recursive coupling with the Point overload
     for (auto& rPoint : aPoly)
     {
-        rPoint = Point(LogicToDevicePixelX(rPoint.X()), LogicToDevicePixelY(rPoint.Y()));
+        basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
+        aPt *= rMat;
+        rPoint = Point(lcl_ToDevicePixel(aPt.getX()), lcl_ToDevicePixel(aPt.getY()));
     }
 
     return aPoly;

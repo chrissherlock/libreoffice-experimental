@@ -401,6 +401,7 @@ public:
     tools::Long LogicToDevicePixelX(tools::Long nX) const;
     tools::Long LogicToDevicePixelY(tools::Long nY) const;
     tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
+    double LogicWidthToDeviceSubPixel(tools::Long nWidth) const;
     tools::Long LogicHeightToDevicePixel(tools::Long nHeight) const;
     Point LogicToDevicePixel(const Point& rLogicPt) const;
     Size LogicToDevicePixel(const Size& rLogicSize) const;
