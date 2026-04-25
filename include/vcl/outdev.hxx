@@ -1689,8 +1689,8 @@ public:
 
      @returns Width in units of device pixels.
      */
-    SAL_DLLPRIVATE tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
-    SAL_DLLPRIVATE double LogicWidthToDeviceSubPixel(tools::Long nWidth) const;
+    tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
+    double LogicWidthToDeviceSubPixel(tools::Long nWidth) const;
 
 protected:
     /** Convert a logical height to a height in units of device pixels.

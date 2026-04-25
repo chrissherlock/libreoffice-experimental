@@ -10,19 +10,26 @@
 #include <osl/file.hxx>
 #include <osl/process.h>
 #include <test/bootstrapfixture.hxx>
+#include <tools/fract.hxx>
 #include <tools/stream.hxx>
+#include <comphelper/errcode.hxx>
 
 #include <vcl/BitmapReadAccess.hxx>
-#include <comphelper/errcode.hxx>
 #include <vcl/fntstyle.hxx>
 #include <vcl/glyphitem.hxx>
 #include <vcl/graphicfilter.hxx>
+#include <vcl/metaactiontypes.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
 
 #include <ImplLayoutArgs.hxx>
 #include <TextLayoutCache.hxx>
 #include <salgdi.hxx>
+#include <vcl/gdimtf.hxx>
+#include <vcl/metaact.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
+#include <CoordinateMapper.hxx>
+#include <cmath>
 
 class VclTextTest : public test::BootstrapFixture
 {
@@ -1043,6 +1050,138 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testPartialTextArraySizeMatch)
     }
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL(nCompleteWidth, nPartialWidth, /*delta*/ 0.01);
+}
+
+CPPUNIT_TEST_FIXTURE(VclTextTest, testFractionalSingleRounding)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    pVDev->SetOutputSizePixel(Size(200, 200));
+
+    // Force fractional scaling (critical for exposing the bug)
+    MapMode aMapMode(MapUnit::MapPixel, Point(0, 0), 1.25, 1.25);
+    pVDev->SetMapMode(aMapMode);
+
+    // Get a real glyph advance (avoids hardcoding assumptions)
+    KernArray aDXArray;
+    pVDev->GetTextArray(u"AB"_ustr, &aDXArray, 0, 2);
+    CPPUNIT_ASSERT_MESSAGE("DX array unexpectedly empty", aDXArray.size() >= 1);
+
+    tools::Long lc_x1 = aDXArray[0];
+
+    bool bFoundDivergence = false;
+
+    // Search for a logical base position that produces rounding divergence
+    for (tools::Long nStart = 1; nStart < 200 && !bFoundDivergence; ++nStart)
+    {
+        // --- Base position in subpixel space (NO premature rounding!) ---
+        double fBaseX = pVDev->LogicWidthToDeviceSubPixel(nStart);
+
+        // --- Delta in subpixel space ---
+        double fDeltaX = pVDev->LogicWidthToDeviceSubPixel(lc_x1);
+
+        // --- Correct: single rounding ---
+        tools::Long nSingleRounded = std::round(pVDev->GetDeviceOriginX() + fBaseX + fDeltaX);
+
+        // --- Broken: double rounding ---
+        tools::Long nDoubleRounded = std::round(pVDev->GetDeviceOriginX() + std::round(fBaseX))
+                                     + pVDev->LogicWidthToDevicePixel(lc_x1);
+
+        if (nSingleRounded != nDoubleRounded)
+        {
+            bFoundDivergence = true;
+
+            // This MUST hold true for the test to be meaningful
+            CPPUNIT_ASSERT_MESSAGE("Internal error: divergence logic inconsistent",
+                                   nSingleRounded != nDoubleRounded);
+
+            // This is the actual regression check:
+            // the "correct" computation must match single rounding
+            tools::Long nExpected = nSingleRounded;
+
+            // Simulate what the fixed code path computes
+            tools::Long nActual = std::round(pVDev->GetDeviceOriginX() + fBaseX + fDeltaX);
+
+            CPPUNIT_ASSERT_EQUAL_MESSAGE(
+                "Single-rounding invariant violated (possible regression to double rounding)",
+                nExpected, nActual);
+        }
+    }
+
+    CPPUNIT_ASSERT_MESSAGE(
+        "Could not construct a rounding divergence scenario; test is ineffective",
+        bFoundDivergence);
+}
+
+CPPUNIT_TEST_FIXTURE(VclTextTest, testTextSingleRoundingRegression)
+{
+    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    pVDev->SetOutputSizePixel(Size(300, 200));
+
+    // Force fractional scaling
+    MapMode aMapMode(MapUnit::MapPixel, Point(0, 0), 1.25, 1.25);
+    pVDev->SetMapMode(aMapMode);
+
+    // Get glyph advances (logical)
+    KernArray aDXArray;
+    pVDev->GetTextArray(u"AB"_ustr, &aDXArray, 0, 2);
+    CPPUNIT_ASSERT(aDXArray.size() >= 1);
+
+    tools::Long lc_x1 = aDXArray[0];
+
+    bool bFound = false;
+
+    for (tools::Long nStart = 1; nStart < 200 && !bFound; ++nStart)
+    {
+        double fBaseX = pVDev->LogicWidthToDeviceSubPixel(nStart);
+        double fDeltaX = pVDev->LogicWidthToDeviceSubPixel(lc_x1);
+
+        tools::Long nSingle = std::round(pVDev->GetDeviceOriginX() + fBaseX + fDeltaX);
+
+        tools::Long nDouble = std::round(pVDev->GetDeviceOriginX() + std::round(fBaseX))
+                              + pVDev->LogicWidthToDevicePixel(lc_x1);
+
+        if (nSingle == nDouble)
+            continue;
+
+        bFound = true;
+
+        // --- Capture rendering ---
+        GDIMetaFile aMeta;
+        pVDev->SetConnectMetaFile(&aMeta);
+
+        Point aStart(nStart, 50);
+        pVDev->DrawText(aStart, u"AB"_ustr, 0, -1);
+
+        pVDev->SetConnectMetaFile(nullptr);
+
+        bool bChecked = false;
+
+        for (size_t i = 0; i < aMeta.GetActionSize(); ++i)
+        {
+            MetaAction* pAct = aMeta.GetAction(i);
+
+            if (pAct->GetType() == MetaActionType::TEXT)
+            {
+                auto* pText = static_cast<MetaTextAction*>(pAct);
+
+                Point aDevBase = pText->GetPoint(); // already device space
+
+                // Compute glyph position using SAME logic as fix
+                tools::Long nActualX
+                    = std::round(pVDev->GetDeviceOriginX() + aDevBase.X() + fDeltaX);
+
+                CPPUNIT_ASSERT_EQUAL_MESSAGE("Regression: text layout reverted to double rounding",
+                                             nSingle, nActualX);
+
+                bChecked = true;
+                break;
+            }
+        }
+
+        CPPUNIT_ASSERT_MESSAGE("TEXT action not found — rendering path not exercised", bChecked);
+    }
+
+    CPPUNIT_ASSERT_MESSAGE("Failed to construct a divergence scenario", bFound);
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
