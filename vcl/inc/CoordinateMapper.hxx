@@ -365,8 +365,10 @@ public:
 
     tools::Long LogicUnitsToViewUnitsX(tools::Long nX) const;
     tools::Long LogicUnitsToViewUnitsY(tools::Long nY) const;
-    tools::Long LogicUnitsToViewUnitsX(tools::Long nX, const ImplMapRes& rRes) const;
-    tools::Long LogicUnitsToViewUnitsY(tools::Long nY, const ImplMapRes& rRes) const;
+    tools::Long LogicUnitsToViewUnitsX(tools::Long nX,
+                                       const vcl::detail::MapConversion& rConv) const;
+    tools::Long LogicUnitsToViewUnitsY(tools::Long nY,
+                                       const vcl::detail::MapConversion& rConv) const;
 
     // View <-> LogicUnits (Sub-pixel)
     double ViewSubPixelToLogicUnitsX(double fX) const;
@@ -433,53 +435,60 @@ public:
     // Note: This rounds the distance before stripping offsets to satisfy legacy test parity.
     tools::Long ViewSubPixelToLogicIntX(double fX) const;
     tools::Long ViewSubPixelToLogicIntY(double fY) const;
-    tools::Long ViewSubPixelToLogicIntX(double fX, const ImplMapRes& rRes) const;
-    tools::Long ViewSubPixelToLogicIntY(double fY, const ImplMapRes& rRes) const;
+    tools::Long ViewSubPixelToLogicIntX(double fX, const vcl::detail::MapConversion& rConv) const;
+    tools::Long ViewSubPixelToLogicIntY(double fY, const vcl::detail::MapConversion& rConv) const;
     double LogicToViewSubPixelX(double fX) const;
     double LogicToViewSubPixelY(double fY) const;
 
     // Logic -> Window units (Commonly used in OutputDevice::LogicToPixel)
     tools::Long LogicToWindowUnitsX(tools::Long nX) const;
     tools::Long LogicToWindowUnitsY(tools::Long nY) const;
-    tools::Long LogicToWindowUnitsX(tools::Long nX, const ImplMapRes& rRes) const;
-    tools::Long LogicToWindowUnitsY(tools::Long nY, const ImplMapRes& rRes) const;
+    tools::Long LogicToWindowUnitsX(tools::Long nX, const vcl::detail::MapConversion& rConv) const;
+    tools::Long LogicToWindowUnitsY(tools::Long nY, const vcl::detail::MapConversion& rConv) const;
     Point LogicToWindowUnits(const Point& rLogicPt) const;
     Point LogicToWindowUnits(const Point& rLogicPt, const MapMode& rMapMode) const;
-    Point LogicToWindowUnits(const Point& rLogicPt, const ImplMapRes& rRes) const;
+    Point LogicToWindowUnits(const Point& rLogicPt, const vcl::detail::MapConversion& rConv) const;
     Size LogicToWindowUnits(const Size& rLogicSize, const MapMode& rMapMode) const;
-    Size LogicToWindowUnits(const Size& rLogicSize, const ImplMapRes& rRes) const;
+    Size LogicToWindowUnits(const Size& rLogicSize, const vcl::detail::MapConversion& rConv) const;
     tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect,
                                         const MapMode& rMapMode) const;
     tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect,
-                                        const ImplMapRes& rRes) const;
+                                        const vcl::detail::MapConversion& rConv) const;
     tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect) const;
     vcl::Region LogicToWindowUnits(const vcl::Region& rRegion) const;
     tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly) const;
     tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly, const MapMode& rMapMode) const;
-    tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly, const ImplMapRes& rRes) const;
+    tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly,
+                                      const vcl::detail::MapConversion& rConv) const;
     tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly) const;
+    tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly,
+                                          const vcl::detail::MapConversion& rConv) const;
+    tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly,
+                                          const MapMode& rMapMode) const;
     basegfx::B2DPolyPolygon LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
+    basegfx::B2DPolyPolygon LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
+                                               const vcl::detail::MapConversion& rConv) const;
     basegfx::B2DPolyPolygon LogicToWindowUnits(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                                                const MapMode& rMapMode) const;
 
     tools::Long WindowSubPixelToLogicIntX(double fX) const;
     tools::Long WindowSubPixelToLogicIntY(double fY) const;
-    tools::Long WindowSubPixelToLogicIntX(double fX, const ImplMapRes& rMapRes) const;
-    tools::Long WindowSubPixelToLogicIntY(double fY, const ImplMapRes& rMapRes) const;
+    tools::Long WindowSubPixelToLogicIntX(double fX, const vcl::detail::MapConversion& rConv) const;
+    tools::Long WindowSubPixelToLogicIntY(double fY, const vcl::detail::MapConversion& rConv) const;
     vcl::Region WindowToLogicUnits(const vcl::Region& rWindowRegion) const;
     Point WindowToLogicUnits(const Point& rWindowPt) const;
-    Point WindowToLogicUnits(const Point& rWindowPt, const ImplMapRes& rMapRes) const;
     Point WindowToLogicUnits(const Point& rWindowPt, const MapMode& rMapMode) const;
+    Point WindowToLogicUnits(const Point& rWindowPt, const vcl::detail::MapConversion& rConv) const;
 
     tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect) const;
     tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect,
-                                        const ImplMapRes& rMapRes) const;
+                                        const vcl::detail::MapConversion& rConv) const;
     tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect,
                                         const MapMode& rMapMode) const;
 
     tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly) const;
     tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly,
-                                      const ImplMapRes& rMapRes) const;
+                                      const vcl::detail::MapConversion& rConv) const;
     tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly,
                                       const MapMode& rMapMode) const;
 
@@ -487,7 +496,7 @@ public:
     Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt) const;
 
     Size WindowToLogicUnits(const Size& rWindowSize) const;
-    Size WindowToLogicUnits(const Size& rWindowSize, const ImplMapRes& rMapRes) const;
+    Size WindowToLogicUnits(const Size& rWindowSize, const vcl::detail::MapConversion& rConv) const;
     Size WindowToLogicUnits(const Size& rWindowSize, const MapMode& rMapMode) const;
 
     template <TransformableB2DGeometry T> T WindowToLogicUnits(const T& rWindowGeometry) const;
