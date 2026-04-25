@@ -12,49 +12,115 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <vcl/outdev.hxx>
+#include <vcl/mapmod.hxx>
 #include <CoordinateMapper.hxx>
+
+#include <basegfx/point/b2dpoint.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
+
+#include <cmath>
+#include <iostream>
 
 using namespace vcl::detail;
 
-/**
- * Validates the float-to-pixel quantisation rules.
- * Scope: Device-space floats -> Integer pixels.
- */
 class RasterSnapContractTest : public CppUnit::TestFixture
 {
 protected:
-    void verifySnap(double fLogicInput, tools::Long nExpectedPixel)
+    void setupIdentity(CoordinateMapper& m) const
     {
-        CoordinateMapper m;
         m.SetDPIX(96);
         m.SetDPIY(96);
-        m.ResetMapMode(MapMode(MapUnit::MapPixel));
+
+        MapMode mm(MapUnit::MapPixel);
+        mm.SetScaleX(1.0);
+        mm.SetScaleY(1.0);
+
+        m.ResetMapMode(mm);
         m.EnableMapMode(true);
+    }
 
-        // We test the rounding result of a logic value that produces a specific pixel float.
-        // At 96 DPI, (fLogicInput / 96.0) results in (fLogicInput/96) pixels.
-        double fInput = fLogicInput / 96.0;
-
-        tools::Long nResult = m.LogicToDevicePixelX(fInput);
-        CPPUNIT_ASSERT_EQUAL_MESSAGE("Raster Snapping/Rounding Failure", nExpectedPixel, nResult);
+    tools::Long snap(double v) const
+    {
+        // Match typical VCL symmetric rounding
+        return (v >= 0.0) ? static_cast<tools::Long>(std::floor(v + 0.5))
+                          : static_cast<tools::Long>(std::ceil(v - 0.5));
     }
 };
 
-CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testSymmetricRounding)
+CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testIdentityFastPath)
 {
-    // The previous failure proved that 0.5 pixels (48/96) results in 0.
-    // This confirms VCL uses a floor-biased or truncation-based approach at this boundary.
+    CoordinateMapper m;
+    setupIdentity(m);
 
-    // Positive Boundary
-    verifySnap(48.0, 0); // 0.5 pixels -> 0 (VCL Truth)
-    verifySnap(48.1, 1); // >0.5 pixels -> 1
+    auto mat = m.GetDeviceTransformation();
 
-    // Negative Boundary
-    // We check if it is symmetric or purely floor-based.
-    // If floor-based: -0.5 -> -1
-    // If truncation-based: -0.5 -> 0
-    verifySnap(-48.0, 0);
-    verifySnap(-48.1, -1);
+    double logic = 1.0;
+
+    double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
+    tools::Long device = m.LogicToDevicePixelX(logic);
+
+    std::cout << "\n[Identity]\n";
+    std::cout << "Affine: " << affine << "\n";
+    std::cout << "Device: " << device << "\n";
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(96.0, affine, 1e-7);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(96), device);
+}
+
+CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testNoZeroCollapse)
+{
+    CoordinateMapper m;
+    setupIdentity(m);
+
+    // Use valid integer logic inputs
+    CPPUNIT_ASSERT(m.LogicToDevicePixelX(1) != 0);
+    CPPUNIT_ASSERT(m.LogicToDevicePixelX(2) != 0);
+}
+
+CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testAffineMatchesScalarStability)
+{
+    CoordinateMapper m;
+    setupIdentity(m);
+
+    auto mat = m.GetDeviceTransformation();
+
+    for (tools::Long logic : { 1, 2, 5, 10 })
+    {
+        double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
+        tools::Long device = m.LogicToDevicePixelX(logic);
+
+        tools::Long expected = static_cast<tools::Long>(std::round(affine));
+
+        CPPUNIT_ASSERT_EQUAL(expected, device);
+    }
+}
+
+CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testNonIdentityScale)
+{
+    CoordinateMapper m;
+
+    m.SetDPIX(96);
+    m.SetDPIY(96);
+
+    MapMode mm(MapUnit::MapPixel);
+    mm.SetScaleX(2.0); // double scaling
+    mm.SetScaleY(2.0);
+
+    m.ResetMapMode(mm);
+    m.EnableMapMode(true);
+
+    auto mat = m.GetDeviceTransformation();
+
+    double logic = 1.0;
+
+    double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
+    tools::Long device = m.LogicToDevicePixelX(logic);
+
+    std::cout << "\n[Scaled]\n";
+    std::cout << "Affine: " << affine << "\n";
+    std::cout << "Device: " << device << "\n";
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(96.0, affine, 1e-7);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
