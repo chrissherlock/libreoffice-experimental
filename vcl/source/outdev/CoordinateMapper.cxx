@@ -1338,12 +1338,12 @@ double CoordinateMapper::ViewToLogicDistanceDoubleY(double n, double fScale) con
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceX(double n) const
 {
-    return ViewSubPixelToLogicDistanceX(n, maMapRes.mfMapScX);
+    return ViewSubPixelToLogicDistanceX(n, maMapConversion.mfScaleX);
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n) const
 {
-    return ViewSubPixelToLogicDistanceY(n, maMapRes.mfMapScY);
+    return ViewSubPixelToLogicDistanceY(n, maMapConversion.mfScaleY);
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceX(double n, double fScale) const
