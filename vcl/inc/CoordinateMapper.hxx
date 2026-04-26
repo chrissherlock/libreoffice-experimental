@@ -313,7 +313,7 @@ public:
 
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
-    vcl::detail::MapConversion ResolveMap(const MapMode& rMapMode) const;
+    vcl::detail::MapConversion ResolveMap(const MapMode& rMapMode, bool bMap) const;
 
     /** Invalidate the view transformation.
 
@@ -322,12 +322,12 @@ public:
     void InvalidateViewTransform();
     basegfx::B2DHomMatrix GetViewTransformation() const;
     basegfx::B2DHomMatrix GetViewTransformation(const vcl::detail::MapConversion& rConv) const;
-    basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rMapMode) const;
+    basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rMapMode, bool bMap) const;
 
     basegfx::B2DHomMatrix GetInverseViewTransformation() const;
     basegfx::B2DHomMatrix
     GetInverseViewTransformation(const vcl::detail::MapConversion& rConv) const;
-    basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rMapMode) const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rMapMode, bool bMap) const;
 
     basegfx::B2DHomMatrix GetDeviceTransformation() const;
 
@@ -498,12 +498,12 @@ public:
     // These do not traverse the VCL device pipeline.
 
     Point LogicToLogic(const Point& rPtSource, const MapMode* pMapModeBaseline,
-                       const MapMode* pMapModeSource, const MapMode* pMapModeDest) const;
+                       const MapMode* pMapModeSource, const MapMode* pMapModeDest, bool bMap) const;
     Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeBaseline,
-                      const MapMode* pMapModeSource, const MapMode* pMapModeDest) const;
+                      const MapMode* pMapModeSource, const MapMode* pMapModeDest, bool bMap) const;
     tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
                                   const MapMode* pMapModeBaseline, const MapMode* pMapModeSource,
-                                  const MapMode* pMapModeDest) const;
+                                  const MapMode* pMapModeDest, bool bMap) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
