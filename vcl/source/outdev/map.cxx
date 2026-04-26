@@ -397,21 +397,21 @@ Point OutputDevice::LogicToLogic(const Point& rPtSource,
                                  const MapMode* pMapModeSource,
                                  const MapMode* pMapModeDest) const
 {
-    return mpMapper->LogicToLogic(rPtSource, pMapModeSource, pMapModeDest);
+    return mpMapper->LogicToLogic(rPtSource, &GetMapMode(), pMapModeSource, pMapModeDest);
 }
 
 Size OutputDevice::LogicToLogic(const Size& rSzSource,
                                 const MapMode* pMapModeSource,
                                 const MapMode* pMapModeDest) const
 {
-    return mpMapper->LogicToLogic(rSzSource, pMapModeSource, pMapModeDest);
+    return mpMapper->LogicToLogic(rSzSource, &GetMapMode(), pMapModeSource, pMapModeDest);
 }
 
 tools::Rectangle OutputDevice::LogicToLogic(const tools::Rectangle& rRectSource,
                                             const MapMode* pMapModeSource,
                                             const MapMode* pMapModeDest) const
 {
-    return mpMapper->LogicToLogic(rRectSource, pMapModeSource, pMapModeDest);
+    return mpMapper->LogicToLogic(rRectSource, &GetMapMode(), pMapModeSource, pMapModeDest);
 }
 
 double OutputDevice::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
