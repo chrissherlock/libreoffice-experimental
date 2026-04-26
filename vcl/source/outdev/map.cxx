@@ -284,28 +284,28 @@ vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
 
 Point OutputDevice::LogicToPixel(const Point& rLogicPt, const MapMode& rMapMode) const
 {
-    return mpMapper->LogicToWindowUnits(rLogicPt, mpMapper->ResolveMap(rMapMode));
+    return mpMapper->LogicToWindowUnits(rLogicPt, mpMapper->ResolveMap(rMapMode, IsMapModeEnabled()));
 }
 
 Size OutputDevice::LogicToPixel(const Size& rLogicSize, const MapMode& rMapMode) const
 {
-    return mpMapper->LogicToWindowUnits(rLogicSize, mpMapper->ResolveMap(rMapMode));
+    return mpMapper->LogicToWindowUnits(rLogicSize, mpMapper->ResolveMap(rMapMode, IsMapModeEnabled()));
 }
 
 tools::Rectangle OutputDevice::LogicToPixel(const tools::Rectangle& rLogicRect, const MapMode& rMapMode) const
 {
-    return mpMapper->LogicToWindowUnits(rLogicRect, mpMapper->ResolveMap(rMapMode));
+    return mpMapper->LogicToWindowUnits(rLogicRect, mpMapper->ResolveMap(rMapMode, IsMapModeEnabled()));
 }
 
 tools::Polygon OutputDevice::LogicToPixel(const tools::Polygon& rLogicPoly, const MapMode& rMapMode) const
 {
-    return mpMapper->LogicToWindowUnits(rLogicPoly, mpMapper->ResolveMap(rMapMode));
+    return mpMapper->LogicToWindowUnits(rLogicPoly, mpMapper->ResolveMap(rMapMode, IsMapModeEnabled()));
 }
 
 basegfx::B2DPolyPolygon OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                                                    const MapMode& rMapMode) const
 {
-    return mpMapper->LogicToWindowUnits(rLogicPolyPoly, mpMapper->ResolveMap(rMapMode));
+    return mpMapper->LogicToWindowUnits(rLogicPolyPoly, mpMapper->ResolveMap(rMapMode, IsMapModeEnabled()));
 }
 
 tools::Long OutputDevice::DevicePixelToLogicWidth(tools::Long nWidth) const
@@ -365,53 +365,53 @@ basegfx::B2DPolyPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolyPolygon
 
 Point OutputDevice::PixelToLogic(const Point& rDevicePt, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rDevicePt, mpMapper->ResolveMap(rMapMode));
+    return mpMapper->WindowToLogicUnits(rDevicePt, mpMapper->ResolveMap(rMapMode, IsMapModeEnabled()));
 }
 
 Size OutputDevice::PixelToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rDeviceSize, mpMapper->ResolveMap(rMapMode));
+    return mpMapper->WindowToLogicUnits(rDeviceSize, mpMapper->ResolveMap(rMapMode, IsMapModeEnabled()));
 }
 
 tools::Rectangle OutputDevice::PixelToLogic(const tools::Rectangle& rDeviceRect, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rDeviceRect, mpMapper->ResolveMap(rMapMode));
+    return mpMapper->WindowToLogicUnits(rDeviceRect, mpMapper->ResolveMap(rMapMode, IsMapModeEnabled()));
 }
 
 tools::Polygon OutputDevice::PixelToLogic(const tools::Polygon& rDevicePoly, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rDevicePoly, mpMapper->ResolveMap(rMapMode));
+    return mpMapper->WindowToLogicUnits(rDevicePoly, mpMapper->ResolveMap(rMapMode, IsMapModeEnabled()));
 }
 
 basegfx::B2DPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolygon& rPixelPoly, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rPixelPoly, mpMapper->ResolveMap(rMapMode));
+    return mpMapper->WindowToLogicUnits(rPixelPoly, mpMapper->ResolveMap(rMapMode, IsMapModeEnabled()));
 }
 
 basegfx::B2DPolyPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly, const MapMode& rMapMode) const
 {
-    return mpMapper->WindowToLogicUnits(rPixelPolyPoly, mpMapper->ResolveMap(rMapMode));
+    return mpMapper->WindowToLogicUnits(rPixelPolyPoly, mpMapper->ResolveMap(rMapMode, IsMapModeEnabled()));
 }
 
 Point OutputDevice::LogicToLogic(const Point& rPtSource,
                                  const MapMode* pMapModeSource,
                                  const MapMode* pMapModeDest) const
 {
-    return mpMapper->LogicToLogic(rPtSource, &GetMapMode(), pMapModeSource, pMapModeDest);
+    return mpMapper->LogicToLogic(rPtSource, &GetMapMode(), pMapModeSource, pMapModeDest, IsMapModeEnabled());
 }
 
 Size OutputDevice::LogicToLogic(const Size& rSzSource,
                                 const MapMode* pMapModeSource,
                                 const MapMode* pMapModeDest) const
 {
-    return mpMapper->LogicToLogic(rSzSource, &GetMapMode(), pMapModeSource, pMapModeDest);
+    return mpMapper->LogicToLogic(rSzSource, &GetMapMode(), pMapModeSource, pMapModeDest, IsMapModeEnabled());
 }
 
 tools::Rectangle OutputDevice::LogicToLogic(const tools::Rectangle& rRectSource,
                                             const MapMode* pMapModeSource,
                                             const MapMode* pMapModeDest) const
 {
-    return mpMapper->LogicToLogic(rRectSource, &GetMapMode(), pMapModeSource, pMapModeDest);
+    return mpMapper->LogicToLogic(rRectSource, &GetMapMode(), pMapModeSource, pMapModeDest, IsMapModeEnabled());
 }
 
 double OutputDevice::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
@@ -431,7 +431,7 @@ basegfx::B2DHomMatrix OutputDevice::GetViewTransformation() const
 
 basegfx::B2DHomMatrix OutputDevice::GetViewTransformation(const MapMode& rMapMode) const
 {
-    return mpMapper->GetViewTransformation(rMapMode);
+    return mpMapper->GetViewTransformation(rMapMode, IsMapModeEnabled());
 }
 
 basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation() const
@@ -441,7 +441,7 @@ basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation() const
 
 basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation(const MapMode& rMapMode) const
 {
-    return mpMapper->GetInverseViewTransformation(rMapMode);
+    return mpMapper->GetInverseViewTransformation(rMapMode, IsMapModeEnabled());
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
