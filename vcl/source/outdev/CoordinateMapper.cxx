@@ -169,10 +169,10 @@ void CoordinateMapper::CalcMapResolution(const MapMode& rMapMode, tools::Long nD
     InvalidateViewTransform();
 }
 
-MappingCoefficients CoordinateMapper::ResolveMapRes(const MapMode* pSrcMode,
-                                                    const MapMode* pDestMode) const
+MappingCoefficients CoordinateMapper::ResolveMapResRelative(const MapMode* pBaseline,
+                                                            const MapMode* pTarget, bool bMap) const
 {
-    return maMapRes.ResolveMapRes(pDestMode, *pSrcMode, mbMap, mnDPIX, mnDPIY);
+    return maMapRes.ResolveMapRes(pTarget, *pBaseline, bMap, mnDPIX, mnDPIY);
 }
 
 vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rMapMode) const
@@ -1421,8 +1421,9 @@ Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMap
     if (*pSrc == *pDst)
         return rPtSource;
 
-    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeBaseline, pMapModeSource);
-    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeBaseline, pMapModeDest);
+    MappingCoefficients aMapResSource
+        = ResolveMapResRelative(pMapModeBaseline, pMapModeSource, mbMap);
+    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pMapModeDest, mbMap);
 
     return Point(aMapResSource.TransformPointX(rPtSource.X(), aMapResDest),
                  aMapResSource.TransformPointY(rPtSource.Y(), aMapResDest));
@@ -1438,8 +1439,9 @@ Size CoordinateMapper::LogicToLogic(const Size& rSzSource, const MapMode* pMapMo
     if (*pSrc == *pDst)
         return rSzSource;
 
-    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeBaseline, pMapModeSource);
-    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeBaseline, pMapModeDest);
+    MappingCoefficients aMapResSource
+        = ResolveMapResRelative(pMapModeBaseline, pMapModeSource, mbMap);
+    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pMapModeDest, mbMap);
 
     return Size(aMapResSource.ScaleDistanceX(rSzSource.Width(), aMapResDest),
                 aMapResSource.ScaleDistanceY(rSzSource.Height(), aMapResDest));
@@ -1456,8 +1458,9 @@ tools::Rectangle CoordinateMapper::LogicToLogic(const tools::Rectangle& rRectSou
     if (*pSrc == *pDst)
         return rRectSource;
 
-    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeBaseline, pMapModeSource);
-    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeBaseline, pMapModeDest);
+    MappingCoefficients aMapResSource
+        = ResolveMapResRelative(pMapModeBaseline, pMapModeSource, mbMap);
+    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pMapModeDest, mbMap);
 
     return tools::Rectangle(aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest),
                             aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest),
