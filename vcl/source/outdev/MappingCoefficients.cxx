@@ -21,31 +21,33 @@
 #include <tools/long.hxx>
 #include <tools/mapunit.hxx>
 
-#include <vcl/rendercontext/ImplMapRes.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/wrkwin.hxx>
 
+#include <MappingCoefficients.hxx>
 #include <svdata.hxx>
 
-ImplMapRes::ImplMapRes(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY)
+MappingCoefficients::MappingCoefficients(const MapMode& rMapMode, tools::Long nDPIX,
+                                         tools::Long nDPIY)
 {
     // Delegate the complex scaling math to the mutator
     CalcMapResolution(rMapMode, nDPIX, nDPIY);
 
     // Because this is a fresh object, the origin is always absolute
-    mnMapOfsX = rMapMode.GetOrigin().X();
-    mnMapOfsY = rMapMode.GetOrigin().Y();
+    mnTranslationX = rMapMode.GetOrigin().X();
+    mnTranslationY = rMapMode.GetOrigin().Y();
 }
 
-void ImplMapRes::SetMapRes(const o3tl::Length eUnit)
+void MappingCoefficients::SetMapRes(const o3tl::Length eUnit)
 {
     const auto[nNum, nDen] = o3tl::getConversionMulDiv(eUnit, o3tl::Length::in);
-    mfMapScX = mfMapScY = double(nNum) / nDen;
+    mfScaleX = mfScaleY = double(nNum) / nDen;
 };
 
-void ImplMapRes::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY)
+void MappingCoefficients::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX,
+                                            tools::Long nDPIY)
 {
     switch (rMapMode.GetMapUnit())
     {
@@ -82,8 +84,8 @@ void ImplMapRes::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, t
             SetMapRes(o3tl::Length::twip);
             break;
         case MapUnit::MapPixel:
-            mfMapScX = 1.0 / nDPIX;
-            mfMapScY = 1.0 / nDPIY;
+            mfScaleX = 1.0 / nDPIX;
+            mfScaleY = 1.0 / nDPIY;
             break;
         case MapUnit::MapSysFont:
         case MapUnit::MapAppFont:
@@ -99,8 +101,8 @@ void ImplMapRes::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, t
                     vcl::Window::ImplInitAppFontData(pWin);
                 }
             }
-            mfMapScX = double(pSVData->maGDIData.mnAppFontX) / (nDPIX * 40);
-            mfMapScY = double(pSVData->maGDIData.mnAppFontY) / (nDPIY * 80);
+            mfScaleX = double(pSVData->maGDIData.mnAppFontX) / (nDPIX * 40);
+            mfScaleY = double(pSVData->maGDIData.mnAppFontY) / (nDPIY * 80);
         }
         break;
         default:
@@ -115,8 +117,8 @@ void ImplMapRes::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, t
     Point aOrigin = rMapMode.GetOrigin();
     if (rMapMode.GetMapUnit() != MapUnit::MapRelative)
     {
-        mnMapOfsX = aOrigin.X();
-        mnMapOfsY = aOrigin.Y();
+        mnTranslationX = aOrigin.X();
+        mnTranslationY = aOrigin.Y();
     }
     else
     {
@@ -128,25 +130,26 @@ void ImplMapRes::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, t
             rnMapOffset = std::llround(fOffset) + nOrigin;
         };
 
-        funcCalcOffset(fScaleX, mnMapOfsX, aOrigin.X());
-        funcCalcOffset(fScaleY, mnMapOfsY, aOrigin.Y());
+        funcCalcOffset(fScaleX, mnTranslationX, aOrigin.X());
+        funcCalcOffset(fScaleY, mnTranslationY, aOrigin.Y());
     }
 
     // calculate scaling factor according to MapMode
     // aTemp? = rMapRes.mnMapSc? * aScale?
-    mfMapScX = fScaleX * mfMapScX;
-    mfMapScY = fScaleY * mfMapScY;
+    mfScaleX = fScaleX * mfScaleX;
+    mfScaleY = fScaleY * mfScaleY;
 }
 
-ImplMapRes ImplMapRes::ResolveMapRes(const MapMode* pMode, const MapMode& rDefaultMapMode,
-                                     bool bMap, tools::Long nDPIX, tools::Long nDPIY) const
+MappingCoefficients MappingCoefficients::ResolveMapRes(const MapMode* pMode,
+                                                       const MapMode& rDefaultMapMode, bool bMap,
+                                                       tools::Long nDPIX, tools::Long nDPIY) const
 {
     const MapMode* pEffectiveMode = pMode ? pMode : &rDefaultMapMode;
 
     if (bMap && pEffectiveMode == &rDefaultMapMode)
         return *this;
 
-    ImplMapRes aRes;
+    MappingCoefficients aRes;
 
     if (pEffectiveMode->GetMapUnit() == MapUnit::MapRelative)
         aRes = *this;
@@ -165,44 +168,45 @@ static tools::Long lcl_scaleLogicValue(const tools::Long nSourceValue, const dou
     return std::llround(nSourceValue * fSourceScale / fDestScale);
 }
 
-tools::Long ImplMapRes::ScaleDistanceX(const tools::Long nDistance,
-                                       const ImplMapRes& rDestRes) const
+tools::Long MappingCoefficients::ScaleDistanceX(const tools::Long nDistance,
+                                                const MappingCoefficients& rDestRes) const
 {
     // Distances only care about the scaling multiplier, not the origin offset
-    return lcl_scaleLogicValue(nDistance, mfMapScX, rDestRes.mfMapScX);
+    return lcl_scaleLogicValue(nDistance, mfScaleX, rDestRes.mfScaleX);
 }
 
-tools::Long ImplMapRes::ScaleDistanceY(const tools::Long nDistance,
-                                       const ImplMapRes& rDestRes) const
+tools::Long MappingCoefficients::ScaleDistanceY(const tools::Long nDistance,
+                                                const MappingCoefficients& rDestRes) const
 {
-    return lcl_scaleLogicValue(nDistance, mfMapScY, rDestRes.mfMapScY);
+    return lcl_scaleLogicValue(nDistance, mfScaleY, rDestRes.mfScaleY);
 }
 
 // Adds the offset
-tools::Long ImplMapRes::LocalToAbsoluteX(const tools::Long nLocalX) const
+tools::Long MappingCoefficients::LocalToAbsoluteX(const tools::Long nLocalX) const
 {
-    return nLocalX + mnMapOfsX;
+    return nLocalX + mnTranslationX;
 }
 
 // Subtracts the offset
-tools::Long ImplMapRes::AbsoluteToLocalX(const tools::Long nAbsoluteX) const
+tools::Long MappingCoefficients::AbsoluteToLocalX(const tools::Long nAbsoluteX) const
 {
-    return nAbsoluteX - mnMapOfsX;
+    return nAbsoluteX - mnTranslationX;
 }
 
 // Adds the offset
-tools::Long ImplMapRes::LocalToAbsoluteY(const tools::Long nLocalY) const
+tools::Long MappingCoefficients::LocalToAbsoluteY(const tools::Long nLocalY) const
 {
-    return nLocalY + mnMapOfsY;
+    return nLocalY + mnTranslationY;
 }
 
 // Subtracts the offset
-tools::Long ImplMapRes::AbsoluteToLocalY(const tools::Long nAbsoluteY) const
+tools::Long MappingCoefficients::AbsoluteToLocalY(const tools::Long nAbsoluteY) const
 {
-    return nAbsoluteY - mnMapOfsY;
+    return nAbsoluteY - mnTranslationY;
 }
 
-tools::Long ImplMapRes::TransformPointX(const tools::Long nLocalX, const ImplMapRes& rDestRes) const
+tools::Long MappingCoefficients::TransformPointX(const tools::Long nLocalX,
+                                                 const MappingCoefficients& rDestRes) const
 {
     // Add (Source to Absolute)
     const tools::Long nAbsoluteX = LocalToAbsoluteX(nLocalX);
@@ -214,7 +218,8 @@ tools::Long ImplMapRes::TransformPointX(const tools::Long nLocalX, const ImplMap
     return rDestRes.AbsoluteToLocalX(nScaledX);
 }
 
-tools::Long ImplMapRes::TransformPointY(const tools::Long nLocalY, const ImplMapRes& rDestRes) const
+tools::Long MappingCoefficients::TransformPointY(const tools::Long nLocalY,
+                                                 const MappingCoefficients& rDestRes) const
 {
     // Add (Source to Absolute)
     const tools::Long nAbsoluteY = LocalToAbsoluteY(nLocalY);

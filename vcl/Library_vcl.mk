@@ -286,7 +286,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/toolkit/group \
     vcl/source/toolkit/morebtn \
     vcl/source/outdev/CoordinateMapper \
-    vcl/source/outdev/ImplMapRes \
+    vcl/source/outdev/MappingCoefficients \
     vcl/source/outdev/background \
     vcl/source/outdev/eps \
     vcl/source/outdev/outdev \
