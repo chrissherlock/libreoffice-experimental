@@ -315,7 +315,7 @@ public:
 
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
-    MappingCoefficients ResolveMapRes(const MapMode* pMode) const;
+    MappingCoefficients ResolveMapRes(const MapMode* pSrcMode, const MapMode* pDestMode) const;
     vcl::detail::MapConversion ResolveMap(const MapMode& rMapMode) const;
 
     /** Invalidate the view transformation.
@@ -501,12 +501,13 @@ public:
     // Pure mathematical transformations between arbitrary MapModes.
     // These do not traverse the VCL device pipeline.
 
-    Point LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
-                       const MapMode* pMapModeDest) const;
-    Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
-                      const MapMode* pMapModeDest) const;
+    Point LogicToLogic(const Point& rPtSource, const MapMode* pMapModeBaseline,
+                       const MapMode* pMapModeSource, const MapMode* pMapModeDest) const;
+    Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeBaseline,
+                      const MapMode* pMapModeSource, const MapMode* pMapModeDest) const;
     tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
-                                  const MapMode* pMapModeSource, const MapMode* pMapModeDest) const;
+                                  const MapMode* pMapModeBaseline, const MapMode* pMapModeSource,
+                                  const MapMode* pMapModeDest) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
