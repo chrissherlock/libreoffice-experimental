@@ -24,18 +24,22 @@
 
 class MapMode;
 
-struct ImplMapRes
+// Transitional wrapper replacing ImplMapRes.
+// Will be simplified in future phases.
+struct MappingCoefficients
 {
-    ImplMapRes() = default;
-    ImplMapRes(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
+    MappingCoefficients() = default;
+    MappingCoefficients(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
     void SetMapRes(const o3tl::Length eUnit);
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
-    ImplMapRes ResolveMapRes(const MapMode* pMode, const MapMode& rDefaultMapMode, bool bMap,
-                             tools::Long nDPIX, tools::Long nDPIY) const;
+    MappingCoefficients ResolveMapRes(const MapMode* pMode, const MapMode& rDefaultMapMode,
+                                      bool bMap, tools::Long nDPIX, tools::Long nDPIY) const;
 
-    tools::Long ScaleDistanceX(const tools::Long nDistance, const ImplMapRes& rDestRes) const;
-    tools::Long ScaleDistanceY(const tools::Long nDistance, const ImplMapRes& rDestRes) const;
+    tools::Long ScaleDistanceX(const tools::Long nDistance,
+                               const MappingCoefficients& rDestRes) const;
+    tools::Long ScaleDistanceY(const tools::Long nDistance,
+                               const MappingCoefficients& rDestRes) const;
 
     tools::Long LocalToAbsoluteX(const tools::Long nLocalX) const;
     tools::Long AbsoluteToLocalX(const tools::Long nLocalX) const;
@@ -43,13 +47,15 @@ struct ImplMapRes
     tools::Long LocalToAbsoluteY(const tools::Long nLocalY) const;
     tools::Long AbsoluteToLocalY(const tools::Long nLocalY) const;
 
-    tools::Long TransformPointX(const tools::Long nLocalX, const ImplMapRes& rDestRes) const;
-    tools::Long TransformPointY(const tools::Long nLocalY, const ImplMapRes& rDestRes) const;
+    tools::Long TransformPointX(const tools::Long nLocalX,
+                                const MappingCoefficients& rDestRes) const;
+    tools::Long TransformPointY(const tools::Long nLocalY,
+                                const MappingCoefficients& rDestRes) const;
 
-    tools::Long mnMapOfsX = 0; ///< Offset in X direction
-    tools::Long mnMapOfsY = 0; ///< Offset in Y direction
-    double mfMapScX = 1; ///< Scaling factor in X direction
-    double mfMapScY = 1; ///< Scaling factor in Y direction
+    tools::Long mnTranslationX = 0; ///< Offset in X direction
+    tools::Long mnTranslationY = 0; ///< Offset in Y direction
+    double mfScaleX = 1; ///< Scaling factor in X direction
+    double mfScaleY = 1; ///< Scaling factor in Y direction
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
