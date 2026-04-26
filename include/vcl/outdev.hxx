@@ -34,7 +34,6 @@
 #include <vcl/region.hxx>
 #include <vcl/rendercontext/DrawImageFlags.hxx>
 #include <vcl/rendercontext/DrawTextFlags.hxx>
-#include <vcl/rendercontext/ImplMapRes.hxx>
 #include <vcl/rendercontext/InvertFlags.hxx>
 #include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <vcl/rendercontext/State.hxx>

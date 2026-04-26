@@ -29,9 +29,9 @@
 #include <tools/mapunit.hxx>
 
 #include <vcl/lineinfo.hxx>
-#include <vcl/rendercontext/ImplMapRes.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <MappingCoefficients.hxx>
 
 #include <cmath>
 #include <cassert>
@@ -160,15 +160,15 @@ void CoordinateMapper::CalcMapResolution(const MapMode& rMapMode, tools::Long nD
     maMapRes.CalcMapResolution(rMapMode, nDPIX, nDPIY);
 
     // 2. Copy the pure math into our firewall struct
-    maMapConversion.mfScaleX = maMapRes.mfMapScX;
-    maMapConversion.mfScaleY = maMapRes.mfMapScY;
-    maMapConversion.mnOffsetX = maMapRes.mnMapOfsX;
-    maMapConversion.mnOffsetY = maMapRes.mnMapOfsY;
+    maMapConversion.mfScaleX = maMapRes.mfScaleX;
+    maMapConversion.mfScaleY = maMapRes.mfScaleY;
+    maMapConversion.mnOffsetX = maMapRes.mnTranslationX;
+    maMapConversion.mnOffsetY = maMapRes.mnTranslationY;
 
     InvalidateViewTransform();
 }
 
-ImplMapRes CoordinateMapper::ResolveMapRes(const MapMode* pMode) const
+MappingCoefficients CoordinateMapper::ResolveMapRes(const MapMode* pMode) const
 {
     return maMapRes.ResolveMapRes(pMode, maMapMode, mbMap, mnDPIX, mnDPIY);
 }
@@ -176,8 +176,8 @@ ImplMapRes CoordinateMapper::ResolveMapRes(const MapMode* pMode) const
 vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rMapMode) const
 {
     // Evaluates a temporary MapMode against the current accumulated state
-    ImplMapRes aRes = maMapRes.ResolveMapRes(&rMapMode, maMapMode, mbMap, mnDPIX, mnDPIY);
-    return { aRes.mfMapScX, aRes.mfMapScY, aRes.mnMapOfsX, aRes.mnMapOfsY };
+    MappingCoefficients aRes = maMapRes.ResolveMapRes(&rMapMode, maMapMode, mbMap, mnDPIX, mnDPIY);
+    return { aRes.mfScaleX, aRes.mfScaleY, aRes.mnTranslationX, aRes.mnTranslationY };
 }
 
 void CoordinateMapper::InvalidateViewTransform()
@@ -1404,8 +1404,8 @@ Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMap
     if (*pSrc == *pDst)
         return rPtSource;
 
-    ImplMapRes aMapResSource = ResolveMapRes(pMapModeSource);
-    ImplMapRes aMapResDest = ResolveMapRes(pMapModeDest);
+    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeSource);
+    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeDest);
 
     return Point(aMapResSource.TransformPointX(rPtSource.X(), aMapResDest),
                  aMapResSource.TransformPointY(rPtSource.Y(), aMapResDest));
@@ -1420,8 +1420,8 @@ Size CoordinateMapper::LogicToLogic(const Size& rSzSource, const MapMode* pMapMo
     if (*pSrc == *pDst)
         return rSzSource;
 
-    ImplMapRes aMapResSource = ResolveMapRes(pMapModeSource);
-    ImplMapRes aMapResDest = ResolveMapRes(pMapModeDest);
+    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeSource);
+    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeDest);
 
     return Size(aMapResSource.ScaleDistanceX(rSzSource.Width(), aMapResDest),
                 aMapResSource.ScaleDistanceY(rSzSource.Height(), aMapResDest));
@@ -1437,8 +1437,8 @@ tools::Rectangle CoordinateMapper::LogicToLogic(const tools::Rectangle& rRectSou
     if (*pSrc == *pDst)
         return rRectSource;
 
-    ImplMapRes aMapResSource = ResolveMapRes(pMapModeSource);
-    ImplMapRes aMapResDest = ResolveMapRes(pMapModeDest);
+    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeSource);
+    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeDest);
 
     return tools::Rectangle(aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest),
                             aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest),
@@ -1478,10 +1478,10 @@ static auto lcl_getCorrectedUnit(MapUnit eMapSrc, MapUnit eMapDst)
     return std::make_pair(eSrc, eDst);
 }
 
-static std::pair<ImplMapRes, ImplMapRes> lcl_calcConversionMapRes(const MapMode& rMMSource,
-                                                                  const MapMode& rMMDest)
+static std::pair<MappingCoefficients, MappingCoefficients>
+lcl_calcConversionMapRes(const MapMode& rMMSource, const MapMode& rMMDest)
 {
-    std::pair<ImplMapRes, ImplMapRes> result;
+    std::pair<MappingCoefficients, MappingCoefficients> result;
     result.first.CalcMapResolution(rMMSource, 72, 72);
     result.second.CalcMapResolution(rMMDest, 72, 72);
     return result;
@@ -1672,15 +1672,15 @@ basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode&
 
     const auto[aMapResSource, aMapResDest] = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
 
-    const double fDestScX = (aMapResDest.mfMapScX != 0.0) ? aMapResDest.mfMapScX : 1.0;
-    const double fDestScY = (aMapResDest.mfMapScY != 0.0) ? aMapResDest.mfMapScY : 1.0;
+    const double fDestScX = (aMapResDest.mfScaleX != 0.0) ? aMapResDest.mfScaleX : 1.0;
+    const double fDestScY = (aMapResDest.mfScaleY != 0.0) ? aMapResDest.mfScaleY : 1.0;
 
-    const double fScaleFactorX(aMapResSource.mfMapScX / fDestScX);
-    const double fScaleFactorY(aMapResSource.mfMapScY / fDestScY);
-    const double fZeroPointX(double(aMapResSource.mnMapOfsX) * fScaleFactorX
-                             - double(aMapResDest.mnMapOfsX));
-    const double fZeroPointY(double(aMapResSource.mnMapOfsY) * fScaleFactorY
-                             - double(aMapResDest.mnMapOfsY));
+    const double fScaleFactorX(aMapResSource.mfScaleX / fDestScX);
+    const double fScaleFactorY(aMapResSource.mfScaleY / fDestScY);
+    const double fZeroPointX(double(aMapResSource.mnTranslationX) * fScaleFactorX
+                             - double(aMapResDest.mnTranslationX));
+    const double fZeroPointY(double(aMapResSource.mnTranslationY) * fScaleFactorY
+                             - double(aMapResDest.mnTranslationY));
 
     aTransform.set(0, 0, fScaleFactorX);
     aTransform.set(1, 1, fScaleFactorY);

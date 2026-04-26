@@ -27,6 +27,8 @@
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
 
+#include <MappingCoefficients.hxx>
+
 #include <optional>
 #include <atomic>
 #include <memory>
@@ -129,7 +131,7 @@ class VCL_DLLPUBLIC CoordinateMapper
 private:
     bool mbMap = false;
     MapMode maMapMode;
-    ImplMapRes maMapRes;
+    MappingCoefficients maMapRes;
     vcl::detail::MapConversion maMapConversion;
 
     // #i75163#
@@ -277,42 +279,42 @@ public:
         InvalidateViewTransform();
     }
 
-    tools::Long GetMappingXOffset() const { return maMapRes.mnMapOfsX; }
-    tools::Long GetMappingYOffset() const { return maMapRes.mnMapOfsY; }
-    double GetMapResolutionScaleX() const { return maMapRes.mfMapScX; }
-    double GetMapResolutionScaleY() const { return maMapRes.mfMapScY; }
+    tools::Long GetMappingXOffset() const { return maMapRes.mnTranslationX; }
+    tools::Long GetMappingYOffset() const { return maMapRes.mnTranslationY; }
+    double GetMapResolutionScaleX() const { return maMapRes.mfScaleX; }
+    double GetMapResolutionScaleY() const { return maMapRes.mfScaleY; }
 
     void SetMappingXOffset(tools::Long nOffset)
     {
-        maMapRes.mnMapOfsX = nOffset;
+        maMapRes.mnTranslationX = nOffset;
         maMapConversion.mnOffsetX = nOffset; // <-- SYNC THE FIREWALL
         InvalidateViewTransform();
     }
 
     void SetMappingYOffset(tools::Long nOffset)
     {
-        maMapRes.mnMapOfsY = nOffset;
+        maMapRes.mnTranslationY = nOffset;
         maMapConversion.mnOffsetY = nOffset; // <-- SYNC THE FIREWALL
         InvalidateViewTransform();
     }
 
     void SetMapResolutionScaleX(double fX)
     {
-        maMapRes.mfMapScX = fX;
+        maMapRes.mfScaleX = fX;
         maMapConversion.mfScaleX = fX; // <-- SYNC THE FIREWALL
         InvalidateViewTransform();
     }
 
     void SetMapResolutionScaleY(double fY)
     {
-        maMapRes.mfMapScY = fY;
+        maMapRes.mfScaleY = fY;
         maMapConversion.mfScaleY = fY; // <-- SYNC THE FIREWALL
         InvalidateViewTransform();
     }
 
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
-    ImplMapRes ResolveMapRes(const MapMode* pMode) const;
+    MappingCoefficients ResolveMapRes(const MapMode* pMode) const;
     vcl::detail::MapConversion ResolveMap(const MapMode& rMapMode) const;
 
     /** Invalidate the view transformation.
