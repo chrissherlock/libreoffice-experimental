@@ -313,7 +313,6 @@ public:
 
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
-    MappingCoefficients ResolveMapRes(const MapMode* pSrcMode, const MapMode* pDestMode) const;
     vcl::detail::MapConversion ResolveMap(const MapMode& rMapMode) const;
 
     /** Invalidate the view transformation.
@@ -557,6 +556,8 @@ public:
     }
 
 private:
+    MappingCoefficients ResolveMapResRelative(const MapMode* pBaseline, const MapMode* pTarget,
+                                              bool bMap) const;
     void UpdateTransforms() const;
     void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
                                double& rTransY) const;
