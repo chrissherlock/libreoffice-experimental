@@ -169,9 +169,10 @@ void CoordinateMapper::CalcMapResolution(const MapMode& rMapMode, tools::Long nD
     InvalidateViewTransform();
 }
 
-MappingCoefficients CoordinateMapper::ResolveMapRes(const MapMode* pMode) const
+MappingCoefficients CoordinateMapper::ResolveMapRes(const MapMode* pSrcMode,
+                                                    const MapMode* pDestMode) const
 {
-    return maMapRes.ResolveMapRes(pMode, maMapMode, mbMap, mnDPIX, mnDPIY);
+    return maMapRes.ResolveMapRes(pDestMode, *pSrcMode, mbMap, mnDPIX, mnDPIY);
 }
 
 vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rMapMode) const
@@ -1410,7 +1411,8 @@ double CoordinateMapper::LogicToWindowSubPixelY(double fY) const
     return fY * snap->maView.get(1, 1) + snap->maView.get(1, 2);
 }
 
-Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMapModeSource,
+Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMapModeBaseline,
+                                     const MapMode* pMapModeSource,
                                      const MapMode* pMapModeDest) const
 {
     const MapMode* pSrc = pMapModeSource ? pMapModeSource : &GetMapMode();
@@ -1419,14 +1421,15 @@ Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMap
     if (*pSrc == *pDst)
         return rPtSource;
 
-    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeSource);
-    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeDest);
+    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeBaseline, pMapModeSource);
+    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeBaseline, pMapModeDest);
 
     return Point(aMapResSource.TransformPointX(rPtSource.X(), aMapResDest),
                  aMapResSource.TransformPointY(rPtSource.Y(), aMapResDest));
 }
 
-Size CoordinateMapper::LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
+Size CoordinateMapper::LogicToLogic(const Size& rSzSource, const MapMode* pMapModeBaseline,
+                                    const MapMode* pMapModeSource,
                                     const MapMode* pMapModeDest) const
 {
     const MapMode* pSrc = pMapModeSource ? pMapModeSource : &GetMapMode();
@@ -1435,14 +1438,15 @@ Size CoordinateMapper::LogicToLogic(const Size& rSzSource, const MapMode* pMapMo
     if (*pSrc == *pDst)
         return rSzSource;
 
-    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeSource);
-    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeDest);
+    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeBaseline, pMapModeSource);
+    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeBaseline, pMapModeDest);
 
     return Size(aMapResSource.ScaleDistanceX(rSzSource.Width(), aMapResDest),
                 aMapResSource.ScaleDistanceY(rSzSource.Height(), aMapResDest));
 }
 
 tools::Rectangle CoordinateMapper::LogicToLogic(const tools::Rectangle& rRectSource,
+                                                const MapMode* pMapModeBaseline,
                                                 const MapMode* pMapModeSource,
                                                 const MapMode* pMapModeDest) const
 {
@@ -1452,8 +1456,8 @@ tools::Rectangle CoordinateMapper::LogicToLogic(const tools::Rectangle& rRectSou
     if (*pSrc == *pDst)
         return rRectSource;
 
-    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeSource);
-    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeDest);
+    MappingCoefficients aMapResSource = ResolveMapRes(pMapModeBaseline, pMapModeSource);
+    MappingCoefficients aMapResDest = ResolveMapRes(pMapModeBaseline, pMapModeDest);
 
     return tools::Rectangle(aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest),
                             aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest),
