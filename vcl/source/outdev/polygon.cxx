@@ -65,7 +65,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
     // use b2dpolygon drawing if possible
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
     {
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(IsMapModeEnabled()));
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
 
         // ensure closed - may be asserted, will prevent buffering
@@ -129,7 +129,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
         // #100127# moved real tools::PolyPolygon draw to separate method,
         // have to call recursively, avoiding duplicate
         // CoordinateMapper::LogicToDevicePixel calls
-        ImplDrawPolyPolygon(nPoly, mpMapper->LogicToDevicePixel(rPolyPoly));
+        ImplDrawPolyPolygon(nPoly, mpMapper->LogicToDevicePixel(rPolyPoly, IsMapModeEnabled()));
     }
 }
 
@@ -177,7 +177,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
     // use b2dpolygon drawing if possible
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
     {
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(IsMapModeEnabled()));
         basegfx::B2DPolygon aB2DPolygon(rPoly.getB2DPolygon());
 
         // ensure closed - maybe assert, hinders buffering
@@ -217,7 +217,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
             return;
     }
 
-    tools::Polygon aPoly = mpMapper->LogicToDevicePixel(rPoly);
+    tools::Polygon aPoly = mpMapper->LogicToDevicePixel(rPoly, IsMapModeEnabled());
     const Point* pPtAry = aPoly.GetConstPointAry();
 
     // #100127# Forward beziers to sal, if any
@@ -279,7 +279,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
 
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
     {
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(IsMapModeEnabled()));
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
         bSuccess = true;
 
@@ -325,7 +325,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
     {
         // fallback to old polygon drawing if needed
         const tools::PolyPolygon aToolsPolyPolygon(rB2DPolyPoly);
-        const tools::PolyPolygon aPixelPolyPolygon = mpMapper->LogicToDevicePixel(aToolsPolyPolygon);
+        const tools::PolyPolygon aPixelPolyPolygon = mpMapper->LogicToDevicePixel(aToolsPolyPolygon, IsMapModeEnabled());
         ImplDrawPolyPolygon(aPixelPolyPolygon.Count(), aPixelPolyPolygon);
     }
 }
