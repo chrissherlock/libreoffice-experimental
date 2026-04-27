@@ -175,10 +175,11 @@ MappingCoefficients CoordinateMapper::ResolveMapResRelative(const MapMode* pBase
     return maMapRes.ResolveMapRes(pTarget, *pBaseline, bMap, mnDPIX, mnDPIY);
 }
 
-vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rMapMode, bool bMap) const
+vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rBaseline,
+                                                        const MapMode& rTarget, bool bMap) const
 {
     // Evaluates a temporary MapMode against the current accumulated state
-    MappingCoefficients aRes = maMapRes.ResolveMapRes(&rMapMode, maMapMode, bMap, mnDPIX, mnDPIY);
+    MappingCoefficients aRes = maMapRes.ResolveMapRes(&rTarget, rBaseline, bMap, mnDPIX, mnDPIY);
     return { aRes.mfScaleX, aRes.mfScaleY, aRes.mnTranslationX, aRes.mnTranslationY };
 }
 
@@ -341,13 +342,11 @@ CoordinateMapper::GetViewTransformation(const vcl::detail::MapConversion& rConv)
     return aTransform;
 }
 
-basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rMapMode,
+basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rBaseline,
+                                                              const MapMode& rTarget,
                                                               bool bMap) const
 {
-    // STRANGLER STEP 2: The legacy API is now just a routing shim
-    if (rMapMode.IsDefault())
-        return GetViewTransformation(bMap);
-    return GetViewTransformation(ResolveMap(rMapMode, bMap));
+    return GetViewTransformation(ResolveMap(rBaseline, rTarget, bMap));
 }
 
 basegfx::B2DHomMatrix
@@ -358,12 +357,11 @@ CoordinateMapper::GetInverseViewTransformation(const vcl::detail::MapConversion&
     return aMatrix;
 }
 
-basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMode& rMapMode,
+basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMode& rBaseline,
+                                                                     const MapMode& rTarget,
                                                                      bool bMap) const
 {
-    if (rMapMode.IsDefault())
-        return GetInverseViewTransformation(bMap);
-    return GetInverseViewTransformation(ResolveMap(rMapMode, bMap));
+    return GetInverseViewTransformation(ResolveMap(rBaseline, rTarget, bMap));
 }
 
 // ========================================================================
@@ -1433,15 +1431,16 @@ Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMap
                                      const MapMode* pMapModeSource, const MapMode* pMapModeDest,
                                      bool bMap) const
 {
-    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &GetMapMode();
-    const MapMode* pDst = pMapModeDest ? pMapModeDest : &GetMapMode();
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : pMapModeBaseline;
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : pMapModeBaseline;
 
-    if (*pSrc == *pDst)
+    // Safety check to prevent null dereference, then check equivalence
+    if (!pSrc || !pDst || *pSrc == *pDst)
         return rPtSource;
 
-    MappingCoefficients aMapResSource
-        = ResolveMapResRelative(pMapModeBaseline, pMapModeSource, bMap);
-    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pMapModeDest, bMap);
+    // Pass the resolved non-null pointers down the pipeline
+    MappingCoefficients aMapResSource = ResolveMapResRelative(pMapModeBaseline, pSrc, bMap);
+    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pDst, bMap);
 
     return Point(aMapResSource.TransformPointX(rPtSource.X(), aMapResDest),
                  aMapResSource.TransformPointY(rPtSource.Y(), aMapResDest));
@@ -1451,15 +1450,14 @@ Size CoordinateMapper::LogicToLogic(const Size& rSzSource, const MapMode* pMapMo
                                     const MapMode* pMapModeSource, const MapMode* pMapModeDest,
                                     bool bMap) const
 {
-    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &GetMapMode();
-    const MapMode* pDst = pMapModeDest ? pMapModeDest : &GetMapMode();
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : pMapModeBaseline;
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : pMapModeBaseline;
 
-    if (*pSrc == *pDst)
+    if (!pSrc || !pDst || *pSrc == *pDst)
         return rSzSource;
 
-    MappingCoefficients aMapResSource
-        = ResolveMapResRelative(pMapModeBaseline, pMapModeSource, bMap);
-    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pMapModeDest, bMap);
+    MappingCoefficients aMapResSource = ResolveMapResRelative(pMapModeBaseline, pSrc, bMap);
+    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pDst, bMap);
 
     return Size(aMapResSource.ScaleDistanceX(rSzSource.Width(), aMapResDest),
                 aMapResSource.ScaleDistanceY(rSzSource.Height(), aMapResDest));
@@ -1470,15 +1468,14 @@ tools::Rectangle CoordinateMapper::LogicToLogic(const tools::Rectangle& rRectSou
                                                 const MapMode* pMapModeSource,
                                                 const MapMode* pMapModeDest, bool bMap) const
 {
-    const MapMode* pSrc = pMapModeSource ? pMapModeSource : &GetMapMode();
-    const MapMode* pDst = pMapModeDest ? pMapModeDest : &GetMapMode();
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : pMapModeBaseline;
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : pMapModeBaseline;
 
-    if (*pSrc == *pDst)
+    if (!pSrc || !pDst || *pSrc == *pDst)
         return rRectSource;
 
-    MappingCoefficients aMapResSource
-        = ResolveMapResRelative(pMapModeBaseline, pMapModeSource, bMap);
-    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pMapModeDest, bMap);
+    MappingCoefficients aMapResSource = ResolveMapResRelative(pMapModeBaseline, pSrc, bMap);
+    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pDst, bMap);
 
     return tools::Rectangle(aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest),
                             aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest),
