@@ -313,6 +313,26 @@ basegfx::B2DHomMatrix CoordinateMapper::GetDeviceTransformation(bool bMap) const
     return AcquireSnapshot(bMap)->maLogicToDevice;
 }
 
+basegfx::B2DHomMatrix CoordinateMapper::GetLogicToWindowMatrix(bool bMap) const
+{
+    return AcquireSnapshot(bMap)->GetLogicToWindow();
+}
+
+basegfx::B2DHomMatrix CoordinateMapper::GetWindowToLogicMatrix(bool bMap) const
+{
+    return AcquireSnapshot(bMap)->GetWindowToLogic();
+}
+
+basegfx::B2DHomMatrix CoordinateMapper::GetLogicToDeviceMatrix(bool bMap) const
+{
+    return AcquireSnapshot(bMap)->GetLogicToDevice();
+}
+
+basegfx::B2DHomMatrix CoordinateMapper::GetDeviceToLogicMatrix(bool bMap) const
+{
+    return AcquireSnapshot(bMap)->GetDeviceToLogic();
+}
+
 basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(bool bMap) const
 {
     return AcquireSnapshot(bMap)->maView;
