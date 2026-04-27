@@ -38,8 +38,8 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
 
         if (!mbOutputClipped)
         {
-            const tools::Long nX = mpMapper->LogicToDevicePixelX(rPoint.X(), IsMapModeEnabled());
-            const tools::Long nY = mpMapper->LogicToDevicePixelY(rPoint.Y(), IsMapModeEnabled());
+            const tools::Long nX = mpMapper->LogicToDevicePixel(Point(rPoint.X(), 0), IsMapModeEnabled()).X();
+            const tools::Long nY = mpMapper->LogicToDevicePixel(Point(0, rPoint.Y()), IsMapModeEnabled()).Y();
             aColor = mpGraphics->GetPixel(nX, nY, *this);
         }
     }

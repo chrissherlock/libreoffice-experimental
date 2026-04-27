@@ -661,7 +661,7 @@ double OutputDevice::GetTextHeightDouble() const
     if (!IsMapModeEnabled())
         return nHeight;
 
-    return mpMapper->ViewToLogicDistanceDoubleY(nHeight, IsMapModeEnabled());
+    return (nHeight * mpMapper->GetWindowToLogicMatrix(IsMapModeEnabled()).get(1,1));
 }
 
 float OutputDevice::approximate_char_width() const
@@ -865,7 +865,7 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
         if (IsMapModeEnabled())
         {
             for (int i = 0; i < nPartLen; ++i)
-                (*pDXPixelArray)[i] = mpMapper->ViewToLogicDistanceDoubleX((*pDXPixelArray)[i], IsMapModeEnabled());
+                (*pDXPixelArray)[i] = ((*pDXPixelArray)[i] * mpMapper->GetWindowToLogicMatrix(IsMapModeEnabled()).get(0,0));
         }
     }
 
@@ -889,7 +889,7 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
     if (!IsMapModeEnabled())
         return nWidth;
 
-    return mpMapper->ViewToLogicDistanceDoubleX(nWidth, IsMapModeEnabled());
+    return (nWidth * mpMapper->GetWindowToLogicMatrix(IsMapModeEnabled()).get(0,0));
 }
 
 void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos,
@@ -943,7 +943,7 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos
     if (IsMapModeEnabled())
     {
         for (i = 0; i < nCaretPos; ++i)
-            aCaretPixelPos[i] = mpMapper->ViewToLogicDistanceDoubleX(aCaretPixelPos[i], IsMapModeEnabled());
+            aCaretPixelPos[i] = (aCaretPixelPos[i] * mpMapper->GetWindowToLogicMatrix(IsMapModeEnabled()).get(0,0));
     }
 
     for (i = 0; i < nCaretPos; ++i)
