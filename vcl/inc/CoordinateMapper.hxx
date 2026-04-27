@@ -129,7 +129,6 @@ struct MapConversion
 class VCL_DLLPUBLIC CoordinateMapper
 {
 private:
-    MapMode maMapMode;
     MappingCoefficients maMapRes;
     vcl::detail::MapConversion maMapConversion;
 
@@ -236,44 +235,6 @@ public:
     void SetOutputWidthPixel(tools::Long nWidth);
     void SetOutputHeightPixel(tools::Long nHeight);
 
-    const MapMode& GetMapMode() const { return maMapMode; }
-    bool IsDefaultMapMode() const { return maMapMode.IsDefault(); }
-
-    void ResetMapMode()
-    {
-        maMapMode = MapMode();
-        InvalidateViewTransform();
-    }
-
-    void ResetMapMode(const MapMode& rMapMode)
-    {
-        maMapMode = rMapMode;
-        InvalidateViewTransform();
-    }
-
-    MapUnit GetMapUnit() const { return maMapMode.GetMapUnit(); }
-
-    double GetScaleX() const { return maMapMode.GetScaleX(); }
-    double GetScaleY() const { return maMapMode.GetScaleY(); }
-
-    void SetScaleX(double nX)
-    {
-        maMapMode.SetScaleX(nX);
-        InvalidateViewTransform();
-    }
-
-    void SetScaleY(double nY)
-    {
-        maMapMode.SetScaleY(nY);
-        InvalidateViewTransform();
-    }
-
-    void SetOrigin(const Point& rPt)
-    {
-        maMapMode.SetOrigin(rPt);
-        InvalidateViewTransform();
-    }
-
     tools::Long GetMappingXOffset() const { return maMapRes.mnTranslationX; }
     tools::Long GetMappingYOffset() const { return maMapRes.mnTranslationY; }
     double GetMapResolutionScaleX() const { return maMapRes.mfScaleX; }
@@ -309,7 +270,8 @@ public:
 
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
-    vcl::detail::MapConversion ResolveMap(const MapMode& rMapMode, bool bMap) const;
+    vcl::detail::MapConversion ResolveMap(const MapMode& rBaseline, const MapMode& rTarget,
+                                          bool bMap) const;
 
     /** Invalidate the view transformation.
 
@@ -318,12 +280,14 @@ public:
     void InvalidateViewTransform();
     basegfx::B2DHomMatrix GetViewTransformation(bool bMap) const;
     basegfx::B2DHomMatrix GetViewTransformation(const vcl::detail::MapConversion& rConv) const;
-    basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rMapMode, bool bMap) const;
+    basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rBaseline, const MapMode& rTarget,
+                                                bool bMap) const;
 
     basegfx::B2DHomMatrix GetInverseViewTransformation(bool bMap) const;
     basegfx::B2DHomMatrix
     GetInverseViewTransformation(const vcl::detail::MapConversion& rConv) const;
-    basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rMapMode, bool bMap) const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rBaseline,
+                                                       const MapMode& rTarget, bool bMap) const;
 
     basegfx::B2DHomMatrix GetDeviceTransformation(bool bMap) const;
 

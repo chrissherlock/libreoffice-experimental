@@ -190,6 +190,7 @@ private:
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;
     bool                            mbMap = false;
+    MapMode                         maMapMode;
 
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
@@ -1576,6 +1577,12 @@ public:
     void                        SetRelativeMapMode( const MapMode& rNewMapMode );
     virtual void                SetMetafileMapMode(const MapMode& rNewMapMode, bool bIsRecord);
     const MapMode&              GetMapMode() const;
+
+    void ResetMapMode();
+    void ResetMapMode(const MapMode& rMapMode);
+    void SetScaleX(double nX);
+    void SetScaleY(double nY);
+    void SetOrigin(const Point& rPt);
 
     basegfx::B2DHomMatrix GetViewTransformation() const;
     basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rMapMode) const;
