@@ -273,33 +273,40 @@ CoordinateMapper::AcquireSnapshot(bool bMap) const
 
     while (true)
     {
-        // Capture version before reading snapshot
-        const uint64_t nStartVersion = mnStateVersion.load(std::memory_order_acquire);
+        // Fast path
+        if (auto pSnap = std::atomic_load_explicit(&mpSnapshots[idx], std::memory_order_acquire))
+        {
+            const uint64_t v = mnStateVersion.load(std::memory_order_acquire);
+            if (pSnap->mnVersion == v)
+                return pSnap; // Valid for the observed version
+        }
 
-        // Load cached snapshot for this mode
-        auto pSnap = std::atomic_load_explicit(&mpSnapshots[idx], std::memory_order_acquire);
+        // Slow path: build snapshot
+        const uint64_t buildVersion = mnStateVersion.load(std::memory_order_acquire);
 
-        // Fast path: snapshot is valid
-        if (pSnap && pSnap->mnVersion == nStartVersion)
-            return pSnap;
-
-        // Build a new snapshot
         auto pNew = BuildSnapshot(bMap);
 
-        // Re-check version after build
-        const uint64_t nEndVersion = mnStateVersion.load(std::memory_order_acquire);
+        const uint64_t verifyVersion = mnStateVersion.load(std::memory_order_acquire);
+        if (buildVersion != verifyVersion)
+            continue; // state changed while building -> retry
 
-        if (nStartVersion != nEndVersion)
-            continue; // state changed → retry
+        pNew->mnVersion = verifyVersion;
 
-        // Publish snapshot
-        pNew->mnVersion = nStartVersion;
+        // Convert to const-qualified shared_ptr
+        auto pPublish = std::shared_ptr<const TransformSnapshot>(std::move(pNew));
 
-        std::atomic_store_explicit(&mpSnapshots[idx],
-                                   std::shared_ptr<const TransformSnapshot>(std::move(pNew)),
-                                   std::memory_order_release);
+        // Avoid redundant publish if another thread won
+        if (auto pExisting
+            = std::atomic_load_explicit(&mpSnapshots[idx], std::memory_order_acquire))
+        {
+            if (pExisting->mnVersion == verifyVersion)
+                return pExisting;
+        }
 
-        return std::atomic_load_explicit(&mpSnapshots[idx], std::memory_order_acquire);
+        // Publish
+        std::atomic_store_explicit(&mpSnapshots[idx], pPublish, std::memory_order_release);
+
+        return pPublish;
     }
 }
 
