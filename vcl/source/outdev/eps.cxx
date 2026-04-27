@@ -44,7 +44,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
     if( mbOutputClipped )
         return true;
 
-    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(tools::Rectangle(rPoint, rSize)));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(tools::Rectangle(rPoint, rSize), IsMapModeEnabled()));
 
     if (aRect.IsEmpty())
         return true;
