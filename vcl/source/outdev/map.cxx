@@ -165,8 +165,7 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
     ImplInitMapModeObjects();
 
     // #106426# Adapt logical offset when changing mapmode
-    mpMapper->SetLogicToAbsoluteOffset(Size(mpMapper->ViewToLogicDistanceX(mpMapper->GetWindowToViewOffsetX(), IsMapModeEnabled()),
-                                    mpMapper->ViewToLogicDistanceY(mpMapper->GetWindowToViewOffsetY(), IsMapModeEnabled())));
+    mpMapper->SetLogicToAbsoluteOffset(mpMapper->WindowToLogicUnits(Size(mpMapper->GetWindowToViewOffsetX(), mpMapper->GetWindowToViewOffsetY()), IsMapModeEnabled()));
 
     // #i75163#
     mpMapper->InvalidateViewTransform();
@@ -235,8 +234,7 @@ void OutputDevice::SetRelativeMapMode( const MapMode& rNewMapMode )
         ResetMapMode(rNewMapMode);
 
     // #106426# Adapt logical offset when changing MapMode
-    mpMapper->SetLogicToAbsoluteOffset(Size(mpMapper->ViewToLogicDistanceX(mpMapper->GetWindowToViewOffsetX(), IsMapModeEnabled()),
-                                    mpMapper->ViewToLogicDistanceY(mpMapper->GetWindowToViewOffsetY(), IsMapModeEnabled())));
+    mpMapper->SetLogicToAbsoluteOffset(mpMapper->WindowToLogicUnits(Size(mpMapper->GetWindowToViewOffsetX(), mpMapper->GetWindowToViewOffsetY()), IsMapModeEnabled()));
 }
 
 void OutputDevice::ResetMapMode()

@@ -55,10 +55,10 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testIdentityFastPath)
     // Pass 'true' to explicitly enable mapping
     auto mat = m.GetDeviceTransformation(true);
 
-    double logic = 1.0;
+    tools::Long logic = 1;
 
     double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
-    tools::Long device = m.LogicToDevicePixelX(logic, true);
+    tools::Long device = m.LogicToDevicePixel(Point(logic, 0), true).X();
 
     std::cout << "\n[Identity]\n";
     std::cout << "Affine: " << affine << "\n";
@@ -73,9 +73,9 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testNoZeroCollapse)
     CoordinateMapper m;
     setupIdentity(m);
 
-    // Use valid integer logic inputs
-    CPPUNIT_ASSERT(m.LogicToDevicePixelX(1, true) != 0);
-    CPPUNIT_ASSERT(m.LogicToDevicePixelX(2, true) != 0);
+    // Use valid integer logic inputs mapped through 2D points
+    CPPUNIT_ASSERT(m.LogicToDevicePixel(Point(1, 0), true).X() != 0);
+    CPPUNIT_ASSERT(m.LogicToDevicePixel(Point(2, 0), true).X() != 0);
 }
 
 CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testAffineMatchesScalarStability)
@@ -88,7 +88,7 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testAffineMatchesScalarStability)
     for (tools::Long logic : { 1, 2, 5, 10 })
     {
         double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
-        tools::Long device = m.LogicToDevicePixelX(logic, true);
+        tools::Long device = m.LogicToDevicePixel(Point(logic, 0), true).X();
 
         tools::Long expected = static_cast<tools::Long>(std::round(affine));
 
@@ -111,17 +111,18 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testNonIdentityScale)
 
     auto mat = m.GetDeviceTransformation(true);
 
-    double logic = 1.0;
+    tools::Long logic = 1;
 
     double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
-    tools::Long device = m.LogicToDevicePixelX(logic, true);
+    tools::Long device = m.LogicToDevicePixel(Point(logic, 0), true).X();
 
     std::cout << "\n[Scaled]\n";
     std::cout << "Affine: " << affine << "\n";
     std::cout << "Device: " << device << "\n";
 
-    // 1.0 logic unit * 2.0 Scale = 2.0 pixels
+    // 1 logic unit * 2.0 Scale = 2.0 pixels
     CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, affine, 1e-7);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(2), device);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

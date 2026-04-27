@@ -119,7 +119,7 @@ void OutputDevice::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     if (xImpBmp)
     {
         SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                           mpMapper->LogicToDevicePixelX(rDestPt.X(), IsMapModeEnabled()), mpMapper->LogicToDevicePixelY(rDestPt.Y(), IsMapModeEnabled()),
+                           mpMapper->LogicToDevicePixel(Point(rDestPt.X(), 0), IsMapModeEnabled()).X(), mpMapper->LogicToDevicePixel(Point(0, rDestPt.Y()), IsMapModeEnabled()).Y(),
                            LogicWidthToDevicePixel(rDestSize.Width()),
                            LogicHeightToDevicePixel(rDestSize.Height()));
 
