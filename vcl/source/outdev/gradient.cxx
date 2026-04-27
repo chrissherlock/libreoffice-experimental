@@ -86,14 +86,14 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     const tools::Rectangle aBoundRect( rPolyPoly.GetBoundRect() );
 
     // convert rectangle to pixels
-    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(aBoundRect));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(aBoundRect, IsMapModeEnabled()));
     aRect.Normalize();
 
     // do nothing if the rectangle is empty
     if (aRect.IsEmpty())
         return;
 
-    tools::PolyPolygon aClixPolyPoly(mpMapper->LogicToDevicePixel(rPolyPoly));
+    tools::PolyPolygon aClixPolyPoly(mpMapper->LogicToDevicePixel(rPolyPoly, IsMapModeEnabled()));
     bool bDrawn = false;
 
     if( !mpGraphics && !AcquireGraphics() )

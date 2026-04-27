@@ -267,7 +267,7 @@ bool OutputDevice::ImplDrawRotateText( SalLayout& rSalLayout )
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     tools::Long nOldOffX = GetDeviceOriginX();
     tools::Long nOldOffY = GetDeviceOriginY();
-    bool bOldMap = mpMapper->IsMapModeEnabled();
+    bool bOldMap = IsMapModeEnabled();
 
     SetDeviceOriginX(0);
     SetDeviceOriginY(0);
@@ -645,7 +645,7 @@ tools::Long OutputDevice::GetTextHeight() const
 
     tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
 
-    if (mpMapper->IsMapModeEnabled())
+    if (IsMapModeEnabled())
         nHeight = DevicePixelToLogicHeight(nHeight);
 
     return nHeight;
@@ -658,10 +658,10 @@ double OutputDevice::GetTextHeightDouble() const
 
     const tools::Long nHeight = mpFontInstance->mnLineHeight + mnEmphasisAscent + mnEmphasisDescent;
 
-    if (!mpMapper->IsMapModeEnabled())
+    if (!IsMapModeEnabled())
         return nHeight;
 
-    return mpMapper->ViewToLogicDistanceDoubleY(nHeight);
+    return mpMapper->ViewToLogicDistanceDoubleY(nHeight, IsMapModeEnabled());
 }
 
 float OutputDevice::approximate_char_width() const
@@ -862,10 +862,10 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
     if (pDXPixelArray)
     {
         assert(pKernArray && "pDXPixelArray depends on pKernArray existing");
-        if (mpMapper->IsMapModeEnabled())
+        if (IsMapModeEnabled())
         {
             for (int i = 0; i < nPartLen; ++i)
-                (*pDXPixelArray)[i] = mpMapper->ViewToLogicDistanceDoubleX((*pDXPixelArray)[i]);
+                (*pDXPixelArray)[i] = mpMapper->ViewToLogicDistanceDoubleX((*pDXPixelArray)[i], IsMapModeEnabled());
         }
     }
 
@@ -882,14 +882,14 @@ OutputDevice::GetPartialTextArray(const OUString& rStr, KernArray* pKernArray, s
         if (pSalLayout->GetBoundRect(stRect))
         {
             auto stRect2 = SalLayout::BoundRect2Rectangle(stRect);
-            *pBounds = mpMapper->DevicePixelToLogic(stRect2);
+            *pBounds = mpMapper->DevicePixelToLogic(stRect2, IsMapModeEnabled());
         }
     }
 
-    if (!mpMapper->IsMapModeEnabled())
+    if (!IsMapModeEnabled())
         return nWidth;
 
-    return mpMapper->ViewToLogicDistanceDoubleX(nWidth);
+    return mpMapper->ViewToLogicDistanceDoubleX(nWidth, IsMapModeEnabled());
 }
 
 void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos,
@@ -940,10 +940,10 @@ void OutputDevice::GetCaretPositions( const OUString& rStr, KernArray& rCaretPos
     }
 
     // convert from font units to logical units
-    if (mpMapper->IsMapModeEnabled())
+    if (IsMapModeEnabled())
     {
         for (i = 0; i < nCaretPos; ++i)
-            aCaretPixelPos[i] = mpMapper->ViewToLogicDistanceDoubleX(aCaretPixelPos[i]);
+            aCaretPixelPos[i] = mpMapper->ViewToLogicDistanceDoubleX(aCaretPixelPos[i], IsMapModeEnabled());
     }
 
     for (i = 0; i < nCaretPos; ++i)
@@ -1168,7 +1168,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
     }
 
     double nPixelWidth = nLogicalWidth;
-    if (nLogicalWidth && mpMapper->IsMapModeEnabled())
+    if (nLogicalWidth && IsMapModeEnabled())
     {
         // convert from logical units to physical units
         nPixelWidth = LogicWidthToDeviceSubPixel(nLogicalWidth);
@@ -1205,7 +1205,7 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 
         JustificationData stJustification{ nJustMinCluster, nJustLen };
 
-        if (!pDXArray.empty() && mpMapper->IsMapModeEnabled())
+        if (!pDXArray.empty() && IsMapModeEnabled())
         {
             // convert from logical units to font units without rounding,
             // keeping accuracy for lower levels
@@ -1296,11 +1296,11 @@ std::unique_ptr<SalLayout> OutputDevice::ImplLayout(
 
     // default to on for pdf export, which uses SubPixelToLogic to convert back to
     // the logical coord space, of if we are scaling/mapping
-    if (mpMapper->IsMapModeEnabled() || meOutDevType == OUTDEV_PDF)
-        pSalLayout->DrawBase() = mpMapper->LogicToDeviceSubPixel(rLogicalPos);
+    if (IsMapModeEnabled() || meOutDevType == OUTDEV_PDF)
+        pSalLayout->DrawBase() = mpMapper->LogicToDeviceSubPixel(rLogicalPos, IsMapModeEnabled());
     else
     {
-        Point aDevicePos = mpMapper->LogicToDevicePixel(rLogicalPos);
+        Point aDevicePos = mpMapper->LogicToDevicePixel(rLogicalPos, IsMapModeEnabled());
         pSalLayout->DrawBase() = basegfx::B2DPoint(aDevicePos.X(), aDevicePos.Y());
     }
 
@@ -1356,7 +1356,7 @@ sal_Int32 OutputDevice::GetTextBreak( const OUString& rStr, tools::Long nTextWid
         // problem with rounding errors especially for small nCharExtras
         // TODO: remove when layout units have subpixel granularity
         tools::Long nSubPixelFactor = 1;
-        if (!mpMapper->IsMapModeEnabled())
+        if (!IsMapModeEnabled())
             nSubPixelFactor = 64;
         double nTextPixelWidth = LogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
         double nExtraPixelWidth = 0;
@@ -1391,7 +1391,7 @@ sal_Int32 OutputDevice::GetTextBreakArray(const OUString& rStr, tools::Long nTex
         // problem with rounding errors especially for small nCharExtras
         // TODO: remove when layout units have subpixel granularity
         tools::Long nSubPixelFactor = 1;
-        if (!mpMapper->IsMapModeEnabled())
+        if (!IsMapModeEnabled())
             nSubPixelFactor = 64;
 
         double nTextPixelWidth = LogicWidthToDeviceSubPixel(nTextWidth * nSubPixelFactor);
@@ -1600,7 +1600,7 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
                         double nMnemonicWidth = rTargetDevice.LogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2));
 
                         // Extract exact subpixel scale factors from the SSoT matrix
-                        const basegfx::B2DHomMatrix aTransform = rTargetDevice.GetMapper().GetDeviceTransformation();
+                        const basegfx::B2DHomMatrix aTransform = rTargetDevice.GetMapper().GetDeviceTransformation(rTargetDevice.IsMapModeEnabled());
                         const double fScaleX = aTransform.get(0, 0);
                         const double fScaleY = aTransform.get(1, 1);
 
@@ -1673,7 +1673,7 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
             nMnemonicWidth = rTargetDevice.LogicWidthToDeviceSubPixel(std::abs(lc_x1 - lc_x2));
 
             // Extract exact subpixel scale factors from the SSoT matrix
-            const basegfx::B2DHomMatrix aTransform = rTargetDevice.GetMapper().GetDeviceTransformation();
+            const basegfx::B2DHomMatrix aTransform = rTargetDevice.GetMapper().GetDeviceTransformation(rTargetDevice.IsMapModeEnabled());
             const double fScaleX = aTransform.get(0, 0);
             const double fScaleY = aTransform.get(1, 1);
 
@@ -1983,7 +1983,7 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
                 aTempPos = Point( std::max(lc_x1,lc_x2), GetFontMetric().GetAscent() );
 
             aTempPos += rPos;
-            aTempPos = mpMapper->LogicToWindowUnits( aTempPos );
+            aTempPos = mpMapper->LogicToWindowUnits(aTempPos, IsMapModeEnabled());
             nMnemonicX = GetDeviceOriginX() + aTempPos.X();
             nMnemonicY = GetDeviceOriginY() + aTempPos.Y();
         }
@@ -2101,7 +2101,7 @@ bool OutputDevice::GetTextBoundRect(basegfx::B2DRectangle& rRect, const OUString
             basegfx::B2DPoint aPos = pSalLayout->GetDrawPosition(basegfx::B2DPoint(nXOffset, 0));
             aPixelRect.translate(mnTextOffX - aPos.getX(), mnTextOffY - aPos.getY());
             rRect = PixelToLogic( aPixelRect );
-            if (mpMapper->IsMapModeEnabled())
+            if (IsMapModeEnabled())
             {
                 rRect.translate(mpMapper->GetMappingXOffset(), mpMapper->GetMappingYOffset());
             }
@@ -2131,7 +2131,7 @@ bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,
 
     // we want to get the Rectangle in logical units, so to
     // avoid rounding errors we just size the font in logical units
-    bool bOldMap = mpMapper->IsMapModeEnabled();
+    bool bOldMap = IsMapModeEnabled();
     if( bOldMap )
     {
         mpMapper->EnableMapMode(false);
@@ -2202,7 +2202,7 @@ bool OutputDevice::GetGlyphOutlines( const sal_uInt32* pGlyphIds, sal_Int32 nGly
     rOutlines.clear();
     rOutlines.reserve(nGlyphs);
 
-    bool bOldMap = mpMapper->IsMapModeEnabled();
+    bool bOldMap = IsMapModeEnabled();
     if (bOldMap)
     {
         const_cast<OutputDevice&>(*this).EnableMapMode(false);

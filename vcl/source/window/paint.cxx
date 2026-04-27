@@ -347,7 +347,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
         rRenderContext.ReMirror(aPaintRect);
         rRenderContext.ReMirror(rPaintRegion);
     }
-    aPaintRect = GetOutDev()->GetMapper().DevicePixelToLogic(aPaintRect);
+    aPaintRect = GetOutDev()->GetMapper().DevicePixelToLogic(aPaintRect, GetOutDev()->IsMapModeEnabled());
     mpWindowImpl->mpPaintRegion = &rPaintRegion;
     mpWindowImpl->maInvalidateRegion.SetEmpty();
 
@@ -1017,7 +1017,7 @@ void Window::Invalidate( const tools::Rectangle& rRect, InvalidateFlags nFlags )
         return;
 
     OutputDevice *pOutDev = GetOutDev();
-    tools::Rectangle aRect = pOutDev->GetMapper().LogicToDevicePixel(rRect);
+    tools::Rectangle aRect = pOutDev->GetMapper().LogicToDevicePixel(rRect, pOutDev->IsMapModeEnabled());
     if ( !aRect.IsEmpty() )
     {
         vcl::Region aRegion( aRect );
@@ -1053,7 +1053,7 @@ void Window::LogicInvalidate(const tools::Rectangle* pRectangle)
 {
     if(pRectangle)
     {
-        tools::Rectangle aRect = GetOutDev()->GetMapper().LogicToDevicePixel(*pRectangle);
+        tools::Rectangle aRect = GetOutDev()->GetMapper().LogicToDevicePixel(*pRectangle, GetOutDev()->IsMapModeEnabled());
         PixelInvalidate(&aRect);
     }
     else

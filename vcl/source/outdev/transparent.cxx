@@ -131,7 +131,7 @@ void OutputDevice::DrawTransparent(
         }
 
         // create ObjectToDevice transformation
-        const basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation() * rObjectTransform);
+        const basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation(IsMapModeEnabled()) * rObjectTransform);
         // TODO: this must not drop transparency for mpAlphaVDev case, but instead use premultiplied
         // alpha... but that requires using premultiplied alpha also for already drawn data
 
@@ -219,7 +219,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
 
         // get the polygon in device coordinates
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation());
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(IsMapModeEnabled()));
 
         const double fTransparency = 0.01 * nTransparencePercent;
         if( mbFillColor )
@@ -306,7 +306,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
                 InitFillColor();
 
             tools::Rectangle aLogicPolyRect( rPolyPoly.GetBoundRect() );
-            tools::Rectangle aPixelRect(mpMapper->LogicToDevicePixel(aLogicPolyRect));
+            tools::Rectangle aPixelRect(mpMapper->LogicToDevicePixel(aLogicPolyRect, IsMapModeEnabled()));
 
             if( !mbOutputClipped )
             {

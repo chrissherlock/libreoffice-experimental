@@ -60,7 +60,7 @@ void OutputDevice::SetClipRegion( const vcl::Region& rRegion )
     }
     else
     {
-        vcl::Region aRegion = mpMapper->LogicToWindowUnits( rRegion );
+        vcl::Region aRegion = mpMapper->LogicToWindowUnits(rRegion, IsMapModeEnabled());
         SetDeviceClipRegion( &aRegion );
     }
 }
@@ -99,7 +99,7 @@ void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaISectRectClipRegionAction( rRect ) );
 
-    tools::Rectangle aRect = mpMapper->LogicToWindowUnits( rRect );
+    tools::Rectangle aRect = mpMapper->LogicToWindowUnits(rRect, IsMapModeEnabled());
     maRegion.Intersect( aRect );
     mbClipRegion        = true;
     mbInitClipRegion    = true;
@@ -112,7 +112,7 @@ void OutputDevice::IntersectClipRegion( const vcl::Region& rRegion )
         if ( mpMetaFile )
             mpMetaFile->AddAction( new MetaISectRegionClipRegionAction( rRegion ) );
 
-        vcl::Region aRegion = mpMapper->LogicToWindowUnits( rRegion );
+        vcl::Region aRegion = mpMapper->LogicToWindowUnits(rRegion, IsMapModeEnabled());
         maRegion.Intersect( aRegion );
         mbClipRegion        = true;
         mbInitClipRegion    = true;

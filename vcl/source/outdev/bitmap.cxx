@@ -154,7 +154,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
         return;
 
     SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                       mpMapper->LogicToDevicePixelX(rDestPt.X()), mpMapper->LogicToDevicePixelY(rDestPt.Y()),
+                       mpMapper->LogicToDevicePixelX(rDestPt.X(), IsMapModeEnabled()), mpMapper->LogicToDevicePixelY(rDestPt.Y(), IsMapModeEnabled()),
                        LogicWidthToDevicePixel(rDestSize.Width()),
                        LogicHeightToDevicePixel(rDestSize.Height()));
 
@@ -268,8 +268,8 @@ void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize
         return;
 
     SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
-                       rSrcSizePixel.Height(), mpMapper->LogicToDevicePixelX(rDestPt.X()),
-                       mpMapper->LogicToDevicePixelY(rDestPt.Y()),
+                       rSrcSizePixel.Height(), mpMapper->LogicToDevicePixelX(rDestPt.X(), IsMapModeEnabled()),
+                       mpMapper->LogicToDevicePixelY(rDestPt.Y(), IsMapModeEnabled()),
                        LogicWidthToDevicePixel(rDestSize.Width()),
                        LogicHeightToDevicePixel(rDestSize.Height()));
 
@@ -296,8 +296,8 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
 
     assert(mpGraphics);
 
-    tools::Long    nX = mpMapper->LogicToDevicePixelX( rSrcPt.X() );
-    tools::Long    nY = mpMapper->LogicToDevicePixelY( rSrcPt.Y() );
+    tools::Long    nX = mpMapper->LogicToDevicePixelX(rSrcPt.X(), IsMapModeEnabled());
+    tools::Long    nY = mpMapper->LogicToDevicePixelY(rSrcPt.Y(), IsMapModeEnabled());
     tools::Long    nWidth = LogicWidthToDevicePixel(rSize.Width());
     tools::Long    nHeight = LogicHeightToDevicePixel(rSize.Height());
     if ( nWidth <= 0 || nHeight <= 0 || nX > (GetOutputWidthPixel() + GetDeviceOriginX()) || nY > (GetOutputHeightPixel() + GetDeviceOriginY()))
@@ -387,8 +387,8 @@ void OutputDevice::DrawDeviceAlphaBitmap( const Bitmap& rBmp,
 {
     assert(!is_double_buffered_window());
 
-    Point     aOutPt(mpMapper->LogicToWindowUnits(rDestPt));
-    Size      aOutSz(mpMapper->LogicToWindowUnits(rDestSize));
+    Point     aOutPt(mpMapper->LogicToWindowUnits(rDestPt, IsMapModeEnabled()));
+    Size      aOutSz(mpMapper->LogicToWindowUnits(rDestSize, IsMapModeEnabled()));
     tools::Rectangle aDstRect(Point(), GetOutputSizePixel());
 
     const bool bHMirr = aOutSz.Width() < 0;

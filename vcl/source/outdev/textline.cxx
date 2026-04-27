@@ -984,7 +984,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     if (!InitFont())
         return;
 
-    Point aPos = mpMapper->LogicToDevicePixel(rPos);
+    Point aPos = mpMapper->LogicToDevicePixel(rPos, IsMapModeEnabled());
     double fWidth = LogicWidthToDeviceSubPixel(nWidth);
     aPos += Point( mnTextOffX, mnTextOffY );
     ImplDrawTextLine( aPos.X(), aPos.X(), 0, fWidth, fWidth, eStrikeout, eUnderline, eOverline, /*bUnderlineAbove*/false );
@@ -1011,8 +1011,8 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
     if (!InitFont())
         return;
 
-    Point aStartPt = mpMapper->LogicToDevicePixel(rStartPos);
-    Point aEndPt = mpMapper->LogicToDevicePixel(rEndPos);
+    Point aStartPt = mpMapper->LogicToDevicePixel(rStartPos, IsMapModeEnabled());
+    Point aEndPt = mpMapper->LogicToDevicePixel(rEndPos, IsMapModeEnabled());
 
     tools::Long nStartX = aStartPt.X();
     tools::Long nStartY = aStartPt.Y();

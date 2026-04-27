@@ -35,8 +35,8 @@ protected:
         mm.SetScaleX(1.0);
         mm.SetScaleY(1.0);
 
-        m.ResetMapMode(mm);
-        m.EnableMapMode(true);
+        // Feed the intent directly to the math engine (Stateless Mapper Refactor)
+        m.CalcMapResolution(mm, 96, 96);
     }
 
     tools::Long snap(double v) const
@@ -52,19 +52,20 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testIdentityFastPath)
     CoordinateMapper m;
     setupIdentity(m);
 
-    auto mat = m.GetDeviceTransformation();
+    // Pass 'true' to explicitly enable mapping
+    auto mat = m.GetDeviceTransformation(true);
 
     double logic = 1.0;
 
     double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
-    tools::Long device = m.LogicToDevicePixelX(logic);
+    tools::Long device = m.LogicToDevicePixelX(logic, true);
 
     std::cout << "\n[Identity]\n";
     std::cout << "Affine: " << affine << "\n";
     std::cout << "Device: " << device << "\n";
 
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(96.0, affine, 1e-7);
-    CPPUNIT_ASSERT_EQUAL(tools::Long(96), device);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(1.0, affine, 1e-7);
+    CPPUNIT_ASSERT_EQUAL(tools::Long(1), device);
 }
 
 CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testNoZeroCollapse)
@@ -73,8 +74,8 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testNoZeroCollapse)
     setupIdentity(m);
 
     // Use valid integer logic inputs
-    CPPUNIT_ASSERT(m.LogicToDevicePixelX(1) != 0);
-    CPPUNIT_ASSERT(m.LogicToDevicePixelX(2) != 0);
+    CPPUNIT_ASSERT(m.LogicToDevicePixelX(1, true) != 0);
+    CPPUNIT_ASSERT(m.LogicToDevicePixelX(2, true) != 0);
 }
 
 CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testAffineMatchesScalarStability)
@@ -82,12 +83,12 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testAffineMatchesScalarStability)
     CoordinateMapper m;
     setupIdentity(m);
 
-    auto mat = m.GetDeviceTransformation();
+    auto mat = m.GetDeviceTransformation(true);
 
     for (tools::Long logic : { 1, 2, 5, 10 })
     {
         double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
-        tools::Long device = m.LogicToDevicePixelX(logic);
+        tools::Long device = m.LogicToDevicePixelX(logic, true);
 
         tools::Long expected = static_cast<tools::Long>(std::round(affine));
 
@@ -106,21 +107,21 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testNonIdentityScale)
     mm.SetScaleX(2.0); // double scaling
     mm.SetScaleY(2.0);
 
-    m.ResetMapMode(mm);
-    m.EnableMapMode(true);
+    m.CalcMapResolution(mm, 96, 96);
 
-    auto mat = m.GetDeviceTransformation();
+    auto mat = m.GetDeviceTransformation(true);
 
     double logic = 1.0;
 
     double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
-    tools::Long device = m.LogicToDevicePixelX(logic);
+    tools::Long device = m.LogicToDevicePixelX(logic, true);
 
     std::cout << "\n[Scaled]\n";
     std::cout << "Affine: " << affine << "\n";
     std::cout << "Device: " << device << "\n";
 
-    CPPUNIT_ASSERT_DOUBLES_EQUAL(96.0, affine, 1e-7);
+    // 1.0 logic unit * 2.0 Scale = 2.0 pixels
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(2.0, affine, 1e-7);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

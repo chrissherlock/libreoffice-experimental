@@ -550,7 +550,6 @@ public:
         // 125% zoom, non-zero origin
         MapMode aHostileMapMode(MapUnit::Map100thMM, Point(15, -33), 1.25, 1.25);
         mpMapper->EnableMapMode(true);
-        mpMapper->ResetMapMode(aHostileMapMode);
         mpMapper->CalcMapResolution(aHostileMapMode, 96, 96); // Standard DPI
 
         // Add weird scroll offsets
@@ -569,13 +568,13 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testRoundTripSymmetry)
     Point aOriginal(1045, -882);
 
     // Forward journey
-    Point aDevice = mpMapper->LogicToDevicePixel(aOriginal);
+    Point aDevice = mpMapper->LogicToDevicePixel(aOriginal, true);
     // Inverse journey
-    Point aRestored = mpMapper->DevicePixelToLogic(aDevice);
+    Point aRestored = mpMapper->DevicePixelToLogic(aDevice, true);
 
     // Due to integer pixel snapping, the restored point might not be bitwise identical,
     // but transforming it FORWARD again must yield the exact same device pixels. (Idempotency)
-    Point aDeviceAgain = mpMapper->LogicToDevicePixel(aRestored);
+    Point aDeviceAgain = mpMapper->LogicToDevicePixel(aRestored, true);
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Idempotency violated: Round-trip drift detected (X)", aDevice.X(),
                                  aDeviceAgain.X());
@@ -589,8 +588,8 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testRectangleAdjacency)
     tools::Rectangle aLeftRect(1000, 500, 2000, 1500);
     tools::Rectangle aRightRect(2000, 500, 3000, 1500);
 
-    tools::Rectangle aDeviceLeft = mpMapper->LogicToDevicePixel(aLeftRect);
-    tools::Rectangle aDeviceRight = mpMapper->LogicToDevicePixel(aRightRect);
+    tools::Rectangle aDeviceLeft = mpMapper->LogicToDevicePixel(aLeftRect, true);
+    tools::Rectangle aDeviceRight = mpMapper->LogicToDevicePixel(aRightRect, true);
 
     // The transformed right edge of A MUST exactly equal the transformed left edge of B
     CPPUNIT_ASSERT_EQUAL_MESSAGE(
@@ -603,10 +602,10 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testMatrixVsScalarParity)
     Point aLogicPoint(3333, 4444);
 
     // 1. Scalar Path
-    Point aScalarDevice = mpMapper->LogicToDevicePixel(aLogicPoint);
+    Point aScalarDevice = mpMapper->LogicToDevicePixel(aLogicPoint, true);
 
     // 2. Matrix Path
-    basegfx::B2DHomMatrix aMatrix = mpMapper->GetDeviceTransformation();
+    basegfx::B2DHomMatrix aMatrix = mpMapper->GetDeviceTransformation(true);
     basegfx::B2DPoint aB2DPoint(aLogicPoint.X(), aLogicPoint.Y());
     aB2DPoint *= aMatrix;
 
@@ -628,8 +627,8 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testSubpixelStability)
     for (int i = 0; i <= 10; ++i)
     {
         double fCurrentX = fBaseX + (i * 0.1);
-        double fPixel = mpMapper->LogicToDeviceSubPixelX(fCurrentX);
-        double fRestored = mpMapper->DevicePixelToLogicSubPixelX(fPixel);
+        double fPixel = mpMapper->LogicToDeviceSubPixelX(fCurrentX, true);
+        double fRestored = mpMapper->DevicePixelToLogicSubPixelX(fPixel, true);
 
         CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Subpixel drift detected in sweep", fCurrentX,
                                              fRestored, 0.0001);
@@ -641,15 +640,15 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testInverseMatrixVsScalarPari
     Point aDevicePoint(1234, 5678);
 
     // Scalar Inverse Path (Full Device -> Logic)
-    double fScalarLogicX = mpMapper->DevicePixelToLogicSubPixelX(aDevicePoint.X());
-    double fScalarLogicY = mpMapper->DevicePixelToLogicSubPixelY(aDevicePoint.Y());
+    double fScalarLogicX = mpMapper->DevicePixelToLogicSubPixelX(aDevicePoint.X(), true);
+    double fScalarLogicY = mpMapper->DevicePixelToLogicSubPixelY(aDevicePoint.Y(), true);
 
     // Matrix Inverse Path (Window -> Logic)
     // We must manually strip the Device offset because GetInverseViewTransformation operates on Window coordinates
     double fWindowX = aDevicePoint.X() - mpMapper->GetDeviceToWindowOffsetX();
     double fWindowY = aDevicePoint.Y() - mpMapper->GetDeviceToWindowOffsetY();
 
-    basegfx::B2DHomMatrix aInverseMatrix = mpMapper->GetInverseViewTransformation();
+    basegfx::B2DHomMatrix aInverseMatrix = mpMapper->GetInverseViewTransformation(true);
     basegfx::B2DPoint aB2DWindowPoint(fWindowX, fWindowY);
     aB2DWindowPoint *= aInverseMatrix;
 
@@ -671,8 +670,8 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testSubpixelRoundTripSymmetry
         for (int i = 0; i <= 10; ++i)
         {
             double fCurrentX = fBaseX + (i * 0.1);
-            double fPixel = mpMapper->LogicToDeviceSubPixelX(fCurrentX);
-            double fRestored = mpMapper->DevicePixelToLogicSubPixelX(fPixel);
+            double fPixel = mpMapper->LogicToDeviceSubPixelX(fCurrentX, true);
+            double fRestored = mpMapper->DevicePixelToLogicSubPixelX(fPixel, true);
 
             // Tight tolerance ensures floating-point accumulation doesn't break algebraic symmetry
             CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Subpixel drift detected in evil sweep", fCurrentX,
