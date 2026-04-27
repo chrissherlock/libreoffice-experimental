@@ -183,7 +183,7 @@ vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rMapMode,
 
 void CoordinateMapper::InvalidateViewTransform()
 {
-    mnStateCounter.fetch_add(1, std::memory_order_release);
+    mnStateVersion.fetch_add(1, std::memory_order_release);
 }
 
 std::shared_ptr<CoordinateMapper::TransformSnapshot>
@@ -193,14 +193,17 @@ CoordinateMapper::BuildSnapshot(bool bMap) const
 
     if (!bMap && IsValidDPI())
     {
-        // Identity fallback: Only screen-space offsets remain
+        // Identity fallback: only screen-space offsets remain
+
         const double dxView = static_cast<double>(mnWindowToViewOffsetX);
         const double dyView = static_cast<double>(mnWindowToViewOffsetY);
 
+        // View transform (Logic -> Window)
         pSnap->maView.identity();
         pSnap->maView.set(0, 2, dxView);
         pSnap->maView.set(1, 2, dyView);
 
+        // Logic -> Device (adds device offset)
         const double dxDev = dxView + static_cast<double>(mnDeviceToWindowOffsetX);
         const double dyDev = dyView + static_cast<double>(mnDeviceToWindowOffsetY);
 
@@ -210,20 +213,20 @@ CoordinateMapper::BuildSnapshot(bool bMap) const
     }
     else
     {
-        // Canonical scale (Logic -> Device space)
-        // STRANGLER STEP 1: Read scale from the pure math firewall, not the state accumulator
+        // Scale (Logic -> Device space)
         const double scaleX = static_cast<double>(mnDPIX) * maMapConversion.mfScaleX;
         const double scaleY = static_cast<double>(mnDPIY) * maMapConversion.mfScaleY;
 
-        // Logic-space translation only
-        // STRANGLER STEP 1: Read offsets from the pure math firewall, not the state accumulator
+        // Logic-space offsets
         const double logicOffsetX = static_cast<double>(maMapConversion.mnOffsetX)
                                     + static_cast<double>(mnLogicToAbsoluteOffsetX);
+
         const double logicOffsetY = static_cast<double>(maMapConversion.mnOffsetY)
                                     + static_cast<double>(mnLogicToAbsoluteOffsetY);
 
-        // View Space (Logic -> Window)
+        // View transform (Logic -> Window)
         const double txView = (logicOffsetX * scaleX) + static_cast<double>(mnWindowToViewOffsetX);
+
         const double tyView = (logicOffsetY * scaleY) + static_cast<double>(mnWindowToViewOffsetY);
 
         pSnap->maView.identity();
@@ -232,8 +235,9 @@ CoordinateMapper::BuildSnapshot(bool bMap) const
         pSnap->maView.set(0, 2, txView);
         pSnap->maView.set(1, 2, tyView);
 
-        // Device Space (Window -> Device)
+        // Logic -> Device
         const double txDev = txView + static_cast<double>(mnDeviceToWindowOffsetX);
+
         const double tyDev = tyView + static_cast<double>(mnDeviceToWindowOffsetY);
 
         pSnap->maLogicToDevice.identity();
@@ -244,10 +248,13 @@ CoordinateMapper::BuildSnapshot(bool bMap) const
     }
 
     // Derived transforms
+
+    // Device -> Logic
     pSnap->maDeviceToLogic = pSnap->maLogicToDevice;
     if (!pSnap->maDeviceToLogic.invert())
         pSnap->maDeviceToLogic.identity();
 
+    // Window -> Logic (inverse view)
     pSnap->maInvView = pSnap->maView;
     if (!pSnap->maInvView.invert())
         pSnap->maInvView.identity();
@@ -258,33 +265,37 @@ CoordinateMapper::BuildSnapshot(bool bMap) const
 std::shared_ptr<const CoordinateMapper::TransformSnapshot>
 CoordinateMapper::AcquireSnapshot(bool bMap) const
 {
+    const int idx = bMap ? 1 : 0;
+
     while (true)
     {
-        // Capture version BEFORE reading snapshot
-        const uint64_t nStartVersion = mnStateCounter.load(std::memory_order_acquire);
+        // Capture version before reading snapshot
+        const uint64_t nStartVersion = mnStateVersion.load(std::memory_order_acquire);
 
-        auto pSnap = std::atomic_load_explicit(&mpSnapshot, std::memory_order_acquire);
+        // Load cached snapshot for this mode
+        auto pSnap = std::atomic_load_explicit(&mpSnapshots[idx], std::memory_order_acquire);
 
         // Fast path: snapshot is valid
         if (pSnap && pSnap->mnVersion == nStartVersion)
             return pSnap;
 
-        // Build new snapshot (single source of truth)
+        // Build a new snapshot
         auto pNew = BuildSnapshot(bMap);
 
-        // Version check (lock-free consistency guard)
-        const uint64_t nEndVersion = mnStateCounter.load(std::memory_order_acquire);
+        // Re-check version after build
+        const uint64_t nEndVersion = mnStateVersion.load(std::memory_order_acquire);
 
         if (nStartVersion != nEndVersion)
-            continue; // state changed mid-build → retry
+            continue; // state changed → retry
 
+        // Publish snapshot
         pNew->mnVersion = nStartVersion;
 
-        std::atomic_store_explicit(&mpSnapshot,
+        std::atomic_store_explicit(&mpSnapshots[idx],
                                    std::shared_ptr<const TransformSnapshot>(std::move(pNew)),
                                    std::memory_order_release);
 
-        return std::atomic_load_explicit(&mpSnapshot, std::memory_order_acquire);
+        return std::atomic_load_explicit(&mpSnapshots[idx], std::memory_order_acquire);
     }
 }
 
