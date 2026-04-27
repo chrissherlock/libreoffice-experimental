@@ -149,9 +149,9 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
     tools::Long nX, nY; // , nWorkX, nWorkY, nWorkWidth, nWorkHeight;
     std::unique_ptr<tools::Long[]> pMapX(new tools::Long[ nSrcWidth + 1 ]);
     std::unique_ptr<tools::Long[]> pMapY(new tools::Long[ nSrcHeight + 1 ]);
-    const bool bOldMap = mpMapper->IsMapModeEnabled();
+    const bool bOldMap = IsMapModeEnabled();
 
-    mpMapper->EnableMapMode(false);
+    EnableMapMode(false);
 
     // create forward mapping tables
     for( nX = 0; nX <= nSrcWidth; nX++ )
@@ -168,7 +168,7 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
 
     DrawBitmap(aMapPt, aMapSz, Point(), aBandBmp.GetSizePixel(), aBandBmp);
 
-    mpMapper->EnableMapMode(bOldMap);
+    EnableMapMode(bOldMap);
 }
 
 bool Printer::DrawTransformedBitmap(
@@ -240,8 +240,8 @@ void Printer::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
     Push( vcl::PushFlags::CLIPREGION | vcl::PushFlags::LINECOLOR );
     IntersectClipRegion(vcl::Region(rPolyPoly));
     SetLineColor( GetFillColor() );
-    const bool bOldMap = mpMapper->IsMapModeEnabled();
-    mpMapper->EnableMapMode( false );
+    const bool bOldMap = IsMapModeEnabled();
+    EnableMapMode( false );
 
     if(nMove)
     {
@@ -265,7 +265,7 @@ void Printer::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
         DrawRect( aPolyRect );
     }
 
-    mpMapper->EnableMapMode( bOldMap );
+    EnableMapMode( bOldMap );
     Pop();
 
     mpMetaFile = pOldMetaFile;
@@ -699,10 +699,10 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     std::unique_ptr<tools::Long[]> pMapX( new tools::Long[ nSrcWidth + 1 ] );
     std::unique_ptr<tools::Long[]> pMapY( new tools::Long[ nSrcHeight + 1 ] );
     GDIMetaFile*    pOldMetaFile = mpMetaFile;
-    const bool      bOldMap = mpMapper->IsMapModeEnabled();
+    const bool      bOldMap = IsMapModeEnabled();
 
     mpMetaFile = nullptr;
-    mpMapper->EnableMapMode(false);
+    EnableMapMode(false);
     Push( vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR );
     SetLineColor( rMaskColor );
     SetFillColor( rMaskColor );
@@ -732,7 +732,7 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     }
 
     Pop();
-    mpMapper->EnableMapMode(bOldMap);
+    EnableMapMode(bOldMap);
     mpMetaFile = pOldMetaFile;
 }
 

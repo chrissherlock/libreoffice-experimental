@@ -76,7 +76,7 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
     if (nFlags & vcl::PushFlags::MAPMODE)
     {
         rState.mpMapMode = mpMapper->GetMapMode();
-        rState.mbMapActive = mpMapper->IsMapModeEnabled();
+        rState.mbMapActive = IsMapModeEnabled();
     }
 
     if (nFlags & vcl::PushFlags::CLIPREGION && mbClipRegion)
@@ -165,7 +165,7 @@ void OutputDevice::Pop()
             SetMapMode( *rState.mpMapMode );
         else
             SetMapMode();
-        mpMapper->EnableMapMode(rState.mbMapActive);
+        EnableMapMode(rState.mbMapActive);
     }
 
     if ( rState.mnFlags & vcl::PushFlags::CLIPREGION )

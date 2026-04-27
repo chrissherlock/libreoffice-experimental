@@ -129,7 +129,6 @@ struct MapConversion
 class VCL_DLLPUBLIC CoordinateMapper
 {
 private:
-    bool mbMap = false;
     MapMode maMapMode;
     MappingCoefficients maMapRes;
     vcl::detail::MapConversion maMapConversion;
@@ -171,13 +170,7 @@ private:
     tools::Long mnOutHeight = 0;
 
 public:
-    bool IsMapModeEnabled() const { return mbMap; }
     bool IsValidDPI() const { return mnDPIX > 0 && mnDPIY > 0; }
-    void EnableMapMode(bool bEnable = true)
-    {
-        mbMap = bEnable;
-        InvalidateViewTransform();
-    }
 
     sal_Int32 GetDPIX() const;
     sal_Int32 GetDPIY() const;

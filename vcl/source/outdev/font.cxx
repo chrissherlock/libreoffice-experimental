@@ -835,7 +835,7 @@ bool OutputDevice::ImplNewFont() const
     bool bRet = true;
 
     // #95414# fix for OLE objects which use scale factors very creatively
-    if (mpMapper->IsMapModeEnabled() && !aSize.Width())
+    if (IsMapModeEnabled() && !aSize.Width())
         bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(maFont), aSize.Height());
 
     return bRet;
@@ -854,12 +854,12 @@ bool OutputDevice::AttemptOLEFontScaleFix(vcl::Font& rFont, tools::Long nHeight)
 
     Size aOrigSize = rFont.GetFontSize();
     rFont.SetFontSize(Size(nNewWidth, nHeight));
-    mpMapper->EnableMapMode(false);
+    const_cast<OutputDevice*>(this)->EnableMapMode(false);
     mbNewFont = true;
 
     const bool bRet = ImplNewFont();  // recurse once using stretched width
 
-    mpMapper->EnableMapMode();
+    const_cast<OutputDevice*>(this)->EnableMapMode();
     rFont.SetFontSize(aOrigSize);
 
     return bRet;
@@ -925,7 +925,7 @@ void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
     auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
     GDIMetaFile*        pOldMetaFile    = mpMetaFile;
     mpMetaFile = nullptr;
-    mpMapper->EnableMapMode(false);
+    EnableMapMode(false);
 
     FontEmphasisMark nEmphasisMark = maFont.GetEmphasisMarkStyle();
     tools::Long nEmphasisHeight;
@@ -1179,7 +1179,7 @@ tools::Long OutputDevice::GetMinKashida() const
         return 0;
 
     auto nKashidaWidth = mpFontInstance->mxFontMetric->GetMinKashida();
-    if (!mpMapper->IsMapModeEnabled())
+    if (!IsMapModeEnabled())
         nKashidaWidth = std::ceil(nKashidaWidth);
 
     return DevicePixelToLogicWidth(nKashidaWidth);
