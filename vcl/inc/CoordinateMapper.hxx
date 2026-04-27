@@ -143,8 +143,10 @@ private:
         uint64_t mnVersion = 0;
     };
 
-    mutable std::shared_ptr<const TransformSnapshot> mpSnapshot;
-    mutable std::atomic<uint64_t> mnStateCounter{ 0 };
+    // Separate snapshots for mapped/unmapped coordinate spaces
+    // because DPI and window/device offsets diverge significantly.
+    mutable std::shared_ptr<const TransformSnapshot> mpSnapshots[2];
+    mutable std::atomic<uint64_t> mnStateVersion{ 0 };
 
     std::shared_ptr<const TransformSnapshot> AcquireSnapshot(bool bMap) const;
     std::shared_ptr<TransformSnapshot> BuildSnapshot(bool bMap) const;
