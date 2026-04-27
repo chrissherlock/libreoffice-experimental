@@ -2134,7 +2134,7 @@ bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,
     bool bOldMap = IsMapModeEnabled();
     if( bOldMap )
     {
-        mpMapper->EnableMapMode(false);
+        const_cast<OutputDevice*>(this)->EnableMapMode(false);
         const_cast<OutputDevice&>(*this).mbNewFont = true;
     }
 
@@ -2186,7 +2186,7 @@ bool OutputDevice::GetTextOutlines( basegfx::B2DPolyPolygonVector& rVector,
     if( bOldMap )
     {
         // restore original font size and map mode
-        mpMapper->EnableMapMode(bOldMap);
+        const_cast<OutputDevice*>(this)->EnableMapMode(bOldMap);
         const_cast<OutputDevice&>(*this).mbNewFont = true;
     }
 

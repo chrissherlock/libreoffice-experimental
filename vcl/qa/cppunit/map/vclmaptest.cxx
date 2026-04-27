@@ -549,7 +549,6 @@ public:
         // Set up a hostile fractional scaling environment to force drift
         // 125% zoom, non-zero origin
         MapMode aHostileMapMode(MapUnit::Map100thMM, Point(15, -33), 1.25, 1.25);
-        mpMapper->EnableMapMode(true);
         mpMapper->CalcMapResolution(aHostileMapMode, 96, 96); // Standard DPI
 
         // Add weird scroll offsets
