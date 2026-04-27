@@ -154,7 +154,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
         return;
 
     SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(), rSrcSizePixel.Height(),
-                       mpMapper->LogicToDevicePixelX(rDestPt.X(), IsMapModeEnabled()), mpMapper->LogicToDevicePixelY(rDestPt.Y(), IsMapModeEnabled()),
+                       mpMapper->LogicToDevicePixel(Point(rDestPt.X(), 0), IsMapModeEnabled()).X(), mpMapper->LogicToDevicePixel(Point(0, rDestPt.Y()), IsMapModeEnabled()).Y(),
                        LogicWidthToDevicePixel(rDestSize.Width()),
                        LogicHeightToDevicePixel(rDestSize.Height()));
 
@@ -268,8 +268,8 @@ void OutputDevice::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize
         return;
 
     SalTwoRect aPosAry(rSrcPtPixel.X(), rSrcPtPixel.Y(), rSrcSizePixel.Width(),
-                       rSrcSizePixel.Height(), mpMapper->LogicToDevicePixelX(rDestPt.X(), IsMapModeEnabled()),
-                       mpMapper->LogicToDevicePixelY(rDestPt.Y(), IsMapModeEnabled()),
+                       rSrcSizePixel.Height(), mpMapper->LogicToDevicePixel(Point(rDestPt.X(), 0), IsMapModeEnabled()).X(),
+                       mpMapper->LogicToDevicePixel(Point(0, rDestPt.Y()), IsMapModeEnabled()).Y(),
                        LogicWidthToDevicePixel(rDestSize.Width()),
                        LogicHeightToDevicePixel(rDestSize.Height()));
 
@@ -296,8 +296,8 @@ Bitmap OutputDevice::GetBitmap( const Point& rSrcPt, const Size& rSize ) const
 
     assert(mpGraphics);
 
-    tools::Long    nX = mpMapper->LogicToDevicePixelX(rSrcPt.X(), IsMapModeEnabled());
-    tools::Long    nY = mpMapper->LogicToDevicePixelY(rSrcPt.Y(), IsMapModeEnabled());
+    tools::Long    nX = mpMapper->LogicToDevicePixel(Point(rSrcPt.X(), 0), IsMapModeEnabled()).X();
+    tools::Long    nY = mpMapper->LogicToDevicePixel(Point(0, rSrcPt.Y()), IsMapModeEnabled()).Y();
     tools::Long    nWidth = LogicWidthToDevicePixel(rSize.Width());
     tools::Long    nHeight = LogicHeightToDevicePixel(rSize.Height());
     if ( nWidth <= 0 || nHeight <= 0 || nX > (GetOutputWidthPixel() + GetDeviceOriginX()) || nY > (GetOutputHeightPixel() + GetDeviceOriginY()))
