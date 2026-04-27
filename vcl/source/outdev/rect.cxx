@@ -255,10 +255,10 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     tools::Long nY = ( rRect.Top() >= aDstRect.Top() ) ? rRect.Top() : ( rRect.Top() + ( ( aDstRect.Top() - rRect.Top() ) / nDistY ) * nDistY );
     const tools::Long nRight = aDstRect.Right();
     const tools::Long nBottom = aDstRect.Bottom();
-    const tools::Long nStartX = mpMapper->LogicToDevicePixelX(nX, IsMapModeEnabled());
-    const tools::Long nEndX = mpMapper->LogicToDevicePixelX(nRight, IsMapModeEnabled());
-    const tools::Long nStartY = mpMapper->LogicToDevicePixelY(nY, IsMapModeEnabled());
-    const tools::Long nEndY = mpMapper->LogicToDevicePixelY(nBottom, IsMapModeEnabled());
+    const tools::Long nStartX = mpMapper->LogicToDevicePixel(Point(nX, 0), IsMapModeEnabled()).X();
+    const tools::Long nEndX = mpMapper->LogicToDevicePixel(Point(nRight, 0), IsMapModeEnabled()).X();
+    const tools::Long nStartY = mpMapper->LogicToDevicePixel(Point(0, nY), IsMapModeEnabled()).Y();
+    const tools::Long nEndY = mpMapper->LogicToDevicePixel(Point(0, nBottom), IsMapModeEnabled()).Y();
     tools::Long nHorzCount = 0;
     tools::Long nVertCount = 0;
 
@@ -271,7 +271,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         aVertBuf[ nVertCount++ ] = nStartY;
         while( ( nY += nDistY ) <= nBottom )
         {
-            aVertBuf[ nVertCount++ ] = mpMapper->LogicToDevicePixelY(nY, IsMapModeEnabled());
+            aVertBuf[ nVertCount++ ] = mpMapper->LogicToDevicePixel(Point(0, nY), IsMapModeEnabled()).Y();
         }
     }
 
@@ -281,7 +281,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         aHorzBuf[ nHorzCount++ ] = nStartX;
         while( ( nX += nDistX ) <= nRight )
         {
-            aHorzBuf[ nHorzCount++ ] = mpMapper->LogicToDevicePixelX(nX, IsMapModeEnabled());
+            aHorzBuf[ nHorzCount++ ] = mpMapper->LogicToDevicePixel(Point(nX, 0), IsMapModeEnabled()).X();
         }
     }
 
@@ -387,19 +387,19 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
         nY += nDistanceY;
     }
 
-    const tools::Long nTopPixel = mpMapper->LogicToDevicePixelY(rDrawingArea.Top(), IsMapModeEnabled());
-    const tools::Long nBottomPixel = mpMapper->LogicToDevicePixelY(rDrawingArea.Bottom(), IsMapModeEnabled());
-    const tools::Long nLeftPixel = mpMapper->LogicToDevicePixelX(rDrawingArea.Left(), IsMapModeEnabled());
-    const tools::Long nRightPixel = mpMapper->LogicToDevicePixelX(rDrawingArea.Right(), IsMapModeEnabled());
+    const tools::Long nTopPixel = mpMapper->LogicToDevicePixel(Point(0, rDrawingArea.Top()), IsMapModeEnabled()).Y();
+    const tools::Long nBottomPixel = mpMapper->LogicToDevicePixel(Point(0, rDrawingArea.Bottom()), IsMapModeEnabled()).Y();
+    const tools::Long nLeftPixel = mpMapper->LogicToDevicePixel(Point(rDrawingArea.Left(), 0), IsMapModeEnabled()).X();
+    const tools::Long nRightPixel = mpMapper->LogicToDevicePixel(Point(rDrawingArea.Right(), 0), IsMapModeEnabled()).X();
 
     // Draw 3x3 pixel crosses within the drawing area
     const tools::Long nHalfCrossSize = 1;
     for (const tools::Long nPositionX : aHorzBuffer)
     {
-        const tools::Long nPositionXPixel = mpMapper->LogicToDevicePixelX(nPositionX, IsMapModeEnabled());
+        const tools::Long nPositionXPixel = mpMapper->LogicToDevicePixel(Point(nPositionX, 0), IsMapModeEnabled()).X();
         for (const tools::Long nPositionY : aVertBuffer)
         {
-            const tools::Long nPositionYPixel = mpMapper->LogicToDevicePixelY(nPositionY, IsMapModeEnabled());
+            const tools::Long nPositionYPixel = mpMapper->LogicToDevicePixel(Point(0, nPositionY), IsMapModeEnabled()).Y();
             const tools::Long nStartXPixel = std::max(nPositionXPixel - nHalfCrossSize, nLeftPixel);
             if (nStartXPixel > nRightPixel)
             {

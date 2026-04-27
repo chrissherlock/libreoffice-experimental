@@ -12,6 +12,7 @@
 #include <cppunit/plugin/TestPlugIn.h>
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/point/b2dpoint.hxx>
 #include <tools/fract.hxx>
 #include <tools/mapunit.hxx>
 
@@ -600,7 +601,7 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testMatrixVsScalarParity)
 {
     Point aLogicPoint(3333, 4444);
 
-    // 1. Scalar Path
+    // 1. Point Path
     Point aScalarDevice = mpMapper->LogicToDevicePixel(aLogicPoint, true);
 
     // 2. Matrix Path
@@ -612,22 +613,24 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testMatrixVsScalarParity)
     tools::Long nMatrixDeviceX = static_cast<tools::Long>(std::llround(aB2DPoint.getX()));
     tools::Long nMatrixDeviceY = static_cast<tools::Long>(std::llround(aB2DPoint.getY()));
 
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Matrix and Scalar pipelines have diverged (X)", aScalarDevice.X(),
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Matrix and Point pipelines have diverged (X)", aScalarDevice.X(),
                                  nMatrixDeviceX);
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Matrix and Scalar pipelines have diverged (Y)", aScalarDevice.Y(),
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Matrix and Point pipelines have diverged (Y)", aScalarDevice.Y(),
                                  nMatrixDeviceY);
 }
 
 CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testSubpixelStability)
 {
     double fBaseX = 100.0;
+    basegfx::B2DHomMatrix aFwd = mpMapper->GetLogicToDeviceMatrix(true);
+    basegfx::B2DHomMatrix aInv = mpMapper->GetDeviceToLogicMatrix(true);
 
     // Sweep X from 100.0 to 101.0 in 0.1 increments
     for (int i = 0; i <= 10; ++i)
     {
         double fCurrentX = fBaseX + (i * 0.1);
-        double fPixel = mpMapper->LogicToDeviceSubPixelX(fCurrentX, true);
-        double fRestored = mpMapper->DevicePixelToLogicSubPixelX(fPixel, true);
+        double fPixel = (aFwd * basegfx::B2DPoint(fCurrentX, 0)).getX();
+        double fRestored = (aInv * basegfx::B2DPoint(fPixel, 0)).getX();
 
         CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Subpixel drift detected in sweep", fCurrentX,
                                              fRestored, 0.0001);
@@ -638,9 +641,10 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testInverseMatrixVsScalarPari
 {
     Point aDevicePoint(1234, 5678);
 
-    // Scalar Inverse Path (Full Device -> Logic)
-    double fScalarLogicX = mpMapper->DevicePixelToLogicSubPixelX(aDevicePoint.X(), true);
-    double fScalarLogicY = mpMapper->DevicePixelToLogicSubPixelY(aDevicePoint.Y(), true);
+    // Scalar Inverse Path (Full Device -> Logic via 2D Point)
+    basegfx::B2DPoint aScalarLogic = mpMapper->DevicePixelToLogicSubPixel(aDevicePoint, true);
+    double fScalarLogicX = aScalarLogic.getX();
+    double fScalarLogicY = aScalarLogic.getY();
 
     // Matrix Inverse Path (Window -> Logic)
     // We must manually strip the Device offset because GetInverseViewTransformation operates on Window coordinates
@@ -663,14 +667,17 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testSubpixelRoundTripSymmetry
     // test irrational-ish fractions and extremely large coordinates
     const double aEvilBases[] = { 0.3, 100.0, 1000000.11 };
 
+    basegfx::B2DHomMatrix aFwd = mpMapper->GetLogicToDeviceMatrix(true);
+    basegfx::B2DHomMatrix aInv = mpMapper->GetDeviceToLogicMatrix(true);
+
     for (double fBaseX : aEvilBases)
     {
         // Sweep X from fBaseX to fBaseX + 1.0 in 0.1 increments
         for (int i = 0; i <= 10; ++i)
         {
             double fCurrentX = fBaseX + (i * 0.1);
-            double fPixel = mpMapper->LogicToDeviceSubPixelX(fCurrentX, true);
-            double fRestored = mpMapper->DevicePixelToLogicSubPixelX(fPixel, true);
+            double fPixel = (aFwd * basegfx::B2DPoint(fCurrentX, 0)).getX();
+            double fRestored = (aInv * basegfx::B2DPoint(fPixel, 0)).getX();
 
             // Tight tolerance ensures floating-point accumulation doesn't break algebraic symmetry
             CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Subpixel drift detected in evil sweep", fCurrentX,
