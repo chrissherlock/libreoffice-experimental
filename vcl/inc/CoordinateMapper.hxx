@@ -140,6 +140,11 @@ private:
         basegfx::B2DHomMatrix maView;
         basegfx::B2DHomMatrix maInvView;
         uint64_t mnVersion = 0;
+
+        basegfx::B2DHomMatrix GetLogicToWindow() const { return maView; }
+        basegfx::B2DHomMatrix GetWindowToLogic() const { return maInvView; }
+        basegfx::B2DHomMatrix GetLogicToDevice() const { return maLogicToDevice; }
+        basegfx::B2DHomMatrix GetDeviceToLogic() const { return maDeviceToLogic; }
     };
 
     // Separate snapshots for mapped/unmapped coordinate spaces
@@ -291,6 +296,11 @@ public:
                                                        const MapMode& rTarget, bool bMap) const;
 
     basegfx::B2DHomMatrix GetDeviceTransformation(bool bMap) const;
+
+    basegfx::B2DHomMatrix GetLogicToWindowMatrix(bool bMap) const;
+    basegfx::B2DHomMatrix GetWindowToLogicMatrix(bool bMap) const;
+    basegfx::B2DHomMatrix GetLogicToDeviceMatrix(bool bMap) const;
+    basegfx::B2DHomMatrix GetDeviceToLogicMatrix(bool bMap) const;
 
     // ========================================================================
     // PIPELINE STAGES (Coordinate Transitions)
