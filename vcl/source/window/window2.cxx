@@ -164,7 +164,7 @@ void Window::HideTracking()
 void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlags )
 {
     OutputDevice *pOutDev = GetOutDev();
-    tools::Rectangle aRect(pOutDev->GetMapper().LogicToDevicePixel(rRect));
+    tools::Rectangle aRect(pOutDev->GetMapper().LogicToDevicePixel(rRect, pOutDev->IsMapModeEnabled()));
 
     if ( aRect.IsEmpty() )
         return;

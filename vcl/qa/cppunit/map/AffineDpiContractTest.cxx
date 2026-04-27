@@ -29,14 +29,18 @@ protected:
         CoordinateMapper m;
         m.SetDPIX(nDPI);
         m.SetDPIY(nDPI);
-        m.ResetMapMode(MapMode(MapUnit::MapPixel));
-        m.EnableMapMode(true);
+
+        // Feed the intent directly to the math engine (Stateless Mapper Refactor)
+        m.CalcMapResolution(MapMode(MapUnit::MapPixel), nDPI, nDPI);
 
         basegfx::B2DPoint aInput(fLogicVal, fLogicVal);
-        basegfx::B2DPoint aResult = m.GetDeviceTransformation() * aInput;
 
-        // The Affine Contract: At MapPixel, Scale must be exactly DPI.
-        double fExpected = fLogicVal * nDPI;
+        // Pass 'true' to explicitly enable mapping for the transformation retrieval
+        basegfx::B2DPoint aResult = m.GetDeviceTransformation(true) * aInput;
+
+        // The Affine Contract: At MapPixel, 1 logic unit = 1 pixel.
+        // The scale factor is exactly 1.0 regardless of the underlying DPI.
+        double fExpected = fLogicVal;
         CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Affine DPI Scaling Failure", fExpected,
                                              aResult.getX(), 1e-7);
     }
@@ -44,9 +48,9 @@ protected:
 
 CPPUNIT_TEST_FIXTURE(AffineDpiContractTest, testDpiScaling)
 {
-    verify(96, 100.0); // 9600
-    verify(144, 100.0); // 14400
-    verify(192, 1.0); // 192
+    verify(96, 100.0);
+    verify(144, 100.0);
+    verify(192, 1.0);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

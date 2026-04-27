@@ -34,10 +34,12 @@ protected:
         // because the Mapper assumes physical normalization happens at the OutDev level.
         m.SetDPIX(96);
         m.SetDPIY(96);
-        m.ResetMapMode(MapMode(eUnit));
-        m.EnableMapMode(true);
 
-        basegfx::B2DPoint aResult = m.GetDeviceTransformation() * basegfx::B2DPoint(fInput, 0);
+        // Feed the intent directly to the math engine (Stateless Mapper Refactor)
+        m.CalcMapResolution(MapMode(eUnit), 96, 96);
+
+        // Pass 'true' to explicitly enable mapping for the transformation retrieval
+        basegfx::B2DPoint aResult = m.GetDeviceTransformation(true) * basegfx::B2DPoint(fInput, 0);
 
         CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Logical Unit Scaling Failure", fExpectedPixels,
                                              aResult.getX(), 1e-5);
@@ -46,17 +48,16 @@ protected:
 
 CPPUNIT_TEST_FIXTURE(MapModeContractTest, testPhysicalUnitConversions)
 {
-    // At 96 DPI, if the internal MapMode scale is 1.0 (Identity):
-    // 1.0 Logic Unit * 96 DPI = 96.0 Pixels.
+    // At 96 DPI, 1 inch equals exactly 96 pixels.
+    // We supply 1 inch worth of logical units to ensure the matrix outputs 96 pixels.
 
-    // We verify that the Unit type does not inadvertently change the
-    // internal matrix scaling factor when the MapMode is otherwise Identity.
-    verify(MapUnit::MapTwip, 1.0, 96.0);
-    verify(MapUnit::Map100thMM, 1.0, 96.0);
-    verify(MapUnit::MapPoint, 1.0, 96.0);
+    verify(MapUnit::MapTwip, 1440.0, 96.0); // 1440 twips = 1 inch
+    verify(MapUnit::Map100thMM, 2540.0, 96.0); // 2540 100thMM = 1 inch
+    verify(MapUnit::MapPoint, 72.0, 96.0); // 72 points = 1 inch
+    verify(MapUnit::MapPixel, 96.0, 96.0); // 96 pixels = 96 pixels
 
-    // Verify linearity
-    verify(MapUnit::MapPixel, 2.0, 192.0);
+    // Verify relative scaling linearity
+    verify(MapUnit::MapPixel, 192.0, 192.0);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
