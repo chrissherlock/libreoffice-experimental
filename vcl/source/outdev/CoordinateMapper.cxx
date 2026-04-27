@@ -19,6 +19,7 @@
 
 #include <sal/log.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/range/b2drange.hxx>
 #include <basegfx/vector/b2dvector.hxx>
 #include <basegfx/range/b2drectangle.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
@@ -675,18 +676,12 @@ Point CoordinateMapper::DevicePixelToLogic(const Point& rDevicePt, bool bMap) co
 tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rPixelRect,
                                                       bool bMap) const
 {
-    tools::Rectangle aRetval(
-        DevicePixelToLogicX(rPixelRect.Left(), bMap), DevicePixelToLogicY(rPixelRect.Top(), bMap),
-        rPixelRect.IsWidthEmpty() ? 0 : DevicePixelToLogicX(rPixelRect.Right(), bMap),
-        rPixelRect.IsHeightEmpty() ? 0 : DevicePixelToLogicY(rPixelRect.Bottom(), bMap));
-
-    if (rPixelRect.IsWidthEmpty())
-        aRetval.SetWidthEmpty();
-
-    if (rPixelRect.IsHeightEmpty())
-        aRetval.SetHeightEmpty();
-
-    return aRetval;
+    basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(bMap);
+    basegfx::B2DRange aRange(rPixelRect.Left(), rPixelRect.Top(), rPixelRect.Right(),
+                             rPixelRect.Bottom());
+    aRange.transform(aMat);
+    return tools::Rectangle(lcl_RoundToLong(aRange.getMinX()), lcl_RoundToLong(aRange.getMinY()),
+                            lcl_RoundToLong(aRange.getMaxX()), lcl_RoundToLong(aRange.getMaxY()));
 }
 
 tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX, bool bMap) const
@@ -750,34 +745,12 @@ Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize, bool bMap) con
 tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect,
                                                       bool bMap) const
 {
-    // Fast path: no mapping active, no offsets -> identity
-    if (!bMap && IsValidDPI() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
-        return rLogicRect;
-
-    auto snap = AcquireSnapshot(bMap);
-
-    // Treat rectangle as geometric range (continuous space)
+    basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
     basegfx::B2DRange aRange(rLogicRect.Left(), rLogicRect.Top(), rLogicRect.Right(),
                              rLogicRect.Bottom());
-
-    // Apply full affine transform
-    aRange.transform(snap->maLogicToDevice);
-
-    const tools::Long nL = lcl_RoundToLong(aRange.getMinX());
-    const tools::Long nT = lcl_RoundToLong(aRange.getMinY());
-    const tools::Long nR = lcl_RoundToLong(aRange.getMaxX());
-    const tools::Long nB = lcl_RoundToLong(aRange.getMaxY());
-
-    tools::Rectangle aRetval(nL, nT, nR, nB);
-
-    // Preserve semantic flags
-    if (rLogicRect.IsWidthEmpty())
-        aRetval.SetWidthEmpty();
-
-    if (rLogicRect.IsHeightEmpty())
-        aRetval.SetHeightEmpty();
-
-    return aRetval;
+    aRange.transform(aMat);
+    return tools::Rectangle(lcl_RoundToLong(aRange.getMinX()), lcl_RoundToLong(aRange.getMinY()),
+                            lcl_RoundToLong(aRange.getMaxX()), lcl_RoundToLong(aRange.getMaxY()));
 }
 
 tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogicPoly,
@@ -919,17 +892,11 @@ Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt, bool bMap) con
 tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect,
                                                       bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return rRect;
-
-    tools::Rectangle aRetval(LogicToWindowUnitsX(rRect.Left(), bMap),
-                             LogicToWindowUnitsY(rRect.Top(), bMap),
-                             rRect.IsWidthEmpty() ? 0 : LogicToWindowUnitsX(rRect.Right(), bMap),
-                             rRect.IsHeightEmpty() ? 0 : LogicToWindowUnitsY(rRect.Bottom(), bMap));
-
-    lcl_ApplyEmptyState(aRetval, rRect);
-
-    return aRetval;
+    basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
+    basegfx::B2DRange aRange(rRect.Left(), rRect.Top(), rRect.Right(), rRect.Bottom());
+    aRange.transform(aMat);
+    return tools::Rectangle(lcl_RoundToLong(aRange.getMinX()), lcl_RoundToLong(aRange.getMinY()),
+                            lcl_RoundToLong(aRange.getMaxX()), lcl_RoundToLong(aRange.getMaxY()));
 }
 
 template <typename TransformFunc>
@@ -1089,18 +1056,12 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, bool bMap) co
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
                                                       bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return rWindowRect;
-
-    tools::Rectangle aRetval(
-        WindowSubPixelToLogicIntX(rWindowRect.Left(), bMap),
-        WindowSubPixelToLogicIntY(rWindowRect.Top(), bMap),
-        rWindowRect.IsWidthEmpty() ? 0 : WindowSubPixelToLogicIntX(rWindowRect.Right(), bMap),
-        rWindowRect.IsHeightEmpty() ? 0 : WindowSubPixelToLogicIntY(rWindowRect.Bottom(), bMap));
-
-    lcl_ApplyEmptyState(aRetval, rWindowRect);
-
-    return aRetval;
+    basegfx::B2DHomMatrix aMat = GetWindowToLogicMatrix(bMap);
+    basegfx::B2DRange aRange(rWindowRect.Left(), rWindowRect.Top(), rWindowRect.Right(),
+                             rWindowRect.Bottom());
+    aRange.transform(aMat);
+    return tools::Rectangle(lcl_RoundToLong(aRange.getMinX()), lcl_RoundToLong(aRange.getMinY()),
+                            lcl_RoundToLong(aRange.getMaxX()), lcl_RoundToLong(aRange.getMaxY()));
 }
 
 tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
