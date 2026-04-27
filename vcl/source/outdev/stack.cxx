@@ -75,7 +75,7 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
 
     if (nFlags & vcl::PushFlags::MAPMODE)
     {
-        rState.mpMapMode = mpMapper->GetMapMode();
+        rState.mpMapMode = maMapMode;
         rState.mbMapActive = IsMapModeEnabled();
     }
 
