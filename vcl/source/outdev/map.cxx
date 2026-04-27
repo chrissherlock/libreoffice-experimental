@@ -63,9 +63,13 @@ Point OutputDevice::GetOutputOffPixel() const { return mpMapper->GetDeviceToWind
 
 Size OutputDevice::GetPixelOffset() const { return mpMapper->GetWindowToViewOffset(); }
 
-bool OutputDevice::IsMapModeEnabled() const { return mpMapper->IsMapModeEnabled(); }
+bool OutputDevice::IsMapModeEnabled() const { return mbMap; }
 
-void OutputDevice::EnableMapMode(bool bEnabled) { mpMapper->EnableMapMode(bEnabled); }
+void OutputDevice::EnableMapMode(bool bEnabled)
+{
+    mbMap = bEnabled;
+    mpMapper->InvalidateViewTransform();
+}
 
 const MapMode& OutputDevice::GetMapMode() const { return mpMapper->GetMapMode(); }
 
