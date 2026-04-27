@@ -35,6 +35,7 @@
 
 #include <cmath>
 #include <cassert>
+#include <ranges>
 
 static inline tools::Long lcl_RoundToLong(double fVal)
 {
@@ -917,9 +918,9 @@ static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc
         RectangleVector aRectangles;
         rRegion.GetRegionRectangles(aRectangles);
 
-        for (auto aRectIter = aRectangles.rbegin(); aRectIter != aRectangles.rend(); ++aRectIter)
+        for (const auto& rRect : aRectangles | std::views::reverse)
         {
-            aRegion.Union(func(*aRectIter));
+            aRegion.Union(func(rRect));
         }
     }
     return aRegion;
