@@ -43,6 +43,23 @@ static inline tools::Long lcl_RoundToLong(double fVal)
     return static_cast<tools::Long>(std::llround(fVal));
 }
 
+namespace
+{
+double GetScaledXLength(const basegfx::B2DHomMatrix& m)
+{
+    basegfx::B2DVector vx(1.0, 0.0);
+    vx *= m;
+    return vx.getLength();
+}
+
+double GetScaledYLength(const basegfx::B2DHomMatrix& m)
+{
+    basegfx::B2DVector vy(0.0, 1.0);
+    vy *= m;
+    return vy.getLength();
+}
+}
+
 // Conceptual Pipeline Separation (Mathematical Invariant):
 // Logic -> View: Scaled transformations (Scale * Logic) + Scaled Offsets ((MapOfs + LogicOfs) * Scale)
 // View -> Window: Pure translation (WindowOfs)
@@ -120,11 +137,11 @@ Point CoordinateMapper::GetDeviceToWindowOffset() const
 
 Size CoordinateMapper::LogicToViewDistance(const Size& rLogicSize, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return rLogicSize;
-
-    return Size(LogicToViewDistanceX(rLogicSize.Width(), bMap),
-                LogicToViewDistanceY(rLogicSize.Height(), bMap));
+    const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
+    const double sx = GetScaledXLength(aMat);
+    const double sy = GetScaledYLength(aMat);
+    return Size(lcl_RoundToLong(rLogicSize.Width() * sx),
+                lcl_RoundToLong(rLogicSize.Height() * sy));
 }
 
 vcl::Region CoordinateMapper::ViewToDevice(const vcl::Region& rRegion) const
@@ -418,91 +435,6 @@ double CoordinateMapper::WindowToDeviceSubPixelY(double fY) const
 }
 
 // View <-> Absolute Logic (Map Scale & Map Offset)
-double CoordinateMapper::ViewSubPixelToLogicUnitsX(double fX, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    // To get Logic from View, we convert View to Window, then apply InvView (which is Window -> Logic)
-    double fWindow = fX + static_cast<double>(mnWindowToViewOffsetX);
-    return fWindow * snap->maInvView.get(0, 0) + snap->maInvView.get(0, 2);
-}
-
-double CoordinateMapper::ViewSubPixelToLogicUnitsY(double fY, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    double fWindow = fY + static_cast<double>(mnWindowToViewOffsetY);
-    return fWindow * snap->maInvView.get(1, 1) + snap->maInvView.get(1, 2);
-}
-
-double CoordinateMapper::LogicUnitsToViewSubPixelX(double fX, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    // maView maps Logic -> Window. View is Window - WindowToViewOffset.
-    return (fX * snap->maView.get(0, 0) + snap->maView.get(0, 2))
-           - static_cast<double>(mnWindowToViewOffsetX);
-}
-
-double CoordinateMapper::LogicUnitsToViewSubPixelY(double fY, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    return (fY * snap->maView.get(1, 1) + snap->maView.get(1, 2))
-           - static_cast<double>(mnWindowToViewOffsetY);
-}
-
-tools::Long CoordinateMapper::ViewToLogicUnitsX(tools::Long nX, bool bMap) const
-{
-    return lcl_RoundToLong(ViewSubPixelToLogicUnitsX(static_cast<double>(nX), bMap));
-}
-
-tools::Long CoordinateMapper::ViewToLogicUnitsY(tools::Long nY, bool bMap) const
-{
-    return lcl_RoundToLong(ViewSubPixelToLogicUnitsY(static_cast<double>(nY), bMap));
-}
-
-tools::Long CoordinateMapper::LogicUnitsToViewUnitsX(tools::Long nX, bool bMap) const
-{
-    return lcl_RoundToLong(LogicUnitsToViewSubPixelX(static_cast<double>(nX), bMap));
-}
-
-tools::Long CoordinateMapper::LogicUnitsToViewUnitsY(tools::Long nY, bool bMap) const
-{
-    return lcl_RoundToLong(LogicUnitsToViewSubPixelY(static_cast<double>(nY), bMap));
-}
-
-tools::Long CoordinateMapper::ViewSubPixelToLogicUnitsIntX(double fX, bool bMap) const
-{
-    return lcl_RoundToLong(ViewSubPixelToLogicUnitsX(fX, bMap));
-}
-
-tools::Long CoordinateMapper::ViewSubPixelToLogicUnitsIntY(double fY, bool bMap) const
-{
-    return lcl_RoundToLong(ViewSubPixelToLogicUnitsY(fY, bMap));
-}
-
-tools::Long CoordinateMapper::LogicUnitsToViewUnitsX(tools::Long nX,
-                                                     const vcl::detail::MapConversion& rConv) const
-{
-    return LogicToViewDistanceX(nX + rConv.mnOffsetX, rConv.mfScaleX);
-}
-
-tools::Long CoordinateMapper::LogicUnitsToViewUnitsY(tools::Long nY,
-                                                     const vcl::detail::MapConversion& rConv) const
-{
-    return LogicToViewDistanceY(nY + rConv.mnOffsetY, rConv.mfScaleY);
-}
-
-tools::Long CoordinateMapper::LogicToWindowUnitsX(tools::Long nX,
-                                                  const vcl::detail::MapConversion& rConv) const
-{
-    auto mat = GetViewTransformation(rConv);
-    return lcl_RoundToLong(static_cast<double>(nX) * mat.get(0, 0) + mat.get(0, 2));
-}
-
-tools::Long CoordinateMapper::LogicToWindowUnitsY(tools::Long nY,
-                                                  const vcl::detail::MapConversion& rConv) const
-{
-    auto mat = GetViewTransformation(rConv);
-    return lcl_RoundToLong(static_cast<double>(nY) * mat.get(1, 1) + mat.get(1, 2));
-}
 
 Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt,
                                            const vcl::detail::MapConversion& rConv) const
@@ -532,13 +464,12 @@ static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle&
 tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect,
                                                       const vcl::detail::MapConversion& rConv) const
 {
-    tools::Rectangle aRetval(
-        LogicToWindowUnitsX(rRect.Left(), rConv), LogicToWindowUnitsY(rRect.Top(), rConv),
-        rRect.IsWidthEmpty() ? 0 : LogicToWindowUnitsX(rRect.Right(), rConv),
-        rRect.IsHeightEmpty() ? 0 : LogicToWindowUnitsY(rRect.Bottom(), rConv));
-
+    basegfx::B2DHomMatrix aMat = GetViewTransformation(rConv);
+    basegfx::B2DRange aRange(rRect.Left(), rRect.Top(), rRect.Right(), rRect.Bottom());
+    aRange.transform(aMat);
+    tools::Rectangle aRetval(lcl_RoundToLong(aRange.getMinX()), lcl_RoundToLong(aRange.getMinY()),
+                             lcl_RoundToLong(aRange.getMaxX()), lcl_RoundToLong(aRange.getMaxY()));
     lcl_ApplyEmptyState(aRetval, rRect);
-
     return aRetval;
 }
 
@@ -546,13 +477,13 @@ tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rLogic
                                                     const vcl::detail::MapConversion& rConv) const
 {
     tools::Polygon aPoly(rLogicPoly);
-
+    basegfx::B2DHomMatrix aMat = GetViewTransformation(rConv);
     for (auto& rPoint : aPoly)
     {
-        rPoint.setX(LogicToWindowUnitsX(rPoint.X(), rConv));
-        rPoint.setY(LogicToWindowUnitsY(rPoint.Y(), rConv));
+        basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
+        aPt *= aMat;
+        rPoint = Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
     }
-
     return aPoly;
 }
 
@@ -577,61 +508,16 @@ CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolyPolygon>(
 // MASTER WRAPPERS (Multi-space Positional Transformations)
 // ========================================================================
 
-double CoordinateMapper::WindowToLogicSubPixelX(double fX, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    return fX * snap->maInvView.get(0, 0) + snap->maInvView.get(0, 2);
-}
-
-double CoordinateMapper::WindowToLogicSubPixelY(double fY, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    return fY * snap->maInvView.get(1, 1) + snap->maInvView.get(1, 2);
-}
-
-tools::Long CoordinateMapper::WindowToLogicX(tools::Long nX, bool bMap) const
-{
-    return lcl_RoundToLong(WindowToLogicSubPixelX(static_cast<double>(nX), bMap));
-}
-
-tools::Long CoordinateMapper::WindowToLogicY(tools::Long nY, bool bMap) const
-{
-    return lcl_RoundToLong(WindowToLogicSubPixelY(static_cast<double>(nY), bMap));
-}
-
 Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return rLogicSize;
-
-    return Size(LogicToViewDistanceX(rLogicSize.Width(), bMap),
-                LogicToViewDistanceY(rLogicSize.Height(), bMap));
+    const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
+    const double sx = GetScaledXLength(aMat);
+    const double sy = GetScaledYLength(aMat);
+    return Size(lcl_RoundToLong(rLogicSize.Width() * sx),
+                lcl_RoundToLong(rLogicSize.Height() * sy));
 }
 
 // --- Sub-Pixel Full Journey ---
-double CoordinateMapper::LogicToDeviceSubPixelX(double fX, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    return fX * snap->maLogicToDevice.get(0, 0) + snap->maLogicToDevice.get(0, 2);
-}
-
-double CoordinateMapper::LogicToDeviceSubPixelY(double fY, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    return fY * snap->maLogicToDevice.get(1, 1) + snap->maLogicToDevice.get(1, 2);
-}
-
-double CoordinateMapper::DevicePixelToLogicSubPixelX(double fX, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    return fX * snap->maDeviceToLogic.get(0, 0) + snap->maDeviceToLogic.get(0, 2);
-}
-
-double CoordinateMapper::DevicePixelToLogicSubPixelY(double fY, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    return fY * snap->maDeviceToLogic.get(1, 1) + snap->maDeviceToLogic.get(1, 2);
-}
 
 basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint, bool bMap) const
 {
@@ -650,16 +536,6 @@ basegfx::B2DPoint CoordinateMapper::DevicePixelToLogicSubPixel(const Point& rPoi
 }
 
 // Integer Boundary (this is the only place rounding occurs)
-
-tools::Long CoordinateMapper::DevicePixelToLogicX(tools::Long nX, bool bMap) const
-{
-    return lcl_RoundToLong(DevicePixelToLogicSubPixelX(static_cast<double>(nX), bMap));
-}
-
-tools::Long CoordinateMapper::DevicePixelToLogicY(tools::Long nY, bool bMap) const
-{
-    return lcl_RoundToLong(DevicePixelToLogicSubPixelY(static_cast<double>(nY), bMap));
-}
 
 Point CoordinateMapper::DevicePixelToLogic(const Point& rDevicePt, bool bMap) const
 {
@@ -680,22 +556,6 @@ tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rP
                             lcl_RoundToLong(aRange.getMaxX()), lcl_RoundToLong(aRange.getMaxY()));
 }
 
-tools::Long CoordinateMapper::LogicToDevicePixelX(tools::Long nX, bool bMap) const
-{
-    if (!bMap && IsValidDPI())
-        return nX + GetDeviceToWindowOffsetX();
-
-    return lcl_RoundToLong(LogicToDeviceSubPixelX(static_cast<double>(nX), bMap));
-}
-
-tools::Long CoordinateMapper::LogicToDevicePixelY(tools::Long nY, bool bMap) const
-{
-    if (!bMap && IsValidDPI())
-        return nY + GetDeviceToWindowOffsetY();
-
-    return lcl_RoundToLong(LogicToDeviceSubPixelY(static_cast<double>(nY), bMap));
-}
-
 Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt, bool bMap) const
 {
     basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
@@ -707,35 +567,29 @@ Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt, bool bMap) con
 // Note: Width/Height use Distances, not Positions!
 double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return static_cast<double>(nWidth);
-
-    return LogicToViewDistanceSubPixelX(nWidth, bMap);
+    const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
+    return static_cast<double>(nWidth) * GetScaledXLength(aMat);
 }
 
 tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return nWidth;
-
-    return lcl_RoundToLong(std::abs(LogicToViewDistanceSubPixelX(nWidth, bMap)));
+    const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
+    return lcl_RoundToLong(nWidth * GetScaledXLength(aMat));
 }
 
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return nHeight;
-
-    return lcl_RoundToLong(std::abs(LogicToViewDistanceSubPixelY(nHeight, bMap)));
+    const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
+    return lcl_RoundToLong(nHeight * GetScaledYLength(aMat));
 }
 
 Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return rLogicSize;
-
-    return Size(LogicWidthToDevicePixel(rLogicSize.Width(), bMap),
-                LogicHeightToDevicePixel(rLogicSize.Height(), bMap));
+    const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
+    const double sx = GetScaledXLength(aMat);
+    const double sy = GetScaledYLength(aMat);
+    return Size(lcl_RoundToLong(rLogicSize.Width() * sx),
+                lcl_RoundToLong(rLogicSize.Height() * sy));
 }
 
 tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect,
@@ -845,32 +699,6 @@ tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY, bool bMap) const
     return lcl_RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY), bMap));
 }
 
-tools::Long CoordinateMapper::ViewToLogicX(tools::Long nX, bool bMap) const
-{
-    return ViewToLogicUnitsX(nX, bMap) - mnLogicToAbsoluteOffsetX;
-}
-
-tools::Long CoordinateMapper::ViewToLogicY(tools::Long nY, bool bMap) const
-{
-    return ViewToLogicUnitsY(nY, bMap) - mnLogicToAbsoluteOffsetY;
-}
-
-tools::Long CoordinateMapper::LogicToWindowUnitsX(tools::Long nX, bool bMap) const
-{
-    if (!bMap && IsValidDPI())
-        return nX;
-
-    return lcl_RoundToLong(LogicToWindowSubPixelX(static_cast<double>(nX), bMap));
-}
-
-tools::Long CoordinateMapper::LogicToWindowUnitsY(tools::Long nY, bool bMap) const
-{
-    if (!bMap && IsValidDPI())
-        return nY;
-
-    return lcl_RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY), bMap));
-}
-
 Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt, bool bMap) const
 {
     basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
@@ -930,15 +758,14 @@ tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rPoly,
 {
     if (!bMap && IsValidDPI())
         return rPoly;
-
     tools::Polygon aPoly(rPoly);
-
+    basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
     for (auto& rPoint : aPoly)
     {
-        rPoint.setX(LogicToWindowUnitsX(rPoint.X(), bMap));
-        rPoint.setY(LogicToWindowUnitsY(rPoint.Y(), bMap));
+        basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
+        aPt *= aMat;
+        rPoint = Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
     }
-
     return aPoly;
 }
 
@@ -979,18 +806,14 @@ CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolyPolygon>(const basegfx::B2D
 
 double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return nWidth;
-
-    return LogicToViewDistanceSubPixelX(nWidth, bMap);
+    const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
+    return static_cast<double>(nWidth) * GetScaledXLength(aMat);
 }
 
 double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return nHeight;
-
-    return LogicToViewDistanceSubPixelY(nHeight, bMap);
+    const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
+    return static_cast<double>(nHeight) * GetScaledYLength(aMat);
 }
 
 vcl::Region CoordinateMapper::WindowToLogicUnits(const vcl::Region& rWindowRegion, bool bMap) const
@@ -1010,37 +833,22 @@ Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, bool bMap) co
     return Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
 }
 
-tools::Long CoordinateMapper::WindowSubPixelToLogicIntX(double fX, bool bMap) const
-{
-    return lcl_RoundToLong(WindowToLogicSubPixelX(fX, bMap));
-}
-
-tools::Long CoordinateMapper::WindowSubPixelToLogicIntY(double fY, bool bMap) const
-{
-    return lcl_RoundToLong(WindowToLogicSubPixelY(fY, bMap));
-}
-
 Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt,
                                                    bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-    {
-        assert(std::floor(rWindowPt.getX()) == rWindowPt.getX()
-               && std::floor(rWindowPt.getY()) == rWindowPt.getY());
-        return Point(rWindowPt.getX(), rWindowPt.getY());
-    }
-
-    return Point(WindowSubPixelToLogicIntX(rWindowPt.getX(), bMap),
-                 WindowSubPixelToLogicIntY(rWindowPt.getY(), bMap));
+    basegfx::B2DHomMatrix aMat = GetWindowToLogicMatrix(bMap);
+    basegfx::B2DPoint aPt(rWindowPt);
+    aPt *= aMat;
+    return Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
 }
 
 Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return rWindowSize;
-
-    return Size(ViewToLogicDistanceX(rWindowSize.Width(), bMap),
-                ViewToLogicDistanceY(rWindowSize.Height(), bMap));
+    const basegfx::B2DHomMatrix aMat = GetWindowToLogicMatrix(bMap);
+    const double sx = GetScaledXLength(aMat);
+    const double sy = GetScaledYLength(aMat);
+    return Size(lcl_RoundToLong(rWindowSize.Width() * sx),
+                lcl_RoundToLong(rWindowSize.Height() * sy));
 }
 
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
@@ -1059,15 +867,14 @@ tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindo
 {
     if (!bMap && IsValidDPI())
         return rWindowPoly;
-
     tools::Polygon aPoly(rWindowPoly);
-
+    basegfx::B2DHomMatrix aMat = GetWindowToLogicMatrix(bMap);
     for (auto& rPoint : aPoly)
     {
-        rPoint = Point(WindowSubPixelToLogicIntX(rPoint.X(), bMap),
-                       WindowSubPixelToLogicIntY(rPoint.Y(), bMap));
+        basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
+        aPt *= aMat;
+        rPoint = Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
     }
-
     return aPoly;
 }
 
@@ -1123,38 +930,6 @@ template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
 CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(
     const basegfx::B2DPolyPolygon&, const vcl::detail::MapConversion&) const;
 
-tools::Long CoordinateMapper::ViewSubPixelToLogicIntX(double fX,
-                                                      const vcl::detail::MapConversion& rConv) const
-{
-    double fLogicDist = ViewToLogicDistanceDoubleX(fX, rConv.mfScaleX);
-    return lcl_RoundToLong(fLogicDist - static_cast<double>(rConv.mnOffsetX)
-                           - static_cast<double>(mnLogicToAbsoluteOffsetX));
-}
-
-tools::Long CoordinateMapper::ViewSubPixelToLogicIntY(double fY,
-                                                      const vcl::detail::MapConversion& rConv) const
-{
-    double fLogicDist = ViewToLogicDistanceDoubleY(fY, rConv.mfScaleY);
-    return lcl_RoundToLong(fLogicDist - static_cast<double>(rConv.mnOffsetY)
-                           - static_cast<double>(mnLogicToAbsoluteOffsetY));
-}
-
-tools::Long
-CoordinateMapper::WindowSubPixelToLogicIntX(double fX,
-                                            const vcl::detail::MapConversion& rConv) const
-{
-    auto mat = GetInverseViewTransformation(rConv);
-    return lcl_RoundToLong(fX * mat.get(0, 0) + mat.get(0, 2));
-}
-
-tools::Long
-CoordinateMapper::WindowSubPixelToLogicIntY(double fY,
-                                            const vcl::detail::MapConversion& rConv) const
-{
-    auto mat = GetInverseViewTransformation(rConv);
-    return lcl_RoundToLong(fY * mat.get(1, 1) + mat.get(1, 2));
-}
-
 Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt,
                                            const vcl::detail::MapConversion& rConv) const
 {
@@ -1174,11 +949,12 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize,
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
                                                       const vcl::detail::MapConversion& rConv) const
 {
-    tools::Rectangle aRetval(
-        WindowSubPixelToLogicIntX(rWindowRect.Left(), rConv),
-        WindowSubPixelToLogicIntY(rWindowRect.Top(), rConv),
-        rWindowRect.IsWidthEmpty() ? 0 : WindowSubPixelToLogicIntX(rWindowRect.Right(), rConv),
-        rWindowRect.IsHeightEmpty() ? 0 : WindowSubPixelToLogicIntY(rWindowRect.Bottom(), rConv));
+    basegfx::B2DHomMatrix aMat = GetInverseViewTransformation(rConv);
+    basegfx::B2DRange aRange(rWindowRect.Left(), rWindowRect.Top(), rWindowRect.Right(),
+                             rWindowRect.Bottom());
+    aRange.transform(aMat);
+    tools::Rectangle aRetval(lcl_RoundToLong(aRange.getMinX()), lcl_RoundToLong(aRange.getMinY()),
+                             lcl_RoundToLong(aRange.getMaxX()), lcl_RoundToLong(aRange.getMaxY()));
     lcl_ApplyEmptyState(aRetval, rWindowRect);
     return aRetval;
 }
@@ -1197,46 +973,6 @@ tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindo
 // ========================================================================
 // DISTANCE SCALING (Raw Scalar Conversion)
 // ========================================================================
-
-tools::Long CoordinateMapper::LogicToViewDistanceX(tools::Long n, double fScale) const
-{
-    return lcl_RoundToLong(LogicToViewDistanceSubPixelX(n, fScale));
-}
-
-tools::Long CoordinateMapper::LogicToViewDistanceY(tools::Long n, double fScale) const
-{
-    return lcl_RoundToLong(LogicToViewDistanceSubPixelY(n, fScale));
-}
-
-tools::Long CoordinateMapper::ViewToLogicDistanceX(tools::Long n, double fScale) const
-{
-    return lcl_RoundToLong(ViewToLogicDistanceDoubleX(static_cast<double>(n), fScale));
-}
-
-tools::Long CoordinateMapper::ViewToLogicDistanceY(tools::Long n, double fScale) const
-{
-    return lcl_RoundToLong(ViewToLogicDistanceDoubleY(static_cast<double>(n), fScale));
-}
-
-tools::Long CoordinateMapper::LogicToViewDistanceX(tools::Long n, bool bMap) const
-{
-    return lcl_RoundToLong(LogicToViewDistanceSubPixelX(n, bMap));
-}
-
-tools::Long CoordinateMapper::LogicToViewDistanceY(tools::Long n, bool bMap) const
-{
-    return lcl_RoundToLong(LogicToViewDistanceSubPixelY(n, bMap));
-}
-
-tools::Long CoordinateMapper::ViewToLogicDistanceX(tools::Long n, bool bMap) const
-{
-    return lcl_RoundToLong(ViewToLogicDistanceDoubleX(static_cast<double>(n), bMap));
-}
-
-tools::Long CoordinateMapper::ViewToLogicDistanceY(tools::Long n, bool bMap) const
-{
-    return lcl_RoundToLong(ViewToLogicDistanceDoubleY(static_cast<double>(n), bMap));
-}
 
 tools::Long CoordinateMapper::ViewToWindowUnitsX(tools::Long nX) const
 {
@@ -1278,68 +1014,6 @@ tools::Long CoordinateMapper::WindowToDeviceUnitsY(tools::Long nY) const
     return nY + mnDeviceToWindowOffsetY;
 }
 
-double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    return static_cast<double>(n) * snap->maView.get(0, 0);
-}
-
-double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    return static_cast<double>(n) * snap->maView.get(1, 1);
-}
-
-double CoordinateMapper::LogicToViewDistanceSubPixelX(tools::Long n, double fScale) const
-{
-    assert(GetDPIX() > 0 && "CoordinateMapper: Invalid DPI X, falling back to identity");
-    if (GetDPIX() <= 0)
-        return static_cast<double>(n);
-
-    return static_cast<double>(n) * fScale * GetDPIX();
-}
-
-double CoordinateMapper::LogicToViewDistanceSubPixelY(tools::Long n, double fScale) const
-{
-    assert(GetDPIY() > 0 && "CoordinateMapper: Invalid DPI Y, falling back to identity");
-    if (GetDPIY() <= 0)
-        return static_cast<double>(n);
-
-    return static_cast<double>(n) * fScale * GetDPIY();
-}
-
-double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    return n * snap->maInvView.get(0, 0);
-}
-
-double CoordinateMapper::ViewToLogicDistanceDoubleY(double n, bool bMap) const
-{
-    auto snap = AcquireSnapshot(bMap);
-    return n * snap->maInvView.get(1, 1);
-}
-
-double CoordinateMapper::ViewToLogicDistanceDoubleX(double n, double fScale) const
-{
-    assert(fScale != 0.0 && GetDPIX() > 0
-           && "CoordinateMapper: Zero scale or invalid DPI X, falling back to identity");
-    if (fScale == 0.0 || GetDPIX() <= 0)
-        return n;
-
-    return n / fScale / GetDPIX();
-}
-
-double CoordinateMapper::ViewToLogicDistanceDoubleY(double n, double fScale) const
-{
-    assert(fScale != 0.0 && GetDPIY() > 0
-           && "CoordinateMapper: Zero scale or invalid DPI Y, falling back to identity");
-    if (fScale == 0.0 || GetDPIY() <= 0)
-        return n;
-
-    return n / fScale / GetDPIY();
-}
-
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceX(double n) const
 {
     return ViewSubPixelToLogicDistanceX(n, maMapConversion.mfScaleX);
@@ -1352,12 +1026,16 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n) const
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceX(double n, double fScale) const
 {
-    return lcl_RoundToLong(ViewToLogicDistanceDoubleX(n, fScale));
+    if (fScale == 0.0 || GetDPIX() <= 0)
+        return lcl_RoundToLong(n);
+    return lcl_RoundToLong(n / (fScale * static_cast<double>(GetDPIX())));
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n, double fScale) const
 {
-    return lcl_RoundToLong(ViewToLogicDistanceDoubleY(n, fScale));
+    if (fScale == 0.0 || GetDPIY() <= 0)
+        return lcl_RoundToLong(n);
+    return lcl_RoundToLong(n / (fScale * static_cast<double>(GetDPIY())));
 }
 
 double CoordinateMapper::WindowToViewSubPixelX(double fX) const
@@ -1382,24 +1060,23 @@ double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
 
 tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return nWidth;
-
-    return ViewToLogicDistanceX(nWidth, bMap);
+    const basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(bMap);
+    return lcl_RoundToLong(nWidth * GetScaledXLength(aMat));
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return nHeight;
-
-    return ViewToLogicDistanceY(nHeight, bMap);
+    const basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(bMap);
+    return lcl_RoundToLong(nHeight * GetScaledYLength(aMat));
 }
 
 Size CoordinateMapper::DevicePixelToLogic(const Size& rDeviceSize, bool bMap) const
 {
-    return Size(DevicePixelToLogicWidth(rDeviceSize.Width(), bMap),
-                DevicePixelToLogicHeight(rDeviceSize.Height(), bMap));
+    const basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(bMap);
+    const double sx = GetScaledXLength(aMat);
+    const double sy = GetScaledYLength(aMat);
+    return Size(lcl_RoundToLong(rDeviceSize.Width() * sx),
+                lcl_RoundToLong(rDeviceSize.Height() * sy));
 }
 
 double CoordinateMapper::LogicToWindowSubPixelX(double fX, bool bMap) const
