@@ -152,7 +152,6 @@ private:
     mutable std::shared_ptr<const TransformSnapshot> mpSnapshots[2];
     mutable std::atomic<uint64_t> mnStateVersion{ 0 };
 
-    std::shared_ptr<const TransformSnapshot> AcquireSnapshot(bool bMap) const;
     std::shared_ptr<TransformSnapshot> BuildSnapshot(bool bMap) const;
 
     sal_Int32 mnDPIX = 72;
@@ -176,6 +175,8 @@ private:
     tools::Long mnOutHeight = 0;
 
 public:
+    std::shared_ptr<const TransformSnapshot> AcquireSnapshot(bool bMap) const;
+
     bool IsValidDPI() const { return mnDPIX > 0 && mnDPIY > 0; }
 
     sal_Int32 GetDPIX() const;
@@ -230,6 +231,9 @@ public:
     void SetDeviceToWindowOffsetY(tools::Long nDeviceToWindowOffsetY);
     void SetWindowToViewOffset(const Size& rWindowPixelOffset);
     void SetLogicToAbsoluteOffset(const Size& rSize);
+    void SetMapMode(const MapMode& rMapMode) { CalcMapResolution(rMapMode, mnDPIX, mnDPIY); }
+    void SetLogicOffset(const Size& rOffset) { SetLogicToAbsoluteOffset(rOffset); }
+    void SetWindowOffset(const Size& rOffset) { SetWindowToViewOffset(rOffset); }
 
     Size LogicToViewDistance(const Size& rLogicSize, bool bMap) const;
 
@@ -346,28 +350,29 @@ public:
     tools::Long LogicWidthToDevicePixel(tools::Long nWidth, bool bMap) const;
     double LogicWidthToDeviceSubPixel(tools::Long nWidth, bool bMap) const;
     tools::Long LogicHeightToDevicePixel(tools::Long nHeight, bool bMap) const;
-    Point LogicToDevicePixel(const Point& rLogicPt, bool bMap) const;
-    Size LogicToDevicePixel(const Size& rLogicSize, bool bMap) const;
-    tools::Rectangle LogicToDevicePixel(const tools::Rectangle& rLogicRect, bool bMap) const;
-    tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly, bool bMap) const;
+    Point LogicToDevicePixel(const Point& rLogicPt, bool bMap = true) const;
+    Size LogicToDevicePixel(const Size& rLogicSize, bool bMap = true) const;
+    tools::Rectangle LogicToDevicePixel(const tools::Rectangle& rLogicRect, bool bMap = true) const;
+    tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly, bool bMap = true) const;
     tools::PolyPolygon LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
                                           bool bMap) const;
-    LineInfo LogicToDevicePixel(const LineInfo& rLineInfo, bool bMap) const;
-    basegfx::B2DPolygon LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly, bool bMap) const;
+    LineInfo LogicToDevicePixel(const LineInfo& rLineInfo, bool bMap = true) const;
+    basegfx::B2DPolygon LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly,
+                                           bool bMap = true) const;
     basegfx::B2DPoint LogicToDeviceSubPixel(const Point& rPoint, bool bMap) const;
     tools::Long DevicePixelToLogicWidth(tools::Long nWidth, bool bMap) const;
     tools::Long DevicePixelToLogicHeight(tools::Long nHeight, bool bMap) const;
-    Point DevicePixelToLogic(const Point& rDevicePt, bool bMap) const;
-    Size DevicePixelToLogic(const Size& rDeviceSize, bool bMap) const;
-    tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect, bool bMap) const;
+    Point DevicePixelToLogic(const Point& rDevicePt, bool bMap = true) const;
+    Size DevicePixelToLogic(const Size& rDeviceSize, bool bMap = true) const;
+    tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect, bool bMap = true) const;
     basegfx::B2DPoint DevicePixelToLogicSubPixel(const Point& rDevicePt, bool bMap) const;
 
     // Window <-> Logic
 
     double LogicToWindowSubPixelX(double fX, bool bMap) const;
     double LogicToWindowSubPixelY(double fY, bool bMap) const;
-    tools::Long LogicToWindowX(tools::Long nX, bool bMap) const;
-    tools::Long LogicToWindowY(tools::Long nY, bool bMap) const;
+    tools::Long LogicToWindowX(tools::Long nX, bool bMap = true) const;
+    tools::Long LogicToWindowY(tools::Long nY, bool bMap = true) const;
     double LogicWidthToWindowSubPixel(tools::Long nWidth, bool bMap) const;
     double LogicHeightToWindowSubPixel(tools::Long nHeight, bool bMap) const;
 
@@ -382,35 +387,36 @@ public:
     double LogicToViewSubPixelY(double fY) const;
 
     // Logic -> Window units (Commonly used in OutputDevice::LogicToPixel)
-    Point LogicToWindowUnits(const Point& rLogicPt, bool bMap) const;
+    Point LogicToWindowUnits(const Point& rLogicPt, bool bMap = true) const;
     Point LogicToWindowUnits(const Point& rLogicPt, const vcl::detail::MapConversion& rConv) const;
     Size LogicToWindowUnits(const Size& rLogicSize, const vcl::detail::MapConversion& rConv) const;
     tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect,
                                         const vcl::detail::MapConversion& rConv) const;
-    tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect, bool bMap) const;
-    Size LogicToWindowUnits(const Size& rLogicSize, bool bMap) const;
-    vcl::Region LogicToWindowUnits(const vcl::Region& rRegion, bool bMap) const;
-    tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly, bool bMap) const;
+    tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect, bool bMap = true) const;
+    Size LogicToWindowUnits(const Size& rLogicSize, bool bMap = true) const;
+    vcl::Region LogicToWindowUnits(const vcl::Region& rRegion, bool bMap = true) const;
+    tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly, bool bMap = true) const;
     tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly,
                                       const vcl::detail::MapConversion& rConv) const;
-    tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly, bool bMap) const;
+    tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly, bool bMap = true) const;
     tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly,
                                           const vcl::detail::MapConversion& rConv) const;
 
     template <TransformableB2DGeometry T>
-    T LogicToWindowUnits(const T& rLogicGeometry, bool bMap) const;
+    T LogicToWindowUnits(const T& rLogicGeometry, bool bMap = true) const;
 
     template <TransformableB2DGeometry T>
     T LogicToWindowUnits(const T& rLogicGeometry, const vcl::detail::MapConversion& rConv) const;
     vcl::Region WindowToLogicUnits(const vcl::Region& rWindowRegion, bool bmap) const;
-    Point WindowToLogicUnits(const Point& rWindowPt, bool bMap) const;
+    Point WindowToLogicUnits(const Point& rWindowPt, bool bMap = true) const;
     Point WindowToLogicUnits(const Point& rWindowPt, const vcl::detail::MapConversion& rConv) const;
 
-    tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect, bool bMap) const;
+    tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect,
+                                        bool bMap = true) const;
     tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect,
                                         const vcl::detail::MapConversion& rConv) const;
 
-    tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly, bool bMap) const;
+    tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly, bool bMap = true) const;
     tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly,
                                       const vcl::detail::MapConversion& rConv) const;
 
@@ -418,11 +424,11 @@ public:
                                           bool bMap) const;
     Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt, bool bMap) const;
 
-    Size WindowToLogicUnits(const Size& rWindowSize, bool bMap) const;
+    Size WindowToLogicUnits(const Size& rWindowSize, bool bMap = true) const;
     Size WindowToLogicUnits(const Size& rWindowSize, const vcl::detail::MapConversion& rConv) const;
 
     template <TransformableB2DGeometry T>
-    T WindowToLogicUnits(const T& rWindowGeometry, bool bMap) const;
+    T WindowToLogicUnits(const T& rWindowGeometry, bool bMap = true) const;
 
     template <TransformableB2DGeometry T>
     T WindowToLogicUnits(const T& rWindowGeometry, const vcl::detail::MapConversion& rConv) const;
