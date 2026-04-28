@@ -211,74 +211,54 @@ CoordinateMapper::BuildSnapshot(bool bMap) const
 {
     auto pSnap = std::make_shared<TransformSnapshot>();
 
-    if (!bMap && IsValidDPI())
-    {
-        // Identity fallback: only screen-space offsets remain
+    pSnap->maView.identity();
+    pSnap->maLogicToDevice.identity();
 
-        const double dxView = static_cast<double>(mnWindowToViewOffsetX);
-        const double dyView = static_cast<double>(mnWindowToViewOffsetY);
+    const double fUIScale = static_cast<double>(mnDPIScalePercentage) / 100.0;
 
-        // View transform (Logic -> Window)
-        pSnap->maView.identity();
-        pSnap->maView.set(0, 2, dxView);
-        pSnap->maView.set(1, 2, dyView);
+    // bMap=false:
+    // - disables MapMode scaling and logic offsets
+    // - preserves window/device offsets (pure pixel-space positioning)
+    const double scaleX = bMap ? (maMapRes.mfScaleX * static_cast<double>(mnDPIX) * fUIScale) : 1.0;
+    const double scaleY = bMap ? (maMapRes.mfScaleY * static_cast<double>(mnDPIY) * fUIScale) : 1.0;
 
-        // Logic -> Device (adds device offset)
-        const double dxDev = dxView + static_cast<double>(mnDeviceToWindowOffsetX);
-        const double dyDev = dyView + static_cast<double>(mnDeviceToWindowOffsetY);
+    const double logicOffsetX
+        = bMap ? static_cast<double>(maMapRes.mnTranslationX + mnLogicToAbsoluteOffsetX) : 0.0;
+    const double logicOffsetY
+        = bMap ? static_cast<double>(maMapRes.mnTranslationY + mnLogicToAbsoluteOffsetY) : 0.0;
 
-        pSnap->maLogicToDevice.identity();
-        pSnap->maLogicToDevice.set(0, 2, dxDev);
-        pSnap->maLogicToDevice.set(1, 2, dyDev);
-    }
-    else
-    {
-        // Scale (Logic -> Device space)
-        const double scaleX = static_cast<double>(mnDPIX) * maMapConversion.mfScaleX;
-        const double scaleY = static_cast<double>(mnDPIY) * maMapConversion.mfScaleY;
+    const double txView = (logicOffsetX * scaleX) + static_cast<double>(mnWindowToViewOffsetX);
+    const double tyView = (logicOffsetY * scaleY) + static_cast<double>(mnWindowToViewOffsetY);
 
-        // Logic-space offsets
-        const double logicOffsetX = static_cast<double>(maMapConversion.mnOffsetX)
-                                    + static_cast<double>(mnLogicToAbsoluteOffsetX);
+    pSnap->maView.set(0, 0, scaleX);
+    pSnap->maView.set(1, 1, scaleY);
+    pSnap->maView.set(0, 2, txView);
+    pSnap->maView.set(1, 2, tyView);
 
-        const double logicOffsetY = static_cast<double>(maMapConversion.mnOffsetY)
-                                    + static_cast<double>(mnLogicToAbsoluteOffsetY);
+    const double txDev = txView + static_cast<double>(mnDeviceToWindowOffsetX);
+    const double tyDev = tyView + static_cast<double>(mnDeviceToWindowOffsetY);
 
-        // View transform (Logic -> Window)
-        const double txView = (logicOffsetX * scaleX) + static_cast<double>(mnWindowToViewOffsetX);
+    pSnap->maLogicToDevice.set(0, 0, scaleX);
+    pSnap->maLogicToDevice.set(1, 1, scaleY);
+    pSnap->maLogicToDevice.set(0, 2, txDev);
+    pSnap->maLogicToDevice.set(1, 2, tyDev);
 
-        const double tyView = (logicOffsetY * scaleY) + static_cast<double>(mnWindowToViewOffsetY);
-
-        pSnap->maView.identity();
-        pSnap->maView.set(0, 0, scaleX);
-        pSnap->maView.set(1, 1, scaleY);
-        pSnap->maView.set(0, 2, txView);
-        pSnap->maView.set(1, 2, tyView);
-
-        // Logic -> Device
-        const double txDev = txView + static_cast<double>(mnDeviceToWindowOffsetX);
-
-        const double tyDev = tyView + static_cast<double>(mnDeviceToWindowOffsetY);
-
-        pSnap->maLogicToDevice.identity();
-        pSnap->maLogicToDevice.set(0, 0, scaleX);
-        pSnap->maLogicToDevice.set(1, 1, scaleY);
-        pSnap->maLogicToDevice.set(0, 2, txDev);
-        pSnap->maLogicToDevice.set(1, 2, tyDev);
-    }
-
-    // Derived transforms
-
-    // Device -> Logic
-    pSnap->maDeviceToLogic = pSnap->maLogicToDevice;
-    if (!pSnap->maDeviceToLogic.invert())
-        pSnap->maDeviceToLogic.identity();
-
-    // Window -> Logic (inverse view)
     pSnap->maInvView = pSnap->maView;
     if (!pSnap->maInvView.invert())
+    {
+        SAL_WARN("vcl.gdi", "CoordinateMapper: maView inversion failed. Falling back to identity.");
         pSnap->maInvView.identity();
+    }
 
+    pSnap->maDeviceToLogic = pSnap->maLogicToDevice;
+    if (!pSnap->maDeviceToLogic.invert())
+    {
+        SAL_WARN("vcl.gdi",
+                 "CoordinateMapper: maLogicToDevice inversion failed. Falling back to identity.");
+        pSnap->maDeviceToLogic.identity();
+    }
+
+    // mnVersion is explicitly NOT set here. It is handled by AcquireSnapshot.
     return pSnap;
 }
 
@@ -289,37 +269,31 @@ CoordinateMapper::AcquireSnapshot(bool bMap) const
 
     while (true)
     {
-        // Fast path
-        if (auto pSnap = std::atomic_load_explicit(&mpSnapshots[idx], std::memory_order_acquire))
-        {
-            const uint64_t v = mnStateVersion.load(std::memory_order_acquire);
-            if (pSnap->mnVersion == v)
-                return pSnap; // Valid for the observed version
-        }
-
-        // Slow path: build snapshot
+        // 1. Acquire current state version BEFORE building
         const uint64_t buildVersion = mnStateVersion.load(std::memory_order_acquire);
 
-        auto pNew = BuildSnapshot(bMap);
-
-        const uint64_t verifyVersion = mnStateVersion.load(std::memory_order_acquire);
-        if (buildVersion != verifyVersion)
-            continue; // state changed while building -> retry
-
-        pNew->mnVersion = verifyVersion;
-
-        // Convert to const-qualified shared_ptr
-        auto pPublish = std::shared_ptr<const TransformSnapshot>(std::move(pNew));
-
-        // Avoid redundant publish if another thread won
+        // Fast path check
         if (auto pExisting
             = std::atomic_load_explicit(&mpSnapshots[idx], std::memory_order_acquire))
         {
-            if (pExisting->mnVersion == verifyVersion)
+            if (pExisting->mnVersion == buildVersion)
                 return pExisting;
         }
 
-        // Publish
+        // 2. Build the math (pure deterministic function of state)
+        auto pNew = BuildSnapshot(bMap);
+
+        // 3. Verify state didn't mutate during the build
+        const uint64_t verifyVersion = mnStateVersion.load(std::memory_order_acquire);
+        if (buildVersion != verifyVersion)
+            continue; // State tore, retry
+
+        // 4. Safe version assignment (Post-verification)
+        pNew->mnVersion = buildVersion;
+
+        auto pPublish = std::shared_ptr<const TransformSnapshot>(std::move(pNew));
+
+        // 5. Publish
         std::atomic_store_explicit(&mpSnapshots[idx], pPublish, std::memory_order_release);
 
         return pPublish;
@@ -527,11 +501,11 @@ basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint, b
     return aPt;
 }
 
-basegfx::B2DPoint CoordinateMapper::DevicePixelToLogicSubPixel(const Point& rPoint, bool bMap) const
+basegfx::B2DPoint CoordinateMapper::DevicePixelToLogicSubPixel(const Point& rDevicePt,
+                                                               bool bMap) const
 {
-    basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(bMap);
-    basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
-    aPt *= aMat;
+    basegfx::B2DPoint aPt(rDevicePt.X(), rDevicePt.Y());
+    aPt *= AcquireSnapshot(bMap)->maDeviceToLogic;
     return aPt;
 }
 
