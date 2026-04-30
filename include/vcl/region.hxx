@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
  *
@@ -26,6 +26,7 @@
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 #include <memory>
 #include <optional>
+#include <vector>
 
 class RegionBand;
 
@@ -45,14 +46,16 @@ private:
     friend class ::Bitmap;
 
     // possible contents
-    std::optional< basegfx::B2DPolyPolygon >
-                                mpB2DPolyPolygon;
-    std::optional< tools::PolyPolygon >
-                                mpPolyPolygon;
-    std::shared_ptr< RegionBand >
-                                mpRegionBand;
+    std::optional< basegfx::B2DPolyPolygon > mpB2DPolyPolygon;
+    std::optional< tools::PolyPolygon >      mpPolyPolygon;
+    std::shared_ptr< RegionBand >            mpRegionBand;
 
-    bool                        mbIsNull : 1;
+    bool                                     mbIsNull : 1;
+
+    // --- PATCH 1: The Derived Cache ---
+    // Mutable so it can be lazily populated in const contexts.
+    // Strictly a derived snapshot; never the semantic source of truth.
+    mutable std::unique_ptr<RectangleVector> mpxRectCache;
 
     // helpers
     SAL_DLLPRIVATE void ImplCreatePolyPolyRegion( const tools::PolyPolygon& rPolyPoly );
@@ -61,6 +64,9 @@ private:
     SAL_DLLPRIVATE tools::PolyPolygon ImplCreatePolyPolygonFromRegionBand() const;
     SAL_DLLPRIVATE basegfx::B2DPolyPolygon ImplCreateB2DPolyPolygonFromRegionBand() const;
 
+    // Future-proofing for Patch 2: Cache invalidation helper
+    SAL_DLLPRIVATE void InvalidateCache() const;
+
 public:
 
     explicit Region(bool bIsNull = false); // default creates empty region, with true a null region is created
@@ -68,9 +74,15 @@ public:
     explicit Region(const tools::Polygon& rPolygon);
     explicit Region(const tools::PolyPolygon& rPolyPoly);
     explicit Region(const basegfx::B2DPolyPolygon&);
+    ~Region();
+
+    // --- PATCH 1: Explicit Lifecycle Management ---
+    // Prevent compiler from silently copying/moving the cache.
     Region(const vcl::Region& rRegion);
     Region(vcl::Region&& rRegion) noexcept;
-    ~Region();
+    vcl::Region& operator=(const vcl::Region& rRegion);
+    vcl::Region& operator=(vcl::Region&& rRegion) noexcept;
+    vcl::Region& operator=(const tools::Rectangle& rRect);
 
     // direct access to contents
     const std::optional<basegfx::B2DPolyPolygon>& getB2DPolyPolygon() const { return mpB2DPolyPolygon; }
@@ -110,10 +122,6 @@ public:
     bool Contains( const Point& rPoint ) const;
     bool Overlaps( const tools::Rectangle& rRect ) const;
 
-    vcl::Region& operator=( const vcl::Region& rRegion );
-    vcl::Region& operator=( vcl::Region&& rRegion ) noexcept;
-    vcl::Region& operator=( const tools::Rectangle& rRect );
-
     bool operator==( const vcl::Region& rRegion ) const;
     bool operator!=( const vcl::Region& rRegion ) const { return !(Region::operator==( rRegion )); }
 
@@ -130,6 +138,21 @@ public:
      * changed to rectangles; e.g. if being set as clip region
      */
     static vcl::Region GetRegionFromPolyPolygon( const tools::PolyPolygon& rPolyPoly );
+
+    // ====================================================================
+    // WARNING: ITERATOR LIFETIME CONTRACT
+    // Iterators are valid ONLY until the next semantic mutation of the Region
+    // (Move, Union, Intersect, operator=, or any operation that may
+    // change underlying representation storage).
+    //
+    // Representation queries MAY trigger lazy materialization and may
+    // invalidate iterators if internal storage is replaced.
+    //
+    // Do NOT store these iterators across VCL API calls.
+    // ====================================================================
+    using const_iterator = RectangleVector::const_iterator;
+    const_iterator begin() const;
+    const_iterator end() const;
 };
 
 template< typename charT, typename traits >
