@@ -1839,6 +1839,11 @@ Region::const_iterator Region::end() const
     return mpxRectCache->end();
 }
 
+void Region::InvalidateCache() const
+{
+    mpxRectCache.reset();
+}
+
 } /* namespace vcl */
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
