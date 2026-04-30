@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
  *
@@ -8,13 +8,13 @@
  *
  * This file incorporates work covered by the following license notice:
  *
- *   Licensed to the Apache Software Foundation (ASF) under one or more
- *   contributor license agreements. See the NOTICE file distributed
- *   with this work for additional information regarding copyright
- *   ownership. The ASF licenses this file to you under the Apache
- *   License, Version 2.0 (the "License"); you may not use this file
- *   except in compliance with the License. You may obtain a copy of
- *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed
+ * with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
 #include <memory>
@@ -78,12 +78,6 @@ namespace
         optimization that prevents the creation of one band per y value.
         However, it still is possible that some temporary bands are created that
         later can be optimized away.
-        @param rPolyPolygon
-            A set of zero, one, or more polygons, nested or not, that are
-            converted into a list of bands.
-        @return
-            A new RegionBand object is returned that contains the bands that
-            represent the given poly-polygon.
     */
     std::shared_ptr<RegionBand> ImplRectilinearPolygonToBands(const tools::PolyPolygon& rPolyPoly)
     {
@@ -103,75 +97,46 @@ namespace
             const sal_uInt16 nSize = aPoly.GetSize();
             if (nSize < 2)
                 continue;
-            // Avoid fetching every point twice (each point is the start point
-            // of one and the end point of another edge.)
             Point aStart (aPoly.GetPoint(0));
             Point aEnd;
             for (sal_uInt16 nPoint = 1; nPoint <= nSize; ++nPoint, aStart=aEnd)
             {
-                // We take the implicit closing edge into account by mapping
-                // index nSize to 0.
                 aEnd = aPoly.GetPoint(nPoint%nSize);
                 if (aStart.Y() == aEnd.Y())
                 {
-                    // Horizontal lines are ignored.
                     continue;
                 }
 
-                // At this point the line has to be vertical.
                 OSL_ASSERT(aStart.X() == aEnd.X());
 
-                // Sort y-coordinates to simplify the algorithm and store the
-                // direction separately.  The direction is calculated as it is
-                // in other places (but seems to be the wrong way.)
                 const tools::Long nTop (::std::min(aStart.Y(), aEnd.Y()));
                 const tools::Long nBottom (::std::max(aStart.Y(), aEnd.Y()));
                 const LineType eLineType (aStart.Y() > aEnd.Y() ? LineType::Descending : LineType::Ascending);
 
-                // Make sure that the current line is covered by bands.
                 pRegionBand->ImplAddMissingBands(nTop,nBottom);
 
-                // Find top-most band that may contain nTop.
                 ImplRegionBand* pBand = pRegionBand->ImplGetFirstRegionBand();
                 while (pBand!=nullptr && pBand->mnYBottom < nTop)
                     pBand = pBand->mpNextBand;
                 ImplRegionBand* pTopBand = pBand;
-                // If necessary split the band at nTop so that nTop is contained
-                // in the lower band.
                 if (pBand!=nullptr
-                       // Prevent the current band from becoming 0 pixel high
                     && pBand->mnYTop<nTop
-                       // this allows the lowest pixel of the band to be split off
                     && pBand->mnYBottom>=nTop
-                       // do not split a band that is just one pixel high
                     && pBand->mnYTop<pBand->mnYBottom-1)
                 {
-                    // Split the top band.
                     pTopBand = pBand->SplitBand(nTop);
                 }
 
-                // Advance to band that may contain nBottom.
                 while (pBand!=nullptr && pBand->mnYBottom < nBottom)
                     pBand = pBand->mpNextBand;
-                // The lowest band may have to be split at nBottom so that
-                // nBottom itself remains in the upper band.
                 if (pBand!=nullptr
-                       // allow the current band becoming 1 pixel high
                     && pBand->mnYTop<=nBottom
-                       // prevent splitting off a band that is 0 pixel high
                     && pBand->mnYBottom>nBottom
-                       // do not split a band that is just one pixel high
                     && pBand->mnYTop<pBand->mnYBottom-1)
                 {
-                    // Split the bottom band.
                     pBand->SplitBand(nBottom+1);
                 }
 
-                // Note that we remember the top band (in pTopBand) but not the
-                // bottom band.  The later can be determined by comparing y
-                // coordinates.
-
-                // Add the x-value as point to all bands in the nTop->nBottom range.
                 for (pBand=pTopBand; pBand!=nullptr&&pBand->mnYTop<=nBottom; pBand=pBand->mpNextBand)
                     pBand->InsertPoint(aStart.X(), nLineId++, true, eLineType);
             }
@@ -180,37 +145,28 @@ namespace
         return pRegionBand;
     }
 
-    /** Convert a general polygon (one for which ImplIsPolygonRectilinear()
-        returns <FALSE/>) to bands.
-    */
     std::shared_ptr<RegionBand> ImplGeneralPolygonToBands(const tools::PolyPolygon& rPolyPoly, const tools::Rectangle& rPolygonBoundingBox)
     {
         tools::Long nLineID = 0;
 
-        // initialisation and creation of Bands
         std::shared_ptr<RegionBand> pRegionBand( std::make_shared<RegionBand>() );
         pRegionBand->CreateBandRange(rPolygonBoundingBox.Top(), rPolygonBoundingBox.Bottom());
 
-        // insert polygons
         const sal_uInt16 nPolyCount = rPolyPoly.Count();
 
         for ( sal_uInt16 nPoly = 0; nPoly < nPolyCount; nPoly++ )
         {
-            // get reference to current polygon
             const tools::Polygon&  aPoly = rPolyPoly.GetObject( nPoly );
             const sal_uInt16    nSize = aPoly.GetSize();
 
-            // not enough points ( <= 2 )? -> nothing to do!
             if ( nSize <= 2 )
                 continue;
 
-            // band the polygon
             for ( sal_uInt16 nPoint = 1; nPoint < nSize; nPoint++ )
             {
                 pRegionBand->InsertLine( aPoly.GetPoint(nPoint-1), aPoly.GetPoint(nPoint), nLineID++ );
             }
 
-            // close polygon with line from first point to last point, if necessary
             const Point rLastPoint = aPoly.GetPoint(nSize-1);
             const Point rFirstPoint = aPoly.GetPoint(0);
 
@@ -238,10 +194,7 @@ static std::shared_ptr<RegionBand> ImplCreateRegionBandFromPolyPolygon(const too
 
     if(rPolyPolygon.Count())
     {
-        // ensure to subdivide when bezier segments are used, it's going to
-        // be expanded to rectangles
         tools::PolyPolygon aPolyPolygon;
-
         rPolyPolygon.AdaptiveSubdivide(aPolyPolygon);
 
         if(aPolyPolygon.Count())
@@ -252,7 +205,6 @@ static std::shared_ptr<RegionBand> ImplCreateRegionBandFromPolyPolygon(const too
             {
                 if(ImplIsPolygonRectilinear(aPolyPolygon))
                 {
-                    // For rectilinear polygons there is an optimized band conversion.
                     pRetval = ImplRectilinearPolygonToBands(aPolyPolygon);
                 }
                 else
@@ -260,13 +212,9 @@ static std::shared_ptr<RegionBand> ImplCreateRegionBandFromPolyPolygon(const too
                     pRetval = ImplGeneralPolygonToBands(aPolyPolygon, aRect);
                 }
 
-                // Convert points into seps.
                 if(pRetval)
                 {
                     pRetval->processPoints();
-
-                    // Optimize list of bands.  Adjacent bands with identical lists
-                    // of seps are joined.
                     if(!pRetval->OptimizeBandList())
                     {
                         pRetval.reset();
@@ -355,7 +303,6 @@ Region::Region(const Region& rRegion)
     , mpPolyPolygon(rRegion.mpPolyPolygon)
     , mpRegionBand(rRegion.mpRegionBand)
     , mbIsNull(rRegion.mbIsNull)
-    // mpxRectCache is implicitly nullptr. We NEVER copy the cache.
 {
 }
 
@@ -364,10 +311,8 @@ Region::Region(Region&& rRegion) noexcept
     , mpPolyPolygon(std::move(rRegion.mpPolyPolygon))
     , mpRegionBand(std::move(rRegion.mpRegionBand))
     , mbIsNull(rRegion.mbIsNull)
-    // mpxRectCache is implicitly nullptr.
 {
     rRegion.mbIsNull = true;
-    // Obliterate the source's cache to prevent stale reads if reused.
     rRegion.mpxRectCache.reset();
 }
 
@@ -380,13 +325,11 @@ void vcl::Region::ImplCreatePolyPolyRegion( const tools::PolyPolygon& rPolyPoly 
     if(!nPolyCount)
         return;
 
-    // polypolygon empty? -> empty region
     const tools::Rectangle aRect(rPolyPoly.GetBoundRect());
 
     if(aRect.IsEmpty())
         return;
 
-    // width OR height == 1 ? => Rectangular region
     if((1 == aRect.GetWidth()) || (1 == aRect.GetHeight()) || rPolyPoly.IsRect())
     {
         mpRegionBand = std::make_shared<RegionBand>(aRect);
@@ -397,6 +340,7 @@ void vcl::Region::ImplCreatePolyPolyRegion( const tools::PolyPolygon& rPolyPoly 
     }
 
     mbIsNull = false;
+    InvalidateCache();
 }
 
 void vcl::Region::ImplCreatePolyPolyRegion( const basegfx::B2DPolyPolygon& rPolyPoly )
@@ -405,6 +349,7 @@ void vcl::Region::ImplCreatePolyPolyRegion( const basegfx::B2DPolyPolygon& rPoly
     {
         mpB2DPolyPolygon = rPolyPoly;
         mbIsNull = false;
+        InvalidateCache();
     }
 }
 
@@ -412,13 +357,11 @@ void vcl::Region::Move( tools::Long nHorzMove, tools::Long nVertMove )
 {
     if(IsNull() || IsEmpty())
     {
-        // empty or null need no move
         return;
     }
 
     if(!nHorzMove && !nVertMove)
     {
-        // no move defined
         return;
     }
 
@@ -459,19 +402,19 @@ void vcl::Region::Move( tools::Long nHorzMove, tools::Long nVertMove )
     {
         OSL_ENSURE(false, "Region::Move error: impossible combination (!)");
     }
+
+    InvalidateCache();
 }
 
 void vcl::Region::Scale( double fScaleX, double fScaleY )
 {
     if(IsNull() || IsEmpty())
     {
-        // empty or null need no scale
         return;
     }
 
     if(basegfx::fTools::equalZero(fScaleX) && basegfx::fTools::equalZero(fScaleY))
     {
-        // no scale defined
         return;
     }
 
@@ -512,38 +455,34 @@ void vcl::Region::Scale( double fScaleX, double fScaleY )
     {
         OSL_ENSURE(false, "Region::Scale error: impossible combination (!)");
     }
+
+    InvalidateCache();
 }
 
 void vcl::Region::Union( const tools::Rectangle& rRect )
 {
     if(rRect.IsEmpty())
     {
-        // empty rectangle will not expand the existing union, nothing to do
         return;
     }
 
     if(IsEmpty())
     {
-        // no local data, the union will be equal to source. Create using rectangle
-        *this = rRect;
+        *this = rRect; // operator= handles invalidation
         return;
     }
 
     if(HasPolyPolygonOrB2DPolyPolygon())
     {
-        // get this B2DPolyPolygon, solve on polygon base
         basegfx::B2DPolyPolygon aThisPolyPoly(GetAsB2DPolyPolygon());
-
         aThisPolyPoly = basegfx::utils::prepareForPolygonOperation(aThisPolyPoly);
 
         if(!aThisPolyPoly.count())
         {
-            // no local polygon, use the rectangle as new region
             *this = rRect;
         }
         else
         {
-            // get the other B2DPolyPolygon and use logical Or-Operation
             const basegfx::B2DPolygon aRectPoly(
                 basegfx::utils::createPolygonFromRect(
                         vcl::unotools::b2DRectangleFromRectangle(rRect)));
@@ -553,68 +492,55 @@ void vcl::Region::Union( const tools::Rectangle& rRect )
                     basegfx::B2DPolyPolygon(aRectPoly)));
             *this = vcl::Region(aClip);
         }
-
         return;
     }
 
-    // only region band mode possibility left here or null/empty
     const RegionBand* pCurrent = getRegionBand();
-
     if(!pCurrent)
     {
-        // no region band, create using the rectangle
         *this = rRect;
         return;
     }
 
     std::shared_ptr<RegionBand> pNew = std::make_shared<RegionBand>(*pCurrent);
-
-    // get justified rectangle
     const tools::Long nLeft(std::min(rRect.Left(), rRect.Right()));
     const tools::Long nTop(std::min(rRect.Top(), rRect.Bottom()));
     const tools::Long nRight(std::max(rRect.Left(), rRect.Right()));
     const tools::Long nBottom(std::max(rRect.Top(), rRect.Bottom()));
 
-    // insert bands if the boundaries are not already in the list
     pNew->InsertBands(nTop, nBottom);
-
-    // process union
     pNew->Union(nLeft, nTop, nRight, nBottom);
 
-    // cleanup
     if(!pNew->OptimizeBandList())
     {
         pNew.reset();
     }
 
     mpRegionBand = std::move(pNew);
+    InvalidateCache();
 }
 
 void vcl::Region::Intersect( const tools::Rectangle& rRect )
 {
     if ( rRect.IsEmpty() )
     {
-        // empty rectangle will create empty region
         SetEmpty();
         return;
     }
 
     if(IsNull())
     {
-        // null region (everything) intersect with rect will give rect
         *this = rRect;
         return;
     }
 
     if(IsEmpty())
     {
-        // no content, cannot get more empty
         return;
     }
 
     if(HasPolyPolygonOrB2DPolyPolygon())
     {
-        // if polygon data prefer double precision, the other will be lost (if buffered)
         if(getB2DPolyPolygon())
         {
             const basegfx::B2DPolyPolygon aPoly(
@@ -635,13 +561,9 @@ void vcl::Region::Intersect( const tools::Rectangle& rRect )
             mpPolyPolygon.reset();
             mpRegionBand.reset();
         }
-        else // if(getPolyPolygon())
+        else
         {
             tools::PolyPolygon aPoly(*getPolyPolygon());
-
-            // use the PolyPolygon::Clip method for rectangles, this is
-            // fairly simple (does not even use GPC) and saves us from
-            // unnecessary banding
             aPoly.Clip(rRect);
 
             mpB2DPolyPolygon.reset();
@@ -652,77 +574,62 @@ void vcl::Region::Intersect( const tools::Rectangle& rRect )
             mpRegionBand.reset();
         }
 
+        InvalidateCache();
         return;
     }
 
-    // only region band mode possibility left here or null/empty
     const RegionBand* pCurrent = getRegionBand();
-
     if(!pCurrent)
     {
-        // region is empty -> nothing to do!
         return;
     }
 
     std::shared_ptr<RegionBand> pNew( std::make_shared<RegionBand>(*pCurrent));
-
-    // get justified rectangle
     const tools::Long nLeft(std::min(rRect.Left(), rRect.Right()));
     const tools::Long nTop(std::min(rRect.Top(), rRect.Bottom()));
     const tools::Long nRight(std::max(rRect.Left(), rRect.Right()));
     const tools::Long nBottom(std::max(rRect.Top(), rRect.Bottom()));
 
-    // insert bands if the boundaries are not already in the list
     pNew->InsertBands(nTop, nBottom);
-
-    // process intersect
     pNew->Intersect(nLeft, nTop, nRight, nBottom);
 
-    // cleanup
     if(!pNew->OptimizeBandList())
     {
         pNew.reset();
     }
 
     mpRegionBand = std::move(pNew);
+    InvalidateCache();
 }
 
 void vcl::Region::Exclude( const tools::Rectangle& rRect )
 {
     if ( rRect.IsEmpty() )
     {
-        // excluding nothing will do no change
         return;
     }
 
     if(IsEmpty())
     {
-        // cannot exclude from empty, done
         return;
     }
 
     if(IsNull())
     {
-        // error; cannot exclude from null region since this is not representable
-        // in the data
         OSL_ENSURE(false, "Region::Exclude error: Cannot exclude from null region (!)");
         return;
     }
 
     if( HasPolyPolygonOrB2DPolyPolygon() )
     {
-        // get this B2DPolyPolygon
         basegfx::B2DPolyPolygon aThisPolyPoly(GetAsB2DPolyPolygon());
-
         aThisPolyPoly = basegfx::utils::prepareForPolygonOperation(aThisPolyPoly);
 
         if(!aThisPolyPoly.count())
         {
-            // when local polygon is empty, nothing can be excluded
             return;
         }
 
-        // get the other B2DPolyPolygon
         const basegfx::B2DPolygon aRectPoly(
             basegfx::utils::createPolygonFromRect(
                 vcl::unotools::b2DRectangleFromRectangle(rRect)));
@@ -730,77 +637,62 @@ void vcl::Region::Exclude( const tools::Rectangle& rRect )
         const basegfx::B2DPolyPolygon aClip = basegfx::utils::solvePolygonOperationDiff(aThisPolyPoly, aOtherPolyPoly);
 
         *this = vcl::Region(aClip);
-
         return;
     }
 
-    // only region band mode possibility left here or null/empty
     if(!mpRegionBand)
     {
-        // empty? -> done!
         return;
     }
 
     std::shared_ptr<RegionBand>& pNew = mpRegionBand;
-    // only make a copy if someone else is also using it
     if (pNew.use_count() > 1)
         pNew = std::make_shared<RegionBand>(*pNew);
 
-    // get justified rectangle
     const tools::Long nLeft(std::min(rRect.Left(), rRect.Right()));
     const tools::Long nTop(std::min(rRect.Top(), rRect.Bottom()));
     const tools::Long nRight(std::max(rRect.Left(), rRect.Right()));
     const tools::Long nBottom(std::max(rRect.Top(), rRect.Bottom()));
 
-    // insert bands if the boundaries are not already in the list
     pNew->InsertBands(nTop, nBottom);
-
-    // process exclude
     pNew->Exclude(nLeft, nTop, nRight, nBottom);
 
-    // cleanup
     if(!pNew->OptimizeBandList())
         pNew.reset();
+
+    InvalidateCache();
 }
 
 void vcl::Region::XOr( const tools::Rectangle& rRect )
 {
     if ( rRect.IsEmpty() )
     {
-        // empty rectangle will not change local content
         return;
     }
 
     if(IsEmpty())
     {
-        // rRect will be the xored-form (local off, rect on)
         *this = rRect;
         return;
     }
 
     if(IsNull())
     {
-        // error; cannot exclude from null region since this is not representable
-        // in the data
         OSL_ENSURE(false, "Region::XOr error: Cannot XOr with null region (!)");
         return;
     }
 
     if( HasPolyPolygonOrB2DPolyPolygon() )
     {
-        // get this B2DPolyPolygon
         basegfx::B2DPolyPolygon aThisPolyPoly(GetAsB2DPolyPolygon());
-
         aThisPolyPoly = basegfx::utils::prepareForPolygonOperation( aThisPolyPoly );
 
         if(!aThisPolyPoly.count())
         {
-            // no local content, XOr will be equal to rectangle
             *this = rRect;
             return;
         }
 
-        // get the other B2DPolyPolygon
         const basegfx::B2DPolygon aRectPoly(
             basegfx::utils::createPolygonFromRect(
                 vcl::unotools::b2DRectangleFromRectangle(rRect)));
@@ -808,133 +700,105 @@ void vcl::Region::XOr( const tools::Rectangle& rRect )
         const basegfx::B2DPolyPolygon aClip = basegfx::utils::solvePolygonOperationXor(aThisPolyPoly, aOtherPolyPoly);
 
         *this = vcl::Region(aClip);
-
         return;
     }
 
-    // only region band mode possibility left here or null/empty
     const RegionBand* pCurrent = getRegionBand();
-
     if(!pCurrent)
     {
-        // rRect will be the xored-form (local off, rect on)
         *this = rRect;
         return;
     }
 
-    // only region band mode possibility left here or null/empty
     std::shared_ptr<RegionBand> pNew( std::make_shared<RegionBand>(*getRegionBand()));
-
-    // get justified rectangle
     const tools::Long nLeft(std::min(rRect.Left(), rRect.Right()));
     const tools::Long nTop(std::min(rRect.Top(), rRect.Bottom()));
     const tools::Long nRight(std::max(rRect.Left(), rRect.Right()));
     const tools::Long nBottom(std::max(rRect.Top(), rRect.Bottom()));
 
-    // insert bands if the boundaries are not already in the list
     pNew->InsertBands(nTop, nBottom);
-
-    // process xor
     pNew->XOr(nLeft, nTop, nRight, nBottom);
 
-    // cleanup
     if(!pNew->OptimizeBandList())
     {
         pNew.reset();
     }
 
     mpRegionBand = std::move(pNew);
+    InvalidateCache();
 }
 
 void vcl::Region::Union( const vcl::Region& rRegion )
 {
     if(rRegion.IsEmpty())
     {
-        // no extension at all
         return;
     }
 
     if(rRegion.IsNull())
     {
-        // extending with null region -> null region
         *this = vcl::Region(true);
         return;
     }
 
     if(IsEmpty())
     {
-        // local is empty, union will give source region
         *this = rRegion;
         return;
     }
 
     if(IsNull())
     {
-        // already fully expanded (is null region), cannot be extended
         return;
     }
 
     if( rRegion.HasPolyPolygonOrB2DPolyPolygon() || HasPolyPolygonOrB2DPolyPolygon() )
     {
-        // get this B2DPolyPolygon
         basegfx::B2DPolyPolygon aThisPolyPoly(GetAsB2DPolyPolygon());
-
         aThisPolyPoly = basegfx::utils::prepareForPolygonOperation(aThisPolyPoly);
 
         if(!aThisPolyPoly.count())
         {
-            // when no local content, union will be equal to rRegion
             *this = rRegion;
             return;
         }
 
-        // get the other B2DPolyPolygon
         basegfx::B2DPolyPolygon aOtherPolyPoly(rRegion.GetAsB2DPolyPolygon());
         aOtherPolyPoly = basegfx::utils::prepareForPolygonOperation(aOtherPolyPoly);
 
-        // use logical OR operation
         basegfx::B2DPolyPolygon aClip(basegfx::utils::solvePolygonOperationOr(aThisPolyPoly, aOtherPolyPoly));
 
         *this = vcl::Region( aClip );
         return;
     }
 
-    // only region band mode possibility left here or null/empty
     const RegionBand* pCurrent = getRegionBand();
-
     if(!pCurrent)
     {
-        // local is empty, union will give source region
         *this = rRegion;
         return;
     }
 
     const RegionBand* pSource = rRegion.getRegionBand();
-
     if(!pSource)
     {
-        // no extension at all
         return;
     }
 
-    // prepare source and target
     std::shared_ptr<RegionBand> pNew( std::make_shared<RegionBand>(*pCurrent));
-
-    // union with source
     pNew->Union(*pSource);
 
-    // cleanup
     if(!pNew->OptimizeBandList())
     {
         pNew.reset();
     }
 
     mpRegionBand = std::move(pNew);
+    InvalidateCache();
 }
 
 void vcl::Region::Intersect( const vcl::Region& rRegion )
 {
-    // same instance data? -> nothing to do!
     if(getB2DPolyPolygon() && getB2DPolyPolygon() == rRegion.getB2DPolyPolygon())
     {
         return;
@@ -952,47 +816,37 @@ void vcl::Region::Intersect( const vcl::Region& rRegion )
 
     if(rRegion.IsNull())
     {
-        // source region is null-region, intersect will not change local region
         return;
     }
 
     if(IsNull())
     {
-        // when local region is null-region, intersect will be equal to source
         *this = rRegion;
         return;
     }
 
     if(rRegion.IsEmpty())
     {
-        // source region is empty, intersection will always be empty
         SetEmpty();
         return;
     }
 
     if(IsEmpty())
     {
-        // local region is empty, cannot get more empty than that. Nothing to do
         return;
     }
 
     if( rRegion.HasPolyPolygonOrB2DPolyPolygon() || HasPolyPolygonOrB2DPolyPolygon() )
     {
-        // get this B2DPolyPolygon
         basegfx::B2DPolyPolygon aThisPolyPoly(GetAsB2DPolyPolygon());
-
         if(!aThisPolyPoly.count())
         {
-            // local region is empty, cannot get more empty than that. Nothing to do
             return;
         }
 
-        // get the other B2DPolyPolygon
         basegfx::B2DPolyPolygon aOtherPolyPoly(rRegion.GetAsB2DPolyPolygon());
-
         if(!aOtherPolyPoly.count())
         {
-            // source region is empty, intersection will always be empty
             SetEmpty();
             return;
         }
@@ -1010,47 +864,37 @@ void vcl::Region::Intersect( const vcl::Region& rRegion )
         return;
     }
 
-    // only region band mode possibility left here or null/empty
     const RegionBand* pCurrent = getRegionBand();
-
     if(!pCurrent)
     {
-        // local region is empty, cannot get more empty than that. Nothing to do
         return;
     }
 
     const RegionBand* pSource = rRegion.getRegionBand();
-
     if(!pSource)
     {
-        // source region is empty, intersection will always be empty
         SetEmpty();
         return;
     }
 
-    // both RegionBands exist and are not empty
     if(pCurrent->getRectangleCount() + 2 < pSource->getRectangleCount())
     {
-        // when we have less rectangles, turn around the call
         vcl::Region aTempRegion = rRegion;
         aTempRegion.Intersect( *this );
         *this = std::move(aTempRegion);
     }
     else
     {
-        // prepare new regionBand
         std::shared_ptr<RegionBand> pNew( std::make_shared<RegionBand>(*pCurrent));
-
-        // intersect with source
         pNew->Intersect(*pSource);
 
-        // cleanup
         if(!pNew->OptimizeBandList())
         {
             pNew.reset();
         }
 
         mpRegionBand = std::move(pNew);
+        InvalidateCache();
     }
 }
 
@@ -1058,45 +902,35 @@ void vcl::Region::Exclude( const vcl::Region& rRegion )
 {
     if ( rRegion.IsEmpty() )
     {
-        // excluding nothing will do no change
         return;
     }
 
     if ( rRegion.IsNull() )
     {
-        // excluding everything will create empty region
         SetEmpty();
         return;
     }
 
     if(IsEmpty())
     {
-        // cannot exclude from empty, done
         return;
     }
 
     if(IsNull())
     {
-        // error; cannot exclude from null region since this is not representable
-        // in the data
         OSL_ENSURE(false, "Region::Exclude error: Cannot exclude from null region (!)");
         return;
     }
 
     if( rRegion.HasPolyPolygonOrB2DPolyPolygon() || HasPolyPolygonOrB2DPolyPolygon() )
     {
-        // get this B2DPolyPolygon
         basegfx::B2DPolyPolygon aThisPolyPoly(GetAsB2DPolyPolygon());
-
         if(!aThisPolyPoly.count())
         {
-            // cannot exclude from empty, done
             return;
         }
 
         aThisPolyPoly = basegfx::utils::prepareForPolygonOperation( aThisPolyPoly );
-
-        // get the other B2DPolyPolygon
         basegfx::B2DPolyPolygon aOtherPolyPoly(rRegion.GetAsB2DPolyPolygon());
         aOtherPolyPoly = basegfx::utils::prepareForPolygonOperation( aOtherPolyPoly );
 
@@ -1105,84 +939,65 @@ void vcl::Region::Exclude( const vcl::Region& rRegion )
         return;
     }
 
-    // only region band mode possibility left here or null/empty
     const RegionBand* pCurrent = getRegionBand();
-
     if(!pCurrent)
     {
-        // cannot exclude from empty, done
         return;
     }
 
     const RegionBand* pSource = rRegion.getRegionBand();
-
     if(!pSource)
     {
-        // excluding nothing will do no change
         return;
     }
 
-    // prepare source and target
     std::shared_ptr<RegionBand> pNew( std::make_shared<RegionBand>(*pCurrent));
-
-    // union with source
     const bool bSuccess(pNew->Exclude(*pSource));
 
-    // cleanup
     if(!bSuccess)
     {
         pNew.reset();
     }
 
     mpRegionBand = std::move(pNew);
+    InvalidateCache();
 }
 
 bool vcl::Region::XOr( const vcl::Region& rRegion )
 {
     if ( rRegion.IsEmpty() )
     {
-        // empty region will not change local content
         return true;
     }
 
     if ( rRegion.IsNull() )
     {
-        // error; cannot exclude null region from local since this is not representable
-        // in the data
         OSL_ENSURE(false, "Region::XOr error: Cannot XOr with null region (!)");
         return true;
     }
 
     if(IsEmpty())
     {
-        // rRect will be the xored-form (local off, rect on)
         *this = rRegion;
         return true;
     }
 
     if(IsNull())
     {
-        // error: cannot exclude from null region since this is not representable
-        // in the data
         OSL_ENSURE(false, "Region::XOr error: Cannot XOr with null region (!)");
         return false;
     }
 
     if( rRegion.HasPolyPolygonOrB2DPolyPolygon() || HasPolyPolygonOrB2DPolyPolygon() )
     {
-        // get this B2DPolyPolygon
         basegfx::B2DPolyPolygon aThisPolyPoly(GetAsB2DPolyPolygon());
-
         if(!aThisPolyPoly.count())
         {
-            // rRect will be the xored-form (local off, rect on)
             *this = rRegion;
             return true;
         }
 
         aThisPolyPoly = basegfx::utils::prepareForPolygonOperation( aThisPolyPoly );
-
-        // get the other B2DPolyPolygon
         basegfx::B2DPolyPolygon aOtherPolyPoly(rRegion.GetAsB2DPolyPolygon());
         aOtherPolyPoly = basegfx::utils::prepareForPolygonOperation( aOtherPolyPoly );
 
@@ -1191,37 +1006,29 @@ bool vcl::Region::XOr( const vcl::Region& rRegion )
         return true;
     }
 
-    // only region band mode possibility left here or null/empty
     const RegionBand* pCurrent = getRegionBand();
-
     if(!pCurrent)
     {
-        // rRect will be the xored-form (local off, rect on)
         *this = rRegion;
         return true;
     }
 
     const RegionBand* pSource = rRegion.getRegionBand();
-
     if(!pSource)
     {
-        // empty region will not change local content
         return true;
     }
 
-    // prepare source and target
     std::shared_ptr<RegionBand> pNew( std::make_shared<RegionBand>(*pCurrent));
-
-    // union with source
     pNew->XOr(*pSource);
 
-    // cleanup
     if(!pNew->OptimizeBandList())
     {
         pNew.reset();
     }
 
     mpRegionBand = std::move(pNew);
+    InvalidateCache();
 
     return true;
 }
@@ -1230,30 +1037,24 @@ tools::Rectangle vcl::Region::GetBoundRect() const
 {
     if(IsEmpty())
     {
-        // no internal data? -> region is empty!
         return tools::Rectangle();
     }
 
     if(IsNull())
     {
-        // error; null region has no BoundRect
-        // OSL_ENSURE(false, "Region::GetBoundRect error: null region has unlimited bound rect, not representable (!)");
         return tools::Rectangle();
     }
 
-    // prefer double precision source
     if(getB2DPolyPolygon())
     {
         const basegfx::B2DRange aRange(getB2DPolyPolygon()->getB2DRange());
 
         if(aRange.isEmpty())
         {
-            // emulate PolyPolygon::GetBoundRect() when empty polygon
             return tools::Rectangle();
         }
         else
         {
-            // #i122149# corrected rounding, no need for ceil() and floor() here
             return tools::Rectangle(
                 basegfx::fround<tools::Long>(aRange.getMinX()), basegfx::fround<tools::Long>(aRange.getMinY()),
                 basegfx::fround<tools::Long>(aRange.getMaxX()), basegfx::fround<tools::Long>(aRange.getMaxY()));
@@ -1282,7 +1083,6 @@ tools::PolyPolygon vcl::Region::GetAsPolyPolygon() const
 
     if(getB2DPolyPolygon())
     {
-        // the polygon needs to be converted, buffer the down conversion
         const tools::PolyPolygon aPolyPolgon(*getB2DPolyPolygon());
         const_cast< vcl::Region* >(this)->mpPolyPolygon = aPolyPolgon;
 
@@ -1291,7 +1091,6 @@ tools::PolyPolygon vcl::Region::GetAsPolyPolygon() const
 
     if(getRegionBand())
     {
-        // the BandRegion needs to be converted, buffer the conversion
         const tools::PolyPolygon aPolyPolgon(ImplCreatePolyPolygonFromRegionBand());
         const_cast< vcl::Region* >(this)->mpPolyPolygon = aPolyPolgon;
 
@@ -1310,7 +1109,6 @@ basegfx::B2DPolyPolygon vcl::Region::GetAsB2DPolyPolygon() const
 
     if(getPolyPolygon())
     {
-        // the polygon needs to be converted, buffer the up conversion. This will be preferred from now.
         const basegfx::B2DPolyPolygon aB2DPolyPolygon(getPolyPolygon()->getB2DPolyPolygon());
         const_cast< vcl::Region* >(this)->mpB2DPolyPolygon = aB2DPolyPolygon;
 
@@ -1319,7 +1117,6 @@ basegfx::B2DPolyPolygon vcl::Region::GetAsB2DPolyPolygon() const
 
     if(getRegionBand())
     {
-        // the BandRegion needs to be converted, buffer the conversion
         const basegfx::B2DPolyPolygon aB2DPolyPolygon(ImplCreateB2DPolyPolygonFromRegionBand());
         const_cast< vcl::Region* >(this)->mpB2DPolyPolygon = aB2DPolyPolygon;
 
@@ -1335,12 +1132,10 @@ const RegionBand* vcl::Region::GetAsRegionBand() const
     {
         if(getB2DPolyPolygon())
         {
-            // convert B2DPolyPolygon to RegionBand, buffer it and return it
             const_cast< vcl::Region* >(this)->mpRegionBand = ImplCreateRegionBandFromPolyPolygon(tools::PolyPolygon(*getB2DPolyPolygon()));
         }
         else if(getPolyPolygon())
         {
-            // convert B2DPolyPolygon to RegionBand, buffer it and return it
             const_cast< vcl::Region* >(this)->mpRegionBand = ImplCreateRegionBandFromPolyPolygon(*getPolyPolygon());
         }
     }
@@ -1352,23 +1147,14 @@ bool vcl::Region::Contains( const Point& rPoint ) const
 {
     if(IsEmpty())
     {
-        // no point can be in empty region
         return false;
     }
 
     if(IsNull())
     {
-        // all points are inside null-region
         return true;
     }
 
-    // Too expensive (?)
-    //if(mpImplRegion->getRegionPolyPoly())
-    //{
-    //  return mpImplRegion->getRegionPolyPoly()->Contains( rPoint );
-    //}
-
-    // ensure RegionBand existence
     const RegionBand* pRegionBand = GetAsRegionBand();
 
     if(pRegionBand)
@@ -1383,23 +1169,17 @@ bool vcl::Region::Overlaps( const tools::Rectangle& rRect ) const
 {
     if(IsEmpty())
     {
-        // nothing can be over something empty
         return false;
     }
 
     if(IsNull())
     {
-        // everything is over null region
         return true;
     }
 
-    // Can we optimize this ??? - is used in StarDraw for brushes pointers
-    // Why we have no IsOver for Regions ???
-    // create region from rectangle and intersect own region
     vcl::Region aRegion(rRect);
     aRegion.Intersect( *this );
 
-    // rectangle is over if include is not empty
     return !aRegion.IsEmpty();
 }
 
@@ -1422,20 +1202,20 @@ bool vcl::Region::IsRectangle() const
 
 void vcl::Region::SetNull()
 {
-    // reset all content
     mpB2DPolyPolygon.reset();
     mpPolyPolygon.reset();
     mpRegionBand.reset();
     mbIsNull = true;
+    InvalidateCache();
 }
 
 void vcl::Region::SetEmpty()
 {
-    // reset all content
     mpB2DPolyPolygon.reset();
     mpPolyPolygon.reset();
     mpRegionBand.reset();
     mbIsNull = false;
+    InvalidateCache();
 }
 
 Region& vcl::Region::operator=(const vcl::Region& rRegion)
@@ -1446,7 +1226,7 @@ Region& vcl::Region::operator=(const vcl::Region& rRegion)
         mpPolyPolygon = rRegion.mpPolyPolygon;
         mpRegionBand = rRegion.mpRegionBand;
         mbIsNull = rRegion.mbIsNull;
-        mpxRectCache.reset();
+        InvalidateCache();
     }
 
     return *this;
@@ -1454,15 +1234,17 @@ Region& vcl::Region::operator=(const vcl::Region& rRegion)
 
 Region& vcl::Region::operator=( vcl::Region&& rRegion ) noexcept
 {
-    mpB2DPolyPolygon = std::move(rRegion.mpB2DPolyPolygon);
-    mpPolyPolygon = std::move(rRegion.mpPolyPolygon);
-    mpRegionBand = std::move(rRegion.mpRegionBand);
-    mbIsNull = rRegion.mbIsNull;
-    rRegion.mbIsNull = true;
+    if (this != &rRegion)
+    {
+        mpB2DPolyPolygon = std::move(rRegion.mpB2DPolyPolygon);
+        mpPolyPolygon = std::move(rRegion.mpPolyPolygon);
+        mpRegionBand = std::move(rRegion.mpRegionBand);
+        mbIsNull = rRegion.mbIsNull;
+        rRegion.mbIsNull = true;
 
-    // Destroy target cache and obliterate source cache.
-    mpxRectCache.reset();
-    rRegion.mpxRectCache.reset();
+        InvalidateCache();
+        rRegion.InvalidateCache();
+    }
 
     return *this;
 }
@@ -1477,8 +1259,7 @@ Region& vcl::Region::operator=( const tools::Rectangle& rRect )
         mpRegionBand.reset();
     mbIsNull = false;
 
-    // Destroy target cache.
-    mpxRectCache.reset();
+    InvalidateCache();
 
     return *this;
 }
@@ -1487,31 +1268,26 @@ bool vcl::Region::operator==( const vcl::Region& rRegion ) const
 {
     if(IsNull() && rRegion.IsNull())
     {
-        // both are null region
         return true;
     }
 
     if(IsEmpty() && rRegion.IsEmpty())
     {
-        // both are empty
         return true;
     }
 
     if(getB2DPolyPolygon() && getB2DPolyPolygon() == rRegion.getB2DPolyPolygon())
     {
-        // same instance data? -> equal
         return true;
     }
 
     if(getPolyPolygon() && getPolyPolygon() == rRegion.getPolyPolygon())
     {
-        // same instance data? -> equal
         return true;
     }
 
     if(getRegionBand() && getRegionBand() == rRegion.getRegionBand())
     {
-        // same instance data? -> equal
         return true;
     }
 
@@ -1527,8 +1303,6 @@ bool vcl::Region::operator==( const vcl::Region& rRegion ) const
 
     if(rRegion.getB2DPolyPolygon() || getB2DPolyPolygon())
     {
-        // one of both has a B2DPolyPolygon based region, ensure both have it
-        // by evtl. conversion
         GetAsB2DPolyPolygon();
         rRegion.GetAsB2DPolyPolygon();
 
@@ -1537,40 +1311,30 @@ bool vcl::Region::operator==( const vcl::Region& rRegion ) const
 
     if(rRegion.getPolyPolygon() || getPolyPolygon())
     {
-        // one of both has a B2DPolyPolygon based region, ensure both have it
-        // by evtl. conversion
         GetAsPolyPolygon();
         rRegion.GetAsPolyPolygon();
 
         return *rRegion.getPolyPolygon() == *getPolyPolygon();
     }
 
-    // both are not empty or null (see above) and if content supported polygon
-    // data the comparison is already done. Only both on RegionBand base can be left,
-    // but better check
     if(rRegion.getRegionBand() && getRegionBand())
     {
         return *rRegion.getRegionBand() == *getRegionBand();
     }
 
-    // should not happen, but better deny equality
     return false;
 }
 
-SvStream& ReadRegion(SvStream& rIStrm, vcl::Region& rRegion)
+SvStream& ReadRegion(SvStream& rIStm, vcl::Region& rRegion)
 {
-    VersionCompatRead aCompat(rIStrm);
+    VersionCompatRead aCompat(rIStm);
     sal_uInt16 nVersion(0);
     sal_uInt16 nTmp16(0);
 
-    // clear region to be loaded
     rRegion.SetEmpty();
 
-    // get version of streamed region
-    rIStrm.ReadUInt16( nVersion );
-
-    // get type of region
-    rIStrm.ReadUInt16( nTmp16 );
+    rIStm.ReadUInt16( nVersion );
+    rIStm.ReadUInt16( nTmp16 );
 
     enum RegionType { REGION_NULL, REGION_EMPTY, REGION_RECTANGLE, REGION_COMPLEX };
     auto eStreamedType = nTmp16;
@@ -1592,18 +1356,18 @@ SvStream& ReadRegion(SvStream& rIStrm, vcl::Region& rRegion)
         default:
         {
             std::shared_ptr<RegionBand> xNewRegionBand(std::make_shared<RegionBand>());
-            bool bSuccess = xNewRegionBand->load(rIStrm);
+            bool bSuccess = xNewRegionBand->load(rIStm);
             rRegion.mpRegionBand = std::move(xNewRegionBand);
 
             bool bHasPolyPolygon(false);
             if (aCompat.GetVersion() >= 2)
             {
-                rIStrm.ReadCharAsBool( bHasPolyPolygon );
+                rIStm.ReadCharAsBool( bHasPolyPolygon );
 
                 if (bHasPolyPolygon)
                 {
                     tools::PolyPolygon aNewPoly;
-                    ReadPolyPolygon(rIStrm, aNewPoly);
+                    ReadPolyPolygon(rIStm, aNewPoly);
                     const auto nPolygons = aNewPoly.Count();
                     if (nPolygons > 128)
                     {
@@ -1621,22 +1385,21 @@ SvStream& ReadRegion(SvStream& rIStrm, vcl::Region& rRegion)
                 rRegion.SetNull();
             }
 
+            rRegion.InvalidateCache(); // Trap 1: Write-through update
             break;
         }
     }
 
-    return rIStrm;
+    return rIStm;
 }
 
-SvStream& WriteRegion( SvStream& rOStrm, const vcl::Region& rRegion )
+SvStream& WriteRegion( SvStream& rOStm, const vcl::Region& rRegion )
 {
     const sal_uInt16 nVersion(2);
-    VersionCompatWrite aCompat(rOStrm, nVersion);
+    VersionCompatWrite aCompat(rOStm, nVersion);
 
-    // put version
-    rOStrm.WriteUInt16( nVersion );
+    rOStm.WriteUInt16( nVersion );
 
-    // put type
     enum RegionType { REGION_NULL, REGION_EMPTY, REGION_RECTANGLE, REGION_COMPLEX };
     RegionType aRegionType(REGION_COMPLEX);
     bool bEmpty(rRegion.IsEmpty());
@@ -1666,46 +1429,38 @@ SvStream& WriteRegion( SvStream& rOStrm, const vcl::Region& rRegion )
         aRegionType = REGION_RECTANGLE;
     }
 
-    rOStrm.WriteUInt16( aRegionType );
+    rOStm.WriteUInt16( aRegionType );
 
-    // get RegionBand
     const RegionBand* pRegionBand = rRegion.getRegionBand();
 
     if(pRegionBand)
     {
-        pRegionBand->save(rOStrm);
+        pRegionBand->save(rOStm);
     }
     else
     {
-        // for compatibility, write an empty RegionBand (will only write
-        // the end marker STREAMENTRY_END, but this *is* needed)
         const RegionBand aRegionBand;
-
-        aRegionBand.save(rOStrm);
+        aRegionBand.save(rOStm);
     }
 
-    // write polypolygon if available
     const bool bHasPolyPolygon(rRegion.HasPolyPolygonOrB2DPolyPolygon());
-    rOStrm.WriteBool( bHasPolyPolygon );
+    rOStm.WriteBool( bHasPolyPolygon );
 
     if(bHasPolyPolygon)
     {
-        // #i105373#
         tools::PolyPolygon aNoCurvePolyPolygon;
         rRegion.GetAsPolyPolygon().AdaptiveSubdivide(aNoCurvePolyPolygon);
 
-        WritePolyPolygon( rOStrm, aNoCurvePolyPolygon );
+        WritePolyPolygon( rOStm, aNoCurvePolyPolygon );
     }
 
-    return rOStrm;
+    return rOStm;
 }
 
 void vcl::Region::GetRegionRectangles(RectangleVector& rTarget) const
 {
-    // clear returnvalues
     rTarget.clear();
 
-    // ensure RegionBand existence
     const RegionBand* pRegionBand = GetAsRegionBand();
 
     if(pRegionBand)
@@ -1770,11 +1525,6 @@ static bool ImplPolygonRectTest( const tools::Polygon& rPoly, tools::Rectangle* 
 
 vcl::Region vcl::Region::GetRegionFromPolyPolygon( const tools::PolyPolygon& rPolyPoly )
 {
-    //return vcl::Region( rPolyPoly );
-
-    // check if it's worth extracting the XOr'ing the Rectangles
-    // empiricism shows that break even between XOr'ing rectangles separately
-    // and ImplCreateRegionBandFromPolyPolygon is at half rectangles/half polygons
     int nPolygonRects = 0, nPolygonPolygons = 0;
     int nPolygons = rPolyPoly.Count();
 
@@ -1822,7 +1572,6 @@ Region::const_iterator Region::begin() const
     if (!mpxRectCache)
     {
         mpxRectCache = std::make_unique<RectangleVector>();
-        // Idempotent semantic read. Does not mutate representation.
         GetRegionRectangles(*mpxRectCache);
     }
     return mpxRectCache->begin();
@@ -1832,7 +1581,6 @@ Region::const_iterator Region::end() const
 {
     if (!mpxRectCache)
     {
-        // Handle edge-case where end() is called before begin()
         mpxRectCache = std::make_unique<RectangleVector>();
         GetRegionRectangles(*mpxRectCache);
     }
