@@ -52,7 +52,6 @@ private:
 
     bool                                     mbIsNull : 1;
 
-    // --- PATCH 1: The Derived Cache ---
     // Mutable so it can be lazily populated in const contexts.
     // Strictly a derived snapshot; never the semantic source of truth.
     mutable std::unique_ptr<RectangleVector> mpxRectCache;
@@ -64,7 +63,6 @@ private:
     SAL_DLLPRIVATE tools::PolyPolygon ImplCreatePolyPolygonFromRegionBand() const;
     SAL_DLLPRIVATE basegfx::B2DPolyPolygon ImplCreateB2DPolyPolygonFromRegionBand() const;
 
-    // Future-proofing for Patch 2: Cache invalidation helper
     SAL_DLLPRIVATE void InvalidateCache() const;
 
 public:
