@@ -350,15 +350,25 @@ Region::Region(const basegfx::B2DPolyPolygon& rPolyPoly)
     }
 }
 
-Region::Region(const vcl::Region&) = default;
+Region::Region(const Region& rRegion)
+    : mpB2DPolyPolygon(rRegion.mpB2DPolyPolygon)
+    , mpPolyPolygon(rRegion.mpPolyPolygon)
+    , mpRegionBand(rRegion.mpRegionBand)
+    , mbIsNull(rRegion.mbIsNull)
+    // mpxRectCache is implicitly nullptr. We NEVER copy the cache.
+{
+}
 
-Region::Region(vcl::Region&& rRegion) noexcept
-:   mpB2DPolyPolygon(std::move(rRegion.mpB2DPolyPolygon)),
-    mpPolyPolygon(std::move(rRegion.mpPolyPolygon)),
-    mpRegionBand(std::move(rRegion.mpRegionBand)),
-    mbIsNull(rRegion.mbIsNull)
+Region::Region(Region&& rRegion) noexcept
+    : mpB2DPolyPolygon(std::move(rRegion.mpB2DPolyPolygon))
+    , mpPolyPolygon(std::move(rRegion.mpPolyPolygon))
+    , mpRegionBand(std::move(rRegion.mpRegionBand))
+    , mbIsNull(rRegion.mbIsNull)
+    // mpxRectCache is implicitly nullptr.
 {
     rRegion.mbIsNull = true;
+    // Obliterate the source's cache to prevent stale reads if reused.
+    rRegion.mpxRectCache.reset();
 }
 
 Region::~Region() = default;
@@ -1428,7 +1438,19 @@ void vcl::Region::SetEmpty()
     mbIsNull = false;
 }
 
-Region& vcl::Region::operator=( const vcl::Region& ) = default;
+Region& vcl::Region::operator=(const vcl::Region& rRegion)
+{
+    if (this != &rRegion)
+    {
+        mpB2DPolyPolygon = rRegion.mpB2DPolyPolygon;
+        mpPolyPolygon = rRegion.mpPolyPolygon;
+        mpRegionBand = rRegion.mpRegionBand;
+        mbIsNull = rRegion.mbIsNull;
+        mpxRectCache.reset();
+    }
+
+    return *this;
+}
 
 Region& vcl::Region::operator=( vcl::Region&& rRegion ) noexcept
 {
@@ -1437,6 +1459,10 @@ Region& vcl::Region::operator=( vcl::Region&& rRegion ) noexcept
     mpRegionBand = std::move(rRegion.mpRegionBand);
     mbIsNull = rRegion.mbIsNull;
     rRegion.mbIsNull = true;
+
+    // Destroy target cache and obliterate source cache.
+    mpxRectCache.reset();
+    rRegion.mpxRectCache.reset();
 
     return *this;
 }
@@ -1450,6 +1476,9 @@ Region& vcl::Region::operator=( const tools::Rectangle& rRect )
     else
         mpRegionBand.reset();
     mbIsNull = false;
+
+    // Destroy target cache.
+    mpxRectCache.reset();
 
     return *this;
 }
@@ -1786,6 +1815,28 @@ vcl::Region vcl::Region::GetRegionFromPolyPolygon( const tools::PolyPolygon& rPo
     }
 
     return aResult;
+}
+
+Region::const_iterator Region::begin() const
+{
+    if (!mpxRectCache)
+    {
+        mpxRectCache = std::make_unique<RectangleVector>();
+        // Idempotent semantic read. Does not mutate representation.
+        GetRegionRectangles(*mpxRectCache);
+    }
+    return mpxRectCache->begin();
+}
+
+Region::const_iterator Region::end() const
+{
+    if (!mpxRectCache)
+    {
+        // Handle edge-case where end() is called before begin()
+        mpxRectCache = std::make_unique<RectangleVector>();
+        GetRegionRectangles(*mpxRectCache);
+    }
+    return mpxRectCache->end();
 }
 
 } /* namespace vcl */
