@@ -364,10 +364,9 @@ class RegionScriptTest : public CppUnit::TestFixture
                 {
                     vcl::Region aOriginal = aRegion;
 
-                    // Use the authoritative system mapper instead of hardcoded 96 DPI.
-                    // This ensures we test the ACTUAL rendering pipeline configuration.
-                    vcl::Region aDevice = mpMapper->LogicToWindowUnits(aRegion, true);
-                    vcl::Region aBack = mpMapper->WindowToLogicUnits(aDevice, true);
+                    vcl::Region aDevice = mpMapper->LogicToDevicePixel(aRegion, true);
+
+                    vcl::Region aBack = mpMapper->DevicePixelToLogic(aDevice, true);
 
                     AssertSemanticEquivalence(aOriginal, aBack);
                     break;
