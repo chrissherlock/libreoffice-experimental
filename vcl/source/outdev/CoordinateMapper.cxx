@@ -566,6 +566,43 @@ Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize, bool bMap) con
                 lcl_RoundToLong(rLogicSize.Height() * sy));
 }
 
+template <typename TransformFunc>
+static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc&& func)
+{
+    if (rRegion.IsNull() || rRegion.IsEmpty())
+        return rRegion;
+
+    vcl::Region aRegion;
+    if (rRegion.getB2DPolyPolygon())
+    {
+        aRegion = vcl::Region(func(*rRegion.getB2DPolyPolygon()));
+    }
+    else if (rRegion.getPolyPolygon())
+    {
+        aRegion = vcl::Region(func(*rRegion.getPolyPolygon()));
+    }
+    else if (rRegion.getRegionBand())
+    {
+        RectangleVector aRectangles;
+        rRegion.GetRegionRectangles(aRectangles);
+
+        for (const auto& rRect : aRectangles | std::views::reverse)
+        {
+            aRegion.Union(func(rRect));
+        }
+    }
+    return aRegion;
+}
+
+vcl::Region CoordinateMapper::LogicToDevicePixel(const vcl::Region& rLogicRegion, bool bMap) const
+{
+    if (!bMap && IsValidDPI() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rLogicRegion;
+
+    return lcl_TransformRegion(
+        rLogicRegion, [bMap, this](const auto& obj) { return LogicToDevicePixel(obj, bMap); });
+}
+
 tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect,
                                                       bool bMap) const
 {
@@ -657,6 +694,18 @@ basegfx::B2DPolygon CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolyg
     return aPoly;
 }
 
+basegfx::B2DPolyPolygon
+CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly, bool bMap) const
+{
+    if (!bMap && IsValidDPI() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rLogicPolyPoly;
+
+    auto snap = AcquireSnapshot(bMap);
+    basegfx::B2DPolyPolygon aPoly(rLogicPolyPoly);
+    aPoly.transform(snap->maLogicToDevice);
+    return aPoly;
+}
+
 tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX, bool bMap) const
 {
     if (!bMap && IsValidDPI())
@@ -689,34 +738,6 @@ tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rR
     aRange.transform(aMat);
     return tools::Rectangle(lcl_RoundToLong(aRange.getMinX()), lcl_RoundToLong(aRange.getMinY()),
                             lcl_RoundToLong(aRange.getMaxX()), lcl_RoundToLong(aRange.getMaxY()));
-}
-
-template <typename TransformFunc>
-static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc&& func)
-{
-    if (rRegion.IsNull() || rRegion.IsEmpty())
-        return rRegion;
-
-    vcl::Region aRegion;
-    if (rRegion.getB2DPolyPolygon())
-    {
-        aRegion = vcl::Region(func(*rRegion.getB2DPolyPolygon()));
-    }
-    else if (rRegion.getPolyPolygon())
-    {
-        aRegion = vcl::Region(func(*rRegion.getPolyPolygon()));
-    }
-    else if (rRegion.getRegionBand())
-    {
-        RectangleVector aRectangles;
-        rRegion.GetRegionRectangles(aRectangles);
-
-        for (const auto& rRect : aRectangles | std::views::reverse)
-        {
-            aRegion.Union(func(rRect));
-        }
-    }
-    return aRegion;
 }
 
 vcl::Region CoordinateMapper::LogicToWindowUnits(const vcl::Region& rLogicRegion, bool bMap) const
@@ -1051,6 +1072,68 @@ Size CoordinateMapper::DevicePixelToLogic(const Size& rDeviceSize, bool bMap) co
     const double sy = GetScaledYLength(aMat);
     return Size(lcl_RoundToLong(rDeviceSize.Width() * sx),
                 lcl_RoundToLong(rDeviceSize.Height() * sy));
+}
+
+vcl::Region CoordinateMapper::DevicePixelToLogic(const vcl::Region& rPixelRegion, bool bMap) const
+{
+    if (!bMap && IsValidDPI() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rPixelRegion;
+
+    return lcl_TransformRegion(
+        rPixelRegion, [this, bMap](const auto& obj) { return DevicePixelToLogic(obj, bMap); });
+}
+
+// --- Add these inside CoordinateMapper.cxx ---
+
+tools::Polygon CoordinateMapper::DevicePixelToLogic(const tools::Polygon& rPixelPoly,
+                                                    bool bMap) const
+{
+    if (!bMap && IsValidDPI() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rPixelPoly;
+
+    tools::Polygon aPoly(rPixelPoly);
+    basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(bMap);
+    for (auto& rPoint : aPoly)
+    {
+        basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
+        aPt *= aMat;
+        rPoint = Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
+    }
+    return aPoly;
+}
+
+tools::PolyPolygon CoordinateMapper::DevicePixelToLogic(const tools::PolyPolygon& rPixelPolyPoly,
+                                                        bool bMap) const
+{
+    if (!bMap && IsValidDPI() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rPixelPolyPoly;
+
+    tools::PolyPolygon aPolyPoly(rPixelPolyPoly);
+    for (auto& rPoly : aPolyPoly)
+        rPoly = DevicePixelToLogic(rPoly, bMap);
+    return aPolyPoly;
+}
+
+basegfx::B2DPolygon CoordinateMapper::DevicePixelToLogic(const basegfx::B2DPolygon& rPixelPoly,
+                                                         bool bMap) const
+{
+    if (!bMap && IsValidDPI() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rPixelPoly;
+
+    basegfx::B2DPolygon aPoly(rPixelPoly);
+    aPoly.transform(GetDeviceToLogicMatrix(bMap));
+    return aPoly;
+}
+
+basegfx::B2DPolyPolygon
+CoordinateMapper::DevicePixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly, bool bMap) const
+{
+    if (!bMap && IsValidDPI() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
+        return rPixelPolyPoly;
+
+    basegfx::B2DPolyPolygon aPoly(rPixelPolyPoly);
+    aPoly.transform(GetDeviceToLogicMatrix(bMap));
+    return aPoly;
 }
 
 double CoordinateMapper::LogicToWindowSubPixelX(double fX, bool bMap) const
