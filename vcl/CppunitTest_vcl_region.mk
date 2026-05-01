@@ -16,9 +16,11 @@ $(eval $(call gb_CppunitTest_set_include,vcl_region,\
 
 $(eval $(call gb_CppunitTest_add_exception_objects,vcl_region, \
 	vcl/qa/cppunit/region_iterator_test \
+	vcl/qa/cppunit/region_test \
 ))
 
 $(eval $(call gb_CppunitTest_use_libraries,vcl_region, \
+	sal \
 	test \
 	tl \
 	unotest \
