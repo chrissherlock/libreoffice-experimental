@@ -359,12 +359,26 @@ public:
     basegfx::B2DPolygon LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly,
                                            bool bMap = true) const;
     basegfx::B2DPoint LogicToDeviceSubPixel(const Point& rPoint, bool bMap) const;
+    basegfx::B2DPolyPolygon LogicToDevicePixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
+                                               bool bMap = true) const;
+
     tools::Long DevicePixelToLogicWidth(tools::Long nWidth, bool bMap) const;
     tools::Long DevicePixelToLogicHeight(tools::Long nHeight, bool bMap) const;
     Point DevicePixelToLogic(const Point& rDevicePt, bool bMap = true) const;
     Size DevicePixelToLogic(const Size& rDeviceSize, bool bMap = true) const;
     tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect, bool bMap = true) const;
     basegfx::B2DPoint DevicePixelToLogicSubPixel(const Point& rDevicePt, bool bMap) const;
+
+    tools::Polygon DevicePixelToLogic(const tools::Polygon& rPixelPoly, bool bMap = true) const;
+    tools::PolyPolygon DevicePixelToLogic(const tools::PolyPolygon& rPixelPolyPoly,
+                                          bool bMap = true) const;
+    basegfx::B2DPolygon DevicePixelToLogic(const basegfx::B2DPolygon& rPixelPoly,
+                                           bool bMap = true) const;
+    basegfx::B2DPolyPolygon DevicePixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly,
+                                               bool bMap = true) const;
+
+    vcl::Region LogicToDevicePixel(const vcl::Region& rLogicRegion, bool bMap = true) const;
+    vcl::Region DevicePixelToLogic(const vcl::Region& rPixelRegion, bool bMap = true) const;
 
     // Window <-> Logic
 
