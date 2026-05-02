@@ -33,34 +33,30 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testBasicIteration)
     CPPUNIT_ASSERT_EQUAL(1, count);
 }
 
-// PROVES: Copying a region does not blindly copy the unique_ptr cache,
-// ensuring that target cache is cleanly rebuilt on demand.
-
 CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCopySemantics)
 {
-    tools::Rectangle aRect(0, 0, 100, 100);
-    vcl::Region aSource(aRect);
+    vcl::Region aSource(tools::Rectangle(0, 0, 10, 10));
 
-    // Prime the cache on the source
-    auto it1 = aSource.begin();
-    CPPUNIT_ASSERT_EQUAL(aRect, *it1);
+    // Get initial rect
+    tools::Rectangle aInitialRect = *aSource.begin();
 
-    // Copy construct
-    vcl::Region aTarget(aSource);
+    // PERFORM COPY
+    vcl::Region aTarget = aSource;
 
-    // Verify target iterator works and cache wasn't blindly shared
-    auto it2 = aTarget.begin();
-    CPPUNIT_ASSERT_EQUAL(aRect, *it2);
+    // VALIDATE ISOLATION (Cache is handle-local)
+    // The iterator addresses should be different because caches are not shared.
+    CPPUNIT_ASSERT_MESSAGE("Cache must be local to the handle",
+                           &(*aSource.begin()) != &(*aTarget.begin()));
 
-    // Address check to ensure deep geometric isolation (not sharing the same cache vector)
-    const uintptr_t nSourceAddr = reinterpret_cast<uintptr_t>(&(*it1));
-    const uintptr_t nTargetAddr = reinterpret_cast<uintptr_t>(&(*it2));
-    CPPUNIT_ASSERT_MESSAGE("Copy must not share underlying cache memory",
-                           nSourceAddr != nTargetAddr);
+    // PERFORM MUTATION (Trigger Detach)
+    aTarget.Move(5, 5);
+
+    // VALIDATE COW ISOLATION
+    // The source should remain unchanged.
+    CPPUNIT_ASSERT_EQUAL(aInitialRect, *aSource.begin());
+    // The target should reflect the mutation.
+    CPPUNIT_ASSERT_EQUAL(tools::Rectangle(5, 5, 15, 15), *aTarget.begin());
 }
-
-// PROVES: Move semantics cleanly transfer the geometry and completely
-// obliterate the source cache to prevent stale reads if the source is reused.
 
 CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMoveSemantics)
 {
@@ -68,17 +64,21 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMoveSemantics)
     vcl::Region aSource(aRect);
 
     // Prime source cache
-    CPPUNIT_ASSERT(aSource.begin() != aSource.end());
+    CPPUNIT_ASSERT(!aSource.IsEmpty());
 
     // Move construct
     vcl::Region aTarget(std::move(aSource));
 
-    // Verify target adopted the geometry safely and cache rebuilds
-    auto itTarget = aTarget.begin();
-    CPPUNIT_ASSERT_EQUAL(aRect, *itTarget);
+    // Verify target adopted the geometry safely
+    CPPUNIT_ASSERT_EQUAL(aRect, *aTarget.begin());
 
-    // Verify source cache was obliterated and it acts as an empty region
-    CPPUNIT_ASSERT_MESSAGE("Moved-from source must have an empty cache",
+    // VERIFY NULL-OBJECT PATTERN (Hard COW)
+    // In our final COW model, mpData is NEVER nullptr. It points to the
+    // immortal singleton which has mbIsNull = true.
+    CPPUNIT_ASSERT_MESSAGE("Moved-from source must be Null", aSource.IsNull());
+
+    // Proves that the singleton safely handles iterator requests without crashing
+    CPPUNIT_ASSERT_MESSAGE("Moved-from source must return safe empty iterators",
                            aSource.begin() == aSource.end());
 
     // Test Move Assignment
@@ -86,11 +86,11 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMoveSemantics)
     aAssignTarget = std::move(aTarget);
 
     // Verify assigned target works
-    auto itAssignTarget = aAssignTarget.begin();
-    CPPUNIT_ASSERT_EQUAL(aRect, *itAssignTarget);
+    CPPUNIT_ASSERT_EQUAL(aRect, *aAssignTarget.begin());
 
-    // Verify the assigned-from source was cleared
-    CPPUNIT_ASSERT_MESSAGE("Move-assigned source must have an empty cache",
+    // Verify the assigned-from source was cleared to the Null singleton
+    CPPUNIT_ASSERT_MESSAGE("Move-assigned source must be Null", aTarget.IsNull());
+    CPPUNIT_ASSERT_MESSAGE("Move-assigned source iterators must be safe",
                            aTarget.begin() == aTarget.end());
 }
 }

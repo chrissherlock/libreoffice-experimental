@@ -118,31 +118,27 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testBMapFalseSemantics)
                                  tools::Long(70), aResult.X());
 }
 
-CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testSnapshotStability)
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCompiledTransformStability)
 {
     CoordinateMapper aMapper;
     aMapper.SetMapMode(MapMode(MapUnit::MapPixel));
     aMapper.SetWindowOffset(Size(10, 10));
 
-    // 1. Thread A acquires snapshot
-    auto pSnap = aMapper.AcquireSnapshot(true);
+    CompiledTransform aTransform = aMapper.Compile(true);
 
-    // 2. Thread B mutates state (simulated)
     aMapper.SetWindowOffset(Size(999, 999));
 
-    // 3. Thread A continues using its acquired snapshot
     basegfx::B2DPoint aPt(0, 0);
-    aPt *= pSnap->maLogicToDevice;
+    aPt *= aTransform.GetMatrix();
 
-    // Expect: Snapshot must reflect the state at the exact time of acquisition (10, not 999)
-    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Snapshot isolation failed under mutation", 10.0,
+    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Compiled transform isolation failed under mutation", 10.0,
                                          aPt.getX(), 1e-9);
 
-    // 4. A fresh acquisition should reflect the new state
-    auto pNewSnap = aMapper.AcquireSnapshot(true);
+    CompiledTransform aNewTransform = aMapper.Compile(true);
     basegfx::B2DPoint aPtNew(0, 0);
-    aPtNew *= pNewSnap->maLogicToDevice;
-    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("New snapshot failed to pick up mutation", 999.0,
+    aPtNew *= aNewTransform.GetMatrix();
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("New compilation failed to capture state mutation", 999.0,
                                          aPtNew.getX(), 1e-9);
 }
 
