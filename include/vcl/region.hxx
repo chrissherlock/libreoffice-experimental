@@ -29,8 +29,12 @@
 #include <vector>
 
 class RegionBand;
+class SvStream;
 
-namespace vcl { class Window; }
+namespace vcl {
+    class Window;
+    struct RegionData;
+}
 class OutputDevice;
 class Bitmap;
 
@@ -45,16 +49,17 @@ private:
     friend class ::vcl::Window;
     friend class ::Bitmap;
 
-    // possible contents
-    std::optional< basegfx::B2DPolyPolygon > mpB2DPolyPolygon;
-    std::optional< tools::PolyPolygon >      mpPolyPolygon;
-    std::shared_ptr< RegionBand >            mpRegionBand;
-
-    bool                                     mbIsNull : 1;
+    // TRUE IMMUTABILITY:
+    // The compiler physically prevents accidental in-place mutation of shared snapshots.
+    // Marked mutable to allow lazy evaluation in const representation getters.
+    mutable std::shared_ptr<const RegionData> mpData;
 
     // Mutable so it can be lazily populated in const contexts.
     // Strictly a derived snapshot; never the semantic source of truth.
     mutable std::unique_ptr<RectangleVector> mpxRectCache;
+
+    // COW internals
+    void detach();
 
     // helpers
     SAL_DLLPRIVATE void ImplCreatePolyPolyRegion( const tools::PolyPolygon& rPolyPoly );
@@ -74,8 +79,6 @@ public:
     explicit Region(const basegfx::B2DPolyPolygon&);
     ~Region();
 
-    // --- PATCH 1: Explicit Lifecycle Management ---
-    // Prevent compiler from silently copying/moving the cache.
     Region(const vcl::Region& rRegion);
     Region(vcl::Region&& rRegion) noexcept;
     vcl::Region& operator=(const vcl::Region& rRegion);
@@ -83,9 +86,9 @@ public:
     vcl::Region& operator=(const tools::Rectangle& rRect);
 
     // direct access to contents
-    const std::optional<basegfx::B2DPolyPolygon>& getB2DPolyPolygon() const { return mpB2DPolyPolygon; }
-    const std::optional<tools::PolyPolygon>& getPolyPolygon() const { return mpPolyPolygon; }
-    const RegionBand* getRegionBand() const { return mpRegionBand.get(); }
+    const std::optional<basegfx::B2DPolyPolygon>& getB2DPolyPolygon() const;
+    const std::optional<tools::PolyPolygon>& getPolyPolygon() const;
+    const RegionBand* getRegionBand() const;
 
     // access with converters, the asked data will be created from the most
     // valuable data, buffered and returned
@@ -105,8 +108,11 @@ public:
     void Exclude( const vcl::Region& rRegion );
     bool XOr( const vcl::Region& rRegion );
 
+    // Null = infinite logical space (clip nothing)
+    // Empty = zero logical space (clip everything). Note: This is structural emptiness
+    // (no geometry representation exists), not necessarily mathematical emptiness (a polygon with 0 area).
     bool IsEmpty() const;
-    bool IsNull() const { return mbIsNull;}
+    bool IsNull() const;
 
     void SetEmpty();
     void SetNull();
@@ -114,17 +120,17 @@ public:
     bool IsRectangle() const;
 
     tools::Rectangle GetBoundRect() const;
-    bool HasPolyPolygonOrB2DPolyPolygon() const { return (getB2DPolyPolygon() || getPolyPolygon()); }
+    bool HasPolyPolygonOrB2DPolyPolygon() const;
     void GetRegionRectangles(RectangleVector& rTarget) const;
 
     bool Contains( const Point& rPoint ) const;
     bool Overlaps( const tools::Rectangle& rRect ) const;
 
     bool operator==( const vcl::Region& rRegion ) const;
-    bool operator!=( const vcl::Region& rRegion ) const { return !(Region::operator==( rRegion )); }
+    bool operator!=( const vcl::Region& rRegion ) const { return !(*this == rRegion); }
 
     friend VCL_DLLPUBLIC SvStream& ReadRegion( SvStream& rIStm, vcl::Region& rRegion );
-    friend SvStream& WriteRegion( SvStream& rOStm, const vcl::Region& rRegion );
+    friend VCL_DLLPUBLIC SvStream& WriteRegion( SvStream& rOStm, const vcl::Region& rRegion );
 
     /* workaround: faster conversion for PolyPolygons
      * if half of the Polygons contained in rPolyPoly are actually
@@ -138,15 +144,18 @@ public:
     static vcl::Region GetRegionFromPolyPolygon( const tools::PolyPolygon& rPolyPoly );
 
     // ====================================================================
-    // WARNING: ITERATOR LIFETIME CONTRACT
-    // Iterators are valid ONLY until the next semantic mutation of the Region
-    // (Move, Union, Intersect, operator=, or any operation that may
-    // change underlying representation storage).
+    // WARNING: THREAD SAFETY & ITERATOR CONTRACT
     //
-    // Representation queries MAY trigger lazy materialization and may
-    // invalidate iterators if internal storage is replaced.
+    // vcl::Region is NOT thread-safe for concurrent read access.
+    // Representation queries (GetAs...) perform lazy materialization,
+    // which mutates the internal shared_ptr handle. Concurrent reads
+    // require external synchronization (e.g., the Solar Mutex).
     //
-    // Do NOT store these iterators across VCL API calls.
+    // vcl::Region DOES NOT PROVIDE STABLE ITERATION.
+    // Iterators are valid ONLY until the next semantic mutation OR
+    // representation query. Even calling `const` methods on the same thread
+    // can silently invalidate iterators via lazy materialization.
+    // Do NOT store these across VCL API calls.
     // ====================================================================
     using const_iterator = RectangleVector::const_iterator;
     const_iterator begin() const;
