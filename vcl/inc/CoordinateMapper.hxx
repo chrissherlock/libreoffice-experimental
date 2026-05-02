@@ -133,6 +133,17 @@ namespace vcl
 {
 class CoordinateMapper;
 
+} // namespace vcl
+
+// The strict execution instruction set
+enum class TransformMode
+{
+    Identity,
+    Translation,
+    RationalScale,
+    AffineFallback
+};
+
 /**
  * @class CompiledTransform
  * @brief An immutable, cacheable instruction payload for VCL coordinate mapping.
@@ -141,37 +152,44 @@ class CoordinateMapper;
  * CRITICAL: The hint pipeline must be strictly algebraically equivalent to:
  * * DevicePoint = Scale(LogicPoint + LogicOffset) + DeviceOffset
  * -------------------------------
- * * Execution hints (mbIsPureTranslation) are validated accelerators
- * only. The matrix remains the single, unassailable source of truth.
  */
 struct VCL_DLLPUBLIC CompiledTransform
 {
-    /* friend class CoordinateMapper; (Handled by struct visibility) */
-
 public:
     basegfx::B2DHomMatrix maMatrix;
     uint64_t mnSemanticKey = 0;
 
+    TransformMode meMode = TransformMode::AffineFallback;
+
+    tools::Long mnLogicTx = 0, mnLogicTy = 0;
     tools::Long mnDeviceTx = 0, mnDeviceTy = 0;
-    bool mbIsIdentity = false;
-    bool mbIsPureTranslation = false;
+    tools::Long mnSxNum = 1, mnSxDen = 1;
+    tools::Long mnSyNum = 1, mnSyDen = 1;
 
 public:
-    vcl::CompiledTransform Compile(bool bMap) const;
-    uint64_t GetSemanticKey(bool bMap) const;
     CompiledTransform() = default;
 
-    const basegfx::B2DHomMatrix& GetMatrix() const { return maMatrix; }
     uint64_t GetSemanticKey() const { return mnSemanticKey; }
+    TransformMode GetMode() const { return meMode; }
 
-    bool IsIdentity() const { return mbIsIdentity; }
-    bool IsPureTranslation() const { return mbIsPureTranslation; }
-
+    // Payload Accessors
+    tools::Long GetLogicTx() const { return mnLogicTx; }
+    tools::Long GetLogicTy() const { return mnLogicTy; }
     tools::Long GetDeviceTx() const { return mnDeviceTx; }
     tools::Long GetDeviceTy() const { return mnDeviceTy; }
-};
+    tools::Long GetSxNum() const { return mnSxNum; }
+    tools::Long GetSxDen() const { return mnSxDen; }
+    tools::Long GetSyNum() const { return mnSyNum; }
+    tools::Long GetSyDen() const { return mnSyDen; }
 
-} // namespace vcl
+    // Fallback Accessor ONLY
+    const basegfx::B2DHomMatrix& GetMatrix() const { return maMatrix; }
+
+    // Legacy helpers to keep tests compiling until fully migrated
+    bool IsIdentity() const { return meMode == TransformMode::Identity; }
+    bool IsPureTranslation() const { return meMode == TransformMode::Translation; }
+    bool IsRationalScale() const { return meMode == TransformMode::RationalScale; }
+};
 
 class VCL_DLLPUBLIC CoordinateMapper
 {
@@ -206,7 +224,7 @@ private:
     tools::Long mnOutHeight = 0;
 
 public:
-    vcl::CompiledTransform Compile(bool bMap) const;
+    CompiledTransform Compile(bool bMap) const;
     uint64_t GetSemanticKey(bool bMap) const;
 
     bool IsValidDPI() const { return mnDPIX > 0 && mnDPIY > 0; }

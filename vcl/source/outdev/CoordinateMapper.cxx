@@ -1299,9 +1299,9 @@ uint64_t CoordinateMapper::GetSemanticKey(bool bMap) const
     return static_cast<uint64_t>(h);
 }
 
-vcl::CompiledTransform CoordinateMapper::Compile(bool bMap) const
+CompiledTransform CoordinateMapper::Compile(bool bMap) const
 {
-    vcl::CompiledTransform t;
+    CompiledTransform t;
     t.mnSemanticKey = GetSemanticKey(bMap);
 
     const double fUIScale = static_cast<double>(mnDPIScalePercentage) / 100.0;
@@ -1326,7 +1326,7 @@ vcl::CompiledTransform CoordinateMapper::Compile(bool bMap) const
 
     if (t.maMatrix.isIdentity())
     {
-        t.mbIsIdentity = true;
+        t.meMode = TransformMode::Identity;
         return t;
     }
 
@@ -1345,21 +1345,23 @@ vcl::CompiledTransform CoordinateMapper::Compile(bool bMap) const
 
             if (t.mnDeviceTx == 0 && t.mnDeviceTy == 0)
             {
-                t.mbIsIdentity = true;
+                t.meMode = TransformMode::Identity;
             }
             else
             {
-                t.mbIsPureTranslation = true;
+                t.meMode = TransformMode::Translation;
             }
+            return t;
         }
     }
 
-    // Note: Rational scaling extraction requires MapUnit which CoordinateMapper does not hold.
+    // Rational scaling extraction requires MapUnit which CoordinateMapper does not hold natively.
     // Matrix fallback elegantly guarantees exactness for scaled coordinates.
+    t.meMode = TransformMode::AffineFallback;
     return t;
 }
 
-static inline Point ApplyTransform(const vcl::CompiledTransform& t, const Point& rPt)
+static inline Point ApplyTransform(const CompiledTransform& t, const Point& rPt)
 {
 #ifndef DBG_UTIL
     if (t.IsIdentity())
@@ -1432,7 +1434,7 @@ Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt, bool bMap) con
 tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect,
                                                       bool bMap) const
 {
-    vcl::CompiledTransform t = Compile(bMap);
+    CompiledTransform t = Compile(bMap);
     return tools::Rectangle(ApplyTransform(t, rLogicRect.TopLeft()),
                             ApplyTransform(t, rLogicRect.BottomRight()));
 }
@@ -1440,7 +1442,7 @@ tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rL
 tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogicPoly,
                                                     bool bMap) const
 {
-    vcl::CompiledTransform t = Compile(bMap);
+    CompiledTransform t = Compile(bMap);
 
     if (!t.IsPureTranslation() && !t.IsIdentity())
     {
