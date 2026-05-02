@@ -43,21 +43,75 @@ static inline tools::Long lcl_RoundToLong(double fVal)
     return static_cast<tools::Long>(std::llround(fVal));
 }
 
-namespace
-{
-double GetScaledXLength(const basegfx::B2DHomMatrix& m)
+static double lcl_GetScaledXLength(const basegfx::B2DHomMatrix& m)
 {
     basegfx::B2DVector vx(1.0, 0.0);
     vx *= m;
     return vx.getLength();
 }
 
-double GetScaledYLength(const basegfx::B2DHomMatrix& m)
+static double lcl_GetScaledYLength(const basegfx::B2DHomMatrix& m)
 {
     basegfx::B2DVector vy(0.0, 1.0);
     vy *= m;
     return vy.getLength();
 }
+
+static tools::Long lcl_ScaleWithFallback(tools::Long nVal, tools::Long nNum, tools::Long nDenom)
+{
+    if (nNum == nDenom || nDenom == 0)
+        return nVal;
+
+    BigInt aValue = nVal;
+    aValue *= nNum;
+
+    if (aValue.IsNeg())
+        aValue -= nDenom / 2;
+    else
+        aValue += nDenom / 2;
+
+    aValue /= nDenom;
+
+    return static_cast<tools::Long>(aValue);
+}
+
+static std::pair<MappingCoefficients, MappingCoefficients>
+lcl_calcConversionMapRes(const MapMode& rMMSource, const MapMode& rMMDest)
+{
+    std::pair<MappingCoefficients, MappingCoefficients> result;
+    result.first.CalcMapResolution(rMMSource, 72, 72);
+    result.second.CalcMapResolution(rMMDest, 72, 72);
+    return result;
+}
+
+static tools::Long lcl_convertLogicValue(const tools::Long nSourceValue,
+                                         const o3tl::Length eSourceUnit,
+                                         const o3tl::Length eDestUnit)
+{
+    if (nSourceValue == 0 || eSourceUnit == o3tl::Length::invalid
+        || eDestUnit == o3tl::Length::invalid)
+    {
+        return 0;
+    }
+
+    bool bOverflow;
+    const auto nResult = o3tl::convert(nSourceValue, eSourceUnit, eDestUnit, bOverflow);
+
+    if (!bOverflow)
+        return nResult;
+
+    const auto[nMultiplier, nDivisor] = o3tl::getConversionMulDiv(eSourceUnit, eDestUnit);
+    BigInt aBigValue = nSourceValue;
+    aBigValue *= nMultiplier;
+
+    if (aBigValue.IsNeg())
+        aBigValue -= nDivisor / 2;
+    else
+        aBigValue += nDivisor / 2;
+
+    aBigValue /= nDivisor;
+
+    return static_cast<tools::Long>(aBigValue);
 }
 
 // Conceptual Pipeline Separation (Mathematical Invariant):
@@ -138,8 +192,8 @@ Point CoordinateMapper::GetDeviceToWindowOffset() const
 Size CoordinateMapper::LogicToViewDistance(const Size& rLogicSize, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
-    const double sx = GetScaledXLength(aMat);
-    const double sy = GetScaledYLength(aMat);
+    const double sx = lcl_GetScaledXLength(aMat);
+    const double sy = lcl_GetScaledYLength(aMat);
     return Size(lcl_RoundToLong(rLogicSize.Width() * sx),
                 lcl_RoundToLong(rLogicSize.Height() * sy));
 }
@@ -258,7 +312,20 @@ CoordinateMapper::BuildSnapshot(bool bMap) const
         pSnap->maDeviceToLogic.identity();
     }
 
-    // mnVersion is explicitly NOT set here. It is handled by AcquireSnapshot.
+    // Populate the Rational Fast-Path Descriptor
+    pSnap->maDescriptor.eComplexity = TransformComplexity::ComplexAffine;
+    if (bMap && mnDPIScalePercentage == 100)
+    {
+        // Placeholder for the full o3tl lookup. Uses 1M denominator for approximation.
+        pSnap->maDescriptor.eComplexity = TransformComplexity::RationalScale;
+        pSnap->maDescriptor.nScaleNumX = lcl_RoundToLong(scaleX * 1000000.0);
+        pSnap->maDescriptor.nScaleDenomX = 1000000;
+        pSnap->maDescriptor.nScaleNumY = lcl_RoundToLong(scaleY * 1000000.0);
+        pSnap->maDescriptor.nScaleDenomY = 1000000;
+        pSnap->maDescriptor.nDx = maMapRes.mnTranslationX + mnLogicToAbsoluteOffsetX;
+        pSnap->maDescriptor.nDy = maMapRes.mnTranslationY + mnLogicToAbsoluteOffsetY;
+    }
+
     return pSnap;
 }
 
@@ -485,8 +552,8 @@ CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolyPolygon>(
 Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
-    const double sx = GetScaledXLength(aMat);
-    const double sy = GetScaledYLength(aMat);
+    const double sx = lcl_GetScaledXLength(aMat);
+    const double sy = lcl_GetScaledYLength(aMat);
     return Size(lcl_RoundToLong(rLogicSize.Width() * sx),
                 lcl_RoundToLong(rLogicSize.Height() * sy));
 }
@@ -542,26 +609,26 @@ Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt, bool bMap) con
 double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
-    return static_cast<double>(nWidth) * GetScaledXLength(aMat);
+    return static_cast<double>(nWidth) * lcl_GetScaledXLength(aMat);
 }
 
 tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
-    return lcl_RoundToLong(nWidth * GetScaledXLength(aMat));
+    return lcl_RoundToLong(nWidth * lcl_GetScaledXLength(aMat));
 }
 
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
-    return lcl_RoundToLong(nHeight * GetScaledYLength(aMat));
+    return lcl_RoundToLong(nHeight * lcl_GetScaledYLength(aMat));
 }
 
 Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
-    const double sx = GetScaledXLength(aMat);
-    const double sy = GetScaledYLength(aMat);
+    const double sx = lcl_GetScaledXLength(aMat);
+    const double sy = lcl_GetScaledYLength(aMat);
     return Size(lcl_RoundToLong(rLogicSize.Width() * sx),
                 lcl_RoundToLong(rLogicSize.Height() * sy));
 }
@@ -594,15 +661,6 @@ static vcl::Region lcl_TransformRegion(const vcl::Region& rRegion, TransformFunc
     return aRegion;
 }
 
-vcl::Region CoordinateMapper::LogicToDevicePixel(const vcl::Region& rLogicRegion, bool bMap) const
-{
-    if (!bMap && IsValidDPI() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
-        return rLogicRegion;
-
-    return lcl_TransformRegion(
-        rLogicRegion, [bMap, this](const auto& obj) { return LogicToDevicePixel(obj, bMap); });
-}
-
 tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect,
                                                       bool bMap) const
 {
@@ -617,25 +675,27 @@ tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rL
 tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogicPoly,
                                                     bool bMap) const
 {
-    if (!bMap && IsValidDPI() && !GetDeviceToWindowOffsetX() && !GetDeviceToWindowOffsetY())
-        return rLogicPoly;
-
     auto snap = AcquireSnapshot(bMap);
+    const auto& desc = snap->maDescriptor;
+
+    if (desc.eComplexity == TransformComplexity::RationalScale)
+    {
+        tools::Polygon aPoly(rLogicPoly);
+        for (sal_uInt16 i = 0; i < aPoly.GetSize(); ++i)
+        {
+            Point& rPoint = aPoly[i];
+            rPoint.setX(lcl_ScaleWithFallback(rPoint.getX() + desc.nDx, desc.nScaleNumX,
+                                              desc.nScaleDenomX));
+            rPoint.setY(lcl_ScaleWithFallback(rPoint.getY() + desc.nDy, desc.nScaleNumY,
+                                              desc.nScaleDenomY));
+        }
+        return aPoly;
+    }
 
     basegfx::B2DPolygon aB2DPoly(rLogicPoly.getB2DPolygon());
     aB2DPoly.transform(snap->maLogicToDevice);
-
-    tools::Polygon aPoly;
-
-    for (sal_uInt32 i = 0; i < aB2DPoly.count(); ++i)
-    {
-        const auto& p = aB2DPoly.getB2DPoint(i);
-        aPoly.Insert(POLY_APPEND, Point(lcl_RoundToLong(p.getX()), lcl_RoundToLong(p.getY())));
-    }
-
-    return aPoly;
+    return tools::Polygon(aB2DPoly);
 }
-
 tools::PolyPolygon CoordinateMapper::LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
                                                         bool bMap) const
 {
@@ -802,13 +862,13 @@ CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolyPolygon>(const basegfx::B2D
 double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
-    return static_cast<double>(nWidth) * GetScaledXLength(aMat);
+    return static_cast<double>(nWidth) * lcl_GetScaledXLength(aMat);
 }
 
 double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
-    return static_cast<double>(nHeight) * GetScaledYLength(aMat);
+    return static_cast<double>(nHeight) * lcl_GetScaledYLength(aMat);
 }
 
 vcl::Region CoordinateMapper::WindowToLogicUnits(const vcl::Region& rWindowRegion, bool bMap) const
@@ -840,8 +900,8 @@ Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWin
 Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetWindowToLogicMatrix(bMap);
-    const double sx = GetScaledXLength(aMat);
-    const double sy = GetScaledYLength(aMat);
+    const double sx = lcl_GetScaledXLength(aMat);
+    const double sy = lcl_GetScaledYLength(aMat);
     return Size(lcl_RoundToLong(rWindowSize.Width() * sx),
                 lcl_RoundToLong(rWindowSize.Height() * sy));
 }
@@ -1056,20 +1116,20 @@ double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
 tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(bMap);
-    return lcl_RoundToLong(nWidth * GetScaledXLength(aMat));
+    return lcl_RoundToLong(nWidth * lcl_GetScaledXLength(aMat));
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(bMap);
-    return lcl_RoundToLong(nHeight * GetScaledYLength(aMat));
+    return lcl_RoundToLong(nHeight * lcl_GetScaledYLength(aMat));
 }
 
 Size CoordinateMapper::DevicePixelToLogic(const Size& rDeviceSize, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(bMap);
-    const double sx = GetScaledXLength(aMat);
-    const double sy = GetScaledYLength(aMat);
+    const double sx = lcl_GetScaledXLength(aMat);
+    const double sy = lcl_GetScaledYLength(aMat);
     return Size(lcl_RoundToLong(rDeviceSize.Width() * sx),
                 lcl_RoundToLong(rDeviceSize.Height() * sy));
 }
@@ -1234,45 +1294,6 @@ static auto lcl_getCorrectedUnit(MapUnit eMapSrc, MapUnit eMapDst)
     }
 
     return std::make_pair(eSrc, eDst);
-}
-
-static std::pair<MappingCoefficients, MappingCoefficients>
-lcl_calcConversionMapRes(const MapMode& rMMSource, const MapMode& rMMDest)
-{
-    std::pair<MappingCoefficients, MappingCoefficients> result;
-    result.first.CalcMapResolution(rMMSource, 72, 72);
-    result.second.CalcMapResolution(rMMDest, 72, 72);
-    return result;
-}
-
-static tools::Long lcl_convertLogicValue(const tools::Long nSourceValue,
-                                         const o3tl::Length eSourceUnit,
-                                         const o3tl::Length eDestUnit)
-{
-    if (nSourceValue == 0 || eSourceUnit == o3tl::Length::invalid
-        || eDestUnit == o3tl::Length::invalid)
-    {
-        return 0;
-    }
-
-    bool bOverflow;
-    const auto nResult = o3tl::convert(nSourceValue, eSourceUnit, eDestUnit, bOverflow);
-
-    if (!bOverflow)
-        return nResult;
-
-    const auto[nMultiplier, nDivisor] = o3tl::getConversionMulDiv(eSourceUnit, eDestUnit);
-    BigInt aBigValue = nSourceValue;
-    aBigValue *= nMultiplier;
-
-    if (aBigValue.IsNeg())
-        aBigValue -= nDivisor / 2;
-    else
-        aBigValue += nDivisor / 2;
-
-    aBigValue /= nDivisor;
-
-    return static_cast<tools::Long>(aBigValue);
 }
 
 Point LogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource,
