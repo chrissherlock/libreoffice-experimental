@@ -42,6 +42,45 @@ concept TransformableB2DGeometry = requires(T a, const basegfx::B2DHomMatrix& rM
     a.transform(rMatrix);
 };
 
+enum class TransformComplexity
+{
+    Identity,
+    PureTranslation,
+    RationalScale,
+    ComplexAffine
+};
+
+struct TransformDescriptor
+{
+    TransformComplexity eComplexity = TransformComplexity::ComplexAffine;
+    tools::Long nScaleNumX = 1, nScaleDenomX = 1;
+    tools::Long nScaleNumY = 1, nScaleDenomY = 1;
+    tools::Long nDx = 0, nDy = 0;
+};
+
+namespace vcl::detail
+{
+template <typename T> concept B2DTransformable = requires(T a, const basegfx::B2DHomMatrix& m)
+{
+    { a.transform(m) };
+};
+
+template <typename T> concept B2DMultipliable = requires(T a, const basegfx::B2DHomMatrix& m)
+{
+    { a *= m };
+};
+
+template <typename T> concept B2DGeometry = B2DTransformable<T> || B2DMultipliable<T>;
+
+struct MapConversion
+{
+    double mfScaleX = 1.0;
+    double mfScaleY = 1.0;
+    tools::Long mnOffsetX = 0;
+    tools::Long mnOffsetY = 0;
+};
+}
+
 /**
  * @class CoordinateMapper
  * @brief Centralized mapping engine for VCL coordinate transformations.
@@ -103,29 +142,6 @@ concept TransformableB2DGeometry = requires(T a, const basegfx::B2DHomMatrix& rM
  * ========================================================================
  */
 
-namespace vcl::detail
-{
-template <typename T> concept B2DTransformable = requires(T a, const basegfx::B2DHomMatrix& m)
-{
-    { a.transform(m) };
-};
-
-template <typename T> concept B2DMultipliable = requires(T a, const basegfx::B2DHomMatrix& m)
-{
-    { a *= m };
-};
-
-template <typename T> concept B2DGeometry = B2DTransformable<T> || B2DMultipliable<T>;
-
-struct MapConversion
-{
-    double mfScaleX = 1.0;
-    double mfScaleY = 1.0;
-    tools::Long mnOffsetX = 0;
-    tools::Long mnOffsetY = 0;
-};
-}
-
 class VCL_DLLPUBLIC CoordinateMapper
 {
 private:
@@ -135,6 +151,7 @@ private:
     // #i75163#
     struct TransformSnapshot
     {
+        TransformDescriptor maDescriptor;
         basegfx::B2DHomMatrix maLogicToDevice;
         basegfx::B2DHomMatrix maDeviceToLogic;
         basegfx::B2DHomMatrix maView;
