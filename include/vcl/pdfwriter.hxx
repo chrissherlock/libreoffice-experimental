@@ -61,6 +61,7 @@ class Bitmap;
 class Gradient;
 class Hatch;
 class Wallpaper;
+class OutputDevice;
 
 namespace vcl
 {

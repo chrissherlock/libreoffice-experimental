@@ -39,29 +39,6 @@
  * without relying on direct inspection of internal representation details.
  *
  * ----------------------------------------------------------------------------
- * Invariant Bifurcation:
- *
- * The DSL defines two independent correctness layers:
- *
- * 1. Structural Invariants (S / E):
- * Validates consistency of vcl::Region’s cached structural representation.
- * Ensures that mutation sequences either:
- * - preserve an identical cached decomposition when semantically no-op, or
- * - correctly invalidate and update cached state when modifications occur.
- *
- * The structural fingerprint (count, coordinate aggregates, and area-like
- * metrics) is used as a diagnostic signal for cache coherence.
- *
- * ----------------------------------------------------------------------------
- * 2. Semantic Invariants (T):
- *
- * Validates geometric stability under coordinate-space transformation.
- *
- * A Region is projected through CoordinateMapper (Logic → Device → Logic)
- * and compared against its original logical representation using tolerance-
- * aware geometric checks.
- *
- * ----------------------------------------------------------------------------
  * SYNTAX REFERENCE
  * ----------------------------------------------------------------------------
  *
@@ -96,7 +73,6 @@ class RegionScriptBase : public CppUnit::TestFixture
 protected:
     using CacheFingerprint = std::tuple<int, tools::Long, tools::Long, tools::Long>;
 
-    // CoordinateMapper is in the global namespace
     std::unique_ptr<CoordinateMapper> mpMapper;
 
     RegionScriptBase()
@@ -261,15 +237,25 @@ protected:
                 case 'E':
                 {
                     CacheFingerprint aCurrentFp = GetCacheFingerprint(aRegion);
-                    CPPUNIT_ASSERT_EQUAL_MESSAGE("Structural Cache Invalidation Failure",
-                                                 std::get<0>(aLastFp), std::get<0>(aCurrentFp));
+                    if (aLastFp != aCurrentFp)
+                    {
+                        OString aBaseMsg = "Structural Cache Invalidation Failure at line "
+                                           + OString::number(nLineNum);
+                        CPPUNIT_ASSERT_EQUAL_MESSAGE(OString(aBaseMsg + " (Count)").getStr(),
+                                                     std::get<0>(aLastFp), std::get<0>(aCurrentFp));
+                        CPPUNIT_ASSERT_EQUAL_MESSAGE(OString(aBaseMsg + " (SumX)").getStr(),
+                                                     std::get<1>(aLastFp), std::get<1>(aCurrentFp));
+                        CPPUNIT_ASSERT_EQUAL_MESSAGE(OString(aBaseMsg + " (SumY)").getStr(),
+                                                     std::get<2>(aLastFp), std::get<2>(aCurrentFp));
+                        CPPUNIT_ASSERT_EQUAL_MESSAGE(OString(aBaseMsg + " (Area)").getStr(),
+                                                     std::get<3>(aLastFp), std::get<3>(aCurrentFp));
+                    }
                     break;
                 }
                 case 'T':
                 {
                     vcl::Region aOriginal = aRegion;
                     basegfx::B2DPolyPolygon aTempPoly = aRegion.GetAsB2DPolyPolygon();
-                    // Using current API for CoordinateMapper
                     aTempPoly.transform(mpMapper->Compile(true).GetMatrix());
                     vcl::Region aDevice(aTempPoly);
                     vcl::Region aBack = mpMapper->DevicePixelToLogic(aDevice, true);
@@ -397,5 +383,4 @@ CPPUNIT_TEST_FIXTURE(RegionScriptBase, testSelfAliasingIdentity)
 }
 
 } // namespace
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
