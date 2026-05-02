@@ -364,8 +364,12 @@ class RegionScriptTest : public CppUnit::TestFixture
                 {
                     vcl::Region aOriginal = aRegion;
 
-                    vcl::Region aDevice = mpMapper->LogicToDevicePixel(aRegion, true);
+                    basegfx::B2DPolyPolygon aTempPoly = aRegion.GetAsB2DPolyPolygon();
+                    // We use 'true' because the original test line was hardcoded to 'true'
+                    aTempPoly.transform(mpMapper->GetLogicToDeviceMatrix(true));
+                    vcl::Region aDevice(aTempPoly);
 
+                    // We must pass 'aDevice' here so mpMapper has pixels to turn back into logic
                     vcl::Region aBack = mpMapper->DevicePixelToLogic(aDevice, true);
 
                     AssertSemanticEquivalence(aOriginal, aBack);
