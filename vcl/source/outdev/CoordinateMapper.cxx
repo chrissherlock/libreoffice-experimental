@@ -1285,24 +1285,13 @@ basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode&
     return aTransform;
 }
 
-uint64_t CoordinateMapper::GetSemanticKey(bool bMap) const
-{
-    uint64_t epoch = mnStateVersion.load(std::memory_order_acquire);
-
-    std::size_t h = 0;
-    o3tl::hash_combine(h, epoch);
-    o3tl::hash_combine(h, bMap);
-    o3tl::hash_combine(h, mnDPIX);
-    o3tl::hash_combine(h, mnDPIY);
-    o3tl::hash_combine(h, mnDPIScalePercentage);
-
-    return static_cast<uint64_t>(h);
-}
+// ============================================================================
+// COMPILED TRANSFORM & EXECUTION
+// ============================================================================
 
 CompiledTransform CoordinateMapper::Compile(bool bMap) const
 {
     CompiledTransform t;
-    t.mnSemanticKey = GetSemanticKey(bMap);
 
     const double fUIScale = static_cast<double>(mnDPIScalePercentage) / 100.0;
     const double scaleX = bMap ? (maMapRes.mfScaleX * static_cast<double>(mnDPIX) * fUIScale) : 1.0;
@@ -1355,13 +1344,12 @@ CompiledTransform CoordinateMapper::Compile(bool bMap) const
         }
     }
 
-    // Rational scaling extraction requires MapUnit which CoordinateMapper does not hold natively.
-    // Matrix fallback elegantly guarantees exactness for scaled coordinates.
+    // Uncacheable affine fallback
     t.meMode = TransformMode::AffineFallback;
     return t;
 }
 
-static inline Point ApplyTransform(const CompiledTransform& t, const Point& rPt)
+static inline Point lcl_ApplyTransform(const CompiledTransform& t, const Point& rPt)
 {
 #ifndef DBG_UTIL
     if (t.IsIdentity())
@@ -1428,15 +1416,15 @@ basegfx::B2DHomMatrix CoordinateMapper::GetWindowToLogicMatrix(bool bMap) const
 
 Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt, bool bMap) const
 {
-    return ApplyTransform(Compile(bMap), rLogicPt);
+    return lcl_ApplyTransform(Compile(bMap), rLogicPt);
 }
 
 tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect,
                                                       bool bMap) const
 {
     CompiledTransform t = Compile(bMap);
-    return tools::Rectangle(ApplyTransform(t, rLogicRect.TopLeft()),
-                            ApplyTransform(t, rLogicRect.BottomRight()));
+    return tools::Rectangle(lcl_ApplyTransform(t, rLogicRect.TopLeft()),
+                            lcl_ApplyTransform(t, rLogicRect.BottomRight()));
 }
 
 tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogicPoly,
@@ -1454,7 +1442,7 @@ tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogic
     tools::Polygon aPoly(rLogicPoly);
     for (sal_uInt16 i = 0; i < aPoly.GetSize(); ++i)
     {
-        aPoly[i] = ApplyTransform(t, aPoly[i]);
+        aPoly[i] = lcl_ApplyTransform(t, aPoly[i]);
     }
 
     return aPoly;
