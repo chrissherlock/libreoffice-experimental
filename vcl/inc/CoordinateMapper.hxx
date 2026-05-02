@@ -42,22 +42,6 @@ concept TransformableB2DGeometry = requires(T a, const basegfx::B2DHomMatrix& rM
     a.transform(rMatrix);
 };
 
-enum class TransformComplexity
-{
-    Identity,
-    PureTranslation,
-    RationalScale,
-    ComplexAffine
-};
-
-struct TransformDescriptor
-{
-    TransformComplexity eComplexity = TransformComplexity::ComplexAffine;
-    tools::Long nScaleNumX = 1, nScaleDenomX = 1;
-    tools::Long nScaleNumY = 1, nScaleDenomY = 1;
-    tools::Long nDx = 0, nDy = 0;
-};
-
 namespace vcl::detail
 {
 template <typename T> concept B2DTransformable = requires(T a, const basegfx::B2DHomMatrix& m)
@@ -142,6 +126,53 @@ struct MapConversion
  * ========================================================================
  */
 
+#include <o3tl/hash_combine.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
+
+namespace vcl
+{
+class CoordinateMapper;
+
+/**
+ * @class CompiledTransform
+ * @brief An immutable, cacheable instruction payload for VCL coordinate mapping.
+ *
+ * --- THE ALGEBRAIC INVARIANT ---
+ * CRITICAL: The hint pipeline must be strictly algebraically equivalent to:
+ * * DevicePoint = Scale(LogicPoint + LogicOffset) + DeviceOffset
+ * -------------------------------
+ * * Execution hints (mbIsPureTranslation) are validated accelerators
+ * only. The matrix remains the single, unassailable source of truth.
+ */
+struct VCL_DLLPUBLIC CompiledTransform
+{
+    /* friend class CoordinateMapper; (Handled by struct visibility) */
+
+public:
+    basegfx::B2DHomMatrix maMatrix;
+    uint64_t mnSemanticKey = 0;
+
+    tools::Long mnDeviceTx = 0, mnDeviceTy = 0;
+    bool mbIsIdentity = false;
+    bool mbIsPureTranslation = false;
+
+public:
+    vcl::CompiledTransform Compile(bool bMap) const;
+    uint64_t GetSemanticKey(bool bMap) const;
+    CompiledTransform() = default;
+
+    const basegfx::B2DHomMatrix& GetMatrix() const { return maMatrix; }
+    uint64_t GetSemanticKey() const { return mnSemanticKey; }
+
+    bool IsIdentity() const { return mbIsIdentity; }
+    bool IsPureTranslation() const { return mbIsPureTranslation; }
+
+    tools::Long GetDeviceTx() const { return mnDeviceTx; }
+    tools::Long GetDeviceTy() const { return mnDeviceTy; }
+};
+
+} // namespace vcl
+
 class VCL_DLLPUBLIC CoordinateMapper
 {
 private:
@@ -149,27 +180,10 @@ private:
     vcl::detail::MapConversion maMapConversion;
 
     // #i75163#
-    struct TransformSnapshot
-    {
-        TransformDescriptor maDescriptor;
-        basegfx::B2DHomMatrix maLogicToDevice;
-        basegfx::B2DHomMatrix maDeviceToLogic;
-        basegfx::B2DHomMatrix maView;
-        basegfx::B2DHomMatrix maInvView;
-        uint64_t mnVersion = 0;
-
-        basegfx::B2DHomMatrix GetLogicToWindow() const { return maView; }
-        basegfx::B2DHomMatrix GetWindowToLogic() const { return maInvView; }
-        basegfx::B2DHomMatrix GetLogicToDevice() const { return maLogicToDevice; }
-        basegfx::B2DHomMatrix GetDeviceToLogic() const { return maDeviceToLogic; }
-    };
 
     // Separate snapshots for mapped/unmapped coordinate spaces
     // because DPI and window/device offsets diverge significantly.
-    mutable std::shared_ptr<const TransformSnapshot> mpSnapshots[2];
     mutable std::atomic<uint64_t> mnStateVersion{ 0 };
-
-    std::shared_ptr<TransformSnapshot> BuildSnapshot(bool bMap) const;
 
     sal_Int32 mnDPIX = 72;
     sal_Int32 mnDPIY = 72;
@@ -192,7 +206,8 @@ private:
     tools::Long mnOutHeight = 0;
 
 public:
-    std::shared_ptr<const TransformSnapshot> AcquireSnapshot(bool bMap) const;
+    vcl::CompiledTransform Compile(bool bMap) const;
+    uint64_t GetSemanticKey(bool bMap) const;
 
     bool IsValidDPI() const { return mnDPIX > 0 && mnDPIY > 0; }
 
@@ -492,22 +507,20 @@ public:
     // Universal basegfx pipeline
     template <vcl::detail::B2DGeometry T> T LogicToDeviceSubPixel(T aObj, bool bMap) const
     {
-        auto snap = AcquireSnapshot(bMap);
         if constexpr (vcl::detail::B2DTransformable<T>)
-            aObj.transform(snap->maLogicToDevice);
+            aObj.transform(GetLogicToDeviceMatrix(bMap));
         else
-            aObj *= snap->maLogicToDevice;
+            aObj *= GetLogicToDeviceMatrix(bMap);
         return aObj;
     }
 
     // Universal inverse basegfx pipeline
     template <vcl::detail::B2DGeometry T> T DevicePixelToLogicSubPixel(T aObj, bool bMap) const
     {
-        auto snap = AcquireSnapshot(bMap);
         if constexpr (vcl::detail::B2DTransformable<T>)
-            aObj.transform(snap->maDeviceToLogic);
+            aObj.transform(GetDeviceToLogicMatrix(bMap));
         else
-            aObj *= snap->maDeviceToLogic;
+            aObj *= GetDeviceToLogicMatrix(bMap);
         return aObj;
     }
 
