@@ -5,22 +5,19 @@
  * This Source Code Form is subject to the terms of the Mozilla Public
  * License, v. 2.0. If a copy of the MPL was not distributed with this
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- *
- * This file incorporates work covered by the following license notice:
- *
- * Licensed to the Apache Software Foundation (ASF) under one or more
- * contributor license agreements. See the NOTICE file distributed
- * with this work for additional information regarding copyright
- * ownership. The ASF licenses this file to you under the Apache
- * License, Version 2.0 (the "License"); you may not use this file
- * except in compliance with the License. You may obtain a copy of
- * the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
 #pragma once
 
 #include <sal/types.h>
 #include <tools/long.hxx>
+#include <o3tl/hash_combine.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/range/b2drange.hxx>
+
+#include <o3tl/hash_combine.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/range/b2drange.hxx>
 
 #include <vcl/dllapi.h>
 #include <vcl/mapconvert.hxx>
@@ -33,6 +30,8 @@
 #include <atomic>
 #include <memory>
 #include <concepts>
+#include <type_traits>
+#include <array>
 
 class LineInfo;
 
@@ -64,6 +63,100 @@ struct MapConversion
     tools::Long mnOffsetY = 0;
 };
 }
+
+class CoordinateMapper;
+
+// The strict execution instruction set
+enum class TransformMode
+{
+    Identity,
+    Translation,
+    AffineFallback
+};
+
+enum class CoordinateSpace
+{
+    Logic,
+    Window,
+    Device
+};
+
+struct TransformRequest
+{
+    CoordinateSpace eFrom = CoordinateSpace::Logic;
+    CoordinateSpace eTo = CoordinateSpace::Device;
+    bool bApplyMapping = true;
+};
+
+// Explicit slots for the O(1) Transform Register File
+enum class TransformSlot : size_t
+{
+    LogicToWindow_Mapped = 0,
+    LogicToWindow_Unmapped = 1,
+    LogicToDevice_Mapped = 2,
+    LogicToDevice_Unmapped = 3,
+    WindowToLogic_Mapped = 4,
+    WindowToLogic_Unmapped = 5,
+    DeviceToLogic_Mapped = 6,
+    DeviceToLogic_Unmapped = 7,
+    Count = 8
+};
+
+struct VCL_DLLPUBLIC CompiledTransform
+{
+public:
+    basegfx::B2DHomMatrix maMatrix;
+    uint64_t mnSemanticKey = 0;
+
+    TransformMode meMode = TransformMode::AffineFallback;
+
+    tools::Long mnLogicTx = 0, mnLogicTy = 0;
+    tools::Long mnDeviceTx = 0, mnDeviceTy = 0;
+
+public:
+    CompiledTransform() = default;
+
+    uint64_t GetSemanticKey() const { return mnSemanticKey; }
+    TransformMode GetMode() const { return meMode; }
+
+    tools::Long GetLogicTx() const { return mnLogicTx; }
+    tools::Long GetLogicTy() const { return mnLogicTy; }
+    tools::Long GetDeviceTx() const { return mnDeviceTx; }
+    tools::Long GetDeviceTy() const { return mnDeviceTy; }
+
+    const basegfx::B2DHomMatrix& GetMatrix() const { return maMatrix; }
+
+    template <typename T> T Apply(const T& rGeometry) const;
+
+    bool IsIdentity() const { return meMode == TransformMode::Identity; }
+    bool IsPureTranslation() const { return meMode == TransformMode::Translation; }
+};
+
+// Declare explicit specializations to prevent implicit instantiation errors
+template <> VCL_DLLPUBLIC Point CompiledTransform::Apply<Point>(const Point& rPt) const;
+template <> VCL_DLLPUBLIC Size CompiledTransform::Apply<Size>(const Size& rSize) const;
+template <>
+VCL_DLLPUBLIC tools::Rectangle
+CompiledTransform::Apply<tools::Rectangle>(const tools::Rectangle& rRect) const;
+template <>
+VCL_DLLPUBLIC tools::Polygon
+CompiledTransform::Apply<tools::Polygon>(const tools::Polygon& rPoly) const;
+template <>
+VCL_DLLPUBLIC tools::PolyPolygon
+CompiledTransform::Apply<tools::PolyPolygon>(const tools::PolyPolygon& rPolyPoly) const;
+template <>
+VCL_DLLPUBLIC basegfx::B2DPolygon
+CompiledTransform::Apply<basegfx::B2DPolygon>(const basegfx::B2DPolygon& rPoly) const;
+template <>
+VCL_DLLPUBLIC basegfx::B2DPolyPolygon
+CompiledTransform::Apply<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon& rPolyPoly) const;
+template <>
+VCL_DLLPUBLIC vcl::Region CompiledTransform::Apply<vcl::Region>(const vcl::Region& rRegion) const;
+template <>
+VCL_DLLPUBLIC LineInfo CompiledTransform::Apply<LineInfo>(const LineInfo& rLineInfo) const;
+template <>
+VCL_DLLPUBLIC basegfx::B2DRange
+CompiledTransform::Apply<basegfx::B2DRange>(const basegfx::B2DRange& rRange) const;
 
 /**
  * @class CoordinateMapper
@@ -124,72 +217,12 @@ struct MapConversion
  * For every transformation A -> B, the inverse B -> A must return the original
  * value within ±0.5 drift for intermediate floating-point values.
  * ========================================================================
- */
-
-#include <o3tl/hash_combine.hxx>
-#include <basegfx/matrix/b2dhommatrix.hxx>
-
-namespace vcl
-{
-class CoordinateMapper;
-
-} // namespace vcl
-
-// The strict execution instruction set
-enum class TransformMode
-{
-    Identity,
-    Translation,
-    RationalScale,
-    AffineFallback
-};
-
-/**
- * @class CompiledTransform
- * @brief An immutable, cacheable instruction payload for VCL coordinate mapping.
  *
- * --- THE ALGEBRAIC INVARIANT ---
- * CRITICAL: The hint pipeline must be strictly algebraically equivalent to:
- * * DevicePoint = Scale(LogicPoint + LogicOffset) + DeviceOffset
- * -------------------------------
+ * THREADING CONTRACT:
+ * CoordinateMapper is NOT internally synchronized. The Transform Register File
+ * (maTransformCache) and cache versioning rely on thread confinement or
+ * external synchronization (e.g., the Solar Mutex).
  */
-struct VCL_DLLPUBLIC CompiledTransform
-{
-public:
-    basegfx::B2DHomMatrix maMatrix;
-    uint64_t mnSemanticKey = 0;
-
-    TransformMode meMode = TransformMode::AffineFallback;
-
-    tools::Long mnLogicTx = 0, mnLogicTy = 0;
-    tools::Long mnDeviceTx = 0, mnDeviceTy = 0;
-    tools::Long mnSxNum = 1, mnSxDen = 1;
-    tools::Long mnSyNum = 1, mnSyDen = 1;
-
-public:
-    CompiledTransform() = default;
-
-    uint64_t GetSemanticKey() const { return mnSemanticKey; }
-    TransformMode GetMode() const { return meMode; }
-
-    // Payload Accessors
-    tools::Long GetLogicTx() const { return mnLogicTx; }
-    tools::Long GetLogicTy() const { return mnLogicTy; }
-    tools::Long GetDeviceTx() const { return mnDeviceTx; }
-    tools::Long GetDeviceTy() const { return mnDeviceTy; }
-    tools::Long GetSxNum() const { return mnSxNum; }
-    tools::Long GetSxDen() const { return mnSxDen; }
-    tools::Long GetSyNum() const { return mnSyNum; }
-    tools::Long GetSyDen() const { return mnSyDen; }
-
-    // Fallback Accessor ONLY
-    const basegfx::B2DHomMatrix& GetMatrix() const { return maMatrix; }
-
-    // Legacy helpers to keep tests compiling until fully migrated
-    bool IsIdentity() const { return meMode == TransformMode::Identity; }
-    bool IsPureTranslation() const { return meMode == TransformMode::Translation; }
-    bool IsRationalScale() const { return meMode == TransformMode::RationalScale; }
-};
 
 class VCL_DLLPUBLIC CoordinateMapper
 {
@@ -197,11 +230,11 @@ private:
     MappingCoefficients maMapRes;
     vcl::detail::MapConversion maMapConversion;
 
-    // #i75163#
-
-    // Separate snapshots for mapped/unmapped coordinate spaces
-    // because DPI and window/device offsets diverge significantly.
+    // The O(1) Transform Register File & Version Tracker
     mutable std::atomic<uint64_t> mnStateVersion{ 0 };
+    mutable uint64_t mnCacheVersion{ 0 };
+    mutable std::array<std::optional<CompiledTransform>, static_cast<size_t>(TransformSlot::Count)>
+        maTransformCache;
 
     sal_Int32 mnDPIX = 72;
     sal_Int32 mnDPIY = 72;
@@ -210,21 +243,26 @@ private:
     tools::Long mnDeviceToWindowOffsetX = 0;
     tools::Long mnDeviceToWindowOffsetY = 0;
 
-    /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnWindowToViewOffsetX = 0;
-    /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnWindowToViewOffsetY = 0;
 
-    /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnLogicToAbsoluteOffsetX = 0;
-    /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
     tools::Long mnLogicToAbsoluteOffsetY = 0;
 
     tools::Long mnOutWidth = 0;
     tools::Long mnOutHeight = 0;
 
+    void UpdateCache(bool bMap) const;
+
 public:
-    CompiledTransform Compile(bool bMap) const;
+    CompiledTransform Compile(const TransformRequest& rReq) const;
+
+    // Legacy bridge
+    CompiledTransform Compile(bool bMap) const
+    {
+        return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
+    }
+
     uint64_t GetSemanticKey(bool bMap) const;
 
     bool IsValidDPI() const { return mnDPIX > 0 && mnDPIY > 0; }
@@ -333,10 +371,6 @@ public:
     vcl::detail::MapConversion ResolveMap(const MapMode& rBaseline, const MapMode& rTarget,
                                           bool bMap) const;
 
-    /** Invalidate the view transformation.
-
-     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
-     */
     void InvalidateViewTransform();
     basegfx::B2DHomMatrix GetViewTransformation(bool bMap) const;
     basegfx::B2DHomMatrix GetViewTransformation(const vcl::detail::MapConversion& rConv) const;
@@ -351,6 +385,7 @@ public:
 
     basegfx::B2DHomMatrix GetDeviceTransformation(bool bMap) const;
 
+    // --- PIPELINE MATRIX BUILDERS (Now single-source-of-truth projections) ---
     basegfx::B2DHomMatrix GetLogicToWindowMatrix(bool bMap) const;
     basegfx::B2DHomMatrix GetWindowToLogicMatrix(bool bMap) const;
     basegfx::B2DHomMatrix GetLogicToDeviceMatrix(bool bMap) const;
@@ -360,44 +395,36 @@ public:
     // PIPELINE STAGES (Coordinate Transitions)
     // ========================================================================
 
-    // Device <-> Window (Integer)
     tools::Long DeviceToWindowUnitsX(tools::Long nX) const;
     tools::Long DeviceToWindowUnitsY(tools::Long nY) const;
     tools::Long WindowToDeviceUnitsX(tools::Long nX) const;
     tools::Long WindowToDeviceUnitsY(tools::Long nY) const;
 
-    // Device <-> Window (Sub-pixel)
     double DeviceToWindowSubPixelX(double fX) const;
     double DeviceToWindowSubPixelY(double fY) const;
     double WindowToDeviceSubPixelX(double fX) const;
     double WindowToDeviceSubPixelY(double fY) const;
 
-    // Window <-> View (Integer)
     tools::Long WindowToViewUnitsX(tools::Long nX) const;
     tools::Long WindowToViewUnitsY(tools::Long nY) const;
     tools::Long ViewToWindowUnitsX(tools::Long nX) const;
     tools::Long ViewToWindowUnitsY(tools::Long nY) const;
 
-    // Window <-> View (Sub-pixel)
     double WindowToViewSubPixelX(double fX) const;
     double WindowToViewSubPixelY(double fY) const;
     double ViewToWindowSubPixelX(double fX) const;
     double ViewToWindowSubPixelY(double fY) const;
 
-    // View <-> LogicUnits (Integer)
     vcl::Region ViewToDevice(const vcl::Region& rRegion) const;
     tools::Long LogicUnitsToViewUnitsX(tools::Long nX,
                                        const vcl::detail::MapConversion& rConv) const;
     tools::Long LogicUnitsToViewUnitsY(tools::Long nY,
                                        const vcl::detail::MapConversion& rConv) const;
 
-    // View <-> LogicUnits (Sub-pixel)
-
     // ========================================================================
     // MASTER WRAPPERS (Multi-space Positional Transformations)
     // ========================================================================
 
-    // Device <-> Logic (Full journey)
     tools::Long LogicWidthToDevicePixel(tools::Long nWidth, bool bMap) const;
     double LogicWidthToDeviceSubPixel(tools::Long nWidth, bool bMap) const;
     tools::Long LogicHeightToDevicePixel(tools::Long nHeight, bool bMap) const;
@@ -406,7 +433,7 @@ public:
     tools::Rectangle LogicToDevicePixel(const tools::Rectangle& rLogicRect, bool bMap = true) const;
     tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly, bool bMap = true) const;
     tools::PolyPolygon LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
-                                          bool bMap) const;
+                                          bool bMap = true) const;
     LineInfo LogicToDevicePixel(const LineInfo& rLineInfo, bool bMap = true) const;
     basegfx::B2DPolygon LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly,
                                            bool bMap = true) const;
@@ -441,17 +468,11 @@ public:
     double LogicWidthToWindowSubPixel(tools::Long nWidth, bool bMap) const;
     double LogicHeightToWindowSubPixel(tools::Long nHeight, bool bMap) const;
 
-    // View <-> Absolute Logic (Includes mnLogicToAbsoluteOffsetX/Y)
-
-    // To resolve the return-type conflict, these now return double
     double ViewSubPixelToLogicX(double fX, bool bMap) const;
     double ViewSubPixelToLogicY(double fY, bool bMap) const;
-    // View (Sub-pixel) -> Absolute Logic (Integer)
-    // Note: This rounds the distance before stripping offsets to satisfy legacy test parity.
     double LogicToViewSubPixelX(double fX) const;
     double LogicToViewSubPixelY(double fY) const;
 
-    // Logic -> Window units (Commonly used in OutputDevice::LogicToPixel)
     Point LogicToWindowUnits(const Point& rLogicPt, bool bMap = true) const;
     Point LogicToWindowUnits(const Point& rLogicPt, const vcl::detail::MapConversion& rConv) const;
     Size LogicToWindowUnits(const Size& rLogicSize, const vcl::detail::MapConversion& rConv) const;
@@ -501,8 +522,6 @@ public:
     // ========================================================================
     // MASTER STAGES / LOGIC-TO-LOGIC CONVERSIONS
     // ========================================================================
-    // Pure mathematical transformations between arbitrary MapModes.
-    // These do not traverse the VCL device pipeline.
 
     Point LogicToLogic(const Point& rPtSource, const MapMode* pMapModeBaseline,
                        const MapMode* pMapModeSource, const MapMode* pMapModeDest, bool bMap) const;
@@ -547,9 +566,19 @@ public:
 private:
     MappingCoefficients ResolveMapResRelative(const MapMode* pBaseline, const MapMode* pTarget,
                                               bool bMap) const;
-    void UpdateTransforms() const;
     void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX, double& rTransY,
                                bool bMap) const;
 };
+
+Point LogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource,
+                   const MapMode& rMapModeDest);
+Size LogicToLogic(const Size& rSzSource, const MapMode& rMapModeSource,
+                  const MapMode& rMapModeDest);
+tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource, const MapMode& rMapModeSource,
+                              const MapMode& rMapModeDest);
+tools::Long LogicToLogic(tools::Long nLongSource, MapUnit eUnitSource, MapUnit eUnitDest);
+basegfx::B2DPolygon LogicToLogic(const basegfx::B2DPolygon& rPolySource,
+                                 const MapMode& rMapModeSource, const MapMode& rMapModeDest);
+basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest);
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
