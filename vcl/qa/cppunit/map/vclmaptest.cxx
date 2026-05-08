@@ -584,17 +584,21 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testRoundTripSymmetry)
 
 CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testRectangleAdjacency)
 {
-    // Two logical rectangles sharing a perfect vertical border at X=2000
-    tools::Rectangle aLeftRect(1000, 500, 2000, 1500);
-    tools::Rectangle aRightRect(2000, 500, 3000, 1500);
+    // Two logical rectangles sharing a perfect vertical boundary.
+    // In VCL's INCLUSIVE bounds, true adjacency means A.Right = X - 1, and B.Left = X.
+    tools::Rectangle aLeftRect(1000, 500, 1999, 1500);
+    tools::Rectangle aRightRect(2000, 500, 2999, 1500);
 
     tools::Rectangle aDeviceLeft = mpMapper->LogicToDevicePixel(aLeftRect, true);
     tools::Rectangle aDeviceRight = mpMapper->LogicToDevicePixel(aRightRect, true);
 
-    // The transformed right edge of A MUST exactly equal the transformed left edge of B
+    // PERFECT ADJACENCY INVARIANT:
+    // The transformed inclusive right edge of A, plus 1, MUST exactly equal
+    // the transformed inclusive left edge of B.
+    // (If Right == Left, they are overlapping and double-drawing the seam!)
     CPPUNIT_ASSERT_EQUAL_MESSAGE(
-        "Adjacency violated: Seam gap or overlap detected between rectangles", aDeviceLeft.Right(),
-        aDeviceRight.Left());
+        "Adjacency violated: Seam gap or overlap detected between rectangles",
+        aDeviceLeft.Right() + 1, aDeviceRight.Left());
 }
 
 CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testMatrixVsScalarParity)
