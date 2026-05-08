@@ -63,19 +63,27 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMatrixEngine)
     aPt = aMapper.LogicToDevicePixel(Point(1000, 1000));
     CPPUNIT_ASSERT_EQUAL(tools::Long(133), aPt.X());
 
-    // Geometry Consistency (Rectangle vs Corners)
+    // ====================================================================
+    // Geometry Consistency (The B2DRange AABB Adapter)
+    // ====================================================================
     tools::Rectangle aLogicRect(100, 100, 1100, 1100);
     tools::Rectangle aPixelRect = aMapper.LogicToDevicePixel(aLogicRect);
 
-    Point aTL = aMapper.LogicToDevicePixel(aLogicRect.TopLeft());
-    Point aBR = aMapper.LogicToDevicePixel(aLogicRect.BottomRight());
+    // Left Edge: 100 -> +100 logic offset -> 200 * 0.07559 = 15.11 -> round(15) + 50 = 65
+    CPPUNIT_ASSERT_EQUAL(tools::Long(65), aPixelRect.Left());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(65), aPixelRect.Top());
 
-    CPPUNIT_ASSERT_EQUAL(aTL.X(), aPixelRect.Left());
-    CPPUNIT_ASSERT_EQUAL(aTL.Y(), aPixelRect.Top());
-    CPPUNIT_ASSERT_EQUAL(aBR.X(), aPixelRect.Right());
-    CPPUNIT_ASSERT_EQUAL(aBR.Y(), aPixelRect.Bottom());
+    // Right Edge (AABB Continuous Math):
+    // 1. Inclusive logic bound 1100 means continuous math bound is 1101.
+    // 2. 1101 + 100 logic offset = 1201.
+    // 3. 1201 * 0.07559 = 90.78 -> round(91) + 50 = 141.
+    // 4. Subtract 1 to return to inclusive integer bounds -> 140.
+    CPPUNIT_ASSERT_EQUAL(tools::Long(140), aPixelRect.Right());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(140), aPixelRect.Bottom());
 
+    // ====================================================================
     // Inverse Consistency (Mathematical Round-tripping)
+    // ====================================================================
     // We test the matrices directly to bypass ANY integer wrapper APIs.
     basegfx::B2DPoint aInput(1000.0, 1000.0);
 
