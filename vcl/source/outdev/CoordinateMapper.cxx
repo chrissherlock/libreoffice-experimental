@@ -107,8 +107,11 @@ static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle&
 
 static bool lcl_IsPureTranslation(const basegfx::B2DHomMatrix& matrix)
 {
-    return matrix.get(0, 0) == 1.0 && matrix.get(1, 1) == 1.0 && matrix.get(0, 1) == 0.0
-           && matrix.get(1, 0) == 0.0;
+    // Protect against future floating-point noise from complex matrix composition
+    constexpr double fEpsilon = 1e-9;
+    return std::abs(matrix.get(0, 0) - 1.0) < fEpsilon
+           && std::abs(matrix.get(1, 1) - 1.0) < fEpsilon && std::abs(matrix.get(0, 1)) < fEpsilon
+           && std::abs(matrix.get(1, 0)) < fEpsilon;
 }
 
 // Conceptual Pipeline Separation (Mathematical Invariant):
@@ -445,7 +448,7 @@ void CoordinateMapper::UpdateCache(bool bMap) const
         = deviceToLogicTransform;
 }
 
-CompiledTransform CoordinateMapper::Compile(const TransformRequest& rReq) const
+const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq) const
 {
     // O(1) Cache Version Validation
     // Locks are unnecessary due to the atomic state version and thread-local assumption of the handle.
@@ -968,7 +971,20 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, bool bMap) co
     return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, bMap }).Apply(rWindowSize);
 }
 
-// Distance extractors routing to the matrices
+// ========================================================================
+// DISTANCE EXTRACTORS (Vector Magnitudes)
+// ========================================================================
+
+/**
+ * IMPORTANT ARCHITECTURAL NOTE: Distance Semantics under Affine Transforms
+ * * Functions like LogicWidthToDevicePixel() now implicitly define "Width" as
+ * the Euclidean magnitude of the transformed basis vector (lcl_GetScaledXLength).
+ * * Historically, VCL assumed strictly orthogonal axes, meaning Width was treated
+ * as an axis-aligned projected extent. Under shear or rotation, Euclidean length
+ * differs from the AABB width. This preserves VCL's legacy vector mirroring
+ * semantics without exploding extents under rotation.
+ */
+
 double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
