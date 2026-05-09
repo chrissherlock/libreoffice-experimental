@@ -835,12 +835,14 @@ double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
 
 double CoordinateMapper::LogicToWindowSubPixelX(double fX, bool bMap) const
 {
-    return fX * GetLogicToWindowMatrix(bMap).get(0, 0) + GetLogicToWindowMatrix(bMap).get(0, 2);
+    const auto& rMat = GetLogicToWindowMatrix(bMap);
+    return fX * rMat.get(0, 0) + rMat.get(0, 2);
 }
 
 double CoordinateMapper::LogicToWindowSubPixelY(double fY, bool bMap) const
 {
-    return fY * GetLogicToWindowMatrix(bMap).get(1, 1) + GetLogicToWindowMatrix(bMap).get(1, 2);
+    const auto& rMat = GetLogicToWindowMatrix(bMap);
+    return fY * rMat.get(1, 1) + rMat.get(1, 2);
 }
 
 // ========================================================================
