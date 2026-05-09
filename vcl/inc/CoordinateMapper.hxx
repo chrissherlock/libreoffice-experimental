@@ -114,7 +114,7 @@ enum class GeometryInvariant : size_t
 
 struct TransformContract
 {
-    std::bitset<8> maPreserved;
+    std::bitset<static_cast<size_t>(GeometryInvariant::COUNT)> maPreserved;
 
     bool preserves(GeometryInvariant inv) const
     {
@@ -144,7 +144,6 @@ public:
         return maContract.preserves(GeometryInvariant::AxisAlignment);
     }
     bool CheckRectilinearContract() const;
-    bool IsSafeForRectilinearAPI() const;
 
     uint64_t GetSemanticKey() const { return mnSemanticKey; }
     TransformMode GetMode() const { return meMode; }
