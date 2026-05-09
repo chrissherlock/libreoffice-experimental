@@ -115,6 +115,23 @@ static bool lcl_IsPureTranslation(const basegfx::B2DHomMatrix& matrix)
            && std::abs(matrix.get(1, 0)) < fEpsilon;
 }
 
+// ARCHITECTURAL INVARIANT: Matrix Composition Order
+// basegfx::B2DHomMatrix applies operations via post-multiplication.
+// Therefore, the sequence: translate(A) -> scale(S) -> translate(B)
+// mathematically equates to: P' = ((P + A) * S) + B
+// This guarantees that logical offsets (A) scale with the MapMode,
+// while physical offsets (B) remain absolute physical pixels.
+static basegfx::B2DHomMatrix lcl_BuildAffineMatrix(double fScaleX, double fScaleY, double fLogicTx,
+                                                   double fLogicTy, double fPhysicalTx,
+                                                   double fPhysicalTy)
+{
+    basegfx::B2DHomMatrix aMat;
+    aMat.translate(fLogicTx, fLogicTy);
+    aMat.scale(fScaleX, fScaleY);
+    aMat.translate(fPhysicalTx, fPhysicalTy);
+    return aMat;
+}
+
 // Conceptual Pipeline Separation (Mathematical Invariant):
 // Logic -> View: Scaled transformations (Scale * Logic) + Scaled Offsets ((MapOfs + LogicOfs) * Scale)
 // View -> Window: Pure translation (WindowOfs)
@@ -281,26 +298,14 @@ basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(bool bMap) 
 basegfx::B2DHomMatrix
 CoordinateMapper::GetViewTransformation(const vcl::detail::MapConversion& rConv) const
 {
-    basegfx::B2DHomMatrix aTransform;
-
     const double fScaleFactorX = static_cast<double>(GetDPIX()) * rConv.mfScaleX;
     const double fScaleFactorY = static_cast<double>(GetDPIY()) * rConv.mfScaleY;
 
-    const double fZeroPointX
-        = (static_cast<double>(rConv.mnOffsetX) + static_cast<double>(mnLogicToAbsoluteOffsetX))
-              * fScaleFactorX
-          + static_cast<double>(GetWindowToViewOffsetX());
-    const double fZeroPointY
-        = (static_cast<double>(rConv.mnOffsetY) + static_cast<double>(mnLogicToAbsoluteOffsetY))
-              * fScaleFactorY
-          + static_cast<double>(GetWindowToViewOffsetY());
-
-    aTransform.set(0, 0, fScaleFactorX);
-    aTransform.set(1, 1, fScaleFactorY);
-    aTransform.set(0, 2, fZeroPointX);
-    aTransform.set(1, 2, fZeroPointY);
-
-    return aTransform;
+    return lcl_BuildAffineMatrix(
+        fScaleFactorX, fScaleFactorY,
+        static_cast<double>(rConv.mnOffsetX + mnLogicToAbsoluteOffsetX), // Fix: mnOffsetX
+        static_cast<double>(rConv.mnOffsetY + mnLogicToAbsoluteOffsetY), // Fix: mnOffsetY
+        static_cast<double>(mnWindowToViewOffsetX), static_cast<double>(mnWindowToViewOffsetY));
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rBaseline,
@@ -368,7 +373,7 @@ void CoordinateMapper::UpdateCache(bool bMap) const
         }
     };
 
-    // Logic -> Window (True Affine Composition)
+    // Logic -> Window (True Affine Composition via Canonical Builder)
     CompiledTransform logicToWindowTransform;
 
     if (bMap)
@@ -382,25 +387,16 @@ void CoordinateMapper::UpdateCache(bool bMap) const
         const double totalLogicalOffsetY
             = static_cast<double>(maMapRes.mnTranslationY + mnLogicToAbsoluteOffsetY);
 
-        // ==========================================================
-        // ARCHITECTURAL INVARIANT: Matrix Composition Order
-        // basegfx::B2DHomMatrix applies operations via post-multiplication.
-        // Therefore, the sequence: translate(A) -> scale(S) -> translate(B)
-        // mathematically equates to: P' = ((P + A) * S) + B
-        // This guarantees that logical offsets (A) scale with the MapMode,
-        // while Window/Viewport offsets (B) remain absolute physical pixels.
-        // ==========================================================
-
-        // Phase 1: Apply Logical Offset
-        logicToWindowTransform.maMatrix.translate(totalLogicalOffsetX, totalLogicalOffsetY);
-
-        // Phase 2: Apply DPI, MapMode, and UI Scaling
-        logicToWindowTransform.maMatrix.scale(finalScaleX, finalScaleY);
+        logicToWindowTransform.maMatrix = lcl_BuildAffineMatrix(
+            finalScaleX, finalScaleY, totalLogicalOffsetX, totalLogicalOffsetY,
+            static_cast<double>(mnWindowToViewOffsetX), static_cast<double>(mnWindowToViewOffsetY));
     }
-
-    // Phase 3: Apply Viewport Scroll Offsets
-    logicToWindowTransform.maMatrix.translate(static_cast<double>(mnWindowToViewOffsetX),
-                                              static_cast<double>(mnWindowToViewOffsetY));
+    else
+    {
+        logicToWindowTransform.maMatrix
+            = lcl_BuildAffineMatrix(1.0, 1.0, 0.0, 0.0, static_cast<double>(mnWindowToViewOffsetX),
+                                    static_cast<double>(mnWindowToViewOffsetY));
+    }
 
     optimizeTransform(logicToWindowTransform);
 
@@ -408,7 +404,7 @@ void CoordinateMapper::UpdateCache(bool bMap) const
     CompiledTransform windowToLogicTransform;
     windowToLogicTransform.maMatrix = logicToWindowTransform.maMatrix;
 
-    // RISK 3 FIX: Determinant guards to prevent NaN poisoning from degenerate MapModes
+    // Determinant guards to prevent NaN poisoning from degenerate MapModes
     if (windowToLogicTransform.maMatrix.isInvertible())
     {
         windowToLogicTransform.maMatrix.invert();
@@ -440,7 +436,7 @@ void CoordinateMapper::UpdateCache(bool bMap) const
     CompiledTransform logicToDeviceTransform;
     logicToDeviceTransform.maMatrix = logicToWindowTransform.maMatrix;
 
-    // Phase 4: Apply OS/Widget physical screen offsets
+    // Apply OS/Widget physical screen offsets
     logicToDeviceTransform.maMatrix.translate(static_cast<double>(mnDeviceToWindowOffsetX),
                                               static_cast<double>(mnDeviceToWindowOffsetY));
     optimizeTransform(logicToDeviceTransform);
@@ -1513,15 +1509,14 @@ basegfx::B2DPolygon LogicToLogic(const basegfx::B2DPolygon& rPolySource,
 
 basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest)
 {
-    basegfx::B2DHomMatrix aTransform;
-
     if (rMapModeSource == rMapModeDest)
-        return aTransform;
+        return basegfx::B2DHomMatrix(); // Returns pure Identity matrix
 
     MapUnit eUnitSource = rMapModeSource.GetMapUnit();
     MapUnit eUnitDest = rMapModeDest.GetMapUnit();
     lcl_verifyUnitSourceDest(eUnitSource, eUnitDest);
 
+    // Path 1: Simple MapModes (Pure Scaling, No Offsets)
     if (rMapModeSource.IsSimple() && rMapModeDest.IsSimple())
     {
         const auto[eFrom, eTo] = lcl_getCorrectedUnit(eUnitSource, eUnitDest);
@@ -1529,33 +1524,31 @@ basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode&
         {
             SAL_WARN("vcl.gdi", "CoordinateMapper: Invalid MapUnit conversion requested. Falling "
                                 "back to identity matrix.");
-            return aTransform;
+            return basegfx::B2DHomMatrix();
         }
 
         const double fScaleFactor = o3tl::convert(1.0, eFrom, eTo);
-        aTransform.set(0, 0, fScaleFactor);
-        aTransform.set(1, 1, fScaleFactor);
-        return aTransform;
+
+        // Simple scaling uses no offsets
+        return lcl_BuildAffineMatrix(fScaleFactor, fScaleFactor, 0.0, 0.0, 0.0, 0.0);
     }
 
+    // Path 2: Complex MapModes (Scaling + Origin Offsets)
     const auto[aMapResSource, aMapResDest] = lcl_calcConversionMapRes(rMapModeSource, rMapModeDest);
 
     const double fDestScX = (aMapResDest.mfScaleX != 0.0) ? aMapResDest.mfScaleX : 1.0;
     const double fDestScY = (aMapResDest.mfScaleY != 0.0) ? aMapResDest.mfScaleY : 1.0;
 
-    const double fScaleFactorX(aMapResSource.mfScaleX / fDestScX);
-    const double fScaleFactorY(aMapResSource.mfScaleY / fDestScY);
-    const double fZeroPointX(double(aMapResSource.mnTranslationX) * fScaleFactorX
-                             - double(aMapResDest.mnTranslationX));
-    const double fZeroPointY(double(aMapResSource.mnTranslationY) * fScaleFactorY
-                             - double(aMapResDest.mnTranslationY));
+    const double fScaleFactorX = aMapResSource.mfScaleX / fDestScX;
+    const double fScaleFactorY = aMapResSource.mfScaleY / fDestScY;
 
-    aTransform.set(0, 0, fScaleFactorX);
-    aTransform.set(1, 1, fScaleFactorY);
-    aTransform.set(0, 2, fZeroPointX);
-    aTransform.set(1, 2, fZeroPointY);
-
-    return aTransform;
+    // By passing the source as the "Logical" offset and the negative dest as the "Physical" offset,
+    // the canonical builder perfectly scales the source offset before subtracting the dest offset.
+    return lcl_BuildAffineMatrix(fScaleFactorX, fScaleFactorY,
+                                 static_cast<double>(aMapResSource.mnTranslationX),
+                                 static_cast<double>(aMapResSource.mnTranslationY),
+                                 static_cast<double>(-aMapResDest.mnTranslationX),
+                                 static_cast<double>(-aMapResDest.mnTranslationY));
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
