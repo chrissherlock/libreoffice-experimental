@@ -317,14 +317,20 @@ basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(bool bMap) 
 basegfx::B2DHomMatrix
 CoordinateMapper::GetViewTransformation(const vcl::detail::MapConversion& rConv) const
 {
+    // NOTE: This path intentionally bypasses the transform cache because MapConversion
+    // represents a temporary, externally resolved mapping state (e.g. for MapMode evaluation).
+    //
+    // IMPORTANT: The affine composition performed here must remain algebraically consistent
+    // with UpdateCache(bMap=true), specifically regarding logical-offset scaling semantics
+    // and the ordering of physical viewport offsets.
     const double fScaleFactorX = static_cast<double>(GetDPIX()) * rConv.mfScaleX;
     const double fScaleFactorY = static_cast<double>(GetDPIY()) * rConv.mfScaleY;
 
-    return lcl_BuildAffineMatrix(
-        fScaleFactorX, fScaleFactorY,
-        static_cast<double>(rConv.mnOffsetX + mnLogicToAbsoluteOffsetX), // Fix: mnOffsetX
-        static_cast<double>(rConv.mnOffsetY + mnLogicToAbsoluteOffsetY), // Fix: mnOffsetY
-        static_cast<double>(mnWindowToViewOffsetX), static_cast<double>(mnWindowToViewOffsetY));
+    return lcl_BuildAffineMatrix(fScaleFactorX, fScaleFactorY,
+                                 static_cast<double>(rConv.mnOffsetX + mnLogicToAbsoluteOffsetX),
+                                 static_cast<double>(rConv.mnOffsetY + mnLogicToAbsoluteOffsetY),
+                                 static_cast<double>(mnWindowToViewOffsetX),
+                                 static_cast<double>(mnWindowToViewOffsetY));
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rBaseline,
