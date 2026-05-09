@@ -29,6 +29,7 @@
 #include <tools/gen.hxx>
 #include <tools/mapunit.hxx>
 
+#include <vcl/svapp.hxx>
 #include <vcl/lineinfo.hxx>
 
 #include <CoordinateMapper.hxx>
@@ -330,6 +331,11 @@ basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMo
 
 void CoordinateMapper::UpdateCache(bool bMap) const
 {
+    // O(1) Cache Version Validation.
+    // This relies on the SolarMutex to protect the maTransformCache against torn reads
+    // and to synchronize mnCacheVersion updates.
+    DBG_TESTSOLARMUTEX();
+
     // Helper to extract Identity/Translation semantics to preserve legacy fast-paths
     auto optimizeTransform = [](CompiledTransform& transform) {
         if (transform.maMatrix.isIdentity())
@@ -341,12 +347,14 @@ void CoordinateMapper::UpdateCache(bool bMap) const
             double translationX = transform.maMatrix.get(0, 2);
             double translationY = transform.maMatrix.get(1, 2);
 
-            // Check if translations are exact integers
-            if (std::floor(translationX) == translationX
-                && std::floor(translationY) == translationY)
+            // Epsilon-based integer detection prevents valid translation
+            // fast-paths from randomly disappearing due to floating-point noise.
+            constexpr double fEpsilon = 1e-9;
+            if (std::abs(translationX - std::round(translationX)) < fEpsilon
+                && std::abs(translationY - std::round(translationY)) < fEpsilon)
             {
-                transform.mnDeviceTx = static_cast<tools::Long>(translationX);
-                transform.mnDeviceTy = static_cast<tools::Long>(translationY);
+                transform.mnDeviceTx = static_cast<tools::Long>(std::round(translationX));
+                transform.mnDeviceTy = static_cast<tools::Long>(std::round(translationY));
                 transform.meMode = TransformMode::Translation;
             }
             else
@@ -374,6 +382,15 @@ void CoordinateMapper::UpdateCache(bool bMap) const
         const double totalLogicalOffsetY
             = static_cast<double>(maMapRes.mnTranslationY + mnLogicToAbsoluteOffsetY);
 
+        // ==========================================================
+        // ARCHITECTURAL INVARIANT: Matrix Composition Order
+        // basegfx::B2DHomMatrix applies operations via post-multiplication.
+        // Therefore, the sequence: translate(A) -> scale(S) -> translate(B)
+        // mathematically equates to: P' = ((P + A) * S) + B
+        // This guarantees that logical offsets (A) scale with the MapMode,
+        // while Window/Viewport offsets (B) remain absolute physical pixels.
+        // ==========================================================
+
         // Phase 1: Apply Logical Offset
         logicToWindowTransform.maMatrix.translate(totalLogicalOffsetX, totalLogicalOffsetY);
 
@@ -390,21 +407,33 @@ void CoordinateMapper::UpdateCache(bool bMap) const
     // Window -> Logic (Precalculated Inverse)
     CompiledTransform windowToLogicTransform;
     windowToLogicTransform.maMatrix = logicToWindowTransform.maMatrix;
-    windowToLogicTransform.maMatrix.invert();
 
-    if (logicToWindowTransform.meMode == TransformMode::Identity)
+    // RISK 3 FIX: Determinant guards to prevent NaN poisoning from degenerate MapModes
+    if (windowToLogicTransform.maMatrix.isInvertible())
     {
-        windowToLogicTransform.meMode = TransformMode::Identity;
-    }
-    else if (logicToWindowTransform.meMode == TransformMode::Translation)
-    {
-        windowToLogicTransform.meMode = TransformMode::Translation;
-        windowToLogicTransform.mnDeviceTx = -logicToWindowTransform.mnDeviceTx;
-        windowToLogicTransform.mnDeviceTy = -logicToWindowTransform.mnDeviceTy;
+        windowToLogicTransform.maMatrix.invert();
+
+        if (logicToWindowTransform.meMode == TransformMode::Identity)
+        {
+            windowToLogicTransform.meMode = TransformMode::Identity;
+        }
+        else if (logicToWindowTransform.meMode == TransformMode::Translation)
+        {
+            windowToLogicTransform.meMode = TransformMode::Translation;
+            windowToLogicTransform.mnDeviceTx = -logicToWindowTransform.mnDeviceTx;
+            windowToLogicTransform.mnDeviceTy = -logicToWindowTransform.mnDeviceTy;
+        }
+        else
+        {
+            windowToLogicTransform.meMode = TransformMode::AffineFallback;
+        }
     }
     else
     {
-        windowToLogicTransform.meMode = TransformMode::AffineFallback;
+        SAL_WARN("vcl.gdi", "CoordinateMapper: Singular LogicToWindow matrix detected. Inversion "
+                            "aborted to prevent NaN poisoning.");
+        windowToLogicTransform.maMatrix.identity();
+        windowToLogicTransform.meMode = TransformMode::Identity;
     }
 
     // Logic -> Device
@@ -419,21 +448,32 @@ void CoordinateMapper::UpdateCache(bool bMap) const
     // Device -> Logic (Precalculated Inverse)
     CompiledTransform deviceToLogicTransform;
     deviceToLogicTransform.maMatrix = logicToDeviceTransform.maMatrix;
-    deviceToLogicTransform.maMatrix.invert();
 
-    if (logicToDeviceTransform.meMode == TransformMode::Identity)
+    if (deviceToLogicTransform.maMatrix.isInvertible())
     {
-        deviceToLogicTransform.meMode = TransformMode::Identity;
-    }
-    else if (logicToDeviceTransform.meMode == TransformMode::Translation)
-    {
-        deviceToLogicTransform.meMode = TransformMode::Translation;
-        deviceToLogicTransform.mnDeviceTx = -logicToDeviceTransform.mnDeviceTx;
-        deviceToLogicTransform.mnDeviceTy = -logicToDeviceTransform.mnDeviceTy;
+        deviceToLogicTransform.maMatrix.invert();
+
+        if (logicToDeviceTransform.meMode == TransformMode::Identity)
+        {
+            deviceToLogicTransform.meMode = TransformMode::Identity;
+        }
+        else if (logicToDeviceTransform.meMode == TransformMode::Translation)
+        {
+            deviceToLogicTransform.meMode = TransformMode::Translation;
+            deviceToLogicTransform.mnDeviceTx = -logicToDeviceTransform.mnDeviceTx;
+            deviceToLogicTransform.mnDeviceTy = -logicToDeviceTransform.mnDeviceTy;
+        }
+        else
+        {
+            deviceToLogicTransform.meMode = TransformMode::AffineFallback;
+        }
     }
     else
     {
-        deviceToLogicTransform.meMode = TransformMode::AffineFallback;
+        SAL_WARN("vcl.gdi", "CoordinateMapper: Singular LogicToDevice matrix detected. Inversion "
+                            "aborted to prevent NaN poisoning.");
+        deviceToLogicTransform.maMatrix.identity();
+        deviceToLogicTransform.meMode = TransformMode::Identity;
     }
 
     // Commit to the Register File
@@ -450,8 +490,10 @@ void CoordinateMapper::UpdateCache(bool bMap) const
 
 const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq) const
 {
-    // O(1) Cache Version Validation
-    // Locks are unnecessary due to the atomic state version and thread-local assumption of the handle.
+    // O(1) Cache Version Validation.
+    // Threading: Caller must hold the SolarMutex. UpdateCache() asserts this.
+    // The atomic mnStateVersion allows fast version checking without a lock,
+    // but the cache array itself is not thread-safe and relies on Solar Mutex confinement.
     uint64_t nCurrentVersion = mnStateVersion.load(std::memory_order_acquire);
     if (mnCacheVersion != nCurrentVersion)
     {
@@ -1196,6 +1238,17 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize,
                 lcl_RoundToLong(rWindowSize.Height() * std::abs(mat.get(1, 1))));
 }
 
+/**
+ * IMPORTANT ARCHITECTURAL NOTE: Conservative Inverse Bounds
+ * * Because forward transformations project Rectangles into Axis-Aligned
+ *   Bounding Boxes (AABBs), inverse transformations of Rectangles are NOT
+ *   geometrically symmetrical under rotation or shear.
+ * * inverse(transform(rect)) will yield a mathematically inflated AABB
+ *   that strictly subsumes the original geometry.
+ * * Callers MUST treat inverse-mapped Rectangles as 'Conservative Invalidation
+ *   Bounds', NOT as exact hit-testing boundaries. For exact hit-testing under
+ *   rotation, map the point forward, or map a basegfx::B2DPolygon backward.
+ */
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
                                                       const vcl::detail::MapConversion& rConv) const
 {
