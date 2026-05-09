@@ -852,15 +852,39 @@ double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
     return fY + static_cast<double>(mnWindowToViewOffsetY);
 }
 
+static bool lcl_IsAxisAligned(const basegfx::B2DHomMatrix& rMat)
+{
+    constexpr double fEpsilon = 1e-9;
+    return std::abs(rMat.get(0, 1)) < fEpsilon && std::abs(rMat.get(1, 0)) < fEpsilon;
+}
+
 double CoordinateMapper::LogicToWindowSubPixelX(double fX, bool bMap) const
 {
-    const auto& rMat = GetLogicToWindowMatrix(bMap);
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+
+    const auto& rMat = rTransform.GetMatrix();
+
+    DBG_ASSERT(lcl_IsAxisAligned(rMat), "LogicToWindowSubPixelX requires axis-aligned transform");
+
+    // NOTE:
+    // This helper assumes an axis-aligned transform (no shear/rotation).
+    // VCL MapModes cannot currently generate shear, so m00 fully defines
+    // the X scale factor.
     return fX * rMat.get(0, 0) + rMat.get(0, 2);
 }
 
 double CoordinateMapper::LogicToWindowSubPixelY(double fY, bool bMap) const
 {
-    const auto& rMat = GetLogicToWindowMatrix(bMap);
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+
+    const auto& rMat = rTransform.GetMatrix();
+
+    DBG_ASSERT(lcl_IsAxisAligned(rMat), "LogicToWindowSubPixelY requires axis-aligned transform");
+
+    // NOTE:
+    // This helper assumes an axis-aligned transform (no shear/rotation).
+    // VCL MapModes cannot currently generate shear, so m11 fully defines
+    // the Y scale factor.
     return fY * rMat.get(1, 1) + rMat.get(1, 2);
 }
 
