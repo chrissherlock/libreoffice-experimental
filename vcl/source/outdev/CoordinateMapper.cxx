@@ -115,6 +115,12 @@ static bool lcl_IsPureTranslation(const basegfx::B2DHomMatrix& matrix)
            && std::abs(matrix.get(1, 0)) < fEpsilon;
 }
 
+static bool lcl_IsAxisAligned(const basegfx::B2DHomMatrix& rMat)
+{
+    constexpr double fEpsilon = 1e-9;
+    return std::abs(rMat.get(0, 1)) < fEpsilon && std::abs(rMat.get(1, 0)) < fEpsilon;
+}
+
 /**
  * THE CANONICAL AFFINE BUILDER
  *
@@ -864,12 +870,6 @@ double CoordinateMapper::ViewToWindowSubPixelX(double fX) const
 double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
 {
     return fY + static_cast<double>(mnWindowToViewOffsetY);
-}
-
-static bool lcl_IsAxisAligned(const basegfx::B2DHomMatrix& rMat)
-{
-    constexpr double fEpsilon = 1e-9;
-    return std::abs(rMat.get(0, 1)) < fEpsilon && std::abs(rMat.get(1, 0)) < fEpsilon;
 }
 
 double CoordinateMapper::LogicToWindowSubPixelX(double fX, bool bMap) const
