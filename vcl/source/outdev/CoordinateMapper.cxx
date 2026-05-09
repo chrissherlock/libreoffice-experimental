@@ -121,6 +121,13 @@ static bool lcl_IsAxisAligned(const basegfx::B2DHomMatrix& rMat)
     return std::abs(rMat.get(0, 1)) < fEpsilon && std::abs(rMat.get(1, 0)) < fEpsilon;
 }
 
+static tools::Rectangle lcl_RangeToVCLRect(const basegfx::B2DRange& rRange)
+{
+    return tools::Rectangle(lcl_RoundToLong(rRange.getMinX()), lcl_RoundToLong(rRange.getMinY()),
+                            lcl_RoundToLong(rRange.getMaxX()) - 1,
+                            lcl_RoundToLong(rRange.getMaxY()) - 1);
+}
+
 /**
  * THE CANONICAL AFFINE BUILDER
  *
@@ -367,161 +374,133 @@ basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMo
 
 void CoordinateMapper::UpdateCache(bool bMap) const
 {
+    // ARCHITECTURAL GUARD: Ensure enum layout is valid for slot arithmetic
     static_assert(static_cast<size_t>(TransformSlot::LogicToWindow_Unmapped)
                   == static_cast<size_t>(TransformSlot::LogicToWindow_Mapped) + 1);
     static_assert(static_cast<size_t>(TransformSlot::LogicToDevice_Unmapped)
                   == static_cast<size_t>(TransformSlot::LogicToDevice_Mapped) + 1);
-    static_assert(static_cast<size_t>(TransformSlot::WindowToLogic_Unmapped)
-                  == static_cast<size_t>(TransformSlot::WindowToLogic_Mapped) + 1);
-    static_assert(static_cast<size_t>(TransformSlot::DeviceToLogic_Unmapped)
-                  == static_cast<size_t>(TransformSlot::DeviceToLogic_Mapped) + 1);
 
-    // O(1) Cache Version Validation.
-    // This relies on the SolarMutex to protect the maTransformCache against torn reads
-    // and to synchronize mnCacheVersion updates.
     DBG_TESTSOLARMUTEX();
 
-    // Helper to extract Identity/Translation semantics to preserve legacy fast-paths
-    auto optimizeTransform = [](CompiledTransform& transform) {
-        if (transform.maMatrix.isIdentity())
-        {
-            transform.meMode = TransformMode::Identity;
-        }
-        else if (lcl_IsPureTranslation(transform.maMatrix))
-        {
-            double translationX = transform.maMatrix.get(0, 2);
-            double translationY = transform.maMatrix.get(1, 2);
+    const size_t nSlotOffset = bMap ? 0 : 1;
 
-            // Epsilon-based integer detection prevents valid translation
-            // fast-paths from randomly disappearing due to floating-point noise.
-            constexpr double fEpsilon = 1e-9;
-            if (std::abs(translationX - std::round(translationX)) < fEpsilon
-                && std::abs(translationY - std::round(translationY)) < fEpsilon)
-            {
-                transform.mnDeviceTx = static_cast<tools::Long>(std::round(translationX));
-                transform.mnDeviceTy = static_cast<tools::Long>(std::round(translationY));
-                transform.meMode = TransformMode::Translation;
-            }
-            else
-            {
-                transform.meMode = TransformMode::AffineFallback;
-            }
-        }
-        else
-        {
-            transform.meMode = TransformMode::AffineFallback;
-        }
-    };
-
-    // Logic -> Window (True Affine Composition via Canonical Builder)
-    CompiledTransform logicToWindowTransform;
-
+    // Phase 1: Logic -> Window (The core mapping)
+    basegfx::B2DHomMatrix aLogicToWindow;
     if (bMap)
     {
-        const double uiScaleFactor = static_cast<double>(mnDPIScalePercentage) / 100.0;
-        const double finalScaleX = maMapRes.mfScaleX * static_cast<double>(mnDPIX) * uiScaleFactor;
-        const double finalScaleY = maMapRes.mfScaleY * static_cast<double>(mnDPIY) * uiScaleFactor;
+        const double fScaleX
+            = maMapRes.mfScaleX * static_cast<double>(mnDPIX) * GetDPIScaleFactor();
+        const double fScaleY
+            = maMapRes.mfScaleY * static_cast<double>(mnDPIY) * GetDPIScaleFactor();
 
-        const double totalLogicalOffsetX
-            = static_cast<double>(maMapRes.mnTranslationX + mnLogicToAbsoluteOffsetX);
-        const double totalLogicalOffsetY
-            = static_cast<double>(maMapRes.mnTranslationY + mnLogicToAbsoluteOffsetY);
-
-        logicToWindowTransform.maMatrix = lcl_BuildAffineMatrix(
-            finalScaleX, finalScaleY, totalLogicalOffsetX, totalLogicalOffsetY,
+        aLogicToWindow = lcl_BuildAffineMatrix(
+            fScaleX, fScaleY,
+            static_cast<double>(maMapRes.mnTranslationX + mnLogicToAbsoluteOffsetX),
+            static_cast<double>(maMapRes.mnTranslationY + mnLogicToAbsoluteOffsetY),
             static_cast<double>(mnWindowToViewOffsetX), static_cast<double>(mnWindowToViewOffsetY));
     }
     else
     {
-        logicToWindowTransform.maMatrix
-            = lcl_BuildAffineMatrix(1.0, 1.0, 0.0, 0.0, static_cast<double>(mnWindowToViewOffsetX),
-                                    static_cast<double>(mnWindowToViewOffsetY));
+        // Unmapped case: Pure viewport translation
+        aLogicToWindow.translate(static_cast<double>(mnWindowToViewOffsetX),
+                                 static_cast<double>(mnWindowToViewOffsetY));
     }
 
-    optimizeTransform(logicToWindowTransform);
+    // Atomic Snapshot for Logic -> Window
+    maTransformCache[static_cast<size_t>(TransformSlot::LogicToWindow_Mapped) + nSlotOffset]
+        = BuildCompiledTransform(aLogicToWindow);
 
-    // Window -> Logic (Precalculated Inverse)
-    CompiledTransform windowToLogicTransform;
-    windowToLogicTransform.maMatrix = logicToWindowTransform.maMatrix;
-
-    // Determinant guards to prevent NaN poisoning from degenerate MapModes
-    if (windowToLogicTransform.maMatrix.isInvertible())
+    // Phase 2: Window -> Logic (The Inverse)
+    if (aLogicToWindow.isInvertible())
     {
-        windowToLogicTransform.maMatrix.invert();
-
-        if (logicToWindowTransform.meMode == TransformMode::Identity)
-        {
-            windowToLogicTransform.meMode = TransformMode::Identity;
-        }
-        else if (logicToWindowTransform.meMode == TransformMode::Translation)
-        {
-            windowToLogicTransform.meMode = TransformMode::Translation;
-            windowToLogicTransform.mnDeviceTx = -logicToWindowTransform.mnDeviceTx;
-            windowToLogicTransform.mnDeviceTy = -logicToWindowTransform.mnDeviceTy;
-        }
-        else
-        {
-            windowToLogicTransform.meMode = TransformMode::AffineFallback;
-        }
+        basegfx::B2DHomMatrix aWindowToLogic = aLogicToWindow;
+        aWindowToLogic.invert();
+        maTransformCache[static_cast<size_t>(TransformSlot::WindowToLogic_Mapped) + nSlotOffset]
+            = BuildCompiledTransform(aWindowToLogic);
     }
     else
     {
-        SAL_WARN("vcl.gdi", "CoordinateMapper: Singular LogicToWindow matrix detected. Inversion "
-                            "aborted to prevent NaN poisoning.");
-        windowToLogicTransform.maMatrix.identity();
-        windowToLogicTransform.meMode = TransformMode::Identity;
+        SAL_WARN("vcl.gdi", "CoordinateMapper: Singular Matrix. Falling back to Identity.");
+        maTransformCache[static_cast<size_t>(TransformSlot::WindowToLogic_Mapped) + nSlotOffset]
+            = BuildCompiledTransform(basegfx::B2DHomMatrix());
     }
 
-    // Logic -> Device
-    CompiledTransform logicToDeviceTransform;
-    logicToDeviceTransform.maMatrix = logicToWindowTransform.maMatrix;
+    // Phase 3: Logic -> Device (Applying physical OS offsets)
+    basegfx::B2DHomMatrix aLogicToDevice = aLogicToWindow;
+    aLogicToDevice.translate(static_cast<double>(mnDeviceToWindowOffsetX),
+                             static_cast<double>(mnDeviceToWindowOffsetY));
 
-    // Apply OS/Widget physical screen offsets
-    logicToDeviceTransform.maMatrix.translate(static_cast<double>(mnDeviceToWindowOffsetX),
-                                              static_cast<double>(mnDeviceToWindowOffsetY));
-    optimizeTransform(logicToDeviceTransform);
+    maTransformCache[static_cast<size_t>(TransformSlot::LogicToDevice_Mapped) + nSlotOffset]
+        = BuildCompiledTransform(aLogicToDevice);
 
-    // Device -> Logic (Precalculated Inverse)
-    CompiledTransform deviceToLogicTransform;
-    deviceToLogicTransform.maMatrix = logicToDeviceTransform.maMatrix;
-
-    if (deviceToLogicTransform.maMatrix.isInvertible())
+    // Phase 4: Device -> Logic
+    if (aLogicToDevice.isInvertible())
     {
-        deviceToLogicTransform.maMatrix.invert();
-
-        if (logicToDeviceTransform.meMode == TransformMode::Identity)
-        {
-            deviceToLogicTransform.meMode = TransformMode::Identity;
-        }
-        else if (logicToDeviceTransform.meMode == TransformMode::Translation)
-        {
-            deviceToLogicTransform.meMode = TransformMode::Translation;
-            deviceToLogicTransform.mnDeviceTx = -logicToDeviceTransform.mnDeviceTx;
-            deviceToLogicTransform.mnDeviceTy = -logicToDeviceTransform.mnDeviceTy;
-        }
-        else
-        {
-            deviceToLogicTransform.meMode = TransformMode::AffineFallback;
-        }
+        basegfx::B2DHomMatrix aDeviceToLogic = aLogicToDevice;
+        aDeviceToLogic.invert();
+        maTransformCache[static_cast<size_t>(TransformSlot::DeviceToLogic_Mapped) + nSlotOffset]
+            = BuildCompiledTransform(aDeviceToLogic);
     }
     else
     {
-        SAL_WARN("vcl.gdi", "CoordinateMapper: Singular LogicToDevice matrix detected. Inversion "
-                            "aborted to prevent NaN poisoning.");
-        deviceToLogicTransform.maMatrix.identity();
-        deviceToLogicTransform.meMode = TransformMode::Identity;
+        maTransformCache[static_cast<size_t>(TransformSlot::DeviceToLogic_Mapped) + nSlotOffset]
+            = BuildCompiledTransform(basegfx::B2DHomMatrix());
+    }
+}
+
+CompiledTransform CoordinateMapper::BuildCompiledTransform(const basegfx::B2DHomMatrix& rMat) const
+{
+    CompiledTransform aTransform;
+    aTransform.maMatrix = rMat;
+
+    // 1. Structural Invariants: Inherent to the basegfx::B2DHomMatrix affine model
+    aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Parallelism));
+    aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Connectivity));
+
+    // 2. Frame Invariants: Determine if we can use Rectilinear (Scalar/Rectangle) APIs
+    if (rMat.isIdentity())
+    {
+        aTransform.meMode = TransformMode::Identity;
+        aTransform.maContract.maPreserved.set(); // All invariants preserved
+    }
+    else if (lcl_IsAxisAligned(rMat))
+    {
+        aTransform.maContract.maPreserved.set(
+            static_cast<size_t>(GeometryInvariant::AxisAlignment));
+        aTransform.maContract.maPreserved.set(
+            static_cast<size_t>(GeometryInvariant::Orthogonality));
+
+        // Check for Orientation (is the coordinate system mirrored?)
+        if (rMat.get(0, 0) > 0 && rMat.get(1, 1) > 0)
+            aTransform.maContract.maPreserved.set(
+                static_cast<size_t>(GeometryInvariant::Orientation));
+
+        // Refine Optimization Mode for legacy fast-paths
+        if (lcl_IsPureTranslation(rMat))
+        {
+            double fTx = rMat.get(0, 2);
+            double fTy = rMat.get(1, 2);
+            constexpr double fEpsilon = 1e-9;
+            if (std::abs(fTx - std::round(fTx)) < fEpsilon
+                && std::abs(fTy - std::round(fTy)) < fEpsilon)
+            {
+                aTransform.meMode = TransformMode::Translation;
+                aTransform.mnDeviceTx = static_cast<tools::Long>(std::round(fTx));
+                aTransform.mnDeviceTy = static_cast<tools::Long>(std::round(fTy));
+            }
+            else
+                aTransform.meMode = TransformMode::AffineFallback;
+        }
+        else
+            aTransform.meMode = TransformMode::AffineFallback;
+    }
+    else
+    {
+        // SEMANTIC COLLAPSE: Non-orthogonal transform (Rotation/Shear)
+        aTransform.meMode = TransformMode::AffineFallback;
     }
 
-    // Commit to the Register File
-    size_t cacheSlotOffset = bMap ? 0 : 1;
-    maTransformCache[static_cast<size_t>(TransformSlot::LogicToWindow_Mapped) + cacheSlotOffset]
-        = logicToWindowTransform;
-    maTransformCache[static_cast<size_t>(TransformSlot::WindowToLogic_Mapped) + cacheSlotOffset]
-        = windowToLogicTransform;
-    maTransformCache[static_cast<size_t>(TransformSlot::LogicToDevice_Mapped) + cacheSlotOffset]
-        = logicToDeviceTransform;
-    maTransformCache[static_cast<size_t>(TransformSlot::DeviceToLogic_Mapped) + cacheSlotOffset]
-        = deviceToLogicTransform;
+    return aTransform;
 }
 
 const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq) const
@@ -592,6 +571,23 @@ basegfx::B2DHomMatrix CoordinateMapper::GetWindowToLogicMatrix(bool bMap) const
 // TEMPLATE SPECIALIZATIONS: THE UNIVERSAL GEOMETRY PIPELINE
 // ============================================================================
 
+bool CompiledTransform::IsSafeForRectilinearAPI() const
+{
+    // The strict prerequisite for Scalar/Rectangle APIs is Axis Alignment.
+    bool bSafe = maContract.Preserves(GeometryInvariant::AxisAlignment);
+
+    // Layer 1: Developer-time hard stop
+    assert(bSafe
+           && "CoordinateMapper Contract Violation: Rectilinear API requires Axis Alignment!");
+
+    // Layer 2: Production-time audit trail
+    SAL_WARN_IF(!bSafe, "vcl.gdi",
+                "CoordinateMapper: Scalar/Rect extraction on non-aligned transform - "
+                "using conservative fallback (AABB/Magnitude).");
+
+    return bSafe;
+}
+
 template <> Point CompiledTransform::Apply<Point>(const Point& rPt) const
 {
     if (meMode == TransformMode::Identity)
@@ -605,51 +601,74 @@ template <> Point CompiledTransform::Apply<Point>(const Point& rPt) const
     return Point(lcl_RoundToLong(aB2DPt.getX()), lcl_RoundToLong(aB2DPt.getY()));
 }
 
+Size CompiledTransform::ApplyRectilinear(const Size& rSize) const
+{
+    // NOTE: We preserve the sign of diagonal elements (m00, m11) to allow
+    // Size to reflect basis orientation/mirroring if the MapMode is flipped.
+    double fWidth = static_cast<double>(rSize.Width()) * maMatrix.get(0, 0);
+    double fHeight = static_cast<double>(rSize.Height()) * maMatrix.get(1, 1);
+
+    return Size(lcl_RoundToLong(fWidth), lcl_RoundToLong(fHeight));
+}
+
+tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRect) const
+{
+    // 1. Map Position (Top-Left)
+    double fL = static_cast<double>(rRect.Left()) * maMatrix.get(0, 0) + maMatrix.get(0, 2);
+    double fT = static_cast<double>(rRect.Top()) * maMatrix.get(1, 1) + maMatrix.get(1, 2);
+
+    tools::Long nLeft = lcl_RoundToLong(fL);
+    tools::Long nTop = lcl_RoundToLong(fT);
+
+    // 2. Map Size (Width/Height)
+    // Constructing via Size guarantees adjacency: Left + Width == Next Left.
+    double fW = static_cast<double>(rRect.GetWidth()) * maMatrix.get(0, 0);
+    double fH = static_cast<double>(rRect.GetHeight()) * maMatrix.get(1, 1);
+
+    tools::Long nWidth = lcl_RoundToLong(fW);
+    tools::Long nHeight = lcl_RoundToLong(fH);
+
+    tools::Rectangle aRet(Point(nLeft, nTop), Size(nWidth, nHeight));
+
+    if (rRect.IsEmpty())
+        aRet.SetEmpty();
+
+    return aRet;
+}
+
 template <> Size CompiledTransform::Apply<Size>(const Size& rSize) const
 {
-    if (meMode == TransformMode::Identity || meMode == TransformMode::Translation)
-        [[likely]] return rSize;
+    if (maContract.Preserves(GeometryInvariant::AxisAlignment))
+    {
+        return ApplyRectilinear(rSize);
+    }
 
-    // CRITICAL FIX: Preserve VCL negative sizes for mirroring
-    // Treat Size as an axis-aligned Extent for legacy compatibility,
-    // rather than a full vector that can flip components under rotation.
-    basegfx::B2DVector vx(1.0, 0.0);
-    basegfx::B2DVector vy(0.0, 1.0);
-    vx *= maMatrix;
-    vy *= maMatrix;
+    // Path B: Basis Magnitude Approximation
+    const double fNewWidth = static_cast<double>(rSize.Width()) * lcl_GetScaledXLength(maMatrix);
+    const double fNewHeight = static_cast<double>(rSize.Height()) * lcl_GetScaledYLength(maMatrix);
 
-    return Size(lcl_RoundToLong(rSize.Width() * vx.getLength()),
-                lcl_RoundToLong(rSize.Height() * vy.getLength()));
+    // Corrected variable name from fHeight to fNewHeight
+    return Size(lcl_RoundToLong(fNewWidth), lcl_RoundToLong(fNewHeight));
 }
 
 template <>
 tools::Rectangle CompiledTransform::Apply<tools::Rectangle>(const tools::Rectangle& rRect) const
 {
-    if (meMode == TransformMode::Identity)
-        [[likely]] return rRect;
-
-    if (meMode == TransformMode::Translation)
+    // Use the bitset directly to avoid the assert/SAL_WARN in the helper
+    if (maContract.Preserves(GeometryInvariant::AxisAlignment))
     {
-        tools::Rectangle aRetval(rRect.Left() + GetDeviceTx(), rRect.Top() + GetDeviceTy(),
-                                 rRect.Right() + GetDeviceTx(), rRect.Bottom() + GetDeviceTy());
-        lcl_ApplyEmptyState(aRetval, rRect);
-        return aRetval;
+        return ApplyRectilinear(rRect);
     }
 
-    // ADAPTER: VCL [Left, Right] -> Math [Min, Max)
+    // Path B: Conservative AABB (This is what the test is exercising!)
     basegfx::B2DRange aRange(rRect.Left(), rRect.Top(), rRect.Right() + 1, rRect.Bottom() + 1);
-
     aRange.transform(maMatrix);
+    tools::Rectangle aRet = lcl_RangeToVCLRect(aRange);
 
-    // ADAPTER: Math [Min, Max) -> VCL [Left, Right]
-    // A B2DRange mathematically guarantees Min <= Max, so this safely
-    // extracts the Axis-Aligned Bounding Box (AABB) of the transformed geometry.
-    tools::Rectangle aRetval(lcl_RoundToLong(aRange.getMinX()), lcl_RoundToLong(aRange.getMinY()),
-                             lcl_RoundToLong(aRange.getMaxX()) - 1,
-                             lcl_RoundToLong(aRange.getMaxY()) - 1);
+    if (rRect.IsEmpty())
+        aRet.SetEmpty();
 
-    lcl_ApplyEmptyState(aRetval, rRect);
-    return aRetval;
+    return aRet;
 }
 
 template <>
@@ -660,7 +679,10 @@ tools::Polygon CompiledTransform::Apply<tools::Polygon>(const tools::Polygon& rP
 
     tools::Polygon aPoly(rPoly);
     for (sal_uInt16 i = 0; i < aPoly.GetSize(); ++i)
+    {
         aPoly[i] = Apply(aPoly[i]);
+    }
+
     return aPoly;
 }
 
@@ -673,7 +695,10 @@ CompiledTransform::Apply<tools::PolyPolygon>(const tools::PolyPolygon& rPolyPoly
 
     tools::PolyPolygon aPolyPoly;
     for (sal_uInt16 i = 0; i < rPolyPoly.Count(); ++i)
+    {
         aPolyPoly.Insert(Apply(rPolyPoly[i]));
+    }
+
     return aPolyPoly;
 }
 
@@ -1081,70 +1106,95 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, bool bMap) co
 // DISTANCE EXTRACTORS (Vector Magnitudes)
 // ========================================================================
 
-/**
- * IMPORTANT ARCHITECTURAL NOTE: Distance Semantics under Affine Transforms
- * * Functions like LogicWidthToDevicePixel() now implicitly define "Width" as
- * the Euclidean magnitude of the transformed basis vector (lcl_GetScaledXLength).
- * * Historically, VCL assumed strictly orthogonal axes, meaning Width was treated
- * as an axis-aligned projected extent. Under shear or rotation, Euclidean length
- * differs from the AABB width. This preserves VCL's legacy vector mirroring
- * semantics without exploding extents under rotation.
- */
-
-double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth, bool bMap) const
-{
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
-    return static_cast<double>(nWidth) * lcl_GetScaledXLength(rTransform.GetMatrix());
-}
-
 tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth, bool bMap) const
 {
     const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
-    return lcl_RoundToLong(nWidth * lcl_GetScaledXLength(rTransform.GetMatrix()));
+
+    if (!rTransform.IsSafeForRectilinearAPI())
+        return lcl_RoundToLong(static_cast<double>(nWidth)
+                               * lcl_GetScaledXLength(rTransform.GetMatrix()));
+
+    // Fast path: Direct matrix scale access
+    return lcl_RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
 }
 
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight, bool bMap) const
 {
     const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
-    return lcl_RoundToLong(nHeight * lcl_GetScaledYLength(rTransform.GetMatrix()));
+
+    if (!rTransform.IsSafeForRectilinearAPI())
+        return lcl_RoundToLong(static_cast<double>(nHeight)
+                               * lcl_GetScaledYLength(rTransform.GetMatrix()));
+
+    return lcl_RoundToLong(static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1));
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth, bool bMap) const
 {
     const auto& rTransform = Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap });
-    return lcl_RoundToLong(nWidth * lcl_GetScaledXLength(rTransform.GetMatrix()));
+
+    if (!rTransform.IsSafeForRectilinearAPI())
+        return lcl_RoundToLong(static_cast<double>(nWidth)
+                               * lcl_GetScaledXLength(rTransform.GetMatrix()));
+
+    return lcl_RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight, bool bMap) const
 {
     const auto& rTransform = Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap });
-    return lcl_RoundToLong(nHeight * lcl_GetScaledYLength(rTransform.GetMatrix()));
+
+    assert(rTransform.IsSafeForRectilinearAPI()
+           && "CoordinateMapper: Inverse scalar height extraction attempted on non-orthogonal "
+              "transform!");
+
+    return lcl_RoundToLong(static_cast<double>(nHeight)
+                           * lcl_GetScaledYLength(rTransform.GetMatrix()));
 }
 
 double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth, bool bMap) const
 {
     const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
-    return static_cast<double>(nWidth) * lcl_GetScaledXLength(rTransform.GetMatrix());
+
+    if (!rTransform.IsSafeForRectilinearAPI())
+        return static_cast<double>(nWidth) * lcl_GetScaledXLength(rTransform.GetMatrix());
+
+    return static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0);
 }
 
 double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight, bool bMap) const
 {
     const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
-    return static_cast<double>(nHeight) * lcl_GetScaledYLength(rTransform.GetMatrix());
+
+    if (!rTransform.IsSafeForRectilinearAPI())
+    {
+        return static_cast<double>(nHeight) * lcl_GetScaledYLength(rTransform.GetMatrix());
+    }
+
+    return static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1);
 }
 
 tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return nX;
-    return lcl_RoundToLong(LogicToWindowSubPixelX(static_cast<double>(nX), bMap));
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+    const auto& rMat = rTransform.GetMatrix();
+
+    if (!rTransform.IsSafeForRectilinearAPI())
+        return lcl_RoundToLong(LogicToWindowSubPixelX(static_cast<double>(nX), bMap));
+
+    // Precise rectilinear path: P' = P * Scale + Trans
+    return lcl_RoundToLong(static_cast<double>(nX) * rMat.get(0, 0) + rMat.get(0, 2));
 }
 
 tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY, bool bMap) const
 {
-    if (!bMap && IsValidDPI())
-        return nY;
-    return lcl_RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY), bMap));
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+    const auto& rMat = rTransform.GetMatrix();
+
+    if (!rTransform.IsSafeForRectilinearAPI())
+        return lcl_RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY), bMap));
+
+    return lcl_RoundToLong(static_cast<double>(nY) * rMat.get(1, 1) + rMat.get(1, 2));
 }
 
 basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint, bool bMap) const
