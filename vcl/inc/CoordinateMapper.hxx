@@ -259,10 +259,10 @@ private:
     void UpdateCache(bool bMap) const;
 
 public:
-    CompiledTransform Compile(const TransformRequest& rReq) const;
+    const CompiledTransform& Compile(const TransformRequest& rReq) const;
 
     // Legacy bridge
-    CompiledTransform Compile(bool bMap) const
+    const CompiledTransform& Compile(bool bMap) const
     {
         return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
     }
