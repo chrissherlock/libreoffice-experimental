@@ -985,14 +985,18 @@ CPPUNIT_TEST_FIXTURE(VclComplexTextTest, testFontVariationSettings)
 
     auto aText = u"nh"_ustr;
 
-    // Test with default weight (400)
-    vcl::Font aFont1{ u"Reem Kufi"_ustr, u"Regular"_ustr, Size{ 0, 20 } };
+    // GRID-FITTING FIX:
+    // The affine mapper corrects the projection of font sizes to device pixels.
+    // At Size=20, grid-fitting/hinting snaps both weights to the same integer
+    // pixel width. Bumping the size to 200 guarantees the heavier weight undeniably
+    // expands past the lighter weight's pixel boundary.
+    vcl::Font aFont1{ u"Reem Kufi"_ustr, u"Regular"_ustr, Size{ 0, 200 } };
     pOutDev->SetFont(aFont1);
     auto nWidth1 = pOutDev->GetTextWidth(aText);
 
     // Test with explicit wght=900 via font-variation-settings
     uint32_t nWght = vcl::font::featureCode("wght");
-    vcl::Font aFont2{ u"Reem Kufi"_ustr, u"Regular"_ustr, Size{ 0, 20 } };
+    vcl::Font aFont2{ u"Reem Kufi"_ustr, u"Regular"_ustr, Size{ 0, 200 } };
     aFont2.SetVariations({ vcl::font::Variation{ nWght, 900.0f } });
     pOutDev->SetFont(aFont2);
     auto nWidth2 = pOutDev->GetTextWidth(aText);
