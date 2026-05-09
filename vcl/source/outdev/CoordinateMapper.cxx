@@ -115,12 +115,31 @@ static bool lcl_IsPureTranslation(const basegfx::B2DHomMatrix& matrix)
            && std::abs(matrix.get(1, 0)) < fEpsilon;
 }
 
-// ARCHITECTURAL INVARIANT: Matrix Composition Order
-// basegfx::B2DHomMatrix applies operations via post-multiplication.
-// Therefore, the sequence: translate(A) -> scale(S) -> translate(B)
-// mathematically equates to: P' = ((P + A) * S) + B
-// This guarantees that logical offsets (A) scale with the MapMode,
-// while physical offsets (B) remain absolute physical pixels.
+/**
+ * THE CANONICAL AFFINE BUILDER
+ *
+ * ARCHITECTURAL INVARIANT: Matrix Composition Order
+ * basegfx::B2DHomMatrix applies operations via post-multiplication.
+ * Therefore, the sequence: translate(A) -> scale(S) -> translate(B)
+ * mathematically equates to the transformation:
+ *
+ *          P' = ((P + A) * S) + B
+ *
+ * Variables:
+ *
+ * P  (Point)      = The input coordinate
+ * A  (LogicTx)    = Logical offset (applied before scaling)
+ * S  (Scale)      = DPI, MapMode, and UI scaling factors
+ * B  (PhysicalTx) = Absolute physical offset (applied after scaling)
+ *
+ * This proof ensures that:
+ *
+ * 1. Logical offsets (A) grow/shrink with the MapMode zoom level.
+ * 2. Physical/Viewport offsets (B) remain constant screen pixels.
+ * 3. The algebraic expansion [P*S + A*S + B] is consistent with legacy
+ *    VCL manual matrix slot injections.
+ */
+
 static basegfx::B2DHomMatrix lcl_BuildAffineMatrix(double fScaleX, double fScaleY, double fLogicTx,
                                                    double fLogicTy, double fPhysicalTx,
                                                    double fPhysicalTy)
