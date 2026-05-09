@@ -718,12 +718,20 @@ template <> vcl::Region CompiledTransform::Apply<vcl::Region>(const vcl::Region&
     if (rRegion.getPolyPolygon())
         return vcl::Region(Apply(*rRegion.getPolyPolygon()));
 
-    // Base case: RegionBand composition via AABB aggregation
+    // Fallback: RegionBand composition via AABB aggregation.
+    // NOTE:
+    // 1. We iterate in standard order; the legacy 'reverse' iteration was a
+    //    vestigial optimization for old RegionBand internals and is not
+    //    semantically required here.
+    // 2. Performance Hazard: Rectangle-wise Region::Union() may become O(n^2)
+    //    for heavily fragmented regions due to repeated normalization/merge
+    //    passes. If profiling shows this path is hot, it should be replaced
+    //    with direct transformed RegionBand construction.
     vcl::Region aRegion;
     RectangleVector aRectangles;
     rRegion.GetRegionRectangles(aRectangles);
 
-    for (const auto& rRect : aRectangles | std::views::reverse)
+    for (const auto& rRect : aRectangles)
         aRegion.Union(Apply(rRect));
 
     return aRegion;
