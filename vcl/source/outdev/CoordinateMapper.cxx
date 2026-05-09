@@ -580,23 +580,6 @@ basegfx::B2DHomMatrix CoordinateMapper::GetWindowToLogicMatrix(bool bMap) const
 // TEMPLATE SPECIALIZATIONS: THE UNIVERSAL GEOMETRY PIPELINE
 // ============================================================================
 
-bool CompiledTransform::IsSafeForRectilinearAPI() const
-{
-    // The strict prerequisite for Scalar/Rectangle APIs is Axis Alignment.
-    bool bSafe = maContract.preserves(GeometryInvariant::AxisAlignment);
-
-    // Layer 1: Developer-time hard stop
-    assert(bSafe
-           && "CoordinateMapper Contract Violation: Rectilinear API requires Axis Alignment!");
-
-    // Layer 2: Production-time audit trail
-    SAL_WARN_IF(!bSafe, "vcl.gdi",
-                "CoordinateMapper: Scalar/Rect extraction on non-aligned transform - "
-                "using conservative fallback (AABB/Magnitude).");
-
-    return bSafe;
-}
-
 template <> Point CompiledTransform::Apply<Point>(const Point& rPt) const
 {
     if (meMode == TransformMode::Identity)
@@ -639,29 +622,24 @@ tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRe
 
 template <> Size CompiledTransform::Apply<Size>(const Size& rSize) const
 {
-    if (maContract.preserves(GeometryInvariant::AxisAlignment))
-    {
+    if (PreservesAxisAlignment())
         return ApplyRectilinear(rSize);
-    }
 
     // Path B: Basis Magnitude Approximation
     const double fNewWidth = static_cast<double>(rSize.Width()) * lcl_GetScaledXLength(maMatrix);
     const double fNewHeight = static_cast<double>(rSize.Height()) * lcl_GetScaledYLength(maMatrix);
 
-    // Corrected variable name from fHeight to fNewHeight
     return Size(lcl_RoundToLong(fNewWidth), lcl_RoundToLong(fNewHeight));
 }
 
 template <>
 tools::Rectangle CompiledTransform::Apply<tools::Rectangle>(const tools::Rectangle& rRect) const
 {
-    // Use the bitset directly to avoid the assert/SAL_WARN in the helper
-    if (maContract.preserves(GeometryInvariant::AxisAlignment))
-    {
+    // Pure query: Silent selection of Path A or Path B
+    if (PreservesAxisAlignment())
         return ApplyRectilinear(rRect);
-    }
 
-    // Path B: Conservative AABB (This is what the test is exercising!)
+    // Path B: Conservative AABB
     basegfx::B2DRange aRange(rRect.Left(), rRect.Top(), rRect.Right() + 1, rRect.Bottom() + 1);
     aRange.transform(maMatrix);
     tools::Rectangle aRet = lcl_RangeToVCLRect(aRange);
@@ -1119,10 +1097,8 @@ tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth, bool b
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
 
     if (!rTransform.CheckRectilinearContract())
-    {
         return lcl_RoundToLong(static_cast<double>(nWidth)
                                * lcl_GetScaledXLength(rTransform.GetMatrix()));
-    }
 
     return lcl_RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
 }
@@ -1133,10 +1109,8 @@ tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight, bool
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
 
     if (!rTransform.CheckRectilinearContract())
-    {
         return lcl_RoundToLong(static_cast<double>(nHeight)
                                * lcl_GetScaledYLength(rTransform.GetMatrix()));
-    }
 
     return lcl_RoundToLong(static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1));
 }
@@ -1147,10 +1121,8 @@ tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth, bool b
         = Compile(TransformRequest{ CoordinateSpace::Device, CoordinateSpace::Logic, bMap });
 
     if (!rTransform.CheckRectilinearContract())
-    {
         return lcl_RoundToLong(static_cast<double>(nWidth)
                                * lcl_GetScaledXLength(rTransform.GetMatrix()));
-    }
 
     return lcl_RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
 }
@@ -1161,10 +1133,8 @@ tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight, bool
         = Compile(TransformRequest{ CoordinateSpace::Device, CoordinateSpace::Logic, bMap });
 
     if (!rTransform.CheckRectilinearContract())
-    {
         return lcl_RoundToLong(static_cast<double>(nHeight)
                                * lcl_GetScaledYLength(rTransform.GetMatrix()));
-    }
 
     return lcl_RoundToLong(static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1));
 }
@@ -1175,9 +1145,7 @@ double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth, bool bMa
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
 
     if (!rTransform.CheckRectilinearContract())
-    {
         return static_cast<double>(nWidth) * lcl_GetScaledXLength(rTransform.GetMatrix());
-    }
 
     return static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0);
 }
@@ -1188,9 +1156,7 @@ double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight, bool b
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
 
     if (!rTransform.CheckRectilinearContract())
-    {
         return static_cast<double>(nHeight) * lcl_GetScaledYLength(rTransform.GetMatrix());
-    }
 
     return static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1);
 }
