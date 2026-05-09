@@ -453,11 +453,19 @@ CompiledTransform CoordinateMapper::BuildCompiledTransform(const basegfx::B2DHom
     CompiledTransform aTransform;
     aTransform.maMatrix = rMat;
 
-    // 1. Structural Invariants: Inherent to the basegfx::B2DHomMatrix affine model
+    // Structural Invariants: Inherent to the affine model.
+    // Affine transforms by definition preserve parallelism and connectivity.
     aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Parallelism));
     aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Connectivity));
 
-    // 2. Frame Invariants: Determine if we can use Rectilinear (Scalar/Rectangle) APIs
+    // Orientation Invariant: Handedness check.
+    // A positive determinant means the coordinate system has not been mirrored or flipped.
+    // det = ad - bc
+    const double fDet = rMat.get(0, 0) * rMat.get(1, 1) - rMat.get(0, 1) * rMat.get(1, 0);
+    if (fDet > 0.0)
+        aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Orientation));
+
+    // Frame Invariants: AxisAlignment and Orthogonality.
     if (rMat.isIdentity())
     {
         aTransform.meMode = TransformMode::Identity;
@@ -465,21 +473,19 @@ CompiledTransform CoordinateMapper::BuildCompiledTransform(const basegfx::B2DHom
     }
     else if (lcl_IsAxisAligned(rMat))
     {
+        // Rectilinear transforms are both axis-aligned and orthogonal.
         aTransform.maContract.maPreserved.set(
             static_cast<size_t>(GeometryInvariant::AxisAlignment));
         aTransform.maContract.maPreserved.set(
             static_cast<size_t>(GeometryInvariant::Orthogonality));
 
-        // Check for Orientation (is the coordinate system mirrored?)
-        if (rMat.get(0, 0) > 0 && rMat.get(1, 1) > 0)
-            aTransform.maContract.maPreserved.set(
-                static_cast<size_t>(GeometryInvariant::Orientation));
-
-        // Refine Optimization Mode for legacy fast-paths
+        // Detect Pure Translation for legacy integer fast-paths
         if (lcl_IsPureTranslation(rMat))
         {
-            double fTx = rMat.get(0, 2);
-            double fTy = rMat.get(1, 2);
+            const double fTx = rMat.get(0, 2);
+            const double fTy = rMat.get(1, 2);
+
+            // Epsilon-guarded integer detection to prevent jitter
             constexpr double fEpsilon = 1e-9;
             if (std::abs(fTx - std::round(fTx)) < fEpsilon
                 && std::abs(fTy - std::round(fTy)) < fEpsilon)
@@ -489,15 +495,24 @@ CompiledTransform CoordinateMapper::BuildCompiledTransform(const basegfx::B2DHom
                 aTransform.mnDeviceTy = static_cast<tools::Long>(std::round(fTy));
             }
             else
+            {
                 aTransform.meMode = TransformMode::AffineFallback;
+            }
         }
         else
+        {
             aTransform.meMode = TransformMode::AffineFallback;
+        }
     }
     else
     {
-        // SEMANTIC COLLAPSE: Non-orthogonal transform (Rotation/Shear)
+        // SEMANTIC COLLAPSE: Transform is rotated or sheared.
+        // We do not set AxisAlignment, which triggers Path B (Conservative AABB)
+        // in downstream VCL consumers.
         aTransform.meMode = TransformMode::AffineFallback;
+
+        // Note: We could technically check for non-axis-aligned Orthogonality
+        // (angles preserved but not axes), but VCL legacy types don't benefit from it.
     }
 
     return aTransform;
@@ -1106,15 +1121,24 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, bool bMap) co
 // DISTANCE EXTRACTORS (Vector Magnitudes)
 // ========================================================================
 
+/**
+ * NOTE: Under non-axis-aligned transforms (Rotation/Shear), 'Width' is not
+ * well-defined as a scalar. This API returns the Euclidean magnitude of
+ * the transformed X-basis vector to preserve legacy distance scaling
+ * expectations (e.g. for line widths or font heights).
+ */
 tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth, bool bMap) const
 {
     const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
 
     if (!rTransform.IsSafeForRectilinearAPI())
+    {
+        // Explicitly use the magnitude fallback helper to sign-post the semantic shift
         return lcl_RoundToLong(static_cast<double>(nWidth)
                                * lcl_GetScaledXLength(rTransform.GetMatrix()));
+    }
 
-    // Fast path: Direct matrix scale access
+    // Standard rectilinear path
     return lcl_RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
 }
 
