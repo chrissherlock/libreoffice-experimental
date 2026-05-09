@@ -336,6 +336,15 @@ basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMo
 
 void CoordinateMapper::UpdateCache(bool bMap) const
 {
+    static_assert(static_cast<size_t>(TransformSlot::LogicToWindow_Unmapped)
+                  == static_cast<size_t>(TransformSlot::LogicToWindow_Mapped) + 1);
+    static_assert(static_cast<size_t>(TransformSlot::LogicToDevice_Unmapped)
+                  == static_cast<size_t>(TransformSlot::LogicToDevice_Mapped) + 1);
+    static_assert(static_cast<size_t>(TransformSlot::WindowToLogic_Unmapped)
+                  == static_cast<size_t>(TransformSlot::WindowToLogic_Mapped) + 1);
+    static_assert(static_cast<size_t>(TransformSlot::DeviceToLogic_Unmapped)
+                  == static_cast<size_t>(TransformSlot::DeviceToLogic_Mapped) + 1);
+
     // O(1) Cache Version Validation.
     // This relies on the SolarMutex to protect the maTransformCache against torn reads
     // and to synchronize mnCacheVersion updates.
