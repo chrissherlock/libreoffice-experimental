@@ -102,6 +102,26 @@ enum class TransformSlot : size_t
     Count = 8
 };
 
+enum class GeometryInvariant : size_t
+{
+    AxisAlignment, // Edges remain parallel to X/Y axes (Critical for Rectangle/Scalar)
+    Orthogonality, // Basis vectors remain 90° to each other (Critical for Shear-safety)
+    Orientation, // Handedness/Mirroring state (Critical for Size)
+    Parallelism, // Parallel lines stay parallel (Always true for Affine)
+    Connectivity, // Shapes stay "in one piece" (Always true for Affine)
+    COUNT
+};
+
+struct TransformContract
+{
+    std::bitset<static_cast<size_t>(GeometryInvariant::COUNT)> maPreserved;
+
+    bool Preserves(GeometryInvariant inv) const
+    {
+        return maPreserved.test(static_cast<size_t>(inv));
+    }
+};
+
 struct VCL_DLLPUBLIC CompiledTransform
 {
 public:
@@ -113,8 +133,14 @@ public:
     tools::Long mnLogicTx = 0, mnLogicTy = 0;
     tools::Long mnDeviceTx = 0, mnDeviceTy = 0;
 
+    TransformContract maContract;
+
 public:
     CompiledTransform() = default;
+
+    const TransformContract& GetContract() const { return maContract; }
+
+    bool IsSafeForRectilinearAPI() const;
 
     uint64_t GetSemanticKey() const { return mnSemanticKey; }
     TransformMode GetMode() const { return meMode; }
@@ -130,6 +156,9 @@ public:
 
     bool IsIdentity() const { return meMode == TransformMode::Identity; }
     bool IsPureTranslation() const { return meMode == TransformMode::Translation; }
+
+    Size ApplyRectilinear(const Size& rSize) const;
+    tools::Rectangle ApplyRectilinear(const tools::Rectangle& rRect) const;
 };
 
 // Declare explicit specializations to prevent implicit instantiation errors
@@ -590,6 +619,8 @@ private:
                                               bool bMap) const;
     void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX, double& rTransY,
                                bool bMap) const;
+
+    CompiledTransform BuildCompiledTransform(const basegfx::B2DHomMatrix& rMat) const;
 };
 
 Point LogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource,
