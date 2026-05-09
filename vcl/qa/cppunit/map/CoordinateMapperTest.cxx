@@ -150,6 +150,41 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCompiledTransformStability)
                                          aPtNew.getX(), 1e-9);
 }
 
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testAffineCompositionOrder)
+{
+    CoordinateMapper aMapper;
+
+    // Setup Asymmetric Scaling
+    // X scale = 2.0, Y scale = 3.0
+    // (We fake this using DPI to bypass MapMode resolution complexities for a pure math test)
+    aMapper.SetDPIX(2);
+    aMapper.SetDPIY(3);
+    aMapper.SetDPIScalePercentage(100);
+
+    // Setup Logical Offset (Should be SCALED)
+    aMapper.SetLogicOffset(Size(10, -20));
+
+    // Setup Viewport Offset (Should NOT be scaled)
+    aMapper.SetWindowOffset(Size(15, 5));
+
+    // Execute the transform on Point(100, 50)
+    // EXPECTED MATH:
+    // X: (100 + 10_logic) * 2.0_scale + 15_view = (110 * 2) + 15 = 235
+    // Y: (50 - 20_logic) * 3.0_scale + 5_view = (30 * 3) + 5 = 95
+
+    // We test the matrix directly to bypass legacy wrappers
+    basegfx::B2DHomMatrix aMat = aMapper.GetLogicToWindowMatrix(true);
+    basegfx::B2DPoint aPt(100.0, 50.0);
+    aPt *= aMat;
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Matrix composition order violated! Logical offset must "
+                                         "be scaled, viewport offset must be absolute.",
+                                         235.0, aPt.getX(), 1e-9);
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+        "Matrix composition order violated! Asymmetric Y scaling failed.", 95.0, aPt.getY(), 1e-9);
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
