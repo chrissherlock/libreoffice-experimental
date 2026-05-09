@@ -1093,44 +1093,44 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, bool bMap) co
 
 double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth, bool bMap) const
 {
-    const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
-    return static_cast<double>(nWidth) * lcl_GetScaledXLength(aMat);
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
+    return static_cast<double>(nWidth) * lcl_GetScaledXLength(rTransform.GetMatrix());
 }
 
 tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth, bool bMap) const
 {
-    const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
-    return lcl_RoundToLong(nWidth * lcl_GetScaledXLength(aMat));
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
+    return lcl_RoundToLong(nWidth * lcl_GetScaledXLength(rTransform.GetMatrix()));
 }
 
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight, bool bMap) const
 {
-    const basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
-    return lcl_RoundToLong(nHeight * lcl_GetScaledYLength(aMat));
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
+    return lcl_RoundToLong(nHeight * lcl_GetScaledYLength(rTransform.GetMatrix()));
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth, bool bMap) const
 {
-    const basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(bMap);
-    return lcl_RoundToLong(nWidth * lcl_GetScaledXLength(aMat));
+    const auto& rTransform = Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap });
+    return lcl_RoundToLong(nWidth * lcl_GetScaledXLength(rTransform.GetMatrix()));
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight, bool bMap) const
 {
-    const basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(bMap);
-    return lcl_RoundToLong(nHeight * lcl_GetScaledYLength(aMat));
+    const auto& rTransform = Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap });
+    return lcl_RoundToLong(nHeight * lcl_GetScaledYLength(rTransform.GetMatrix()));
 }
 
 double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth, bool bMap) const
 {
-    const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
-    return static_cast<double>(nWidth) * lcl_GetScaledXLength(aMat);
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+    return static_cast<double>(nWidth) * lcl_GetScaledXLength(rTransform.GetMatrix());
 }
 
 double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight, bool bMap) const
 {
-    const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
-    return static_cast<double>(nHeight) * lcl_GetScaledYLength(aMat);
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+    return static_cast<double>(nHeight) * lcl_GetScaledYLength(rTransform.GetMatrix());
 }
 
 tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX, bool bMap) const
