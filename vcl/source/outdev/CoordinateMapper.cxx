@@ -909,7 +909,7 @@ tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogic
     CompiledTransform t = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
     if (t.GetMode() == TransformMode::AffineFallback)
     {
-        // Legacy Note: We currently don't AdaptiveSubdivide inside Apply<Polygon> because
+        // TODO: Legacy Note: We currently don't AdaptiveSubdivide inside Apply<Polygon> because
         // subdivision relies on global VCL tools settings which breaks abstraction. We
         // leave it here temporarily.
         tools::Polygon aSubdivided;
