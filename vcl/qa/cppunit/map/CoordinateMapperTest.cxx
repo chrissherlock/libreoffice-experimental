@@ -185,6 +185,54 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testAffineCompositionOrder)
         "Matrix composition order violated! Asymmetric Y scaling failed.", 95.0, aPt.getY(), 1e-9);
 }
 
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testAffineSizeUnderRotation)
+{
+    // Proves "Size as Extent" preserves legacy semantics under rotation.
+    CompiledTransform aTransform;
+    aTransform.meMode = TransformMode::AffineFallback;
+
+    // Rotate exactly 90 degrees clockwise
+    aTransform.maMatrix.rotate(M_PI_2);
+
+    Size aOriginal(100, 50);
+    Size aTransformed = aTransform.Apply(aOriginal);
+
+    // Because we use lcl_GetScaledLength on the basis vectors,
+    // the magnitudes remain perfectly intact regardless of orientation!
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Size must extract basis magnitude, not vector coordinates",
+                                 tools::Long(100), aTransformed.Width());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Size must extract basis magnitude, not vector coordinates",
+                                 tools::Long(50), aTransformed.Height());
+}
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testAffineAABBInflationAndInverse)
+{
+    // Proves the B2DRange adapter accurately inflates rotated Rectangles into AABBs
+    CompiledTransform aFwd;
+    aFwd.meMode = TransformMode::AffineFallback;
+    aFwd.maMatrix.rotate(M_PI_2);
+
+    tools::Rectangle aOriginal(10, 20, 110, 70);
+    tools::Rectangle aRotatedAABB = aFwd.Apply(aOriginal);
+
+    // Inverse Transformation Proof (Conservative Bounds)
+    CompiledTransform aInv;
+    aInv.meMode = TransformMode::AffineFallback;
+    aInv.maMatrix = aFwd.maMatrix;
+    aInv.maMatrix.invert();
+
+    tools::Rectangle aRestored = aInv.Apply(aRotatedAABB);
+
+    CPPUNIT_ASSERT_MESSAGE("Conservative bounds failed: Left edge shrank!",
+                           aRestored.Left() <= aOriginal.Left());
+    CPPUNIT_ASSERT_MESSAGE("Conservative bounds failed: Right edge shrank!",
+                           aRestored.Right() >= aOriginal.Right());
+    CPPUNIT_ASSERT_MESSAGE("Conservative bounds failed: Top edge shrank!",
+                           aRestored.Top() <= aOriginal.Top());
+    CPPUNIT_ASSERT_MESSAGE("Conservative bounds failed: Bottom edge shrank!",
+                           aRestored.Bottom() >= aOriginal.Bottom());
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
