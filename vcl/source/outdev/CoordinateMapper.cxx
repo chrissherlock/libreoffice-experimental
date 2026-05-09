@@ -515,9 +515,9 @@ void CoordinateMapper::UpdateCache(bool bMap) const
 const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq) const
 {
     // O(1) Cache Version Validation.
-    // Threading: Caller must hold the SolarMutex. UpdateCache() asserts this.
-    // The atomic mnStateVersion allows fast version checking without a lock,
-    // but the cache array itself is not thread-safe and relies on Solar Mutex confinement.
+    // CoordinateMapper is externally synchronized via SolarMutex.
+    // The atomic version counter is used only for cache invalidation visibility,
+    // not to provide full internal thread safety.
     uint64_t nCurrentVersion = mnStateVersion.load(std::memory_order_acquire);
     if (mnCacheVersion != nCurrentVersion)
     {
