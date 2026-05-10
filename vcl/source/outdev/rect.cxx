@@ -60,7 +60,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect )
     if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, IsMapModeEnabled()));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
 
     if ( aRect.IsEmpty() )
         return;
@@ -97,7 +97,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
-    const tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, IsMapModeEnabled()));
+    const tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
 
     if ( aRect.IsEmpty() )
         return;
@@ -148,7 +148,7 @@ void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
     if ( !IsDeviceOutputNecessary() )
         return;
 
-    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, IsMapModeEnabled()));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
 
     if ( aRect.IsEmpty() )
         return;
@@ -184,7 +184,7 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
     if ( nPoints < 2 )
         return;
 
-    tools::Polygon aPoly(mpMapper->LogicToDevicePixel(rPoly, IsMapModeEnabled()));
+    tools::Polygon aPoly(mpMapper->LogicToDevicePixel(rPoly, GetMappingPolicy()));
 
     // we need a graphics
     if ( !mpGraphics && !AcquireGraphics() )
@@ -256,10 +256,10 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     tools::Long nY = ( rRect.Top() >= aDstRect.Top() ) ? rRect.Top() : ( rRect.Top() + ( ( aDstRect.Top() - rRect.Top() ) / nDistY ) * nDistY );
     const tools::Long nRight = aDstRect.Right();
     const tools::Long nBottom = aDstRect.Bottom();
-    const tools::Long nStartX = mpMapper->LogicToDevicePixel(Point(nX, 0), IsMapModeEnabled()).X();
-    const tools::Long nEndX = mpMapper->LogicToDevicePixel(Point(nRight, 0), IsMapModeEnabled()).X();
-    const tools::Long nStartY = mpMapper->LogicToDevicePixel(Point(0, nY), IsMapModeEnabled()).Y();
-    const tools::Long nEndY = mpMapper->LogicToDevicePixel(Point(0, nBottom), IsMapModeEnabled()).Y();
+    const tools::Long nStartX = mpMapper->LogicToDevicePixel(Point(nX, 0), GetMappingPolicy()).X();
+    const tools::Long nEndX = mpMapper->LogicToDevicePixel(Point(nRight, 0), GetMappingPolicy()).X();
+    const tools::Long nStartY = mpMapper->LogicToDevicePixel(Point(0, nY), GetMappingPolicy()).Y();
+    const tools::Long nEndY = mpMapper->LogicToDevicePixel(Point(0, nBottom), GetMappingPolicy()).Y();
     tools::Long nHorzCount = 0;
     tools::Long nVertCount = 0;
 
@@ -272,7 +272,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         aVertBuf[ nVertCount++ ] = nStartY;
         while( ( nY += nDistY ) <= nBottom )
         {
-            aVertBuf[ nVertCount++ ] = mpMapper->LogicToDevicePixel(Point(0, nY), IsMapModeEnabled()).Y();
+            aVertBuf[ nVertCount++ ] = mpMapper->LogicToDevicePixel(Point(0, nY), GetMappingPolicy()).Y();
         }
     }
 
@@ -282,7 +282,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         aHorzBuf[ nHorzCount++ ] = nStartX;
         while( ( nX += nDistX ) <= nRight )
         {
-            aHorzBuf[ nHorzCount++ ] = mpMapper->LogicToDevicePixel(Point(nX, 0), IsMapModeEnabled()).X();
+            aHorzBuf[ nHorzCount++ ] = mpMapper->LogicToDevicePixel(Point(nX, 0), GetMappingPolicy()).X();
         }
     }
 
@@ -292,8 +292,8 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     if( mbInitFillColor )
         InitFillColor();
 
-    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
-    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+    const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
+    SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
     if( nFlags & DrawGridFlags::Dots )
     {
@@ -326,7 +326,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         }
     }
 
-    EnableMapMode( eOldPolicy );
+    SetMappingPolicy( eOldPolicy );
 }
 
 void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Size& rGridDistance,
@@ -388,19 +388,19 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
         nY += nDistanceY;
     }
 
-    const tools::Long nTopPixel = mpMapper->LogicToDevicePixel(Point(0, rDrawingArea.Top()), IsMapModeEnabled()).Y();
-    const tools::Long nBottomPixel = mpMapper->LogicToDevicePixel(Point(0, rDrawingArea.Bottom()), IsMapModeEnabled()).Y();
-    const tools::Long nLeftPixel = mpMapper->LogicToDevicePixel(Point(rDrawingArea.Left(), 0), IsMapModeEnabled()).X();
-    const tools::Long nRightPixel = mpMapper->LogicToDevicePixel(Point(rDrawingArea.Right(), 0), IsMapModeEnabled()).X();
+    const tools::Long nTopPixel = mpMapper->LogicToDevicePixel(Point(0, rDrawingArea.Top()), GetMappingPolicy()).Y();
+    const tools::Long nBottomPixel = mpMapper->LogicToDevicePixel(Point(0, rDrawingArea.Bottom()), GetMappingPolicy()).Y();
+    const tools::Long nLeftPixel = mpMapper->LogicToDevicePixel(Point(rDrawingArea.Left(), 0), GetMappingPolicy()).X();
+    const tools::Long nRightPixel = mpMapper->LogicToDevicePixel(Point(rDrawingArea.Right(), 0), GetMappingPolicy()).X();
 
     // Draw 3x3 pixel crosses within the drawing area
     const tools::Long nHalfCrossSize = 1;
     for (const tools::Long nPositionX : aHorzBuffer)
     {
-        const tools::Long nPositionXPixel = mpMapper->LogicToDevicePixel(Point(nPositionX, 0), IsMapModeEnabled()).X();
+        const tools::Long nPositionXPixel = mpMapper->LogicToDevicePixel(Point(nPositionX, 0), GetMappingPolicy()).X();
         for (const tools::Long nPositionY : aVertBuffer)
         {
-            const tools::Long nPositionYPixel = mpMapper->LogicToDevicePixel(Point(0, nPositionY), IsMapModeEnabled()).Y();
+            const tools::Long nPositionYPixel = mpMapper->LogicToDevicePixel(Point(0, nPositionY), GetMappingPolicy()).Y();
             const tools::Long nStartXPixel = std::max(nPositionXPixel - nHalfCrossSize, nLeftPixel);
             if (nStartXPixel > nRightPixel)
             {
@@ -424,8 +424,8 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
                 continue;
             }
 
-            const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
-            EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+            const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
+            SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
             // Draw horizontal line if visible
             if (nPositionY >= rDrawingArea.Top() && nPositionY <= rDrawingArea.Bottom())
@@ -441,7 +441,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
                                      *this);
             }
 
-            EnableMapMode( eOldPolicy );
+            SetMappingPolicy( eOldPolicy );
         }
     }
 }

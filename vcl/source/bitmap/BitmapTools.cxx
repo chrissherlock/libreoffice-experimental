@@ -578,7 +578,7 @@ void DrawAndClipBitmap(const Point& rPos, const Size& rSize, const Bitmap& rBitm
     pVDev->DrawPolyPolygon( aClip );
 
     // #i50672# Extract whole VDev content (to match size of rBitmap)
-    pVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    pVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     const Bitmap aVDevMask(pVDev->GetBitmap(Point(), aSizePixel));
 
     if(aBmp.HasAlpha())

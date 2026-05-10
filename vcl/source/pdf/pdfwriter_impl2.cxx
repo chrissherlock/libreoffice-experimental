@@ -475,7 +475,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                                 MapMode aMapMode( pDummyVDev->GetMapMode() );
                                 aMapMode.SetOrigin( aPoint );
                                 xVDev->SetMapMode( aMapMode );
-                                const vcl::MappingPolicy eVDevOldPolicy = xVDev->IsMapModeEnabled();
+                                const vcl::MappingPolicy eVDevOldPolicy = xVDev->GetMappingPolicy();
                                 Size aDstSize( xVDev->PixelToLogic( aDstSizePixel ) );
 
                                 Point   aMtfOrigin( aTmpMtf.GetPrefMapMode().GetOrigin() );
@@ -491,15 +491,15 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                                 aTmpMtf.WindStart();
                                 aTmpMtf.Play(*xVDev, aPoint, aDstSize);
                                 aTmpMtf.WindStart();
-                                xVDev->EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+                                xVDev->SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
                                 Bitmap aPaint(xVDev->GetBitmap(aPoint, xVDev->GetOutputSizePixel()));
-                                xVDev->EnableMapMode( eVDevOldPolicy ); // #i35331#: MUST NOT use EnableMapMode( sal_True ) here!
+                                xVDev->SetMappingPolicy( eVDevOldPolicy ); // #i35331#: MUST NOT use SetMappingPolicy( sal_True ) here!
 
                                 // create alpha mask from gradient
                                 xVDev->SetDrawMode( DrawModeFlags::GrayGradient );
                                 xVDev->DrawGradient( tools::Rectangle( aPoint, aDstSize ), rTransparenceGradient );
                                 xVDev->SetDrawMode( DrawModeFlags::Default );
-                                xVDev->EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+                                xVDev->SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
                                 AlphaMask aAlpha(xVDev->GetBitmap(Point(), xVDev->GetOutputSizePixel()));
 #if HAVE_FEATURE_SKIA

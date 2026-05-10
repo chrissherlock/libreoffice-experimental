@@ -1440,7 +1440,7 @@ static Bitmap getTile(ScModelObj* pModelObj, int nTilePosX, int nTilePosY, tools
     xDevice->SetOutputSizePixelScaleOffsetAndLOKBuffer(Size(nCanvasSize, nCanvasSize),
             1.0, Point(), aPixmap.data());
     pModelObj->paintTile(*xDevice, nCanvasSize, nCanvasSize, nTilePosX, nTilePosY, nTileWidth, nTileHeight);
-    xDevice->EnableMapMode(false);
+    xDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     return xDevice->GetBitmap(Point(0, 0), Size(nTileSize, nTileSize));
 }
 

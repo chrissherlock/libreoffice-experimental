@@ -138,11 +138,11 @@ DrawViewShell::DrawViewShell( ViewShellBase& rViewShellBase, vcl::Window* pParen
     if (comphelper::LibreOfficeKit::isActive())
     {
         // get the full page size in pixels
-        mpContentWindow->EnableMapMode();
+        mpContentWindow->SetMappingPolicy();
         Size aSize(mpContentWindow->LogicToPixel(GetView()->GetSdrPageView()->GetPage()->GetSize()));
         // Disable map mode, so that it's possible to send mouse event
         // coordinates in logic units
-        mpContentWindow->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        mpContentWindow->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
         // arrange UI elements again with new view size
         GetParentWindow()->SetSizePixel(aSize);

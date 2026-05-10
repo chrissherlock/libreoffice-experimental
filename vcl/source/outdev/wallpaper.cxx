@@ -49,7 +49,7 @@ void OutputDevice::DrawWallpaper( const tools::Rectangle& rRect,
 
     if ( rWallpaper.GetStyle() != WallpaperStyle::NONE )
     {
-        tools::Rectangle aRect = mpMapper->LogicToWindowUnits(rRect, IsMapModeEnabled());
+        tools::Rectangle aRect = mpMapper->LogicToWindowUnits(rRect, GetMappingPolicy());
         aRect.Normalize();
 
         if ( !aRect.IsEmpty() )
@@ -85,15 +85,15 @@ void OutputDevice::DrawColorWallpaper( tools::Long nX, tools::Long nY,
     Color aOldLineColor = GetLineColor();
     bool bOldIsFillColor = IsFillColor();
     Color aOldFillColor = GetFillColor();
-    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
+    const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
     SetLineColor();
     SetFillColor( rWallpaper.GetColor() );
-    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+    SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
     DrawRect( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
 
-    EnableMapMode( eOldPolicy );
+    SetMappingPolicy( eOldPolicy );
     if (bOldIsFillColor)
         SetFillColor(aOldFillColor);
     else
@@ -142,7 +142,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
     const Bitmap* pCached = rWallpaper.ImplGetCachedBitmap();
 
     GDIMetaFile* pOldMetaFile = mpMetaFile;
-    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
+    const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
     Bitmap aBmp;
     if( pCached )
@@ -203,7 +203,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
     // calc pos and size
     if( rWallpaper.IsRect() )
     {
-        const tools::Rectangle aBound(mpMapper->LogicToWindowUnits(rWallpaper.GetRect(), IsMapModeEnabled()));
+        const tools::Rectangle aBound(mpMapper->LogicToWindowUnits(rWallpaper.GetRect(), GetMappingPolicy()));
         aPos = aBound.TopLeft();
         aSize = aBound.GetSize();
     }
@@ -214,7 +214,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
     }
 
     mpMetaFile = nullptr;
-    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+    SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
 
@@ -383,7 +383,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
     rWallpaper.ImplSetCachedBitmap( aBmp );
 
     Pop();
-    EnableMapMode( eOldPolicy );
+    SetMappingPolicy( eOldPolicy );
     mpMetaFile = pOldMetaFile;
 }
 
@@ -395,19 +395,19 @@ void OutputDevice::DrawGradientWallpaper( tools::Long nX, tools::Long nY,
 
     tools::Rectangle aBound;
     GDIMetaFile* pOldMetaFile = mpMetaFile;
-    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
+    const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
     aBound = tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) );
 
     mpMetaFile = nullptr;
-    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+    SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
 
     DrawGradient( aBound, rWallpaper.GetGradient() );
 
     Pop();
-    EnableMapMode( eOldPolicy );
+    SetMappingPolicy( eOldPolicy );
     mpMetaFile = pOldMetaFile;
 }
 
