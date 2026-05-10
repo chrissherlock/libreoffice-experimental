@@ -32,7 +32,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/lineinfo.hxx>
 
-#include <CoordinateMapper.hxx>
+#include <CompiledTransform.hxx>
 #include <MappingCoefficients.hxx>
 
 #include "CoordinateMath.hxx"
