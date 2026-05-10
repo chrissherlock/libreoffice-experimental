@@ -1332,14 +1332,14 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
                                          OutputDevice& rOutput)
 {
     rOutput.Push();
-    vcl::MappingPolicy eOldPolicy = pWindow->IsMapModeEnabled();
+    vcl::MappingPolicy eOldPolicy = pWindow->GetMappingPolicy();
 
     if (pWindow->GetMapMode().GetMapUnit() != rOutput.GetMapMode().GetMapUnit())
     {
         // This is needed for e.g. the scrollbar in writer comments in margins that has its map unit in pixels
         // as seen with bin/run gtktiledviewer --enable-tiled-annotations on a document containing a comment
         // long enough to need a scrollbar
-        pWindow->EnableMapMode();
+        pWindow->SetMappingPolicy();
         MapMode aMapMode = pWindow->GetMapMode();
         aMapMode.SetMapUnit(rOutput.GetMapMode().GetMapUnit());
         aMapMode.SetScaleX(rOutput.GetMapMode().GetScaleX());
@@ -1402,7 +1402,7 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
 
     xOutput.disposeAndClear();
 
-    pWindow->EnableMapMode(eOldPolicy);
+    pWindow->SetMappingPolicy(eOldPolicy);
     rOutput.Pop();
 
     for (vcl::Window* pChild = pWindow->GetWindow(GetWindowType::FirstChild); pChild;

@@ -149,9 +149,9 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
     tools::Long nX, nY; // , nWorkX, nWorkY, nWorkWidth, nWorkHeight;
     std::unique_ptr<tools::Long[]> pMapX(new tools::Long[ nSrcWidth + 1 ]);
     std::unique_ptr<tools::Long[]> pMapY(new tools::Long[ nSrcHeight + 1 ]);
-    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
+    const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
-    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+    SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
     // create forward mapping tables
     for( nX = 0; nX <= nSrcWidth; nX++ )
@@ -168,7 +168,7 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
 
     DrawBitmap(aMapPt, aMapSz, Point(), aBandBmp.GetSizePixel(), aBandBmp);
 
-    EnableMapMode( eOldPolicy );
+    SetMappingPolicy( eOldPolicy );
 }
 
 bool Printer::DrawTransformedBitmap(
@@ -240,8 +240,8 @@ void Printer::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
     Push( vcl::PushFlags::CLIPREGION | vcl::PushFlags::LINECOLOR );
     IntersectClipRegion(vcl::Region(rPolyPoly));
     SetLineColor( GetFillColor() );
-    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
-    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+    const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
+    SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
     if(nMove)
     {
@@ -265,7 +265,7 @@ void Printer::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
         DrawRect( aPolyRect );
     }
 
-    EnableMapMode( eOldPolicy );
+    SetMappingPolicy( eOldPolicy );
     Pop();
 
     mpMetaFile = pOldMetaFile;
@@ -699,10 +699,10 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     std::unique_ptr<tools::Long[]> pMapX( new tools::Long[ nSrcWidth + 1 ] );
     std::unique_ptr<tools::Long[]> pMapY( new tools::Long[ nSrcHeight + 1 ] );
     GDIMetaFile*    pOldMetaFile = mpMetaFile;
-    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
+    const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
     mpMetaFile = nullptr;
-    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+    SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
     Push( vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR );
     SetLineColor( rMaskColor );
     SetFillColor( rMaskColor );
@@ -732,7 +732,7 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     }
 
     Pop();
-    EnableMapMode( eOldPolicy );
+    SetMappingPolicy( eOldPolicy );
     mpMetaFile = pOldMetaFile;
 }
 

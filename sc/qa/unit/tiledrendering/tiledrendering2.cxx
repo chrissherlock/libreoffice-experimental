@@ -246,7 +246,7 @@ CPPUNIT_TEST_FIXTURE(ScTiledRenderingTest, testBreakPageView)
     xDevice->SetOutputSizePixelScaleOffsetAndLOKBuffer(Size(nCanvasSize, nCanvasSize), 1.0, Point(),
                                                        aPixmap.data());
     pModelObj->paintTile(*xDevice, nCanvasSize, nCanvasSize, 3840, 3840, 3840, 3840);
-    xDevice->EnableMapMode(false);
+    xDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     Bitmap aBitmap = xDevice->GetBitmap(Point(0, 0), Size(nTileSize, nTileSize));
 
     // Top left pixel should be white, not blue
