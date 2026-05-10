@@ -71,6 +71,7 @@ enum class TransformMode
 {
     Identity,
     Translation,
+    AxisAlignedAffine,
     AffineFallback
 };
 
