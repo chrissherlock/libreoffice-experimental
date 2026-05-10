@@ -132,7 +132,7 @@ void OutputDevice::DrawTransparent(
         }
 
         // create ObjectToDevice transformation
-        const basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation(IsMapModeEnabled()) * rObjectTransform);
+        const basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation(GetMappingPolicy()) * rObjectTransform);
         // TODO: this must not drop transparency for mpAlphaVDev case, but instead use premultiplied
         // alpha... but that requires using premultiplied alpha also for already drawn data
 
@@ -220,7 +220,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
 
         // get the polygon in device coordinates
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(IsMapModeEnabled()));
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(GetMappingPolicy()));
 
         const double fTransparency = 0.01 * nTransparencePercent;
         if( mbFillColor )
@@ -307,7 +307,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
                 InitFillColor();
 
             tools::Rectangle aLogicPolyRect( rPolyPoly.GetBoundRect() );
-            tools::Rectangle aPixelRect(mpMapper->LogicToDevicePixel(aLogicPolyRect, IsMapModeEnabled()));
+            tools::Rectangle aPixelRect(mpMapper->LogicToDevicePixel(aLogicPolyRect, GetMappingPolicy()));
 
             if( !mbOutputClipped )
             {
@@ -337,9 +337,9 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 
             if( aVDev->SetOutputSizePixel( aDstSz ) )
             {
-                const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
+                const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
-                EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
                 aVDev->SetLineColor( COL_BLACK );
                 aVDev->SetFillColor( COL_BLACK );
@@ -414,7 +414,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 
                     DrawBitmap( aDstRect.TopLeft(), aPaint );
 
-                    EnableMapMode(eOldPolicy);
+                    SetMappingPolicy(eOldPolicy);
 
                     if( mbLineColor )
                     {
@@ -544,12 +544,12 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
                     xVDev->SetMapMode(aMap);
 
                     // copy MapMode state and disable for target
-                    const vcl::MappingPolicy eOrigPolicy = IsMapModeEnabled();
-                    EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                    const vcl::MappingPolicy eOrigPolicy = GetMappingPolicy();
+                    SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
                     // copy MapMode state and disable for buffer
-                    const vcl::MappingPolicy eBufferPolicy = xVDev->IsMapModeEnabled();
-                    xVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                    const vcl::MappingPolicy eBufferPolicy = xVDev->GetMappingPolicy();
+                    xVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
                     // copy content from original to buffer
                     xVDev->DrawOutDev( aPoint, xVDev->GetOutputSizePixel(), // dest
@@ -557,18 +557,18 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
                                        *this);
 
                     // draw MetaFile to buffer
-                    xVDev->EnableMapMode(eBufferPolicy);
+                    xVDev->SetMappingPolicy(eBufferPolicy);
                     const_cast<GDIMetaFile&>(rMtf).WindStart();
                     const_cast<GDIMetaFile&>(rMtf).Play(*xVDev, rMtfPos, rMtfSize);
                     const_cast<GDIMetaFile&>(rMtf).WindStart();
 
                     // get content bitmap from buffer
-                    xVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                    xVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
                     const Bitmap aPaint(xVDev->GetBitmap(aPoint, xVDev->GetOutputSizePixel()));
 
                     // create alpha mask from gradient and get as Bitmap
-                    xVDev->EnableMapMode(eBufferPolicy);
+                    xVDev->SetMappingPolicy(eBufferPolicy);
                     xVDev->SetDrawMode(DrawModeFlags::GrayGradient);
                     // Related tdf#150610 draw gradient to VirtualDevice bounds
                     // If we are here and the metafile bounds differs from the
@@ -577,7 +577,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
                     // bounds.
                     xVDev->DrawGradient(tools::Rectangle(rPos, rSize), rTransparenceGradient);
                     xVDev->SetDrawMode(DrawModeFlags::Default);
-                    xVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                    xVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
                     AlphaMask aAlpha(xVDev->GetBitmap(aPoint, xVDev->GetOutputSizePixel()));
                     const AlphaMask aPaintAlpha(aPaint.CreateAlphaMask());
@@ -590,31 +590,31 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
 
                     // draw masked content to target and restore MapMode
                     DrawBitmap(aDstRect.TopLeft(), Bitmap(aPaint.CreateColorBitmap(), aAlpha));
-                    EnableMapMode(eOrigPolicy);
+                    SetMappingPolicy(eOrigPolicy);
                 }
                 else
                 {
                     MapMode aMap( GetMapMode() );
                     Point aOutPos( PixelToLogic( aDstRect.TopLeft() ) );
-                    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
+                    const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
                     aMap.SetOrigin( Point( -aOutPos.X(), -aOutPos.Y() ) );
                     xVDev->SetMapMode( aMap );
-                    const vcl::MappingPolicy eVDevOldPolicy = xVDev->IsMapModeEnabled();
+                    const vcl::MappingPolicy eVDevOldPolicy = xVDev->GetMappingPolicy();
 
                     // create paint bitmap
                     const_cast<GDIMetaFile&>(rMtf).WindStart();
                     const_cast<GDIMetaFile&>(rMtf).Play(*xVDev, rMtfPos, rMtfSize);
                     const_cast<GDIMetaFile&>(rMtf).WindStart();
-                    xVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                    xVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
                     Bitmap aPaint(xVDev->GetBitmap(Point(), xVDev->GetOutputSizePixel()));
-                    xVDev->EnableMapMode(eVDevOldPolicy); // #i35331#: MUST NOT use EnableMapMode( sal_True ) here!
+                    xVDev->SetMappingPolicy(eVDevOldPolicy); // #i35331#: MUST NOT use SetMappingPolicy( sal_True ) here!
 
                     // create alpha mask from gradient
                     xVDev->SetDrawMode( DrawModeFlags::GrayGradient );
                     xVDev->DrawGradient( tools::Rectangle( rMtfPos, rMtfSize ), rTransparenceGradient );
                     xVDev->SetDrawMode( DrawModeFlags::Default );
-                    xVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                    xVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
                     AlphaMask aAlpha(xVDev->GetBitmap(Point(), xVDev->GetOutputSizePixel()));
                     const AlphaMask aPaintAlpha(aPaint.CreateAlphaMask());
@@ -625,9 +625,9 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
 
                     xVDev.disposeAndClear();
 
-                    EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                    SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
                     DrawBitmap(aDstRect.TopLeft(), Bitmap(aPaint.CreateColorBitmap(), aAlpha));
-                    EnableMapMode(eOldPolicy);
+                    SetMappingPolicy(eOldPolicy);
                 }
             }
         }
@@ -1769,9 +1769,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                                         Application::Reschedule( true );
                                     }
 
-                                    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
-                                    EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
-                                    aPaintVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                                    const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
+                                    SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
+                                    aPaintVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
                                     Bitmap aBandBmp( aPaintVDev->GetBitmap( Point(), aDstSzPix ) );
 
@@ -1785,8 +1785,8 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                                     rOutMtf.AddAction( new MetaBmpScaleAction( aDstPtPix, aDstSzPix, aBandBmp ) );
                                     rOutMtf.AddAction( new MetaCommentAction( "PRNSPOOL_TRANSPARENTBITMAP_END"_ostr ) );
 
-                                    aPaintVDev->EnableMapMode();
-                                    EnableMapMode(eOldPolicy);
+                                    aPaintVDev->SetMappingPolicy();
+                                    SetMappingPolicy(eOldPolicy);
                                 }
 
                                 // overlapping bands to avoid missing lines (e.g. PostScript)

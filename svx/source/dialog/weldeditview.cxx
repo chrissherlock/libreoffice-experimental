@@ -250,12 +250,12 @@ void WeldEditView::DoPaint(vcl::RenderContext& rRenderContext, const tools::Rect
     {
         VirtualDevice& rSrc = m_bCursorVisible ? *m_xCursorOnDev : *m_xCursorOffDev;
         // Blit cached bitmap in pixel coordinates to avoid rounding issues
-        vcl::MappingPolicy bMapMode = rRenderContext.IsMapModeEnabled();
-        rRenderContext.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        vcl::MappingPolicy bMapMode = rRenderContext.GetMappingPolicy();
+        rRenderContext.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
         rRenderContext.DrawOutDev(m_aCachedCursorPixRect.TopLeft(),
                                   m_aCachedCursorPixRect.GetSize(), Point(0, 0),
                                   m_aCachedCursorPixRect.GetSize(), rSrc);
-        rRenderContext.EnableMapMode(bMapMode);
+        rRenderContext.SetMappingPolicy(bMapMode);
         return;
     }
 
@@ -279,8 +279,8 @@ void WeldEditView::DoPaint(vcl::RenderContext& rRenderContext, const tools::Rect
             Size aPixSize = aPixRect.GetSize();
 
             // Cache in pixel coordinates to avoid rounding issues
-            vcl::MappingPolicy bMapMode = rRenderContext.IsMapModeEnabled();
-            rRenderContext.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+            vcl::MappingPolicy bMapMode = rRenderContext.GetMappingPolicy();
+            rRenderContext.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
             // Cache "cursor off" — text without cursor (before drawing cursor)
             m_xCursorOffDev->SetOutputSizePixel(aPixSize);
@@ -289,24 +289,24 @@ void WeldEditView::DoPaint(vcl::RenderContext& rRenderContext, const tools::Rect
                                         rRenderContext);
 
             // Draw cursor, then cache "cursor on"
-            rRenderContext.EnableMapMode(bMapMode);
+            rRenderContext.SetMappingPolicy(bMapMode);
             pCursor->DrawToDevice(rRenderContext);
-            rRenderContext.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+            rRenderContext.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
             m_xCursorOnDev->SetOutputSizePixel(aPixSize);
             m_xCursorOnDev->SetMapMode(MapMode(MapUnit::MapPixel));
             m_xCursorOnDev->DrawOutDev(Point(0, 0), aPixSize, aPixRect.TopLeft(), aPixSize,
                                        rRenderContext);
 
-            rRenderContext.EnableMapMode(bMapMode);
+            rRenderContext.SetMappingPolicy(bMapMode);
 
             // If cursor should be hidden, restore to clean state
             if (!m_bCursorVisible)
             {
-                rRenderContext.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                rRenderContext.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
                 rRenderContext.DrawOutDev(aPixRect.TopLeft(), aPixSize, Point(0, 0), aPixSize,
                                           *m_xCursorOffDev);
-                rRenderContext.EnableMapMode(bMapMode);
+                rRenderContext.SetMappingPolicy(bMapMode);
             }
         }
     }

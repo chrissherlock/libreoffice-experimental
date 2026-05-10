@@ -229,11 +229,11 @@ namespace cairocanvas
         SvFileStream aStream( aFilename, StreamMode::STD_READWRITE );
 
         const ::Point aEmptyPoint;
-        bool bOldMap( mpRefDevice->IsMapModeEnabled() );
-        mpRefDevice->EnableMapMode( false );
+        bool bOldMap( mpRefDevice->GetMappingPolicy() );
+        mpRefDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
         const ::Bitmap aTempBitmap(mpRefDevice->GetBitmap(aEmptyPoint, mpRefDevice->GetOutputSizePixel()));
         WriteDIB(aTempBitmap, aStream, false);
-        mpRefDevice->EnableMapMode( bOldMap );
+        mpRefDevice->SetMappingPolicy( bOldMap );
 
         ++nFilePostfixCount;
     }

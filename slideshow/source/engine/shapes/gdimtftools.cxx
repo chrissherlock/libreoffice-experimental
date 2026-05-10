@@ -275,11 +275,11 @@ bool getAnimationFromGraphic( VectorOfMtfAnimationFrames&   o_rFrames,
         // though, can contain bitmaps of varying sizes and different
         // update modes)
         pVDev->SetOutputSizePixel(aAnimSize);
-        pVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        pVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
         // setup mask VDev (alpha VDev is currently rather slow)
         pVDevMask->SetOutputSizePixel(aAnimSize);
-        pVDevMask->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        pVDevMask->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
         // tdf#156630 make erase calls fill with transparency
         pVDev->SetBackground(Wallpaper(COL_BLACK));

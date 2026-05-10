@@ -159,13 +159,13 @@ void OutputDevice::DrawScaledAndTranslatedBitmap(
     if (!mpMetaFile && comphelper::LibreOfficeKit::isActive() && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
     {
         aDestPt.Move(aOrigin.getX(), aOrigin.getY());
-        EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     }
 
     DrawBitmap(aDestPt, aDestSize, rBitmap);
     if (!mpMetaFile && comphelper::LibreOfficeKit::isActive() && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
     {
-        EnableMapMode();
+        SetMappingPolicy();
         aDestPt.Move(-aOrigin.getX(), -aOrigin.getY());
     }
     return;
@@ -241,7 +241,7 @@ void OutputDevice::DrawTransformedBitmapEx(
     // tdf#130768 CAUTION(!) using GetViewTransformation() is *not* enough here, it may
     // be that mnOutOffX/mnOutOffY is used - see AOO bug 75163, mentioned at
     // ImplGetDeviceTransformation declaration
-    basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation(IsMapModeEnabled()) * rTransformation);
+    basegfx::B2DHomMatrix aFullTransform(mpMapper->GetDeviceTransformation(GetMappingPolicy()) * rTransformation);
 
     // First try to handle additional alpha blending, either directly, or modify the bitmap.
     if(!rtl::math::approxEqual( fAlpha, 1.0 ))

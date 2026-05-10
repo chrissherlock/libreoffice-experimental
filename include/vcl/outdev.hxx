@@ -1581,8 +1581,8 @@ protected:
 
 public:
 
-    void EnableMapMode(vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode);
-    vcl::MappingPolicy IsMapModeEnabled() const;
+    void SetMappingPolicy(vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode);
+    vcl::MappingPolicy GetMappingPolicy() const;
 
     void                        SetMapMode();
     void                        SetMapMode( const MapMode& rNewMapMode );

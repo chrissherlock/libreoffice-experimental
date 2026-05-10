@@ -2182,7 +2182,7 @@ static void assertTilePixelColor(SdXImpressDocument* pXImpressDocument, int nPix
     pDevice->SetOutputSizePixelScaleOffsetAndLOKBuffer(Size(nCanvasSize, nCanvasSize),
             1.0, Point(), aPixmap.data());
     pXImpressDocument->paintTile(*pDevice, nCanvasSize, nCanvasSize, 0, 0, 15360, 7680);
-    pDevice->EnableMapMode(false);
+    pDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     Bitmap aBitmap = pDevice->GetBitmap(Point(0, 0), Size(nTileSize, nTileSize));
     BitmapScopedReadAccess pAccess(aBitmap);
     Color aActualColor(pAccess->GetPixel(nPixelX, nPixelY));

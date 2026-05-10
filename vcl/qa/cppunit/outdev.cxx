@@ -141,7 +141,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testUseAfterDispose)
     // Create a virtual device, enable map mode then dispose it.
     ScopedVclPtrInstance<VirtualDevice> pVDev;
 
-    pVDev->EnableMapMode();
+    pVDev->SetMappingPolicy();
 
     pVDev->disposeOnce();
 
