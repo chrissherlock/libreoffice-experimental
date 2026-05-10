@@ -44,14 +44,14 @@ static inline tools::Long lcl_RoundToLong(double fVal)
     return static_cast<tools::Long>(std::llround(fVal));
 }
 
-static double lcl_GetScaledXLength(const basegfx::B2DHomMatrix& m)
+static double lcl_GetBasisVectorMagnitudeX(const basegfx::B2DHomMatrix& m)
 {
     basegfx::B2DVector vx(1.0, 0.0);
     vx *= m;
     return vx.getLength();
 }
 
-static double lcl_GetScaledYLength(const basegfx::B2DHomMatrix& m)
+static double lcl_GetBasisVectorMagnitudeY(const basegfx::B2DHomMatrix& m)
 {
     basegfx::B2DVector vy(0.0, 1.0);
     vy *= m;
@@ -173,8 +173,8 @@ void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, d
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
 
-    rScaleX = lcl_GetScaledXLength(aMat);
-    rScaleY = lcl_GetScaledYLength(aMat);
+    rScaleX = lcl_GetBasisVectorMagnitudeX(aMat);
+    rScaleY = lcl_GetBasisVectorMagnitudeY(aMat);
 
     rTransX = aMat.get(0, 2);
     rTransY = aMat.get(1, 2);
@@ -244,8 +244,8 @@ Point CoordinateMapper::GetDeviceToWindowOffset() const
 Size CoordinateMapper::LogicToViewDistance(const Size& rLogicSize, bool bMap) const
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
-    const double sx = lcl_GetScaledXLength(aMat);
-    const double sy = lcl_GetScaledYLength(aMat);
+    const double sx = lcl_GetBasisVectorMagnitudeX(aMat);
+    const double sy = lcl_GetBasisVectorMagnitudeY(aMat);
     return Size(lcl_RoundToLong(rLogicSize.Width() * sx),
                 lcl_RoundToLong(rLogicSize.Height() * sy));
 }
@@ -626,8 +626,10 @@ template <> Size CompiledTransform::Apply<Size>(const Size& rSize) const
         return ApplyRectilinear(rSize);
 
     // Path B: Basis Magnitude Approximation
-    const double fNewWidth = static_cast<double>(rSize.Width()) * lcl_GetScaledXLength(maMatrix);
-    const double fNewHeight = static_cast<double>(rSize.Height()) * lcl_GetScaledYLength(maMatrix);
+    const double fNewWidth
+        = static_cast<double>(rSize.Width()) * lcl_GetBasisVectorMagnitudeX(maMatrix);
+    const double fNewHeight
+        = static_cast<double>(rSize.Height()) * lcl_GetBasisVectorMagnitudeY(maMatrix);
 
     return Size(lcl_RoundToLong(fNewWidth), lcl_RoundToLong(fNewHeight));
 }
@@ -1098,7 +1100,7 @@ tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth, bool b
 
     if (!rTransform.CheckRectilinearContract())
         return lcl_RoundToLong(static_cast<double>(nWidth)
-                               * lcl_GetScaledXLength(rTransform.GetMatrix()));
+                               * lcl_GetBasisVectorMagnitudeX(rTransform.GetMatrix()));
 
     return lcl_RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
 }
@@ -1110,7 +1112,7 @@ tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight, bool
 
     if (!rTransform.CheckRectilinearContract())
         return lcl_RoundToLong(static_cast<double>(nHeight)
-                               * lcl_GetScaledYLength(rTransform.GetMatrix()));
+                               * lcl_GetBasisVectorMagnitudeY(rTransform.GetMatrix()));
 
     return lcl_RoundToLong(static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1));
 }
@@ -1122,7 +1124,7 @@ tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth, bool b
 
     if (!rTransform.CheckRectilinearContract())
         return lcl_RoundToLong(static_cast<double>(nWidth)
-                               * lcl_GetScaledXLength(rTransform.GetMatrix()));
+                               * lcl_GetBasisVectorMagnitudeX(rTransform.GetMatrix()));
 
     return lcl_RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
 }
@@ -1134,7 +1136,7 @@ tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight, bool
 
     if (!rTransform.CheckRectilinearContract())
         return lcl_RoundToLong(static_cast<double>(nHeight)
-                               * lcl_GetScaledYLength(rTransform.GetMatrix()));
+                               * lcl_GetBasisVectorMagnitudeY(rTransform.GetMatrix()));
 
     return lcl_RoundToLong(static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1));
 }
@@ -1145,7 +1147,7 @@ double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth, bool bMa
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
 
     if (!rTransform.CheckRectilinearContract())
-        return static_cast<double>(nWidth) * lcl_GetScaledXLength(rTransform.GetMatrix());
+        return static_cast<double>(nWidth) * lcl_GetBasisVectorMagnitudeX(rTransform.GetMatrix());
 
     return static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0);
 }
@@ -1156,7 +1158,7 @@ double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight, bool b
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
 
     if (!rTransform.CheckRectilinearContract())
-        return static_cast<double>(nHeight) * lcl_GetScaledYLength(rTransform.GetMatrix());
+        return static_cast<double>(nHeight) * lcl_GetBasisVectorMagnitudeY(rTransform.GetMatrix());
 
     return static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1);
 }
