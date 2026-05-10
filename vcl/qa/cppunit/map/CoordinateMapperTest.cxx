@@ -233,6 +233,71 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testAffineAABBInflationAndInverse)
                            aRestored.Bottom() >= aOriginal.Bottom());
 }
 
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionRectilinearCollapsePrevention)
+{
+    CoordinateMapper aMapper;
+    aMapper.SetDPIX(100);
+    aMapper.SetDPIY(100);
+    aMapper.SetDPIScalePercentage(100);
+
+    // Set a severe downscale to force sub-pixel dimensions.
+    // ResolutionScale 0.001 * 100 DPI = 0.1 scale factor.
+    aMapper.SetMapResolutionScaleX(0.001);
+    aMapper.SetMapResolutionScaleY(0.001);
+
+    // Create a 4x4 logical region.
+    // 4 units * 0.1 scale = 0.4 pixels.
+    // Standard rounding would push this to 0, causing the region to vanish.
+    vcl::Region aRegion(tools::Rectangle(Point(100, 100), Size(4, 4)));
+
+    const auto& rTransform = aMapper.Compile(true);
+    vcl::Region aTransformed = rTransform.Apply(aRegion);
+
+    // ASSERTION 1: The region MUST NOT vanish.
+    // (This asserts the fix for the SwVirtFlyDrawObj empty-viewport crash)
+    CPPUNIT_ASSERT_MESSAGE("Rectangular region collapsed to empty during severe downscale!",
+                           !aTransformed.IsEmpty());
+
+    // ASSERTION 2: The structural footprint must be clamped to exactly 1x1.
+    tools::Rectangle aBound = aTransformed.GetBoundRect();
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Region width should be clamped to 1 pixel", tools::Long(1),
+                                 aBound.GetWidth());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Region height should be clamped to 1 pixel", tools::Long(1),
+                                 aBound.GetHeight());
+}
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionTransformationCoverage)
+{
+    CoordinateMapper aMapper;
+    aMapper.SetDPIX(100);
+    aMapper.SetDPIY(100);
+    aMapper.SetDPIScalePercentage(100);
+
+    // ResolutionScale 0.02 * 100 DPI = 2.0 scale factor
+    aMapper.SetMapResolutionScaleX(0.02);
+    aMapper.SetMapResolutionScaleY(0.02);
+
+    // Create a 100x100 logical rectangle.
+    // In VCL, this is Point(0,0) to Point(99,99) for a width of 100.
+    vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
+
+    const auto& rTransform = aMapper.Compile(true);
+    vcl::Region aTransformed = rTransform.Apply(aRegion);
+    tools::Rectangle aBound = aTransformed.GetBoundRect();
+
+    // Verification:
+    // Logical 100 units * 2.0 = 200 physical pixels.
+    // We use a delta or a range check to handle VCL's inclusive integer coordinate system
+    // which can drift by 1 pixel depending on scanline conversion.
+    tools::Long nWidth = aBound.GetWidth();
+    CPPUNIT_ASSERT_MESSAGE("Region width scaling failed significantly",
+                           nWidth >= 199 && nWidth <= 201);
+
+    tools::Long nHeight = aBound.GetHeight();
+    CPPUNIT_ASSERT_MESSAGE("Region height scaling failed significantly",
+                           nHeight >= 199 && nHeight <= 201);
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
