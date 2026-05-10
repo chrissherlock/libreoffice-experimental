@@ -35,35 +35,11 @@
 #include <CoordinateMapper.hxx>
 #include <MappingCoefficients.hxx>
 
+#include "CoordinateMath.hxx"
+
 #include <cmath>
 #include <cassert>
 #include <ranges>
-
-static inline tools::Long lcl_RoundToLong(double fVal)
-{
-    return static_cast<tools::Long>(std::llround(fVal));
-}
-
-static double lcl_GetBasisVectorMagnitudeX(const basegfx::B2DHomMatrix& m)
-{
-    basegfx::B2DVector vx(1.0, 0.0);
-    vx *= m;
-    return vx.getLength();
-}
-
-static double lcl_GetBasisVectorMagnitudeY(const basegfx::B2DHomMatrix& m)
-{
-    basegfx::B2DVector vy(0.0, 1.0);
-    vy *= m;
-    return vy.getLength();
-}
-
-static tools::Rectangle lcl_RangeToVCLRect(const basegfx::B2DRange& rRange)
-{
-    return tools::Rectangle(lcl_RoundToLong(rRange.getMinX()), lcl_RoundToLong(rRange.getMinY()),
-                            lcl_RoundToLong(rRange.getMaxX()) - 1,
-                            lcl_RoundToLong(rRange.getMaxY()) - 1);
-}
 
 // ============================================================================
 // TEMPLATE SPECIALIZATIONS: THE UNIVERSAL GEOMETRY PIPELINE
@@ -88,7 +64,7 @@ template <> Point CompiledTransform::Apply<Point>(const Point& rPt) const
             double fX = aPt.getX() * maMatrix.get(0, 0) + maMatrix.get(0, 2);
             double fY = aPt.getY() * maMatrix.get(1, 1) + maMatrix.get(1, 2);
 
-            return Point(lcl_RoundToLong(fX), lcl_RoundToLong(fY));
+            return Point(vcl::detail::RoundToLong(fX), vcl::detail::RoundToLong(fY));
         }
 
         case TransformMode::AffineFallback:
@@ -96,7 +72,8 @@ template <> Point CompiledTransform::Apply<Point>(const Point& rPt) const
             // Full 3x3 Affine Transformation
             basegfx::B2DPoint aB2DPt(rPt.X(), rPt.Y());
             aB2DPt *= maMatrix;
-            return Point(lcl_RoundToLong(aB2DPt.getX()), lcl_RoundToLong(aB2DPt.getY()));
+            return Point(vcl::detail::RoundToLong(aB2DPt.getX()),
+                         vcl::detail::RoundToLong(aB2DPt.getY()));
     }
 }
 
@@ -107,7 +84,7 @@ Size CompiledTransform::ApplyRectilinear(const Size& rSize) const
     double fWidth = static_cast<double>(rSize.Width()) * maMatrix.get(0, 0);
     double fHeight = static_cast<double>(rSize.Height()) * maMatrix.get(1, 1);
 
-    return Size(lcl_RoundToLong(fWidth), lcl_RoundToLong(fHeight));
+    return Size(vcl::detail::RoundToLong(fWidth), vcl::detail::RoundToLong(fHeight));
 }
 
 tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRect) const
@@ -120,10 +97,10 @@ tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRe
     double fW = static_cast<double>(rRect.GetWidth()) * maMatrix.get(0, 0);
     double fH = static_cast<double>(rRect.GetHeight()) * maMatrix.get(1, 1);
 
-    tools::Long nL = lcl_RoundToLong(fL);
-    tools::Long nT = lcl_RoundToLong(fT);
-    tools::Long nW = lcl_RoundToLong(fW);
-    tools::Long nH = lcl_RoundToLong(fH);
+    tools::Long nL = vcl::detail::RoundToLong(fL);
+    tools::Long nT = vcl::detail::RoundToLong(fT);
+    tools::Long nW = vcl::detail::RoundToLong(fW);
+    tools::Long nH = vcl::detail::RoundToLong(fH);
 
     if (nW == 0 && rRect.GetWidth() > 0)
         nW = 1;
@@ -140,11 +117,11 @@ template <> Size CompiledTransform::Apply<Size>(const Size& rSize) const
 
     // Path B: Basis Magnitude Approximation
     const double fNewWidth
-        = static_cast<double>(rSize.Width()) * lcl_GetBasisVectorMagnitudeX(maMatrix);
+        = static_cast<double>(rSize.Width()) * vcl::detail::GetBasisVectorMagnitudeX(maMatrix);
     const double fNewHeight
-        = static_cast<double>(rSize.Height()) * lcl_GetBasisVectorMagnitudeY(maMatrix);
+        = static_cast<double>(rSize.Height()) * vcl::detail::GetBasisVectorMagnitudeY(maMatrix);
 
-    return Size(lcl_RoundToLong(fNewWidth), lcl_RoundToLong(fNewHeight));
+    return Size(vcl::detail::RoundToLong(fNewWidth), vcl::detail::RoundToLong(fNewHeight));
 }
 
 template <>
@@ -157,7 +134,7 @@ tools::Rectangle CompiledTransform::Apply<tools::Rectangle>(const tools::Rectang
     // Path B: Conservative AABB
     basegfx::B2DRange aRange(rRect.Left(), rRect.Top(), rRect.Right() + 1, rRect.Bottom() + 1);
     aRange.transform(maMatrix);
-    tools::Rectangle aRet = lcl_RangeToVCLRect(aRange);
+    tools::Rectangle aRet = vcl::detail::RangeToVCLRect(aRange);
 
     if (rRect.IsEmpty())
         aRet.SetEmpty();
