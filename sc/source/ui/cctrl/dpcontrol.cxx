@@ -105,10 +105,10 @@ void ScDPFieldButton::setPopupLeft(bool b)
 
 void ScDPFieldButton::draw()
 {
-    vcl::MappingPolicy bOldMapEnabled = mpOutDev->IsMapModeEnabled();
+    vcl::MappingPolicy bOldMapEnabled = mpOutDev->GetMappingPolicy();
 
     if (mpOutDev->GetMapMode().GetMapUnit() != MapUnit::MapPixel)
-        mpOutDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        mpOutDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     if (mbBaseButton)
     {
@@ -155,7 +155,7 @@ void ScDPFieldButton::draw()
     if (mbToggleButton)
         drawToggleButton();
 
-    mpOutDev->EnableMapMode(bOldMapEnabled);
+    mpOutDev->SetMappingPolicy(bOldMapEnabled);
 }
 
 void ScDPFieldButton::getPopupBoundingBox(Point& rPos, Size& rSize) const

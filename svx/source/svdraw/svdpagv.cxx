@@ -443,7 +443,7 @@ void SdrPageView::DrawPageViewGrid(OutputDevice& rOut, const tools::Rectangle& r
     Color aOriginalLineColor( rOut.GetLineColor() );
     rOut.SetLineColor( aColor );
 
-    vcl::MappingPolicy eMapPolicy0 = rOut.IsMapModeEnabled();
+    vcl::MappingPolicy eMapPolicy0 = rOut.GetMappingPolicy();
 
     Point aGridOrigin(maPageOrigin);
     tools::Long x1 = 0;
@@ -637,7 +637,7 @@ void SdrPageView::DrawPageViewGrid(OutputDevice& rOut, const tools::Rectangle& r
         }
     }
 
-    rOut.EnableMapMode(eMapPolicy0);
+    rOut.SetMappingPolicy(eMapPolicy0);
     rOut.SetLineColor(aOriginalLineColor);
 }
 

@@ -686,15 +686,15 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
         {
             const vcl::Region    aOldClip( rSaveDevice.GetClipRegion() );
             const Point     aPixOffset( rSaveDevice.LogicToPixel( Point() ) );
-            const vcl::MappingPolicy eOldPolicy = rSaveDevice.IsMapModeEnabled();
+            const vcl::MappingPolicy eOldPolicy = rSaveDevice.GetMappingPolicy();
 
             // move clip region to have the same distance to DestOffset
             aClip.Move( aPixOffset.X() - aPixPos.X(), aPixOffset.Y() - aPixPos.Y() );
 
             // set pixel clip region
-            rSaveDevice.EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+            rSaveDevice.SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
             rSaveDevice.SetClipRegion( aClip );
-            rSaveDevice.EnableMapMode( eOldPolicy );
+            rSaveDevice.SetMappingPolicy( eOldPolicy );
             rSaveDevice.DrawOutDev( Point(), rSize, rPos, rSize, *this );
             rSaveDevice.SetClipRegion( aOldClip );
         }

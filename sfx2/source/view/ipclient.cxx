@@ -450,12 +450,12 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getPlacement()
     // editing in LOK.
     if (comphelper::LibreOfficeKit::isActive())
     {
-        vcl::MappingPolicy eOldPolicy = pEditWin->IsMapModeEnabled();
+        vcl::MappingPolicy eOldPolicy = pEditWin->GetMappingPolicy();
         if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode)
-            pEditWin->EnableMapMode();
+            pEditWin->SetMappingPolicy();
         aRealObjArea = pEditWin->LogicToPixel(aRealObjArea);
-        if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode  && pEditWin->IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode)
-            pEditWin->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode  && pEditWin->GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode)
+            pEditWin->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     }
     else
     {
@@ -480,12 +480,12 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getClipRectangle()
     // See comment for SfxInPlaceClient_Impl::getPlacement.
     if (comphelper::LibreOfficeKit::isActive())
     {
-        vcl::MappingPolicy eOldPolicy = pEditWin->IsMapModeEnabled();
+        vcl::MappingPolicy eOldPolicy = pEditWin->GetMappingPolicy();
         if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode)
-            pEditWin->EnableMapMode();
+            pEditWin->SetMappingPolicy();
         aRealObjArea = pEditWin->LogicToPixel(aRealObjArea);
-        if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode  && pEditWin->IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode)
-            pEditWin->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode  && pEditWin->GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode)
+            pEditWin->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     }
     else
     {
@@ -962,10 +962,10 @@ ErrCodeMsg SfxInPlaceClient::DoVerb(sal_Int32 nVerb)
             {
                 // See comment for SfxInPlaceClient_Impl::getPlacement.
                 vcl::Window* pEditWin = GetEditWin();
-                vcl::MappingPolicy eOldPolicy = pEditWin->IsMapModeEnabled();
+                vcl::MappingPolicy eOldPolicy = pEditWin->GetMappingPolicy();
                 if (comphelper::LibreOfficeKit::isActive() && eOldPolicy == vcl::MappingPolicy::IgnoreMapMode)
                 {
-                    pEditWin->EnableMapMode();
+                    pEditWin->SetMappingPolicy();
                 }
                 m_pViewSh->GetViewFrame().GetFrame().LockResize_Impl(true);
                 try
@@ -1017,9 +1017,9 @@ ErrCodeMsg SfxInPlaceClient::DoVerb(sal_Int32 nVerb)
 
                 }
                 if (comphelper::LibreOfficeKit::isActive() && eOldPolicy == vcl::MappingPolicy::IgnoreMapMode
-                         && pEditWin->IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode)
+                         && pEditWin->GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode)
                 {
-                    pEditWin->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                    pEditWin->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
                 }
                 SfxViewFrame& rFrame = m_pViewSh->GetViewFrame();
                 rFrame.GetFrame().LockResize_Impl(false);

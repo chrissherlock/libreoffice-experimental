@@ -137,16 +137,14 @@ public:
         , mbMappingWasEnabled(mpVirtualDevice->IsMapModeEnabled())
     {
         mpVirtualDevice->Push();
-        mpVirtualDevice->EnableMapMode(false);
+        mpVirtualDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     }
 
     ~DeviceSettingsGuard()
     {
-        mpVirtualDevice->EnableMapMode(mbMappingWasEnabled);
+        mpVirtualDevice->SetMappingPolicy(mbMappingWasEnabled);
         mpVirtualDevice->Pop();
     }
-};
-}
 
 static bool setupTextOutput(OutputDevice& rOutDev, const rendering::XCanvas* pOwner,
                             ::Point& o_rOutPos, const rendering::ViewState& viewState,

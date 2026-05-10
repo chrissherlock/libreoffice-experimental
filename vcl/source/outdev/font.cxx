@@ -697,7 +697,7 @@ vcl::Font OutputDevice::GetDefaultFont( DefaultFontType nType, LanguageType eLan
                     aFont.SetFamilyName( aSearch );
 
                     // convert to pixel height
-                    Size aSize = pOutDev->GetMapper().LogicToViewDistance(aFont.GetFontSize(), pOutDev->IsMapModeEnabled());
+                    Size aSize = pOutDev->GetMapper().LogicToViewDistance(aFont.GetFontSize(), pOutDev->GetMappingPolicy());
 
                     if ( !aSize.Height() )
                     {
@@ -843,7 +843,7 @@ bool OutputDevice::ImplNewFont() const
     // convert to pixel height
     // TODO: replace integer based aSize completely with subpixel accurate type
     float fExactHeight = LogicHeightToDeviceSubPixel(maFont.GetFontHeight());
-    Size aSize = mpMapper->LogicToViewDistance(maFont.GetFontSize(), IsMapModeEnabled());
+    Size aSize = mpMapper->LogicToViewDistance(maFont.GetFontSize(), GetMappingPolicy());
     if ( !aSize.Height() )
     {
         // use default pixel height only when logical height is zero
@@ -967,7 +967,7 @@ bool OutputDevice::ImplNewFont() const
     bool bRet = true;
 
     // #95414# fix for OLE objects which use scale factors very creatively
-    if (IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode && !aSize.Width())
+    if (GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode && !aSize.Width())
         bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(maFont), aSize.Height());
 
     return bRet;
@@ -986,12 +986,12 @@ bool OutputDevice::AttemptOLEFontScaleFix(vcl::Font& rFont, tools::Long nHeight)
 
     Size aOrigSize = rFont.GetFontSize();
     rFont.SetFontSize(Size(nNewWidth, nHeight));
-    const_cast<OutputDevice*>(this)->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    const_cast<OutputDevice*>(this)->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     mbNewFont = true;
 
     const bool bRet = ImplNewFont();  // recurse once using stretched width
 
-    const_cast<OutputDevice*>(this)->EnableMapMode();
+    const_cast<OutputDevice*>(this)->SetMappingPolicy();
     rFont.SetFontSize(aOrigSize);
 
     return bRet;
@@ -1057,7 +1057,7 @@ void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
     auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
     GDIMetaFile*        pOldMetaFile    = mpMetaFile;
     mpMetaFile = nullptr;
-    EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     FontEmphasisMark nEmphasisMark = maFont.GetEmphasisMarkStyle();
     tools::Long nEmphasisHeight;
@@ -1311,7 +1311,7 @@ tools::Long OutputDevice::GetMinKashida() const
         return 0;
 
     auto nKashidaWidth = mpFontInstance->mxFontMetric->GetMinKashida();
-    if (IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode)
+    if (GetMappingPolicy() == vcl::MappingPolicy::IgnoreMapMode)
         nKashidaWidth = std::ceil(nKashidaWidth);
 
     return DevicePixelToLogicWidth(nKashidaWidth);

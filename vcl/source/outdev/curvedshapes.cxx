@@ -35,7 +35,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     if  ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, IsMapModeEnabled()));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
     if ( aRect.IsEmpty() )
         return;
 
@@ -78,7 +78,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     if ( !IsDeviceOutputNecessary() || !mbLineColor || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, IsMapModeEnabled()));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
     if ( aRect.IsEmpty() )
         return;
 
@@ -95,8 +95,8 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     if ( mbInitLineColor )
         InitLineColor();
 
-    const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, IsMapModeEnabled()));
-    const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, IsMapModeEnabled()));
+    const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
+    const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, GetMappingPolicy()));
     tools::Polygon aArcPoly( aRect, aStart, aEnd, PolyStyle::Arc );
 
     if ( aArcPoly.GetSize() >= 2 )
@@ -117,7 +117,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, IsMapModeEnabled()));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
     if ( aRect.IsEmpty() )
         return;
 
@@ -134,8 +134,8 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     if ( mbInitLineColor )
         InitLineColor();
 
-    const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, IsMapModeEnabled()));
-    const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, IsMapModeEnabled()));
+    const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
+    const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, GetMappingPolicy()));
     tools::Polygon aPiePoly( aRect, aStart, aEnd, PolyStyle::Pie );
 
     if ( aPiePoly.GetSize() >= 2 )
@@ -163,7 +163,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
         return;
 
-    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, IsMapModeEnabled()));
+    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
     if ( aRect.IsEmpty() )
         return;
 
@@ -180,8 +180,8 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     if ( mbInitLineColor )
         InitLineColor();
 
-    const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, IsMapModeEnabled()));
-    const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, IsMapModeEnabled()));
+    const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
+    const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, GetMappingPolicy()));
     tools::Polygon aChordPoly( aRect, aStart, aEnd, PolyStyle::Chord );
 
     if ( aChordPoly.GetSize() >= 2 )

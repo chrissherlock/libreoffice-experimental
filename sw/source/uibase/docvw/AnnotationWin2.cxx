@@ -616,14 +616,14 @@ void SwAnnotationWin::SetPosAndSize()
 
             // LOK has map mode disabled, and we still want to perform pixel ->
             // twips conversion for the size of the line above the note.
-            if (comphelper::LibreOfficeKit::isActive() && (EditWin().IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode))
+            if (comphelper::LibreOfficeKit::isActive() && (EditWin().GetMappingPolicy() == vcl::MappingPolicy::IgnoreMapMode))
             {
-                EditWin().EnableMapMode();
+                EditWin().SetMappingPolicy();
                 Size aSize(aLineEnd.getX() - aLineStart.getX(), aLineEnd.getY() - aLineStart.getY());
                 aSize = EditWin().PixelToLogic(aSize);
                 aLineEnd = aLineStart;
                 aLineEnd.Move(aSize.getWidth(), aSize.getHeight());
-                EditWin().EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                EditWin().SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
             }
 
             if (mpAnchor)
@@ -737,15 +737,15 @@ void SwAnnotationWin::SetPosAndSize()
 
             // For annotation text range rectangles to be calculated correctly,
             // we need the map mode disabled
-            bool bDisableMapMode = comphelper::LibreOfficeKit::isActive() && EditWin().IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode;
+            bool bDisableMapMode = comphelper::LibreOfficeKit::isActive() && EditWin().GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode;
             if (bDisableMapMode)
-                EditWin().EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                EditWin().SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
             if (mpSidebarItem->maLayoutInfo.mPositionFromCommentAnchor)
                 pTmpCursorForAnnotationTextRange->FillRects();
 
             if (bDisableMapMode)
-                EditWin().EnableMapMode();
+                EditWin().SetMappingPolicy();
 
             SwRects* pRects(pTmpCursorForAnnotationTextRange.get());
             for(const SwRect & rNextRect : *pRects)

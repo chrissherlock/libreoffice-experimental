@@ -72,8 +72,8 @@ namespace cairocanvas
         if( !pOutDev )
             return;
 
-        const bool bOldMapState( pOutDev->IsMapModeEnabled() );
-        pOutDev->EnableMapMode(false);
+        const bool bOldMapState( pOutDev->GetMappingPolicy() );
+        pOutDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
         const Size aSize = pOutDev->GetFontMetric( *maFont ).GetFontSize();
 
@@ -87,7 +87,7 @@ namespace cairocanvas
 
         maFont->SetFontWidth( nNewWidth );
 
-        pOutDev->EnableMapMode(bOldMapState);
+        pOutDev->SetMappingPolicy(bOldMapState);
     }
 
     void CanvasFont::disposing(std::unique_lock<std::mutex>& rGuard)

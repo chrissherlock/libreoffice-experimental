@@ -122,7 +122,7 @@ AlphaMask implcreateAlphaMask(drawinglayer::primitive2d::Primitive2DContainer& r
     pContentProcessor.reset();
 
     // get alpha channel from vdev
-    pContent->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    pContent->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     const Point aEmptyPoint;
 
     // Convert from transparency->alpha.
