@@ -39,8 +39,8 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
 
         if (!mbOutputClipped)
         {
-            const tools::Long nX = mpMapper->LogicToDevicePixel(Point(rPoint.X(), 0), IsMapModeEnabled()).X();
-            const tools::Long nY = mpMapper->LogicToDevicePixel(Point(0, rPoint.Y()), IsMapModeEnabled()).Y();
+            const tools::Long nX = mpMapper->LogicToDevicePixel(Point(rPoint.X(), 0), GetMappingPolicy()).X();
+            const tools::Long nY = mpMapper->LogicToDevicePixel(Point(0, rPoint.Y()), GetMappingPolicy()).Y();
             aColor = mpGraphics->GetPixel(nX, nY, *this);
         }
     }
@@ -57,7 +57,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( !IsDeviceOutputNecessary() || !mbLineColor || ImplIsRecordLayout() )
         return;
 
-    Point aPt = mpMapper->LogicToDevicePixel(rPt, IsMapModeEnabled());
+    Point aPt = mpMapper->LogicToDevicePixel(rPt, GetMappingPolicy());
 
     if ( !mpGraphics && !AcquireGraphics() )
         return;
@@ -87,7 +87,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
         return;
 
-    Point aPt = mpMapper->LogicToDevicePixel(rPt, IsMapModeEnabled());
+    Point aPt = mpMapper->LogicToDevicePixel(rPt, GetMappingPolicy());
 
     if ( !mpGraphics && !AcquireGraphics() )
         return;

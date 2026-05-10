@@ -143,8 +143,8 @@ using namespace vclcanvas;
 
             if (!::rtl::math::approxEqual(rFontMatrix.m00, rFontMatrix.m11))
             {
-                const vcl::MappingPolicy bOldMapState(rOutDev.IsMapModeEnabled());
-                rOutDev.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+                const vcl::MappingPolicy bOldMapState(rOutDev.GetMappingPolicy());
+                rOutDev.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
                 const Size aSize = rOutDev.GetFontMetric(rFont).GetFontSize();
 
@@ -158,7 +158,7 @@ using namespace vclcanvas;
 
                 rFont.SetFontWidth(nNewWidth);
 
-                rOutDev.EnableMapMode(bOldMapState);
+                rOutDev.SetMappingPolicy(bOldMapState);
             }
         }
 

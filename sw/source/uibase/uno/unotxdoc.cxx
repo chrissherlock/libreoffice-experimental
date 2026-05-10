@@ -3970,7 +3970,7 @@ void SwXTextDocument::initializeForTiledRendering(const css::uno::Sequence<css::
     // Disable map mode, so that it's possible to send mouse event coordinates
     // directly in twips.
     SwEditWin& rEditWin = m_pDocShell->GetView()->GetEditWin();
-    rEditWin.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    rEditWin.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     // when the "This document may contain formatting or content that cannot
     // be saved..." dialog appears, it is auto-cancelled with tiled rendering,

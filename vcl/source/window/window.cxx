@@ -1359,7 +1359,7 @@ void Window::ImplInitResolutionSettings()
 
     // update the recalculated values for logical units
     // and also tools belonging to the values
-    if (IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode)
+    if (GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode)
     {
         MapMode aMapMode = GetMapMode();
         SetMapMode();
@@ -1753,7 +1753,7 @@ void Window::ImplNewInputContext()
     if (!rFontName.isEmpty())
     {
         OutputDevice *pFocusWinOutDev = pFocusWin->GetOutDev();
-        Size aSize = pFocusWinOutDev->GetMapper().LogicToViewDistance( rFont.GetFontSize(), pFocusWinOutDev->IsMapModeEnabled() );
+        Size aSize = pFocusWinOutDev->GetMapper().LogicToViewDistance( rFont.GetFontSize(), pFocusWinOutDev->GetMappingPolicy() );
         if ( !aSize.Height() )
         {
             // only set default sizes if the font height in logical
@@ -2953,7 +2953,7 @@ void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll,
                      const tools::Rectangle& rRect, ScrollFlags nFlags )
 {
     OutputDevice *pOutDev = GetOutDev();
-    tools::Rectangle aRect = pOutDev->GetMapper().LogicToDevicePixel(rRect, pOutDev->IsMapModeEnabled());
+    tools::Rectangle aRect = pOutDev->GetMapper().LogicToDevicePixel(rRect, pOutDev->GetMappingPolicy());
     aRect.Intersection( GetOutputRectPixel() );
     if ( !aRect.IsEmpty() )
         ImplScroll( aRect, nHorzScroll, nVertScroll, nFlags );

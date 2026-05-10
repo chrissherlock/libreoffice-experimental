@@ -270,7 +270,7 @@ void ChartWindow::LogicInvalidate(const tools::Rectangle* pRectangle)
     {
         tools::Rectangle aRectangle(*pRectangle);
         // When dragging shapes the map mode is disabled.
-        if (IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode)
+        if (GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode)
         {
             if (GetMapMode().GetMapUnit() == MapUnit::Map100thMM)
             {
@@ -292,7 +292,7 @@ void ChartWindow::LogicInvalidate(const tools::Rectangle* pRectangle)
             const double nX = p.first * scaleX / p.second;
             const double nY = p.first * scaleY / p.second;
 
-            if (IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode)
+            if (GetMappingPolicy() == vcl::MappingPolicy::IgnoreMapMode)
             {
                 aRectangle = aRectangle.scale(1.0 / scaleX, 1.0 / scaleY);
             }

@@ -112,8 +112,11 @@ void Window::SetBackground(const Wallpaper& rBackground)
 {
     GetOutDev()->SetBackground(rBackground);
 }
-void Window::EnableMapMode(vcl::MappingPolicy ePolicy) { GetOutDev()->EnableMapMode(ePolicy); }
-vcl::MappingPolicy Window::IsMapModeEnabled() const { return GetOutDev()->IsMapModeEnabled(); }
+void Window::SetMappingPolicy(vcl::MappingPolicy ePolicy)
+{
+    GetOutDev()->SetMappingPolicy(ePolicy);
+}
+vcl::MappingPolicy Window::GetMappingPolicy() const { return GetOutDev()->GetMappingPolicy(); }
 
 void Window::SetTextColor(const Color& rColor) { GetOutDev()->SetTextColor(rColor); }
 const Color& Window::GetTextColor() const { return GetOutDev()->GetTextColor(); }

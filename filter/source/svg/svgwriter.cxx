@@ -623,7 +623,7 @@ sal_Int32 SVGTextWriter::setTextPosition(const GDIMetaFile& rMtf, size_t& nCurAc
 
     // similar to OutputDevice::Push, but we may conditionally not restore these
     MapMode aOrigMapMode = mpVDev->GetMapMode();
-    vcl::MappingPolicy eOrigMapPolicy = mpVDev->IsMapModeEnabled();
+    vcl::MappingPolicy eOrigMapPolicy = mpVDev->GetMappingPolicy();
     int nPopsNeeded = 0;
 
     size_t nActionIndex = nCurAction + 1;
@@ -782,7 +782,7 @@ sal_Int32 SVGTextWriter::setTextPosition(const GDIMetaFile& rMtf, size_t& nCurAc
     }
 
     mpVDev->SetMapMode(aOrigMapMode);
-    mpVDev->EnableMapMode(eOrigMapPolicy);
+    mpVDev->SetMappingPolicy(eOrigMapPolicy);
     return 1;
 }
 

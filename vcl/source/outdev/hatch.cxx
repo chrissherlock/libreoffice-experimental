@@ -76,21 +76,21 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
 
     if( rPolyPoly.Count() )
     {
-        tools::PolyPolygon aPolyPoly(mpMapper->LogicToWindowUnits(rPolyPoly, IsMapModeEnabled()));
+        tools::PolyPolygon aPolyPoly(mpMapper->LogicToWindowUnits(rPolyPoly, GetMappingPolicy()));
         GDIMetaFile*    pOldMetaFile = mpMetaFile;
-        vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
+        vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
         aPolyPoly.Optimize( PolyOptimizeFlags::NO_SAME );
         aHatch.SetDistance(LogicWidthToDevicePixel(aHatch.GetDistance()));
 
         mpMetaFile = nullptr;
-        EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+        SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
         Push( vcl::PushFlags::LINECOLOR );
         SetLineColor( aHatch.GetColor() );
         InitLineColor();
         DrawHatch( aPolyPoly, aHatch, false );
         Pop();
-        EnableMapMode( eOldPolicy );
+        SetMappingPolicy( eOldPolicy );
         mpMetaFile = pOldMetaFile;
     }
 }
@@ -431,7 +431,7 @@ void OutputDevice::DrawHatchLine( const tools::Line& rLine, const tools::PolyPol
 
 void OutputDevice::DrawHatchLine_DrawLine(const Point& rStartPoint, const Point& rEndPoint)
 {
-    Point aPt1{mpMapper->LogicToDevicePixel(rStartPoint, IsMapModeEnabled())}, aPt2{mpMapper->LogicToDevicePixel(rEndPoint, IsMapModeEnabled())};
+    Point aPt1{mpMapper->LogicToDevicePixel(rStartPoint, GetMappingPolicy())}, aPt2{mpMapper->LogicToDevicePixel(rEndPoint, GetMappingPolicy())};
     mpGraphics->DrawLine(aPt1.X(), aPt1.Y(), aPt2.X(), aPt2.Y(), *this);
 }
 

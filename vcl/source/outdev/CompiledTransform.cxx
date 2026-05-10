@@ -1,0 +1,290 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
+/*
+ * This file is part of the LibreOffice project.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This file incorporates work covered by the following license notice:
+ *
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed
+ * with this work for additional information regarding copyright
+ * ownership. The ASF licenses this file to you under the Apache
+ * License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of
+ * the License at http://www.apache.org/licenses/LICENSE-2.0 .
+ */
+
+#include <sal/log.hxx>
+#include <basegfx/matrix/b2dhommatrix.hxx>
+#include <basegfx/range/b2drange.hxx>
+#include <basegfx/vector/b2dvector.hxx>
+#include <basegfx/range/b2drectangle.hxx>
+#include <basegfx/polygon/b2dpolygon.hxx>
+#include <basegfx/polygon/b2dpolypolygon.hxx>
+#include <tools/bigint.hxx>
+#include <tools/debug.hxx>
+#include <tools/gen.hxx>
+#include <tools/mapunit.hxx>
+
+#include <vcl/svapp.hxx>
+#include <vcl/lineinfo.hxx>
+
+#include <CoordinateMapper.hxx>
+#include <MappingCoefficients.hxx>
+
+#include <cmath>
+#include <cassert>
+#include <ranges>
+
+static inline tools::Long lcl_RoundToLong(double fVal)
+{
+    return static_cast<tools::Long>(std::llround(fVal));
+}
+
+static double lcl_GetBasisVectorMagnitudeX(const basegfx::B2DHomMatrix& m)
+{
+    basegfx::B2DVector vx(1.0, 0.0);
+    vx *= m;
+    return vx.getLength();
+}
+
+static double lcl_GetBasisVectorMagnitudeY(const basegfx::B2DHomMatrix& m)
+{
+    basegfx::B2DVector vy(0.0, 1.0);
+    vy *= m;
+    return vy.getLength();
+}
+
+static tools::Rectangle lcl_RangeToVCLRect(const basegfx::B2DRange& rRange)
+{
+    return tools::Rectangle(lcl_RoundToLong(rRange.getMinX()), lcl_RoundToLong(rRange.getMinY()),
+                            lcl_RoundToLong(rRange.getMaxX()) - 1,
+                            lcl_RoundToLong(rRange.getMaxY()) - 1);
+}
+
+// ============================================================================
+// TEMPLATE SPECIALIZATIONS: THE UNIVERSAL GEOMETRY PIPELINE
+// ============================================================================
+
+template <> Point CompiledTransform::Apply<Point>(const Point& rPt) const
+{
+    switch (meMode)
+    {
+        case TransformMode::Identity:
+            [[likely]] return rPt;
+
+        case TransformMode::Translation:
+            return Point(rPt.X() + mnDeviceTx, rPt.Y() + mnDeviceTy);
+
+        case TransformMode::AxisAlignedAffine:
+        {
+            // Stabilization: Use basegfx logic to ensure rounding consistency
+            // with the full affine path, avoiding 1-pixel 'jitter' in unit tests.
+            basegfx::B2DPoint aPt(rPt.X(), rPt.Y());
+
+            double fX = aPt.getX() * maMatrix.get(0, 0) + maMatrix.get(0, 2);
+            double fY = aPt.getY() * maMatrix.get(1, 1) + maMatrix.get(1, 2);
+
+            return Point(lcl_RoundToLong(fX), lcl_RoundToLong(fY));
+        }
+
+        case TransformMode::AffineFallback:
+        default:
+            // Full 3x3 Affine Transformation
+            basegfx::B2DPoint aB2DPt(rPt.X(), rPt.Y());
+            aB2DPt *= maMatrix;
+            return Point(lcl_RoundToLong(aB2DPt.getX()), lcl_RoundToLong(aB2DPt.getY()));
+    }
+}
+
+Size CompiledTransform::ApplyRectilinear(const Size& rSize) const
+{
+    // NOTE: We preserve the sign of diagonal elements (m00, m11) to allow
+    // Size to reflect basis orientation/mirroring if the MapMode is flipped.
+    double fWidth = static_cast<double>(rSize.Width()) * maMatrix.get(0, 0);
+    double fHeight = static_cast<double>(rSize.Height()) * maMatrix.get(1, 1);
+
+    return Size(lcl_RoundToLong(fWidth), lcl_RoundToLong(fHeight));
+}
+
+tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRect) const
+{
+    if (rRect.IsEmpty())
+        return tools::Rectangle();
+
+    double fL = static_cast<double>(rRect.Left()) * maMatrix.get(0, 0) + maMatrix.get(0, 2);
+    double fT = static_cast<double>(rRect.Top()) * maMatrix.get(1, 1) + maMatrix.get(1, 2);
+    double fW = static_cast<double>(rRect.GetWidth()) * maMatrix.get(0, 0);
+    double fH = static_cast<double>(rRect.GetHeight()) * maMatrix.get(1, 1);
+
+    tools::Long nL = lcl_RoundToLong(fL);
+    tools::Long nT = lcl_RoundToLong(fT);
+    tools::Long nW = lcl_RoundToLong(fW);
+    tools::Long nH = lcl_RoundToLong(fH);
+
+    if (nW == 0 && rRect.GetWidth() > 0)
+        nW = 1;
+    if (nH == 0 && rRect.GetHeight() > 0)
+        nH = 1;
+
+    return tools::Rectangle(Point(nL, nT), Size(nW, nH));
+}
+
+template <> Size CompiledTransform::Apply<Size>(const Size& rSize) const
+{
+    if (PreservesAxisAlignment())
+        return ApplyRectilinear(rSize);
+
+    // Path B: Basis Magnitude Approximation
+    const double fNewWidth
+        = static_cast<double>(rSize.Width()) * lcl_GetBasisVectorMagnitudeX(maMatrix);
+    const double fNewHeight
+        = static_cast<double>(rSize.Height()) * lcl_GetBasisVectorMagnitudeY(maMatrix);
+
+    return Size(lcl_RoundToLong(fNewWidth), lcl_RoundToLong(fNewHeight));
+}
+
+template <>
+tools::Rectangle CompiledTransform::Apply<tools::Rectangle>(const tools::Rectangle& rRect) const
+{
+    // Pure query: Silent selection of Path A or Path B
+    if (PreservesAxisAlignment())
+        return ApplyRectilinear(rRect);
+
+    // Path B: Conservative AABB
+    basegfx::B2DRange aRange(rRect.Left(), rRect.Top(), rRect.Right() + 1, rRect.Bottom() + 1);
+    aRange.transform(maMatrix);
+    tools::Rectangle aRet = lcl_RangeToVCLRect(aRange);
+
+    if (rRect.IsEmpty())
+        aRet.SetEmpty();
+
+    return aRet;
+}
+
+template <>
+tools::Polygon CompiledTransform::Apply<tools::Polygon>(const tools::Polygon& rPoly) const
+{
+    if (meMode == TransformMode::Identity)
+        [[likely]] return rPoly;
+
+    tools::Polygon aPoly(rPoly);
+    for (sal_uInt16 i = 0; i < aPoly.GetSize(); ++i)
+    {
+        aPoly[i] = Apply(aPoly[i]);
+    }
+
+    return aPoly;
+}
+
+template <>
+tools::PolyPolygon
+CompiledTransform::Apply<tools::PolyPolygon>(const tools::PolyPolygon& rPolyPoly) const
+{
+    if (meMode == TransformMode::Identity)
+        [[likely]] return rPolyPoly;
+
+    tools::PolyPolygon aPolyPoly;
+    for (sal_uInt16 i = 0; i < rPolyPoly.Count(); ++i)
+    {
+        aPolyPoly.Insert(Apply(rPolyPoly[i]));
+    }
+
+    return aPolyPoly;
+}
+
+template <>
+basegfx::B2DPolygon
+CompiledTransform::Apply<basegfx::B2DPolygon>(const basegfx::B2DPolygon& rPoly) const
+{
+    if (meMode == TransformMode::Identity)
+        [[likely]] return rPoly;
+
+    basegfx::B2DPolygon aRet(rPoly);
+    aRet.transform(maMatrix);
+    return aRet;
+}
+
+template <>
+basegfx::B2DPolyPolygon
+CompiledTransform::Apply<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon& rPolyPoly) const
+{
+    if (meMode == TransformMode::Identity)
+        [[likely]] return rPolyPoly;
+
+    basegfx::B2DPolyPolygon aRet(rPolyPoly);
+    aRet.transform(maMatrix);
+    return aRet;
+}
+
+template <>
+basegfx::B2DRange CompiledTransform::Apply<basegfx::B2DRange>(const basegfx::B2DRange& rRange) const
+{
+    if (meMode == TransformMode::Identity)
+        [[likely]] return rRange;
+
+    basegfx::B2DRange aRet(rRange);
+    aRet.transform(maMatrix);
+    return aRet;
+}
+
+template <> vcl::Region CompiledTransform::Apply<vcl::Region>(const vcl::Region& rRegion) const
+{
+    if (rRegion.IsNull() || rRegion.IsEmpty() || meMode == TransformMode::Identity)
+        [[likely]] return rRegion;
+
+    if (meMode == TransformMode::Translation)
+    {
+        vcl::Region aRet(rRegion);
+        aRet.Move(mnDeviceTx, mnDeviceTy);
+        return aRet;
+    }
+
+    // PDF Structural Fix: Use the PolyPolygon bridge.
+    // basegfx handles the transformation math using our optimized matrix.
+    // vcl::Region then handles the scan-conversion. This ensures that
+    // the rounding behavior matches the legacy path PDF export relies on.
+    if (rRegion.getB2DPolyPolygon())
+        return vcl::Region(Apply(*rRegion.getB2DPolyPolygon()));
+
+    if (rRegion.getPolyPolygon())
+        return vcl::Region(Apply(*rRegion.getPolyPolygon()));
+
+    return vcl::Region(Apply(rRegion.GetAsPolyPolygon()));
+}
+
+template <> LineInfo CompiledTransform::Apply<LineInfo>(const LineInfo& rLineInfo) const
+{
+    if (meMode == TransformMode::Identity || meMode == TransformMode::Translation)
+        [[likely]] return rLineInfo;
+
+    // LineInfo isn't a geometry type yet, we leave it as an explicit passthrough for now
+    // until we fully eradicate the LineInfo wrapper from vcl
+    LineInfo aInfo(rLineInfo);
+    aInfo.SetWidth(Apply(Size(rLineInfo.GetWidth(), 0)).Width());
+    aInfo.SetDashLen(Apply(Size(rLineInfo.GetDashLen(), 0)).Width());
+    aInfo.SetDotLen(Apply(Size(rLineInfo.GetDotLen(), 0)).Width());
+    aInfo.SetDistance(Apply(Size(rLineInfo.GetDistance(), 0)).Width());
+    return aInfo;
+}
+
+bool CompiledTransform::CheckRectilinearContract() const
+{
+    const bool bSafe = PreservesAxisAlignment();
+
+    // Developer Stop
+    assert(bSafe
+           && "CoordinateMapper Contract Violation: Rectilinear API requires Axis Alignment!");
+
+    // Production Audit
+    SAL_WARN_IF(
+        !bSafe, "vcl.gdi",
+        "CoordinateMapper: Scalar/Rect extraction on non-aligned transform - fallback used.");
+
+    return bSafe;
+}
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

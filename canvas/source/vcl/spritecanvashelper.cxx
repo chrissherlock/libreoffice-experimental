@@ -86,7 +86,7 @@ namespace vclcanvas
             // clip output to actual update region (otherwise a)
             // wouldn't save much render time, and b) will clutter
             // scrolled sprite content outside this area)
-            rOutDev.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+            rOutDev.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
             rOutDev.SetAntialiasing( AntialiasingFlags::Enable );
             rOutDev.SetClipRegion(vcl::Region(aRequestedArea));
 
@@ -258,7 +258,7 @@ namespace vclcanvas
             // but repaint everything (or caller requested that)
 
             maVDev->SetOutputSizePixel( aOutDevSize );
-            maVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+            maVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
             maVDev->DrawOutDev( aEmptyPoint, aOutDevSize,
                                 aEmptyPoint, aOutDevSize,
                                 rBackOutDev );
@@ -272,7 +272,7 @@ namespace vclcanvas
                     );
 
             // flush to screen
-            rOutDev.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+            rOutDev.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
             rOutDev.SetAntialiasing( AntialiasingFlags::Enable );
             rOutDev.SetClipRegion();
             rOutDev.DrawOutDev( aEmptyPoint, aOutDevSize,
@@ -512,7 +512,7 @@ namespace vclcanvas
         }
 
         // paint background
-        maVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        maVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
         maVDev->SetAntialiasing( AntialiasingFlags::Enable );
         maVDev->SetClipRegion();
         maVDev->DrawOutDev( aEmptyPoint, aOutputSize,
@@ -539,7 +539,7 @@ namespace vclcanvas
         }
 
         // flush to screen
-        rOutDev.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        rOutDev.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
         rOutDev.SetAntialiasing( AntialiasingFlags::Enable );
         rOutDev.DrawOutDev( aOutputPosition, aOutputSize,
                             aEmptyPoint, aOutputSize,

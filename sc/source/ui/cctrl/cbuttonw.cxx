@@ -58,12 +58,12 @@ void ScDDComboBoxButton::Draw( const Point& rAt,
     Color       aOldFill   = pOut->GetFillColor();
     bool        bHadLine   = pOut->IsLineColor();
     Color       aOldLine   = pOut->GetLineColor();
-    vcl::MappingPolicy bOldEnable = pOut->IsMapModeEnabled();
+    vcl::MappingPolicy bOldEnable = pOut->GetMappingPolicy();
 
     tools::Rectangle   aBtnRect( rAt, rSize );
 
     if (!comphelper::LibreOfficeKit::isActive())
-        pOut->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        pOut->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     DecorationView aDecoView( pOut);
 
@@ -83,7 +83,7 @@ void ScDDComboBoxButton::Draw( const Point& rAt,
     ImpDrawArrow( aInnerRect );
 
     // restore old state
-    pOut->EnableMapMode(bOldEnable);
+    pOut->SetMappingPolicy(bOldEnable);
     if (bHadLine)
         pOut->SetLineColor(aOldLine);
     else

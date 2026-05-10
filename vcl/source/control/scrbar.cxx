@@ -951,11 +951,11 @@ void ScrollBar::MouseButtonDown( const MouseEvent& rMEvt )
         return;
 
     Point aPosPixel;
-    if (IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode && GetMapMode().GetMapUnit() == MapUnit::MapTwip)
+    if (GetMappingPolicy() == vcl::MappingPolicy::IgnoreMapMode && GetMapMode().GetMapUnit() == MapUnit::MapTwip)
     {
         // rMEvt coordinates are in twips.
         auto popIt = GetOutDev()->ScopedPush(vcl::PushFlags::MAPMODE);
-        EnableMapMode(vcl::MappingPolicy::ApplyMapMode);
+        SetMappingPolicy(vcl::MappingPolicy::ApplyMapMode);
         MapMode aMapMode = GetMapMode();
         aMapMode.SetOrigin(Point(0, 0));
         SetMapMode(aMapMode);
@@ -1107,11 +1107,11 @@ void ScrollBar::Tracking( const TrackingEvent& rTEvt )
     else
     {
         Point aPosPixel;
-        if (IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode && GetMapMode().GetMapUnit() == MapUnit::MapTwip)
+        if (GetMappingPolicy() == vcl::MappingPolicy::IgnoreMapMode && GetMapMode().GetMapUnit() == MapUnit::MapTwip)
         {
             // rTEvt coordinates are in twips.
             auto popIt = GetOutDev()->ScopedPush(vcl::PushFlags::MAPMODE);
-            EnableMapMode(vcl::MappingPolicy::ApplyMapMode);
+            SetMappingPolicy(vcl::MappingPolicy::ApplyMapMode);
             MapMode aMapMode = GetMapMode();
             aMapMode.SetOrigin(Point(0, 0));
             SetMapMode(aMapMode);

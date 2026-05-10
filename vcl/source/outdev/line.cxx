@@ -114,9 +114,9 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     if ( mbOutputClipped )
         return;
 
-    const Point aStartPt(mpMapper->LogicToDevicePixel(rStartPt, IsMapModeEnabled()));
-    const Point aEndPt(mpMapper->LogicToDevicePixel(rEndPt, IsMapModeEnabled()));
-    const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo, IsMapModeEnabled()));
+    const Point aStartPt(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
+    const Point aEndPt(mpMapper->LogicToDevicePixel(rEndPt, GetMappingPolicy()));
+    const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo, GetMappingPolicy()));
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 
@@ -167,7 +167,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     {
         // at least transform with double precision to device coordinates; this will
         // avoid pixel snap of single, appended lines
-        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(IsMapModeEnabled()));
+        const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(GetMappingPolicy()));
         basegfx::B2DPolygon aB2DPolyLine;
 
         aB2DPolyLine.append(basegfx::B2DPoint(rStartPt.X(), rStartPt.Y()));
@@ -190,8 +190,8 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     }
     if(!bDrawn)
     {
-        const Point aStartPt(mpMapper->LogicToDevicePixel(rStartPt, IsMapModeEnabled()));
-        const Point aEndPt(mpMapper->LogicToDevicePixel(rEndPt, IsMapModeEnabled()));
+        const Point aStartPt(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
+        const Point aEndPt(mpMapper->LogicToDevicePixel(rEndPt, GetMappingPolicy()));
         mpGraphics->DrawLine( aStartPt.X(), aStartPt.Y(), aEndPt.X(), aEndPt.Y(), *this );
     }
 }

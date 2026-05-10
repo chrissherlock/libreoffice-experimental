@@ -256,10 +256,10 @@ void SdrGluePoint::Invalidate(vcl::Window& rWin, const SdrObject* pObj) const
 {
     if (comphelper::LibreOfficeKit::isActive())
         return;
-    vcl::MappingPolicy bMapMode = rWin.IsMapModeEnabled();
+    vcl::MappingPolicy bMapMode = rWin.GetMappingPolicy();
     Point aPt(pObj!=nullptr ? GetAbsolutePos(*pObj) : GetPos());
     aPt=rWin.LogicToPixel(aPt);
-    rWin.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    rWin.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     Size aSiz( aGlueHalfSize );
     tools::Rectangle aRect(aPt.X()-aSiz.Width(),aPt.Y()-aSiz.Height(),
@@ -268,7 +268,7 @@ void SdrGluePoint::Invalidate(vcl::Window& rWin, const SdrObject* pObj) const
     // do not erase background, that causes flicker (!)
     rWin.Invalidate(aRect, InvalidateFlags::NoErase);
 
-    rWin.EnableMapMode(bMapMode);
+    rWin.SetMappingPolicy(bMapMode);
 }
 
 bool SdrGluePoint::IsHit(const Point& rPnt, const OutputDevice& rOut, const SdrObject* pObj) const

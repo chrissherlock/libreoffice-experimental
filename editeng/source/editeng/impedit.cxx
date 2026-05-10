@@ -293,21 +293,21 @@ static void lcl_translateTwips(const OutputDevice& rParent, OutputDevice& rChild
 
     // Set map mode, so that callback payloads will contain absolute coordinates instead of relative ones.
     Point aOffset(rChild.GetDeviceOriginX() - rParent.GetDeviceOriginX(), rChild.GetDeviceOriginY() - rParent.GetDeviceOriginY());
-    if (rChild.IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode)
+    if (rChild.GetMappingPolicy() == vcl::MappingPolicy::IgnoreMapMode)
     {
         MapMode aMapMode(rChild.GetMapMode());
         aMapMode.SetMapUnit(MapUnit::MapTwip);
         aMapMode.SetScaleX(rParent.GetMapMode().GetScaleX());
         aMapMode.SetScaleY(rParent.GetMapMode().GetScaleY());
         rChild.SetMapMode(aMapMode);
-        rChild.EnableMapMode(vcl::MappingPolicy::ApplyMapMode);
+        rChild.SetMappingPolicy(vcl::MappingPolicy::ApplyMapMode);
     }
     aOffset = rChild.PixelToLogic(aOffset);
     MapMode aMapMode(rChild.GetMapMode());
     aMapMode.SetOrigin(aOffset);
     aMapMode.SetMapUnit(rParent.GetMapMode().GetMapUnit());
     rChild.SetMapMode(aMapMode);
-    rChild.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    rChild.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 }
 
 // EditView never had a central/secure place to react on SelectionChange since

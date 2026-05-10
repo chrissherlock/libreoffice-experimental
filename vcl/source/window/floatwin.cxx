@@ -458,7 +458,7 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
 
     if (bLOKActive && pLOKTwipsPos)
     {
-        if (pW->IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode || pW->GetMapMode().GetMapUnit() == MapUnit::MapPixel)
+        if (pW->GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode || pW->GetMapMode().GetMapUnit() == MapUnit::MapPixel)
         {
             // if we use pW->LogicToLogic(aPos, pW->GetMapMode(), MapMode(MapUnit::MapTwip)),
             // for pixel conversions when map mode is not enabled, we get

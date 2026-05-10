@@ -148,15 +148,15 @@ namespace cairocanvas
     public:
         DeviceSettingsGuard(OutputDevice *pVirtualDevice)
             : mpVirtualDevice(pVirtualDevice)
-            , mbMappingWasEnabled(mpVirtualDevice->IsMapModeEnabled())
+            , mbMappingWasEnabled(mpVirtualDevice->GetMappingPolicy())
         {
             mpVirtualDevice->Push();
-            mpVirtualDevice->EnableMapMode(false);
+            mpVirtualDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
         }
 
         ~DeviceSettingsGuard()
         {
-            mpVirtualDevice->EnableMapMode(mbMappingWasEnabled);
+            mpVirtualDevice->SetMappingPolicy(mbMappingWasEnabled);
             mpVirtualDevice->Pop();
         }
     };

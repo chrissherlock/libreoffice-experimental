@@ -152,10 +152,10 @@ void SdrPreRenderDevice::OutputPreRenderDevice(const vcl::Region& rExpandedRegio
     //Rectangle aRegionRectanglePixel;
 
     // MapModes off
-    vcl::MappingPolicy bMapModeWasEnabledDest(mpOutputDevice->IsMapModeEnabled());
-    vcl::MappingPolicy bMapModeWasEnabledSource(mpPreRenderDevice->IsMapModeEnabled());
-    mpOutputDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
-    mpPreRenderDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    vcl::MappingPolicy bMapModeWasEnabledDest(mpOutputDevice->GetMappingPolicy());
+    vcl::MappingPolicy bMapModeWasEnabledSource(mpPreRenderDevice->GetMappingPolicy());
+    mpOutputDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
+    mpPreRenderDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     RectangleVector aRectangles;
     aRegionPixel.GetRegionRectangles(aRectangles);
@@ -172,8 +172,8 @@ void SdrPreRenderDevice::OutputPreRenderDevice(const vcl::Region& rExpandedRegio
             *mpPreRenderDevice);
     }
 
-    mpOutputDevice->EnableMapMode(bMapModeWasEnabledDest);
-    mpPreRenderDevice->EnableMapMode(bMapModeWasEnabledSource);
+    mpOutputDevice->SetMappingPolicy(bMapModeWasEnabledDest);
+    mpPreRenderDevice->SetMappingPolicy(bMapModeWasEnabledSource);
 }
 
 void SdrPaintView::InitOverlayManager(const rtl::Reference<sdr::overlay::OverlayManager> & xOverlayManager)

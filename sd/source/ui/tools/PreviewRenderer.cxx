@@ -171,12 +171,12 @@ Image PreviewRenderer::RenderSubstitution (
         const ::tools::Rectangle aPaintRectangle (
             Point(0,0),
             mpPreviewDevice->GetOutputSizePixel());
-        mpPreviewDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        mpPreviewDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
         mpPreviewDevice->SetLineColor();
         svtools::ColorConfig aColorConfig;
         mpPreviewDevice->SetFillColor(aColorConfig.GetColorValue(svtools::DOCCOLOR).nColor);
         mpPreviewDevice->DrawRect (aPaintRectangle);
-        mpPreviewDevice->EnableMapMode();
+        mpPreviewDevice->SetMappingPolicy();
 
         // Paint substitution text and a frame around it.
         PaintSubstitutionText (rSubstitutionText);
@@ -340,11 +340,11 @@ void PreviewRenderer::PaintFrame()
         ::tools::Rectangle aPaintRectangle (
             Point(0,0),
             mpPreviewDevice->GetOutputSizePixel());
-        mpPreviewDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        mpPreviewDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
         mpPreviewDevice->SetLineColor(maFrameColor);
         mpPreviewDevice->SetFillColor();
         mpPreviewDevice->DrawRect(aPaintRectangle);
-        mpPreviewDevice->EnableMapMode();
+        mpPreviewDevice->SetMappingPolicy();
     }
 }
 

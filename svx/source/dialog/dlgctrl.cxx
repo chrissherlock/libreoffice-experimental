@@ -1334,11 +1334,11 @@ void SvxPreviewBase::LocalPrePaint(vcl::RenderContext const & rRenderContext)
         static const sal_uInt32 nLen(8);
         static const Color aW(COL_WHITE);
         static const Color aG(0xef, 0xef, 0xef);
-        const vcl::MappingPolicy bWasEnabled(mpBufferDevice->IsMapModeEnabled());
+        const vcl::MappingPolicy bWasEnabled(mpBufferDevice->GetMappingPolicy());
 
-        mpBufferDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+        mpBufferDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
         mpBufferDevice->DrawCheckered(aNull, mpBufferDevice->GetOutputSizePixel(), nLen, aW, aG);
-        mpBufferDevice->EnableMapMode(bWasEnabled);
+        mpBufferDevice->SetMappingPolicy(bWasEnabled);
     }
     else
     {
@@ -1349,19 +1349,19 @@ void SvxPreviewBase::LocalPrePaint(vcl::RenderContext const & rRenderContext)
 void SvxPreviewBase::LocalPostPaint(vcl::RenderContext& rRenderContext)
 {
     // copy to front (in pixel mode)
-    const vcl::MappingPolicy bWasEnabledSrc(mpBufferDevice->IsMapModeEnabled());
-    const vcl::MappingPolicy bWasEnabledDst(rRenderContext.IsMapModeEnabled());
+    const vcl::MappingPolicy bWasEnabledSrc(mpBufferDevice->GetMappingPolicy());
+    const vcl::MappingPolicy bWasEnabledDst(rRenderContext.GetMappingPolicy());
     const Point aEmptyPoint;
 
-    mpBufferDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
-    rRenderContext.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    mpBufferDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
+    rRenderContext.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     rRenderContext.DrawOutDev(aEmptyPoint, GetOutputSizePixel(),
                               aEmptyPoint, GetOutputSizePixel(),
                               *mpBufferDevice);
 
-    mpBufferDevice->EnableMapMode(bWasEnabledSrc);
-    rRenderContext.EnableMapMode(bWasEnabledDst);
+    mpBufferDevice->SetMappingPolicy(bWasEnabledSrc);
+    rRenderContext.SetMappingPolicy(bWasEnabledDst);
 }
 
 void SvxPreviewBase::StyleUpdated()

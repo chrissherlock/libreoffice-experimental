@@ -80,13 +80,13 @@ bool GraphicObject::ImplRenderTempTile( VirtualDevice& rVDev,
 
     // #105229# Switch off mapping (converting to logic and back to
     // pixel might cause roundoff errors)
-    vcl::MappingPolicy eOldPolicy( rVDev.IsMapModeEnabled() );
-    rVDev.EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+    vcl::MappingPolicy eOldPolicy( rVDev.GetMappingPolicy() );
+    rVDev.SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
     bool bRet( ImplRenderTileRecursive( rVDev, nExponent, nMSBFactor, nNumTilesX, nNumTilesY,
                                         nNumTilesX, nNumTilesY, rTileSizePixel, pAttr, aTileInfo ) );
 
-    rVDev.EnableMapMode( eOldPolicy );
+    rVDev.SetMappingPolicy( eOldPolicy );
 
     return bRet;
 }
@@ -367,10 +367,10 @@ bool GraphicObject::ImplDrawTiled( OutputDevice& rOut, const Point& rPosPixel,
 
     // #105229# Switch off mapping (converting to logic and back to
     // pixel might cause roundoff errors)
-    vcl::MappingPolicy eOldPolicy( rOut.IsMapModeEnabled() );
+    vcl::MappingPolicy eOldPolicy( rOut.GetMappingPolicy() );
 
     if( bDrawInPixel )
-        rOut.EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
+        rOut.SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
     for( nY=0; nY < nNumTilesY; ++nY )
     {
@@ -396,7 +396,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice& rOut, const Point& rPosPixel,
     }
 
     if( bDrawInPixel )
-        rOut.EnableMapMode( eOldPolicy );
+        rOut.SetMappingPolicy( eOldPolicy );
 
     return bRet;
 }

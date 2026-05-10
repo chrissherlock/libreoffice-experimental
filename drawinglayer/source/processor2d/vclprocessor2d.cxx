@@ -744,8 +744,8 @@ bool VclProcessor2D::RenderFillGraphicPrimitive2DImpl(
     const Point aEmptyPoint(0, 0);
     // the visible rect, in pixels
     const ::tools::Rectangle aVisiblePixel(aEmptyPoint, mpOutputDevice->GetOutputSizePixel());
-    const vcl::MappingPolicy eOldPolicy = mpOutputDevice->IsMapModeEnabled();
-    mpOutputDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    const vcl::MappingPolicy eOldPolicy = mpOutputDevice->GetMappingPolicy();
+    mpOutputDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     // check if offset is used
     const sal_Int32 nOffsetX(basegfx::fround(rFillGraphicAttribute.getOffsetX() * nBWidth));
@@ -812,7 +812,7 @@ bool VclProcessor2D::RenderFillGraphicPrimitive2DImpl(
     }
 
     // restore OutDev
-    mpOutputDevice->EnableMapMode(eOldPolicy);
+    mpOutputDevice->SetMappingPolicy(eOldPolicy);
     return true;
 }
 
@@ -1137,7 +1137,7 @@ void VclProcessor2D::RenderMarkerArrayPrimitive2D(
     // get discrete half size
     const basegfx::B2DVector aDiscreteHalfSize((aBitmapSize.getWidth() - 1.0) * 0.5,
                                                (aBitmapSize.getHeight() - 1.0) * 0.5);
-    const vcl::MappingPolicy eOldPolicy = mpOutputDevice->IsMapModeEnabled();
+    const vcl::MappingPolicy eOldPolicy = mpOutputDevice->GetMappingPolicy();
 
     // do not forget evtl. moved origin in target device MapMode when
     // switching it off; it would be missing and lead to wrong positions.
@@ -1146,7 +1146,7 @@ void VclProcessor2D::RenderMarkerArrayPrimitive2D(
     // to work with switching off MapMode usage completely.
     const Point aOrigin(mpOutputDevice->GetMapMode().GetOrigin());
 
-    mpOutputDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    mpOutputDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     for (auto const& pos : rPositions)
     {
@@ -1158,7 +1158,7 @@ void VclProcessor2D::RenderMarkerArrayPrimitive2D(
         mpOutputDevice->DrawBitmap(aDiscretePoint + aOrigin, rMarker);
     }
 
-    mpOutputDevice->EnableMapMode(eOldPolicy);
+    mpOutputDevice->SetMappingPolicy(eOldPolicy);
 }
 
 // point
