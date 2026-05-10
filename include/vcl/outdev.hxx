@@ -27,6 +27,7 @@
 #include <tools/solar.h>
 #include <tools/color.hxx>
 #include <tools/poly.hxx>
+#include <vcl/MappingPolicy.hxx>
 #include <vcl/cairo.hxx>
 #include <vcl/dllapi.h>
 #include <vcl/font.hxx>
@@ -190,7 +191,7 @@ private:
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;
-    bool                            mbMap = false;
+    vcl::MappingPolicy meMapMode = vcl::MappingPolicy::IgnoreMapMode;
     MapMode                         maMapMode;
 
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
@@ -1580,8 +1581,8 @@ protected:
 
 public:
 
-    void                        EnableMapMode( bool bEnable = true );
-    bool                        IsMapModeEnabled() const;
+    void EnableMapMode(vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode);
+    vcl::MappingPolicy IsMapModeEnabled() const;
 
     void                        SetMapMode();
     void                        SetMapMode( const MapMode& rNewMapMode );

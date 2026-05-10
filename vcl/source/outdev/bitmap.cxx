@@ -28,6 +28,7 @@
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/MappingPolicy.hxx>
 #include <vcl/BitmapWriteAccess.hxx>
 
 #include <CoordinateMapper.hxx>

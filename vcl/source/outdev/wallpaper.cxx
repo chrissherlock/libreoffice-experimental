@@ -85,15 +85,15 @@ void OutputDevice::DrawColorWallpaper( tools::Long nX, tools::Long nY,
     Color aOldLineColor = GetLineColor();
     bool bOldIsFillColor = IsFillColor();
     Color aOldFillColor = GetFillColor();
-    bool bMap = IsMapModeEnabled();
+    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
 
     SetLineColor();
     SetFillColor( rWallpaper.GetColor() );
-    EnableMapMode(false);
+    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
 
     DrawRect( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
 
-    EnableMapMode(bMap);
+    EnableMapMode( eOldPolicy );
     if (bOldIsFillColor)
         SetFillColor(aOldFillColor);
     else
@@ -142,7 +142,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
     const Bitmap* pCached = rWallpaper.ImplGetCachedBitmap();
 
     GDIMetaFile* pOldMetaFile = mpMetaFile;
-    const bool bOldMap = IsMapModeEnabled();
+    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
 
     Bitmap aBmp;
     if( pCached )
@@ -214,7 +214,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
     }
 
     mpMetaFile = nullptr;
-    EnableMapMode(false);
+    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
 
@@ -383,7 +383,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
     rWallpaper.ImplSetCachedBitmap( aBmp );
 
     Pop();
-    EnableMapMode(bOldMap);
+    EnableMapMode( eOldPolicy );
     mpMetaFile = pOldMetaFile;
 }
 
@@ -395,19 +395,19 @@ void OutputDevice::DrawGradientWallpaper( tools::Long nX, tools::Long nY,
 
     tools::Rectangle aBound;
     GDIMetaFile* pOldMetaFile = mpMetaFile;
-    const bool bOldMap = IsMapModeEnabled();
+    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
 
     aBound = tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) );
 
     mpMetaFile = nullptr;
-    EnableMapMode(false);
+    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
 
     DrawGradient( aBound, rWallpaper.GetGradient() );
 
     Pop();
-    EnableMapMode(bOldMap);
+    EnableMapMode( eOldPolicy );
     mpMetaFile = pOldMetaFile;
 }
 

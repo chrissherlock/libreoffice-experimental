@@ -78,19 +78,19 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     {
         tools::PolyPolygon aPolyPoly(mpMapper->LogicToWindowUnits(rPolyPoly, IsMapModeEnabled()));
         GDIMetaFile*    pOldMetaFile = mpMetaFile;
-        bool bOldMap = IsMapModeEnabled();
+        vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
 
         aPolyPoly.Optimize( PolyOptimizeFlags::NO_SAME );
         aHatch.SetDistance(LogicWidthToDevicePixel(aHatch.GetDistance()));
 
         mpMetaFile = nullptr;
-        EnableMapMode(false);
+        EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
         Push( vcl::PushFlags::LINECOLOR );
         SetLineColor( aHatch.GetColor() );
         InitLineColor();
         DrawHatch( aPolyPoly, aHatch, false );
         Pop();
-        EnableMapMode(bOldMap);
+        EnableMapMode( eOldPolicy );
         mpMetaFile = pOldMetaFile;
     }
 }

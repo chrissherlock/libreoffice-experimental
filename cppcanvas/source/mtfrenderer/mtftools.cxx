@@ -218,14 +218,14 @@ namespace cppcanvastools
         TextLineInfo createTextLineInfo( const ::VirtualDevice&                     rVDev,
                                          const ::cppcanvas::internal::OutDevState&  rState )
         {
-            const bool bOldMode( rVDev.IsMapModeEnabled() );
+            const vcl::MappingPolicy eOldPolicy( rVDev.IsMapModeEnabled() );
 
             // #i68512# Force metric regeneration with mapmode enabled
             // (prolly OutDev bug)
             rVDev.GetFontMetric();
 
             // will restore map mode below
-            const_cast< ::VirtualDevice& >(rVDev).EnableMapMode( false );
+            const_cast< ::VirtualDevice& >(rVDev).EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
 
             const ::FontMetric aMetric = rVDev.GetFontMetric();
 
@@ -239,7 +239,7 @@ namespace cppcanvastools
                 rState.textUnderlineStyle,
                 rState.textStrikeoutStyle );
 
-            const_cast< ::VirtualDevice& >(rVDev).EnableMapMode( bOldMode );
+            const_cast< ::VirtualDevice& >(rVDev).EnableMapMode( eOldPolicy );
 
             return aTextInfo;
         }

@@ -23,6 +23,7 @@
 #include <vcl/mapconvert.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
+#include <vcl/MappingPolicy.hxx>
 
 #include <MappingCoefficients.hxx>
 
@@ -86,7 +87,7 @@ struct TransformRequest
 {
     CoordinateSpace eFrom = CoordinateSpace::Logic;
     CoordinateSpace eTo = CoordinateSpace::Device;
-    bool bApplyMapping = true;
+    vcl::MappingPolicy Policy = vcl::MappingPolicy::ApplyMapMode; // Changed from bool
 };
 
 // Explicit slots for the O(1) Transform Register File
@@ -289,18 +290,18 @@ private:
     tools::Long mnOutWidth = 0;
     tools::Long mnOutHeight = 0;
 
-    void UpdateCache(bool bMap) const;
+    void UpdateCache(vcl::MappingPolicy ePolicy) const;
 
 public:
     const CompiledTransform& Compile(const TransformRequest& rReq) const;
 
     // Legacy bridge
-    const CompiledTransform& Compile(bool bMap) const
+    const CompiledTransform& Compile(vcl::MappingPolicy ePolicy) const
     {
-        return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
+        return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
     }
 
-    uint64_t GetSemanticKey(bool bMap) const;
+    uint64_t GetSemanticKey(vcl::MappingPolicy ePolicy) const;
 
     bool IsValidDPI() const { return mnDPIX > 0 && mnDPIY > 0; }
 
@@ -359,7 +360,7 @@ public:
     void SetLogicOffset(const Size& rOffset) { SetLogicToAbsoluteOffset(rOffset); }
     void SetWindowOffset(const Size& rOffset) { SetWindowToViewOffset(rOffset); }
 
-    Size LogicToViewDistance(const Size& rLogicSize, bool bMap) const;
+    Size LogicToViewDistance(const Size& rLogicSize, vcl::MappingPolicy ePolicy) const;
 
     tools::Long GetOutputWidthPixel() const;
     tools::Long GetOutputHeightPixel() const;
@@ -404,31 +405,32 @@ public:
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
     vcl::detail::MapConversion ResolveMap(const MapMode& rBaseline, const MapMode& rTarget,
-                                          bool bMap) const;
+                                          vcl::MappingPolicy ePolicy) const;
 
     /** Invalidate the view transformation.
 
      @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
      */
     void InvalidateViewTransform();
-    basegfx::B2DHomMatrix GetViewTransformation(bool bMap) const;
+    basegfx::B2DHomMatrix GetViewTransformation(vcl::MappingPolicy ePolicy) const;
     basegfx::B2DHomMatrix GetViewTransformation(const vcl::detail::MapConversion& rConv) const;
     basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rBaseline, const MapMode& rTarget,
-                                                bool bMap) const;
+                                                vcl::MappingPolicy ePolicy) const;
 
-    basegfx::B2DHomMatrix GetInverseViewTransformation(bool bMap) const;
+    basegfx::B2DHomMatrix GetInverseViewTransformation(vcl::MappingPolicy ePolicy) const;
     basegfx::B2DHomMatrix
     GetInverseViewTransformation(const vcl::detail::MapConversion& rConv) const;
     basegfx::B2DHomMatrix GetInverseViewTransformation(const MapMode& rBaseline,
-                                                       const MapMode& rTarget, bool bMap) const;
+                                                       const MapMode& rTarget,
+                                                       vcl::MappingPolicy ePolicy) const;
 
-    basegfx::B2DHomMatrix GetDeviceTransformation(bool bMap) const;
+    basegfx::B2DHomMatrix GetDeviceTransformation(vcl::MappingPolicy ePolicy) const;
 
     // --- PIPELINE MATRIX BUILDERS (Now single-source-of-truth projections) ---
-    basegfx::B2DHomMatrix GetLogicToWindowMatrix(bool bMap) const;
-    basegfx::B2DHomMatrix GetWindowToLogicMatrix(bool bMap) const;
-    basegfx::B2DHomMatrix GetLogicToDeviceMatrix(bool bMap) const;
-    basegfx::B2DHomMatrix GetDeviceToLogicMatrix(bool bMap) const;
+    basegfx::B2DHomMatrix GetLogicToWindowMatrix(vcl::MappingPolicy ePolicy) const;
+    basegfx::B2DHomMatrix GetWindowToLogicMatrix(vcl::MappingPolicy ePolicy) const;
+    basegfx::B2DHomMatrix GetLogicToDeviceMatrix(vcl::MappingPolicy ePolicy) const;
+    basegfx::B2DHomMatrix GetDeviceToLogicMatrix(vcl::MappingPolicy ePolicy) const;
 
     // ========================================================================
     // PIPELINE STAGES (Coordinate Transitions)
@@ -471,103 +473,142 @@ public:
     // MASTER WRAPPERS (Multi-space Positional Transformations)
     // ========================================================================
 
-    // Device <-> Logic (Full journey)
-    tools::Long LogicWidthToDevicePixel(tools::Long nWidth, bool bMap) const;
-    double LogicWidthToDeviceSubPixel(tools::Long nWidth, bool bMap) const;
-    tools::Long LogicHeightToDevicePixel(tools::Long nHeight, bool bMap) const;
-    Point LogicToDevicePixel(const Point& rLogicPt, bool bMap = true) const;
-    Size LogicToDevicePixel(const Size& rLogicSize, bool bMap = true) const;
-    tools::Rectangle LogicToDevicePixel(const tools::Rectangle& rLogicRect, bool bMap = true) const;
-    tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly, bool bMap = true) const;
+    tools::Long LogicWidthToDevicePixel(tools::Long nWidth, vcl::MappingPolicy ePolicy) const;
+    double LogicWidthToDeviceSubPixel(tools::Long nWidth, vcl::MappingPolicy ePolicy) const;
+    tools::Long LogicHeightToDevicePixel(tools::Long nHeight, vcl::MappingPolicy ePolicy) const;
+    Point LogicToDevicePixel(const Point& rLogicPt,
+                             vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
+    Size LogicToDevicePixel(const Size& rLogicSize,
+                            vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
+    tools::Rectangle LogicToDevicePixel(const tools::Rectangle& rLogicRect,
+                                        vcl::MappingPolicy ePolicy
+                                        = vcl::MappingPolicy::ApplyMapMode) const;
+    tools::Polygon LogicToDevicePixel(const tools::Polygon& rLogicPoly,
+                                      vcl::MappingPolicy ePolicy
+                                      = vcl::MappingPolicy::ApplyMapMode) const;
     tools::PolyPolygon LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
-                                          bool bMap = true) const;
-    LineInfo LogicToDevicePixel(const LineInfo& rLineInfo, bool bMap = true) const;
+                                          vcl::MappingPolicy ePolicy
+                                          = vcl::MappingPolicy::ApplyMapMode) const;
+    LineInfo LogicToDevicePixel(const LineInfo& rLineInfo,
+                                vcl::MappingPolicy ePolicy
+                                = vcl::MappingPolicy::ApplyMapMode) const;
     basegfx::B2DPolygon LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly,
-                                           bool bMap = true) const;
-    basegfx::B2DPoint LogicToDeviceSubPixel(const Point& rPoint, bool bMap) const;
+                                           vcl::MappingPolicy ePolicy
+                                           = vcl::MappingPolicy::ApplyMapMode) const;
+    basegfx::B2DPoint LogicToDeviceSubPixel(const Point& rPoint, vcl::MappingPolicy ePolicy) const;
     basegfx::B2DPolyPolygon LogicToDevicePixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
-                                               bool bMap = true) const;
+                                               vcl::MappingPolicy ePolicy
+                                               = vcl::MappingPolicy::ApplyMapMode) const;
 
-    tools::Long DevicePixelToLogicWidth(tools::Long nWidth, bool bMap) const;
-    tools::Long DevicePixelToLogicHeight(tools::Long nHeight, bool bMap) const;
-    Point DevicePixelToLogic(const Point& rDevicePt, bool bMap = true) const;
-    Size DevicePixelToLogic(const Size& rDeviceSize, bool bMap = true) const;
-    tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect, bool bMap = true) const;
-    basegfx::B2DPoint DevicePixelToLogicSubPixel(const Point& rDevicePt, bool bMap) const;
+    tools::Long DevicePixelToLogicWidth(tools::Long nWidth, vcl::MappingPolicy ePolicy) const;
+    tools::Long DevicePixelToLogicHeight(tools::Long nHeight, vcl::MappingPolicy ePolicy) const;
+    Point DevicePixelToLogic(const Point& rDevicePt,
+                             vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
+    Size DevicePixelToLogic(const Size& rDeviceSize,
+                            vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
+    tools::Rectangle DevicePixelToLogic(const tools::Rectangle& rPixelRect,
+                                        vcl::MappingPolicy ePolicy
+                                        = vcl::MappingPolicy::ApplyMapMode) const;
+    basegfx::B2DPoint DevicePixelToLogicSubPixel(const Point& rDevicePt,
+                                                 vcl::MappingPolicy ePolicy) const;
 
-    tools::Polygon DevicePixelToLogic(const tools::Polygon& rPixelPoly, bool bMap = true) const;
+    tools::Polygon DevicePixelToLogic(const tools::Polygon& rPixelPoly,
+                                      vcl::MappingPolicy ePolicy
+                                      = vcl::MappingPolicy::ApplyMapMode) const;
     tools::PolyPolygon DevicePixelToLogic(const tools::PolyPolygon& rPixelPolyPoly,
-                                          bool bMap = true) const;
+                                          vcl::MappingPolicy ePolicy
+                                          = vcl::MappingPolicy::ApplyMapMode) const;
     basegfx::B2DPolygon DevicePixelToLogic(const basegfx::B2DPolygon& rPixelPoly,
-                                           bool bMap = true) const;
+                                           vcl::MappingPolicy ePolicy
+                                           = vcl::MappingPolicy::ApplyMapMode) const;
     basegfx::B2DPolyPolygon DevicePixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly,
-                                               bool bMap = true) const;
+                                               vcl::MappingPolicy ePolicy
+                                               = vcl::MappingPolicy::ApplyMapMode) const;
 
-    vcl::Region LogicToDevicePixel(const vcl::Region& rLogicRegion, bool bMap = true) const;
-    vcl::Region DevicePixelToLogic(const vcl::Region& rPixelRegion, bool bMap = true) const;
+    vcl::Region LogicToDevicePixel(const vcl::Region& rLogicRegion,
+                                   vcl::MappingPolicy ePolicy
+                                   = vcl::MappingPolicy::ApplyMapMode) const;
+    vcl::Region DevicePixelToLogic(const vcl::Region& rPixelRegion,
+                                   vcl::MappingPolicy ePolicy
+                                   = vcl::MappingPolicy::ApplyMapMode) const;
 
     // Window <-> Logic
 
-    double LogicToWindowSubPixelX(double fX, bool bMap) const;
-    double LogicToWindowSubPixelY(double fY, bool bMap) const;
-    tools::Long LogicToWindowX(tools::Long nX, bool bMap = true) const;
-    tools::Long LogicToWindowY(tools::Long nY, bool bMap = true) const;
-    double LogicWidthToWindowSubPixel(tools::Long nWidth, bool bMap) const;
-    double LogicHeightToWindowSubPixel(tools::Long nHeight, bool bMap) const;
+    double LogicToWindowSubPixelX(double fX, vcl::MappingPolicy ePolicy) const;
+    double LogicToWindowSubPixelY(double fY, vcl::MappingPolicy ePolicy) const;
+    tools::Long LogicToWindowX(tools::Long nX,
+                               vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
+    tools::Long LogicToWindowY(tools::Long nY,
+                               vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
+    double LogicWidthToWindowSubPixel(tools::Long nWidth, vcl::MappingPolicy ePolicy) const;
+    double LogicHeightToWindowSubPixel(tools::Long nHeight, vcl::MappingPolicy ePolicy) const;
 
-    // View <-> Absolute Logic (Includes mnLogicToAbsoluteOffsetX/Y)
-
-    // To resolve the return-type conflict, these now return double
-    double ViewSubPixelToLogicX(double fX, bool bMap) const;
-    double ViewSubPixelToLogicY(double fY, bool bMap) const;
-    // View (Sub-pixel) -> Absolute Logic (Integer)
-    // Note: This rounds the distance before stripping offsets to satisfy legacy test parity.
+    double ViewSubPixelToLogicX(double fX, vcl::MappingPolicy ePolicy) const;
+    double ViewSubPixelToLogicY(double fY, vcl::MappingPolicy ePolicy) const;
     double LogicToViewSubPixelX(double fX) const;
     double LogicToViewSubPixelY(double fY) const;
 
-    // Logic -> Window units (Commonly used in OutputDevice::LogicToPixel)
-    Point LogicToWindowUnits(const Point& rLogicPt, bool bMap = true) const;
+    Point LogicToWindowUnits(const Point& rLogicPt,
+                             vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
     Point LogicToWindowUnits(const Point& rLogicPt, const vcl::detail::MapConversion& rConv) const;
     Size LogicToWindowUnits(const Size& rLogicSize, const vcl::detail::MapConversion& rConv) const;
     tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect,
                                         const vcl::detail::MapConversion& rConv) const;
-    tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect, bool bMap = true) const;
-    Size LogicToWindowUnits(const Size& rLogicSize, bool bMap = true) const;
-    vcl::Region LogicToWindowUnits(const vcl::Region& rRegion, bool bMap = true) const;
-    tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly, bool bMap = true) const;
+    tools::Rectangle LogicToWindowUnits(const tools::Rectangle& rRect,
+                                        vcl::MappingPolicy ePolicy
+                                        = vcl::MappingPolicy::ApplyMapMode) const;
+    Size LogicToWindowUnits(const Size& rLogicSize,
+                            vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
+    vcl::Region LogicToWindowUnits(const vcl::Region& rRegion,
+                                   vcl::MappingPolicy ePolicy
+                                   = vcl::MappingPolicy::ApplyMapMode) const;
+    tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly,
+                                      vcl::MappingPolicy ePolicy
+                                      = vcl::MappingPolicy::ApplyMapMode) const;
     tools::Polygon LogicToWindowUnits(const tools::Polygon& rPoly,
                                       const vcl::detail::MapConversion& rConv) const;
-    tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly, bool bMap = true) const;
+    tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly,
+                                          vcl::MappingPolicy ePolicy
+                                          = vcl::MappingPolicy::ApplyMapMode) const;
     tools::PolyPolygon LogicToWindowUnits(const tools::PolyPolygon& rPoly,
                                           const vcl::detail::MapConversion& rConv) const;
 
     template <TransformableB2DGeometry T>
-    T LogicToWindowUnits(const T& rLogicGeometry, bool bMap = true) const;
+    T LogicToWindowUnits(const T& rLogicGeometry,
+                         vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
 
     template <TransformableB2DGeometry T>
     T LogicToWindowUnits(const T& rLogicGeometry, const vcl::detail::MapConversion& rConv) const;
-    vcl::Region WindowToLogicUnits(const vcl::Region& rWindowRegion, bool bmap) const;
-    Point WindowToLogicUnits(const Point& rWindowPt, bool bMap = true) const;
+    vcl::Region WindowToLogicUnits(const vcl::Region& rWindowRegion,
+                                   vcl::MappingPolicy ePolicy) const;
+    Point WindowToLogicUnits(const Point& rWindowPt,
+                             vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
     Point WindowToLogicUnits(const Point& rWindowPt, const vcl::detail::MapConversion& rConv) const;
 
     tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect,
-                                        bool bMap = true) const;
+                                        vcl::MappingPolicy ePolicy
+                                        = vcl::MappingPolicy::ApplyMapMode) const;
     tools::Rectangle WindowToLogicUnits(const tools::Rectangle& rWindowRect,
                                         const vcl::detail::MapConversion& rConv) const;
 
-    tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly, bool bMap = true) const;
+    tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly,
+                                      vcl::MappingPolicy ePolicy
+                                      = vcl::MappingPolicy::ApplyMapMode) const;
     tools::Polygon WindowToLogicUnits(const tools::Polygon& rWindowPoly,
                                       const vcl::detail::MapConversion& rConv) const;
 
     tools::PolyPolygon WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly,
-                                          bool bMap) const;
-    Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt, bool bMap) const;
+                                          vcl::MappingPolicy ePolicy) const;
+    Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt,
+                                     vcl::MappingPolicy ePolicy) const;
 
-    Size WindowToLogicUnits(const Size& rWindowSize, bool bMap = true) const;
+    Size WindowToLogicUnits(const Size& rWindowSize,
+                            vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
     Size WindowToLogicUnits(const Size& rWindowSize, const vcl::detail::MapConversion& rConv) const;
 
     template <TransformableB2DGeometry T>
-    T WindowToLogicUnits(const T& rWindowGeometry, bool bMap = true) const;
+    T WindowToLogicUnits(const T& rWindowGeometry,
+                         vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
 
     template <TransformableB2DGeometry T>
     T WindowToLogicUnits(const T& rWindowGeometry, const vcl::detail::MapConversion& rConv) const;
@@ -579,12 +620,14 @@ public:
     // These do not traverse the VCL device pipeline.
 
     Point LogicToLogic(const Point& rPtSource, const MapMode* pMapModeBaseline,
-                       const MapMode* pMapModeSource, const MapMode* pMapModeDest, bool bMap) const;
+                       const MapMode* pMapModeSource, const MapMode* pMapModeDest,
+                       vcl::MappingPolicy ePolicy) const;
     Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeBaseline,
-                      const MapMode* pMapModeSource, const MapMode* pMapModeDest, bool bMap) const;
+                      const MapMode* pMapModeSource, const MapMode* pMapModeDest,
+                      vcl::MappingPolicy ePolicy) const;
     tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
                                   const MapMode* pMapModeBaseline, const MapMode* pMapModeSource,
-                                  const MapMode* pMapModeDest, bool bMap) const;
+                                  const MapMode* pMapModeDest, vcl::MappingPolicy ePolicy) const;
 
     // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
@@ -599,30 +642,32 @@ public:
     tools::Long ViewSubPixelToLogicDistanceY(double n, double fScale) const;
 
     // Universal basegfx pipeline
-    template <vcl::detail::B2DGeometry T> T LogicToDeviceSubPixel(T aObj, bool bMap) const
+    template <vcl::detail::B2DGeometry T>
+    T LogicToDeviceSubPixel(T aObj, vcl::MappingPolicy ePolicy) const
     {
         if constexpr (vcl::detail::B2DTransformable<T>)
-            aObj.transform(GetLogicToDeviceMatrix(bMap));
+            aObj.transform(GetLogicToDeviceMatrix(ePolicy));
         else
-            aObj *= GetLogicToDeviceMatrix(bMap);
+            aObj *= GetLogicToDeviceMatrix(ePolicy);
         return aObj;
     }
 
     // Universal inverse basegfx pipeline
-    template <vcl::detail::B2DGeometry T> T DevicePixelToLogicSubPixel(T aObj, bool bMap) const
+    template <vcl::detail::B2DGeometry T>
+    T DevicePixelToLogicSubPixel(T aObj, vcl::MappingPolicy ePolicy) const
     {
         if constexpr (vcl::detail::B2DTransformable<T>)
-            aObj.transform(GetDeviceToLogicMatrix(bMap));
+            aObj.transform(GetDeviceToLogicMatrix(ePolicy));
         else
-            aObj *= GetDeviceToLogicMatrix(bMap);
+            aObj *= GetDeviceToLogicMatrix(ePolicy);
         return aObj;
     }
 
 private:
     MappingCoefficients ResolveMapResRelative(const MapMode* pBaseline, const MapMode* pTarget,
-                                              bool bMap) const;
+                                              vcl::MappingPolicy ePolicy) const;
     void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX, double& rTransY,
-                               bool bMap) const;
+                               vcl::MappingPolicy ePolicy) const;
 
     CompiledTransform BuildCompiledTransform(const basegfx::B2DHomMatrix& rMat) const;
 };

@@ -28,6 +28,7 @@
 #include <comphelper/configuration.hxx>
 #include <unotools/fontdefs.hxx>
 
+#include <vcl/MappingPolicy.hxx>
 #include <vcl/event.hxx>
 #include <vcl/fontcharmap.hxx>
 #include <vcl/fntstyle.hxx>
@@ -966,7 +967,7 @@ bool OutputDevice::ImplNewFont() const
     bool bRet = true;
 
     // #95414# fix for OLE objects which use scale factors very creatively
-    if (IsMapModeEnabled() && !aSize.Width())
+    if (IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode && !aSize.Width())
         bRet = AttemptOLEFontScaleFix(const_cast<vcl::Font&>(maFont), aSize.Height());
 
     return bRet;
@@ -985,7 +986,7 @@ bool OutputDevice::AttemptOLEFontScaleFix(vcl::Font& rFont, tools::Long nHeight)
 
     Size aOrigSize = rFont.GetFontSize();
     rFont.SetFontSize(Size(nNewWidth, nHeight));
-    const_cast<OutputDevice*>(this)->EnableMapMode(false);
+    const_cast<OutputDevice*>(this)->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     mbNewFont = true;
 
     const bool bRet = ImplNewFont();  // recurse once using stretched width
@@ -1056,7 +1057,7 @@ void OutputDevice::ImplDrawEmphasisMarks( SalLayout& rSalLayout )
     auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
     GDIMetaFile*        pOldMetaFile    = mpMetaFile;
     mpMetaFile = nullptr;
-    EnableMapMode(false);
+    EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
     FontEmphasisMark nEmphasisMark = maFont.GetEmphasisMarkStyle();
     tools::Long nEmphasisHeight;
@@ -1310,7 +1311,7 @@ tools::Long OutputDevice::GetMinKashida() const
         return 0;
 
     auto nKashidaWidth = mpFontInstance->mxFontMetric->GetMinKashida();
-    if (!IsMapModeEnabled())
+    if (IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode)
         nKashidaWidth = std::ceil(nKashidaWidth);
 
     return DevicePixelToLogicWidth(nKashidaWidth);

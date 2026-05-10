@@ -36,7 +36,8 @@ protected:
         basegfx::B2DPoint aInput(fLogicVal, fLogicVal);
 
         // Pass 'true' to explicitly enable mapping for the transformation retrieval
-        basegfx::B2DPoint aResult = m.GetDeviceTransformation(true) * aInput;
+        basegfx::B2DPoint aResult
+            = m.GetDeviceTransformation(vcl::MappingPolicy::ApplyMapMode) * aInput;
 
         // The Affine Contract: At MapPixel, 1 logic unit = 1 pixel.
         // The scale factor is exactly 1.0 regardless of the underlying DPI.

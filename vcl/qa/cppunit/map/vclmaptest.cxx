@@ -515,7 +515,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModeInvalidation)
     ScopedVclPtrInstance<VirtualDevice> pVDev;
     MapMode aMapMode(MapUnit::Map100thMM); // 1 unit = 0.01mm
     pVDev->SetMapMode(aMapMode);
-    pVDev->EnableMapMode(true);
+    pVDev->EnableMapMode(vcl::MappingPolicy::ApplyMapMode);
 
     // Capture the initial logic-to-pixel result
     Point aLogicPt(1000, 1000);
@@ -523,7 +523,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModeInvalidation)
 
     // DISABLE MapMode
     // This is where your bug lived!
-    pVDev->EnableMapMode(false);
+    pVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     Point aPixelPt2 = pVDev->LogicToPixel(aLogicPt);
 
     // In 'false' mode, LogicToPixel should be an identity (1:1)
@@ -532,7 +532,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModeInvalidation)
 
     // RE-ENABLE MapMode
     // This verifies the 'true' restoration correctly invalidates the cache
-    pVDev->EnableMapMode(true);
+    pVDev->EnableMapMode(vcl::MappingPolicy::ApplyMapMode);
     Point aPixelPt3 = pVDev->LogicToPixel(aLogicPt);
 
     // This should match the very first calculation
@@ -568,13 +568,13 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testRoundTripSymmetry)
     Point aOriginal(1045, -882);
 
     // Forward journey
-    Point aDevice = mpMapper->LogicToDevicePixel(aOriginal, true);
+    Point aDevice = mpMapper->LogicToDevicePixel(aOriginal, vcl::MappingPolicy::ApplyMapMode);
     // Inverse journey
-    Point aRestored = mpMapper->DevicePixelToLogic(aDevice, true);
+    Point aRestored = mpMapper->DevicePixelToLogic(aDevice, vcl::MappingPolicy::ApplyMapMode);
 
     // Due to integer pixel snapping, the restored point might not be bitwise identical,
     // but transforming it FORWARD again must yield the exact same device pixels. (Idempotency)
-    Point aDeviceAgain = mpMapper->LogicToDevicePixel(aRestored, true);
+    Point aDeviceAgain = mpMapper->LogicToDevicePixel(aRestored, vcl::MappingPolicy::ApplyMapMode);
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Idempotency violated: Round-trip drift detected (X)", aDevice.X(),
                                  aDeviceAgain.X());
@@ -589,8 +589,10 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testRectangleAdjacency)
     tools::Rectangle aLeftRect(1000, 500, 1999, 1500);
     tools::Rectangle aRightRect(2000, 500, 2999, 1500);
 
-    tools::Rectangle aDeviceLeft = mpMapper->LogicToDevicePixel(aLeftRect, true);
-    tools::Rectangle aDeviceRight = mpMapper->LogicToDevicePixel(aRightRect, true);
+    tools::Rectangle aDeviceLeft
+        = mpMapper->LogicToDevicePixel(aLeftRect, vcl::MappingPolicy::ApplyMapMode);
+    tools::Rectangle aDeviceRight
+        = mpMapper->LogicToDevicePixel(aRightRect, vcl::MappingPolicy::ApplyMapMode);
 
     // PERFECT ADJACENCY INVARIANT:
     // The transformed inclusive right edge of A, plus 1, MUST exactly equal
@@ -606,10 +608,12 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testMatrixVsScalarParity)
     Point aLogicPoint(3333, 4444);
 
     // 1. Point Path
-    Point aScalarDevice = mpMapper->LogicToDevicePixel(aLogicPoint, true);
+    Point aScalarDevice
+        = mpMapper->LogicToDevicePixel(aLogicPoint, vcl::MappingPolicy::ApplyMapMode);
 
     // 2. Matrix Path
-    basegfx::B2DHomMatrix aMatrix = mpMapper->GetDeviceTransformation(true);
+    basegfx::B2DHomMatrix aMatrix
+        = mpMapper->GetDeviceTransformation(vcl::MappingPolicy::ApplyMapMode);
     basegfx::B2DPoint aB2DPoint(aLogicPoint.X(), aLogicPoint.Y());
     aB2DPoint *= aMatrix;
 
@@ -626,8 +630,8 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testMatrixVsScalarParity)
 CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testSubpixelStability)
 {
     double fBaseX = 100.0;
-    basegfx::B2DHomMatrix aFwd = mpMapper->GetLogicToDeviceMatrix(true);
-    basegfx::B2DHomMatrix aInv = mpMapper->GetDeviceToLogicMatrix(true);
+    basegfx::B2DHomMatrix aFwd = mpMapper->GetLogicToDeviceMatrix(vcl::MappingPolicy::ApplyMapMode);
+    basegfx::B2DHomMatrix aInv = mpMapper->GetDeviceToLogicMatrix(vcl::MappingPolicy::ApplyMapMode);
 
     // Sweep X from 100.0 to 101.0 in 0.1 increments
     for (int i = 0; i <= 10; ++i)
@@ -646,7 +650,8 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testInverseMatrixVsScalarPari
     Point aDevicePoint(1234, 5678);
 
     // Scalar Inverse Path (Full Device -> Logic via 2D Point)
-    basegfx::B2DPoint aScalarLogic = mpMapper->DevicePixelToLogicSubPixel(aDevicePoint, true);
+    basegfx::B2DPoint aScalarLogic
+        = mpMapper->DevicePixelToLogicSubPixel(aDevicePoint, vcl::MappingPolicy::ApplyMapMode);
     double fScalarLogicX = aScalarLogic.getX();
     double fScalarLogicY = aScalarLogic.getY();
 
@@ -655,7 +660,8 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testInverseMatrixVsScalarPari
     double fWindowX = aDevicePoint.X() - mpMapper->GetDeviceToWindowOffsetX();
     double fWindowY = aDevicePoint.Y() - mpMapper->GetDeviceToWindowOffsetY();
 
-    basegfx::B2DHomMatrix aInverseMatrix = mpMapper->GetInverseViewTransformation(true);
+    basegfx::B2DHomMatrix aInverseMatrix
+        = mpMapper->GetInverseViewTransformation(vcl::MappingPolicy::ApplyMapMode);
     basegfx::B2DPoint aB2DWindowPoint(fWindowX, fWindowY);
     aB2DWindowPoint *= aInverseMatrix;
 
@@ -671,8 +677,8 @@ CPPUNIT_TEST_FIXTURE(CoordinateMapperContractTest, testSubpixelRoundTripSymmetry
     // test irrational-ish fractions and extremely large coordinates
     const double aEvilBases[] = { 0.3, 100.0, 1000000.11 };
 
-    basegfx::B2DHomMatrix aFwd = mpMapper->GetLogicToDeviceMatrix(true);
-    basegfx::B2DHomMatrix aInv = mpMapper->GetDeviceToLogicMatrix(true);
+    basegfx::B2DHomMatrix aFwd = mpMapper->GetLogicToDeviceMatrix(vcl::MappingPolicy::ApplyMapMode);
+    basegfx::B2DHomMatrix aInv = mpMapper->GetDeviceToLogicMatrix(vcl::MappingPolicy::ApplyMapMode);
 
     for (double fBaseX : aEvilBases)
     {

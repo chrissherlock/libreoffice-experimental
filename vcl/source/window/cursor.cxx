@@ -119,8 +119,8 @@ tools::Rectangle ImplCursorBoundRect(ImplCursorData const* pData)
 
 static tools::Rectangle ImplCursorInvert(vcl::RenderContext* pRenderContext, ImplCursorData const * pData)
 {
-    bool bMapMode = pRenderContext->IsMapModeEnabled();
-    pRenderContext->EnableMapMode( false );
+    vcl::MappingPolicy eOldPolicy = pRenderContext->IsMapModeEnabled();
+    pRenderContext->EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
     InvertFlags nInvertStyle;
     if ( pData->mnStyle & CURSOR_SHADOW )
         nInvertStyle = InvertFlags::N50;
@@ -140,7 +140,7 @@ static tools::Rectangle ImplCursorInvert(vcl::RenderContext* pRenderContext, Imp
         pRenderContext->Invert(aRect, nInvertStyle);
     }
 
-    pRenderContext->EnableMapMode(bMapMode);
+    pRenderContext->EnableMapMode( eOldPolicy );
     return aRect;
 }
 

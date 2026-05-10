@@ -24,6 +24,7 @@
 #include <basegfx/matrix/b2dhommatrixtools.hxx>
 #include <tools/mapunit.hxx>
 
+#include <vcl/MappingPolicy.hxx>
 #include <vcl/alpha.hxx>
 #include <vcl/canvastools.hxx>
 #include <vcl/metaact.hxx>
@@ -158,7 +159,7 @@ void OutputDevice::DrawScaledAndTranslatedBitmap(
     if (!mpMetaFile && comphelper::LibreOfficeKit::isActive() && GetMapMode().GetMapUnit() != MapUnit::MapPixel)
     {
         aDestPt.Move(aOrigin.getX(), aOrigin.getY());
-        EnableMapMode(false);
+        EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     }
 
     DrawBitmap(aDestPt, aDestSize, rBitmap);

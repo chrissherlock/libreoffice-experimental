@@ -1663,7 +1663,7 @@ void ScGridWindow::LogicInvalidatePart(const tools::Rectangle* pRectangle, int n
     {
         aRectangle = *pRectangle;
         // When dragging shapes the map mode is disabled.
-        if (IsMapModeEnabled())
+        if (IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode)
         {
             if (GetMapMode().GetMapUnit() == MapUnit::Map100thMM)
             {

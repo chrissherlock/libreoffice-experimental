@@ -1686,9 +1686,9 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
                             const Point aSourceTopLeft(pVout->LogicToPixel(aTargetLogic.TopLeft()));
 
                             // switch off MapModes
-                            const bool bMapModeWasEnabledDest(rTargetDevice.IsMapModeEnabled());
-                            const bool bMapModeWasEnabledSource(pVout->IsMapModeEnabled());
-                            rTargetDevice.EnableMapMode(false);
+                            const vcl::MappingPolicy bMapModeWasEnabledDest(rTargetDevice.IsMapModeEnabled());
+                            const vcl::MappingPolicy bMapModeWasEnabledSource(pVout->IsMapModeEnabled());
+                            rTargetDevice.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
                             pVout->EnableMapMode(false);
 
                             rTargetDevice.DrawOutDev(
@@ -2193,7 +2193,7 @@ void SwViewShell::PaintTile(VirtualDevice &rDevice, int contextWidth, int contex
         aOption.SetZoom(fScale * 100);
         ApplyViewOptions(aOption);
         // Make sure the map mode (disabled in SwXTextDocument::initializeForTiledRendering()) is still disabled.
-        GetWin()->EnableMapMode(false);
+        GetWin()->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     }
 
     tools::Rectangle aOutRect(Point(tilePosX, tilePosY),
@@ -2245,7 +2245,7 @@ void SwViewShell::PaintTile(VirtualDevice &rDevice, int contextWidth, int contex
         }
 
         // Make sure the map mode (disabled in SwXTextDocument::initializeForTiledRendering()) is still disabled.
-        GetWin()->EnableMapMode(false);
+        GetWin()->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     }
 
     mpOut = pSaveOut;

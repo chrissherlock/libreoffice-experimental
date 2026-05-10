@@ -450,12 +450,12 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getPlacement()
     // editing in LOK.
     if (comphelper::LibreOfficeKit::isActive())
     {
-        bool bMapModeEnabled = pEditWin->IsMapModeEnabled();
-        if (!bMapModeEnabled)
+        vcl::MappingPolicy eOldPolicy = pEditWin->IsMapModeEnabled();
+        if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode)
             pEditWin->EnableMapMode();
         aRealObjArea = pEditWin->LogicToPixel(aRealObjArea);
-        if (!bMapModeEnabled && pEditWin->IsMapModeEnabled())
-            pEditWin->EnableMapMode(false);
+        if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode  && pEditWin->IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode)
+            pEditWin->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     }
     else
     {
@@ -480,12 +480,12 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getClipRectangle()
     // See comment for SfxInPlaceClient_Impl::getPlacement.
     if (comphelper::LibreOfficeKit::isActive())
     {
-        bool bMapModeEnabled = pEditWin->IsMapModeEnabled();
-        if (!bMapModeEnabled)
+        vcl::MappingPolicy eOldPolicy = pEditWin->IsMapModeEnabled();
+        if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode)
             pEditWin->EnableMapMode();
         aRealObjArea = pEditWin->LogicToPixel(aRealObjArea);
-        if (!bMapModeEnabled && pEditWin->IsMapModeEnabled())
-            pEditWin->EnableMapMode(false);
+        if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode  && pEditWin->IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode)
+            pEditWin->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     }
     else
     {
@@ -962,8 +962,8 @@ ErrCodeMsg SfxInPlaceClient::DoVerb(sal_Int32 nVerb)
             {
                 // See comment for SfxInPlaceClient_Impl::getPlacement.
                 vcl::Window* pEditWin = GetEditWin();
-                bool bMapModeEnabled = pEditWin->IsMapModeEnabled();
-                if (comphelper::LibreOfficeKit::isActive() && !bMapModeEnabled)
+                vcl::MappingPolicy eOldPolicy = pEditWin->IsMapModeEnabled();
+                if (comphelper::LibreOfficeKit::isActive() && eOldPolicy == vcl::MappingPolicy::IgnoreMapMode)
                 {
                     pEditWin->EnableMapMode();
                 }
@@ -1016,10 +1016,10 @@ ErrCodeMsg SfxInPlaceClient::DoVerb(sal_Int32 nVerb)
                     //TODO/LATER: better error handling
 
                 }
-                if (comphelper::LibreOfficeKit::isActive() && !bMapModeEnabled
-                        && pEditWin->IsMapModeEnabled())
+                if (comphelper::LibreOfficeKit::isActive() && eOldPolicy == vcl::MappingPolicy::IgnoreMapMode
+                         && pEditWin->IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode)
                 {
-                    pEditWin->EnableMapMode(false);
+                    pEditWin->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
                 }
                 SfxViewFrame& rFrame = m_pViewSh->GetViewFrame();
                 rFrame.GetFrame().LockResize_Impl(false);

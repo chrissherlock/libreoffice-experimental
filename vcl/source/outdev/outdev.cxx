@@ -33,6 +33,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/sysdata.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/MappingPolicy.hxx>
 
 #include <CoordinateMapper.hxx>
 #include <ImplOutDevData.hxx>
