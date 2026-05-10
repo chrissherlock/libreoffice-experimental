@@ -107,7 +107,7 @@ namespace vclcanvastools
 
             explicit OutDevStateKeeper( const vclcanvas::OutDevProviderSharedPtr& rOutDev ) :
                 mpOutDev( rOutDev ? &(rOutDev->getOutDev()) : nullptr ),
-                mbMappingWasEnabled( mpOutDev && mpOutDev->IsMapModeEnabled() ),
+                mbMappingWasEnabled( mpOutDev ? mpOutDev->IsMapModeEnabled() : vcl::MappingPolicy::IgnoreMapMode ),
                 mnAntiAliasing( mpOutDev ? mpOutDev->GetAntialiasing() : AntialiasingFlags::NONE )
             {
                 init();
@@ -117,7 +117,7 @@ namespace vclcanvastools
             {
                 if( mpOutDev )
                 {
-                    mpOutDev->EnableMapMode( mbMappingWasEnabled );
+                    mpOutDev->EnableMapMode(mbMappingWasEnabled);
                     mpOutDev->SetAntialiasing( mnAntiAliasing );
 
                     mpOutDev->Pop();
@@ -130,13 +130,13 @@ namespace vclcanvastools
                 if( mpOutDev )
                 {
                     mpOutDev->Push();
-                    mpOutDev->EnableMapMode(false);
+                    mpOutDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
                     mpOutDev->SetAntialiasing( AntialiasingFlags::Enable );
                 }
             }
 
             VclPtr<OutputDevice>    mpOutDev;
-            const bool              mbMappingWasEnabled;
+            const vcl::MappingPolicy mbMappingWasEnabled;
             const AntialiasingFlags mnAntiAliasing;
         };
 

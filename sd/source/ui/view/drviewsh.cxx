@@ -75,7 +75,7 @@ void DrawViewShell::MakeVisible(const ::tools::Rectangle& rRect, vcl::Window& rW
 
     // visible area
     Size aVisSizePixel(rWin.GetOutputSizePixel());
-    bool bTiledRendering = comphelper::LibreOfficeKit::isActive() && !rWin.IsMapModeEnabled();
+    bool bTiledRendering = comphelper::LibreOfficeKit::isActive() && (rWin.IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode);
     if (bTiledRendering)
     {
         rWin.GetOutDev()->Push(vcl::PushFlags::MAPMODE);

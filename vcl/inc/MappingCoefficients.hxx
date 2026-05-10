@@ -21,6 +21,7 @@
 
 #include <tools/long.hxx>
 #include <o3tl/unit_conversion.hxx>
+#include <vcl/MappingPolicy.hxx>
 
 class MapMode;
 
@@ -34,7 +35,8 @@ struct MappingCoefficients
     void SetMapRes(const o3tl::Length eUnit);
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
     MappingCoefficients ResolveMapRes(const MapMode* pMode, const MapMode& rDefaultMapMode,
-                                      bool bMap, tools::Long nDPIX, tools::Long nDPIY) const;
+                                      vcl::MappingPolicy ePolicy, tools::Long nDPIX,
+                                      tools::Long nDPIY) const;
 
     tools::Long ScaleDistanceX(const tools::Long nDistance,
                                const MappingCoefficients& rDestRes) const;

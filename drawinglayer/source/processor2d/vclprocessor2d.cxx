@@ -763,8 +763,8 @@ bool VclProcessor2D::RenderFillGraphicPrimitive2DImpl(
     const Point aEmptyPoint(0, 0);
     // the visible rect, in pixels
     const ::tools::Rectangle aVisiblePixel(aEmptyPoint, mpOutputDevice->GetOutputSizePixel());
-    const bool bWasEnabled(mpOutputDevice->IsMapModeEnabled());
-    mpOutputDevice->EnableMapMode(false);
+    const vcl::MappingPolicy eOldPolicy = mpOutputDevice->IsMapModeEnabled();
+    mpOutputDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
     // check if offset is used
     const sal_Int32 nOffsetX(basegfx::fround(rFillGraphicAttribute.getOffsetX() * nBWidth));
@@ -831,7 +831,7 @@ bool VclProcessor2D::RenderFillGraphicPrimitive2DImpl(
     }
 
     // restore OutDev
-    mpOutputDevice->EnableMapMode(bWasEnabled);
+    mpOutputDevice->EnableMapMode(eOldPolicy);
     return true;
 }
 
@@ -1156,7 +1156,7 @@ void VclProcessor2D::RenderMarkerArrayPrimitive2D(
     // get discrete half size
     const basegfx::B2DVector aDiscreteHalfSize((aBitmapSize.getWidth() - 1.0) * 0.5,
                                                (aBitmapSize.getHeight() - 1.0) * 0.5);
-    const bool bWasEnabled(mpOutputDevice->IsMapModeEnabled());
+    const vcl::MappingPolicy eOldPolicy = mpOutputDevice->IsMapModeEnabled();
 
     // do not forget evtl. moved origin in target device MapMode when
     // switching it off; it would be missing and lead to wrong positions.
@@ -1165,7 +1165,7 @@ void VclProcessor2D::RenderMarkerArrayPrimitive2D(
     // to work with switching off MapMode usage completely.
     const Point aOrigin(mpOutputDevice->GetMapMode().GetOrigin());
 
-    mpOutputDevice->EnableMapMode(false);
+    mpOutputDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
     for (auto const& pos : rPositions)
     {
@@ -1177,7 +1177,7 @@ void VclProcessor2D::RenderMarkerArrayPrimitive2D(
         mpOutputDevice->DrawBitmap(aDiscretePoint + aOrigin, rMarker);
     }
 
-    mpOutputDevice->EnableMapMode(bWasEnabled);
+    mpOutputDevice->EnableMapMode(eOldPolicy);
 }
 
 // point

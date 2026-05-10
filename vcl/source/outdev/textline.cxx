@@ -24,7 +24,9 @@
 #include <o3tl/hash_combine.hxx>
 #include <o3tl/lru_map.hxx>
 #include <comphelper/configuration.hxx>
+
 #include <tools/lazydelete.hxx>
+#include <vcl/MappingPolicy.hxx>
 #include <vcl/dropcache.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>

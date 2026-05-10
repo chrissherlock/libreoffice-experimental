@@ -244,6 +244,7 @@ VclPtr<VirtualDevice> VDevBuffer::alloc(OutputDevice& rOutDev, const Size& rSize
     {
         // reused, reset some values
         pRetval->SetMapMode();
+        pRetval->EnableMapMode(vcl::MappingPolicy::ApplyMapMode);
         pRetval->SetRasterOp(RasterOp::OverPaint);
     }
 
@@ -409,11 +410,11 @@ impBufferDevice::impBufferDevice(OutputDevice& rOutDev, const tools::Rectangle& 
 
     // initialize buffer by blitting content of source to prepare for
     // transparence/ copying back
-    const bool bWasEnabledSrc(mrOutDev.IsMapModeEnabled());
-    mrOutDev.EnableMapMode(false);
+    const vcl::MappingPolicy eOldPolicySrc = mrOutDev.IsMapModeEnabled();
+    mrOutDev.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     mpContent->DrawOutDev(Point(), maDestPixel.GetSize(), maDestPixel.TopLeft(),
                           maDestPixel.GetSize(), mrOutDev);
-    mrOutDev.EnableMapMode(bWasEnabledSrc);
+    mrOutDev.EnableMapMode(eOldPolicySrc);
 
     MapMode aNewMapMode(mrOutDev.GetMapMode());
 
@@ -449,10 +450,10 @@ void impBufferDevice::paint(double fTrans)
 
     const Point aEmptyPoint;
     const Size aSizePixel(maDestPixel.GetSize());
-    const bool bWasEnabledDst(mrOutDev.IsMapModeEnabled());
+    const vcl::MappingPolicy eOldPolicyDst = mrOutDev.IsMapModeEnabled();
 
-    mrOutDev.EnableMapMode(false);
-    mpContent->EnableMapMode(false);
+    mrOutDev.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    mpContent->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
 #ifdef DBG_UTIL
     // VCL_DUMP_BMP_PATH should be like C:/path/ or ~/path/
@@ -473,7 +474,7 @@ void impBufferDevice::paint(double fTrans)
 
     if (mpAlpha)
     {
-        mpAlpha->EnableMapMode(false);
+        mpAlpha->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
         AlphaMask aAlphaMask(mpAlpha->GetBitmap(aEmptyPoint, aSizePixel));
         aAlphaMask.Invert(); // convert transparency to alpha
 
@@ -562,7 +563,7 @@ void impBufferDevice::paint(double fTrans)
     }
 
     mrOutDev.SetRasterOp(aOrigRasterOp);
-    mrOutDev.EnableMapMode(bWasEnabledDst);
+    mrOutDev.EnableMapMode(eOldPolicyDst);
 }
 
 VirtualDevice& impBufferDevice::getContent()
