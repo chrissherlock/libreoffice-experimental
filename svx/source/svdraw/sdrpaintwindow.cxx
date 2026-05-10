@@ -152,10 +152,10 @@ void SdrPreRenderDevice::OutputPreRenderDevice(const vcl::Region& rExpandedRegio
     //Rectangle aRegionRectanglePixel;
 
     // MapModes off
-    bool bMapModeWasEnabledDest(mpOutputDevice->IsMapModeEnabled());
-    bool bMapModeWasEnabledSource(mpPreRenderDevice->IsMapModeEnabled());
-    mpOutputDevice->EnableMapMode(false);
-    mpPreRenderDevice->EnableMapMode(false);
+    vcl::MappingPolicy bMapModeWasEnabledDest(mpOutputDevice->IsMapModeEnabled());
+    vcl::MappingPolicy bMapModeWasEnabledSource(mpPreRenderDevice->IsMapModeEnabled());
+    mpOutputDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    mpPreRenderDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
     RectangleVector aRectangles;
     aRegionPixel.GetRegionRectangles(aRectangles);

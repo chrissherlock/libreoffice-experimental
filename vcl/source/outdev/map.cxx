@@ -63,12 +63,20 @@ Point OutputDevice::GetOutputOffPixel() const { return mpMapper->GetDeviceToWind
 
 Size OutputDevice::GetPixelOffset() const { return mpMapper->GetWindowToViewOffset(); }
 
-bool OutputDevice::IsMapModeEnabled() const { return mbMap; }
-
-void OutputDevice::EnableMapMode(bool bEnabled)
+void OutputDevice::EnableMapMode(vcl::MappingPolicy ePolicy)
 {
-    mbMap = bEnabled;
-    mpMapper->InvalidateViewTransform();
+    if (meMapMode != ePolicy)
+    {
+        meMapMode = ePolicy;
+        // The version update here is what tells CoordinateMapper
+        // that its 8-slot cache is now stale.
+        mpMapper->InvalidateViewTransform();
+    }
+}
+
+vcl::MappingPolicy OutputDevice::IsMapModeEnabled() const
+{
+    return meMapMode;
 }
 
 const MapMode& OutputDevice::GetMapMode() const { return maMapMode; }
@@ -83,10 +91,10 @@ void OutputDevice::SetMapMode()
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaMapModeAction( MapMode() ) );
 
-    if (!IsMapModeEnabled() && maMapMode.IsDefault())
+    if ((IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode) && maMapMode.IsDefault())
         return;
 
-    EnableMapMode(false);
+    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
     ResetMapMode();
 
     // create new objects (clip region are not re-scaled)
@@ -114,15 +122,15 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
         return;
 
      // if default MapMode calculate nothing
-    bool bOldMap = IsMapModeEnabled();
-    EnableMapMode(!rNewMapMode.IsDefault());
-    if ( IsMapModeEnabled() )
+    vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
+    EnableMapMode( !rNewMapMode.IsDefault() ? vcl::MappingPolicy::ApplyMapMode : vcl::MappingPolicy::IgnoreMapMode );
+    if ( IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode )
     {
         // if only the origin is converted, do not scale new
         if ( (rNewMapMode.GetMapUnit() == maMapMode.GetMapUnit()) &&
              (rNewMapMode.GetScaleX()  == maMapMode.GetScaleX())  &&
              (rNewMapMode.GetScaleY()  == maMapMode.GetScaleY())  &&
-             (bOldMap                  == IsMapModeEnabled()) )
+             (eOldPolicy                  == IsMapModeEnabled()) )
         {
             // set offset
             Point aOrigin = rNewMapMode.GetOrigin();
@@ -135,7 +143,7 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
 
             return;
         }
-        if ( !bOldMap && bRelMap )
+        if ( (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode) && bRelMap )
         {
             mpMapper->SetMapResolutionScaleX(1.0 / mpMapper->GetDPIX());
             mpMapper->SetMapResolutionScaleY(1.0 / mpMapper->GetDPIY());

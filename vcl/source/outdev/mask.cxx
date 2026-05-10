@@ -22,6 +22,7 @@
 #include <vcl/virdev.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <vcl/MappingPolicy.hxx>
 #include <salgdi.hxx>
 #include <salbmp.hxx>
 

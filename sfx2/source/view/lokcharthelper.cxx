@@ -193,9 +193,9 @@ void LokChartHelper::PaintTile(VirtualDevice& rRenderContext, const tools::Recta
     Size aSize = convertTwipToMm100(aChartRect.GetSize());
     tools::Rectangle aRectangle(Point(0,0), aSize);
 
-    bool bEnableMapMode = !pChartWindow->IsMapModeEnabled();
+    bool bEnableMapMode = (pChartWindow->IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode);
     pChartWindow->EnableMapMode();
-    bool bRenderContextEnableMapMode = !rRenderContext.IsMapModeEnabled();
+    bool bRenderContextEnableMapMode = rRenderContext.IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode;
     rRenderContext.EnableMapMode();
 
     rRenderContext.Push(vcl::PushFlags::MAPMODE);
@@ -212,9 +212,9 @@ void LokChartHelper::PaintTile(VirtualDevice& rRenderContext, const tools::Recta
     rRenderContext.Pop();
 
     if (bRenderContextEnableMapMode)
-        rRenderContext.EnableMapMode(false);
+        rRenderContext.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     if (bEnableMapMode)
-        pChartWindow->EnableMapMode(false);
+        pChartWindow->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 }
 
 void LokChartHelper::PaintAllChartsOnTile(VirtualDevice& rDevice,

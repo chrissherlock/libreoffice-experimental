@@ -256,10 +256,10 @@ void SdrGluePoint::Invalidate(vcl::Window& rWin, const SdrObject* pObj) const
 {
     if (comphelper::LibreOfficeKit::isActive())
         return;
-    bool bMapMode=rWin.IsMapModeEnabled();
+    vcl::MappingPolicy bMapMode = rWin.IsMapModeEnabled();
     Point aPt(pObj!=nullptr ? GetAbsolutePos(*pObj) : GetPos());
     aPt=rWin.LogicToPixel(aPt);
-    rWin.EnableMapMode(false);
+    rWin.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
     Size aSiz( aGlueHalfSize );
     tools::Rectangle aRect(aPt.X()-aSiz.Width(),aPt.Y()-aSiz.Height(),

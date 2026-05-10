@@ -1,3 +1,4 @@
+#include <vcl/MappingPolicy.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -1361,7 +1362,7 @@ void Window::ImplInitResolutionSettings()
 
     // update the recalculated values for logical units
     // and also tools belonging to the values
-    if (IsMapModeEnabled())
+    if (IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode)
     {
         MapMode aMapMode = GetMapMode();
         SetMapMode();

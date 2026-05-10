@@ -143,8 +143,8 @@ using namespace vclcanvas;
 
             if (!::rtl::math::approxEqual(rFontMatrix.m00, rFontMatrix.m11))
             {
-                const bool bOldMapState(rOutDev.IsMapModeEnabled());
-                rOutDev.EnableMapMode(false);
+                const vcl::MappingPolicy bOldMapState(rOutDev.IsMapModeEnabled());
+                rOutDev.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
                 const Size aSize = rOutDev.GetFontMetric(rFont).GetFontSize();
 

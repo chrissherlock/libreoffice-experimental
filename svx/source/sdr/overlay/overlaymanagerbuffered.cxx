@@ -61,8 +61,8 @@ namespace sdr::overlay
                         const Size aOutputSizePixel(mpBufferDevice->GetOutputSizePixel());
 
                         // remember and switch off MapMode
-                        const bool bMapModeWasEnabled(mpBufferDevice->IsMapModeEnabled());
-                        mpBufferDevice->EnableMapMode(false);
+                        const vcl::MappingPolicy eOldPolicy(mpBufferDevice->IsMapModeEnabled());
+                        mpBufferDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
                         // scroll internally buffered stuff
                         mpBufferDevice->DrawOutDev(
@@ -70,7 +70,7 @@ namespace sdr::overlay
                             Point(), aOutputSizePixel); // source
 
                         // restore MapMode
-                        mpBufferDevice->EnableMapMode(bMapModeWasEnabled);
+                        mpBufferDevice->EnableMapMode(eOldPolicy);
 
                         // scroll remembered region, too.
                         if(!maBufferRememberedRangePixel.isEmpty())
@@ -106,10 +106,10 @@ namespace sdr::overlay
         void OverlayManagerBuffered::ImpRestoreBackground(const vcl::Region& rRegionPixel) const
         {
             // MapModes off
-            const bool bMapModeWasEnabledDest(getOutputDevice().IsMapModeEnabled());
-            const bool bMapModeWasEnabledSource(mpBufferDevice->IsMapModeEnabled());
-            getOutputDevice().EnableMapMode(false);
-            const_cast<OverlayManagerBuffered*>(this)->mpBufferDevice->EnableMapMode(false);
+            const vcl::MappingPolicy eOldPolicyDest(getOutputDevice().IsMapModeEnabled());
+            const vcl::MappingPolicy eOldPolicySource(mpBufferDevice->IsMapModeEnabled());
+            getOutputDevice().EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+            const_cast<OverlayManagerBuffered*>(this)->mpBufferDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
             // local region
             RectangleVector aRectangles;
@@ -128,8 +128,8 @@ namespace sdr::overlay
             }
 
             // restore MapModes
-            getOutputDevice().EnableMapMode(bMapModeWasEnabledDest);
-            const_cast<OverlayManagerBuffered*>(this)->mpBufferDevice->EnableMapMode(bMapModeWasEnabledSource);
+            getOutputDevice().EnableMapMode(eOldPolicyDest);
+            const_cast<OverlayManagerBuffered*>(this)->mpBufferDevice->EnableMapMode(eOldPolicySource);
         }
 
         void OverlayManagerBuffered::ImpSaveBackground(const vcl::Region& rRegion, OutputDevice* pPreRenderDevice)
@@ -161,10 +161,10 @@ namespace sdr::overlay
             aRegion.Intersect(aBufferDeviceRectanglePixel);
 
             // MapModes off
-            const bool bMapModeWasEnabledDest(rSource.IsMapModeEnabled());
-            const bool bMapModeWasEnabledSource(mpBufferDevice->IsMapModeEnabled());
-            rSource.EnableMapMode(false);
-            mpBufferDevice->EnableMapMode(false);
+            const vcl::MappingPolicy eOldPolicyDest(rSource.IsMapModeEnabled());
+            const vcl::MappingPolicy eOldPolicySource(mpBufferDevice->IsMapModeEnabled());
+            rSource.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+            mpBufferDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
             // prepare to iterate over the rectangles from the region in pixels
             RectangleVector aRectangles;
@@ -183,8 +183,8 @@ namespace sdr::overlay
             }
 
             // restore MapModes
-            rSource.EnableMapMode(bMapModeWasEnabledDest);
-            mpBufferDevice->EnableMapMode(bMapModeWasEnabledSource);
+            rSource.EnableMapMode(eOldPolicyDest);
+            mpBufferDevice->EnableMapMode(eOldPolicySource);
         }
 
         IMPL_LINK_NOARG(OverlayManagerBuffered, ImpBufferTimerHandler, Timer*, void)
@@ -254,7 +254,7 @@ namespace sdr::overlay
                 }
 
                 mpOutputBufferDevice->SetMapMode(getOutputDevice().GetMapMode());
-                mpOutputBufferDevice->EnableMapMode(false);
+                mpOutputBufferDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
                 mpOutputBufferDevice->SetDrawMode(mpBufferDevice->GetDrawMode());
                 mpOutputBufferDevice->SetSettings(mpBufferDevice->GetSettings());
                 mpOutputBufferDevice->SetAntialiasing(mpBufferDevice->GetAntialiasing());
@@ -292,8 +292,8 @@ namespace sdr::overlay
                 const Size aSize(aRegionRectanglePixel.GetSize());
 
                 {
-                    const bool bMapModeWasEnabledDest(mpBufferDevice->IsMapModeEnabled());
-                    mpBufferDevice->EnableMapMode(false);
+                    const vcl::MappingPolicy eOldPolicyDest(mpBufferDevice->IsMapModeEnabled());
+                    mpBufferDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
                     mpOutputBufferDevice->DrawOutDev(
                         aTopLeft, aSize, // destination
@@ -301,19 +301,19 @@ namespace sdr::overlay
                         *mpBufferDevice);
 
                     // restore MapModes
-                    mpBufferDevice->EnableMapMode(bMapModeWasEnabledDest);
+                    mpBufferDevice->EnableMapMode(eOldPolicyDest);
                 }
 
                 // paint overlay content for remembered region, use
                 // method from base class directly
                 mpOutputBufferDevice->EnableMapMode();
                 OverlayManager::ImpDrawMembers(aBufferRememberedRangeLogic, *mpOutputBufferDevice);
-                mpOutputBufferDevice->EnableMapMode(false);
+                mpOutputBufferDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
                 // copy to output
                 {
-                    const bool bMapModeWasEnabledDest(getOutputDevice().IsMapModeEnabled());
-                    getOutputDevice().EnableMapMode(false);
+                    const vcl::MappingPolicy eOldPolicyDest(getOutputDevice().IsMapModeEnabled());
+                    getOutputDevice().EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
                     getOutputDevice().DrawOutDev(
                         aTopLeft, aSize, // destination
@@ -326,7 +326,7 @@ namespace sdr::overlay
                     getOutputDevice().DrawRect(Rectangle(aTopLeft, aSize));*/
 
                     // restore MapModes
-                    getOutputDevice().EnableMapMode(bMapModeWasEnabledDest);
+                    getOutputDevice().EnableMapMode(eOldPolicyDest);
                 }
             }
 
