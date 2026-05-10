@@ -35,28 +35,11 @@
 #include <CoordinateMapper.hxx>
 #include <MappingCoefficients.hxx>
 
+#include "CoordinateMath.hxx"
+
 #include <cmath>
 #include <cassert>
 #include <ranges>
-
-static inline tools::Long lcl_RoundToLong(double fVal)
-{
-    return static_cast<tools::Long>(std::llround(fVal));
-}
-
-static double lcl_GetBasisVectorMagnitudeX(const basegfx::B2DHomMatrix& m)
-{
-    basegfx::B2DVector vx(1.0, 0.0);
-    vx *= m;
-    return vx.getLength();
-}
-
-static double lcl_GetBasisVectorMagnitudeY(const basegfx::B2DHomMatrix& m)
-{
-    basegfx::B2DVector vy(0.0, 1.0);
-    vy *= m;
-    return vy.getLength();
-}
 
 static std::pair<MappingCoefficients, MappingCoefficients>
 lcl_calcConversionMapRes(const MapMode& rMMSource, const MapMode& rMMDest)
@@ -166,8 +149,8 @@ void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, d
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(ePolicy);
 
-    rScaleX = lcl_GetBasisVectorMagnitudeX(aMat);
-    rScaleY = lcl_GetBasisVectorMagnitudeY(aMat);
+    rScaleX = vcl::detail::GetBasisVectorMagnitudeX(aMat);
+    rScaleY = vcl::detail::GetBasisVectorMagnitudeY(aMat);
 
     rTransX = aMat.get(0, 2);
     rTransY = aMat.get(1, 2);
@@ -237,10 +220,10 @@ Point CoordinateMapper::GetDeviceToWindowOffset() const
 Size CoordinateMapper::LogicToViewDistance(const Size& rLogicSize, vcl::MappingPolicy ePolicy) const
 {
     const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(ePolicy);
-    const double sx = lcl_GetBasisVectorMagnitudeX(aMat);
-    const double sy = lcl_GetBasisVectorMagnitudeY(aMat);
-    return Size(lcl_RoundToLong(rLogicSize.Width() * sx),
-                lcl_RoundToLong(rLogicSize.Height() * sy));
+    const double sx = vcl::detail::GetBasisVectorMagnitudeX(aMat);
+    const double sy = vcl::detail::GetBasisVectorMagnitudeY(aMat);
+    return Size(vcl::detail::RoundToLong(rLogicSize.Width() * sx),
+                vcl::detail::RoundToLong(rLogicSize.Height() * sy));
 }
 
 vcl::Region CoordinateMapper::ViewToDevice(const vcl::Region& rRegion) const
@@ -649,15 +632,15 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n) const
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceX(double n, double fScale) const
 {
     if (fScale == 0.0 || GetDPIX() <= 0)
-        return lcl_RoundToLong(n);
-    return lcl_RoundToLong(n / (fScale * static_cast<double>(GetDPIX())));
+        return vcl::detail::RoundToLong(n);
+    return vcl::detail::RoundToLong(n / (fScale * static_cast<double>(GetDPIX())));
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n, double fScale) const
 {
     if (fScale == 0.0 || GetDPIY() <= 0)
-        return lcl_RoundToLong(n);
-    return lcl_RoundToLong(n / (fScale * static_cast<double>(GetDPIY())));
+        return vcl::detail::RoundToLong(n);
+    return vcl::detail::RoundToLong(n / (fScale * static_cast<double>(GetDPIY())));
 }
 
 double CoordinateMapper::WindowToViewSubPixelX(double fX) const
@@ -914,10 +897,11 @@ tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth,
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
-        return lcl_RoundToLong(static_cast<double>(nWidth)
-                               * lcl_GetBasisVectorMagnitudeX(rTransform.GetMatrix()));
+        return vcl::detail::RoundToLong(
+            static_cast<double>(nWidth)
+            * vcl::detail::GetBasisVectorMagnitudeX(rTransform.GetMatrix()));
 
-    return lcl_RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
+    return vcl::detail::RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
 }
 
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight,
@@ -927,10 +911,12 @@ tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight,
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
-        return lcl_RoundToLong(static_cast<double>(nHeight)
-                               * lcl_GetBasisVectorMagnitudeY(rTransform.GetMatrix()));
+        return vcl::detail::RoundToLong(
+            static_cast<double>(nHeight)
+            * vcl::detail::GetBasisVectorMagnitudeY(rTransform.GetMatrix()));
 
-    return lcl_RoundToLong(static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1));
+    return vcl::detail::RoundToLong(static_cast<double>(nHeight)
+                                    * rTransform.GetMatrix().get(1, 1));
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth,
@@ -940,10 +926,11 @@ tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth,
         = Compile(TransformRequest{ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
-        return lcl_RoundToLong(static_cast<double>(nWidth)
-                               * lcl_GetBasisVectorMagnitudeX(rTransform.GetMatrix()));
+        return vcl::detail::RoundToLong(
+            static_cast<double>(nWidth)
+            * vcl::detail::GetBasisVectorMagnitudeX(rTransform.GetMatrix()));
 
-    return lcl_RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
+    return vcl::detail::RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight,
@@ -953,10 +940,12 @@ tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight,
         = Compile(TransformRequest{ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
-        return lcl_RoundToLong(static_cast<double>(nHeight)
-                               * lcl_GetBasisVectorMagnitudeY(rTransform.GetMatrix()));
+        return vcl::detail::RoundToLong(
+            static_cast<double>(nHeight)
+            * vcl::detail::GetBasisVectorMagnitudeY(rTransform.GetMatrix()));
 
-    return lcl_RoundToLong(static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1));
+    return vcl::detail::RoundToLong(static_cast<double>(nHeight)
+                                    * rTransform.GetMatrix().get(1, 1));
 }
 
 double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth,
@@ -966,7 +955,8 @@ double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth,
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
-        return static_cast<double>(nWidth) * lcl_GetBasisVectorMagnitudeX(rTransform.GetMatrix());
+        return static_cast<double>(nWidth)
+               * vcl::detail::GetBasisVectorMagnitudeX(rTransform.GetMatrix());
 
     return static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0);
 }
@@ -978,7 +968,8 @@ double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight,
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
-        return static_cast<double>(nHeight) * lcl_GetBasisVectorMagnitudeY(rTransform.GetMatrix());
+        return static_cast<double>(nHeight)
+               * vcl::detail::GetBasisVectorMagnitudeY(rTransform.GetMatrix());
 
     return static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1);
 }
@@ -990,9 +981,9 @@ tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX, vcl::MappingPolicy 
     const auto& rMat = rTransform.GetMatrix();
 
     if (!rTransform.PreservesAxisAlignment())
-        return lcl_RoundToLong(LogicToWindowSubPixelX(static_cast<double>(nX), ePolicy));
+        return vcl::detail::RoundToLong(LogicToWindowSubPixelX(static_cast<double>(nX), ePolicy));
 
-    return lcl_RoundToLong(static_cast<double>(nX) * rMat.get(0, 0) + rMat.get(0, 2));
+    return vcl::detail::RoundToLong(static_cast<double>(nX) * rMat.get(0, 0) + rMat.get(0, 2));
 }
 
 tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY, vcl::MappingPolicy ePolicy) const
@@ -1002,9 +993,9 @@ tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY, vcl::MappingPolicy 
     const auto& rMat = rTransform.GetMatrix();
 
     if (!rTransform.PreservesAxisAlignment())
-        return lcl_RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY), ePolicy));
+        return vcl::detail::RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY), ePolicy));
 
-    return lcl_RoundToLong(static_cast<double>(nY) * rMat.get(1, 1) + rMat.get(1, 2));
+    return vcl::detail::RoundToLong(static_cast<double>(nY) * rMat.get(1, 1) + rMat.get(1, 2));
 }
 
 basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint,
@@ -1030,7 +1021,7 @@ Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWin
     basegfx::B2DHomMatrix aMat = GetWindowToLogicMatrix(ePolicy);
     basegfx::B2DPoint aPt(rWindowPt);
     aPt *= aMat;
-    return Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
+    return Point(vcl::detail::RoundToLong(aPt.getX()), vcl::detail::RoundToLong(aPt.getY()));
 }
 
 template <TransformableB2DGeometry T>
@@ -1076,15 +1067,15 @@ Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt,
 {
     basegfx::B2DPoint aPt(rLogicPt.X(), rLogicPt.Y());
     aPt *= GetViewTransformation(rConv);
-    return Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
+    return Point(vcl::detail::RoundToLong(aPt.getX()), vcl::detail::RoundToLong(aPt.getY()));
 }
 
 Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize,
                                           const vcl::detail::MapConversion& rConv) const
 {
     auto mat = GetViewTransformation(rConv);
-    return Size(lcl_RoundToLong(rLogicSize.Width() * std::abs(mat.get(0, 0))),
-                lcl_RoundToLong(rLogicSize.Height() * std::abs(mat.get(1, 1))));
+    return Size(vcl::detail::RoundToLong(rLogicSize.Width() * std::abs(mat.get(0, 0))),
+                vcl::detail::RoundToLong(rLogicSize.Height() * std::abs(mat.get(1, 1))));
 }
 
 tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect,
@@ -1098,9 +1089,10 @@ tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rR
     aRange.transform(aMat);
 
     // ADAPTER: Math [Min, Max) -> VCL [Left, Right]
-    tools::Rectangle aRetval(lcl_RoundToLong(aRange.getMinX()), lcl_RoundToLong(aRange.getMinY()),
-                             lcl_RoundToLong(aRange.getMaxX()) - 1,
-                             lcl_RoundToLong(aRange.getMaxY()) - 1);
+    tools::Rectangle aRetval(vcl::detail::RoundToLong(aRange.getMinX()),
+                             vcl::detail::RoundToLong(aRange.getMinY()),
+                             vcl::detail::RoundToLong(aRange.getMaxX()) - 1,
+                             vcl::detail::RoundToLong(aRange.getMaxY()) - 1);
 
     lcl_ApplyEmptyState(aRetval, rRect);
     return aRetval;
@@ -1115,7 +1107,7 @@ tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rLogic
     {
         basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
         aPt *= aMat;
-        rPoint = Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
+        rPoint = Point(vcl::detail::RoundToLong(aPt.getX()), vcl::detail::RoundToLong(aPt.getY()));
     }
     return aPoly;
 }
@@ -1154,15 +1146,15 @@ Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt,
 {
     basegfx::B2DPoint aPt(rWindowPt.X(), rWindowPt.Y());
     aPt *= GetInverseViewTransformation(rConv);
-    return Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
+    return Point(vcl::detail::RoundToLong(aPt.getX()), vcl::detail::RoundToLong(aPt.getY()));
 }
 
 Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize,
                                           const vcl::detail::MapConversion& rConv) const
 {
     auto mat = GetInverseViewTransformation(rConv);
-    return Size(lcl_RoundToLong(rWindowSize.Width() * std::abs(mat.get(0, 0))),
-                lcl_RoundToLong(rWindowSize.Height() * std::abs(mat.get(1, 1))));
+    return Size(vcl::detail::RoundToLong(rWindowSize.Width() * std::abs(mat.get(0, 0))),
+                vcl::detail::RoundToLong(rWindowSize.Height() * std::abs(mat.get(1, 1))));
 }
 
 /**
@@ -1188,9 +1180,10 @@ tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rW
     aRange.transform(aMat);
 
     // ADAPTER: Math [Min, Max) -> VCL [Left, Right]
-    tools::Rectangle aRetval(lcl_RoundToLong(aRange.getMinX()), lcl_RoundToLong(aRange.getMinY()),
-                             lcl_RoundToLong(aRange.getMaxX()) - 1,
-                             lcl_RoundToLong(aRange.getMaxY()) - 1);
+    tools::Rectangle aRetval(vcl::detail::RoundToLong(aRange.getMinX()),
+                             vcl::detail::RoundToLong(aRange.getMinY()),
+                             vcl::detail::RoundToLong(aRange.getMaxX()) - 1,
+                             vcl::detail::RoundToLong(aRange.getMaxY()) - 1);
 
     lcl_ApplyEmptyState(aRetval, rWindowRect);
     return aRetval;
