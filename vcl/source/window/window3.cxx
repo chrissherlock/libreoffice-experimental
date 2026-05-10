@@ -18,6 +18,7 @@
  */
 
 #include <vcl/window.hxx>
+#include <vcl/MappingPolicy.hxx>
 #include <window.h>
 #include <vcl/cursor.hxx>
 #include <salframe.hxx>
@@ -111,8 +112,8 @@ void Window::SetBackground(const Wallpaper& rBackground)
 {
     GetOutDev()->SetBackground(rBackground);
 }
-void Window::EnableMapMode(bool bEnable) { GetOutDev()->EnableMapMode(bEnable); }
-bool Window::IsMapModeEnabled() const { return GetOutDev()->IsMapModeEnabled(); }
+void Window::EnableMapMode(vcl::MappingPolicy ePolicy) { GetOutDev()->EnableMapMode(ePolicy); }
+vcl::MappingPolicy Window::IsMapModeEnabled() const { return GetOutDev()->IsMapModeEnabled(); }
 
 void Window::SetTextColor(const Color& rColor) { GetOutDev()->SetTextColor(rColor); }
 const Color& Window::GetTextColor() const { return GetOutDev()->GetTextColor(); }

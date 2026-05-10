@@ -142,7 +142,7 @@ DrawViewShell::DrawViewShell( ViewShellBase& rViewShellBase, vcl::Window* pParen
         Size aSize(mpContentWindow->LogicToPixel(GetView()->GetSdrPageView()->GetPage()->GetSize()));
         // Disable map mode, so that it's possible to send mouse event
         // coordinates in logic units
-        mpContentWindow->EnableMapMode(false);
+        mpContentWindow->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
         // arrange UI elements again with new view size
         GetParentWindow()->SetSizePixel(aSize);

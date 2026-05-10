@@ -763,7 +763,7 @@ void DecorationView::DrawSymbol( const tools::Rectangle& rRect, SymbolType eType
     const tools::Rectangle         aRect           = mpOutDev->LogicToPixel( rRect );
     auto popIt = mpOutDev->ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
     Color                   nColor(rColor);
-    mpOutDev->EnableMapMode( false );
+    mpOutDev->EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
 
     if ( (rStyleSettings.GetOptions() & StyleSettingsOptions::Mono) ||
          (mpOutDev->GetOutDevType() == OUTDEV_PRINTER) )
@@ -798,11 +798,11 @@ void DecorationView::DrawFrame( const tools::Rectangle& rRect,
 {
     tools::Rectangle   aRect         = mpOutDev->LogicToPixel( rRect );
     const Color aOldLineColor = mpOutDev->GetLineColor();
-    const bool  bOldMapMode   = mpOutDev->IsMapModeEnabled();
-    mpOutDev->EnableMapMode( false );
+    const vcl::MappingPolicy eOldPolicy = mpOutDev->IsMapModeEnabled();
+    mpOutDev->EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
     ImplDraw2ColorFrame( mpOutDev, aRect, rLeftTopColor, rRightBottomColor );
     mpOutDev->SetLineColor( aOldLineColor );
-    mpOutDev->EnableMapMode( bOldMapMode );
+    mpOutDev->EnableMapMode( eOldPolicy );
 }
 
 void DecorationView::DrawHighlightFrame( const tools::Rectangle& rRect )
@@ -848,8 +848,8 @@ void DecorationView::DrawHighlightFrame( const tools::Rectangle& rRect )
 tools::Rectangle DecorationView::DrawFrame( const tools::Rectangle& rRect, DrawFrameStyle nStyle, DrawFrameFlags nFlags )
 {
     tools::Rectangle aRect = mpOutDev->LogicToPixel( rRect );
-    bool bOldMap = mpOutDev->IsMapModeEnabled();
-    mpOutDev->EnableMapMode( false );
+    vcl::MappingPolicy eOldPolicy = mpOutDev->IsMapModeEnabled();
+    mpOutDev->EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
 
     if ( !rRect.IsEmpty() )
     {
@@ -862,7 +862,7 @@ tools::Rectangle DecorationView::DrawFrame( const tools::Rectangle& rRect, DrawF
         }
     }
 
-    mpOutDev->EnableMapMode( bOldMap );
+    mpOutDev->EnableMapMode( eOldPolicy );
     aRect = mpOutDev->PixelToLogic( aRect );
 
     return aRect;
@@ -876,8 +876,8 @@ tools::Rectangle DecorationView::DrawButton( const tools::Rectangle& rRect, Draw
     }
 
     tools::Rectangle aRect = mpOutDev->LogicToPixel( rRect );
-    const bool bOldMap = mpOutDev->IsMapModeEnabled();
-    mpOutDev->EnableMapMode( false );
+    const vcl::MappingPolicy eOldPolicy = mpOutDev->IsMapModeEnabled();
+    mpOutDev->EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
 
     mpOutDev->Push(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR);
     ImplDrawButton( mpOutDev, aRect, nStyle );
@@ -931,7 +931,7 @@ tools::Rectangle DecorationView::DrawButton( const tools::Rectangle& rRect, Draw
         aRect.AdjustBottom( -3 );
     }
 
-    mpOutDev->EnableMapMode( bOldMap );
+    mpOutDev->EnableMapMode( eOldPolicy );
     aRect = mpOutDev->PixelToLogic( aRect );
 
     return aRect;
