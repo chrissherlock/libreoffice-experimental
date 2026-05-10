@@ -684,7 +684,7 @@ void Application::SetSettings(const AllSettings& rSettings, bool bTemporary)
                         {
                             pVirDev->SetDPIX( pFirstFrame->GetOutDev()->GetDPIX() );
                             pVirDev->SetDPIY( pFirstFrame->GetOutDev()->GetDPIY() );
-                            if ( pVirDev->IsMapModeEnabled() == vcl::MappingPolicy::ApplyMapMode )
+                            if ( pVirDev->GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode )
                             {
 
                                 MapMode aMapMode = pVirDev->GetMapMode();

@@ -1395,7 +1395,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest9, testParagraphStyleCloneFormatting)
     // Disable map mode, so that it's possible to send mouse event coordinates
     // directly in twips.
     SwEditWin& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    rEditWin.EnableMapMode(false);
+    rEditWin.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
     CPPUNIT_ASSERT(pWrtShell);
@@ -1437,7 +1437,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest9, testTdf122756)
     // Disable map mode, so that it's possible to send mouse event coordinates
     // directly in twips.
     SwEditWin& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    rEditWin.EnableMapMode(false);
+    rEditWin.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     SwWrtShell* pWrtShell = getSwDocShell()->GetWrtShell();
     CPPUNIT_ASSERT(pWrtShell);

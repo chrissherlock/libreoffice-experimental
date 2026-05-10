@@ -1482,8 +1482,8 @@ public:
     tools::Long                 GetDeviceOriginX() const;
     tools::Long                 GetDeviceOriginY() const;
 
-    void EnableMapMode( vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode );
-    vcl::MappingPolicy IsMapModeEnabled() const;
+    void SetMappingPolicy( vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode );
+    vcl::MappingPolicy GetMappingPolicy() const;
     SAL_DLLPRIVATE void         SetMapMode();
     void                        SetMapMode( const MapMode& rNewMapMode );
 

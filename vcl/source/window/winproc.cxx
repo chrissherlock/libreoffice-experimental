@@ -1495,14 +1495,14 @@ static void ImplHandleExtTextInputPos( vcl::Window* pWindow,
         const tools::Rectangle* pRect = pChild->GetCursorRect();
         if ( pRect )
         {
-            rRect = pChildOutDev->GetMapper().LogicToDevicePixel(*pRect, pChildOutDev->IsMapModeEnabled());
+            rRect = pChildOutDev->GetMapper().LogicToDevicePixel(*pRect, pChildOutDev->GetMappingPolicy());
         }
         else
         {
             vcl::Cursor* pCursor = pChild->GetCursor();
             if ( pCursor )
             {
-                Point aPos = pChildOutDev->GetMapper().LogicToDevicePixel(pCursor->GetPos(), pChildOutDev->IsMapModeEnabled());
+                Point aPos = pChildOutDev->GetMapper().LogicToDevicePixel(pCursor->GetPos(), pChildOutDev->GetMappingPolicy());
                 Size aSize = pChild->LogicToPixel( pCursor->GetSize() );
                 if ( !aSize.Width() )
                     aSize.setWidth( pChild->GetSettings().GetStyleSettings().GetCursorSize() );
@@ -2661,7 +2661,7 @@ static void ImplHandleSalQueryCharPosition( vcl::Window *pWindow,
 
     const OutputDevice *pChildOutDev = pChild->GetOutDev();
     const tools::Rectangle& aRect = pWinData->mpCompositionCharRects[ pEvt->mnCharPos ];
-    tools::Rectangle aDeviceRect = pChildOutDev->GetMapper().LogicToDevicePixel(aRect, pChildOutDev->IsMapModeEnabled());
+    tools::Rectangle aDeviceRect = pChildOutDev->GetMapper().LogicToDevicePixel(aRect, pChildOutDev->GetMappingPolicy());
     AbsoluteScreenPixelPoint aAbsScreenPos = pChild->OutputToAbsoluteScreenPixel( pChild->ScreenToOutputPixel(aDeviceRect.TopLeft()) );
     pEvt->maCursorBound = AbsoluteScreenPixelRectangle(aAbsScreenPos, aDeviceRect.GetSize());
     pEvt->mbVertical = pWinData->mbVertical;

@@ -515,7 +515,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModeInvalidation)
     ScopedVclPtrInstance<VirtualDevice> pVDev;
     MapMode aMapMode(MapUnit::Map100thMM); // 1 unit = 0.01mm
     pVDev->SetMapMode(aMapMode);
-    pVDev->EnableMapMode(vcl::MappingPolicy::ApplyMapMode);
+    pVDev->SetMappingPolicy(vcl::MappingPolicy::ApplyMapMode);
 
     // Capture the initial logic-to-pixel result
     Point aLogicPt(1000, 1000);
@@ -523,7 +523,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModeInvalidation)
 
     // DISABLE MapMode
     // This is where your bug lived!
-    pVDev->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    pVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     Point aPixelPt2 = pVDev->LogicToPixel(aLogicPt);
 
     // In 'false' mode, LogicToPixel should be an identity (1:1)
@@ -532,7 +532,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModeInvalidation)
 
     // RE-ENABLE MapMode
     // This verifies the 'true' restoration correctly invalidates the cache
-    pVDev->EnableMapMode(vcl::MappingPolicy::ApplyMapMode);
+    pVDev->SetMappingPolicy(vcl::MappingPolicy::ApplyMapMode);
     Point aPixelPt3 = pVDev->LogicToPixel(aLogicPt);
 
     // This should match the very first calculation
