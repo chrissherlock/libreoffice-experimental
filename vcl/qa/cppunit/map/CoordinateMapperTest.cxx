@@ -250,7 +250,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionRectilinearCollapsePreventi
     // Standard rounding would push this to 0, causing the region to vanish.
     vcl::Region aRegion(tools::Rectangle(Point(100, 100), Size(4, 4)));
 
-    const auto& rTransform = aMapper.Compile(true);
+    const auto& rTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
     vcl::Region aTransformed = rTransform.Apply(aRegion);
 
     // ASSERTION 1: The region MUST NOT vanish.
