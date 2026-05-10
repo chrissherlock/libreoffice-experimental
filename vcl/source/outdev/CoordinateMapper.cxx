@@ -169,9 +169,9 @@ static basegfx::B2DHomMatrix lcl_BuildAffineMatrix(double fScaleX, double fScale
 // View -> Window: Pure translation (WindowOfs)
 // Window -> Device: Pure translation (DeviceOfs)
 void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
-                                             double& rTransY, bool bMap) const
+                                             double& rTransY, vcl::MappingPolicy ePolicy) const
 {
-    const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
+    const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(ePolicy);
 
     rScaleX = lcl_GetBasisVectorMagnitudeX(aMat);
     rScaleY = lcl_GetBasisVectorMagnitudeY(aMat);
@@ -241,9 +241,9 @@ Point CoordinateMapper::GetDeviceToWindowOffset() const
     return Point(mnDeviceToWindowOffsetX, mnDeviceToWindowOffsetY);
 }
 
-Size CoordinateMapper::LogicToViewDistance(const Size& rLogicSize, bool bMap) const
+Size CoordinateMapper::LogicToViewDistance(const Size& rLogicSize, vcl::MappingPolicy ePolicy) const
 {
-    const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(bMap);
+    const basegfx::B2DHomMatrix aMat = GetLogicToWindowMatrix(ePolicy);
     const double sx = lcl_GetBasisVectorMagnitudeX(aMat);
     const double sy = lcl_GetBasisVectorMagnitudeY(aMat);
     return Size(lcl_RoundToLong(rLogicSize.Width() * sx),
@@ -294,16 +294,18 @@ void CoordinateMapper::CalcMapResolution(const MapMode& rMapMode, tools::Long nD
 }
 
 MappingCoefficients CoordinateMapper::ResolveMapResRelative(const MapMode* pBaseline,
-                                                            const MapMode* pTarget, bool bMap) const
+                                                            const MapMode* pTarget,
+                                                            vcl::MappingPolicy ePolicy) const
 {
-    return maMapRes.ResolveMapRes(pTarget, *pBaseline, bMap, mnDPIX, mnDPIY);
+    return maMapRes.ResolveMapRes(pTarget, *pBaseline, ePolicy, mnDPIX, mnDPIY);
 }
 
 vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rBaseline,
-                                                        const MapMode& rTarget, bool bMap) const
+                                                        const MapMode& rTarget,
+                                                        vcl::MappingPolicy ePolicy) const
 {
     // Evaluates a temporary MapMode against the current accumulated state
-    MappingCoefficients aRes = maMapRes.ResolveMapRes(&rTarget, rBaseline, bMap, mnDPIX, mnDPIY);
+    MappingCoefficients aRes = maMapRes.ResolveMapRes(&rTarget, rBaseline, ePolicy, mnDPIX, mnDPIY);
     return { aRes.mfScaleX, aRes.mfScaleY, aRes.mnTranslationX, aRes.mnTranslationY };
 }
 
@@ -312,19 +314,20 @@ void CoordinateMapper::InvalidateViewTransform()
     mnStateVersion.fetch_add(1, std::memory_order_release);
 }
 
-basegfx::B2DHomMatrix CoordinateMapper::GetDeviceTransformation(bool bMap) const
+basegfx::B2DHomMatrix CoordinateMapper::GetDeviceTransformation(vcl::MappingPolicy ePolicy) const
 {
-    return GetLogicToDeviceMatrix(bMap);
+    return GetLogicToDeviceMatrix(ePolicy);
 }
 
-basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(bool bMap) const
+basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(vcl::MappingPolicy ePolicy) const
 {
-    return GetLogicToWindowMatrix(bMap);
+    return GetLogicToWindowMatrix(ePolicy);
 }
 
-basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(bool bMap) const
+basegfx::B2DHomMatrix
+CoordinateMapper::GetInverseViewTransformation(vcl::MappingPolicy ePolicy) const
 {
-    return GetWindowToLogicMatrix(bMap);
+    return GetWindowToLogicMatrix(ePolicy);
 }
 
 basegfx::B2DHomMatrix
@@ -334,7 +337,7 @@ CoordinateMapper::GetViewTransformation(const vcl::detail::MapConversion& rConv)
     // represents a temporary, externally resolved mapping state (e.g. for MapMode evaluation).
     //
     // IMPORTANT: The affine composition performed here must remain algebraically consistent
-    // with UpdateCache(bMap=true), specifically regarding logical-offset scaling semantics
+    // with UpdateCache(ePolicy=true), specifically regarding logical-offset scaling semantics
     // and the ordering of physical viewport offsets.
     const double fScaleFactorX = static_cast<double>(GetDPIX()) * rConv.mfScaleX;
     const double fScaleFactorY = static_cast<double>(GetDPIY()) * rConv.mfScaleY;
@@ -348,9 +351,9 @@ CoordinateMapper::GetViewTransformation(const vcl::detail::MapConversion& rConv)
 
 basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rBaseline,
                                                               const MapMode& rTarget,
-                                                              bool bMap) const
+                                                              vcl::MappingPolicy ePolicy) const
 {
-    return GetViewTransformation(ResolveMap(rBaseline, rTarget, bMap));
+    return GetViewTransformation(ResolveMap(rBaseline, rTarget, ePolicy));
 }
 
 basegfx::B2DHomMatrix
@@ -361,18 +364,18 @@ CoordinateMapper::GetInverseViewTransformation(const vcl::detail::MapConversion&
     return aMatrix;
 }
 
-basegfx::B2DHomMatrix CoordinateMapper::GetInverseViewTransformation(const MapMode& rBaseline,
-                                                                     const MapMode& rTarget,
-                                                                     bool bMap) const
+basegfx::B2DHomMatrix
+CoordinateMapper::GetInverseViewTransformation(const MapMode& rBaseline, const MapMode& rTarget,
+                                               vcl::MappingPolicy ePolicy) const
 {
-    return GetInverseViewTransformation(ResolveMap(rBaseline, rTarget, bMap));
+    return GetInverseViewTransformation(ResolveMap(rBaseline, rTarget, ePolicy));
 }
 
 // ============================================================================
 // THE O(1) TRANSFORM REGISTER FILE
 // ============================================================================
 
-void CoordinateMapper::UpdateCache(bool bMap) const
+void CoordinateMapper::UpdateCache(vcl::MappingPolicy ePolicy) const
 {
     // ARCHITECTURAL GUARD: Ensure enum layout is valid for slot arithmetic
     static_assert(static_cast<size_t>(TransformSlot::LogicToWindow_Unmapped)
@@ -382,11 +385,11 @@ void CoordinateMapper::UpdateCache(bool bMap) const
 
     DBG_TESTSOLARMUTEX();
 
-    const size_t nSlotOffset = bMap ? 0 : 1;
+    const size_t nSlotOffset = ePolicy == vcl::MappingPolicy::ApplyMapMode ? 0 : 1;
 
     // Phase 1: Logic -> Window (The core mapping)
     basegfx::B2DHomMatrix aLogicToWindow;
-    if (bMap)
+    if (ePolicy == vcl::MappingPolicy::ApplyMapMode)
     {
         const double fScaleX
             = maMapRes.mfScaleX * static_cast<double>(mnDPIX) * GetDPIScaleFactor();
@@ -526,7 +529,7 @@ const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq)
         mnCacheVersion = nCurrentVersion;
     }
 
-    size_t nOffset = rReq.bApplyMapping ? 0 : 1;
+    size_t nOffset = rReq.Policy == vcl::MappingPolicy::ApplyMapMode ? 0 : 1;
     TransformSlot eSlot;
 
     if (rReq.eFrom == CoordinateSpace::Logic && rReq.eTo == CoordinateSpace::Window)
@@ -546,7 +549,7 @@ const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq)
 
     if (!maTransformCache[static_cast<size_t>(eSlot)])
     {
-        UpdateCache(rReq.bApplyMapping);
+        UpdateCache(rReq.Policy);
     }
 
     return *maTransformCache[static_cast<size_t>(eSlot)];
@@ -556,24 +559,24 @@ const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq)
 // SINGLE SOURCE OF TRUTH: MATRIX BUILDERS (NOW ROUTES TO COMPILE)
 // ============================================================================
 
-basegfx::B2DHomMatrix CoordinateMapper::GetLogicToDeviceMatrix(bool bMap) const
+basegfx::B2DHomMatrix CoordinateMapper::GetLogicToDeviceMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap }).GetMatrix();
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).GetMatrix();
 }
 
-basegfx::B2DHomMatrix CoordinateMapper::GetDeviceToLogicMatrix(bool bMap) const
+basegfx::B2DHomMatrix CoordinateMapper::GetDeviceToLogicMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap }).GetMatrix();
+    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).GetMatrix();
 }
 
-basegfx::B2DHomMatrix CoordinateMapper::GetLogicToWindowMatrix(bool bMap) const
+basegfx::B2DHomMatrix CoordinateMapper::GetLogicToWindowMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap }).GetMatrix();
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).GetMatrix();
 }
 
-basegfx::B2DHomMatrix CoordinateMapper::GetWindowToLogicMatrix(bool bMap) const
+basegfx::B2DHomMatrix CoordinateMapper::GetWindowToLogicMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, bMap }).GetMatrix();
+    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).GetMatrix();
 }
 
 // ============================================================================
@@ -898,9 +901,9 @@ double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
     return fY + static_cast<double>(mnWindowToViewOffsetY);
 }
 
-double CoordinateMapper::LogicToWindowSubPixelX(double fX, bool bMap) const
+double CoordinateMapper::LogicToWindowSubPixelX(double fX, vcl::MappingPolicy ePolicy) const
 {
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
 
     const auto& rMat = rTransform.GetMatrix();
 
@@ -913,9 +916,9 @@ double CoordinateMapper::LogicToWindowSubPixelX(double fX, bool bMap) const
     return fX * rMat.get(0, 0) + rMat.get(0, 2);
 }
 
-double CoordinateMapper::LogicToWindowSubPixelY(double fY, bool bMap) const
+double CoordinateMapper::LogicToWindowSubPixelY(double fY, vcl::MappingPolicy ePolicy) const
 {
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
 
     const auto& rMat = rTransform.GetMatrix();
 
@@ -932,21 +935,21 @@ double CoordinateMapper::LogicToWindowSubPixelY(double fY, bool bMap) const
 // PUBLIC WRAPPERS (Routing into the unified pipeline)
 // ========================================================================
 
-Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt, bool bMap) const
+Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap }).Apply(rLogicPt);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rLogicPt);
 }
 
 tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect,
-                                                      bool bMap) const
+                                                      vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap }).Apply(rLogicRect);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rLogicRect);
 }
 
 tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogicPoly,
-                                                    bool bMap) const
+                                                    vcl::MappingPolicy ePolicy) const
 {
-    CompiledTransform t = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
+    CompiledTransform t = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
     if (t.GetMode() == TransformMode::AffineFallback)
     {
         // TODO: Legacy Note: We currently don't AdaptiveSubdivide inside Apply<Polygon> because
@@ -960,147 +963,159 @@ tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogic
 }
 
 tools::PolyPolygon CoordinateMapper::LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
-                                                        bool bMap) const
+                                                        vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap }).Apply(rLogicPolyPoly);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy })
+        .Apply(rLogicPolyPoly);
 }
 
-LineInfo CoordinateMapper::LogicToDevicePixel(const LineInfo& rLineInfo, bool bMap) const
+LineInfo CoordinateMapper::LogicToDevicePixel(const LineInfo& rLineInfo,
+                                              vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap }).Apply(rLineInfo);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rLineInfo);
 }
 
 basegfx::B2DPolygon CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly,
-                                                         bool bMap) const
+                                                         vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap }).Apply(rLogicPoly);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rLogicPoly);
 }
 
 basegfx::B2DPolyPolygon
-CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly, bool bMap) const
+CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
+                                     vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap }).Apply(rLogicPolyPoly);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy })
+        .Apply(rLogicPolyPoly);
 }
 
-vcl::Region CoordinateMapper::LogicToDevicePixel(const vcl::Region& rRegion, bool bMap) const
+vcl::Region CoordinateMapper::LogicToDevicePixel(const vcl::Region& rRegion,
+                                                 vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap }).Apply(rRegion);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rRegion);
 }
 
-Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize, bool bMap) const
+Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, bMap }).Apply(rLogicSize);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rLogicSize);
 }
 
-Point CoordinateMapper::DevicePixelToLogic(const Point& rDevicePt, bool bMap) const
+Point CoordinateMapper::DevicePixelToLogic(const Point& rDevicePt, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap }).Apply(rDevicePt);
+    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rDevicePt);
 }
 
 tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rPixelRect,
-                                                      bool bMap) const
+                                                      vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap }).Apply(rPixelRect);
+    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rPixelRect);
 }
 
 tools::Polygon CoordinateMapper::DevicePixelToLogic(const tools::Polygon& rPixelPoly,
-                                                    bool bMap) const
+                                                    vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap }).Apply(rPixelPoly);
+    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rPixelPoly);
 }
 
 tools::PolyPolygon CoordinateMapper::DevicePixelToLogic(const tools::PolyPolygon& rPixelPolyPoly,
-                                                        bool bMap) const
+                                                        vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap }).Apply(rPixelPolyPoly);
+    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy })
+        .Apply(rPixelPolyPoly);
 }
 
 basegfx::B2DPolygon CoordinateMapper::DevicePixelToLogic(const basegfx::B2DPolygon& rPixelPoly,
-                                                         bool bMap) const
+                                                         vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap }).Apply(rPixelPoly);
+    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rPixelPoly);
 }
 
 basegfx::B2DPolyPolygon
-CoordinateMapper::DevicePixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly, bool bMap) const
+CoordinateMapper::DevicePixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly,
+                                     vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap }).Apply(rPixelPolyPoly);
+    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy })
+        .Apply(rPixelPolyPoly);
 }
 
-vcl::Region CoordinateMapper::DevicePixelToLogic(const vcl::Region& rRegion, bool bMap) const
+vcl::Region CoordinateMapper::DevicePixelToLogic(const vcl::Region& rRegion,
+                                                 vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap }).Apply(rRegion);
+    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rRegion);
 }
 
-Size CoordinateMapper::DevicePixelToLogic(const Size& rDeviceSize, bool bMap) const
+Size CoordinateMapper::DevicePixelToLogic(const Size& rDeviceSize, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, bMap }).Apply(rDeviceSize);
+    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rDeviceSize);
 }
 
-Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt, bool bMap) const
+Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap }).Apply(rLogicPt);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rLogicPt);
 }
 
 tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect,
-                                                      bool bMap) const
+                                                      vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap }).Apply(rRect);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rRect);
 }
 
-tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rPoly, bool bMap) const
+tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rPoly,
+                                                    vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap }).Apply(rPoly);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rPoly);
 }
 
 tools::PolyPolygon CoordinateMapper::LogicToWindowUnits(const tools::PolyPolygon& rPolyPoly,
-                                                        bool bMap) const
+                                                        vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap }).Apply(rPolyPoly);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rPolyPoly);
 }
 
-vcl::Region CoordinateMapper::LogicToWindowUnits(const vcl::Region& rRegion, bool bMap) const
+vcl::Region CoordinateMapper::LogicToWindowUnits(const vcl::Region& rRegion,
+                                                 vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap }).Apply(rRegion);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rRegion);
 }
 
-Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, bool bMap) const
+Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap }).Apply(rLogicSize);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rLogicSize);
 }
 
-Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, bool bMap) const
+Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, bMap }).Apply(rWindowPt);
+    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).Apply(rWindowPt);
 }
 
 tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
-                                                      bool bMap) const
+                                                      vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, bMap }).Apply(rWindowRect);
+    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).Apply(rWindowRect);
 }
 
 tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
-                                                    bool bMap) const
+                                                    vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, bMap }).Apply(rWindowPoly);
+    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).Apply(rWindowPoly);
 }
 
 tools::PolyPolygon CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly,
-                                                        bool bMap) const
+                                                        vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, bMap })
+    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy })
         .Apply(rWindowPolyPoly);
 }
 
-vcl::Region CoordinateMapper::WindowToLogicUnits(const vcl::Region& rRegion, bool bMap) const
+vcl::Region CoordinateMapper::WindowToLogicUnits(const vcl::Region& rRegion,
+                                                 vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, bMap }).Apply(rRegion);
+    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).Apply(rRegion);
 }
 
-Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, bool bMap) const
+Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, bMap }).Apply(rWindowSize);
+    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).Apply(rWindowSize);
 }
 
 // ========================================================================
@@ -1113,10 +1128,11 @@ Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, bool bMap) co
  * the transformed X-basis vector to preserve legacy distance scaling
  * expectations (e.g. for line widths or font heights).
  */
-tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth, bool bMap) const
+tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth,
+                                                      vcl::MappingPolicy ePolicy) const
 {
     const auto& rTransform
-        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
+        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
         return lcl_RoundToLong(static_cast<double>(nWidth)
@@ -1125,10 +1141,11 @@ tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth, bool b
     return lcl_RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
 }
 
-tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight, bool bMap) const
+tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight,
+                                                       vcl::MappingPolicy ePolicy) const
 {
     const auto& rTransform
-        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Device, bMap });
+        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
         return lcl_RoundToLong(static_cast<double>(nHeight)
@@ -1137,10 +1154,11 @@ tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight, bool
     return lcl_RoundToLong(static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1));
 }
 
-tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth, bool bMap) const
+tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth,
+                                                      vcl::MappingPolicy ePolicy) const
 {
     const auto& rTransform
-        = Compile(TransformRequest{ CoordinateSpace::Device, CoordinateSpace::Logic, bMap });
+        = Compile(TransformRequest{ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
         return lcl_RoundToLong(static_cast<double>(nWidth)
@@ -1149,10 +1167,11 @@ tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth, bool b
     return lcl_RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
 }
 
-tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight, bool bMap) const
+tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight,
+                                                       vcl::MappingPolicy ePolicy) const
 {
     const auto& rTransform
-        = Compile(TransformRequest{ CoordinateSpace::Device, CoordinateSpace::Logic, bMap });
+        = Compile(TransformRequest{ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
         return lcl_RoundToLong(static_cast<double>(nHeight)
@@ -1161,10 +1180,11 @@ tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight, bool
     return lcl_RoundToLong(static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1));
 }
 
-double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth, bool bMap) const
+double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth,
+                                                    vcl::MappingPolicy ePolicy) const
 {
     const auto& rTransform
-        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
         return static_cast<double>(nWidth) * lcl_GetBasisVectorMagnitudeX(rTransform.GetMatrix());
@@ -1172,10 +1192,11 @@ double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth, bool bMa
     return static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0);
 }
 
-double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight, bool bMap) const
+double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight,
+                                                     vcl::MappingPolicy ePolicy) const
 {
     const auto& rTransform
-        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
 
     if (!rTransform.CheckRectilinearContract())
         return static_cast<double>(nHeight) * lcl_GetBasisVectorMagnitudeY(rTransform.GetMatrix());
@@ -1183,86 +1204,89 @@ double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight, bool b
     return static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1);
 }
 
-tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX, bool bMap) const
+tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX, vcl::MappingPolicy ePolicy) const
 {
     const auto& rTransform
-        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
     const auto& rMat = rTransform.GetMatrix();
 
     if (!rTransform.PreservesAxisAlignment())
-        return lcl_RoundToLong(LogicToWindowSubPixelX(static_cast<double>(nX), bMap));
+        return lcl_RoundToLong(LogicToWindowSubPixelX(static_cast<double>(nX), ePolicy));
 
     return lcl_RoundToLong(static_cast<double>(nX) * rMat.get(0, 0) + rMat.get(0, 2));
 }
 
-tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY, bool bMap) const
+tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY, vcl::MappingPolicy ePolicy) const
 {
     const auto& rTransform
-        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, bMap });
+        = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
     const auto& rMat = rTransform.GetMatrix();
 
     if (!rTransform.PreservesAxisAlignment())
-        return lcl_RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY), bMap));
+        return lcl_RoundToLong(LogicToWindowSubPixelY(static_cast<double>(nY), ePolicy));
 
     return lcl_RoundToLong(static_cast<double>(nY) * rMat.get(1, 1) + rMat.get(1, 2));
 }
 
-basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint, bool bMap) const
+basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint,
+                                                          vcl::MappingPolicy ePolicy) const
 {
-    basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(bMap);
+    basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(ePolicy);
     basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
     aPt *= aMat;
     return aPt;
 }
 
 basegfx::B2DPoint CoordinateMapper::DevicePixelToLogicSubPixel(const Point& rDevicePt,
-                                                               bool bMap) const
+                                                               vcl::MappingPolicy ePolicy) const
 {
     basegfx::B2DPoint aPt(rDevicePt.X(), rDevicePt.Y());
-    aPt *= GetDeviceToLogicMatrix(bMap);
+    aPt *= GetDeviceToLogicMatrix(ePolicy);
     return aPt;
 }
 
 Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt,
-                                                   bool bMap) const
+                                                   vcl::MappingPolicy ePolicy) const
 {
-    basegfx::B2DHomMatrix aMat = GetWindowToLogicMatrix(bMap);
+    basegfx::B2DHomMatrix aMat = GetWindowToLogicMatrix(ePolicy);
     basegfx::B2DPoint aPt(rWindowPt);
     aPt *= aMat;
     return Point(lcl_RoundToLong(aPt.getX()), lcl_RoundToLong(aPt.getY()));
 }
 
 template <TransformableB2DGeometry T>
-T CoordinateMapper::LogicToWindowUnits(const T& rLogicGeometry, bool bMap) const
+T CoordinateMapper::LogicToWindowUnits(const T& rLogicGeometry, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, bMap }).Apply(rLogicGeometry);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy })
+        .Apply(rLogicGeometry);
 }
 
 template SAL_DLLPRIVATE basegfx::B2DRectangle
 CoordinateMapper::LogicToWindowUnits<basegfx::B2DRectangle>(const basegfx::B2DRectangle&,
-                                                            bool) const;
+                                                            vcl::MappingPolicy) const;
 
 template SAL_DLLPRIVATE basegfx::B2DPolygon
-CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&, bool) const;
+CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&,
+                                                          vcl::MappingPolicy) const;
 
 template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
 CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&,
-                                                              bool) const;
+                                                              vcl::MappingPolicy) const;
 
 template <TransformableB2DGeometry T>
-T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry, bool bMap) const
+T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, bMap })
+    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy })
         .Apply(rWindowGeometry);
 }
 
 template SAL_DLLPRIVATE basegfx::B2DRectangle
 CoordinateMapper::WindowToLogicUnits<basegfx::B2DRectangle>(const basegfx::B2DRectangle&,
-                                                            bool) const;
+                                                            vcl::MappingPolicy) const;
 
 template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
 CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&,
-                                                              bool) const;
+                                                              vcl::MappingPolicy) const;
 
 // ========================================================================
 // MapConversion Wrappers
@@ -1427,7 +1451,7 @@ CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(
 
 Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMapModeBaseline,
                                      const MapMode* pMapModeSource, const MapMode* pMapModeDest,
-                                     bool bMap) const
+                                     vcl::MappingPolicy ePolicy) const
 {
     const MapMode* pSrc = pMapModeSource ? pMapModeSource : pMapModeBaseline;
     const MapMode* pDst = pMapModeDest ? pMapModeDest : pMapModeBaseline;
@@ -1435,8 +1459,8 @@ Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMap
     if (!pSrc || !pDst || *pSrc == *pDst)
         return rPtSource;
 
-    MappingCoefficients aMapResSource = ResolveMapResRelative(pMapModeBaseline, pSrc, bMap);
-    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pDst, bMap);
+    MappingCoefficients aMapResSource = ResolveMapResRelative(pMapModeBaseline, pSrc, ePolicy);
+    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pDst, ePolicy);
 
     return Point(aMapResSource.TransformPointX(rPtSource.X(), aMapResDest),
                  aMapResSource.TransformPointY(rPtSource.Y(), aMapResDest));
@@ -1444,7 +1468,7 @@ Point CoordinateMapper::LogicToLogic(const Point& rPtSource, const MapMode* pMap
 
 Size CoordinateMapper::LogicToLogic(const Size& rSzSource, const MapMode* pMapModeBaseline,
                                     const MapMode* pMapModeSource, const MapMode* pMapModeDest,
-                                    bool bMap) const
+                                    vcl::MappingPolicy ePolicy) const
 {
     const MapMode* pSrc = pMapModeSource ? pMapModeSource : pMapModeBaseline;
     const MapMode* pDst = pMapModeDest ? pMapModeDest : pMapModeBaseline;
@@ -1452,8 +1476,8 @@ Size CoordinateMapper::LogicToLogic(const Size& rSzSource, const MapMode* pMapMo
     if (!pSrc || !pDst || *pSrc == *pDst)
         return rSzSource;
 
-    MappingCoefficients aMapResSource = ResolveMapResRelative(pMapModeBaseline, pSrc, bMap);
-    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pDst, bMap);
+    MappingCoefficients aMapResSource = ResolveMapResRelative(pMapModeBaseline, pSrc, ePolicy);
+    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pDst, ePolicy);
 
     return Size(aMapResSource.ScaleDistanceX(rSzSource.Width(), aMapResDest),
                 aMapResSource.ScaleDistanceY(rSzSource.Height(), aMapResDest));
@@ -1473,7 +1497,8 @@ Size CoordinateMapper::LogicToLogic(const Size& rSzSource, const MapMode* pMapMo
 tools::Rectangle CoordinateMapper::LogicToLogic(const tools::Rectangle& rRectSource,
                                                 const MapMode* pMapModeBaseline,
                                                 const MapMode* pMapModeSource,
-                                                const MapMode* pMapModeDest, bool bMap) const
+                                                const MapMode* pMapModeDest,
+                                                vcl::MappingPolicy ePolicy) const
 {
     const MapMode* pSrc = pMapModeSource ? pMapModeSource : pMapModeBaseline;
     const MapMode* pDst = pMapModeDest ? pMapModeDest : pMapModeBaseline;
@@ -1481,8 +1506,8 @@ tools::Rectangle CoordinateMapper::LogicToLogic(const tools::Rectangle& rRectSou
     if (!pSrc || !pDst || *pSrc == *pDst)
         return rRectSource;
 
-    MappingCoefficients aMapResSource = ResolveMapResRelative(pMapModeBaseline, pSrc, bMap);
-    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pDst, bMap);
+    MappingCoefficients aMapResSource = ResolveMapResRelative(pMapModeBaseline, pSrc, ePolicy);
+    MappingCoefficients aMapResDest = ResolveMapResRelative(pMapModeBaseline, pDst, ePolicy);
 
     return tools::Rectangle(aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest),
                             aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest),

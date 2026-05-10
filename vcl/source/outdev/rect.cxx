@@ -21,6 +21,7 @@
 #include <tools/poly.hxx>
 #include <tools/helpers.hxx>
 
+#include <vcl/MappingPolicy.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/rendercontext/DrawGridFlags.hxx>
 #include <vcl/virdev.hxx>
@@ -291,8 +292,8 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     if( mbInitFillColor )
         InitFillColor();
 
-    const bool bOldMap = IsMapModeEnabled();
-    EnableMapMode(false);
+    const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
+    EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
 
     if( nFlags & DrawGridFlags::Dots )
     {
@@ -325,7 +326,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         }
     }
 
-    EnableMapMode(bOldMap);
+    EnableMapMode( eOldPolicy );
 }
 
 void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Size& rGridDistance,
@@ -423,8 +424,8 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
                 continue;
             }
 
-            const bool bOldMap = IsMapModeEnabled();
-            EnableMapMode(false);
+            const vcl::MappingPolicy eOldPolicy = IsMapModeEnabled();
+            EnableMapMode( vcl::MappingPolicy::IgnoreMapMode );
 
             // Draw horizontal line if visible
             if (nPositionY >= rDrawingArea.Top() && nPositionY <= rDrawingArea.Bottom())
@@ -440,7 +441,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
                                      *this);
             }
 
-            EnableMapMode(bOldMap);
+            EnableMapMode( eOldPolicy );
         }
     }
 }

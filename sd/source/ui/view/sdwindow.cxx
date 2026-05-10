@@ -687,10 +687,10 @@ Point Window::GetVisibleCenter()
     Point aPos = ::tools::Rectangle(Point(), GetOutputSizePixel()).Center();
 
     // For LOK
-    bool bMapModeWasEnabled(IsMapModeEnabled());
+    vcl::MappingPolicy eOldPolicy(IsMapModeEnabled());
     EnableMapMode(/*true*/);
     aPos = PixelToLogic(aPos);
-    EnableMapMode(bMapModeWasEnabled);
+    EnableMapMode(eOldPolicy);
 
     return aPos;
 }

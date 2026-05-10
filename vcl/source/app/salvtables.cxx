@@ -1332,7 +1332,7 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
                                          OutputDevice& rOutput)
 {
     rOutput.Push();
-    bool bOldMapModeEnabled = pWindow->IsMapModeEnabled();
+    vcl::MappingPolicy eOldPolicy = pWindow->IsMapModeEnabled();
 
     if (pWindow->GetMapMode().GetMapUnit() != rOutput.GetMapMode().GetMapUnit())
     {
@@ -1402,7 +1402,7 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
 
     xOutput.disposeAndClear();
 
-    pWindow->EnableMapMode(bOldMapModeEnabled);
+    pWindow->EnableMapMode(eOldPolicy);
     rOutput.Pop();
 
     for (vcl::Window* pChild = pWindow->GetWindow(GetWindowType::FirstChild); pChild;

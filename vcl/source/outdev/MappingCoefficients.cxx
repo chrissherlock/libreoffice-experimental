@@ -138,12 +138,13 @@ void MappingCoefficients::CalcMapResolution(const MapMode& rMapMode, tools::Long
 }
 
 MappingCoefficients MappingCoefficients::ResolveMapRes(const MapMode* pMode,
-                                                       const MapMode& rDefaultMapMode, bool bMap,
+                                                       const MapMode& rDefaultMapMode,
+                                                       vcl::MappingPolicy ePolicy,
                                                        tools::Long nDPIX, tools::Long nDPIY) const
 {
     const MapMode* pEffectiveMode = pMode ? pMode : &rDefaultMapMode;
 
-    if (bMap && pEffectiveMode == &rDefaultMapMode)
+    if (ePolicy == vcl::MappingPolicy::ApplyMapMode && pEffectiveMode == &rDefaultMapMode)
         return *this;
 
     MappingCoefficients aRes;

@@ -250,8 +250,8 @@ void WeldEditView::DoPaint(vcl::RenderContext& rRenderContext, const tools::Rect
     {
         VirtualDevice& rSrc = m_bCursorVisible ? *m_xCursorOnDev : *m_xCursorOffDev;
         // Blit cached bitmap in pixel coordinates to avoid rounding issues
-        bool bMapMode = rRenderContext.IsMapModeEnabled();
-        rRenderContext.EnableMapMode(false);
+        vcl::MappingPolicy bMapMode = rRenderContext.IsMapModeEnabled();
+        rRenderContext.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
         rRenderContext.DrawOutDev(m_aCachedCursorPixRect.TopLeft(),
                                   m_aCachedCursorPixRect.GetSize(), Point(0, 0),
                                   m_aCachedCursorPixRect.GetSize(), rSrc);
@@ -279,8 +279,8 @@ void WeldEditView::DoPaint(vcl::RenderContext& rRenderContext, const tools::Rect
             Size aPixSize = aPixRect.GetSize();
 
             // Cache in pixel coordinates to avoid rounding issues
-            bool bMapMode = rRenderContext.IsMapModeEnabled();
-            rRenderContext.EnableMapMode(false);
+            vcl::MappingPolicy bMapMode = rRenderContext.IsMapModeEnabled();
+            rRenderContext.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
             // Cache "cursor off" — text without cursor (before drawing cursor)
             m_xCursorOffDev->SetOutputSizePixel(aPixSize);
@@ -291,7 +291,7 @@ void WeldEditView::DoPaint(vcl::RenderContext& rRenderContext, const tools::Rect
             // Draw cursor, then cache "cursor on"
             rRenderContext.EnableMapMode(bMapMode);
             pCursor->DrawToDevice(rRenderContext);
-            rRenderContext.EnableMapMode(false);
+            rRenderContext.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
             m_xCursorOnDev->SetOutputSizePixel(aPixSize);
             m_xCursorOnDev->SetMapMode(MapMode(MapUnit::MapPixel));
@@ -303,7 +303,7 @@ void WeldEditView::DoPaint(vcl::RenderContext& rRenderContext, const tools::Rect
             // If cursor should be hidden, restore to clean state
             if (!m_bCursorVisible)
             {
-                rRenderContext.EnableMapMode(false);
+                rRenderContext.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
                 rRenderContext.DrawOutDev(aPixRect.TopLeft(), aPixSize, Point(0, 0), aPixSize,
                                           *m_xCursorOffDev);
                 rRenderContext.EnableMapMode(bMapMode);

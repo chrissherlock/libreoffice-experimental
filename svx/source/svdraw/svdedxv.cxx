@@ -989,7 +989,7 @@ void SdrObjEditView::ImpPaintOutlinerView(OutlinerView& rOutlView, const tools::
             drawinglayer::processor2d::createProcessor2DFromOutputDevice(rTargetDevice,
                                                                          aViewInformation2D));
 
-        const bool bMapModeEnabled(rTargetDevice.IsMapModeEnabled());
+        const vcl::MappingPolicy bMapModeEnabled(rTargetDevice.IsMapModeEnabled());
         const basegfx::B2DRange aRange = vcl::unotools::b2DRectangleFromRectangle(aPixRect);
         const Color aHilightColor(SvtOptionsDrawinglayer::getHilightColor());
         const double fTransparence(SvtOptionsDrawinglayer::GetTransparentSelectionPercent() * 0.01);
@@ -1001,7 +1001,7 @@ void SdrObjEditView::ImpPaintOutlinerView(OutlinerView& rOutlView, const tools::
                 0.0));
         const drawinglayer::primitive2d::Primitive2DContainer aSequence{ xReference };
 
-        rTargetDevice.EnableMapMode(false);
+        rTargetDevice.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
         xProcessor->process(aSequence);
         rTargetDevice.EnableMapMode(bMapModeEnabled);
     }
@@ -1056,8 +1056,8 @@ void SdrObjEditView::ImpInvalidateOutlinerView(OutlinerView const& rOutlView) co
     aOuterPix.AdjustRight(nPixSiz);
     aOuterPix.AdjustBottom(nPixSiz);
 
-    bool bMapModeEnabled(pWin->IsMapModeEnabled());
-    pWin->EnableMapMode(false);
+    vcl::MappingPolicy bMapModeEnabled(pWin->IsMapModeEnabled());
+    pWin->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     pWin->Invalidate(aOuterPix);
     pWin->EnableMapMode(bMapModeEnabled);
 }

@@ -89,11 +89,11 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMatrixEngine)
 
     // Forward journey via the actual LogicToDevice matrix
     basegfx::B2DPoint aDevice = aInput;
-    aDevice *= aMapper.GetLogicToDeviceMatrix(true);
+    aDevice *= aMapper.GetLogicToDeviceMatrix(vcl::MappingPolicy::ApplyMapMode);
 
     // Backward journey via the actual DeviceToLogic matrix
     basegfx::B2DPoint aBackToLogic = aDevice;
-    aBackToLogic *= aMapper.GetDeviceToLogicMatrix(true);
+    aBackToLogic *= aMapper.GetDeviceToLogicMatrix(vcl::MappingPolicy::ApplyMapMode);
 
     // Standard epsilon check for double precision parity
     CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Matrix inversion drift detected", aInput.getX(),
@@ -119,7 +119,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testBMapFalseSemantics)
 
     // Request translation with bMap = false
     Point aPt(10, 10);
-    Point aResult = aMapper.LogicToDevicePixel(aPt, false);
+    Point aResult = aMapper.LogicToDevicePixel(aPt, vcl::MappingPolicy::IgnoreMapMode);
 
     // Expect: (10 + 0 logical scaling/offset) + 50 window + 10 device = 70
     CPPUNIT_ASSERT_EQUAL_MESSAGE("bMap=false must ignore logic but apply pixel offsets",
@@ -132,7 +132,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCompiledTransformStability)
     aMapper.SetMapMode(MapMode(MapUnit::MapPixel));
     aMapper.SetWindowOffset(Size(10, 10));
 
-    CompiledTransform aTransform = aMapper.Compile(true);
+    CompiledTransform aTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
 
     aMapper.SetWindowOffset(Size(999, 999));
 
@@ -142,7 +142,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCompiledTransformStability)
     CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Compiled transform isolation failed under mutation", 10.0,
                                          aPt.getX(), 1e-9);
 
-    CompiledTransform aNewTransform = aMapper.Compile(true);
+    CompiledTransform aNewTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
     basegfx::B2DPoint aPtNew(0, 0);
     aPtNew *= aNewTransform.GetMatrix();
 
@@ -173,7 +173,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testAffineCompositionOrder)
     // Y: (50 - 20_logic) * 3.0_scale + 5_view = (30 * 3) + 5 = 95
 
     // We test the matrix directly to bypass legacy wrappers
-    basegfx::B2DHomMatrix aMat = aMapper.GetLogicToWindowMatrix(true);
+    basegfx::B2DHomMatrix aMat = aMapper.GetLogicToWindowMatrix(vcl::MappingPolicy::ApplyMapMode);
     basegfx::B2DPoint aPt(100.0, 50.0);
     aPt *= aMat;
 
@@ -281,7 +281,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionTransformationCoverage)
     // In VCL, this is Point(0,0) to Point(99,99) for a width of 100.
     vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
 
-    const auto& rTransform = aMapper.Compile(true);
+    const auto& rTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
     vcl::Region aTransformed = rTransform.Apply(aRegion);
     tools::Rectangle aBound = aTransformed.GetBoundRect();
 
