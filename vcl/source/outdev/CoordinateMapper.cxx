@@ -458,15 +458,12 @@ CompiledTransform CoordinateMapper::BuildCompiledTransform(const basegfx::B2DHom
     aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Connectivity));
 
     // Orientation Invariant: Handedness check.
-    // det = ad - bc. Epsilon-guarded to handle numerical noise near singular transforms.
+    // det = ad - bc. Epsilon-guarded for numerical stability.
     const double fDet = rMat.get(0, 0) * rMat.get(1, 1) - rMat.get(0, 1) * rMat.get(1, 0);
-    constexpr double fDetEpsilon = 1e-12;
-    if (fDet > fDetEpsilon)
-    {
+    if (fDet > 1e-12)
         aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Orientation));
-    }
 
-    // Frame Invariants: AxisAlignment and Orthogonality.
+    // Performance Taxonomy Classification
     if (rMat.isIdentity())
     {
         aTransform.meMode = TransformMode::Identity;
@@ -474,18 +471,19 @@ CompiledTransform CoordinateMapper::BuildCompiledTransform(const basegfx::B2DHom
     }
     else if (lcl_IsAxisAligned(rMat))
     {
+        // Rectilinear transforms preserve Axis Alignment and Orthogonality
         aTransform.maContract.maPreserved.set(
             static_cast<size_t>(GeometryInvariant::AxisAlignment));
         aTransform.maContract.maPreserved.set(
             static_cast<size_t>(GeometryInvariant::Orthogonality));
 
-        // Refine Optimization Mode for legacy integer fast-paths
         if (lcl_IsPureTranslation(rMat))
         {
             const double fTx = rMat.get(0, 2);
             const double fTy = rMat.get(1, 2);
             constexpr double fEpsilon = 1e-9;
 
+            // Fast path for integer-only translations (Legacy VCL optimization)
             if (std::abs(fTx - std::round(fTx)) < fEpsilon
                 && std::abs(fTy - std::round(fTy)) < fEpsilon)
             {
@@ -495,12 +493,14 @@ CompiledTransform CoordinateMapper::BuildCompiledTransform(const basegfx::B2DHom
             }
             else
             {
-                aTransform.meMode = TransformMode::AffineFallback;
+                // Floating point translation or non-identity scale
+                aTransform.meMode = TransformMode::AxisAlignedAffine;
             }
         }
         else
         {
-            aTransform.meMode = TransformMode::AffineFallback;
+            // Axis-aligned but contains scaling (DPI, MapMode, etc.)
+            aTransform.meMode = TransformMode::AxisAlignedAffine;
         }
     }
     else
@@ -582,15 +582,33 @@ basegfx::B2DHomMatrix CoordinateMapper::GetWindowToLogicMatrix(bool bMap) const
 
 template <> Point CompiledTransform::Apply<Point>(const Point& rPt) const
 {
-    if (meMode == TransformMode::Identity)
-        [[likely]] return rPt;
+    switch (meMode)
+    {
+        case TransformMode::Identity:
+            [[likely]] return rPt;
 
-    if (meMode == TransformMode::Translation)
-        return Point(rPt.X() + GetDeviceTx(), rPt.Y() + GetDeviceTy());
+        case TransformMode::Translation:
+            return Point(rPt.X() + mnDeviceTx, rPt.Y() + mnDeviceTy);
 
-    basegfx::B2DPoint aB2DPt(rPt.X(), rPt.Y());
-    aB2DPt *= maMatrix;
-    return Point(lcl_RoundToLong(aB2DPt.getX()), lcl_RoundToLong(aB2DPt.getY()));
+        case TransformMode::AxisAlignedAffine:
+        {
+            // Stabilization: Use basegfx logic to ensure rounding consistency
+            // with the full affine path, avoiding 1-pixel 'jitter' in unit tests.
+            basegfx::B2DPoint aPt(rPt.X(), rPt.Y());
+
+            double fX = aPt.getX() * maMatrix.get(0, 0) + maMatrix.get(0, 2);
+            double fY = aPt.getY() * maMatrix.get(1, 1) + maMatrix.get(1, 2);
+
+            return Point(lcl_RoundToLong(fX), lcl_RoundToLong(fY));
+        }
+
+        case TransformMode::AffineFallback:
+        default:
+            // Full 3x3 Affine Transformation
+            basegfx::B2DPoint aB2DPt(rPt.X(), rPt.Y());
+            aB2DPt *= maMatrix;
+            return Point(lcl_RoundToLong(aB2DPt.getX()), lcl_RoundToLong(aB2DPt.getY()));
+    }
 }
 
 Size CompiledTransform::ApplyRectilinear(const Size& rSize) const
@@ -605,19 +623,25 @@ Size CompiledTransform::ApplyRectilinear(const Size& rSize) const
 
 tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRect) const
 {
+    if (rRect.IsEmpty())
+        return tools::Rectangle();
+
     double fL = static_cast<double>(rRect.Left()) * maMatrix.get(0, 0) + maMatrix.get(0, 2);
     double fT = static_cast<double>(rRect.Top()) * maMatrix.get(1, 1) + maMatrix.get(1, 2);
-    tools::Long nL = lcl_RoundToLong(fL);
-    tools::Long nT = lcl_RoundToLong(fT);
-
     double fW = static_cast<double>(rRect.GetWidth()) * maMatrix.get(0, 0);
     double fH = static_cast<double>(rRect.GetHeight()) * maMatrix.get(1, 1);
 
-    tools::Rectangle aRet(Point(nL, nT), Size(lcl_RoundToLong(fW), lcl_RoundToLong(fH)));
-    if (rRect.IsEmpty())
-        aRet.SetEmpty();
+    tools::Long nL = lcl_RoundToLong(fL);
+    tools::Long nT = lcl_RoundToLong(fT);
+    tools::Long nW = lcl_RoundToLong(fW);
+    tools::Long nH = lcl_RoundToLong(fH);
 
-    return aRet;
+    if (nW == 0 && rRect.GetWidth() > 0)
+        nW = 1;
+    if (nH == 0 && rRect.GetHeight() > 0)
+        nH = 1;
+
+    return tools::Rectangle(Point(nL, nT), Size(nW, nH));
 }
 
 template <> Size CompiledTransform::Apply<Size>(const Size& rSize) const
@@ -721,7 +745,7 @@ basegfx::B2DRange CompiledTransform::Apply<basegfx::B2DRange>(const basegfx::B2D
 template <> vcl::Region CompiledTransform::Apply<vcl::Region>(const vcl::Region& rRegion) const
 {
     if (rRegion.IsNull() || rRegion.IsEmpty() || meMode == TransformMode::Identity)
-        return rRegion;
+        [[likely]] return rRegion;
 
     if (meMode == TransformMode::Translation)
     {
@@ -730,21 +754,17 @@ template <> vcl::Region CompiledTransform::Apply<vcl::Region>(const vcl::Region&
         return aRet;
     }
 
+    // PDF Structural Fix: Use the PolyPolygon bridge ONLY if the region
+    // is already a complex polygon.
     if (rRegion.getB2DPolyPolygon())
         return vcl::Region(Apply(*rRegion.getB2DPolyPolygon()));
 
     if (rRegion.getPolyPolygon())
         return vcl::Region(Apply(*rRegion.getPolyPolygon()));
 
-    // Fallback: RegionBand composition via AABB aggregation.
-    // NOTE:
-    // 1. We iterate in standard order; the legacy 'reverse' iteration was a
-    //    vestigial optimization for old RegionBand internals and is not
-    //    semantically required here.
-    // 2. Performance Hazard: Rectangle-wise Region::Union() may become O(n^2)
-    //    for heavily fragmented regions due to repeated normalization/merge
-    //    passes. If profiling shows this path is hot, it should be replaced
-    //    with direct transformed RegionBand construction.
+    // UI Paint Rectangles MUST fallback to AABB aggregation so they
+    // hit ApplyRectilinear() and benefit from the nW=1 / nH=1 footprint safeguards,
+    // avoiding destructive scan-conversion.
     vcl::Region aRegion;
     RectangleVector aRectangles;
     rRegion.GetRegionRectangles(aRectangles);
