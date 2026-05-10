@@ -1334,9 +1334,9 @@ void SvxPreviewBase::LocalPrePaint(vcl::RenderContext const & rRenderContext)
         static const sal_uInt32 nLen(8);
         static const Color aW(COL_WHITE);
         static const Color aG(0xef, 0xef, 0xef);
-        const bool bWasEnabled(mpBufferDevice->IsMapModeEnabled());
+        const vcl::MappingPolicy bWasEnabled(mpBufferDevice->IsMapModeEnabled());
 
-        mpBufferDevice->EnableMapMode(false);
+        mpBufferDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
         mpBufferDevice->DrawCheckered(aNull, mpBufferDevice->GetOutputSizePixel(), nLen, aW, aG);
         mpBufferDevice->EnableMapMode(bWasEnabled);
     }
@@ -1349,12 +1349,12 @@ void SvxPreviewBase::LocalPrePaint(vcl::RenderContext const & rRenderContext)
 void SvxPreviewBase::LocalPostPaint(vcl::RenderContext& rRenderContext)
 {
     // copy to front (in pixel mode)
-    const bool bWasEnabledSrc(mpBufferDevice->IsMapModeEnabled());
-    const bool bWasEnabledDst(rRenderContext.IsMapModeEnabled());
+    const vcl::MappingPolicy bWasEnabledSrc(mpBufferDevice->IsMapModeEnabled());
+    const vcl::MappingPolicy bWasEnabledDst(rRenderContext.IsMapModeEnabled());
     const Point aEmptyPoint;
 
-    mpBufferDevice->EnableMapMode(false);
-    rRenderContext.EnableMapMode(false);
+    mpBufferDevice->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
+    rRenderContext.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 
     rRenderContext.DrawOutDev(aEmptyPoint, GetOutputSizePixel(),
                               aEmptyPoint, GetOutputSizePixel(),

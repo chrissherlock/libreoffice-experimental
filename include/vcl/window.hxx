@@ -22,6 +22,7 @@
 
 #include <vcl/dllapi.h>
 #include <vcl/outdev.hxx>
+#include <vcl/MappingPolicy.hxx>
 #include <tools/link.hxx>
 #include <vcl/wintypes.hxx>
 #include <vcl/vclenum.hxx>
@@ -1482,8 +1483,8 @@ public:
     tools::Long                 GetDeviceOriginX() const;
     tools::Long                 GetDeviceOriginY() const;
 
-    void                        EnableMapMode( bool bEnable = true );
-    bool                        IsMapModeEnabled() const;
+    void EnableMapMode( vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode );
+    vcl::MappingPolicy IsMapModeEnabled() const;
     SAL_DLLPRIVATE void         SetMapMode();
     void                        SetMapMode( const MapMode& rNewMapMode );
 

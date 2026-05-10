@@ -453,8 +453,8 @@ void SdrPageWindow::InvalidatePageWindow(const basegfx::B2DRange& rRange)
             static_cast<tools::Long>(bNegativeX ? std::max(0.0, floor(-aDiscreteRange.getMinX())) : ceil(aDiscreteRange.getMaxX())),
             static_cast<tools::Long>(ceil(aDiscreteRange.getMaxY())));
 
-        const bool bWasMapModeEnabled(rWindow.IsMapModeEnabled());
-        rWindow.EnableMapMode(false);
+        const vcl::MappingPolicy bWasMapModeEnabled(rWindow.IsMapModeEnabled());
+        rWindow.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
         GetPageView().GetView().InvalidateOneWin(rWindow, aVCLDiscreteRectangle);
         rWindow.EnableMapMode(bWasMapModeEnabled);
     }

@@ -21,6 +21,7 @@
 #include <vcl/graph.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/MappingPolicy.hxx>
 
 #include <CoordinateMapper.hxx>
 #include <salgdi.hxx>

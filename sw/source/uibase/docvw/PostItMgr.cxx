@@ -969,7 +969,7 @@ void SwPostItMgr::LayoutPostIts()
     const bool bTiledAnnotations = comphelper::LibreOfficeKit::isTiledAnnotations();
     const bool bShowNotes = ShowNotes();
 
-    const bool bEnableMapMode = bLoKitActive && !mpEditWin->IsMapModeEnabled();
+    const bool bEnableMapMode = bLoKitActive && (mpEditWin->IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode);
     if (bEnableMapMode)
         mpEditWin->EnableMapMode();
 
@@ -1243,7 +1243,7 @@ void SwPostItMgr::LayoutPostIts()
     }
 
     if (bEnableMapMode)
-        mpEditWin->EnableMapMode(false);
+        mpEditWin->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 }
 
 bool SwPostItMgr::BorderOverPageBorder(tools::ULong aPage) const
@@ -1272,8 +1272,7 @@ void SwPostItMgr::DrawNotesForPage(OutputDevice *pOutDev, sal_uInt32 nPage)
     assert(nPage < mPages.size());
     if (nPage >= mPages.size())
         return;
-    const bool bEnableMapMode
-        = comphelper::LibreOfficeKit::isActive() && !mpEditWin->IsMapModeEnabled();
+    const bool bEnableMapMode = comphelper::LibreOfficeKit::isActive() && (mpEditWin->IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode);
     if (bEnableMapMode)
         mpEditWin->EnableMapMode();
     for (auto const& pItem : mPages[nPage]->mvSidebarItems)
@@ -1285,7 +1284,7 @@ void SwPostItMgr::DrawNotesForPage(OutputDevice *pOutDev, sal_uInt32 nPage)
         pPostIt->DrawForPage(pOutDev, aPoint);
     }
     if (bEnableMapMode)
-        mpEditWin->EnableMapMode(false);
+        mpEditWin->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
 }
 
 void SwPostItMgr::PaintTile(OutputDevice& rRenderContext)
@@ -1296,7 +1295,7 @@ void SwPostItMgr::PaintTile(OutputDevice& rRenderContext)
         if (!pPostIt)
             continue;
 
-        bool bEnableMapMode = !mpEditWin->IsMapModeEnabled();
+        bool bEnableMapMode = (mpEditWin->IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode);
         mpEditWin->EnableMapMode();
         rRenderContext.Push(vcl::PushFlags::MAPMODE);
         Point aOffset(mpEditWin->PixelToLogic(pPostIt->GetPosPixel()));
@@ -1310,7 +1309,7 @@ void SwPostItMgr::PaintTile(OutputDevice& rRenderContext)
 
         rRenderContext.Pop();
         if (bEnableMapMode)
-            mpEditWin->EnableMapMode(false);
+            mpEditWin->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     }
 }
 
@@ -2236,7 +2235,7 @@ vcl::Window* SwPostItMgr::IsHitSidebarWindow(const Point& rPointLogic)
 
     if (HasNotes() && ShowNotes())
     {
-        bool bEnableMapMode = !mpEditWin->IsMapModeEnabled();
+        bool bEnableMapMode = (mpEditWin->IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode);
         if (bEnableMapMode)
             mpEditWin->EnableMapMode();
 
@@ -2254,7 +2253,7 @@ vcl::Window* SwPostItMgr::IsHitSidebarWindow(const Point& rPointLogic)
         }
 
         if (bEnableMapMode)
-            mpEditWin->EnableMapMode(false);
+            mpEditWin->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     }
 
     return pRet;
@@ -2452,7 +2451,7 @@ void SwPostItMgr::SetSidebarWidth(const Point& rPointLogic)
 
 tools::ULong SwPostItMgr::GetSidebarWidth(bool bPx) const
 {
-    bool bEnableMapMode = !mpWrtShell->GetOut()->IsMapModeEnabled();
+    bool bEnableMapMode = (mpWrtShell->GetOut()->IsMapModeEnabled() == vcl::MappingPolicy::IgnoreMapMode);
     sal_uInt16 nZoom = mpWrtShell->GetViewOptions()->GetZoom();
     if (comphelper::LibreOfficeKit::isActive() && !bEnableMapMode)
     {
@@ -2482,7 +2481,7 @@ tools::ULong SwPostItMgr::GetSidebarWidth(bool bPx) const
             mpWrtShell->GetOut()->EnableMapMode();
         tools::Long nRet = mpWrtShell->GetOut()->PixelToLogic(Size(aWidth, 0)).Width();
         if (bEnableMapMode)
-            mpWrtShell->GetOut()->EnableMapMode(false);
+            mpWrtShell->GetOut()->EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
         return nRet;
     }
 }

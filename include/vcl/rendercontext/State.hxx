@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include <vcl/MappingPolicy.hxx>
+
 #include <tools/color.hxx>
 #include <tools/gen.hxx>
 #include <tools/fontenum.hxx>
@@ -113,7 +115,7 @@ struct State
     text::ComplexTextLayoutFlags mnTextLayoutMode = text::ComplexTextLayoutFlags::Default;
     LanguageType meTextLanguage = LANGUAGE_SYSTEM;
     PushFlags mnFlags = PushFlags::NONE;
-    bool mbMapActive = false;
+    vcl::MappingPolicy meMapMode = vcl::MappingPolicy::IgnoreMapMode;
 };
 }
 

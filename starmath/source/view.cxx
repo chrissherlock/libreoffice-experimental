@@ -336,7 +336,7 @@ void SmGraphicWidget::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     {
         // Disable map mode, so that it's possible to send mouse event coordinates
         // directly in twips.
-        rDevice.EnableMapMode(false);
+        rDevice.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     }
     else
     {

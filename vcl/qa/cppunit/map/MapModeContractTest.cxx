@@ -39,7 +39,8 @@ protected:
         m.CalcMapResolution(MapMode(eUnit), 96, 96);
 
         // Pass 'true' to explicitly enable mapping for the transformation retrieval
-        basegfx::B2DPoint aResult = m.GetDeviceTransformation(true) * basegfx::B2DPoint(fInput, 0);
+        basegfx::B2DPoint aResult = m.GetDeviceTransformation(vcl::MappingPolicy::ApplyMapMode)
+                                    * basegfx::B2DPoint(fInput, 0);
 
         CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Logical Unit Scaling Failure", fExpectedPixels,
                                              aResult.getX(), 1e-5);

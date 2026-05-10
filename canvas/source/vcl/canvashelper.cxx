@@ -142,7 +142,7 @@ void CanvasHelper::setOutDev(const OutDevProviderSharedPtr& rOutDev, bool bProte
 void CanvasHelper::setBackgroundOutDev(const OutDevProviderSharedPtr& rOutDev)
 {
     mp2ndOutDevProvider = rOutDev;
-    mp2ndOutDevProvider->getOutDev().EnableMapMode(false);
+    mp2ndOutDevProvider->getOutDev().EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     mp2ndOutDevProvider->getOutDev().SetAntialiasing(AntialiasingFlags::Enable);
 }
 
@@ -155,7 +155,7 @@ void CanvasHelper::clear()
     OutputDevice& rOutDev(mpOutDevProvider->getOutDev());
     vclcanvastools::OutDevStateKeeper aStateKeeper(mpProtectedOutDevProvider);
 
-    rOutDev.EnableMapMode(false);
+    rOutDev.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     rOutDev.SetAntialiasing(AntialiasingFlags::Enable);
     rOutDev.SetLineColor(COL_WHITE);
     rOutDev.SetFillColor(COL_WHITE);
@@ -168,7 +168,7 @@ void CanvasHelper::clear()
     OutputDevice& rOutDev2(mp2ndOutDevProvider->getOutDev());
 
     rOutDev2.SetDrawMode(DrawModeFlags::Default);
-    rOutDev2.EnableMapMode(false);
+    rOutDev2.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     rOutDev2.SetAntialiasing(AntialiasingFlags::Enable);
     rOutDev2.SetLineColor(COL_WHITE);
     rOutDev2.SetFillColor(COL_WHITE);
@@ -808,7 +808,7 @@ CanvasHelper::getScaledBitmap(const geometry::RealSize2D& newSize, bool beFast)
     OutputDevice& rOutDev(mpOutDevProvider->getOutDev());
 
     vclcanvastools::OutDevStateKeeper aStateKeeper(mpProtectedOutDevProvider);
-    rOutDev.EnableMapMode(false);
+    rOutDev.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     rOutDev.SetAntialiasing(AntialiasingFlags::Enable);
 
     // TODO(F2): Support alpha vdev canvas here
@@ -838,7 +838,7 @@ uno::Sequence<sal_Int8> CanvasHelper::getData(rendering::IntegerBitmapLayout& rL
     OutputDevice& rOutDev(mpOutDevProvider->getOutDev());
 
     vclcanvastools::OutDevStateKeeper aStateKeeper(mpProtectedOutDevProvider);
-    rOutDev.EnableMapMode(false);
+    rOutDev.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     rOutDev.SetAntialiasing(AntialiasingFlags::Enable);
 
     Bitmap aBitmap(rOutDev.GetBitmap(aRect.TopLeft(), aRect.GetSize()).CreateColorBitmap());
@@ -895,7 +895,7 @@ int CanvasHelper::setupOutDevState(const rendering::ViewState& viewState,
 
     OutputDevice& rOutDev(mpOutDevProvider->getOutDev());
 
-    rOutDev.EnableMapMode(false);
+    rOutDev.EnableMapMode(vcl::MappingPolicy::IgnoreMapMode);
     rOutDev.SetAntialiasing(AntialiasingFlags::Enable);
     OutputDevice* p2ndOutDev = nullptr;
 

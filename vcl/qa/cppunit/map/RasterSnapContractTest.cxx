@@ -53,12 +53,13 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testIdentityFastPath)
     setupIdentity(m);
 
     // Pass 'true' to explicitly enable mapping
-    auto mat = m.GetDeviceTransformation(true);
+    auto mat = m.GetDeviceTransformation(vcl::MappingPolicy::ApplyMapMode);
 
     tools::Long logic = 1;
 
     double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
-    tools::Long device = m.LogicToDevicePixel(Point(logic, 0), true).X();
+    tools::Long device
+        = m.LogicToDevicePixel(Point(logic, 0), vcl::MappingPolicy::ApplyMapMode).X();
 
     std::cout << "\n[Identity]\n";
     std::cout << "Affine: " << affine << "\n";
@@ -74,8 +75,8 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testNoZeroCollapse)
     setupIdentity(m);
 
     // Use valid integer logic inputs mapped through 2D points
-    CPPUNIT_ASSERT(m.LogicToDevicePixel(Point(1, 0), true).X() != 0);
-    CPPUNIT_ASSERT(m.LogicToDevicePixel(Point(2, 0), true).X() != 0);
+    CPPUNIT_ASSERT(m.LogicToDevicePixel(Point(1, 0), vcl::MappingPolicy::ApplyMapMode).X() != 0);
+    CPPUNIT_ASSERT(m.LogicToDevicePixel(Point(2, 0), vcl::MappingPolicy::ApplyMapMode).X() != 0);
 }
 
 CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testAffineMatchesScalarStability)
@@ -83,12 +84,13 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testAffineMatchesScalarStability)
     CoordinateMapper m;
     setupIdentity(m);
 
-    auto mat = m.GetDeviceTransformation(true);
+    auto mat = m.GetDeviceTransformation(vcl::MappingPolicy::ApplyMapMode);
 
     for (tools::Long logic : { 1, 2, 5, 10 })
     {
         double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
-        tools::Long device = m.LogicToDevicePixel(Point(logic, 0), true).X();
+        tools::Long device
+            = m.LogicToDevicePixel(Point(logic, 0), vcl::MappingPolicy::ApplyMapMode).X();
 
         tools::Long expected = static_cast<tools::Long>(std::round(affine));
 
@@ -109,12 +111,13 @@ CPPUNIT_TEST_FIXTURE(RasterSnapContractTest, testNonIdentityScale)
 
     m.CalcMapResolution(mm, 96, 96);
 
-    auto mat = m.GetDeviceTransformation(true);
+    auto mat = m.GetDeviceTransformation(vcl::MappingPolicy::ApplyMapMode);
 
     tools::Long logic = 1;
 
     double affine = (mat * basegfx::B2DPoint(logic, 0)).getX();
-    tools::Long device = m.LogicToDevicePixel(Point(logic, 0), true).X();
+    tools::Long device
+        = m.LogicToDevicePixel(Point(logic, 0), vcl::MappingPolicy::ApplyMapMode).X();
 
     std::cout << "\n[Scaled]\n";
     std::cout << "Affine: " << affine << "\n";
