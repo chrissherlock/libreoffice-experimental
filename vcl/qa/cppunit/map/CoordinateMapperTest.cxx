@@ -298,6 +298,59 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionTransformationCoverage)
                            nHeight >= 199 && nHeight <= 201);
 }
 
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRectangleBoundaryIntegrity)
+{
+    CoordinateMapper aMapper;
+
+    aMapper.SetDPIX(96);
+    aMapper.SetDPIY(96);
+
+    // Set a non-integer zoom (150%)
+    MapMode aMap(MapUnit::MapPixel);
+    aMap.SetScaleX(1.5);
+    aMap.SetScaleY(1.5);
+    aMapper.SetMapMode(aMap);
+
+    // Create a 10x10 rectangle at (10, 10)
+    // Inclusive bounds: Left=10, Right=19 (Width is 10)
+    tools::Rectangle aRect(Point(10, 10), Size(10, 10));
+
+    tools::Rectangle aResult = aMapper.LogicToDevicePixel(aRect);
+
+    // Calculation Check:
+    // Left: 10 * 1.5 = 15
+    // Width: 10 * 1.5 = 15
+    // Expected Right: 15 + 15 - 1 = 29
+    CPPUNIT_ASSERT_EQUAL(tools::Long(15), aResult.Left());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(29), aResult.Right());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(15), aResult.GetWidth());
+}
+
+/**
+ * Verifies that shapes that scale to sub-pixel sizes correctly
+ * collapse to Empty rather than producing "Ghost Pixels".
+ */
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testEmptyStateCollapsing)
+{
+    CoordinateMapper aMapper;
+    // Set a tiny zoom (10%)
+    MapMode aMap(MapUnit::Map100thMM);
+    aMap.SetScaleX(0.1);
+    aMap.SetScaleY(0.1);
+    aMapper.SetMapMode(aMap);
+
+    // A 2x2 rectangle at 10% scale becomes 0.2x0.2 pixels.
+    // This should round to 0 width/height and be marked Empty.
+    tools::Rectangle aTinyRect(Point(10, 10), Size(2, 2));
+
+    tools::Rectangle aResult = aMapper.LogicToDevicePixel(aTinyRect);
+
+    // BUG CHECK: If our fix works, this is empty.
+    // If the "Ghost Pixel" bug returns, Width will be 1.
+    CPPUNIT_ASSERT_MESSAGE("Rectangle should collapse to empty at 10% scale", aResult.IsEmpty());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(0), aResult.GetWidth());
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
