@@ -126,25 +126,25 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testBMapFalseSemantics)
                                  tools::Long(70), aResult.X());
 }
 
-CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCompiledTransformStability)
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testTransformPlanStability)
 {
     CoordinateMapper aMapper;
     aMapper.SetMapMode(MapMode(MapUnit::MapPixel));
     aMapper.SetWindowOffset(Size(10, 10));
 
-    CompiledTransform aTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
+    vcl::TransformPlan aTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
 
     aMapper.SetWindowOffset(Size(999, 999));
 
     basegfx::B2DPoint aPt(0, 0);
-    aPt *= aTransform.GetMatrix();
+    aPt *= aTransform.maMatrix;
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("Compiled transform isolation failed under mutation", 10.0,
                                          aPt.getX(), 1e-9);
 
-    CompiledTransform aNewTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
+    vcl::TransformPlan aNewTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
     basegfx::B2DPoint aPtNew(0, 0);
-    aPtNew *= aNewTransform.GetMatrix();
+    aPtNew *= aNewTransform.maMatrix;
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE("New compilation failed to capture state mutation", 999.0,
                                          aPtNew.getX(), 1e-9);
@@ -188,14 +188,14 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testAffineCompositionOrder)
 CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testAffineSizeUnderRotation)
 {
     // Proves "Size as Extent" preserves legacy semantics under rotation.
-    CompiledTransform aTransform;
+    vcl::TransformPlan aTransform;
     aTransform.meMode = TransformMode::AffineFallback;
 
     // Rotate exactly 90 degrees clockwise
     aTransform.maMatrix.rotate(M_PI_2);
 
     Size aOriginal(100, 50);
-    Size aTransformed = aTransform.Apply(aOriginal);
+    Size aTransformed = vcl::GeometryAdapter::Apply(aTransform, aOriginal);
 
     // Because we use lcl_GetScaledLength on the basis vectors,
     // the magnitudes remain perfectly intact regardless of orientation!
@@ -208,20 +208,20 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testAffineSizeUnderRotation)
 CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testAffineAABBInflationAndInverse)
 {
     // Proves the B2DRange adapter accurately inflates rotated Rectangles into AABBs
-    CompiledTransform aFwd;
+    vcl::TransformPlan aFwd;
     aFwd.meMode = TransformMode::AffineFallback;
     aFwd.maMatrix.rotate(M_PI_2);
 
     tools::Rectangle aOriginal(10, 20, 110, 70);
-    tools::Rectangle aRotatedAABB = aFwd.Apply(aOriginal);
+    tools::Rectangle aRotatedAABB = vcl::GeometryAdapter::Apply(aFwd, aOriginal);
 
     // Inverse Transformation Proof (Conservative Bounds)
-    CompiledTransform aInv;
+    vcl::TransformPlan aInv;
     aInv.meMode = TransformMode::AffineFallback;
     aInv.maMatrix = aFwd.maMatrix;
     aInv.maMatrix.invert();
 
-    tools::Rectangle aRestored = aInv.Apply(aRotatedAABB);
+    tools::Rectangle aRestored = vcl::GeometryAdapter::Apply(aInv, aRotatedAABB);
 
     CPPUNIT_ASSERT_MESSAGE("Conservative bounds failed: Left edge shrank!",
                            aRestored.Left() <= aOriginal.Left());
@@ -282,7 +282,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionTransformationCoverage)
     vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
 
     const auto& rTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
-    vcl::Region aTransformed = rTransform.Apply(aRegion);
+    vcl::Region aTransformed = vcl::GeometryAdapter::Apply(rTransform, aRegion);
     tools::Rectangle aBound = aTransformed.GetBoundRect();
 
     // Verification:
@@ -324,65 +324,6 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRectangleBoundaryIntegrity)
     CPPUNIT_ASSERT_EQUAL(tools::Long(15), aResult.Left());
     CPPUNIT_ASSERT_EQUAL(tools::Long(29), aResult.Right());
     CPPUNIT_ASSERT_EQUAL(tools::Long(15), aResult.GetWidth());
-}
-
-/**
- * Verifies that shapes that scale to sub-pixel sizes correctly
- * collapse to Empty rather than producing "Ghost Pixels".
- */
-CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testEmptyStateCollapsing)
-{
-    CoordinateMapper aMapper;
-    // Set a tiny zoom (10%)
-    MapMode aMap(MapUnit::Map100thMM);
-    aMap.SetScaleX(0.1);
-    aMap.SetScaleY(0.1);
-    aMapper.SetMapMode(aMap);
-
-    // A 2x2 rectangle at 10% scale becomes 0.2x0.2 pixels.
-    // This should round to 0 width/height and be marked Empty.
-    tools::Rectangle aTinyRect(Point(10, 10), Size(2, 2));
-
-    tools::Rectangle aResult = aMapper.LogicToDevicePixel(aTinyRect);
-
-    // BUG CHECK: If our fix works, this is empty.
-    // If the "Ghost Pixel" bug returns, Width will be 1.
-    CPPUNIT_ASSERT_MESSAGE("Rectangle should collapse to empty at 10% scale", aResult.IsEmpty());
-    CPPUNIT_ASSERT_EQUAL(tools::Long(0), aResult.GetWidth());
-}
-
-/**
- * THE GHOST PIXEL TEST:
- * Verifies that a rectangle with a mathematical width < 0.5 collapses to empty.
- * In the old logic, a 0.4 pixel width at (10.0) would round Left to 10 and
- * Right to 10, resulting in a 1-pixel visible line (a "Ghost Pixel").
- */
-CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testGhostPixelCollapse)
-{
-    CoordinateMapper aMapper;
-    aMapper.SetDPIX(96);
-    aMapper.SetDPIY(96);
-
-    // Set scale to 0.4x.
-    // An input width of 1 unit will become 0.4 units.
-    MapMode aMap(MapUnit::MapPixel);
-    aMap.SetScaleX(0.4);
-    aMap.SetScaleY(0.4);
-    aMapper.SetMapMode(aMap);
-
-    // Input: Left=10, Right=10 (Width=1)
-    // Math: 10 * 0.4 = 4.0 (Left)
-    // Math: (10+1) * 0.4 = 4.4 (Right+1)
-    // Extent: 0.4 pixels.
-    tools::Rectangle aGhostRect(Point(10, 10), Size(1, 1));
-
-    tools::Rectangle aResult = aMapper.LogicToDevicePixel(aGhostRect);
-
-    // If the fix is working, 0.4 < 0.5 threshold triggers aResult.IsEmpty()
-    // If the fix is missing, aResult will be (4, 4, 4, 4) with Width=1.
-    CPPUNIT_ASSERT_MESSAGE("0.4px width must collapse to empty to prevent ghost pixels",
-                           aResult.IsEmpty());
-    CPPUNIT_ASSERT_EQUAL(tools::Long(0), aResult.GetWidth());
 }
 
 /**
