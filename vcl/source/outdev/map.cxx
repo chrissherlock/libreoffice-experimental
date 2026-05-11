@@ -435,21 +435,56 @@ Point OutputDevice::LogicToLogic(const Point& rPtSource,
                                  const MapMode* pMapModeSource,
                                  const MapMode* pMapModeDest) const
 {
-    return mpMapper->LogicToLogic(rPtSource, &GetMapMode(), pMapModeSource, pMapModeDest, GetMappingPolicy());
+    const MapMode* pBaseline = &GetMapMode();
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : pBaseline;
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : pBaseline;
+
+    if (!pSrc || !pDst || *pSrc == *pDst)
+        return rPtSource;
+
+    MappingCoefficients aMapResSource = mpMapper->ResolveMapResRelative(pBaseline, pSrc, GetMappingPolicy());
+    MappingCoefficients aMapResDest = mpMapper->ResolveMapResRelative(pBaseline, pDst, GetMappingPolicy());
+
+    return Point(aMapResSource.TransformPointX(rPtSource.X(), aMapResDest),
+                 aMapResSource.TransformPointY(rPtSource.Y(), aMapResDest));
 }
 
 Size OutputDevice::LogicToLogic(const Size& rSzSource,
                                 const MapMode* pMapModeSource,
                                 const MapMode* pMapModeDest) const
 {
-    return mpMapper->LogicToLogic(rSzSource, &GetMapMode(), pMapModeSource, pMapModeDest, GetMappingPolicy());
+    const MapMode* pBaseline = &GetMapMode();
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : pBaseline;
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : pBaseline;
+
+    if (!pSrc || !pDst || *pSrc == *pDst)
+        return rSzSource;
+
+    MappingCoefficients aMapResSource = mpMapper->ResolveMapResRelative(pBaseline, pSrc, GetMappingPolicy());
+    MappingCoefficients aMapResDest = mpMapper->ResolveMapResRelative(pBaseline, pDst, GetMappingPolicy());
+
+    return Size(aMapResSource.ScaleDistanceX(rSzSource.Width(), aMapResDest),
+                aMapResSource.ScaleDistanceY(rSzSource.Height(), aMapResDest));
 }
 
 tools::Rectangle OutputDevice::LogicToLogic(const tools::Rectangle& rRectSource,
-                                            const MapMode* pMapModeSource,
-                                            const MapMode* pMapModeDest) const
+                                        const MapMode* pMapModeSource,
+                                        const MapMode* pMapModeDest) const
 {
-    return mpMapper->LogicToLogic(rRectSource, &GetMapMode(), pMapModeSource, pMapModeDest, GetMappingPolicy());
+    const MapMode* pBaseline = &GetMapMode();
+    const MapMode* pSrc = pMapModeSource ? pMapModeSource : pBaseline;
+    const MapMode* pDst = pMapModeDest ? pMapModeDest : pBaseline;
+
+    if (!pSrc || !pDst || *pSrc == *pDst)
+        return rRectSource;
+
+    MappingCoefficients aMapResSource = mpMapper->ResolveMapResRelative(pBaseline, pSrc, GetMappingPolicy());
+    MappingCoefficients aMapResDest = mpMapper->ResolveMapResRelative(pBaseline, pDst, GetMappingPolicy());
+
+    return tools::Rectangle(aMapResSource.TransformPointX(rRectSource.Left(), aMapResDest),
+                            aMapResSource.TransformPointY(rRectSource.Top(), aMapResDest),
+                            aMapResSource.TransformPointX(rRectSource.Right(), aMapResDest),
+                            aMapResSource.TransformPointY(rRectSource.Bottom(), aMapResDest));
 }
 
 double OutputDevice::LogicWidthToDeviceSubPixel(tools::Long nWidth) const
