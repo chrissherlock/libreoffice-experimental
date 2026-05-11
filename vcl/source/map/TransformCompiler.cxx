@@ -8,59 +8,83 @@
  */
 
 #include <TransformCompiler.hxx>
+#include <sal/log.hxx>
 #include <TransformTypes.hxx>
 
-#include "CoordinateMath.hxx"
-
+#include <basegfx/numeric/ftools.hxx>
 #include <cmath>
 
 namespace vcl
 {
-CompiledTransform TransformCompiler::Compile(const basegfx::B2DHomMatrix& rMat)
+TransformPlan TransformCompiler::Compile(const basegfx::B2DHomMatrix& rMat)
 {
-    CompiledTransform aTransform;
+    TransformPlan aTransform;
     aTransform.maMatrix = rMat;
 
-    // Structural Invariants: Inherent to the affine model.
+    // Structural Invariants (Guaranteed across all affine transformations)
     aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Parallelism));
     aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Connectivity));
 
-    // Orientation Invariant: Handedness check.
-    // det = ad - bc. Epsilon-guarded for numerical stability.
+    // Orientation Invariant (Determinant check for scaling/reflection)
     const double fDet = rMat.get(0, 0) * rMat.get(1, 1) - rMat.get(0, 1) * rMat.get(1, 0);
     if (fDet > 1e-12)
+    {
         aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Orientation));
+    }
 
-    // Performance Taxonomy Classification
+    // Extract translation components early for uniform downstream access
+    const double fTx = rMat.get(0, 2);
+    const double fTy = rMat.get(1, 2);
+    aTransform.mnDeviceTx = basegfx::fround<tools::Long>(fTx);
+    aTransform.mnDeviceTy = basegfx::fround<tools::Long>(fTy);
+
+    // Performance Taxonomy Classification & Geometric Contracts
     if (rMat.isIdentity())
     {
         aTransform.meMode = TransformMode::Identity;
-        aTransform.maContract.maPreserved.set(); // All invariants preserved
+        aTransform.maContract.maPreserved.set(); // Identity preserves all geometric properties
+        aTransform.mnDeviceTx = 0;
+        aTransform.mnDeviceTy = 0;
+        return aTransform;
     }
-    else if (IsAxisAligned(rMat))
+
+    // Full orthogonal rectilinear check:
+    // Case 1: 0 or 180-degree variations (off-diagonal shear/rotation elements are zero)
+    // Case 2: 90 or 270-degree variations (diagonal scale/reflection elements are zero)
+    const bool bIsStandardAxisAligned
+        = basegfx::fTools::equalZero(rMat.get(0, 1)) && basegfx::fTools::equalZero(rMat.get(1, 0));
+    const bool bIsRotatedAxisAligned
+        = basegfx::fTools::equalZero(rMat.get(0, 0)) && basegfx::fTools::equalZero(rMat.get(1, 1));
+
+    const bool bIsAxisAligned = bIsStandardAxisAligned || bIsRotatedAxisAligned;
+
+    if (bIsAxisAligned)
     {
-        // Rectilinear transforms preserve Axis Alignment and Orthogonality
+        // Rectilinear configurations preserve axis orientation vectors and right angles
         aTransform.maContract.maPreserved.set(
             static_cast<size_t>(GeometryInvariant::AxisAlignment));
         aTransform.maContract.maPreserved.set(
             static_cast<size_t>(GeometryInvariant::Orthogonality));
 
-        if (IsPureTranslation(rMat))
-        {
-            const double fTx = rMat.get(0, 2);
-            const double fTy = rMat.get(1, 2);
-            constexpr double fEpsilon = 1e-9;
+        // Pure translation must be unrotated and unscaled (Case 1 with scale factors matching 1.0)
+        const bool bIsPureTranslation = bIsStandardAxisAligned
+                                        && basegfx::fTools::equal(rMat.get(0, 0), 1.0)
+                                        && basegfx::fTools::equal(rMat.get(1, 1), 1.0);
 
-            // Fast path for integer-only translations (Legacy VCL optimization)
-            if (std::abs(fTx - std::round(fTx)) < fEpsilon
-                && std::abs(fTy - std::round(fTy)) < fEpsilon)
+        if (bIsPureTranslation)
+        {
+            constexpr double fPixelEpsilon = 1e-9;
+            const bool bIsIntegerTranslation = std::abs(fTx - std::round(fTx)) < fPixelEpsilon
+                                               && std::abs(fTy - std::round(fTy)) < fPixelEpsilon;
+
+            // Mark as fast-path Translation mode ONLY if it aligns precisely to the pixel grid
+            if (bIsIntegerTranslation)
             {
                 aTransform.meMode = TransformMode::Translation;
-                aTransform.mnDeviceTx = static_cast<tools::Long>(std::round(fTx));
-                aTransform.mnDeviceTy = static_cast<tools::Long>(std::round(fTy));
             }
             else
             {
+                // Fractional translations require full sub-pixel geometry adaptation passes
                 aTransform.meMode = TransformMode::AxisAlignedAffine;
             }
         }
@@ -71,7 +95,7 @@ CompiledTransform TransformCompiler::Compile(const basegfx::B2DHomMatrix& rMat)
     }
     else
     {
-        // SEMANTIC COLLAPSE: Transform is rotated or sheared.
+        // Complex transformation: Matrix contains arbitrary rotation or shearing components.
         aTransform.meMode = TransformMode::AffineFallback;
     }
 

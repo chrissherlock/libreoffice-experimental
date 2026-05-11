@@ -21,10 +21,12 @@
 #include <vcl/region.hxx>
 #include <vcl/MappingPolicy.hxx>
 
-#include <TransformCache.hxx>
-#include <CompiledTransform.hxx>
+#include <TransformRouter.hxx>
+#include <TransformPlan.hxx>
+#include <GeometryAdapter.hxx>
 #include <MappingCoefficients.hxx>
 #include <TransformTypes.hxx>
+#include <CoordinateState.hxx>
 
 #include <memory>
 #include <concepts>
@@ -51,14 +53,6 @@ template <typename T> concept B2DMultipliable = requires(T a, const basegfx::B2D
 };
 
 template <typename T> concept B2DGeometry = B2DTransformable<T> || B2DMultipliable<T>;
-
-struct MapConversion
-{
-    double mfScaleX = 1.0;
-    double mfScaleY = 1.0;
-    tools::Long mnOffsetX = 0;
-    tools::Long mnOffsetY = 0;
-};
 }
 
 /**
@@ -67,7 +61,7 @@ struct MapConversion
  *
  * The CoordinateMapper decouples transformation state from the physical
  * OutputDevice. It acts as the central coordinator between VCL's window state,
- * the stateless TransformCompiler, and the thread-safe TransformCache.
+ * the stateless vcl::TransformCompiler, and the thread-safe TransformCache.
  *
  * Coordinate Spaces (Conceptual)
  * ------------------------------
@@ -77,15 +71,15 @@ struct MapConversion
  * 3. View Space: Scrollable viewport pixels (Window minus WindowToViewOffset).
  * 4. Logic Space: Document coordinates defined by a MapMode and MapOffset.
  * * NOTE: While these spaces exist conceptually, the CoordinateMapper squashes
- * them into unified, cached Affine Transformation Matrices (CompiledTransform)
+ * them into unified, cached Affine Transformation Matrices (TransformPlan)
  * for O(1) execution performance.
  *
  * Architecture & Subsystems
  * ----------------------------
  * CoordinateMapper has been structurally decomposed into a pure coordinator:
- * * - The Compiler (TransformCompiler): CoordinateMapper does not synthesize
+ * * - The Compiler (vcl::TransformCompiler): CoordinateMapper does not synthesize
  * matrices. It passes its current physical offsets and mapping coefficients
- * to the TransformCompiler, which returns an immutable CompiledTransform
+ * to the vcl::TransformCompiler, which returns an immutable TransformPlan
  * artifact annotated with geometric invariants.
  *
  * - The Memory (TransformCache): CoordinateMapper does not manage lock-free
@@ -128,45 +122,24 @@ struct MapConversion
 class VCL_DLLPUBLIC CoordinateMapper
 {
 private:
-    MappingCoefficients maMapRes;
-    vcl::detail::MapConversion maMapConversion;
-
-    vcl::TransformCache maCache;
-
-    sal_Int32 mnDPIX = 72;
-    sal_Int32 mnDPIY = 72;
-    sal_Int32 mnDPIScalePercentage = 100;
-
-    tools::Long mnDeviceToWindowOffsetX = 0;
-    tools::Long mnDeviceToWindowOffsetY = 0;
-
-    /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnWindowToViewOffsetX = 0;
-    /// Additional output pixel offset, applied in LogicToPixel (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnWindowToViewOffsetY = 0;
-
-    /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnLogicToAbsoluteOffsetX = 0;
-    /// Additional output offset in _logical_ coordinates, applied in PixelToLogic (used by SetPixelOffset/GetPixelOffset)
-    tools::Long mnLogicToAbsoluteOffsetY = 0;
+    vcl::CoordinateState maState;
+    vcl::TransformRouter maRouter;
 
     tools::Long mnOutWidth = 0;
     tools::Long mnOutHeight = 0;
 
-    void UpdateCache(vcl::MappingPolicy ePolicy) const;
-
 public:
-    const CompiledTransform& Compile(const TransformRequest& rReq) const;
+    const vcl::TransformPlan& Compile(const TransformRequest& rReq) const;
 
     // Legacy bridge
-    const CompiledTransform& Compile(vcl::MappingPolicy ePolicy) const
+    const vcl::TransformPlan& Compile(vcl::MappingPolicy ePolicy) const
     {
         return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
     }
 
     uint64_t GetSemanticKey(vcl::MappingPolicy ePolicy) const;
 
-    bool IsValidDPI() const { return mnDPIX > 0 && mnDPIY > 0; }
+    bool IsValidDPI() const { return maState.GetDPIX() > 0 && maState.GetDPIY() > 0; }
 
     sal_Int32 GetDPIX() const;
     sal_Int32 GetDPIY() const;
@@ -184,30 +157,30 @@ public:
     tools::Long GetDeviceToWindowOffsetY() const;
     Point GetDeviceToWindowOffset() const;
 
-    tools::Long GetWindowToViewOffsetX() const { return mnWindowToViewOffsetX; }
-    tools::Long GetWindowToViewOffsetY() const { return mnWindowToViewOffsetY; }
+    tools::Long GetWindowToViewOffsetX() const { return maState.GetWindowToViewOffsetX(); }
+    tools::Long GetWindowToViewOffsetY() const { return maState.GetWindowToViewOffsetY(); }
 
     Size GetWindowToViewOffset() const
     {
-        return Size(mnWindowToViewOffsetX, mnWindowToViewOffsetY);
+        return Size(maState.GetWindowToViewOffsetX(), maState.GetWindowToViewOffsetY());
     }
 
-    tools::Long GetLogicToAbsoluteOffsetX() const { return mnLogicToAbsoluteOffsetX; }
-    tools::Long GetLogicToAbsoluteOffsetY() const { return mnLogicToAbsoluteOffsetY; }
+    tools::Long GetLogicToAbsoluteOffsetX() const { return maState.GetLogicToAbsoluteOffsetX(); }
+    tools::Long GetLogicToAbsoluteOffsetY() const { return maState.GetLogicToAbsoluteOffsetY(); }
 
     Size GetLogicToAbsoluteOffset() const
     {
-        return Size(mnLogicToAbsoluteOffsetX, mnLogicToAbsoluteOffsetY);
+        return Size(maState.GetLogicToAbsoluteOffsetX(), maState.GetLogicToAbsoluteOffsetY());
     }
 
     tools::Long GetDeviceToViewOffsetX() const
     {
-        return mnDeviceToWindowOffsetX + mnWindowToViewOffsetX;
+        return maState.GetDeviceToWindowOffsetX() + maState.GetWindowToViewOffsetX();
     }
 
     tools::Long GetDeviceToViewOffsetY() const
     {
-        return mnDeviceToWindowOffsetY + mnWindowToViewOffsetY;
+        return maState.GetDeviceToWindowOffsetY() + maState.GetWindowToViewOffsetY();
     }
 
     Size GetDeviceToViewOffset() const
@@ -219,7 +192,10 @@ public:
     void SetDeviceToWindowOffsetY(tools::Long nDeviceToWindowOffsetY);
     void SetWindowToViewOffset(const Size& rWindowPixelOffset);
     void SetLogicToAbsoluteOffset(const Size& rSize);
-    void SetMapMode(const MapMode& rMapMode) { CalcMapResolution(rMapMode, mnDPIX, mnDPIY); }
+    void SetMapMode(const MapMode& rMapMode)
+    {
+        CalcMapResolution(rMapMode, maState.GetDPIX(), maState.GetDPIY());
+    }
     void SetLogicOffset(const Size& rOffset) { SetLogicToAbsoluteOffset(rOffset); }
     void SetWindowOffset(const Size& rOffset) { SetWindowToViewOffset(rOffset); }
 
@@ -232,36 +208,32 @@ public:
     void SetOutputWidthPixel(tools::Long nWidth);
     void SetOutputHeightPixel(tools::Long nHeight);
 
-    tools::Long GetMappingXOffset() const { return maMapRes.mnTranslationX; }
-    tools::Long GetMappingYOffset() const { return maMapRes.mnTranslationY; }
-    double GetMapResolutionScaleX() const { return maMapRes.mfScaleX; }
-    double GetMapResolutionScaleY() const { return maMapRes.mfScaleY; }
+    tools::Long GetMappingXOffset() const { return maState.GetMapRes().mnTranslationX; }
+    tools::Long GetMappingYOffset() const { return maState.GetMapRes().mnTranslationY; }
+    double GetMapResolutionScaleX() const { return maState.GetMapRes().mfScaleX; }
+    double GetMapResolutionScaleY() const { return maState.GetMapRes().mfScaleY; }
 
     void SetMappingXOffset(tools::Long nOffset)
     {
-        maMapRes.mnTranslationX = nOffset;
-        maMapConversion.mnOffsetX = nOffset; // <-- SYNC THE FIREWALL
+        maState.SetMappingXOffset(nOffset);
         InvalidateViewTransform();
     }
 
     void SetMappingYOffset(tools::Long nOffset)
     {
-        maMapRes.mnTranslationY = nOffset;
-        maMapConversion.mnOffsetY = nOffset; // <-- SYNC THE FIREWALL
+        maState.SetMappingYOffset(nOffset);
         InvalidateViewTransform();
     }
 
     void SetMapResolutionScaleX(double fX)
     {
-        maMapRes.mfScaleX = fX;
-        maMapConversion.mfScaleX = fX; // <-- SYNC THE FIREWALL
+        maState.SetMapResolutionScaleX(fX);
         InvalidateViewTransform();
     }
 
     void SetMapResolutionScaleY(double fY)
     {
-        maMapRes.mfScaleY = fY;
-        maMapConversion.mfScaleY = fY; // <-- SYNC THE FIREWALL
+        maState.SetMapResolutionScaleY(fY);
         InvalidateViewTransform();
     }
 
@@ -272,11 +244,8 @@ public:
 
     vcl::detail::MapConversion ResolveMap(const MapMode& rBaseline, const MapMode& rTarget,
                                           vcl::MappingPolicy ePolicy) const;
-    /** Invalidate the view transformation.
 
-     @since AOO bug 75163 (OpenOffice.org 2.4.3 - OOH 680 milestone 212)
-     */
-    void InvalidateViewTransform() { maCache.Invalidate(); }
+    void InvalidateViewTransform() { maRouter.Invalidate(); }
     basegfx::B2DHomMatrix GetViewTransformation(vcl::MappingPolicy ePolicy) const;
     basegfx::B2DHomMatrix GetViewTransformation(const vcl::detail::MapConversion& rConv) const;
     basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rBaseline, const MapMode& rTarget,
@@ -301,38 +270,31 @@ public:
     // PIPELINE STAGES (Coordinate Transitions)
     // ========================================================================
 
-    // Device <-> Window (Integer)
     tools::Long DeviceToWindowUnitsX(tools::Long nX) const;
     tools::Long DeviceToWindowUnitsY(tools::Long nY) const;
     tools::Long WindowToDeviceUnitsX(tools::Long nX) const;
     tools::Long WindowToDeviceUnitsY(tools::Long nY) const;
 
-    // Device <-> Window (Sub-pixel)
     double DeviceToWindowSubPixelX(double fX) const;
     double DeviceToWindowSubPixelY(double fY) const;
     double WindowToDeviceSubPixelX(double fX) const;
     double WindowToDeviceSubPixelY(double fY) const;
 
-    // Window <-> View (Integer)
     tools::Long WindowToViewUnitsX(tools::Long nX) const;
     tools::Long WindowToViewUnitsY(tools::Long nY) const;
     tools::Long ViewToWindowUnitsX(tools::Long nX) const;
     tools::Long ViewToWindowUnitsY(tools::Long nY) const;
 
-    // Window <-> View (Sub-pixel)
     double WindowToViewSubPixelX(double fX) const;
     double WindowToViewSubPixelY(double fY) const;
     double ViewToWindowSubPixelX(double fX) const;
     double ViewToWindowSubPixelY(double fY) const;
 
-    // View <-> LogicUnits (Integer)
     vcl::Region ViewToDevice(const vcl::Region& rRegion) const;
     tools::Long LogicUnitsToViewUnitsX(tools::Long nX,
                                        const vcl::detail::MapConversion& rConv) const;
     tools::Long LogicUnitsToViewUnitsY(tools::Long nY,
                                        const vcl::detail::MapConversion& rConv) const;
-
-    // View <-> LogicUnits (Sub-pixel)
 
     // ========================================================================
     // MASTER WRAPPERS (Multi-space Positional Transformations)
@@ -457,7 +419,11 @@ public:
                                       const vcl::detail::MapConversion& rConv) const;
 
     tools::PolyPolygon WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly,
-                                          vcl::MappingPolicy ePolicy) const;
+                                          vcl::MappingPolicy ePolicy
+                                          = vcl::MappingPolicy::ApplyMapMode) const;
+    tools::PolyPolygon WindowToLogicUnits(const tools::PolyPolygon& rPoly,
+                                          const vcl::detail::MapConversion& rConv) const;
+
     Point WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWindowPt,
                                      vcl::MappingPolicy ePolicy) const;
 

@@ -33,6 +33,8 @@
 #include <vcl/lineinfo.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <GeometryAdapter.hxx>
+#include <TransformRouter.hxx>
 #include <TransformCompiler.hxx>
 #include <MappingCoefficients.hxx>
 
@@ -72,65 +74,75 @@ void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, d
     rTransY = aMat.get(1, 2);
 }
 
-sal_Int32 CoordinateMapper::GetDPIX() const { return mnDPIX; }
+sal_Int32 CoordinateMapper::GetDPIX() const { return maState.GetDPIX(); }
 
-sal_Int32 CoordinateMapper::GetDPIY() const { return mnDPIY; }
+sal_Int32 CoordinateMapper::GetDPIY() const { return maState.GetDPIY(); }
 
 void CoordinateMapper::SetDPIX(sal_Int32 nDPIX)
 {
-    mnDPIX = nDPIX;
+    maState.SetDPIX(nDPIX);
     InvalidateViewTransform();
 }
 
 void CoordinateMapper::SetDPIY(sal_Int32 nDPIY)
 {
-    mnDPIY = nDPIY;
+    maState.SetDPIY(nDPIY);
     InvalidateViewTransform();
 }
 
-sal_Int32 CoordinateMapper::GetDPIScalePercentage() const { return mnDPIScalePercentage; }
+sal_Int32 CoordinateMapper::GetDPIScalePercentage() const
+{
+    return maState.GetDPIScalePercentage();
+}
 
 void CoordinateMapper::SetDPIScalePercentage(sal_Int32 nPercent)
 {
-    mnDPIScalePercentage = nPercent;
+    maState.SetDPIScalePercentage(nPercent);
     InvalidateViewTransform();
 }
 
-float CoordinateMapper::GetDPIScaleFactor() const { return mnDPIScalePercentage / 100.0f; }
+float CoordinateMapper::GetDPIScaleFactor() const
+{
+    return maState.GetDPIScalePercentage() / 100.0f;
+}
 
 void CoordinateMapper::SetPixelOffset(const Size& rSize)
 {
-    mnLogicToAbsoluteOffsetX = rSize.getWidth();
-    mnLogicToAbsoluteOffsetY = rSize.getHeight();
+    maState.SetLogicToAbsoluteOffset(rSize);
     InvalidateViewTransform();
 }
 
 void CoordinateMapper::SetWindowToViewOffset(const Size& rWindowPixelOffset)
 {
-    mnWindowToViewOffsetX = rWindowPixelOffset.Width();
-    mnWindowToViewOffsetY = rWindowPixelOffset.Height();
+    maState.SetWindowToViewOffset(rWindowPixelOffset);
     InvalidateViewTransform();
 }
 
-tools::Long CoordinateMapper::GetDeviceToWindowOffsetX() const { return mnDeviceToWindowOffsetX; }
+tools::Long CoordinateMapper::GetDeviceToWindowOffsetX() const
+{
+    return maState.GetDeviceToWindowOffsetX();
+}
 
-tools::Long CoordinateMapper::GetDeviceToWindowOffsetY() const { return mnDeviceToWindowOffsetY; }
+tools::Long CoordinateMapper::GetDeviceToWindowOffsetY() const
+{
+    return maState.GetDeviceToWindowOffsetY();
+}
 
 void CoordinateMapper::SetDeviceToWindowOffsetX(tools::Long nDeviceToWindowOffsetX)
 {
-    mnDeviceToWindowOffsetX = nDeviceToWindowOffsetX;
+    maState.SetDeviceToWindowOffset(nDeviceToWindowOffsetX, maState.GetDeviceToWindowOffsetY());
     InvalidateViewTransform();
 }
 
 void CoordinateMapper::SetDeviceToWindowOffsetY(tools::Long nDeviceToWindowOffsetY)
 {
-    mnDeviceToWindowOffsetY = nDeviceToWindowOffsetY;
+    maState.SetDeviceToWindowOffset(maState.GetDeviceToWindowOffsetX(), nDeviceToWindowOffsetY);
     InvalidateViewTransform();
 }
 
 Point CoordinateMapper::GetDeviceToWindowOffset() const
 {
-    return Point(mnDeviceToWindowOffsetX, mnDeviceToWindowOffsetY);
+    return Point(maState.GetDeviceToWindowOffsetX(), maState.GetDeviceToWindowOffsetY());
 }
 
 Size CoordinateMapper::LogicToViewDistance(const Size& rLogicSize, vcl::MappingPolicy ePolicy) const
@@ -165,23 +177,16 @@ void CoordinateMapper::SetOutputHeightPixel(tools::Long nHeight) { mnOutHeight =
 
 void CoordinateMapper::SetLogicToAbsoluteOffset(Size const& rOffset)
 {
-    mnLogicToAbsoluteOffsetX = rOffset.getWidth();
-    mnLogicToAbsoluteOffsetY = rOffset.getHeight();
+    maState.SetLogicToAbsoluteOffset(rOffset);
     InvalidateViewTransform();
 }
 
 void CoordinateMapper::CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX,
                                          tools::Long nDPIY)
 {
-    // Let the legacy accumulator do its complex state math
-    maMapRes.CalcMapResolution(rMapMode, nDPIX, nDPIY);
-
-    // Copy the pure math into our firewall struct
-    maMapConversion.mfScaleX = maMapRes.mfScaleX;
-    maMapConversion.mfScaleY = maMapRes.mfScaleY;
-    maMapConversion.mnOffsetX = maMapRes.mnTranslationX;
-    maMapConversion.mnOffsetY = maMapRes.mnTranslationY;
-
+    maState.SetDPIX(nDPIX);
+    maState.SetDPIY(nDPIY);
+    maState.UpdateFromMapMode(rMapMode);
     InvalidateViewTransform();
 }
 
@@ -189,7 +194,7 @@ MappingCoefficients CoordinateMapper::ResolveMapResRelative(const MapMode* pBase
                                                             const MapMode* pTarget,
                                                             vcl::MappingPolicy ePolicy) const
 {
-    return maMapRes.ResolveMapRes(pTarget, *pBaseline, ePolicy, mnDPIX, mnDPIY);
+    return maState.ResolveMapResRelative(pTarget, pBaseline, ePolicy);
 }
 
 vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rBaseline,
@@ -197,7 +202,7 @@ vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rBaseline
                                                         vcl::MappingPolicy ePolicy) const
 {
     // Evaluates a temporary MapMode against the current accumulated state
-    MappingCoefficients aRes = maMapRes.ResolveMapRes(&rTarget, rBaseline, ePolicy, mnDPIX, mnDPIY);
+    MappingCoefficients aRes = maState.ResolveMapResRelative(&rTarget, &rBaseline, ePolicy);
     return { aRes.mfScaleX, aRes.mfScaleY, aRes.mnTranslationX, aRes.mnTranslationY };
 }
 
@@ -229,11 +234,12 @@ CoordinateMapper::GetViewTransformation(const vcl::detail::MapConversion& rConv)
     const double fScaleFactorX = static_cast<double>(GetDPIX()) * rConv.mfScaleX;
     const double fScaleFactorY = static_cast<double>(GetDPIY()) * rConv.mfScaleY;
 
-    return vcl::BuildAffineMatrix(fScaleFactorX, fScaleFactorY,
-                                  static_cast<double>(rConv.mnOffsetX + mnLogicToAbsoluteOffsetX),
-                                  static_cast<double>(rConv.mnOffsetY + mnLogicToAbsoluteOffsetY),
-                                  static_cast<double>(mnWindowToViewOffsetX),
-                                  static_cast<double>(mnWindowToViewOffsetY));
+    return vcl::BuildAffineMatrix(
+        fScaleFactorX, fScaleFactorY,
+        static_cast<double>(rConv.mnOffsetX + maState.GetLogicToAbsoluteOffsetX()),
+        static_cast<double>(rConv.mnOffsetY + maState.GetLogicToAbsoluteOffsetY()),
+        static_cast<double>(maState.GetWindowToViewOffsetX()),
+        static_cast<double>(maState.GetWindowToViewOffsetY()));
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rBaseline,
@@ -259,130 +265,12 @@ CoordinateMapper::GetInverseViewTransformation(const MapMode& rBaseline, const M
 }
 
 // ============================================================================
-// THE O(1) TRANSFORM REGISTER FILE
+// THE ROUTER DELEGATION
 // ============================================================================
 
-void CoordinateMapper::UpdateCache(vcl::MappingPolicy ePolicy) const
+const vcl::TransformPlan& CoordinateMapper::Compile(const TransformRequest& rReq) const
 {
-    DBG_TESTSOLARMUTEX();
-
-    const bool bMapped = (ePolicy == vcl::MappingPolicy::ApplyMapMode);
-
-    const TransformKey eL2W
-        = bMapped ? TransformKey::LogicToWindow_Mapped : TransformKey::LogicToWindow_Unmapped;
-    const TransformKey eW2L
-        = bMapped ? TransformKey::WindowToLogic_Mapped : TransformKey::WindowToLogic_Unmapped;
-    const TransformKey eL2D
-        = bMapped ? TransformKey::LogicToDevice_Mapped : TransformKey::LogicToDevice_Unmapped;
-    const TransformKey eD2L
-        = bMapped ? TransformKey::DeviceToLogic_Mapped : TransformKey::DeviceToLogic_Unmapped;
-
-    // Phase 1: Logic -> Window
-    basegfx::B2DHomMatrix aLogicToWindow;
-    if (bMapped)
-    {
-        const double fScaleX
-            = maMapRes.mfScaleX * static_cast<double>(mnDPIX) * GetDPIScaleFactor();
-        const double fScaleY
-            = maMapRes.mfScaleY * static_cast<double>(mnDPIY) * GetDPIScaleFactor();
-
-        aLogicToWindow = vcl::BuildAffineMatrix(
-            fScaleX, fScaleY,
-            static_cast<double>(maMapRes.mnTranslationX + mnLogicToAbsoluteOffsetX),
-            static_cast<double>(maMapRes.mnTranslationY + mnLogicToAbsoluteOffsetY),
-            static_cast<double>(mnWindowToViewOffsetX), static_cast<double>(mnWindowToViewOffsetY));
-    }
-    else
-    {
-        aLogicToWindow.translate(static_cast<double>(mnWindowToViewOffsetX),
-                                 static_cast<double>(mnWindowToViewOffsetY));
-    }
-
-    maCache.Store(eL2W, vcl::TransformCompiler::Compile(aLogicToWindow));
-
-    // Phase 2: Window -> Logic
-    if (aLogicToWindow.isInvertible())
-    {
-        basegfx::B2DHomMatrix aWindowToLogic = aLogicToWindow;
-        aWindowToLogic.invert();
-        maCache.Store(eW2L, vcl::TransformCompiler::Compile(aWindowToLogic));
-    }
-    else
-    {
-        SAL_WARN("vcl.gdi", "CoordinateMapper: Singular Matrix. Falling back to Identity.");
-        maCache.Store(eW2L, vcl::TransformCompiler::Compile(basegfx::B2DHomMatrix()));
-    }
-
-    // Phase 3: Logic -> Device
-    basegfx::B2DHomMatrix aLogicToDevice = aLogicToWindow;
-    aLogicToDevice.translate(static_cast<double>(mnDeviceToWindowOffsetX),
-                             static_cast<double>(mnDeviceToWindowOffsetY));
-
-    maCache.Store(eL2D, vcl::TransformCompiler::Compile(aLogicToDevice));
-
-    // Phase 4: Device -> Logic
-    if (aLogicToDevice.isInvertible())
-    {
-        basegfx::B2DHomMatrix aDeviceToLogic = aLogicToDevice;
-        aDeviceToLogic.invert();
-        maCache.Store(eD2L, vcl::TransformCompiler::Compile(aDeviceToLogic));
-    }
-    else
-    {
-        maCache.Store(eD2L, vcl::TransformCompiler::Compile(basegfx::B2DHomMatrix()));
-    }
-}
-
-TransformKey CoordinateMapper::ResolveKey(const TransformRequest& rReq) const
-{
-    const bool bMapped = (rReq.Policy == vcl::MappingPolicy::ApplyMapMode);
-
-    // Logic <-> Window
-    if (rReq.eFrom == CoordinateSpace::Logic && rReq.eTo == CoordinateSpace::Window)
-        return bMapped ? TransformKey::LogicToWindow_Mapped : TransformKey::LogicToWindow_Unmapped;
-
-    if (rReq.eFrom == CoordinateSpace::Window && rReq.eTo == CoordinateSpace::Logic)
-        return bMapped ? TransformKey::WindowToLogic_Mapped : TransformKey::WindowToLogic_Unmapped;
-
-    // Logic <-> Device
-    if (rReq.eFrom == CoordinateSpace::Logic && rReq.eTo == CoordinateSpace::Device)
-        return bMapped ? TransformKey::LogicToDevice_Mapped : TransformKey::LogicToDevice_Unmapped;
-
-    if (rReq.eFrom == CoordinateSpace::Device && rReq.eTo == CoordinateSpace::Logic)
-        return bMapped ? TransformKey::DeviceToLogic_Mapped : TransformKey::DeviceToLogic_Unmapped;
-
-    // Device <-> Window (Direct viewport offsets, rarely used but supported)
-    if (rReq.eFrom == CoordinateSpace::Device && rReq.eTo == CoordinateSpace::Window)
-        return TransformKey::DeviceToWindow;
-
-    if (rReq.eFrom == CoordinateSpace::Window && rReq.eTo == CoordinateSpace::Device)
-        return TransformKey::WindowToDevice;
-
-    // CRITICAL: If we reach here, a caller has requested a coordinate transition
-    // that the engine does not formally support or hasn't indexed.
-    // We abort here because returning a "default" key would result in
-    // silent coordinate corruption across the rendering pipeline.
-    SAL_WARN("vcl.gdi", "Unsupported TransformRequest routing: " << static_cast<int>(rReq.eFrom)
-                                                                 << " to "
-                                                                 << static_cast<int>(rReq.eTo));
-
-    std::abort();
-}
-
-const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq) const
-{
-    // Resolve the semantic route to a physical cache key
-    TransformKey eKey = ResolveKey(rReq);
-
-    // Check Memory (Handles version validation internally)
-    if (const CompiledTransform* pCached = maCache.Get(eKey))
-        return *pCached;
-
-    // Cache Miss: Compile the graph for this policy
-    UpdateCache(rReq.Policy);
-
-    // Return immutable execution artifact
-    return *maCache.Get(eKey);
+    return maRouter.Compile(maState, rReq);
 }
 
 // ============================================================================
@@ -391,22 +279,22 @@ const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq)
 
 basegfx::B2DHomMatrix CoordinateMapper::GetLogicToDeviceMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).GetMatrix();
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).maMatrix;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetDeviceToLogicMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).GetMatrix();
+    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).maMatrix;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetLogicToWindowMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).GetMatrix();
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).maMatrix;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetWindowToLogicMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).GetMatrix();
+    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).maMatrix;
 }
 
 // ========================================================================
@@ -415,72 +303,72 @@ basegfx::B2DHomMatrix CoordinateMapper::GetWindowToLogicMatrix(vcl::MappingPolic
 
 double CoordinateMapper::DeviceToWindowSubPixelX(double fX) const
 {
-    return fX - static_cast<double>(mnDeviceToWindowOffsetX);
+    return fX - static_cast<double>(maState.GetDeviceToWindowOffsetX());
 }
 
 double CoordinateMapper::DeviceToWindowSubPixelY(double fY) const
 {
-    return fY - static_cast<double>(mnDeviceToWindowOffsetY);
+    return fY - static_cast<double>(maState.GetDeviceToWindowOffsetY());
 }
 
 double CoordinateMapper::WindowToDeviceSubPixelX(double fX) const
 {
-    return fX + static_cast<double>(mnDeviceToWindowOffsetX);
+    return fX + static_cast<double>(maState.GetDeviceToWindowOffsetX());
 }
 
 double CoordinateMapper::WindowToDeviceSubPixelY(double fY) const
 {
-    return fY + static_cast<double>(mnDeviceToWindowOffsetY);
+    return fY + static_cast<double>(maState.GetDeviceToWindowOffsetY());
 }
 
 tools::Long CoordinateMapper::ViewToWindowUnitsX(tools::Long nX) const
 {
-    return nX + mnWindowToViewOffsetX;
+    return nX + maState.GetWindowToViewOffsetX();
 }
 
 tools::Long CoordinateMapper::ViewToWindowUnitsY(tools::Long nY) const
 {
-    return nY + mnWindowToViewOffsetY;
+    return nY + maState.GetWindowToViewOffsetY();
 }
 
 tools::Long CoordinateMapper::WindowToViewUnitsX(tools::Long nX) const
 {
-    return nX - mnWindowToViewOffsetX;
+    return nX - maState.GetWindowToViewOffsetX();
 }
 
 tools::Long CoordinateMapper::WindowToViewUnitsY(tools::Long nY) const
 {
-    return nY - mnWindowToViewOffsetY;
+    return nY - maState.GetWindowToViewOffsetY();
 }
 
 tools::Long CoordinateMapper::DeviceToWindowUnitsX(tools::Long nX) const
 {
-    return nX - mnDeviceToWindowOffsetX;
+    return nX - maState.GetDeviceToWindowOffsetX();
 }
 
 tools::Long CoordinateMapper::DeviceToWindowUnitsY(tools::Long nY) const
 {
-    return nY - mnDeviceToWindowOffsetY;
+    return nY - maState.GetDeviceToWindowOffsetY();
 }
 
 tools::Long CoordinateMapper::WindowToDeviceUnitsX(tools::Long nX) const
 {
-    return nX + mnDeviceToWindowOffsetX;
+    return nX + maState.GetDeviceToWindowOffsetX();
 }
 
 tools::Long CoordinateMapper::WindowToDeviceUnitsY(tools::Long nY) const
 {
-    return nY + mnDeviceToWindowOffsetY;
+    return nY + maState.GetDeviceToWindowOffsetY();
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceX(double n) const
 {
-    return ViewSubPixelToLogicDistanceX(n, maMapConversion.mfScaleX);
+    return ViewSubPixelToLogicDistanceX(n, maState.GetMapConversion().mfScaleX);
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n) const
 {
-    return ViewSubPixelToLogicDistanceY(n, maMapConversion.mfScaleY);
+    return ViewSubPixelToLogicDistanceY(n, maState.GetMapConversion().mfScaleY);
 }
 
 tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceX(double n, double fScale) const
@@ -499,209 +387,269 @@ tools::Long CoordinateMapper::ViewSubPixelToLogicDistanceY(double n, double fSca
 
 double CoordinateMapper::WindowToViewSubPixelX(double fX) const
 {
-    return fX - static_cast<double>(mnWindowToViewOffsetX);
+    return fX - static_cast<double>(maState.GetWindowToViewOffsetX());
 }
 
 double CoordinateMapper::WindowToViewSubPixelY(double fY) const
 {
-    return fY - static_cast<double>(mnWindowToViewOffsetY);
+    return fY - static_cast<double>(maState.GetWindowToViewOffsetY());
 }
 
 double CoordinateMapper::ViewToWindowSubPixelX(double fX) const
 {
-    return fX + static_cast<double>(mnWindowToViewOffsetX);
+    return fX + static_cast<double>(maState.GetWindowToViewOffsetX());
 }
 
 double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
 {
-    return fY + static_cast<double>(mnWindowToViewOffsetY);
+    return fY + static_cast<double>(maState.GetWindowToViewOffsetY());
 }
 
 // ========================================================================
 // PUBLIC WRAPPERS (Routing into the unified pipeline)
 // ========================================================================
 
-Point CoordinateMapper::LogicToDevicePixel(const Point& rLogicPt, vcl::MappingPolicy ePolicy) const
+// Logic -> Device
+Point CoordinateMapper::LogicToDevicePixel(const Point& rPt, vcl::MappingPolicy eP) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rLogicPt);
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, eP }), rPt);
+}
+Size CoordinateMapper::LogicToDevicePixel(const Size& rSz, vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, eP }), rSz);
+}
+tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rRect,
+                                                      vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, eP }), rRect);
+}
+tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rPoly,
+                                                    vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, eP }), rPoly);
+}
+tools::PolyPolygon CoordinateMapper::LogicToDevicePixel(const tools::PolyPolygon& rPoly,
+                                                        vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, eP }), rPoly);
+}
+vcl::Region CoordinateMapper::LogicToDevicePixel(const vcl::Region& rReg,
+                                                 vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, eP }), rReg);
+}
+LineInfo CoordinateMapper::LogicToDevicePixel(const LineInfo& rLine, vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, eP }), rLine);
+}
+basegfx::B2DPolygon CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolygon& rPoly,
+                                                         vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, eP }), rPoly);
+}
+basegfx::B2DPolyPolygon CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolyPolygon& rPoly,
+                                                             vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, eP }), rPoly);
 }
 
-tools::Rectangle CoordinateMapper::LogicToDevicePixel(const tools::Rectangle& rLogicRect,
-                                                      vcl::MappingPolicy ePolicy) const
+// Device -> Logic
+Point CoordinateMapper::DevicePixelToLogic(const Point& rPt, vcl::MappingPolicy eP) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rLogicRect);
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, eP }), rPt);
+}
+Size CoordinateMapper::DevicePixelToLogic(const Size& rSz, vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, eP }), rSz);
+}
+tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rRect,
+                                                      vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, eP }), rRect);
+}
+tools::Polygon CoordinateMapper::DevicePixelToLogic(const tools::Polygon& rPoly,
+                                                    vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, eP }), rPoly);
+}
+tools::PolyPolygon CoordinateMapper::DevicePixelToLogic(const tools::PolyPolygon& rPoly,
+                                                        vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, eP }), rPoly);
+}
+vcl::Region CoordinateMapper::DevicePixelToLogic(const vcl::Region& rReg,
+                                                 vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, eP }), rReg);
+}
+basegfx::B2DPolygon CoordinateMapper::DevicePixelToLogic(const basegfx::B2DPolygon& rPoly,
+                                                         vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, eP }), rPoly);
+}
+basegfx::B2DPolyPolygon CoordinateMapper::DevicePixelToLogic(const basegfx::B2DPolyPolygon& rPoly,
+                                                             vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, eP }), rPoly);
 }
 
-tools::Polygon CoordinateMapper::LogicToDevicePixel(const tools::Polygon& rLogicPoly,
-                                                    vcl::MappingPolicy ePolicy) const
+// Logic -> Window
+Point CoordinateMapper::LogicToWindowUnits(const Point& rPt, vcl::MappingPolicy eP) const
 {
-    CompiledTransform t = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
-    if (t.GetMode() == TransformMode::AffineFallback)
-    {
-        // TODO: Legacy Note: We currently don't AdaptiveSubdivide inside Apply<Polygon> because
-        // subdivision relies on global VCL tools settings which breaks abstraction. We
-        // leave it here temporarily.
-        tools::Polygon aSubdivided;
-        rLogicPoly.AdaptiveSubdivide(aSubdivided);
-        return t.Apply(aSubdivided);
-    }
-    return t.Apply(rLogicPoly);
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, eP }), rPt);
 }
-
-tools::PolyPolygon CoordinateMapper::LogicToDevicePixel(const tools::PolyPolygon& rLogicPolyPoly,
-                                                        vcl::MappingPolicy ePolicy) const
+Size CoordinateMapper::LogicToWindowUnits(const Size& rSz, vcl::MappingPolicy eP) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy })
-        .Apply(rLogicPolyPoly);
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, eP }), rSz);
 }
-
-LineInfo CoordinateMapper::LogicToDevicePixel(const LineInfo& rLineInfo,
-                                              vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rLineInfo);
-}
-
-basegfx::B2DPolygon CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolygon& rLogicPoly,
-                                                         vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rLogicPoly);
-}
-
-basegfx::B2DPolyPolygon
-CoordinateMapper::LogicToDevicePixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
-                                     vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy })
-        .Apply(rLogicPolyPoly);
-}
-
-vcl::Region CoordinateMapper::LogicToDevicePixel(const vcl::Region& rRegion,
-                                                 vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rRegion);
-}
-
-Size CoordinateMapper::LogicToDevicePixel(const Size& rLogicSize, vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).Apply(rLogicSize);
-}
-
-Point CoordinateMapper::DevicePixelToLogic(const Point& rDevicePt, vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rDevicePt);
-}
-
-tools::Rectangle CoordinateMapper::DevicePixelToLogic(const tools::Rectangle& rPixelRect,
-                                                      vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rPixelRect);
-}
-
-tools::Polygon CoordinateMapper::DevicePixelToLogic(const tools::Polygon& rPixelPoly,
-                                                    vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rPixelPoly);
-}
-
-tools::PolyPolygon CoordinateMapper::DevicePixelToLogic(const tools::PolyPolygon& rPixelPolyPoly,
-                                                        vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy })
-        .Apply(rPixelPolyPoly);
-}
-
-basegfx::B2DPolygon CoordinateMapper::DevicePixelToLogic(const basegfx::B2DPolygon& rPixelPoly,
-                                                         vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rPixelPoly);
-}
-
-basegfx::B2DPolyPolygon
-CoordinateMapper::DevicePixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly,
-                                     vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy })
-        .Apply(rPixelPolyPoly);
-}
-
-vcl::Region CoordinateMapper::DevicePixelToLogic(const vcl::Region& rRegion,
-                                                 vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rRegion);
-}
-
-Size CoordinateMapper::DevicePixelToLogic(const Size& rDeviceSize, vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).Apply(rDeviceSize);
-}
-
-Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt, vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rLogicPt);
-}
-
 tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect,
-                                                      vcl::MappingPolicy ePolicy) const
+                                                      vcl::MappingPolicy eP) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rRect);
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, eP }), rRect);
 }
-
 tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rPoly,
-                                                    vcl::MappingPolicy ePolicy) const
+                                                    vcl::MappingPolicy eP) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rPoly);
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, eP }), rPoly);
+}
+tools::PolyPolygon CoordinateMapper::LogicToWindowUnits(const tools::PolyPolygon& rPoly,
+                                                        vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, eP }), rPoly);
+}
+vcl::Region CoordinateMapper::LogicToWindowUnits(const vcl::Region& rReg,
+                                                 vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, eP }), rReg);
 }
 
-tools::PolyPolygon CoordinateMapper::LogicToWindowUnits(const tools::PolyPolygon& rPolyPoly,
-                                                        vcl::MappingPolicy ePolicy) const
+// Window -> Logic
+Point CoordinateMapper::WindowToLogicUnits(const Point& rPt, vcl::MappingPolicy eP) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rPolyPoly);
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, eP }), rPt);
+}
+Size CoordinateMapper::WindowToLogicUnits(const Size& rSz, vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, eP }), rSz);
+}
+tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rRect,
+                                                      vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, eP }), rRect);
+}
+tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rPoly,
+                                                    vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, eP }), rPoly);
+}
+tools::PolyPolygon CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rPoly,
+                                                        vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, eP }), rPoly);
+}
+vcl::Region CoordinateMapper::WindowToLogicUnits(const vcl::Region& rReg,
+                                                 vcl::MappingPolicy eP) const
+{
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, eP }), rReg);
 }
 
-vcl::Region CoordinateMapper::LogicToWindowUnits(const vcl::Region& rRegion,
-                                                 vcl::MappingPolicy ePolicy) const
+// ========================================================================
+// MapConversion Wrappers (Dynamic Compilation)
+// ========================================================================
+// NOTE: Instead of duplicating geometry logic, we compile a temporary
+// TransformPlan from the MapConversion matrix and route it through the Adapter.
+
+Point CoordinateMapper::LogicToWindowUnits(const Point& rPt,
+                                           const vcl::detail::MapConversion& rConv) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rRegion);
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetViewTransformation(rConv)), rPt);
+}
+Size CoordinateMapper::LogicToWindowUnits(const Size& rSz,
+                                          const vcl::detail::MapConversion& rConv) const
+{
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetViewTransformation(rConv)), rSz);
+}
+tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect,
+                                                      const vcl::detail::MapConversion& rConv) const
+{
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetViewTransformation(rConv)), rRect);
+}
+tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rPoly,
+                                                    const vcl::detail::MapConversion& rConv) const
+{
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetViewTransformation(rConv)), rPoly);
+}
+tools::PolyPolygon
+CoordinateMapper::LogicToWindowUnits(const tools::PolyPolygon& rPoly,
+                                     const vcl::detail::MapConversion& rConv) const
+{
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetViewTransformation(rConv)), rPoly);
 }
 
-Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize, vcl::MappingPolicy ePolicy) const
+Point CoordinateMapper::WindowToLogicUnits(const Point& rPt,
+                                           const vcl::detail::MapConversion& rConv) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).Apply(rLogicSize);
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetInverseViewTransformation(rConv)), rPt);
 }
-
-Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt, vcl::MappingPolicy ePolicy) const
+Size CoordinateMapper::WindowToLogicUnits(const Size& rSz,
+                                          const vcl::detail::MapConversion& rConv) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).Apply(rWindowPt);
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetInverseViewTransformation(rConv)), rSz);
 }
-
-tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
-                                                      vcl::MappingPolicy ePolicy) const
+tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rRect,
+                                                      const vcl::detail::MapConversion& rConv) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).Apply(rWindowRect);
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetInverseViewTransformation(rConv)), rRect);
 }
-
-tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
-                                                    vcl::MappingPolicy ePolicy) const
+tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rPoly,
+                                                    const vcl::detail::MapConversion& rConv) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).Apply(rWindowPoly);
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetInverseViewTransformation(rConv)), rPoly);
 }
-
-tools::PolyPolygon CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rWindowPolyPoly,
-                                                        vcl::MappingPolicy ePolicy) const
+tools::PolyPolygon
+CoordinateMapper::WindowToLogicUnits(const tools::PolyPolygon& rPoly,
+                                     const vcl::detail::MapConversion& rConv) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy })
-        .Apply(rWindowPolyPoly);
-}
-
-vcl::Region CoordinateMapper::WindowToLogicUnits(const vcl::Region& rRegion,
-                                                 vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).Apply(rRegion);
-}
-
-Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize, vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).Apply(rWindowSize);
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetInverseViewTransformation(rConv)), rPoly);
 }
 
 // ========================================================================
@@ -720,12 +668,12 @@ tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth,
     const auto& rTransform
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
 
-    if (!rTransform.CheckRectilinearContract())
+    if (!rTransform.PreservesAxisAlignment())
         return vcl::detail::RoundToLong(
             static_cast<double>(nWidth)
-            * vcl::detail::GetBasisVectorMagnitudeX(rTransform.GetMatrix()));
+            * vcl::detail::GetBasisVectorMagnitudeX(rTransform.maMatrix));
 
-    return vcl::detail::RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
+    return vcl::detail::RoundToLong(static_cast<double>(nWidth) * rTransform.maMatrix.get(0, 0));
 }
 
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight,
@@ -734,13 +682,12 @@ tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight,
     const auto& rTransform
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
 
-    if (!rTransform.CheckRectilinearContract())
+    if (!rTransform.PreservesAxisAlignment())
         return vcl::detail::RoundToLong(
             static_cast<double>(nHeight)
-            * vcl::detail::GetBasisVectorMagnitudeY(rTransform.GetMatrix()));
+            * vcl::detail::GetBasisVectorMagnitudeY(rTransform.maMatrix));
 
-    return vcl::detail::RoundToLong(static_cast<double>(nHeight)
-                                    * rTransform.GetMatrix().get(1, 1));
+    return vcl::detail::RoundToLong(static_cast<double>(nHeight) * rTransform.maMatrix.get(1, 1));
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth,
@@ -749,12 +696,12 @@ tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth,
     const auto& rTransform
         = Compile(TransformRequest{ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy });
 
-    if (!rTransform.CheckRectilinearContract())
+    if (!rTransform.PreservesAxisAlignment())
         return vcl::detail::RoundToLong(
             static_cast<double>(nWidth)
-            * vcl::detail::GetBasisVectorMagnitudeX(rTransform.GetMatrix()));
+            * vcl::detail::GetBasisVectorMagnitudeX(rTransform.maMatrix));
 
-    return vcl::detail::RoundToLong(static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0));
+    return vcl::detail::RoundToLong(static_cast<double>(nWidth) * rTransform.maMatrix.get(0, 0));
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight,
@@ -763,13 +710,12 @@ tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight,
     const auto& rTransform
         = Compile(TransformRequest{ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy });
 
-    if (!rTransform.CheckRectilinearContract())
+    if (!rTransform.PreservesAxisAlignment())
         return vcl::detail::RoundToLong(
             static_cast<double>(nHeight)
-            * vcl::detail::GetBasisVectorMagnitudeY(rTransform.GetMatrix()));
+            * vcl::detail::GetBasisVectorMagnitudeY(rTransform.maMatrix));
 
-    return vcl::detail::RoundToLong(static_cast<double>(nHeight)
-                                    * rTransform.GetMatrix().get(1, 1));
+    return vcl::detail::RoundToLong(static_cast<double>(nHeight) * rTransform.maMatrix.get(1, 1));
 }
 
 double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth,
@@ -778,11 +724,11 @@ double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth,
     const auto& rTransform
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
 
-    if (!rTransform.CheckRectilinearContract())
+    if (!rTransform.PreservesAxisAlignment())
         return static_cast<double>(nWidth)
-               * vcl::detail::GetBasisVectorMagnitudeX(rTransform.GetMatrix());
+               * vcl::detail::GetBasisVectorMagnitudeX(rTransform.maMatrix);
 
-    return static_cast<double>(nWidth) * rTransform.GetMatrix().get(0, 0);
+    return static_cast<double>(nWidth) * rTransform.maMatrix.get(0, 0);
 }
 
 double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight,
@@ -791,11 +737,11 @@ double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight,
     const auto& rTransform
         = Compile(TransformRequest{ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
 
-    if (!rTransform.CheckRectilinearContract())
+    if (!rTransform.PreservesAxisAlignment())
         return static_cast<double>(nHeight)
-               * vcl::detail::GetBasisVectorMagnitudeY(rTransform.GetMatrix());
+               * vcl::detail::GetBasisVectorMagnitudeY(rTransform.maMatrix);
 
-    return static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1);
+    return static_cast<double>(nHeight) * rTransform.maMatrix.get(1, 1);
 }
 
 double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth,
@@ -803,7 +749,7 @@ double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth,
 {
     // Acquire the compiled execution plan for this specific route
     const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
-    const auto& rMat = rTransform.GetMatrix();
+    const auto& rMat = rTransform.maMatrix;
 
     // Fast Path: Rectilinear (No rotation/shear)
     // If the transform is axis-aligned, the width scale is simply M00.
@@ -845,198 +791,71 @@ Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rWin
     return Point(vcl::detail::RoundToLong(aPt.getX()), vcl::detail::RoundToLong(aPt.getY()));
 }
 
+// ========================================================================
+// B2DGeometry Template Implementations
+// ========================================================================
+
 template <TransformableB2DGeometry T>
 T CoordinateMapper::LogicToWindowUnits(const T& rLogicGeometry, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy })
-        .Apply(rLogicGeometry);
-}
-
-template SAL_DLLPRIVATE basegfx::B2DRectangle
-CoordinateMapper::LogicToWindowUnits<basegfx::B2DRectangle>(const basegfx::B2DRectangle&,
-                                                            vcl::MappingPolicy) const;
-
-template SAL_DLLPRIVATE basegfx::B2DPolygon
-CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&,
-                                                          vcl::MappingPolicy) const;
-
-template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
-CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&,
-                                                              vcl::MappingPolicy) const;
-
-template <TransformableB2DGeometry T>
-T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry, vcl::MappingPolicy ePolicy) const
-{
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy })
-        .Apply(rWindowGeometry);
-}
-
-template SAL_DLLPRIVATE basegfx::B2DRectangle
-CoordinateMapper::WindowToLogicUnits<basegfx::B2DRectangle>(const basegfx::B2DRectangle&,
-                                                            vcl::MappingPolicy) const;
-
-template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
-CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&,
-                                                              vcl::MappingPolicy) const;
-
-// ========================================================================
-// MapConversion Wrappers
-// ========================================================================
-
-Point CoordinateMapper::LogicToWindowUnits(const Point& rLogicPt,
-                                           const vcl::detail::MapConversion& rConv) const
-{
-    basegfx::B2DPoint aPt(rLogicPt.X(), rLogicPt.Y());
-    aPt *= GetViewTransformation(rConv);
-    return Point(vcl::detail::RoundToLong(aPt.getX()), vcl::detail::RoundToLong(aPt.getY()));
-}
-
-Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize,
-                                          const vcl::detail::MapConversion& rConv) const
-{
-    auto mat = GetViewTransformation(rConv);
-
-    // Use basis vector magnitudes to prevent zero-width/height collapse under rotation.
-    return Size(
-        vcl::detail::RoundToLong(rLogicSize.Width() * vcl::detail::GetBasisVectorMagnitudeX(mat)),
-        vcl::detail::RoundToLong(rLogicSize.Height() * vcl::detail::GetBasisVectorMagnitudeY(mat)));
-}
-
-tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect,
-                                                      const vcl::detail::MapConversion& rConv) const
-{
-    basegfx::B2DHomMatrix aMat = GetViewTransformation(rConv);
-
-    // ADAPTER: VCL [Left, Right] -> Math [Min, Max)
-    basegfx::B2DRange aRange(rRect.Left(), rRect.Top(), rRect.Right() + 1, rRect.Bottom() + 1);
-
-    aRange.transform(aMat);
-
-    // ADAPTER: Math [Min, Max) -> VCL [Left, Right]
-    tools::Rectangle aRetval(vcl::detail::RoundToLong(aRange.getMinX()),
-                             vcl::detail::RoundToLong(aRange.getMinY()),
-                             vcl::detail::RoundToLong(aRange.getMaxX()) - 1,
-                             vcl::detail::RoundToLong(aRange.getMaxY()) - 1);
-
-    vcl::ApplyEmptyState(aRetval, rRect);
-    return aRetval;
-}
-
-tools::Polygon CoordinateMapper::LogicToWindowUnits(const tools::Polygon& rLogicPoly,
-                                                    const vcl::detail::MapConversion& rConv) const
-{
-    tools::Polygon aPoly(rLogicPoly);
-    basegfx::B2DHomMatrix aMat = GetViewTransformation(rConv);
-    for (auto& rPoint : aPoly)
-    {
-        basegfx::B2DPoint aPt(rPoint.X(), rPoint.Y());
-        aPt *= aMat;
-        rPoint = Point(vcl::detail::RoundToLong(aPt.getX()), vcl::detail::RoundToLong(aPt.getY()));
-    }
-    return aPoly;
-}
-
-tools::PolyPolygon
-CoordinateMapper::LogicToWindowUnits(const tools::PolyPolygon& rPolyPoly,
-                                     const vcl::detail::MapConversion& rConv) const
-{
-    tools::PolyPolygon aPolyPoly(rPolyPoly);
-    for (auto& rPoly : aPolyPoly)
-    {
-        rPoly = LogicToWindowUnits(rPoly, rConv);
-    }
-    return aPolyPoly;
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }), rLogicGeometry);
 }
 
 template <TransformableB2DGeometry T>
 T CoordinateMapper::LogicToWindowUnits(const T& rLogicGeometry,
                                        const vcl::detail::MapConversion& rConv) const
 {
-    T aTransformedGeometry = rLogicGeometry;
-    aTransformedGeometry.transform(GetViewTransformation(rConv));
-    return aTransformedGeometry;
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetViewTransformation(rConv)), rLogicGeometry);
 }
 
-template SAL_DLLPRIVATE basegfx::B2DPolygon
-CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&,
-                                                          const vcl::detail::MapConversion&) const;
-
-template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
-CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolyPolygon>(
-    const basegfx::B2DPolyPolygon&, const vcl::detail::MapConversion&) const;
-
-Point CoordinateMapper::WindowToLogicUnits(const Point& rWindowPt,
-                                           const vcl::detail::MapConversion& rConv) const
+template <TransformableB2DGeometry T>
+T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry, vcl::MappingPolicy ePolicy) const
 {
-    basegfx::B2DPoint aPt(rWindowPt.X(), rWindowPt.Y());
-    aPt *= GetInverseViewTransformation(rConv);
-    return Point(vcl::detail::RoundToLong(aPt.getX()), vcl::detail::RoundToLong(aPt.getY()));
-}
-
-Size CoordinateMapper::WindowToLogicUnits(const Size& rWindowSize,
-                                          const vcl::detail::MapConversion& rConv) const
-{
-    auto mat = GetInverseViewTransformation(rConv);
-    return Size(vcl::detail::RoundToLong(rWindowSize.Width() * std::abs(mat.get(0, 0))),
-                vcl::detail::RoundToLong(rWindowSize.Height() * std::abs(mat.get(1, 1))));
-}
-
-/**
- * IMPORTANT ARCHITECTURAL NOTE: Conservative Inverse Bounds
- * * Because forward transformations project Rectangles into Axis-Aligned
- *   Bounding Boxes (AABBs), inverse transformations of Rectangles are NOT
- *   geometrically symmetrical under rotation or shear.
- * * inverse(transform(rect)) will yield a mathematically inflated AABB
- *   that strictly subsumes the original geometry.
- * * Callers MUST treat inverse-mapped Rectangles as 'Conservative Invalidation
- *   Bounds', NOT as exact hit-testing boundaries. For exact hit-testing under
- *   rotation, map the point forward, or map a basegfx::B2DPolygon backward.
- */
-tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rWindowRect,
-                                                      const vcl::detail::MapConversion& rConv) const
-{
-    basegfx::B2DHomMatrix aMat = GetInverseViewTransformation(rConv);
-
-    // ADAPTER: VCL [Left, Right] -> Math [Min, Max)
-    basegfx::B2DRange aRange(rWindowRect.Left(), rWindowRect.Top(), rWindowRect.Right() + 1,
-                             rWindowRect.Bottom() + 1);
-
-    aRange.transform(aMat);
-
-    // ADAPTER: Math [Min, Max) -> VCL [Left, Right]
-    tools::Rectangle aRetval(vcl::detail::RoundToLong(aRange.getMinX()),
-                             vcl::detail::RoundToLong(aRange.getMinY()),
-                             vcl::detail::RoundToLong(aRange.getMaxX()) - 1,
-                             vcl::detail::RoundToLong(aRange.getMaxY()) - 1);
-
-    vcl::ApplyEmptyState(aRetval, rWindowRect);
-    return aRetval;
-}
-
-tools::Polygon CoordinateMapper::WindowToLogicUnits(const tools::Polygon& rWindowPoly,
-                                                    const vcl::detail::MapConversion& rConv) const
-{
-    tools::Polygon aPoly(rWindowPoly);
-    for (auto& rPoint : aPoly)
-    {
-        rPoint = WindowToLogicUnits(rPoint, rConv);
-    }
-    return aPoly;
+    return vcl::GeometryAdapter::Apply(
+        Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }), rWindowGeometry);
 }
 
 template <TransformableB2DGeometry T>
 T CoordinateMapper::WindowToLogicUnits(const T& rWindowGeometry,
                                        const vcl::detail::MapConversion& rConv) const
 {
-    T aTransformedGeometry = rWindowGeometry;
-    aTransformedGeometry.transform(GetInverseViewTransformation(rConv));
-    return aTransformedGeometry;
+    return vcl::GeometryAdapter::Apply(
+        vcl::TransformCompiler::Compile(GetInverseViewTransformation(rConv)), rWindowGeometry);
 }
+
+// Explicit Instantiations
+template SAL_DLLPRIVATE basegfx::B2DRectangle
+CoordinateMapper::LogicToWindowUnits<basegfx::B2DRectangle>(const basegfx::B2DRectangle&,
+                                                            vcl::MappingPolicy) const;
+template SAL_DLLPRIVATE basegfx::B2DPolygon
+CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&,
+                                                          vcl::MappingPolicy) const;
+template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&,
+                                                              vcl::MappingPolicy) const;
+
+template SAL_DLLPRIVATE basegfx::B2DPolygon
+CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&,
+                                                          const vcl::detail::MapConversion&) const;
+template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+CoordinateMapper::LogicToWindowUnits<basegfx::B2DPolyPolygon>(
+    const basegfx::B2DPolyPolygon&, const vcl::detail::MapConversion&) const;
+
+template SAL_DLLPRIVATE basegfx::B2DRectangle
+CoordinateMapper::WindowToLogicUnits<basegfx::B2DRectangle>(const basegfx::B2DRectangle&,
+                                                            vcl::MappingPolicy) const;
+template SAL_DLLPRIVATE basegfx::B2DPolygon
+CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&,
+                                                          vcl::MappingPolicy) const;
+template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
+CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(const basegfx::B2DPolyPolygon&,
+                                                              vcl::MappingPolicy) const;
 
 template SAL_DLLPRIVATE basegfx::B2DPolygon
 CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolygon>(const basegfx::B2DPolygon&,
                                                           const vcl::detail::MapConversion&) const;
-
 template SAL_DLLPRIVATE basegfx::B2DPolyPolygon
 CoordinateMapper::WindowToLogicUnits<basegfx::B2DPolyPolygon>(
     const basegfx::B2DPolyPolygon&, const vcl::detail::MapConversion&) const;

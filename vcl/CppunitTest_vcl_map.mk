@@ -19,6 +19,7 @@ $(eval $(call gb_CppunitTest_add_exception_objects,vcl_map, \
 	vcl/qa/cppunit/map/AffineDpiContractTest \
 	vcl/qa/cppunit/map/MapModeContractTest \
 	vcl/qa/cppunit/map/RasterSnapContractTest \
+	vcl/qa/cppunit/map/GeometryAdapterTest \
 ))
 
 $(eval $(call gb_CppunitTest_use_libraries,vcl_map, \
