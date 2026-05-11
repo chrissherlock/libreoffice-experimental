@@ -42,6 +42,20 @@
 #include <cassert>
 #include <ranges>
 
+/**
+ * COORDINATE TRANSFORMATION STRATEGY
+ *
+ * All transformations in this mapper are orchestrated via vcl::BuildAffineMatrix.
+ * We enforce a single-source-of-truth mathematical contract where Logic-to-Device
+ * projections are composed as:
+ *
+ * P' = ((P + LogicOffset) * Scale) + PhysicalOffset
+ *
+ * This specific ordering is critical for maintaining parity with legacy VCL
+ * behavior while benefiting from modern basegfx::B2DHomMatrix performance.
+ * For the full algebraic derivation, see CoordinateMath.hxx.
+ */
+
 // Conceptual Pipeline Separation (Mathematical Invariant):
 // Logic -> View: Scaled transformations (Scale * Logic) + Scaled Offsets ((MapOfs + LogicOfs) * Scale)
 // View -> Window: Pure translation (WindowOfs)
