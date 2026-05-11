@@ -286,6 +286,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/toolkit/group \
     vcl/source/toolkit/morebtn \
     vcl/source/map/CoordinateMapper \
+    vcl/source/map/LegacyCoordinateAdapter \
     vcl/source/map/CompiledTransform \
     vcl/source/map/MappingCoefficients \
     vcl/source/outdev/background \
