@@ -42,51 +42,6 @@
 #include <cassert>
 #include <ranges>
 
-static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
-{
-    if (rSrc.IsWidthEmpty())
-        rDest.SetWidthEmpty();
-
-    if (rSrc.IsHeightEmpty())
-        rDest.SetHeightEmpty();
-}
-
-/**
- * THE CANONICAL AFFINE BUILDER
- *
- * ARCHITECTURAL INVARIANT: Matrix Composition Order
- * basegfx::B2DHomMatrix applies operations via post-multiplication.
- * Therefore, the sequence: translate(A) -> scale(S) -> translate(B)
- * mathematically equates to the transformation:
- *
- *          P' = ((P + A) * S) + B
- *
- * Variables:
- *
- * P  (Point)      = The input coordinate
- * A  (LogicTx)    = Logical offset (applied before scaling)
- * S  (Scale)      = DPI, MapMode, and UI scaling factors
- * B  (PhysicalTx) = Absolute physical offset (applied after scaling)
- *
- * This proof ensures that:
- *
- * 1. Logical offsets (A) grow/shrink with the MapMode zoom level.
- * 2. Physical/Viewport offsets (B) remain constant screen pixels.
- * 3. The algebraic expansion [P*S + A*S + B] is consistent with legacy
- *    VCL manual matrix slot injections.
- */
-
-static basegfx::B2DHomMatrix lcl_BuildAffineMatrix(double fScaleX, double fScaleY, double fLogicTx,
-                                                   double fLogicTy, double fPhysicalTx,
-                                                   double fPhysicalTy)
-{
-    basegfx::B2DHomMatrix aMat;
-    aMat.translate(fLogicTx, fLogicTy);
-    aMat.scale(fScaleX, fScaleY);
-    aMat.translate(fPhysicalTx, fPhysicalTy);
-    return aMat;
-}
-
 // Conceptual Pipeline Separation (Mathematical Invariant):
 // Logic -> View: Scaled transformations (Scale * Logic) + Scaled Offsets ((MapOfs + LogicOfs) * Scale)
 // View -> Window: Pure translation (WindowOfs)
@@ -260,11 +215,11 @@ CoordinateMapper::GetViewTransformation(const vcl::detail::MapConversion& rConv)
     const double fScaleFactorX = static_cast<double>(GetDPIX()) * rConv.mfScaleX;
     const double fScaleFactorY = static_cast<double>(GetDPIY()) * rConv.mfScaleY;
 
-    return lcl_BuildAffineMatrix(fScaleFactorX, fScaleFactorY,
-                                 static_cast<double>(rConv.mnOffsetX + mnLogicToAbsoluteOffsetX),
-                                 static_cast<double>(rConv.mnOffsetY + mnLogicToAbsoluteOffsetY),
-                                 static_cast<double>(mnWindowToViewOffsetX),
-                                 static_cast<double>(mnWindowToViewOffsetY));
+    return vcl::BuildAffineMatrix(fScaleFactorX, fScaleFactorY,
+                                  static_cast<double>(rConv.mnOffsetX + mnLogicToAbsoluteOffsetX),
+                                  static_cast<double>(rConv.mnOffsetY + mnLogicToAbsoluteOffsetY),
+                                  static_cast<double>(mnWindowToViewOffsetX),
+                                  static_cast<double>(mnWindowToViewOffsetY));
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetViewTransformation(const MapMode& rBaseline,
@@ -317,7 +272,7 @@ void CoordinateMapper::UpdateCache(vcl::MappingPolicy ePolicy) const
         const double fScaleY
             = maMapRes.mfScaleY * static_cast<double>(mnDPIY) * GetDPIScaleFactor();
 
-        aLogicToWindow = lcl_BuildAffineMatrix(
+        aLogicToWindow = vcl::BuildAffineMatrix(
             fScaleX, fScaleY,
             static_cast<double>(maMapRes.mnTranslationX + mnLogicToAbsoluteOffsetX),
             static_cast<double>(maMapRes.mnTranslationY + mnLogicToAbsoluteOffsetY),
@@ -965,7 +920,7 @@ tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rR
                              vcl::detail::RoundToLong(aRange.getMaxX()) - 1,
                              vcl::detail::RoundToLong(aRange.getMaxY()) - 1);
 
-    lcl_ApplyEmptyState(aRetval, rRect);
+    vcl::ApplyEmptyState(aRetval, rRect);
     return aRetval;
 }
 
@@ -1056,7 +1011,7 @@ tools::Rectangle CoordinateMapper::WindowToLogicUnits(const tools::Rectangle& rW
                              vcl::detail::RoundToLong(aRange.getMaxX()) - 1,
                              vcl::detail::RoundToLong(aRange.getMaxY()) - 1);
 
-    lcl_ApplyEmptyState(aRetval, rWindowRect);
+    vcl::ApplyEmptyState(aRetval, rWindowRect);
     return aRetval;
 }
 
