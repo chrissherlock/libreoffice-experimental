@@ -486,6 +486,41 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRotationScaleIntegrity)
                                  aViewSize.Height());
 }
 
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testSizeIsBasisVectorScaledUnderRotation)
+{
+    CoordinateMapper aMapper;
+    aMapper.SetDPIX(1);
+    aMapper.SetDPIY(1);
+
+    // Identity MapMode (no scaling, pure geometry test)
+    vcl::detail::MapConversion aConv;
+    aConv.mfScaleX = 1.0;
+    aConv.mfScaleY = 1.0;
+    aConv.mnOffsetX = 0;
+    aConv.mnOffsetY = 0;
+
+    const Size aLogicSize(100, 50);
+
+    // Transform once through affine pipeline
+    const Size aResult = aMapper.LogicToWindowUnits(aLogicSize, aConv);
+
+    // Instead of "width must stay 100", we assert vector invariants:
+    //
+    // In a pure rotation, the *lengths of basis contributions* are preserved.
+    //
+    // So the transformed rectangle must still span the same total extent
+    // in Euclidean space, even if axis-aligned components change.
+
+    const double fExpectedMagnitude = std::sqrt(100.0 * 100.0 + 50.0 * 50.0);
+
+    const double fActualMagnitude = std::sqrt(double(aResult.Width()) * aResult.Width()
+                                              + double(aResult.Height()) * aResult.Height());
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL_MESSAGE(
+        "Affine transform must preserve Euclidean magnitude of Size vector", fExpectedMagnitude,
+        fActualMagnitude, 1e-6);
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
