@@ -895,8 +895,11 @@ Size CoordinateMapper::LogicToWindowUnits(const Size& rLogicSize,
                                           const vcl::detail::MapConversion& rConv) const
 {
     auto mat = GetViewTransformation(rConv);
-    return Size(vcl::detail::RoundToLong(rLogicSize.Width() * std::abs(mat.get(0, 0))),
-                vcl::detail::RoundToLong(rLogicSize.Height() * std::abs(mat.get(1, 1))));
+
+    // Use basis vector magnitudes to prevent zero-width/height collapse under rotation.
+    return Size(
+        vcl::detail::RoundToLong(rLogicSize.Width() * vcl::detail::GetBasisVectorMagnitudeX(mat)),
+        vcl::detail::RoundToLong(rLogicSize.Height() * vcl::detail::GetBasisVectorMagnitudeY(mat)));
 }
 
 tools::Rectangle CoordinateMapper::LogicToWindowUnits(const tools::Rectangle& rRect,
