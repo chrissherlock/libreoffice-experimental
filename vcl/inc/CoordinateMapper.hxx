@@ -138,7 +138,8 @@ private:
     // The O(1) Transform Register File & Version Tracker
     mutable std::atomic<uint64_t> mnStateVersion{ 0 };
     mutable uint64_t mnCacheVersion{ 0 };
-    mutable std::array<std::optional<CompiledTransform>, static_cast<size_t>(TransformSlot::Count)>
+    // Swap TransformSlot::Count for TransformKey::Count
+    mutable std::array<std::optional<CompiledTransform>, static_cast<size_t>(TransformKey::Count)>
         maTransformCache;
 
     sal_Int32 mnDPIX = 72;
@@ -507,6 +508,8 @@ public:
     }
 
 private:
+    TransformKey ResolveKey(const TransformRequest& rReq) const;
+
     void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX, double& rTransY,
                                vcl::MappingPolicy ePolicy) const;
 
