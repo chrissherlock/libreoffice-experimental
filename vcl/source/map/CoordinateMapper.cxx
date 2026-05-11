@@ -33,6 +33,7 @@
 #include <vcl/lineinfo.hxx>
 
 #include <CoordinateMapper.hxx>
+#include <TransformCompiler.hxx>
 #include <MappingCoefficients.hxx>
 
 #include "CoordinateMath.hxx"
@@ -48,21 +49,6 @@ static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle&
 
     if (rSrc.IsHeightEmpty())
         rDest.SetHeightEmpty();
-}
-
-static bool lcl_IsPureTranslation(const basegfx::B2DHomMatrix& matrix)
-{
-    // Protect against future floating-point noise from complex matrix composition
-    constexpr double fEpsilon = 1e-9;
-    return std::abs(matrix.get(0, 0) - 1.0) < fEpsilon
-           && std::abs(matrix.get(1, 1) - 1.0) < fEpsilon && std::abs(matrix.get(0, 1)) < fEpsilon
-           && std::abs(matrix.get(1, 0)) < fEpsilon;
-}
-
-static bool lcl_IsAxisAligned(const basegfx::B2DHomMatrix& rMat)
-{
-    constexpr double fEpsilon = 1e-9;
-    return std::abs(rMat.get(0, 1)) < fEpsilon && std::abs(rMat.get(1, 0)) < fEpsilon;
 }
 
 /**
@@ -343,19 +329,19 @@ void CoordinateMapper::UpdateCache(vcl::MappingPolicy ePolicy) const
                                  static_cast<double>(mnWindowToViewOffsetY));
     }
 
-    maCache.Store(eL2W, BuildCompiledTransform(aLogicToWindow));
+    maCache.Store(eL2W, vcl::TransformCompiler::Compile(aLogicToWindow));
 
     // Phase 2: Window -> Logic
     if (aLogicToWindow.isInvertible())
     {
         basegfx::B2DHomMatrix aWindowToLogic = aLogicToWindow;
         aWindowToLogic.invert();
-        maCache.Store(eW2L, BuildCompiledTransform(aWindowToLogic));
+        maCache.Store(eW2L, vcl::TransformCompiler::Compile(aWindowToLogic));
     }
     else
     {
         SAL_WARN("vcl.gdi", "CoordinateMapper: Singular Matrix. Falling back to Identity.");
-        maCache.Store(eW2L, BuildCompiledTransform(basegfx::B2DHomMatrix()));
+        maCache.Store(eW2L, vcl::TransformCompiler::Compile(basegfx::B2DHomMatrix()));
     }
 
     // Phase 3: Logic -> Device
@@ -363,83 +349,19 @@ void CoordinateMapper::UpdateCache(vcl::MappingPolicy ePolicy) const
     aLogicToDevice.translate(static_cast<double>(mnDeviceToWindowOffsetX),
                              static_cast<double>(mnDeviceToWindowOffsetY));
 
-    maCache.Store(eL2D, BuildCompiledTransform(aLogicToDevice));
+    maCache.Store(eL2D, vcl::TransformCompiler::Compile(aLogicToDevice));
 
     // Phase 4: Device -> Logic
     if (aLogicToDevice.isInvertible())
     {
         basegfx::B2DHomMatrix aDeviceToLogic = aLogicToDevice;
         aDeviceToLogic.invert();
-        maCache.Store(eD2L, BuildCompiledTransform(aDeviceToLogic));
+        maCache.Store(eD2L, vcl::TransformCompiler::Compile(aDeviceToLogic));
     }
     else
     {
-        maCache.Store(eD2L, BuildCompiledTransform(basegfx::B2DHomMatrix()));
+        maCache.Store(eD2L, vcl::TransformCompiler::Compile(basegfx::B2DHomMatrix()));
     }
-}
-
-CompiledTransform CoordinateMapper::BuildCompiledTransform(const basegfx::B2DHomMatrix& rMat) const
-{
-    CompiledTransform aTransform;
-    aTransform.maMatrix = rMat;
-
-    // Structural Invariants: Inherent to the affine model.
-    aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Parallelism));
-    aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Connectivity));
-
-    // Orientation Invariant: Handedness check.
-    // det = ad - bc. Epsilon-guarded for numerical stability.
-    const double fDet = rMat.get(0, 0) * rMat.get(1, 1) - rMat.get(0, 1) * rMat.get(1, 0);
-    if (fDet > 1e-12)
-        aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Orientation));
-
-    // Performance Taxonomy Classification
-    if (rMat.isIdentity())
-    {
-        aTransform.meMode = TransformMode::Identity;
-        aTransform.maContract.maPreserved.set(); // All invariants preserved
-    }
-    else if (lcl_IsAxisAligned(rMat))
-    {
-        // Rectilinear transforms preserve Axis Alignment and Orthogonality
-        aTransform.maContract.maPreserved.set(
-            static_cast<size_t>(GeometryInvariant::AxisAlignment));
-        aTransform.maContract.maPreserved.set(
-            static_cast<size_t>(GeometryInvariant::Orthogonality));
-
-        if (lcl_IsPureTranslation(rMat))
-        {
-            const double fTx = rMat.get(0, 2);
-            const double fTy = rMat.get(1, 2);
-            constexpr double fEpsilon = 1e-9;
-
-            // Fast path for integer-only translations (Legacy VCL optimization)
-            if (std::abs(fTx - std::round(fTx)) < fEpsilon
-                && std::abs(fTy - std::round(fTy)) < fEpsilon)
-            {
-                aTransform.meMode = TransformMode::Translation;
-                aTransform.mnDeviceTx = static_cast<tools::Long>(std::round(fTx));
-                aTransform.mnDeviceTy = static_cast<tools::Long>(std::round(fTy));
-            }
-            else
-            {
-                // Floating point translation or non-identity scale
-                aTransform.meMode = TransformMode::AxisAlignedAffine;
-            }
-        }
-        else
-        {
-            // Axis-aligned but contains scaling (DPI, MapMode, etc.)
-            aTransform.meMode = TransformMode::AxisAlignedAffine;
-        }
-    }
-    else
-    {
-        // SEMANTIC COLLAPSE: Transform is rotated or sheared.
-        aTransform.meMode = TransformMode::AffineFallback;
-    }
-
-    return aTransform;
 }
 
 TransformKey CoordinateMapper::ResolveKey(const TransformRequest& rReq) const
@@ -616,7 +538,8 @@ double CoordinateMapper::LogicToWindowSubPixelX(double fX, vcl::MappingPolicy eP
 
     const auto& rMat = rTransform.GetMatrix();
 
-    DBG_ASSERT(lcl_IsAxisAligned(rMat), "LogicToWindowSubPixelX requires axis-aligned transform");
+    DBG_ASSERT(rTransform.PreservesAxisAlignment(),
+               "LogicToWindowSubPixelX requires axis-aligned transform");
 
     // NOTE:
     // This helper assumes an axis-aligned transform (no shear/rotation).
@@ -631,7 +554,8 @@ double CoordinateMapper::LogicToWindowSubPixelY(double fY, vcl::MappingPolicy eP
 
     const auto& rMat = rTransform.GetMatrix();
 
-    DBG_ASSERT(lcl_IsAxisAligned(rMat), "LogicToWindowSubPixelY requires axis-aligned transform");
+    DBG_ASSERT(rTransform.PreservesAxisAlignment(),
+               "LogicToWindowSubPixelY requires axis-aligned transform");
 
     // NOTE:
     // This helper assumes an axis-aligned transform (no shear/rotation).
