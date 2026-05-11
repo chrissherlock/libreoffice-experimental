@@ -15,10 +15,6 @@
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <basegfx/range/b2drange.hxx>
 
-#include <o3tl/hash_combine.hxx>
-#include <basegfx/matrix/b2dhommatrix.hxx>
-#include <basegfx/range/b2drange.hxx>
-
 #include <vcl/dllapi.h>
 #include <vcl/mapconvert.hxx>
 #include <vcl/mapmod.hxx>
@@ -279,6 +275,9 @@ public:
 
     void CalcMapResolution(const MapMode& rMapMode, tools::Long nDPIX, tools::Long nDPIY);
 
+    MappingCoefficients ResolveMapResRelative(const MapMode* pBaseline, const MapMode* pTarget,
+                                              vcl::MappingPolicy ePolicy) const;
+
     vcl::detail::MapConversion ResolveMap(const MapMode& rBaseline, const MapMode& rTarget,
                                           vcl::MappingPolicy ePolicy) const;
 
@@ -489,26 +488,8 @@ public:
     T WindowToLogicUnits(const T& rWindowGeometry, const vcl::detail::MapConversion& rConv) const;
 
     // ========================================================================
-    // MASTER STAGES / LOGIC-TO-LOGIC CONVERSIONS
-    // ========================================================================
-    // Pure mathematical transformations between arbitrary MapModes.
-    // These do not traverse the VCL device pipeline.
-
-    Point LogicToLogic(const Point& rPtSource, const MapMode* pMapModeBaseline,
-                       const MapMode* pMapModeSource, const MapMode* pMapModeDest,
-                       vcl::MappingPolicy ePolicy) const;
-    Size LogicToLogic(const Size& rSzSource, const MapMode* pMapModeBaseline,
-                      const MapMode* pMapModeSource, const MapMode* pMapModeDest,
-                      vcl::MappingPolicy ePolicy) const;
-    tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
-                                  const MapMode* pMapModeBaseline, const MapMode* pMapModeSource,
-                                  const MapMode* pMapModeDest, vcl::MappingPolicy ePolicy) const;
-
-    // ========================================================================
     // DISTANCE SCALING (Raw Scalar Conversion, NO offsets applied)
     // ========================================================================
-
-    // Integer Distances
 
     // Double/Sub-Pixel Distances
     tools::Long ViewSubPixelToLogicDistanceX(double n) const;
@@ -539,23 +520,10 @@ public:
     }
 
 private:
-    MappingCoefficients ResolveMapResRelative(const MapMode* pBaseline, const MapMode* pTarget,
-                                              vcl::MappingPolicy ePolicy) const;
     void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX, double& rTransY,
                                vcl::MappingPolicy ePolicy) const;
 
     CompiledTransform BuildCompiledTransform(const basegfx::B2DHomMatrix& rMat) const;
 };
-
-Point LogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource,
-                   const MapMode& rMapModeDest);
-Size LogicToLogic(const Size& rSzSource, const MapMode& rMapModeSource,
-                  const MapMode& rMapModeDest);
-tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource, const MapMode& rMapModeSource,
-                              const MapMode& rMapModeDest);
-tools::Long LogicToLogic(tools::Long nLongSource, MapUnit eUnitSource, MapUnit eUnitDest);
-basegfx::B2DPolygon LogicToLogic(const basegfx::B2DPolygon& rPolySource,
-                                 const MapMode& rMapModeSource, const MapMode& rMapModeDest);
-basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode& rMapModeDest);
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
