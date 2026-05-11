@@ -246,11 +246,6 @@ vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rBaseline
     return { aRes.mfScaleX, aRes.mfScaleY, aRes.mnTranslationX, aRes.mnTranslationY };
 }
 
-void CoordinateMapper::InvalidateViewTransform()
-{
-    mnStateVersion.fetch_add(1, std::memory_order_release);
-}
-
 basegfx::B2DHomMatrix CoordinateMapper::GetDeviceTransformation(vcl::MappingPolicy ePolicy) const
 {
     return GetLogicToDeviceMatrix(ePolicy);
@@ -318,7 +313,6 @@ void CoordinateMapper::UpdateCache(vcl::MappingPolicy ePolicy) const
 
     const bool bMapped = (ePolicy == vcl::MappingPolicy::ApplyMapMode);
 
-    // Explicitly resolve the keys for this specific compilation pass
     const TransformKey eL2W
         = bMapped ? TransformKey::LogicToWindow_Mapped : TransformKey::LogicToWindow_Unmapped;
     const TransformKey eW2L
@@ -328,7 +322,7 @@ void CoordinateMapper::UpdateCache(vcl::MappingPolicy ePolicy) const
     const TransformKey eD2L
         = bMapped ? TransformKey::DeviceToLogic_Mapped : TransformKey::DeviceToLogic_Unmapped;
 
-    // Phase 1: Logic -> Window (The core mapping)
+    // Phase 1: Logic -> Window
     basegfx::B2DHomMatrix aLogicToWindow;
     if (bMapped)
     {
@@ -345,47 +339,42 @@ void CoordinateMapper::UpdateCache(vcl::MappingPolicy ePolicy) const
     }
     else
     {
-        // Unmapped case: Pure viewport translation
         aLogicToWindow.translate(static_cast<double>(mnWindowToViewOffsetX),
                                  static_cast<double>(mnWindowToViewOffsetY));
     }
 
-    // Store Phase 1
-    maTransformCache[static_cast<size_t>(eL2W)] = BuildCompiledTransform(aLogicToWindow);
+    maCache.Store(eL2W, BuildCompiledTransform(aLogicToWindow));
 
-    // Phase 2: Window -> Logic (The Inverse)
+    // Phase 2: Window -> Logic
     if (aLogicToWindow.isInvertible())
     {
         basegfx::B2DHomMatrix aWindowToLogic = aLogicToWindow;
         aWindowToLogic.invert();
-        maTransformCache[static_cast<size_t>(eW2L)] = BuildCompiledTransform(aWindowToLogic);
+        maCache.Store(eW2L, BuildCompiledTransform(aWindowToLogic));
     }
     else
     {
         SAL_WARN("vcl.gdi", "CoordinateMapper: Singular Matrix. Falling back to Identity.");
-        maTransformCache[static_cast<size_t>(eW2L)]
-            = BuildCompiledTransform(basegfx::B2DHomMatrix());
+        maCache.Store(eW2L, BuildCompiledTransform(basegfx::B2DHomMatrix()));
     }
 
-    // Phase 3: Logic -> Device (Applying physical OS offsets)
+    // Phase 3: Logic -> Device
     basegfx::B2DHomMatrix aLogicToDevice = aLogicToWindow;
     aLogicToDevice.translate(static_cast<double>(mnDeviceToWindowOffsetX),
                              static_cast<double>(mnDeviceToWindowOffsetY));
 
-    // Store Phase 3
-    maTransformCache[static_cast<size_t>(eL2D)] = BuildCompiledTransform(aLogicToDevice);
+    maCache.Store(eL2D, BuildCompiledTransform(aLogicToDevice));
 
-    // Phase 4: Device -> Logic (The Inverse)
+    // Phase 4: Device -> Logic
     if (aLogicToDevice.isInvertible())
     {
         basegfx::B2DHomMatrix aDeviceToLogic = aLogicToDevice;
         aDeviceToLogic.invert();
-        maTransformCache[static_cast<size_t>(eD2L)] = BuildCompiledTransform(aDeviceToLogic);
+        maCache.Store(eD2L, BuildCompiledTransform(aDeviceToLogic));
     }
     else
     {
-        maTransformCache[static_cast<size_t>(eD2L)]
-            = BuildCompiledTransform(basegfx::B2DHomMatrix());
+        maCache.Store(eD2L, BuildCompiledTransform(basegfx::B2DHomMatrix()));
     }
 }
 
@@ -475,27 +464,18 @@ TransformKey CoordinateMapper::ResolveKey(const TransformRequest& rReq) const
 
 const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq) const
 {
-    // O(1) Cache Version Validation
-    uint64_t nCurrentVersion = mnStateVersion.load(std::memory_order_acquire);
-    if (mnCacheVersion != nCurrentVersion)
-    {
-        for (auto& slot : maTransformCache)
-        {
-            slot.reset();
-        }
-
-        mnCacheVersion = nCurrentVersion;
-    }
-
     // Resolve the semantic route to a physical cache key
     TransformKey eKey = ResolveKey(rReq);
 
+    // Check Memory (Handles version validation internally)
+    if (const CompiledTransform* pCached = maCache.Get(eKey))
+        return *pCached;
+
     // Cache Miss: Compile the graph for this policy
-    if (!maTransformCache[static_cast<size_t>(eKey)])
-        UpdateCache(rReq.Policy);
+    UpdateCache(rReq.Policy);
 
     // Return immutable execution artifact
-    return *maTransformCache[static_cast<size_t>(eKey)];
+    return *maCache.Get(eKey);
 }
 
 // ============================================================================
