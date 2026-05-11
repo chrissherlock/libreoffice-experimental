@@ -351,6 +351,72 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testEmptyStateCollapsing)
     CPPUNIT_ASSERT_EQUAL(tools::Long(0), aResult.GetWidth());
 }
 
+/**
+ * THE GHOST PIXEL TEST:
+ * Verifies that a rectangle with a mathematical width < 0.5 collapses to empty.
+ * In the old logic, a 0.4 pixel width at (10.0) would round Left to 10 and
+ * Right to 10, resulting in a 1-pixel visible line (a "Ghost Pixel").
+ */
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testGhostPixelCollapse)
+{
+    CoordinateMapper aMapper;
+    aMapper.SetDPIX(96);
+    aMapper.SetDPIY(96);
+
+    // Set scale to 0.4x.
+    // An input width of 1 unit will become 0.4 units.
+    MapMode aMap(MapUnit::MapPixel);
+    aMap.SetScaleX(0.4);
+    aMap.SetScaleY(0.4);
+    aMapper.SetMapMode(aMap);
+
+    // Input: Left=10, Right=10 (Width=1)
+    // Math: 10 * 0.4 = 4.0 (Left)
+    // Math: (10+1) * 0.4 = 4.4 (Right+1)
+    // Extent: 0.4 pixels.
+    tools::Rectangle aGhostRect(Point(10, 10), Size(1, 1));
+
+    tools::Rectangle aResult = aMapper.LogicToDevicePixel(aGhostRect);
+
+    // If the fix is working, 0.4 < 0.5 threshold triggers aResult.IsEmpty()
+    // If the fix is missing, aResult will be (4, 4, 4, 4) with Width=1.
+    CPPUNIT_ASSERT_MESSAGE("0.4px width must collapse to empty to prevent ghost pixels",
+                           aResult.IsEmpty());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(0), aResult.GetWidth());
+}
+
+/**
+ * THE CARET/THIN LINE PRESERVATION TEST:
+ * Verifies that a thin rectangle representing a 1D vertical primitive (like a text cursor)
+ * does not completely collapse to a zero-geometry empty rect if only its width is sub-pixel.
+ */
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCaretLineHeightPreservation)
+{
+    CoordinateMapper aMapper;
+    aMapper.SetDPIX(96);
+    aMapper.SetDPIY(96);
+
+    // Set horizontal scale to 0.4x (sub-pixel boundary) and vertical scale to 1.0x
+    MapMode aMap(MapUnit::MapPixel);
+    aMap.SetScaleX(0.4);
+    aMap.SetScaleY(1.0);
+    aMapper.SetMapMode(aMap);
+
+    // Input: Left=10, Top=10, Width=1, Height=20 (A typical text insertion caret)
+    // Horizontal Math: Left = 10 * 0.4 = 4.0. Right+1 = 11 * 0.4 = 4.4. Extent = 0.4px (< 0.5px)
+    // Vertical Math:   Top = 10 * 1.0 = 10.0. Bottom+1 = 30 * 1.0 = 30.0. Extent = 20.0px
+    tools::Rectangle aCaretRect(Point(10, 10), Size(1, 20));
+
+    tools::Rectangle aResult = aMapper.LogicToDevicePixel(aCaretRect);
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Vertical height metrics must be preserved for 1D carets/lines",
+                                 tools::Long(20), aResult.GetHeight());
+
+    // Explicitly verify the vertical screen coordinates remain intact for the paint engine
+    CPPUNIT_ASSERT_EQUAL(tools::Long(10), aResult.Top());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(29), aResult.Bottom());
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
