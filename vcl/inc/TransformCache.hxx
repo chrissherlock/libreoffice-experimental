@@ -10,9 +10,10 @@
 #pragma once
 
 #include <vcl/dllapi.h>
+#include <sal/log.hxx>
 
 #include <TransformTypes.hxx>
-#include <CompiledTransform.hxx>
+#include <TransformPlan.hxx>
 
 #include <array>
 #include <atomic>
@@ -33,7 +34,7 @@ private:
     mutable std::atomic<uint64_t> mnStateVersion{ 0 };
     mutable uint64_t mnCacheVersion{ 0 };
 
-    mutable std::array<std::optional<CompiledTransform>, static_cast<size_t>(TransformKey::Count)>
+    mutable std::array<std::optional<TransformPlan>, static_cast<size_t>(TransformKey::Count)>
         maSlots;
 
 public:
@@ -49,7 +50,7 @@ public:
      * @brief Retrieves a compiled transform if valid.
      * Automatically flushes all slots if the state version has mutated since the last call.
      */
-    const CompiledTransform* Get(TransformKey eKey) const
+    const TransformPlan* Get(TransformKey eKey) const
     {
         uint64_t nCurrentVersion = mnStateVersion.load(std::memory_order_acquire);
 
@@ -67,9 +68,10 @@ public:
     /**
      * @brief Stores a compiled transform artifact into the register file.
      */
-    void Store(TransformKey eKey, const CompiledTransform& rTransform) const
+    void Store(TransformKey eKey, const TransformPlan& rTransform) const
     {
         maSlots[static_cast<size_t>(eKey)] = rTransform;
+        mnCacheVersion = mnStateVersion.load(std::memory_order_acquire);
     }
 };
 

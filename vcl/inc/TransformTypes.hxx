@@ -9,6 +9,8 @@
 
 #pragma once
 
+#include <vcl/MappingPolicy.hxx>
+
 #include <bitset>
 
 // The strict execution instruction set
@@ -35,7 +37,7 @@ struct TransformRequest
 };
 
 /**
- * Explicit routing keys for the CompiledTransform cache.
+ * Explicit routing keys for the TransformPlan cache.
  * This maps a CoordinateSpace pair + a MappingPolicy directly to a cache slot,
  * completely eliminating fragile slot arithmetic.
  */

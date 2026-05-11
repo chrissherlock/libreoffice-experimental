@@ -257,7 +257,7 @@ protected:
                     vcl::Region aOriginal = aRegion;
                     basegfx::B2DPolyPolygon aTempPoly = aRegion.GetAsB2DPolyPolygon();
                     aTempPoly.transform(
-                        mpMapper->Compile(vcl::MappingPolicy::ApplyMapMode).GetMatrix());
+                        mpMapper->Compile(vcl::MappingPolicy::ApplyMapMode).maMatrix);
                     vcl::Region aDevice(aTempPoly);
                     vcl::Region aBack
                         = mpMapper->DevicePixelToLogic(aDevice, vcl::MappingPolicy::ApplyMapMode);
