@@ -32,12 +32,9 @@
 MappingCoefficients::MappingCoefficients(const MapMode& rMapMode, tools::Long nDPIX,
                                          tools::Long nDPIY)
 {
-    // Delegate the complex scaling math to the mutator
+    // CalcMapResolution is the single source of truth for origin and scale derivation.
+    // It correctly handles the distinction between Absolute and Relative MapModes.
     CalcMapResolution(rMapMode, nDPIX, nDPIY);
-
-    // Because this is a fresh object, the origin is always absolute
-    mnTranslationX = rMapMode.GetOrigin().X();
-    mnTranslationY = rMapMode.GetOrigin().Y();
 }
 
 void MappingCoefficients::SetMapRes(const o3tl::Length eUnit)
