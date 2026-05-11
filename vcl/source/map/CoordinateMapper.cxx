@@ -323,20 +323,36 @@ TransformKey CoordinateMapper::ResolveKey(const TransformRequest& rReq) const
 {
     const bool bMapped = (rReq.Policy == vcl::MappingPolicy::ApplyMapMode);
 
+    // Logic <-> Window
     if (rReq.eFrom == CoordinateSpace::Logic && rReq.eTo == CoordinateSpace::Window)
         return bMapped ? TransformKey::LogicToWindow_Mapped : TransformKey::LogicToWindow_Unmapped;
 
     if (rReq.eFrom == CoordinateSpace::Window && rReq.eTo == CoordinateSpace::Logic)
         return bMapped ? TransformKey::WindowToLogic_Mapped : TransformKey::WindowToLogic_Unmapped;
 
+    // Logic <-> Device
     if (rReq.eFrom == CoordinateSpace::Logic && rReq.eTo == CoordinateSpace::Device)
         return bMapped ? TransformKey::LogicToDevice_Mapped : TransformKey::LogicToDevice_Unmapped;
 
     if (rReq.eFrom == CoordinateSpace::Device && rReq.eTo == CoordinateSpace::Logic)
         return bMapped ? TransformKey::DeviceToLogic_Mapped : TransformKey::DeviceToLogic_Unmapped;
 
-    assert(false && "Unsupported TransformRequest routing");
-    return TransformKey::LogicToWindow_Unmapped; // Safe fallback
+    // Device <-> Window (Direct viewport offsets, rarely used but supported)
+    if (rReq.eFrom == CoordinateSpace::Device && rReq.eTo == CoordinateSpace::Window)
+        return TransformKey::DeviceToWindow;
+
+    if (rReq.eFrom == CoordinateSpace::Window && rReq.eTo == CoordinateSpace::Device)
+        return TransformKey::WindowToDevice;
+
+    // CRITICAL: If we reach here, a caller has requested a coordinate transition
+    // that the engine does not formally support or hasn't indexed.
+    // We abort here because returning a "default" key would result in
+    // silent coordinate corruption across the rendering pipeline.
+    SAL_WARN("vcl.gdi", "Unsupported TransformRequest routing: " << static_cast<int>(rReq.eFrom)
+                                                                 << " to "
+                                                                 << static_cast<int>(rReq.eTo));
+
+    std::abort();
 }
 
 const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq) const

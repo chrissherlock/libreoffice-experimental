@@ -49,6 +49,8 @@ enum class TransformKey : size_t
     LogicToDevice_Unmapped,
     DeviceToLogic_Mapped,
     DeviceToLogic_Unmapped,
+    DeviceToWindow,
+    WindowToDevice,
     Count
 };
 
