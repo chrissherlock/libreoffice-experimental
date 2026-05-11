@@ -47,34 +47,27 @@
 
 template <> Point CompiledTransform::Apply<Point>(const Point& rPt) const
 {
-    switch (meMode)
+    // Fast Path 1: Pure Integer Translation
+    if (meMode == TransformMode::Translation)
+        return Point(rPt.X() + mnDeviceTx, rPt.Y() + mnDeviceTy);
+
+    // Fast Path 2: Scale + Translation (No rotation/shear)
+    if (meMode == TransformMode::AxisAlignedAffine)
     {
-        case TransformMode::Identity:
-            [[likely]] return rPt;
+        // Optimization: Use direct scalar arithmetic to bypass matrix cross-terms.
+        // This is mathematically equivalent to a full matrix multiply for axis-aligned transforms.
+        const double fX = static_cast<double>(rPt.X()) * maMatrix.get(0, 0) + maMatrix.get(0, 2);
+        const double fY = static_cast<double>(rPt.Y()) * maMatrix.get(1, 1) + maMatrix.get(1, 2);
 
-        case TransformMode::Translation:
-            return Point(rPt.X() + mnDeviceTx, rPt.Y() + mnDeviceTy);
-
-        case TransformMode::AxisAlignedAffine:
-        {
-            // Stabilization: Use basegfx logic to ensure rounding consistency
-            // with the full affine path, avoiding 1-pixel 'jitter' in unit tests.
-            basegfx::B2DPoint aPt(rPt.X(), rPt.Y());
-
-            double fX = aPt.getX() * maMatrix.get(0, 0) + maMatrix.get(0, 2);
-            double fY = aPt.getY() * maMatrix.get(1, 1) + maMatrix.get(1, 2);
-
-            return Point(vcl::detail::RoundToLong(fX), vcl::detail::RoundToLong(fY));
-        }
-
-        case TransformMode::AffineFallback:
-        default:
-            // Full 3x3 Affine Transformation
-            basegfx::B2DPoint aB2DPt(rPt.X(), rPt.Y());
-            aB2DPt *= maMatrix;
-            return Point(vcl::detail::RoundToLong(aB2DPt.getX()),
-                         vcl::detail::RoundToLong(aB2DPt.getY()));
+        return Point(vcl::detail::RoundToLong(fX), vcl::detail::RoundToLong(fY));
     }
+
+    // Fallback: Complex Affine (Rotation, Shear, or Identity)
+    // Stabilization: Use basegfx logic to ensure rounding consistency across complex projections.
+    basegfx::B2DPoint aPt(rPt.X(), rPt.Y());
+    aPt *= maMatrix;
+
+    return Point(vcl::detail::RoundToLong(aPt.getX()), vcl::detail::RoundToLong(aPt.getY()));
 }
 
 Size CompiledTransform::ApplyRectilinear(const Size& rSize) const
@@ -92,22 +85,29 @@ tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRe
     if (rRect.IsEmpty())
         return tools::Rectangle();
 
-    double fL = static_cast<double>(rRect.Left()) * maMatrix.get(0, 0) + maMatrix.get(0, 2);
-    double fT = static_cast<double>(rRect.Top()) * maMatrix.get(1, 1) + maMatrix.get(1, 2);
-    double fW = static_cast<double>(rRect.GetWidth()) * maMatrix.get(0, 0);
-    double fH = static_cast<double>(rRect.GetHeight()) * maMatrix.get(1, 1);
+    // VCL rectangles are inclusive [Left, Right].
+    // Map the mathematical bounds using half-open intervals [Left, Right + 1).
+    // This ensures that Width (Right - Left + 1) scales correctly as a mathematical extent.
+    const double fLeft
+        = static_cast<double>(rRect.Left()) * maMatrix.get(0, 0) + maMatrix.get(0, 2);
+    const double fTop = static_cast<double>(rRect.Top()) * maMatrix.get(1, 1) + maMatrix.get(1, 2);
+    const double fRight
+        = static_cast<double>(rRect.Right() + 1) * maMatrix.get(0, 0) + maMatrix.get(0, 2);
+    const double fBottom
+        = static_cast<double>(rRect.Bottom() + 1) * maMatrix.get(1, 1) + maMatrix.get(1, 2);
 
-    tools::Long nL = vcl::detail::RoundToLong(fL);
-    tools::Long nT = vcl::detail::RoundToLong(fT);
-    tools::Long nW = vcl::detail::RoundToLong(fW);
-    tools::Long nH = vcl::detail::RoundToLong(fH);
+    // Reconstruct the rectangle using the transformed mathematical extents.
+    // std::min/max handles potential mirroring (negative scaling).
+    // We subtract 1 from the Max boundary to return to VCL's inclusive [Left, Right] contract.
+    tools::Rectangle aRet(vcl::detail::RoundToLong(std::min(fLeft, fRight)),
+                          vcl::detail::RoundToLong(std::min(fTop, fBottom)),
+                          vcl::detail::RoundToLong(std::max(fLeft, fRight)) - 1,
+                          vcl::detail::RoundToLong(std::max(fTop, fBottom)) - 1);
 
-    if (nW == 0 && rRect.GetWidth() > 0)
-        nW = 1;
-    if (nH == 0 && rRect.GetHeight() > 0)
-        nH = 1;
+    // Preserve the original empty state if the resulting dimensions collapsed to zero.
+    vcl::ApplyEmptyState(aRet, rRect);
 
-    return tools::Rectangle(Point(nL, nT), Size(nW, nH));
+    return aRet;
 }
 
 template <> Size CompiledTransform::Apply<Size>(const Size& rSize) const

@@ -7,13 +7,15 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <LegacyCoordinateAdapter.hxx>
-#include <MappingCoefficients.hxx>
-
 #include <sal/log.hxx>
 #include <tools/bigint.hxx>
 #include <tools/debug.hxx>
 #include <o3tl/unit_conversion.hxx>
+
+#include "CoordinateMath.hxx"
+
+#include <LegacyCoordinateAdapter.hxx>
+#include <MappingCoefficients.hxx>
 
 static std::pair<MappingCoefficients, MappingCoefficients>
 lcl_calcConversionMapRes(const MapMode& rMMSource, const MapMode& rMMDest)
@@ -52,26 +54,6 @@ static tools::Long lcl_convertLogicValue(const tools::Long nSourceValue,
     aBigValue /= nDivisor;
 
     return static_cast<tools::Long>(aBigValue);
-}
-
-static void lcl_ApplyEmptyState(tools::Rectangle& rDest, const tools::Rectangle& rSrc)
-{
-    if (rSrc.IsWidthEmpty())
-        rDest.SetWidthEmpty();
-
-    if (rSrc.IsHeightEmpty())
-        rDest.SetHeightEmpty();
-}
-
-static basegfx::B2DHomMatrix lcl_BuildAffineMatrix(double fScaleX, double fScaleY, double fLogicTx,
-                                                   double fLogicTy, double fPhysicalTx,
-                                                   double fPhysicalTy)
-{
-    basegfx::B2DHomMatrix aMat;
-    aMat.translate(fLogicTx, fLogicTy);
-    aMat.scale(fScaleX, fScaleY);
-    aMat.translate(fPhysicalTx, fPhysicalTy);
-    return aMat;
 }
 
 static void lcl_verifyUnitSourceDest(MapUnit eUnitSource, MapUnit eUnitDest)
@@ -193,7 +175,7 @@ tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource, const MapMode
         aRetval = tools::Rectangle(left, top, right, bottom);
     }
 
-    lcl_ApplyEmptyState(aRetval, rRectSource);
+    vcl::ApplyEmptyState(aRetval, rRectSource);
     return aRetval;
 }
 
@@ -242,7 +224,7 @@ basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode&
         const double fScaleFactor = o3tl::convert(1.0, eFrom, eTo);
 
         // Simple scaling uses no offsets
-        return lcl_BuildAffineMatrix(fScaleFactor, fScaleFactor, 0.0, 0.0, 0.0, 0.0);
+        return vcl::BuildAffineMatrix(fScaleFactor, fScaleFactor, 0.0, 0.0, 0.0, 0.0);
     }
 
     // Path 2: Complex MapModes (Scaling + Origin Offsets)
@@ -256,11 +238,11 @@ basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource, const MapMode&
 
     // By passing the source as the "Logical" offset and the negative dest as the "Physical" offset,
     // the canonical builder perfectly scales the source offset before subtracting the dest offset.
-    return lcl_BuildAffineMatrix(fScaleFactorX, fScaleFactorY,
-                                 static_cast<double>(aMapResSource.mnTranslationX),
-                                 static_cast<double>(aMapResSource.mnTranslationY),
-                                 static_cast<double>(-aMapResDest.mnTranslationX),
-                                 static_cast<double>(-aMapResDest.mnTranslationY));
+    return vcl::BuildAffineMatrix(fScaleFactorX, fScaleFactorY,
+                                  static_cast<double>(aMapResSource.mnTranslationX),
+                                  static_cast<double>(aMapResSource.mnTranslationY),
+                                  static_cast<double>(-aMapResDest.mnTranslationX),
+                                  static_cast<double>(-aMapResDest.mnTranslationY));
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
