@@ -417,6 +417,25 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCaretLineHeightPreservation)
     CPPUNIT_ASSERT_EQUAL(tools::Long(29), aResult.Bottom());
 }
 
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRelativeMapModeAccumulation)
+{
+    CoordinateMapper aMapper;
+    aMapper.SetDPIX(96);
+    aMapper.SetDPIY(96);
+
+    // Initial Absolute MapMode (Origin at 100, 100)
+    MapMode aAbs(MapUnit::MapPixel, Point(100, 100), 1.0, 1.0);
+    aMapper.SetMapMode(aAbs);
+
+    // MapUnit::MapRelative signals VCL to accumulate rather than overwrite.
+    MapMode aRel(MapUnit::MapRelative, Point(50, 50), 1.0, 1.0);
+    aMapper.SetMapMode(aRel);
+
+    Point aResult = aMapper.LogicToDevicePixel(Point(0, 0));
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Relative offsets must accumulate", tools::Long(150), aResult.X());
+}
+
 } // namespace
 
 CPPUNIT_PLUGIN_IMPLEMENT();
