@@ -63,11 +63,11 @@ struct MapConversion
 
 /**
  * @class CoordinateMapper
- * @brief Centralized mapping engine for VCL coordinate transformations.
+ * @brief Centralized mapping orchestrator for VCL coordinate transformations.
  *
- * The CoordinateMapper decouples pure mathematical mapping and spatial translation
- * logic from the physical OutputDevice. It provides a strict, layered pipeline
- * to convert geometry between physical pixels and mathematical document units.
+ * The CoordinateMapper decouples transformation state from the physical
+ * OutputDevice. It acts as the central coordinator between VCL's window state,
+ * the stateless TransformCompiler, and the thread-safe TransformCache.
  *
  * Coordinate Spaces (Conceptual)
  * ------------------------------
@@ -76,55 +76,53 @@ struct MapConversion
  * 2. Window Space: Client area pixels (Device minus DeviceToWindowOffset).
  * 3. View Space: Scrollable viewport pixels (Window minus WindowToViewOffset).
  * 4. Logic Space: Document coordinates defined by a MapMode and MapOffset.
- * * NOTE: While these spaces exist conceptually, the actual implementation squashes
- * them into a single, unified Affine Transformation Matrix for performance.
+ * * NOTE: While these spaces exist conceptually, the CoordinateMapper squashes
+ * them into unified, cached Affine Transformation Matrices (CompiledTransform)
+ * for O(1) execution performance.
  *
- * Architecture & API Groupings
+ * Architecture & Subsystems
  * ----------------------------
- * - Lock-Free Snapshots (Core): Because coordinate state (DPI, MapModes, offsets)
- * can be mutated concurrently, the mapper uses a lock-free, version-stamped
- * `TransformSnapshot`. All transformations project from an immutable snapshot
- * acquired via `AcquireSnapshot()`.
+ * CoordinateMapper has been structurally decomposed into a pure coordinator:
+ * * - The Compiler (TransformCompiler): CoordinateMapper does not synthesize
+ * matrices. It passes its current physical offsets and mapping coefficients
+ * to the TransformCompiler, which returns an immutable CompiledTransform
+ * artifact annotated with geometric invariants.
  *
- * - Single Source of Truth: Basegfx geometry and legacy scalar pipelines are unified.
- * All legacy procedural math acts as a lightweight wrapper directly extracting scale
- * and translation components from the pre-calculated Affine matrix cache.
+ * - The Memory (TransformCache): CoordinateMapper does not manage lock-free
+ * versioning. It delegates storage to the TransformCache, which guarantees
+ * that threads never read an artifact compiled against stale state.
  *
- * - Distance Scaling: Specialized scalar functions (e.g., LogicToViewDistanceX)
- * apply scaling *without* applying translational offsets. Used strictly for Size.
+ * - Legacy Quarantine: CoordinateMapper strictly operates on Affine math.
+ * Historical procedural unit conversions (e.g., Twips to 100th MM) are
+ * expressly forbidden here and are quarantined in LegacyCoordinateAdapter.
  *
  * ========================================================================
  * CoordinateMapper Transformation Contract
  * ========================================================================
  *
- * 1. Concurrency and State Coherence
- * Transformation functions must never read mutable state (DPI, offsets) directly.
- * They must acquire a localized, immutable `TransformSnapshot` once per function
- * boundary to guarantee mathematical coherence and avoid torn reads.
- *
- * 2. Subpixel Authority
+ * 1. Subpixel Authority
  * All geometric transformations must be performed in double precision
  * (basegfx::B2DHomMatrix). Conversion to integer occurs at the final API boundary.
  *
- * 3. Fast-Path Semantic Guards
- * If `IsMappingActive()` is false, scalar legacy pipelines must bypass MapMode
- * scaling *and* intermediate View/Window offsets, acting as a pure translation
- * to device space.
+ * 2. Explicit Topology Routing
+ * Coordinate requests are routed through a formal topology (TransformKey),
+ * eliminating implicit slot math and ensuring rigorous path validation.
  *
- * 4. Distance vs. Position
+ * 3. Distance vs. Position
  * Distance (Size) transformations apply scaling only. Position (Point/Geometry)
  * transformations include both scaling and offsets. Width/Height must not be
  * used to calculate geometric boundaries.
  *
- * 5. Forward/Inverse Symmetry
+ * 4. Forward/Inverse Symmetry
  * For every transformation A -> B, the inverse B -> A must return the original
- * value within ±0.5 drift for intermediate floating-point values.
+ * value within +/-0.5 drift for intermediate floating-point values.
  * ========================================================================
  *
  * THREADING CONTRACT:
- * CoordinateMapper is NOT internally synchronized. The Transform Register File
- * (maTransformCache) and cache versioning rely on thread confinement or
- * external synchronization (e.g., the Solar Mutex).
+ * CoordinateMapper's internal state (DPI, offsets) is mutated concurrently
+ * and MUST be protected by external synchronization (e.g., the SolarMutex).
+ * Lock-free read safety of the resulting execution artifacts is handled
+ * entirely by the underlying TransformCache.
  */
 
 class VCL_DLLPUBLIC CoordinateMapper
