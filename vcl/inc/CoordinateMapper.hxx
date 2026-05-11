@@ -399,12 +399,6 @@ public:
 
     // Window <-> Logic
 
-    double LogicToWindowSubPixelX(double fX, vcl::MappingPolicy ePolicy) const;
-    double LogicToWindowSubPixelY(double fY, vcl::MappingPolicy ePolicy) const;
-    tools::Long LogicToWindowX(tools::Long nX,
-                               vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
-    tools::Long LogicToWindowY(tools::Long nY,
-                               vcl::MappingPolicy ePolicy = vcl::MappingPolicy::ApplyMapMode) const;
     double LogicWidthToWindowSubPixel(tools::Long nWidth, vcl::MappingPolicy ePolicy) const;
     double LogicHeightToWindowSubPixel(tools::Long nHeight, vcl::MappingPolicy ePolicy) const;
 

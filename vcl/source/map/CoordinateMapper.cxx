@@ -517,32 +517,6 @@ double CoordinateMapper::ViewToWindowSubPixelY(double fY) const
     return fY + static_cast<double>(mnWindowToViewOffsetY);
 }
 
-double CoordinateMapper::LogicToWindowSubPixelX(double fX, vcl::MappingPolicy ePolicy) const
-{
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
-    const auto& rMat = rTransform.GetMatrix();
-
-    // Use the cached invariant flag instead of re-calculating alignment
-    DBG_ASSERT(rTransform.PreservesAxisAlignment(),
-               "LogicToWindowSubPixelX requires axis-aligned transform");
-
-    // P' = P * M00 + M02 (The horizontal scale + translation)
-    return fX * rMat.get(0, 0) + rMat.get(0, 2);
-}
-
-double CoordinateMapper::LogicToWindowSubPixelY(double fY, vcl::MappingPolicy ePolicy) const
-{
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
-    const auto& rMat = rTransform.GetMatrix();
-
-    // Use the cached invariant flag
-    DBG_ASSERT(rTransform.PreservesAxisAlignment(),
-               "LogicToWindowSubPixelY requires axis-aligned transform");
-
-    // P' = P * M11 + M12 (The vertical scale + translation)
-    return fY * rMat.get(1, 1) + rMat.get(1, 2);
-}
-
 // ========================================================================
 // PUBLIC WRAPPERS (Routing into the unified pipeline)
 // ========================================================================
@@ -822,40 +796,6 @@ double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight,
                * vcl::detail::GetBasisVectorMagnitudeY(rTransform.GetMatrix());
 
     return static_cast<double>(nHeight) * rTransform.GetMatrix().get(1, 1);
-}
-
-tools::Long CoordinateMapper::LogicToWindowX(tools::Long nX, vcl::MappingPolicy ePolicy) const
-{
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
-    const auto& rMat = rTransform.GetMatrix();
-
-    // If the transform is complex (rotation/shear), we must use the full sub-pixel
-    // path, but we do the math here to avoid a redundant Compile() call.
-    if (!rTransform.PreservesAxisAlignment())
-    {
-        basegfx::B2DPoint aPt(static_cast<double>(nX), 0.0);
-        aPt *= rMat;
-        return vcl::detail::RoundToLong(aPt.getX());
-    }
-
-    // Fast path: Pure rectilinear math
-    return vcl::detail::RoundToLong(static_cast<double>(nX) * rMat.get(0, 0) + rMat.get(0, 2));
-}
-
-tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY, vcl::MappingPolicy ePolicy) const
-{
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
-    const auto& rMat = rTransform.GetMatrix();
-
-    if (!rTransform.PreservesAxisAlignment())
-    {
-        basegfx::B2DPoint aPt(0.0, static_cast<double>(nY));
-        aPt *= rMat;
-        return vcl::detail::RoundToLong(aPt.getY());
-    }
-
-    // Fast path: Pure rectilinear math
-    return vcl::detail::RoundToLong(static_cast<double>(nY) * rMat.get(1, 1) + rMat.get(1, 2));
 }
 
 double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth,
