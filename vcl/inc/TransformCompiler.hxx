@@ -13,7 +13,7 @@
 
 #include <vcl/dllapi.h>
 
-#include <CompiledTransform.hxx>
+#include <TransformPlan.hxx>
 
 namespace vcl
 {
@@ -22,12 +22,12 @@ namespace vcl
  * * Analyzes raw affine matrices to determine their geometric invariants
  * (e.g., orientation, orthogonality) and classifies them into performance
  * taxonomies (e.g., pure translation vs. complex affine) to build highly
- * optimized CompiledTransform artifacts.
+ * optimized TransformPlan artifacts.
  */
 class VCL_DLLPUBLIC TransformCompiler
 {
 public:
-    static CompiledTransform Compile(const basegfx::B2DHomMatrix& rMat);
+    static TransformPlan Compile(const basegfx::B2DHomMatrix& rMat);
 };
 
 } // namespace vcl
