@@ -844,6 +844,27 @@ tools::Long CoordinateMapper::LogicToWindowY(tools::Long nY, vcl::MappingPolicy 
     return vcl::detail::RoundToLong(static_cast<double>(nY) * rMat.get(1, 1) + rMat.get(1, 2));
 }
 
+double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth,
+                                                    vcl::MappingPolicy ePolicy) const
+{
+    // Acquire the compiled execution plan for this specific route
+    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
+    const auto& rMat = rTransform.GetMatrix();
+
+    // Fast Path: Rectilinear (No rotation/shear)
+    // If the transform is axis-aligned, the width scale is simply M00.
+    if (rTransform.PreservesAxisAlignment())
+    {
+        return static_cast<double>(nWidth) * rMat.get(0, 0);
+    }
+
+    // Fallback: Complex Affine (Rotation/Shear)
+    // If the coordinate system is rotated, 'Width' is no longer a simple scalar along X.
+    // We must measure the magnitude of the transformed X-basis vector.
+    // This uses the Pythagorean helper from CoordinateMath: sqrt(M00^2 + M01^2)
+    return static_cast<double>(nWidth) * vcl::detail::GetBasisVectorMagnitudeX(rMat);
+}
+
 basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPoint,
                                                           vcl::MappingPolicy ePolicy) const
 {
