@@ -85,6 +85,7 @@ tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRe
     if (rRect.IsEmpty())
         return tools::Rectangle();
 
+    // Map mathematical bounds [Left, Right + 1)
     const double fLeft
         = static_cast<double>(rRect.Left()) * maMatrix.get(0, 0) + maMatrix.get(0, 2);
     const double fTop = static_cast<double>(rRect.Top()) * maMatrix.get(1, 1) + maMatrix.get(1, 2);
@@ -93,6 +94,20 @@ tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRe
     const double fBottom
         = static_cast<double>(rRect.Bottom() + 1) * maMatrix.get(1, 1) + maMatrix.get(1, 2);
 
+    // Determine physical extents
+    const double fWidth = std::abs(fRight - fLeft);
+    const double fHeight = std::abs(fBottom - fTop);
+
+    // If the scaled width or height is less than 0.5 pixels, it cannot be rendered
+    // meaningfully. We return a formally Empty rectangle to prevent "ghost" lines.
+    if (fWidth < 0.5 && fHeight < 0.5)
+    {
+        tools::Rectangle aEmpty;
+        aEmpty.SetEmpty();
+        return aEmpty;
+    }
+
+    // Round to physical pixel indices
     tools::Long nL = vcl::detail::RoundToLong(std::min(fLeft, fRight));
     tools::Long nT = vcl::detail::RoundToLong(std::min(fTop, fBottom));
     tools::Long nR = vcl::detail::RoundToLong(std::max(fLeft, fRight)) - 1;
@@ -100,14 +115,9 @@ tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRe
 
     tools::Rectangle aRet(nL, nT, nR, nB);
 
-    // CRITICAL: If the mathematical extent is less than a half-pixel,
-    // force the VCL rectangle to an explicit empty state.
-    if (std::abs(fRight - fLeft) < 0.5)
-        aRet.SetWidthEmpty();
-    if (std::abs(fBottom - fTop) < 0.5)
-        aRet.SetHeightEmpty();
-
+    // Final safety check: preserve original empty state flags (e.g. from Logic)
     vcl::ApplyEmptyState(aRet, rRect);
+
     return aRet;
 }
 
