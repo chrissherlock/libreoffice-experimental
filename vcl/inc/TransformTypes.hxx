@@ -34,18 +34,22 @@ struct TransformRequest
     vcl::MappingPolicy Policy = vcl::MappingPolicy::ApplyMapMode; // Changed from bool
 };
 
-// Explicit slots for the O(1) Transform Register File
-enum class TransformSlot : size_t
+/**
+ * Explicit routing keys for the CompiledTransform cache.
+ * This maps a CoordinateSpace pair + a MappingPolicy directly to a cache slot,
+ * completely eliminating fragile slot arithmetic.
+ */
+enum class TransformKey : size_t
 {
     LogicToWindow_Mapped = 0,
-    LogicToWindow_Unmapped = 1,
-    LogicToDevice_Mapped = 2,
-    LogicToDevice_Unmapped = 3,
-    WindowToLogic_Mapped = 4,
-    WindowToLogic_Unmapped = 5,
-    DeviceToLogic_Mapped = 6,
-    DeviceToLogic_Unmapped = 7,
-    Count = 8
+    LogicToWindow_Unmapped,
+    WindowToLogic_Mapped,
+    WindowToLogic_Unmapped,
+    LogicToDevice_Mapped,
+    LogicToDevice_Unmapped,
+    DeviceToLogic_Mapped,
+    DeviceToLogic_Unmapped,
+    Count
 };
 
 enum class GeometryInvariant : size_t
