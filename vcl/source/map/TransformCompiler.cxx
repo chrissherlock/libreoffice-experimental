@@ -10,25 +10,12 @@
 #include <TransformCompiler.hxx>
 #include <TransformTypes.hxx>
 
+#include "CoordinateMath.hxx"
+
 #include <cmath>
 
 namespace vcl
 {
-static bool lcl_IsPureTranslation(const basegfx::B2DHomMatrix& matrix)
-{
-    // Protect against future floating-point noise from complex matrix composition
-    constexpr double fEpsilon = 1e-9;
-    return std::abs(matrix.get(0, 0) - 1.0) < fEpsilon
-           && std::abs(matrix.get(1, 1) - 1.0) < fEpsilon && std::abs(matrix.get(0, 1)) < fEpsilon
-           && std::abs(matrix.get(1, 0)) < fEpsilon;
-}
-
-static bool lcl_IsAxisAligned(const basegfx::B2DHomMatrix& rMat)
-{
-    constexpr double fEpsilon = 1e-9;
-    return std::abs(rMat.get(0, 1)) < fEpsilon && std::abs(rMat.get(1, 0)) < fEpsilon;
-}
-
 CompiledTransform TransformCompiler::Compile(const basegfx::B2DHomMatrix& rMat)
 {
     CompiledTransform aTransform;
@@ -50,7 +37,7 @@ CompiledTransform TransformCompiler::Compile(const basegfx::B2DHomMatrix& rMat)
         aTransform.meMode = TransformMode::Identity;
         aTransform.maContract.maPreserved.set(); // All invariants preserved
     }
-    else if (lcl_IsAxisAligned(rMat))
+    else if (IsAxisAligned(rMat))
     {
         // Rectilinear transforms preserve Axis Alignment and Orthogonality
         aTransform.maContract.maPreserved.set(
@@ -58,7 +45,7 @@ CompiledTransform TransformCompiler::Compile(const basegfx::B2DHomMatrix& rMat)
         aTransform.maContract.maPreserved.set(
             static_cast<size_t>(GeometryInvariant::Orthogonality));
 
-        if (lcl_IsPureTranslation(rMat))
+        if (IsPureTranslation(rMat))
         {
             const double fTx = rMat.get(0, 2);
             const double fTy = rMat.get(1, 2);
