@@ -21,16 +21,14 @@
 #include <vcl/region.hxx>
 #include <vcl/MappingPolicy.hxx>
 
+#include <TransformCache.hxx>
 #include <CompiledTransform.hxx>
 #include <MappingCoefficients.hxx>
 #include <TransformTypes.hxx>
 
-#include <optional>
-#include <atomic>
 #include <memory>
 #include <concepts>
 #include <type_traits>
-#include <array>
 
 class LineInfo;
 
@@ -135,12 +133,7 @@ private:
     MappingCoefficients maMapRes;
     vcl::detail::MapConversion maMapConversion;
 
-    // The O(1) Transform Register File & Version Tracker
-    mutable std::atomic<uint64_t> mnStateVersion{ 0 };
-    mutable uint64_t mnCacheVersion{ 0 };
-    // Swap TransformSlot::Count for TransformKey::Count
-    mutable std::array<std::optional<CompiledTransform>, static_cast<size_t>(TransformKey::Count)>
-        maTransformCache;
+    vcl::TransformCache maCache;
 
     sal_Int32 mnDPIX = 72;
     sal_Int32 mnDPIY = 72;
@@ -279,7 +272,7 @@ public:
     vcl::detail::MapConversion ResolveMap(const MapMode& rBaseline, const MapMode& rTarget,
                                           vcl::MappingPolicy ePolicy) const;
 
-    void InvalidateViewTransform();
+    void InvalidateViewTransform() { maCache.Invalidate(); }
     basegfx::B2DHomMatrix GetViewTransformation(vcl::MappingPolicy ePolicy) const;
     basegfx::B2DHomMatrix GetViewTransformation(const vcl::detail::MapConversion& rConv) const;
     basegfx::B2DHomMatrix GetViewTransformation(const MapMode& rBaseline, const MapMode& rTarget,
