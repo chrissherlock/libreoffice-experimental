@@ -288,7 +288,8 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/map/CoordinateMapper \
     vcl/source/map/LegacyCoordinateAdapter \
     vcl/source/map/TransformCompiler \
-    vcl/source/map/CompiledTransform \
+    vcl/source/map/TransformRouter \
+    vcl/source/map/GeometryAdapter \
     vcl/source/map/MappingCoefficients \
     vcl/source/outdev/background \
     vcl/source/outdev/eps \
