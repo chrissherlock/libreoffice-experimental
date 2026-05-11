@@ -314,19 +314,23 @@ CoordinateMapper::GetInverseViewTransformation(const MapMode& rBaseline, const M
 
 void CoordinateMapper::UpdateCache(vcl::MappingPolicy ePolicy) const
 {
-    // ARCHITECTURAL GUARD: Ensure enum layout is valid for slot arithmetic
-    static_assert(static_cast<size_t>(TransformSlot::LogicToWindow_Unmapped)
-                  == static_cast<size_t>(TransformSlot::LogicToWindow_Mapped) + 1);
-    static_assert(static_cast<size_t>(TransformSlot::LogicToDevice_Unmapped)
-                  == static_cast<size_t>(TransformSlot::LogicToDevice_Mapped) + 1);
-
     DBG_TESTSOLARMUTEX();
 
-    const size_t nSlotOffset = ePolicy == vcl::MappingPolicy::ApplyMapMode ? 0 : 1;
+    const bool bMapped = (ePolicy == vcl::MappingPolicy::ApplyMapMode);
+
+    // Explicitly resolve the keys for this specific compilation pass
+    const TransformKey eL2W
+        = bMapped ? TransformKey::LogicToWindow_Mapped : TransformKey::LogicToWindow_Unmapped;
+    const TransformKey eW2L
+        = bMapped ? TransformKey::WindowToLogic_Mapped : TransformKey::WindowToLogic_Unmapped;
+    const TransformKey eL2D
+        = bMapped ? TransformKey::LogicToDevice_Mapped : TransformKey::LogicToDevice_Unmapped;
+    const TransformKey eD2L
+        = bMapped ? TransformKey::DeviceToLogic_Mapped : TransformKey::DeviceToLogic_Unmapped;
 
     // Phase 1: Logic -> Window (The core mapping)
     basegfx::B2DHomMatrix aLogicToWindow;
-    if (ePolicy == vcl::MappingPolicy::ApplyMapMode)
+    if (bMapped)
     {
         const double fScaleX
             = maMapRes.mfScaleX * static_cast<double>(mnDPIX) * GetDPIScaleFactor();
@@ -346,22 +350,20 @@ void CoordinateMapper::UpdateCache(vcl::MappingPolicy ePolicy) const
                                  static_cast<double>(mnWindowToViewOffsetY));
     }
 
-    // Atomic Snapshot for Logic -> Window
-    maTransformCache[static_cast<size_t>(TransformSlot::LogicToWindow_Mapped) + nSlotOffset]
-        = BuildCompiledTransform(aLogicToWindow);
+    // Store Phase 1
+    maTransformCache[static_cast<size_t>(eL2W)] = BuildCompiledTransform(aLogicToWindow);
 
     // Phase 2: Window -> Logic (The Inverse)
     if (aLogicToWindow.isInvertible())
     {
         basegfx::B2DHomMatrix aWindowToLogic = aLogicToWindow;
         aWindowToLogic.invert();
-        maTransformCache[static_cast<size_t>(TransformSlot::WindowToLogic_Mapped) + nSlotOffset]
-            = BuildCompiledTransform(aWindowToLogic);
+        maTransformCache[static_cast<size_t>(eW2L)] = BuildCompiledTransform(aWindowToLogic);
     }
     else
     {
         SAL_WARN("vcl.gdi", "CoordinateMapper: Singular Matrix. Falling back to Identity.");
-        maTransformCache[static_cast<size_t>(TransformSlot::WindowToLogic_Mapped) + nSlotOffset]
+        maTransformCache[static_cast<size_t>(eW2L)]
             = BuildCompiledTransform(basegfx::B2DHomMatrix());
     }
 
@@ -370,20 +372,19 @@ void CoordinateMapper::UpdateCache(vcl::MappingPolicy ePolicy) const
     aLogicToDevice.translate(static_cast<double>(mnDeviceToWindowOffsetX),
                              static_cast<double>(mnDeviceToWindowOffsetY));
 
-    maTransformCache[static_cast<size_t>(TransformSlot::LogicToDevice_Mapped) + nSlotOffset]
-        = BuildCompiledTransform(aLogicToDevice);
+    // Store Phase 3
+    maTransformCache[static_cast<size_t>(eL2D)] = BuildCompiledTransform(aLogicToDevice);
 
-    // Phase 4: Device -> Logic
+    // Phase 4: Device -> Logic (The Inverse)
     if (aLogicToDevice.isInvertible())
     {
         basegfx::B2DHomMatrix aDeviceToLogic = aLogicToDevice;
         aDeviceToLogic.invert();
-        maTransformCache[static_cast<size_t>(TransformSlot::DeviceToLogic_Mapped) + nSlotOffset]
-            = BuildCompiledTransform(aDeviceToLogic);
+        maTransformCache[static_cast<size_t>(eD2L)] = BuildCompiledTransform(aDeviceToLogic);
     }
     else
     {
-        maTransformCache[static_cast<size_t>(TransformSlot::DeviceToLogic_Mapped) + nSlotOffset]
+        maTransformCache[static_cast<size_t>(eD2L)]
             = BuildCompiledTransform(basegfx::B2DHomMatrix());
     }
 }
@@ -452,44 +453,49 @@ CompiledTransform CoordinateMapper::BuildCompiledTransform(const basegfx::B2DHom
     return aTransform;
 }
 
+TransformKey CoordinateMapper::ResolveKey(const TransformRequest& rReq) const
+{
+    const bool bMapped = (rReq.Policy == vcl::MappingPolicy::ApplyMapMode);
+
+    if (rReq.eFrom == CoordinateSpace::Logic && rReq.eTo == CoordinateSpace::Window)
+        return bMapped ? TransformKey::LogicToWindow_Mapped : TransformKey::LogicToWindow_Unmapped;
+
+    if (rReq.eFrom == CoordinateSpace::Window && rReq.eTo == CoordinateSpace::Logic)
+        return bMapped ? TransformKey::WindowToLogic_Mapped : TransformKey::WindowToLogic_Unmapped;
+
+    if (rReq.eFrom == CoordinateSpace::Logic && rReq.eTo == CoordinateSpace::Device)
+        return bMapped ? TransformKey::LogicToDevice_Mapped : TransformKey::LogicToDevice_Unmapped;
+
+    if (rReq.eFrom == CoordinateSpace::Device && rReq.eTo == CoordinateSpace::Logic)
+        return bMapped ? TransformKey::DeviceToLogic_Mapped : TransformKey::DeviceToLogic_Unmapped;
+
+    assert(false && "Unsupported TransformRequest routing");
+    return TransformKey::LogicToWindow_Unmapped; // Safe fallback
+}
+
 const CompiledTransform& CoordinateMapper::Compile(const TransformRequest& rReq) const
 {
-    // O(1) Cache Version Validation.
-    // CoordinateMapper is externally synchronized via SolarMutex.
-    // The atomic version counter is used only for cache invalidation visibility,
-    // not to provide full internal thread safety.
+    // O(1) Cache Version Validation
     uint64_t nCurrentVersion = mnStateVersion.load(std::memory_order_acquire);
     if (mnCacheVersion != nCurrentVersion)
     {
         for (auto& slot : maTransformCache)
+        {
             slot.reset();
+        }
+
         mnCacheVersion = nCurrentVersion;
     }
 
-    size_t nOffset = rReq.Policy == vcl::MappingPolicy::ApplyMapMode ? 0 : 1;
-    TransformSlot eSlot;
+    // Resolve the semantic route to a physical cache key
+    TransformKey eKey = ResolveKey(rReq);
 
-    if (rReq.eFrom == CoordinateSpace::Logic && rReq.eTo == CoordinateSpace::Window)
-        eSlot = static_cast<TransformSlot>(static_cast<size_t>(TransformSlot::LogicToWindow_Mapped)
-                                           + nOffset);
-    else if (rReq.eFrom == CoordinateSpace::Window && rReq.eTo == CoordinateSpace::Logic)
-        eSlot = static_cast<TransformSlot>(static_cast<size_t>(TransformSlot::WindowToLogic_Mapped)
-                                           + nOffset);
-    else if (rReq.eFrom == CoordinateSpace::Logic && rReq.eTo == CoordinateSpace::Device)
-        eSlot = static_cast<TransformSlot>(static_cast<size_t>(TransformSlot::LogicToDevice_Mapped)
-                                           + nOffset);
-    else if (rReq.eFrom == CoordinateSpace::Device && rReq.eTo == CoordinateSpace::Logic)
-        eSlot = static_cast<TransformSlot>(static_cast<size_t>(TransformSlot::DeviceToLogic_Mapped)
-                                           + nOffset);
-    else
-        assert(false && "Unsupported TransformRequest routing");
-
-    if (!maTransformCache[static_cast<size_t>(eSlot)])
-    {
+    // Cache Miss: Compile the graph for this policy
+    if (!maTransformCache[static_cast<size_t>(eKey)])
         UpdateCache(rReq.Policy);
-    }
 
-    return *maTransformCache[static_cast<size_t>(eSlot)];
+    // Return immutable execution artifact
+    return *maTransformCache[static_cast<size_t>(eKey)];
 }
 
 // ============================================================================
