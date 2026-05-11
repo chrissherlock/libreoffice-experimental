@@ -47,6 +47,10 @@
 
 template <> Point CompiledTransform::Apply<Point>(const Point& rPt) const
 {
+    // Fast Path 0: Identity (Common for unmapped modes or unity scaling)
+    if (meMode == TransformMode::Identity)
+        [[likely]] return rPt;
+
     // Fast Path 1: Pure Integer Translation
     if (meMode == TransformMode::Translation)
         return Point(rPt.X() + mnDeviceTx, rPt.Y() + mnDeviceTy);
@@ -82,9 +86,6 @@ Size CompiledTransform::ApplyRectilinear(const Size& rSize) const
 
 tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRect) const
 {
-    if (rRect.IsEmpty())
-        return tools::Rectangle();
-
     // Map mathematical bounds [Left, Right + 1)
     const double fLeft
         = static_cast<double>(rRect.Left()) * maMatrix.get(0, 0) + maMatrix.get(0, 2);
