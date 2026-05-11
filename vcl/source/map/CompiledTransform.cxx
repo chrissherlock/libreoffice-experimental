@@ -85,9 +85,6 @@ tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRe
     if (rRect.IsEmpty())
         return tools::Rectangle();
 
-    // VCL rectangles are inclusive [Left, Right].
-    // Map the mathematical bounds using half-open intervals [Left, Right + 1).
-    // This ensures that Width (Right - Left + 1) scales correctly as a mathematical extent.
     const double fLeft
         = static_cast<double>(rRect.Left()) * maMatrix.get(0, 0) + maMatrix.get(0, 2);
     const double fTop = static_cast<double>(rRect.Top()) * maMatrix.get(1, 1) + maMatrix.get(1, 2);
@@ -96,17 +93,21 @@ tools::Rectangle CompiledTransform::ApplyRectilinear(const tools::Rectangle& rRe
     const double fBottom
         = static_cast<double>(rRect.Bottom() + 1) * maMatrix.get(1, 1) + maMatrix.get(1, 2);
 
-    // Reconstruct the rectangle using the transformed mathematical extents.
-    // std::min/max handles potential mirroring (negative scaling).
-    // We subtract 1 from the Max boundary to return to VCL's inclusive [Left, Right] contract.
-    tools::Rectangle aRet(vcl::detail::RoundToLong(std::min(fLeft, fRight)),
-                          vcl::detail::RoundToLong(std::min(fTop, fBottom)),
-                          vcl::detail::RoundToLong(std::max(fLeft, fRight)) - 1,
-                          vcl::detail::RoundToLong(std::max(fTop, fBottom)) - 1);
+    tools::Long nL = vcl::detail::RoundToLong(std::min(fLeft, fRight));
+    tools::Long nT = vcl::detail::RoundToLong(std::min(fTop, fBottom));
+    tools::Long nR = vcl::detail::RoundToLong(std::max(fLeft, fRight)) - 1;
+    tools::Long nB = vcl::detail::RoundToLong(std::max(fTop, fBottom)) - 1;
 
-    // Preserve the original empty state if the resulting dimensions collapsed to zero.
+    tools::Rectangle aRet(nL, nT, nR, nB);
+
+    // CRITICAL: If the mathematical extent is less than a half-pixel,
+    // force the VCL rectangle to an explicit empty state.
+    if (std::abs(fRight - fLeft) < 0.5)
+        aRet.SetWidthEmpty();
+    if (std::abs(fBottom - fTop) < 0.5)
+        aRet.SetHeightEmpty();
+
     vcl::ApplyEmptyState(aRet, rRect);
-
     return aRet;
 }
 
