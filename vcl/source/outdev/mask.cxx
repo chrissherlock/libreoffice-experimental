@@ -20,9 +20,9 @@
 #include <vcl/metaact.hxx>
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/virdev.hxx>
-
-#include <CoordinateMapper.hxx>
+#include <vcl/CoordinateMapper.hxx>
 #include <vcl/MappingPolicy.hxx>
+
 #include <salgdi.hxx>
 #include <salbmp.hxx>
 
@@ -34,7 +34,7 @@ void OutputDevice::DrawMask( const Point& rDestPt,
     assert(!is_double_buffered_window());
 
     const Size aSizePix( rBitmap.GetSizePixel() );
-    DrawMask( rDestPt, PixelToLogic( aSizePix ), Point(), aSizePix, rBitmap, rMaskColor, MetaActionType::MASK );
+    DrawMask( rDestPt, PixelToLogic( aSizePix ).get(), Point(), aSizePix, rBitmap, rMaskColor, MetaActionType::MASK );
 }
 
 void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,

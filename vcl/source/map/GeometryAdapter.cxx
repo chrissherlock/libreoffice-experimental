@@ -13,13 +13,11 @@
 #include <basegfx/vector/b2dvector.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
-
 #include <tools/gen.hxx>
 
 #include <vcl/region.hxx>
 #include <vcl/lineinfo.hxx>
-
-#include <GeometryAdapter.hxx>
+#include <vcl/GeometryAdapter.hxx>
 
 #include "CoordinateMath.hxx"
 
@@ -167,11 +165,20 @@ VCL_DLLPUBLIC tools::Rectangle Apply(const TransformPlan& rPlan, const tools::Re
     // Path B: Conservative AABB for Rotated/Sheared geometry
     basegfx::B2DRange aRange(rRect.Left(), rRect.Top(), rRect.Right() + 1, rRect.Bottom() + 1);
     aRange.transform(rPlan.maMatrix);
-    tools::Rectangle aRet = vcl::detail::RangeToVCLRect(aRange);
 
-    if (rRect.IsEmpty())
-        aRet.SetEmpty();
+    tools::Long nL = vcl::detail::RoundToLong(aRange.getMinX());
+    tools::Long nT = vcl::detail::RoundToLong(aRange.getMinY());
+    tools::Long nR = vcl::detail::RoundToLong(aRange.getMaxX()) - 1;
+    tools::Long nB = vcl::detail::RoundToLong(aRange.getMaxY()) - 1;
 
+    // Apply the exact same safety clamp to the rotation fallback
+    if (nR < nL && !rRect.IsWidthEmpty())
+        nR = nL;
+    if (nB < nT && !rRect.IsHeightEmpty())
+        nB = nT;
+
+    tools::Rectangle aRet(nL, nT, nR, nB);
+    vcl::ApplyEmptyState(aRet, rRect);
     return aRet;
 }
 

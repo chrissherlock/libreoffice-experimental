@@ -1048,7 +1048,7 @@ void PushButton::ImplDrawPushButton(vcl::RenderContext& rRenderContext)
 #else
         aFontSize = rRenderContext.LogicToPixel(aFontSize, MapMode(MapUnit::MapPoint));
 #endif
-        Size aInRectSize(rRenderContext.LogicToPixel(Size(aInRect.GetWidth(), aInRect.GetHeight())));
+        Size aInRectSize(rRenderContext.LogicToPixel(Size(aInRect.GetWidth(), aInRect.GetHeight())).get());
         aControlValue.mbSingleLine = (aInRectSize.Height() < 2 * aFontSize.Height());
 
         if (!aControlValue.m_bFlatButton || (nState & ControlState::ROLLOVER) || (nState & ControlState::PRESSED)
@@ -1337,7 +1337,7 @@ void PushButton::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
 
 void PushButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point aPos = rDev.LogicToPixel(rPos).get();
     Size        aSize = GetSizePixel();
     tools::Rectangle   aRect( aPos, aSize );
     vcl::Font aFont = GetDrawPixelFont(&rDev);
@@ -2441,7 +2441,7 @@ void RadioButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFla
     if ( !maImage )
     {
         MapMode     aResMapMode( MapUnit::Map100thMM );
-        Point aPos = rDev.LogicToPixel(rPos);
+        Point aPos = rDev.LogicToPixel(rPos).get();
         Size        aSize = GetSizePixel();
         Size aImageSize = rDev.LogicToPixel(Size(300, 300), aResMapMode);
         Size aBrd1Size = rDev.LogicToPixel(Size(20, 20), aResMapMode);
@@ -3237,7 +3237,7 @@ void CheckBox::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&
 void CheckBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
     MapMode     aResMapMode( MapUnit::Map100thMM );
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point aPos = rDev.LogicToPixel(rPos).get();
     Size        aSize = GetSizePixel();
     Size aImageSize = rDev.LogicToPixel(Size(300, 300), aResMapMode);
     Size aBrd1Size = rDev.LogicToPixel(Size(20, 20), aResMapMode);

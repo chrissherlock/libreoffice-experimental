@@ -51,9 +51,9 @@
 #include <vcl/IDialogRenderable.hxx>
 
 #include <vcl/uitest/uiobject.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 #include <CanvasFactory.hxx>
-#include <CoordinateMapper.hxx>
 #include <ImplOutDevData.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>
@@ -1388,7 +1388,7 @@ void Window::ImplPointToLogic(vcl::RenderContext const& rRenderContext, vcl::Fon
     aSize.setHeight( aSize.Height() / 72 );
 #endif
 
-    aSize = rRenderContext.PixelToLogic(aSize);
+    aSize = rRenderContext.PixelToLogic(aSize).get();
 
     rFont.SetFontSize(aSize);
 }
@@ -1396,7 +1396,7 @@ void Window::ImplPointToLogic(vcl::RenderContext const& rRenderContext, vcl::Fon
 void Window::ImplLogicToPoint(vcl::RenderContext const & rRenderContext, vcl::Font& rFont) const
 {
     Size aSize = rFont.GetFontSize();
-    aSize = rRenderContext.LogicToPixel(aSize);
+    aSize = rRenderContext.LogicToPixel(aSize).get();
 
 #ifndef MACOSX
     if (aSize.Width())

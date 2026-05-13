@@ -7,15 +7,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <TransformRouter.hxx>
+#include <vcl/TransformRouter.hxx>
+
 #include <TransformCompiler.hxx>
 
 #include "CoordinateMath.hxx"
 
-namespace vcl
-{
 #include <cstdlib>
 
+namespace vcl
+{
 const TransformPlan& TransformRouter::Compile(const CoordinateState& rState,
                                               const TransformRequest& rReq) const
 {

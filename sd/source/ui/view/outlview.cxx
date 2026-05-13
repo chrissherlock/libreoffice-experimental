@@ -100,7 +100,7 @@ void expandSelection(std::vector<::tools::Rectangle>& rVector, const ::OutputDev
     if (rVector.empty())
         return;
 
-    const Size aLogicPixel(rTarget.PixelToLogic(Size(1, 1)));
+    const Size aLogicPixel(rTarget.PixelToLogic(Size(1, 1)).get());
 
     for (auto& aRect : rVector)
     {
@@ -1677,7 +1677,7 @@ IMPL_LINK(OutlineView, PaintingFirstLineHdl, PaintFirstLineInfo*, pInfo, void)
     sal_Int32 nPara = pInfo->mnPara;
     EditEngine& rEditEngine = mrOutliner.GetEditEngine();
 
-    Size aImageSize( pInfo->mpOutDev->PixelToLogic( maSlideImage.GetSizePixel()  ) );
+    Size aImageSize( pInfo->mpOutDev->PixelToLogic( maSlideImage.GetSizePixel()  ).get() );
     Size aOffset( 100, 100 );
 
     // paint slide number

@@ -25,8 +25,8 @@
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -80,7 +80,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
         return;
 
     // Clip and then draw the gradient
-    if (tools::Rectangle(PixelToLogic(Point()), GetOutputSize()).IsEmpty())
+    if (tools::Rectangle(PixelToLogic(Point()).get(), GetOutputSize()).IsEmpty())
         return;
 
     const tools::Rectangle aBoundRect( rPolyPoly.GetBoundRect() );

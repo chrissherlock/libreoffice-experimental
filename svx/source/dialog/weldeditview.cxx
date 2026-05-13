@@ -139,7 +139,7 @@ void WeldEditView::Resize()
     if (EditView* pEditView = GetEditView())
     {
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        Size aOutputSize(rDevice.PixelToLogic(GetOutputSizePixel()));
+        Size aOutputSize(rDevice.PixelToLogic(GetOutputSizePixel()).get());
         // Resizes the edit engine to adjust to the size of the output area
         pEditView->SetOutputArea(tools::Rectangle(Point(0, 0), aOutputSize));
         GetEditEngine()->SetPaperSize(aOutputSize);
@@ -187,7 +187,7 @@ void WeldEditView::PaintSelection(vcl::RenderContext& rRenderContext, tools::Rec
         nMaxY = std::max(nMaxY, aRect.Bottom());
     }
 
-    const Size aLogicPixel(rRenderContext.PixelToLogic(Size(1, 1)));
+    const Size aLogicPixel(rRenderContext.PixelToLogic(Size(1, 1)).get());
     for (const auto& aRect : rLogicRects)
     {
         // Extend each range by one pixel so multiple lines touch each
@@ -237,7 +237,7 @@ void WeldEditView::DoPaint(vcl::RenderContext& rRenderContext, const tools::Rect
     rRenderContext.SetClipRegion();
 
     pEditView->DrawText_ToEditView(
-        comphelper::LibreOfficeKit::isActive() ? rRenderContext.PixelToLogic(rRect) : rRect,
+        comphelper::LibreOfficeKit::isActive() ? rRenderContext.PixelToLogic(rRect).get() : rRect,
         &rRenderContext);
 
     if (HasFocus())
@@ -1524,7 +1524,7 @@ void WeldEditView::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     rDevice.SetMapMode(MapMode(MapUnit::MapTwip));
     rDevice.SetBackground(aBgColor);
 
-    Size aOutputSize(rDevice.PixelToLogic(aSize));
+    Size aOutputSize(rDevice.PixelToLogic(aSize).get());
 
     makeEditEngine();
     m_xEditEngine->SetPaperSize(aOutputSize);

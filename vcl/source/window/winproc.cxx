@@ -49,8 +49,8 @@
 #include <vcl/virdev.hxx>
 #include <vcl/uitest/logger.hxx>
 #include <vcl/ptrstyle.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <svdata.hxx>
 #include <salwtype.hxx>
 #include <salframe.hxx>

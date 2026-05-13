@@ -94,7 +94,7 @@ ScopedVclPtr<VirtualDevice> SfxCharmapContainer::CreateIcon(const weld::IconView
     aFont.SetFamilyName(rFont);
     aFont.SetWeight(WEIGHT_NORMAL);
     aFont.SetAlignment(ALIGN_TOP);
-    aFont.SetFontSize(pDev->PixelToLogic(Size(0, nWinHeight / 2)));
+    aFont.SetFontSize(pDev->PixelToLogic(Size(0, nWinHeight / 2)).get());
     aFont.SetTransparent(true);
 
     pDev->SetOutputSize(aSize);

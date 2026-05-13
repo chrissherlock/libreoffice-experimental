@@ -34,9 +34,9 @@
 #include <vcl/sysdata.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/MappingPolicy.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 #include <CanvasFactory.hxx>
-#include <CoordinateMapper.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>

@@ -499,7 +499,7 @@ void DlgEditor::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
 
             if (nWidth == 0 && nHeight == 0)
             {
-                Size   aSize = rRenderContext.PixelToLogic( Size( 400, 300 ) );
+                Size   aSize = rRenderContext.PixelToLogic( Size( 400, 300 ) ).get();
 
                 // align with grid
                 Size aGridSize_(tools::Long(pDlgEdView->GetSnapGridWidthX()), tools::Long(pDlgEdView->GetSnapGridWidthY()));
@@ -516,7 +516,7 @@ void DlgEditor::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
                 aPos.AdjustY( -(aPos.Y() % aGridSize_.Height()) );
 
                 // don't put in the corner
-                Point aMinPos = rRenderContext.PixelToLogic( Point( 30, 20 ) );
+                Point aMinPos = rRenderContext.PixelToLogic( Point( 30, 20 ) ).get();
                 if( (aPos.X() < aMinPos.X()) || (aPos.Y() < aMinPos.Y()) )
                 {
                     aPos = aMinPos;
@@ -1153,7 +1153,7 @@ void DlgEditor::Print( Printer* pPrinter, const OUString& rTitle )    // not wor
     lcl_PrintHeader( pPrinter, rTitle );
 
     Bitmap aDlg;
-    Size aBmpSz( pPrinter->PixelToLogic( aDlg.GetSizePixel() ) );
+    Size aBmpSz( pPrinter->PixelToLogic( aDlg.GetSizePixel() ).get() );
     double nPaperSzWidth = aPaperSz.Width();
     double nPaperSzHeight = aPaperSz.Height();
     double nBmpSzWidth = aBmpSz.Width();

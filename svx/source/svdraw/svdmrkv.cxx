@@ -1861,7 +1861,7 @@ bool SdrMarkView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
         SdrHdl* pMouseOverHdl = nullptr;
         if( !rMEvt.IsLeaveWindow() && pWin )
         {
-            Point aMDPos( pWin->PixelToLogic( rMEvt.GetPosPixel() ) );
+            Point aMDPos( pWin->PixelToLogic( rMEvt.GetPosPixel() ).get() );
             pMouseOverHdl = PickHandle(aMDPos);
         }
 
@@ -1934,12 +1934,12 @@ void SdrMarkView::ForceRefToMarked()
             OutputDevice* pOut=GetFirstOutputDevice();
             if (pOut!=nullptr) {
                 // minimum length: 50 pixels
-                nMinLen=pOut->PixelToLogic(Size(0,50)).Height();
+                nMinLen=pOut->PixelToLogic(Size(0,50))->Height();
                 // 20 pixels distance to the Obj for the reference point
-                nObjDst=pOut->PixelToLogic(Size(0,20)).Height();
+                nObjDst=pOut->PixelToLogic(Size(0,20))->Height();
                 // MinY/MaxY
                 // margin = minimum length = 10 pixels
-                tools::Long nDst=pOut->PixelToLogic(Size(0,10)).Height();
+                tools::Long nDst=pOut->PixelToLogic(Size(0,10))->Height();
                 nOutMin=-pOut->GetMapMode().GetOrigin().Y();
                 nOutMax=pOut->GetOutputSize().Height()-1+nOutMin;
                 nOutMin+=nDst;

@@ -28,7 +28,7 @@
 #include <vcl/gdimtf.hxx>
 #include <vcl/metaact.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
-#include <CoordinateMapper.hxx>
+#include <vcl/CoordinateMapper.hxx>
 #include <cmath>
 
 class VclTextTest : public test::BootstrapFixture

@@ -178,7 +178,7 @@ lcl_PaintTransparentFormControls(SwViewShell const & rShell, SwRect const& rRect
     if (rShell.GetWin())
     {
         vcl::Window& rWindow = *(rShell.GetWin());
-        const tools::Rectangle aRectanglePixel(rShell.GetOut()->LogicToPixel(rRect.SVRect()));
+        const tools::Rectangle aRectanglePixel(rShell.GetOut()->LogicToPixel(rRect.SVRect()).get());
         PaintTransparentChildren(rWindow, aRectanglePixel);
     }
 }
@@ -1410,7 +1410,7 @@ void SwViewShell::VisPortChgd( const SwRect &rRect)
                     if ( pPage->GetSortedObjs() )
                     {
                         const tools::Long nOfst = GetOut()->PixelToLogic(
-                            Size(Imp()->GetDrawView()->GetMarkHdlSizePixel()/2,0)).Width();
+                            Size(Imp()->GetDrawView()->GetMarkHdlSizePixel()/2,0))->Width();
                         for (SwAnchoredObject* pObj : *pPage->GetSortedObjs())
                         {
                             // ignore objects that are not actually placed on the page
@@ -2197,7 +2197,7 @@ void SwViewShell::PaintTile(VirtualDevice &rDevice, int contextWidth, int contex
     }
 
     tools::Rectangle aOutRect(Point(tilePosX, tilePosY),
-                              rDevice.PixelToLogic(Size(contextWidth, contextHeight)));
+                              rDevice.PixelToLogic(Size(contextWidth, contextHeight)).get());
 
     // Make the requested area visible -- we can't use MakeVisible as that will
     // only scroll the contents, but won't zoom/resize if needed.
@@ -2275,10 +2275,10 @@ sal_Int32 SwViewShell::GetBrowseWidth() const
         Size aBorder( maBrowseBorder );
         aBorder.AdjustWidth(maBrowseBorder.Width() );
         aBorder.AdjustWidth(pPostItMgr->GetSidebarWidth(true) + pPostItMgr->GetSidebarBorderWidth(true) );
-        return maVisArea.Width() - GetOut()->PixelToLogic(aBorder).Width();
+        return maVisArea.Width() - GetOut()->PixelToLogic(aBorder)->Width();
     }
     else
-        return maVisArea.Width() - 2 * GetOut()->PixelToLogic(maBrowseBorder).Width();
+        return maVisArea.Width() - 2 * GetOut()->PixelToLogic(maBrowseBorder)->Width();
 }
 
 void SwViewShell::InvalidateLayout( bool bSizeChanged )

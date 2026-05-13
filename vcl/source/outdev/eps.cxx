@@ -22,8 +22,8 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/MappingPolicy.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 
 bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,

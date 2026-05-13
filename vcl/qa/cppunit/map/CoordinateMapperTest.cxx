@@ -15,8 +15,9 @@
 
 #include <vcl/mapmod.hxx>
 
-#include <CoordinateMapper.hxx>
-#include <TransformPlan.hxx>
+#include <vcl/CoordinateMapper.hxx>
+#include <vcl/TransformPlan.hxx>
+
 #include <TransformCompiler.hxx>
 
 namespace

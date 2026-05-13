@@ -330,7 +330,7 @@ void SwColumnOnlyExample::Paint(vcl::RenderContext& rRenderContext, const tools:
     const Color& rFieldTextColor = SwViewOption::GetCurrentViewOptions().GetFontColor();
     const Color& rDocColor = SwViewOption::GetCurrentViewOptions().GetDocColor();
 
-    Size aLogSize(rRenderContext.PixelToLogic(GetOutputSizePixel()));
+    Size aLogSize(rRenderContext.PixelToLogic(GetOutputSizePixel()).get());
     tools::Rectangle aCompleteRect(Point(0,0), aLogSize);
     rRenderContext.SetLineColor(rDlgColor);
     rRenderContext.SetFillColor(rDlgColor);
@@ -466,7 +466,7 @@ void SwColumnOnlyExample::Resize()
     m_aWinSize = GetOutputSizePixel();
     m_aWinSize.AdjustHeight( -4 );
     m_aWinSize.AdjustWidth( -4 );
-    m_aWinSize = rRefDevice.PixelToLogic(m_aWinSize);
+    m_aWinSize = rRefDevice.PixelToLogic(m_aWinSize).get();
     rRefDevice.Pop();
     Invalidate();
 }

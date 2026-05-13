@@ -583,8 +583,8 @@ Bitmap LineListBox::ImpGetLine(tools::Long nLine1, tools::Long nLine2, tools::Lo
     aSize.AdjustWidth(-6);
 
     // Paint the lines
-    aSize = m_aVirDev->PixelToLogic(aSize);
-    tools::Long nPix = m_aVirDev->PixelToLogic(Size(0, 1)).Height();
+    aSize = m_aVirDev->PixelToLogic(aSize).get();
+    tools::Long nPix = m_aVirDev->PixelToLogic(Size(0, 1))->Height();
     sal_uInt32 n1 = nLine1;
     sal_uInt32 n2 = nLine2;
     tools::Long nDist = nDistance;

@@ -12,8 +12,9 @@
 #include <cppunit/extensions/HelperMacros.h>
 
 #include <tools/gen.hxx>
+
 #include <vcl/region.hxx>
-#include <CoordinateMapper.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 #include <sstream>
 #include <string>

@@ -28,8 +28,8 @@
 #include <vcl/metaact.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 

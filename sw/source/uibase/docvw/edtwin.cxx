@@ -246,7 +246,7 @@ public:
     Point GetPosForHitTest( const OutputDevice& rOut )
     {
         Point aHitTestPos( m_pHdl->GetPos() );
-        aHitTestPos = rOut.LogicToPixel( aHitTestPos );
+        aHitTestPos = rOut.LogicToPixel( aHitTestPos ).get();
         if ( m_bTopRightHandle )
         {
             aHitTestPos += Point( -1, 1 );
@@ -255,7 +255,7 @@ public:
         {
             aHitTestPos += Point( 1, 1 );
         }
-        aHitTestPos = rOut.PixelToLogic( aHitTestPos );
+        aHitTestPos = rOut.PixelToLogic( aHitTestPos ).get();
 
         return aHitTestPos;
     }
