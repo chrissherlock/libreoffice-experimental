@@ -20,7 +20,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/print.hxx>
 #include <vcl/mapconvert.hxx>
-#include <CoordinateMapper.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 namespace
 {

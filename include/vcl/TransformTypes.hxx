@@ -9,9 +9,18 @@
 
 #pragma once
 
+#include <tools/gen.hxx>
+#include <basegfx/point/b2dpoint.hxx>
+#include <basegfx/polygon/b2dpolygon.hxx>
+
 #include <vcl/MappingPolicy.hxx>
 
 #include <bitset>
+
+namespace tools
+{
+class Polygon;
+}
 
 // The strict execution instruction set
 enum class TransformMode
@@ -25,6 +34,7 @@ enum class TransformMode
 enum class CoordinateSpace
 {
     Logic,
+    View,
     Window,
     Device
 };
@@ -75,5 +85,71 @@ struct TransformContract
         return maPreserved.test(static_cast<size_t>(inv));
     }
 };
+
+// ========================================================================
+// ZERO-COST PHANTOM TYPES (Compile-Time Coordinate Space Safety)
+// ========================================================================
+
+namespace vcl
+{
+// The Phantom Tags (Representing Coordinate Spaces)
+struct SpaceView
+{
+};
+struct SpaceLogic
+{
+};
+struct SpaceWindow
+{
+};
+struct SpaceDevice
+{
+};
+
+// The Universal Strongly-Typed Wrapper
+template <typename Space, typename T> struct TypedGeom
+{
+    T maData;
+
+    // Explicit constructor prevents accidental implicit conversions
+    explicit TypedGeom(const T& rData)
+        : maData(rData)
+    {
+    }
+    explicit TypedGeom(T&& rData)
+        : maData(std::move(rData))
+    {
+    }
+
+    // Allow explicit unwrapping when interfacing with legacy APIs
+    const T& get() const { return maData; }
+    T& get() { return maData; }
+
+    // Transparent operator overloading for base type
+    const T* operator->() const { return &maData; }
+    T* operator->() { return &maData; }
+};
+
+// --- Type Aliases for the Modern API ---
+using LogicPoint = TypedGeom<SpaceLogic, Point>;
+using ViewPoint = TypedGeom<SpaceView, Point>;
+using WindowPoint = TypedGeom<SpaceWindow, Point>;
+using DevicePoint = TypedGeom<SpaceDevice, Point>;
+
+using LogicSize = TypedGeom<SpaceLogic, Size>;
+using ViewSize = TypedGeom<SpaceView, Size>;
+using WindowSize = TypedGeom<SpaceWindow, Size>;
+using DeviceSize = TypedGeom<SpaceDevice, Size>;
+
+using LogicRect = TypedGeom<SpaceLogic, tools::Rectangle>;
+using ViewRect = TypedGeom<SpaceView, tools::Rectangle>;
+using WindowRect = TypedGeom<SpaceWindow, tools::Rectangle>;
+using DeviceRect = TypedGeom<SpaceDevice, tools::Rectangle>;
+
+using LogicPolygon = TypedGeom<SpaceLogic, tools::Polygon>;
+using ViewPolygon = TypedGeom<SpaceView, tools::Polygon>;
+using WindowPolygon = TypedGeom<SpaceWindow, tools::Polygon>;
+using DevicePolygon = TypedGeom<SpaceDevice, tools::Polygon>;
+} // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

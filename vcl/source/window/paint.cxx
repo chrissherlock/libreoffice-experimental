@@ -26,11 +26,11 @@
 #include <vcl/cursor.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/syswin.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 #include <sal/types.h>
 #include <sal/log.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <window.h>
 #include <salgdi.hxx>
 #include <salframe.hxx>

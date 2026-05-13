@@ -24,8 +24,8 @@
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
