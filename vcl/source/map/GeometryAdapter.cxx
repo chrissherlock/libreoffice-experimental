@@ -94,31 +94,23 @@ VCL_DLLPUBLIC tools::Rectangle Apply(const TransformPlan& rPlan, const tools::Re
                              + rPlan.maMatrix.get(0, 2);
         const double fTop = static_cast<double>(rRect.Top()) * rPlan.maMatrix.get(1, 1)
                             + rPlan.maMatrix.get(1, 2);
-        double fRight = static_cast<double>(rRect.Right() + 1) * rPlan.maMatrix.get(0, 0)
-                        + rPlan.maMatrix.get(0, 2);
-        double fBottom = static_cast<double>(rRect.Bottom() + 1) * rPlan.maMatrix.get(1, 1)
-                         + rPlan.maMatrix.get(1, 2);
-
-        // Determine physical extents
-        double fWidth = std::abs(fRight - fLeft);
-        double fHeight = std::abs(fBottom - fTop);
-
-        // Hairline clamp: If the logical rectangle was not empty, do not let it
-        // collapse to 0 pixels due to scaling. Force a 1-pixel minimum footprint.
-        if (fWidth < 0.5 && !rRect.IsWidthEmpty())
-        {
-            fRight = fLeft + (fRight >= fLeft ? 1.0 : -1.0);
-        }
-        if (fHeight < 0.5 && !rRect.IsHeightEmpty())
-        {
-            fBottom = fTop + (fBottom >= fTop ? 1.0 : -1.0);
-        }
+        const double fRight = static_cast<double>(rRect.Right() + 1) * rPlan.maMatrix.get(0, 0)
+                              + rPlan.maMatrix.get(0, 2);
+        const double fBottom = static_cast<double>(rRect.Bottom() + 1) * rPlan.maMatrix.get(1, 1)
+                               + rPlan.maMatrix.get(1, 2);
 
         // Round to physical pixel indices
-        const tools::Long nL = vcl::detail::RoundToLong(std::min(fLeft, fRight));
-        const tools::Long nT = vcl::detail::RoundToLong(std::min(fTop, fBottom));
-        const tools::Long nR = vcl::detail::RoundToLong(std::max(fLeft, fRight)) - 1;
-        const tools::Long nB = vcl::detail::RoundToLong(std::max(fTop, fBottom)) - 1;
+        tools::Long nL = vcl::detail::RoundToLong(std::min(fLeft, fRight));
+        tools::Long nT = vcl::detail::RoundToLong(std::min(fTop, fBottom));
+        tools::Long nR = vcl::detail::RoundToLong(std::max(fLeft, fRight)) - 1;
+        tools::Long nB = vcl::detail::RoundToLong(std::max(fTop, fBottom)) - 1;
+
+        // Hairline & Sub-pixel Boundary Clamp:
+        // Ensure rounding doesn't collapse valid geometry into negative/empty bounds
+        if (nR < nL && !rRect.IsWidthEmpty())
+            nR = nL;
+        if (nB < nT && !rRect.IsHeightEmpty())
+            nB = nT;
 
         tools::Rectangle aRet(nL, nT, nR, nB);
         vcl::ApplyEmptyState(aRet, rRect);
@@ -128,11 +120,20 @@ VCL_DLLPUBLIC tools::Rectangle Apply(const TransformPlan& rPlan, const tools::Re
     // Path B: Conservative AABB for Rotated/Sheared geometry
     basegfx::B2DRange aRange(rRect.Left(), rRect.Top(), rRect.Right() + 1, rRect.Bottom() + 1);
     aRange.transform(rPlan.maMatrix);
-    tools::Rectangle aRet = vcl::detail::RangeToVCLRect(aRange);
 
-    if (rRect.IsEmpty())
-        aRet.SetEmpty();
+    tools::Long nL = vcl::detail::RoundToLong(aRange.getMinX());
+    tools::Long nT = vcl::detail::RoundToLong(aRange.getMinY());
+    tools::Long nR = vcl::detail::RoundToLong(aRange.getMaxX()) - 1;
+    tools::Long nB = vcl::detail::RoundToLong(aRange.getMaxY()) - 1;
 
+    // Apply the exact same safety clamp to the rotation fallback
+    if (nR < nL && !rRect.IsWidthEmpty())
+        nR = nL;
+    if (nB < nT && !rRect.IsHeightEmpty())
+        nB = nT;
+
+    tools::Rectangle aRet(nL, nT, nR, nB);
+    vcl::ApplyEmptyState(aRet, rRect);
     return aRet;
 }
 
