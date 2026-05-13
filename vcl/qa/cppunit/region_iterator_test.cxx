@@ -93,6 +93,32 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMoveSemantics)
     CPPUNIT_ASSERT_MESSAGE("Move-assigned source iterators must be safe",
                            aTarget.begin() == aTarget.end());
 }
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testNullMathematicalProperties)
+{
+    // A Null region represents Infinite logical space
+    vcl::Region aInfiniteRegion(true);
+    vcl::Region aShape(tools::Rectangle(10, 10, 50, 50));
+
+    // Intersect: Infinite ∩ Shape = Shape
+    vcl::Region aTestIntersect = aInfiniteRegion;
+    aTestIntersect.Intersect(aShape);
+    CPPUNIT_ASSERT_MESSAGE("Infinite intersected with Shape must equal Shape",
+                           !aTestIntersect.IsNull());
+    CPPUNIT_ASSERT_EQUAL(aShape.GetBoundRect(), aTestIntersect.GetBoundRect());
+
+    // Union: Infinite ∪ Shape = Infinite
+    vcl::Region aTestUnion = aInfiniteRegion;
+    aTestUnion.Union(aShape);
+    CPPUNIT_ASSERT_MESSAGE("Infinite unioned with Shape must remain Infinite", aTestUnion.IsNull());
+
+    // Exclude: Infinite - Shape = (Cannot be easily represented, VCL usually ignores or throws)
+    // But Shape - Infinite = Empty
+    vcl::Region aTestExclude = aShape;
+    aTestExclude.Exclude(aInfiniteRegion);
+    CPPUNIT_ASSERT_MESSAGE("Shape excluding Infinite space must result in Empty space",
+                           aTestExclude.IsEmpty());
+}
 }
 
 CPPUNIT_PLUGIN_IMPLEMENT();
