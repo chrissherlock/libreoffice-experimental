@@ -65,4 +65,44 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testHairlineClampRectangle)
     CPPUNIT_ASSERT_EQUAL(tools::Long(1), aResult.GetWidth());
 }
 
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testSubPixelBoundaryCrossover)
+{
+    // We need to trigger the exact floating-point rounding trap where:
+    // fLeft rounds UP, but fRight rounds DOWN, causing Right < Left (an Empty rect).
+    // Let's force the math to yield: fLeft = 5.5, fRight = 6.1
+
+    basegfx::B2DHomMatrix aMat;
+    aMat.scale(0.6, 0.6); // Scale first
+    aMat.translate(5.5, 5.5); // Translate second
+
+    vcl::TransformPlan aPlan = vcl::TransformCompiler::Compile(aMat);
+
+    // A 1x1 logical rectangle at the origin.
+    // In VCL, bounds are inclusive, so [Left=0, Right=0] means Width = 1.
+    tools::Rectangle aLogicalRect(0, 0, 0, 0);
+
+    // MATHEMATICAL PROOF OF THE CROSSOVER:
+    // fLeft  = (0 * 0.6) + 5.5 = 5.5  -> std::round(5.5) = 6
+    // fRight = (1 * 0.6) + 5.5 = 6.1  -> std::round(6.1) - 1 = 5
+    // Without our clamp, Right (5) < Left (6), so VCL flags it as IsEmpty() = true!
+
+    tools::Rectangle aResult = vcl::GeometryAdapter::Apply(aPlan, aLogicalRect);
+
+    // Ensure the clamp caught the crossover and prevented the viewport from vanishing
+    CPPUNIT_ASSERT_MESSAGE("Sub-pixel crossover caused the geometry to collapse to Empty!",
+                           !aResult.IsEmpty());
+
+    // Explicitly verify the bounds did not cross
+    CPPUNIT_ASSERT_MESSAGE("Right bound crossed over Left bound!",
+                           aResult.Right() >= aResult.Left());
+    CPPUNIT_ASSERT_MESSAGE("Bottom bound crossed over Top bound!",
+                           aResult.Bottom() >= aResult.Top());
+
+    // It should have safely clamped to a 1x1 physical pixel footprint at index 6
+    CPPUNIT_ASSERT_EQUAL(tools::Long(6), aResult.Left());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(6), aResult.Right());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(6), aResult.Top());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(6), aResult.Bottom());
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
