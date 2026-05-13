@@ -30,11 +30,11 @@
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/wrkwin.hxx>
+#include <vcl/CoordinateMapper.hxx>
+#include <vcl/GeometryAdapter.hxx>
+#include <vcl/TransformTypes.hxx>
 
-#include <CoordinateMapper.hxx>
-#include <GeometryAdapter.hxx>
 #include <TransformCompiler.hxx>
-#include <TransformTypes.hxx>
 #include <ImplOutDevData.hxx>
 #include <svdata.hxx>
 #include <window.h>

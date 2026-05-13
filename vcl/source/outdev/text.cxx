@@ -38,8 +38,8 @@
 #include <vcl/textrectinfo.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/sysdata.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <ImplLayoutArgs.hxx>
 #include <ImplOutDevData.hxx>
 #include <drawmode.hxx>

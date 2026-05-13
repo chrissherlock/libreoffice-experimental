@@ -39,7 +39,7 @@
 #include <vcl/builder.hxx>
 #include <o3tl/string_view.hxx>
 
-#include <CoordinateMapper.hxx>
+#include <vcl/CoordinateMapper.hxx>
 #include <window.h>
 #include <svdata.hxx>
 #include <salgdi.hxx>

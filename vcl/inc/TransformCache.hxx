@@ -10,10 +10,8 @@
 #pragma once
 
 #include <vcl/dllapi.h>
-#include <sal/log.hxx>
-
-#include <TransformTypes.hxx>
-#include <TransformPlan.hxx>
+#include <vcl/TransformTypes.hxx>
+#include <vcl/TransformPlan.hxx>
 
 #include <array>
 #include <atomic>

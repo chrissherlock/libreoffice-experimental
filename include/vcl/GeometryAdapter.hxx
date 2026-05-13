@@ -10,16 +10,15 @@
 
 #pragma once
 
-#include <vcl/dllapi.h>
 #include <tools/gen.hxx>
 #include <tools/poly.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/polygon/b2dpolypolygon.hxx>
 
+#include <vcl/dllapi.h>
 #include <vcl/region.hxx>
 #include <vcl/lineinfo.hxx>
-
-#include <TransformPlan.hxx>
+#include <vcl/TransformPlan.hxx>
 
 namespace vcl::GeometryAdapter
 {

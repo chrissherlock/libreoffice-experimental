@@ -10,8 +10,10 @@
 #pragma once
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
-#include <TransformTypes.hxx>
 #include <tools/long.hxx>
+
+#include <vcl/TransformTypes.hxx>
+
 #include <bitset>
 
 namespace vcl

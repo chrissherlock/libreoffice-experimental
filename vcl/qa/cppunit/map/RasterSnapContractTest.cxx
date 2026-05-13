@@ -13,7 +13,7 @@
 
 #include <vcl/outdev.hxx>
 #include <vcl/mapmod.hxx>
-#include <CoordinateMapper.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 #include <basegfx/point/b2dpoint.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>

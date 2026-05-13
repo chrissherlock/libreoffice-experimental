@@ -23,8 +23,8 @@
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 #include <toolbarvalue.hxx>
 #include <menubarvalue.hxx>

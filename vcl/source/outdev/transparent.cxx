@@ -36,8 +36,8 @@
 #include <vcl/svapp.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/BitmapWriteAccess.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <pdf/pdfwriter_impl.hxx>
 #include <salgdi.hxx>
 

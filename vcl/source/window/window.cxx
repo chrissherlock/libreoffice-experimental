@@ -49,10 +49,9 @@
 #include <vcl/sysdata.hxx>
 #include <vcl/ptrstyle.hxx>
 #include <vcl/IDialogRenderable.hxx>
-
 #include <vcl/uitest/uiobject.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <ImplOutDevData.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>

@@ -11,9 +11,10 @@
 #include <cppunit/TestFixture.h>
 #include <cppunit/extensions/HelperMacros.h>
 
-#include <vcl/outdev.hxx>
-#include <CoordinateMapper.hxx>
 #include <basegfx/point/b2dpoint.hxx>
+
+#include <vcl/outdev.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 using namespace vcl::detail;
 

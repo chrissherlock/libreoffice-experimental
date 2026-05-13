@@ -175,6 +175,7 @@ tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource, const MapMode
         aRetval = tools::Rectangle(left, top, right, bottom);
     }
 
+    aRetval.Normalize();
     vcl::ApplyEmptyState(aRetval, rRectSource);
     return aRetval;
 }
