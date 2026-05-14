@@ -16,9 +16,10 @@
 #include <tools/gen.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 
-#include <GeometryAdapter.hxx>
+#include <vcl/GeometryAdapter.hxx>
+#include <vcl/TransformTypes.hxx>
+
 #include <TransformCompiler.hxx>
-#include <TransformTypes.hxx>
 
 CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testHairlineClampSize)
 {

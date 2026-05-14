@@ -14,8 +14,7 @@
 #include <tools/gen.hxx>
 
 #include <vcl/mapmod.hxx>
-
-#include <CoordinateMapper.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 namespace
 {

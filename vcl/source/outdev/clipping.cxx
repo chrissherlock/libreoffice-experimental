@@ -23,8 +23,8 @@
 
 #include <vcl/metaact.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <salgdi.hxx>
 
 void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
