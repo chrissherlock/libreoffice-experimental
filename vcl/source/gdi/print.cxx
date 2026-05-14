@@ -35,10 +35,10 @@
 #include <vcl/printer/Options.hxx>
 #include <vcl/PrinterSupport.hxx>
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 #include <jobset.h>
 #include <print.h>
-#include <CoordinateMapper.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>

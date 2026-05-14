@@ -31,10 +31,10 @@
 
 #include <vcl/svapp.hxx>
 #include <vcl/lineinfo.hxx>
+#include <vcl/CoordinateMapper.hxx>
+#include <vcl/GeometryAdapter.hxx>
+#include <vcl/TransformRouter.hxx>
 
-#include <CoordinateMapper.hxx>
-#include <GeometryAdapter.hxx>
-#include <TransformRouter.hxx>
 #include <TransformCompiler.hxx>
 #include <MappingCoefficients.hxx>
 

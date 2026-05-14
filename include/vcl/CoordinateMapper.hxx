@@ -20,14 +20,14 @@
 #include <vcl/mapmod.hxx>
 #include <vcl/region.hxx>
 #include <vcl/MappingPolicy.hxx>
+#include <vcl/TransformTypes.hxx>
+#include <vcl/CoordinateState.hxx>
+#include <vcl/TransformPlan.hxx>
+#include <vcl/TransformRouter.hxx>
+#include <vcl/GeometryAdapter.hxx>
 
 #include <TransformCompiler.hxx>
-#include <TransformRouter.hxx>
-#include <TransformPlan.hxx>
-#include <GeometryAdapter.hxx>
 #include <MappingCoefficients.hxx>
-#include <TransformTypes.hxx>
-#include <CoordinateState.hxx>
 
 #include <memory>
 #include <concepts>

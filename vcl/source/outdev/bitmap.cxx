@@ -30,8 +30,8 @@
 #include <vcl/virdev.hxx>
 #include <vcl/MappingPolicy.hxx>
 #include <vcl/BitmapWriteAccess.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <bitmap/bmpfast.hxx>
 #include <drawmode.hxx>
 #include <salbmp.hxx>

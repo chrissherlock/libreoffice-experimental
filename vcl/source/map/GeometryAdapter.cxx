@@ -17,8 +17,7 @@
 
 #include <vcl/region.hxx>
 #include <vcl/lineinfo.hxx>
-
-#include <GeometryAdapter.hxx>
+#include <vcl/GeometryAdapter.hxx>
 
 #include "CoordinateMath.hxx"
 

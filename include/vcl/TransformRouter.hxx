@@ -11,10 +11,11 @@
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
 
-#include <CoordinateState.hxx>
-#include <TransformPlan.hxx>
+#include <vcl/CoordinateState.hxx>
+#include <vcl/TransformPlan.hxx>
+#include <vcl/TransformTypes.hxx>
+
 #include <TransformCache.hxx>
-#include <TransformTypes.hxx>
 
 namespace vcl
 {

@@ -39,11 +39,11 @@
 #include <vcl/rendercontext/GetDefaultFontFlags.hxx>
 #include <vcl/sysdata.hxx>
 #include <vcl/virdev.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 #include <window.h>
 #include <font/EmphasisMark.hxx>
 
-#include <CoordinateMapper.hxx>
 #include <ImplLayoutArgs.hxx>
 #include <drawmode.hxx>
 #include <impfontcache.hxx>
