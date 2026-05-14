@@ -20,9 +20,9 @@
 #include <vcl/metaact.hxx>
 #include <vcl/metaactiontypes.hxx>
 #include <vcl/virdev.hxx>
-
-#include <CoordinateMapper.hxx>
+#include <vcl/CoordinateMapper.hxx>
 #include <vcl/MappingPolicy.hxx>
+
 #include <salgdi.hxx>
 #include <salbmp.hxx>
 

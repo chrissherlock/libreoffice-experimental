@@ -34,6 +34,7 @@ enum class TransformMode
 enum class CoordinateSpace
 {
     Logic,
+    View,
     Window,
     Device
 };
@@ -92,6 +93,9 @@ struct TransformContract
 namespace vcl
 {
 // The Phantom Tags (Representing Coordinate Spaces)
+struct SpaceView
+{
+};
 struct SpaceLogic
 {
 };
@@ -128,18 +132,22 @@ template <typename Space, typename T> struct TypedGeom
 
 // --- Type Aliases for the Modern API ---
 using LogicPoint = TypedGeom<SpaceLogic, Point>;
+using ViewPoint = TypedGeom<SpaceView, Point>;
 using WindowPoint = TypedGeom<SpaceWindow, Point>;
 using DevicePoint = TypedGeom<SpaceDevice, Point>;
 
 using LogicSize = TypedGeom<SpaceLogic, Size>;
+using ViewSize = TypedGeom<SpaceView, Size>;
 using WindowSize = TypedGeom<SpaceWindow, Size>;
 using DeviceSize = TypedGeom<SpaceDevice, Size>;
 
 using LogicRect = TypedGeom<SpaceLogic, tools::Rectangle>;
+using ViewRect = TypedGeom<SpaceView, tools::Rectangle>;
 using WindowRect = TypedGeom<SpaceWindow, tools::Rectangle>;
 using DeviceRect = TypedGeom<SpaceDevice, tools::Rectangle>;
 
 using LogicPolygon = TypedGeom<SpaceLogic, tools::Polygon>;
+using ViewPolygon = TypedGeom<SpaceView, tools::Polygon>;
 using WindowPolygon = TypedGeom<SpaceWindow, tools::Polygon>;
 using DevicePolygon = TypedGeom<SpaceDevice, tools::Polygon>;
 } // namespace vcl

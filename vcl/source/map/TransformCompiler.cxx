@@ -7,11 +7,12 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <TransformCompiler.hxx>
-#include <sal/log.hxx>
-#include <TransformTypes.hxx>
-
 #include <basegfx/numeric/ftools.hxx>
+
+#include <vcl/TransformTypes.hxx>
+
+#include <TransformCompiler.hxx>
+
 #include <cmath>
 
 namespace vcl
@@ -28,9 +29,7 @@ TransformPlan TransformCompiler::Compile(const basegfx::B2DHomMatrix& rMat)
     // Orientation Invariant (Determinant check for scaling/reflection)
     const double fDet = rMat.get(0, 0) * rMat.get(1, 1) - rMat.get(0, 1) * rMat.get(1, 0);
     if (fDet > 1e-12)
-    {
         aTransform.maContract.maPreserved.set(static_cast<size_t>(GeometryInvariant::Orientation));
-    }
 
     // Extract translation components early for uniform downstream access
     const double fTx = rMat.get(0, 2);

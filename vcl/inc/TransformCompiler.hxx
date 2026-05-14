@@ -12,8 +12,7 @@
 #include <basegfx/matrix/b2dhommatrix.hxx>
 
 #include <vcl/dllapi.h>
-
-#include <TransformPlan.hxx>
+#include <vcl/TransformPlan.hxx>
 
 namespace vcl
 {
