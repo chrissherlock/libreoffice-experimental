@@ -33,7 +33,7 @@
 
 void OutputDevice::DrawBorder(tools::Rectangle aBorderRect)
 {
-    sal_uInt16 nPixel = static_cast<sal_uInt16>(PixelToLogic(Size(1, 1)).Width());
+    sal_uInt16 nPixel = static_cast<sal_uInt16>(PixelToLogic(Size(1, 1))->Width());
 
     aBorderRect.AdjustLeft(nPixel);
     aBorderRect.AdjustTop(nPixel);
@@ -234,7 +234,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
 {
     assert(!is_double_buffered_window());
 
-    tools::Rectangle aDstRect( PixelToLogic( Point() ), GetOutputSize() );
+    tools::Rectangle aDstRect( PixelToLogic( Point() ).get(), GetOutputSize() );
     aDstRect.Intersection( rRect );
 
     if( aDstRect.IsEmpty() || ImplIsRecordLayout() )

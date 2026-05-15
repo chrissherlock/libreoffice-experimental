@@ -43,6 +43,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/vclptr.hxx>
 #include <vcl/vclreferencebase.hxx>
+#include <vcl/TransformTypes.hxx>
 
 #include <basegfx/range/b2drectangle.hxx>
 #include <basegfx/numeric/ftools.hxx>
@@ -311,7 +312,7 @@ public:
                                     { return tools::Rectangle(GetOutputOffPixel(), GetOutputSizePixel() ); }
 
     Size                        GetOutputSize() const
-                                    { return PixelToLogic( GetOutputSizePixel() ); }
+                                    { return PixelToLogic( GetOutputSizePixel() ).get(); }
 
     css::uno::Reference< css::awt::XGraphics >
                                 CreateUnoGraphics();
@@ -1629,9 +1630,9 @@ public:
      */
     SAL_WARN_UNUSED_RESULT Size GetPixelOffset() const;
 
-    SAL_WARN_UNUSED_RESULT Point LogicToPixel(const Point& rLogicPt) const;
-    SAL_WARN_UNUSED_RESULT Size  LogicToPixel(const Size& rLogicSize) const;
-    SAL_WARN_UNUSED_RESULT tools::Rectangle LogicToPixel(const tools::Rectangle& rLogicRect) const;
+    SAL_WARN_UNUSED_RESULT vcl::DevicePoint LogicToPixel(const Point& rLogicPt) const;
+    SAL_WARN_UNUSED_RESULT vcl::DeviceSize LogicToPixel(const Size& rLogicSize) const;
+    SAL_WARN_UNUSED_RESULT vcl::DeviceRect LogicToPixel(const tools::Rectangle& rLogicRect) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon LogicToPixel(const tools::Polygon& rLogicPoly) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::PolyPolygon LogicToPixel(const tools::PolyPolygon& rLogicPolyPoly) const;
     SAL_WARN_UNUSED_RESULT basegfx::B2DPolyPolygon LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
@@ -1645,9 +1646,9 @@ public:
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                                                                 const MapMode& rMapMode) const;
 
-    SAL_WARN_UNUSED_RESULT Point PixelToLogic(const Point& rDevicePt) const;
-    SAL_WARN_UNUSED_RESULT Size PixelToLogic(const Size& rDeviceSize) const;
-    SAL_WARN_UNUSED_RESULT tools::Rectangle PixelToLogic(const tools::Rectangle& rDeviceRect) const;
+    SAL_WARN_UNUSED_RESULT vcl::LogicPoint PixelToLogic(const Point& rDevicePt) const;
+    SAL_WARN_UNUSED_RESULT vcl::LogicSize PixelToLogic(const Size& rDeviceSize) const;
+    SAL_WARN_UNUSED_RESULT vcl::LogicRect PixelToLogic(const tools::Rectangle& rDeviceRect) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon PixelToLogic(const tools::Polygon& rDevicePoly) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::PolyPolygon PixelToLogic(const tools::PolyPolygon& rDevicePolyPoly) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon PixelToLogic(const basegfx::B2DPolyPolygon& rDevicePolyPoly) const;

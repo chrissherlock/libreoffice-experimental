@@ -145,7 +145,7 @@ namespace sdr::overlay
                         // Offset to be applied to the external outline
                         double fOffset(0);
                         if (getOverlayManager())
-                            fOffset = getOverlayManager()->getOutputDevice().PixelToLogic(Size(1, 1)).getWidth();
+                            fOffset = getOverlayManager()->getOutputDevice().PixelToLogic(Size(1, 1))->getWidth();
 
                         // External outline using themed color
                         basegfx::B2DPolyPolygon aPolyPolygon(impCombineRectanglesToPolyPolygon(getRanges(), mbContrastOutline, fOffset));

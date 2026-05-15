@@ -74,7 +74,7 @@ ImplConnectMarkerOverlay::ImplConnectMarkerOverlay(const SdrCreateView& rView, S
         if(xTargetOverlay.is())
         {
             float fScalingFactor = xTargetOverlay->getOutputDevice().GetDPIScaleFactor();
-            Size aHalfLogicSize(xTargetOverlay->getOutputDevice().PixelToLogic(Size(4 * fScalingFactor, 4 * fScalingFactor)));
+            Size aHalfLogicSize(xTargetOverlay->getOutputDevice().PixelToLogic(Size(4 * fScalingFactor, 4 * fScalingFactor)).get());
 
             // object
             std::unique_ptr<sdr::overlay::OverlayPolyPolygonStripedAndFilled> pNew(new sdr::overlay::OverlayPolyPolygonStripedAndFilled(
@@ -303,7 +303,7 @@ bool SdrCreateView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
         if(pPV)
         {
             // TODO: Change default hit tolerance at IsMarkedHit() some time!
-            Point aPos(pWin->PixelToLogic(rMEvt.GetPosPixel()));
+            Point aPos(pWin->PixelToLogic(rMEvt.GetPosPixel()).get());
             bool bMarkHit=PickHandle(aPos)!=nullptr || IsMarkedObjHit(aPos);
             SdrObjConnection aCon;
             if (!bMarkHit) SdrEdgeObj::ImpFindConnector(aPos,*pPV,aCon,nullptr,pWin);

@@ -88,7 +88,7 @@ void SvxPageWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
         aMapMode.SetScaleY(aXScale);
     }
     rRenderContext.SetMapMode(aMapMode);
-    Size aSz(rRenderContext.PixelToLogic(GetOutputSizePixel()));
+    Size aSz(rRenderContext.PixelToLogic(GetOutputSizePixel()).get());
     tools::Long nYPos = (aSz.Height() - m_aSize.Height()) / 2;
 
     if (m_eUsage == SvxPageUsage::All)
@@ -105,7 +105,7 @@ void SvxPageWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
             aMapMode.SetScaleX(aX);
             aMapMode.SetScaleY(aY);
             rRenderContext.SetMapMode(aMapMode);
-            aSz = rRenderContext.PixelToLogic(GetOutputSizePixel());
+            aSz = rRenderContext.PixelToLogic(GetOutputSizePixel()).get();
             nYPos = (aSz.Height() - m_aSize.Height()) / 2;
             tools::Long nXPos = (aSz.Width() - m_aSize.Width()) / 2;
             DrawPage(rRenderContext, Point(nXPos,nYPos),false,true);
@@ -235,7 +235,7 @@ void SvxPageWindow::DrawPage(vcl::RenderContext& rRenderContext, const Point& rO
         {
         case SvxFrameDirection::Horizontal_LR_TB:
             aPos = aRect.TopLeft();
-            aPos.AdjustX(rRenderContext.PixelToLogic(Point(1,1)).X() );
+            aPos.AdjustX(rRenderContext.PixelToLogic(Point(1,1))->X() );
             aMove.setY( 0 );
             cArrow = 0x2192;
             break;
@@ -248,7 +248,7 @@ void SvxPageWindow::DrawPage(vcl::RenderContext& rRenderContext, const Point& rO
             break;
         case SvxFrameDirection::Vertical_LR_TB:
             aPos = aRect.TopLeft();
-            aPos.AdjustX(rRenderContext.PixelToLogic(Point(1,1)).X() );
+            aPos.AdjustX(rRenderContext.PixelToLogic(Point(1,1))->X() );
             aMove.setX( 0 );
             break;
         case SvxFrameDirection::Vertical_RL_TB:
@@ -390,7 +390,7 @@ void SvxPageWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     m_aWinSize.AdjustHeight( -4 );
     m_aWinSize.AdjustWidth( -4 );
 
-    m_aWinSize = rRefDevice.PixelToLogic(m_aWinSize);
+    m_aWinSize = rRefDevice.PixelToLogic(m_aWinSize).get();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

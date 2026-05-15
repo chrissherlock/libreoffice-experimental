@@ -259,9 +259,9 @@ public:
     void                        SetPrinterSettingsPreferred( bool bPaperSizeFromSetup );
 
     const Size&                 GetPaperSizePixel() const { return maPaperSize; }
-    Size                        GetPaperSize() const { return PixelToLogic( maPaperSize ); }
+    Size                        GetPaperSize() const { return PixelToLogic(maPaperSize).get(); }
     const Point&                GetPageOffsetPixel() const { return maPageOffset; }
-    Point                       GetPageOffset() const { return PixelToLogic( maPageOffset ); }
+    Point                       GetPageOffset() const { return PixelToLogic( maPageOffset ).get(); }
 
     SAL_DLLPRIVATE void                        SetCopyCount( sal_uInt16 nCopy, bool bCollate );
     sal_uInt16                  GetCopyCount() const { return mnCopyCount; }

@@ -51,7 +51,7 @@ namespace vclcanvas
         OutputDevice& rOutDev = mpOutDev->getOutDev();
         const MapMode aOldMapMode( rOutDev.GetMapMode() );
         rOutDev.SetMapMode( MapMode(MapUnit::MapMM) );
-        const Size aPixelSize( rOutDev.LogicToPixel(Size(1,1)) );
+        const Size aPixelSize( rOutDev.LogicToPixel(Size(1,1)).get() );
         rOutDev.SetMapMode( aOldMapMode );
 
         return vcl::unotools::size2DFromSize( aPixelSize );
@@ -66,7 +66,7 @@ namespace vclcanvas
         OutputDevice& rOutDev = mpOutDev->getOutDev();
         const MapMode aOldMapMode( rOutDev.GetMapMode() );
         rOutDev.SetMapMode( MapMode(MapUnit::MapMM) );
-        const Size aLogSize( rOutDev.PixelToLogic(rOutDev.GetOutputSizePixel()) );
+        const Size aLogSize( rOutDev.PixelToLogic(rOutDev.GetOutputSizePixel()).get() );
         rOutDev.SetMapMode( aOldMapMode );
 
         return vcl::unotools::size2DFromSize( aLogSize );
