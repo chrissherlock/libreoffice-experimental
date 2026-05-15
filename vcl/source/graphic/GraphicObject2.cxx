@@ -332,7 +332,7 @@ bool GraphicObject::ImplDrawTiled(OutputDevice& rOut, const tools::Rectangle& rA
 
         // origin from where to 'virtually' start drawing in pixel
         const Point aOutOrigin( rOut.LogicToPixel( Point( rArea.Left() - rOffset.Width(),
-                                                           rArea.Top() - rOffset.Height() ) ) );
+                                                           rArea.Top() - rOffset.Height() ) ) .get() );
         // position in pixel from where to really start output
         const Point aOutStart( aOutOrigin.X() + nInvisibleTilesX*rSizePixel.Width(),
                                aOutOrigin.Y() + nInvisibleTilesY*rSizePixel.Height() );
@@ -358,7 +358,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice& rOut, const Point& rPosPixel,
                                    const Size& rTileSizePixel, const GraphicAttr* pAttr ) const
 {
     Point   aCurrPos( rPosPixel );
-    Size    aTileSizeLogic( rOut.PixelToLogic( rTileSizePixel ) );
+    Size    aTileSizeLogic( rOut.PixelToLogic( rTileSizePixel ).get() );
     int     nX, nY;
 
     // #107607# Use logical coordinates for metafile playing, too
@@ -385,7 +385,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice& rOut, const Point& rPosPixel,
             // update return value. This method should return true, if
             // at least one of the looped Draws succeeded.
             bRet |= Draw(rOut,
-                         bDrawInPixel ? aCurrPos : rOut.PixelToLogic(aCurrPos),
+                         bDrawInPixel ? aCurrPos : rOut.PixelToLogic(aCurrPos).get(),
                          bDrawInPixel ? rTileSizePixel : aTileSizeLogic,
                          pAttr);
 

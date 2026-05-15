@@ -1177,7 +1177,7 @@ Point ScTextWndGroup::GetCursorScreenPixelPos(bool bBelow)
     Point aLogicPos = pCur->GetPos();
     if (bBelow)
         aLogicPos.AdjustY(pCur->GetHeight());
-    aPos = GetEditViewDevice().LogicToPixel(aLogicPos);
+    aPos = GetEditViewDevice().LogicToPixel(aLogicPos).get();
     bool bRTL = mrParent.IsRTLEnabled();
     if (bRTL)
         aPos.setX(mxTextWnd->GetOutputSizePixel().Width() - aPos.X() + gnBorderWidth);
@@ -1348,7 +1348,7 @@ const OutputDevice& ScTextWnd::GetEditViewDevice() const
 int ScTextWnd::GetPixelHeightForLines(tools::Long nLines)
 {
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    return rDevice.LogicToPixel(Size(0, nLines * rDevice.GetTextHeight())).Height() + 1;
+    return rDevice.LogicToPixel(Size(0, nLines * rDevice.GetTextHeight()))->Height() + 1;
 }
 
 tools::Long ScTextWnd::GetNumLines() const
@@ -1375,7 +1375,7 @@ void ScTextWnd::Resize()
     {
         Size aOutputSize = GetOutputSizePixel();
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        tools::Rectangle aOutputArea = rDevice.PixelToLogic( tools::Rectangle( Point(), aOutputSize ));
+        tools::Rectangle aOutputArea = rDevice.PixelToLogic( tools::Rectangle( Point(), aOutputSize )).get();
         m_xEditView->SetOutputArea( aOutputArea );
 
         // Don't leave an empty area at the bottom if we can move the text down.
@@ -1385,7 +1385,7 @@ void ScTextWnd::Resize()
             m_xEditView->Scroll(0, m_xEditView->GetVisArea().Top() - nMaxVisAreaTop);
         }
 
-        m_xEditEngine->SetPaperSize( rDevice.PixelToLogic( Size( aOutputSize.Width(), 10000 ) ) );
+        m_xEditEngine->SetPaperSize( rDevice.PixelToLogic( Size( aOutputSize.Width(), 10000 ) ).get() );
     }
 
     // skip WeldEditView's Resize();
@@ -1540,7 +1540,7 @@ void ScTextWnd::InitEditEngine()
 
     Size barSize = GetOutputSizePixel();
     m_xEditEngine->SetUpdateLayout( false );
-    m_xEditEngine->SetPaperSize( GetDrawingArea()->get_ref_device().PixelToLogic(Size(barSize.Width(),10000)) );
+    m_xEditEngine->SetPaperSize( GetDrawingArea()->get_ref_device().PixelToLogic(Size(barSize.Width(),10000)).get() );
     m_xEditEngine->SetWordDelimiters(
                     ScEditUtil::ModifyDelimiters( m_xEditEngine->GetWordDelimiters() ) );
     m_xEditEngine->SetReplaceLeadingSingleQuotationMark( false );
@@ -2059,7 +2059,7 @@ void ScTextWnd::SetTextString( const OUString& rNewString, bool bKitUpdate )
                 else
                     nTextSize = GetOutputSizePixel().Width(); // Overflow
 
-                Point aLogicStart = GetDrawingArea()->get_ref_device().PixelToLogic(Point(0,0));
+                Point aLogicStart = GetDrawingArea()->get_ref_device().PixelToLogic(Point(0,0)).get();
                 tools::Long nStartPos = aLogicStart.X();
                 tools::Long nInvPos = nStartPos;
                 if (nDifPos)

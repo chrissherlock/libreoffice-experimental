@@ -619,7 +619,7 @@ void ScPrintFunc::DrawToDev(ScDocument& rDoc, OutputDevice* pDev, double /* nPri
 
         pDev->SetLineColor( COL_BLACK );
 
-        Size aOne = pDev->PixelToLogic( Size(1,1) );
+        Size aOne = pDev->PixelToLogic( Size(1,1) ).get();
         if (bMetaFile)
             aOne = Size(1,1);   // compatible with DrawGrid
         tools::Long nRight = nScrX + aOutputData.GetScrW() - aOne.Width();
@@ -1420,7 +1420,7 @@ void ScPrintFunc::PrintColHdr( SCCOL nX1, SCCOL nX2, tools::Long nScrX, tools::L
     bool bLayoutRTL = rDoc.IsLayoutRTL( nPrintTab );
     tools::Long nLayoutSign = bLayoutRTL ? -1 : 1;
 
-    Size aOnePixel = pDev->PixelToLogic(Size(1,1));
+    Size aOnePixel = pDev->PixelToLogic(Size(1,1)).get();
     tools::Long nOneX = aOnePixel.Width();
     tools::Long nOneY = aOnePixel.Height();
     SCCOL nCol;
@@ -1466,7 +1466,7 @@ void ScPrintFunc::PrintColHdr( SCCOL nX1, SCCOL nX2, tools::Long nScrX, tools::L
 
 void ScPrintFunc::PrintRowHdr( SCROW nY1, SCROW nY2, tools::Long nScrX, tools::Long nScrY )
 {
-    Size aOnePixel = pDev->PixelToLogic(Size(1,1));
+    Size aOnePixel = pDev->PixelToLogic(Size(1,1)).get();
     tools::Long nOneX = aOnePixel.Width();
     tools::Long nOneY = aOnePixel.Height();
 
@@ -1508,7 +1508,7 @@ void ScPrintFunc::PrintRowHdr( SCROW nY1, SCROW nY2, tools::Long nScrX, tools::L
 void ScPrintFunc::LocateColHdr( SCCOL nX1, SCCOL nX2, tools::Long nScrX, tools::Long nScrY,
                                 bool bRepCol, ScPreviewLocationData& rLocationData )
 {
-    Size aOnePixel = pDev->PixelToLogic(Size(1,1));
+    Size aOnePixel = pDev->PixelToLogic(Size(1,1)).get();
     tools::Long nOneX = aOnePixel.Width();
     tools::Long nOneY = aOnePixel.Height();
 
@@ -1529,7 +1529,7 @@ void ScPrintFunc::LocateColHdr( SCCOL nX1, SCCOL nX2, tools::Long nScrX, tools::
 void ScPrintFunc::LocateRowHdr( SCROW nY1, SCROW nY2, tools::Long nScrX, tools::Long nScrY,
                                 bool bRepRow, ScPreviewLocationData& rLocationData )
 {
-    Size aOnePixel = pDev->PixelToLogic(Size(1,1));
+    Size aOnePixel = pDev->PixelToLogic(Size(1,1)).get();
     tools::Long nOneX = aOnePixel.Width();
     tools::Long nOneY = aOnePixel.Height();
 
@@ -1568,7 +1568,7 @@ void ScPrintFunc::LocateArea( SCCOL nX1, SCROW nY1, SCCOL nX2, SCROW nY2,
 
     //  get pixel rectangle
 
-    Size aOnePixel = pDev->PixelToLogic(Size(1,1));
+    Size aOnePixel = pDev->PixelToLogic(Size(1,1)).get();
     tools::Long nOneX = aOnePixel.Width();
     tools::Long nOneY = aOnePixel.Height();
 
@@ -2385,7 +2385,7 @@ void ScPrintFunc::PrintPage( tools::Long nPageNo, SCCOL nX1, SCROW nY1, SCCOL nX
 
     if ( bDoPrint && ( aTableParam.bGrid || aTableParam.bHeaders ) )
     {
-        Size aOnePixel = pDev->PixelToLogic(Size(1,1));
+        Size aOnePixel = pDev->PixelToLogic(Size(1,1)).get();
         tools::Long nOneX = aOnePixel.Width();
         tools::Long nOneY = aOnePixel.Height();
 
