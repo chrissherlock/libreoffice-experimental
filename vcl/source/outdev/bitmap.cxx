@@ -45,11 +45,11 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Bitmap& rBitmap )
 
     if (!rBitmap.HasAlpha())
     {
-        DrawBitmap(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmap, MetaActionType::BMP);
+        DrawBitmap(rDestPt, PixelToLogic(aSizePix).get(), Point(), aSizePix, rBitmap, MetaActionType::BMP);
         return;
     }
 
-    DrawAlphaBitmap(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmap, MetaActionType::BMPEX);
+    DrawAlphaBitmap(rDestPt, PixelToLogic(aSizePix).get(), Point(), aSizePix, rBitmap, MetaActionType::BMPEX);
 }
 
 void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize, const Bitmap& rBitmap )

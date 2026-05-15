@@ -1309,10 +1309,10 @@ void E3dView::Start3DCreation()
     // first determine representation boundaries
     if (pOut != nullptr)
     {
-        nMinLen = pOut->PixelToLogic(Size(0,50)).Height();
-        nObjDst = pOut->PixelToLogic(Size(0,20)).Height();
+        nMinLen = pOut->PixelToLogic(Size(0,50))->Height();
+        nObjDst = pOut->PixelToLogic(Size(0,20))->Height();
 
-        tools::Long nDst = pOut->PixelToLogic(Size(0,10)).Height();
+        tools::Long nDst = pOut->PixelToLogic(Size(0,10))->Height();
 
         nOutMin =  -pOut->GetMapMode().GetOrigin().Y();
         nOutMax =  pOut->GetOutputSize().Height() - 1 + nOutMin;

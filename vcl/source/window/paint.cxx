@@ -1,4 +1,3 @@
-#include <vcl/MappingPolicy.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -27,6 +26,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/syswin.hxx>
 #include <vcl/CoordinateMapper.hxx>
+#include <vcl/MappingPolicy.hxx>
 
 #include <sal/types.h>
 #include <sal/log.hxx>
@@ -1281,7 +1281,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 
         Paint(*pDevice, tools::Rectangle(Point(), GetOutputSizePixel()));
 
-        rTargetOutDev.DrawOutDev(i_rPos, aSize, Point(), pDevice->PixelToLogic(aSize), *pDevice);
+        rTargetOutDev.DrawOutDev(i_rPos, aSize, Point(), pDevice->PixelToLogic(aSize).get(), *pDevice);
 
         bool bHasMirroredGraphics = pDevice->HasMirroredGraphics();
 
@@ -1423,7 +1423,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
             // i_rPos *may* be in logical coordinates if a MapMode is set at
             // i_pTargetOutDev. To not mix values of different coordinate systems
             // it *needs* to be converted (which does nothing if no MapMode)
-            Point aDelta(rTargetOutDev.PixelToLogic(Point(nDeltaX, nDeltaY)));
+            Point aDelta(rTargetOutDev.PixelToLogic(Point(nDeltaX, nDeltaY)).get());
             aPos += aDelta;
             pChild->ImplPaintToDevice(rTargetOutDev, aPos);
         }

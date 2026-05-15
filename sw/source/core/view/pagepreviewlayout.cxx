@@ -221,7 +221,7 @@ void SwPagePreviewLayout::Init( const sal_uInt16 _nCols,
     }
 
     // set window size in twips
-    maWinSize = mrParentViewShell.GetOut()->PixelToLogic( _rPxWinSize );
+    maWinSize = mrParentViewShell.GetOut()->PixelToLogic( _rPxWinSize ).get();
     // validate layout sizes
     mbLayoutSizesValid = true;
 }
@@ -312,7 +312,7 @@ bool SwPagePreviewLayout::Prepare( const sal_uInt16 _nProposedStartPageNum,
     // environment and parameter ok
 
     // update window size at preview setting data
-    maWinSize = mrParentViewShell.GetOut()->PixelToLogic( _rPxWinSize );
+    maWinSize = mrParentViewShell.GetOut()->PixelToLogic( _rPxWinSize ).get();
 
     mbNoPageVisible = false;
     if ( nProposedStartPageNum > 0 )
@@ -697,7 +697,7 @@ bool SwPagePreviewLayout::SetBookPreviewMode( const bool _bEnableBookPreview,
                 aProposedStartPos.setY( maPreviewDocRect.Bottom() );
             }
             Prepare( 0, aProposedStartPos,
-                     mrParentViewShell.GetOut()->LogicToPixel( maWinSize ),
+                     mrParentViewShell.GetOut()->LogicToPixel( maWinSize ).get(),
                      _onStartPageNum, _orDocPreviewPaintRect );
             mbBookPreviewModeToggled = false;
         }
@@ -1044,7 +1044,7 @@ bool SwPagePreviewLayout::Paint(vcl::RenderContext& rRenderContext, const tools:
     }
 
     // prepare data for paint of pages
-    const tools::Rectangle aPxOutRect( pOutputDev->LogicToPixel(rOutRect) );
+    const tools::Rectangle aPxOutRect( pOutputDev->LogicToPixel(rOutRect).get() );
 
     MapMode aMapMode( pOutputDev->GetMapMode() );
     MapMode aSavedMapMode = aMapMode;
@@ -1059,7 +1059,7 @@ bool SwPagePreviewLayout::Paint(vcl::RenderContext& rRenderContext, const tools:
         tools::Rectangle aPageRect( rpPreviewPage->aLogicPos, rpPreviewPage->aPageSize );
         aMapMode.SetOrigin( rpPreviewPage->aMapOffset );
         pOutputDev->SetMapMode( aMapMode );
-        tools::Rectangle aPxPaintRect = pOutputDev->LogicToPixel( aPageRect );
+        tools::Rectangle aPxPaintRect = pOutputDev->LogicToPixel( aPageRect ).get();
         if ( aPxOutRect.Overlaps( aPxPaintRect) )
         {
             const SwPageFrame* pPage = rpPreviewPage->pPage;
@@ -1097,7 +1097,7 @@ bool SwPagePreviewLayout::Paint(vcl::RenderContext& rRenderContext, const tools:
 
                 mrParentViewShell.maVisArea = SwRect(aPageRect);
                 aPxPaintRect.Intersection( aPxOutRect );
-                tools::Rectangle aPaintRect = pOutputDev->PixelToLogic( aPxPaintRect );
+                tools::Rectangle aPaintRect = pOutputDev->PixelToLogic( aPxPaintRect ).get();
                 mrParentViewShell.Paint(rRenderContext, aPaintRect);
 
                 // --> OD 2007-08-15 #i80691#
@@ -1228,20 +1228,20 @@ void SwPagePreviewLayout::PaintSelectMarkAtPage(vcl::RenderContext& rRenderConte
     // OD 19.02.2003 #107369# - use aligned page rectangle, as it is used for
     // page border and shadow paint - see <SwPageFrame::PaintBorderAndShadow(..)>
     ::SwAlignRect( aPageRect, &mrParentViewShell, pOutputDev );
-    tools::Rectangle aPxPageRect = pOutputDev->LogicToPixel( aPageRect.SVRect() );
+    tools::Rectangle aPxPageRect = pOutputDev->LogicToPixel( aPageRect.SVRect() ).get();
 
     // draw two rectangle
     // OD 19.02.2003 #107369# - adjust position of select mark rectangle
     tools::Rectangle aRect( aPxPageRect.Left(), aPxPageRect.Top(),
                        aPxPageRect.Right(), aPxPageRect.Bottom() );
-    aRect = pOutputDev->PixelToLogic( aRect );
+    aRect = pOutputDev->PixelToLogic( aRect ).get();
     pOutputDev->SetFillColor(); // OD 20.02.2003 #107369# - no fill color
     pOutputDev->SetLineColor( aSelPgLineColor );
     pOutputDev->DrawRect( aRect );
     // OD 19.02.2003 #107369# - adjust position of select mark rectangle
     aRect = tools::Rectangle( aPxPageRect.Left()+1, aPxPageRect.Top()+1,
                        aPxPageRect.Right()-1, aPxPageRect.Bottom()-1 );
-    aRect = pOutputDev->PixelToLogic( aRect );
+    aRect = pOutputDev->PixelToLogic( aRect ).get();
     pOutputDev->DrawRect( aRect );
 }
 
@@ -1267,23 +1267,23 @@ void SwPagePreviewLayout::MarkNewSelectedPage( const sal_uInt16 _nSelectedPage )
         SwRect aPageRect( pOldSelectedPreviewPage->aPreviewWinPos,
                               pOldSelectedPreviewPage->aPageSize );
         ::SwAlignRect( aPageRect, &mrParentViewShell, pOutputDev );
-        tools::Rectangle aPxPageRect = pOutputDev->LogicToPixel( aPageRect.SVRect() );
+        tools::Rectangle aPxPageRect = pOutputDev->LogicToPixel( aPageRect.SVRect() ).get();
         // invalidate top mark line
         tools::Rectangle aInvalPxRect( aPxPageRect.Left(), aPxPageRect.Top(),
                                 aPxPageRect.Right(), aPxPageRect.Top()+1 );
-        mrParentViewShell.GetWin()->Invalidate( pOutputDev->PixelToLogic( aInvalPxRect ) );
+        mrParentViewShell.GetWin()->Invalidate( pOutputDev->PixelToLogic( aInvalPxRect ).get() );
         // invalidate right mark line
         aInvalPxRect = tools::Rectangle( aPxPageRect.Right()-1, aPxPageRect.Top(),
                                   aPxPageRect.Right(), aPxPageRect.Bottom() );
-        mrParentViewShell.GetWin()->Invalidate( pOutputDev->PixelToLogic( aInvalPxRect ) );
+        mrParentViewShell.GetWin()->Invalidate( pOutputDev->PixelToLogic( aInvalPxRect ).get() );
         // invalidate bottom mark line
         aInvalPxRect = tools::Rectangle( aPxPageRect.Left(), aPxPageRect.Bottom()-1,
                                   aPxPageRect.Right(), aPxPageRect.Bottom() );
-        mrParentViewShell.GetWin()->Invalidate( pOutputDev->PixelToLogic( aInvalPxRect ) );
+        mrParentViewShell.GetWin()->Invalidate( pOutputDev->PixelToLogic( aInvalPxRect ).get() );
         // invalidate left mark line
         aInvalPxRect = tools::Rectangle( aPxPageRect.Left(), aPxPageRect.Top(),
                                   aPxPageRect.Left()+1, aPxPageRect.Bottom() );
-        mrParentViewShell.GetWin()->Invalidate( pOutputDev->PixelToLogic( aInvalPxRect ) );
+        mrParentViewShell.GetWin()->Invalidate( pOutputDev->PixelToLogic( aInvalPxRect ).get() );
     }
 
     // re-paint for new selected page in order to mark it.

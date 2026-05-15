@@ -575,7 +575,7 @@ namespace frm
         }
 
         tools::Rectangle aPlayground( aPos, aSize );
-        Size aOnePixel( _pDev->PixelToLogic( Size( 1, 1 ) ) );
+        Size aOnePixel( _pDev->PixelToLogic( Size( 1, 1 ) ).get() );
         aPlayground.AdjustRight( -(aOnePixel.Width()) );
         aPlayground.AdjustBottom( -(aOnePixel.Height()) );
 

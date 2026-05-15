@@ -146,7 +146,7 @@ void Svx3DPreviewControl::Resize()
 {
     // size of page
     Size aSize(GetOutputSizePixel());
-    aSize = GetDrawingArea()->get_ref_device().PixelToLogic(aSize);
+    aSize = GetDrawingArea()->get_ref_device().PixelToLogic(aSize).get();
     mxFmPage->SetSize(aSize);
 
     // set size
@@ -456,7 +456,7 @@ void Svx3DLightControl::TrySelection(Point aPosPixel)
     if(!mpScene)
         return;
 
-    const Point aPosLogic(GetDrawingArea()->get_ref_device().PixelToLogic(aPosPixel));
+    const Point aPosLogic(GetDrawingArea()->get_ref_device().PixelToLogic(aPosPixel).get());
     const basegfx::B2DPoint aPoint(aPosLogic.X(), aPosLogic.Y());
     std::vector< const E3dCompoundObject* > aResult;
     getAllHit3DObjectsSortedFrontToBack(aPoint, *mpScene, aResult);
@@ -676,7 +676,7 @@ bool Svx3DLightControl::MouseButtonUp(const MouseEvent& rMEvt)
 void Svx3DLightControl::Resize()
 {
     // set size of page
-    const Size aSize(GetDrawingArea()->get_ref_device().PixelToLogic(GetOutputSizePixel()));
+    const Size aSize(GetDrawingArea()->get_ref_device().PixelToLogic(GetOutputSizePixel()).get());
     mxFmPage->SetSize(aSize);
 
     // set position and size of scene

@@ -886,7 +886,7 @@ namespace cppcanvas::internal
             if( rState.textReliefStyle != FontRelief::NONE )
             {
                 // calculate relief offset (similar to outdev3.cxx)
-                sal_Int32 nReliefOffset = rParms.mrVDev.PixelToLogic( Size( 1, 1 ) ).Height();
+                sal_Int32 nReliefOffset = rParms.mrVDev.PixelToLogic( Size( 1, 1 ) )->Height();
                 nReliefOffset += nReliefOffset/2;
                 if( nReliefOffset < 1 )
                     nReliefOffset = 1;
@@ -1269,7 +1269,7 @@ namespace cppcanvas::internal
                                 // #121806# explicitly kept integer
                                 ::tools::Rectangle aClipRect(
                                     rVDev.LogicToPixel(
-                                        pClipAction->GetRegion().GetBoundRect() ) );
+                                        pClipAction->GetRegion().GetBoundRect() ).get() );
 
                                 // intersect current clip with given rect
                                 updateClipping(
@@ -1302,7 +1302,7 @@ namespace cppcanvas::internal
 
                         // #121806# explicitly kept integer
                         ::tools::Rectangle aClipRect(
-                            rVDev.LogicToPixel( pClipAction->GetRect() ) );
+                            rVDev.LogicToPixel( pClipAction->GetRect() ).get() );
 
                         // intersect current clip with given rect
                         updateClipping(
@@ -1324,7 +1324,7 @@ namespace cppcanvas::internal
 
                             // #121806# explicitly kept integer
                             ::tools::Rectangle aClipRect(
-                                rVDev.LogicToPixel( pClipAction->GetRegion().GetBoundRect() ) );
+                                rVDev.LogicToPixel( pClipAction->GetRegion().GetBoundRect() ).get() );
 
                             // intersect current clip with given rect
                             updateClipping(
@@ -1576,8 +1576,8 @@ namespace cppcanvas::internal
                         rVDev.Push();
                         rVDev.SetMapMode( rSubstitute.GetPrefMapMode() );
 
-                        const ::Point aPos( rVDev.LogicToPixel( pAct->GetPoint() ) );
-                        const ::Size  aSize( rVDev.LogicToPixel( pAct->GetSize() ) );
+                        const ::Point aPos( rVDev.LogicToPixel( pAct->GetPoint() ).get() );
+                        const ::Size  aSize( rVDev.LogicToPixel( pAct->GetSize() ).get() );
 
                         rStates.getState().transform.translate( aPos.X(),
                                                                 aPos.Y() );
