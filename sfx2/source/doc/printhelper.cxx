@@ -407,7 +407,7 @@ void SfxPrintHelper::impl_setPrinter(const uno::Sequence< beans::PropertyValue >
         aSetPaperSize = pPrinter->LogicToPixel(aSetPaperSize, MapMode(MapUnit::Map100thMM));
         if( aSetPaperSize != pPrinter->GetPaperSizePixel() )
         {
-            pPrinter->SetPaperSizeUser( pPrinter->PixelToLogic( aSetPaperSize ) );
+            pPrinter->SetPaperSizeUser( pPrinter->PixelToLogic( aSetPaperSize ).get() );
             nChangeFlags |= SfxPrinterChangeFlags::CHG_SIZE;
         }
     }

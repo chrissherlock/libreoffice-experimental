@@ -1302,7 +1302,7 @@ void SwPostItMgr::PaintTile(OutputDevice& rRenderContext)
         MapMode aMapMode(rRenderContext.GetMapMode());
         aMapMode.SetOrigin(aMapMode.GetOrigin() + aOffset);
         rRenderContext.SetMapMode(aMapMode);
-        Size aSize(rRenderContext.PixelToLogic(pPostIt->GetSizePixel()));
+        Size aSize(rRenderContext.PixelToLogic(pPostIt->GetSizePixel()).get());
         tools::Rectangle aRectangle(Point(0, 0), aSize);
 
         pPostIt->PaintTile(rRenderContext, aRectangle);
@@ -2479,7 +2479,7 @@ tools::ULong SwPostItMgr::GetSidebarWidth(bool bPx) const
         if (bEnableMapMode)
             // The output device is the window.
             mpWrtShell->GetOut()->SetMappingPolicy();
-        tools::Long nRet = mpWrtShell->GetOut()->PixelToLogic(Size(aWidth, 0)).Width();
+        tools::Long nRet = mpWrtShell->GetOut()->PixelToLogic(Size(aWidth, 0))->Width();
         if (bEnableMapMode)
             mpWrtShell->GetOut()->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
         return nRet;
@@ -2491,7 +2491,7 @@ tools::ULong SwPostItMgr::GetSidebarBorderWidth(bool bPx) const
     if (bPx)
         return 2;
     else
-        return mpWrtShell->GetOut()->PixelToLogic(Size(2,0)).Width();
+        return mpWrtShell->GetOut()->PixelToLogic(Size(2,0))->Width();
 }
 
 Color SwPostItMgr::GetColorDark(std::size_t aAuthorIndex)

@@ -259,9 +259,9 @@ void OViewsWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     tools::Long nStartWidth = tools::Long(REPORT_STARTMARKER_WIDTH * rRenderContext.GetMapMode().GetScaleX());
 
     aOut.AdjustWidth( -nStartWidth );
-    aOut = rRenderContext.PixelToLogic(aOut);
+    aOut = rRenderContext.PixelToLogic(aOut).get();
 
-    tools::Rectangle aRect(rRenderContext.PixelToLogic(Point(nStartWidth,0)), aOut);
+    tools::Rectangle aRect(rRenderContext.PixelToLogic(Point(nStartWidth,0)).get(), aOut);
     Wallpaper aWall(m_aColorConfig.GetColorValue(::svtools::APPBACKGROUND).nColor);
     rRenderContext.DrawWallpaper(aRect, aWall);
 }

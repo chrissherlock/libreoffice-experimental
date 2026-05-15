@@ -338,7 +338,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testBasicLogicToPixel)
     // 1. Default MapMode (MapPixel)
     // In MapPixel, Logic == Pixel
     Point aLogicPt(100, 100);
-    Point aPixelPt = pDev->LogicToPixel(aLogicPt);
+    Point aPixelPt = pDev->LogicToPixel(aLogicPt).get();
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Default MapMode should map 1:1", aLogicPt, aPixelPt);
 
@@ -404,7 +404,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testSetRelativeMapMode)
     // 1000 logic units * 2 (scale) -> converted to pixels
     // 1000 units normally ~37 pixels. Scaled by 2 should be ~75 pixels.
     Point aPt(1000, 1000);
-    Point aPix = pDev->LogicToPixel(aPt);
+    Point aPix = pDev->LogicToPixel(aPt).get();
 
     CPPUNIT_ASSERT(aPix.X() > 70);
     CPPUNIT_ASSERT(aPix.X() < 80);
@@ -430,7 +430,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testViewTransformation)
 
     // Transform using the convenience function
     Point aLogicPt(1000, 1000);
-    Point aPix = pDev->LogicToPixel(aLogicPt);
+    Point aPix = pDev->LogicToPixel(aLogicPt).get();
 
     // Compare Matrix result vs Helper result
     // Matrix result includes floating point precision, Helper rounds.
@@ -458,7 +458,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testB2DPolygonAsymmetricDPI)
 
     // Test Point Scaling (Public API)
     Point aLogicPt(2540, 2540);
-    Point aPixelPt = pVDev->LogicToPixel(aLogicPt);
+    Point aPixelPt = pVDev->LogicToPixel(aLogicPt).get();
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("X-axis scaling failed", tools::Long(100), aPixelPt.X());
 
@@ -467,7 +467,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testB2DPolygonAsymmetricDPI)
 
     // Test Size Scaling (Public API)
     Size aLogicSize(2540, 2540);
-    Size aPixelSize = pVDev->LogicToPixel(aLogicSize);
+    Size aPixelSize = pVDev->LogicToPixel(aLogicSize).get();
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Size Width scaling failed", tools::Long(100), aPixelSize.Width());
 
@@ -519,12 +519,12 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModeInvalidation)
 
     // Capture the initial logic-to-pixel result
     Point aLogicPt(1000, 1000);
-    Point aPixelPt1 = pVDev->LogicToPixel(aLogicPt);
+    Point aPixelPt1 = pVDev->LogicToPixel(aLogicPt).get();
 
     // DISABLE MapMode
     // This is where your bug lived!
     pVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
-    Point aPixelPt2 = pVDev->LogicToPixel(aLogicPt);
+    Point aPixelPt2 = pVDev->LogicToPixel(aLogicPt).get();
 
     // In 'false' mode, LogicToPixel should be an identity (1:1)
     CPPUNIT_ASSERT_EQUAL(aLogicPt.X(), aPixelPt2.X());
@@ -533,7 +533,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModeInvalidation)
     // RE-ENABLE MapMode
     // This verifies the 'true' restoration correctly invalidates the cache
     pVDev->SetMappingPolicy(vcl::MappingPolicy::ApplyMapMode);
-    Point aPixelPt3 = pVDev->LogicToPixel(aLogicPt);
+    Point aPixelPt3 = pVDev->LogicToPixel(aLogicPt).get();
 
     // This should match the very first calculation
     CPPUNIT_ASSERT_EQUAL(aPixelPt1.X(), aPixelPt3.X());

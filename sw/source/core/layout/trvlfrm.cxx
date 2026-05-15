@@ -2506,7 +2506,7 @@ void SwRootFrame::CalcFrameRects(SwShellCursor const& rCursor, SwRects & rRects,
                 tools::Long nCursorWidth = pOut->GetSettings().GetStyleSettings().
                     GetCursorSize();
                 aRectFnSet.SetWidth( aTmp, pOut->PixelToLogic(
-                    Size( nCursorWidth, 0 ) ).Width() );
+                    Size( nCursorWidth, 0 ) )->Width() );
             }
             aTmp.Intersection( aStFrame );
             Sub( aRegion, aTmp );

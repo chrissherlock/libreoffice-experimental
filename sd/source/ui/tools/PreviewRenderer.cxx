@@ -122,8 +122,8 @@ Image PreviewRenderer::RenderPage (
 
                 Size aSize (mpPreviewDevice->GetOutputSizePixel());
                 aPreview = Image(mpPreviewDevice->GetBitmap(
-                    mpPreviewDevice->PixelToLogic(Point(0,0)),
-                    mpPreviewDevice->PixelToLogic(aSize)));
+                    mpPreviewDevice->PixelToLogic(Point(0,0)).get(),
+                    mpPreviewDevice->PixelToLogic(aSize).get()));
 
                 mpView->HideSdrPage();
             }
@@ -184,8 +184,8 @@ Image PreviewRenderer::RenderSubstitution (
 
         const Size aSize (mpPreviewDevice->GetOutputSizePixel());
         aPreview = Image(mpPreviewDevice->GetBitmap(
-            mpPreviewDevice->PixelToLogic(Point(0,0)),
-            mpPreviewDevice->PixelToLogic(aSize)));
+            mpPreviewDevice->PixelToLogic(Point(0,0)).get(),
+            mpPreviewDevice->PixelToLogic(aSize).get()));
     }
     catch (const css::uno::Exception&)
     {
@@ -312,7 +312,7 @@ void PreviewRenderer::PaintSubstitutionText (const OUString& rSubstitutionText)
     // Set the font size.
     const vcl::Font& rOriginalFont (mpPreviewDevice->GetFont());
     vcl::Font aFont (mpPreviewDevice->GetSettings().GetStyleSettings().GetAppFont());
-    sal_Int32 nHeight (mpPreviewDevice->PixelToLogic(Size(0,snSubstitutionTextSize)).Height());
+    sal_Int32 nHeight (mpPreviewDevice->PixelToLogic(Size(0,snSubstitutionTextSize))->Height());
     aFont.SetFontHeight(nHeight);
     mpPreviewDevice->SetFont (aFont);
 
@@ -320,7 +320,7 @@ void PreviewRenderer::PaintSubstitutionText (const OUString& rSubstitutionText)
     ::tools::Rectangle aTextBox (
         Point(0,0),
         mpPreviewDevice->PixelToLogic(
-            mpPreviewDevice->GetOutputSizePixel()));
+            mpPreviewDevice->GetOutputSizePixel()).get());
     DrawTextFlags const nTextStyle =
         DrawTextFlags::Center
         | DrawTextFlags::VCenter

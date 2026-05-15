@@ -274,7 +274,7 @@ void SdrGluePoint::Invalidate(vcl::Window& rWin, const SdrObject* pObj) const
 bool SdrGluePoint::IsHit(const Point& rPnt, const OutputDevice& rOut, const SdrObject* pObj) const
 {
     Point aPt(pObj!=nullptr ? GetAbsolutePos(*pObj) : GetPos());
-    Size aSiz=rOut.PixelToLogic(aGlueHalfSize);
+    Size aSiz=rOut.PixelToLogic(aGlueHalfSize).get();
     tools::Rectangle aRect(aPt.X()-aSiz.Width(),aPt.Y()-aSiz.Height(),aPt.X()+aSiz.Width(),aPt.Y()+aSiz.Height());
     return aRect.Contains(rPnt);
 }

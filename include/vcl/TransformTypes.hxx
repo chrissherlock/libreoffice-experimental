@@ -128,6 +128,18 @@ template <typename Space, typename T> struct TypedGeom
     // Transparent operator overloading for base type
     const T* operator->() const { return &maData; }
     T* operator->() { return &maData; }
+
+    /**
+     * The Monadic Map Operation
+     * Takes a callable function/lambda, applies it to the underlying geometry,
+     * and returns a NEW TypedGeom wrapped safely back in the SAME space context.
+     */
+    template <typename Func> constexpr auto map(Func&& f) const
+    {
+        // std::invoke_result_t automatically deduces the return type of the function
+        using ReturnType = std::invoke_result_t<Func, const T&>;
+        return TypedGeom<Space, ReturnType>(f(maData));
+    }
 };
 
 // --- Type Aliases for the Modern API ---

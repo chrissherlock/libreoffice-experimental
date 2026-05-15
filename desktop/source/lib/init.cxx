@@ -4297,7 +4297,7 @@ static void doc_paintTile(LibreOfficeKitDocument* pThis,
     {
         // Draw a small red rectangle in the top left corner so that it's easy to see where a new tile begins.
         tools::Rectangle aRect(0, 0, 5, 5);
-        aRect = pDevice->PixelToLogic(aRect);
+        aRect = pDevice->PixelToLogic(aRect).get();
         auto popIt = pDevice->ScopedPush(PushFlags::FILLCOLOR | PushFlags::LINECOLOR);
         pDevice->SetFillColor(COL_LIGHTRED);
         pDevice->SetLineColor();

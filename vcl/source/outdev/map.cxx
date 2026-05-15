@@ -288,19 +288,19 @@ tools::Long OutputDevice::LogicHeightToDevicePixel(tools::Long nHeight) const
     return mpMapper->LogicHeightToDevicePixel(nHeight, GetMappingPolicy());
 }
 
-Point OutputDevice::LogicToPixel(const Point& rLogicPt) const
+vcl::DevicePoint OutputDevice::LogicToPixel(const Point& rLogicPt) const
 {
-    return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicPt);
+    return vcl::DevicePoint(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicPt));
 }
 
-Size OutputDevice::LogicToPixel(const Size& rLogicSize) const
+vcl::DeviceSize OutputDevice::LogicToPixel(const Size& rLogicSize) const
 {
-    return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicSize);
+    return vcl::DeviceSize(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicSize));
 }
 
-tools::Rectangle OutputDevice::LogicToPixel(const tools::Rectangle& rLogicRect) const
+vcl::DeviceRect OutputDevice::LogicToPixel(const tools::Rectangle& rLogicRect) const
 {
-    return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicRect);
+    return vcl::DeviceRect(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicRect));
 }
 
 tools::Polygon OutputDevice::LogicToPixel(const tools::Polygon& rLogicPoly) const
@@ -364,9 +364,9 @@ vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
     return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDeviceRegion);
 }
 
-Point OutputDevice::PixelToLogic(const Point& rDevicePt) const
+vcl::LogicPoint OutputDevice::PixelToLogic(const Point& rDevicePt) const
 {
-    return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDevicePt);
+    return vcl::LogicPoint(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDevicePt));
 }
 
 Point OutputDevice::SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const
@@ -374,14 +374,14 @@ Point OutputDevice::SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const
     return mpMapper->WindowSubPixelToLogicUnits(rDevicePt, GetMappingPolicy());
 }
 
-Size OutputDevice::PixelToLogic(const Size& rDeviceSize) const
+vcl::LogicSize OutputDevice::PixelToLogic(const Size& rDeviceSize) const
 {
-    return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDeviceSize);
+    return vcl::LogicSize(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDeviceSize));
 }
 
-tools::Rectangle OutputDevice::PixelToLogic(const tools::Rectangle& rDeviceRect) const
+vcl::LogicRect OutputDevice::PixelToLogic(const tools::Rectangle& rDeviceRect) const
 {
-    return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDeviceRect);
+    return vcl::LogicRect(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDeviceRect));
 }
 
 tools::Polygon OutputDevice::PixelToLogic(const tools::Polygon& rDevicePoly) const

@@ -383,7 +383,7 @@ bool GDIMetaFile::ImplPlayWithRenderer(OutputDevice& rOut, const Point& rPos, Si
     if (!m_bUseCanvas)
         return false;
 
-    Size rDestSize(rOut.LogicToPixel(rLogicDestSize));
+    Size rDestSize(rOut.LogicToPixel(rLogicDestSize).get());
 
     const vcl::Window* win = rOut.GetOwnerWindow();
 
@@ -451,7 +451,7 @@ void GDIMetaFile::Play(OutputDevice& rOut, const Point& rPos,
                        const Size& rSize)
 {
     MapMode aDrawMap( GetPrefMapMode() );
-    Size    aDestSize(rOut.LogicToPixel(rSize));
+    Size    aDestSize(rOut.LogicToPixel(rSize).get());
 
     if (aDestSize.Width() <= 0 || aDestSize.Height() <= 0)
         return;
@@ -495,7 +495,7 @@ void GDIMetaFile::Play(OutputDevice& rOut, const Point& rPos,
     const Size aOldOffset(rOut.GetPixelOffset());
     const Size aEmptySize;
     rOut.SetPixelOffset(aEmptySize);
-    aDrawMap.SetOrigin(rOut.PixelToLogic(rOut.LogicToPixel(rPos), aDrawMap));
+    aDrawMap.SetOrigin(rOut.PixelToLogic(rOut.LogicToPixel(rPos).get(), aDrawMap));
     rOut.SetPixelOffset(aOldOffset);
 
     auto popIt = rOut.ScopedPush();
@@ -1593,7 +1593,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
         case MetaActionType::BMP:
         {
             MetaBmpAction* pAct = static_cast<MetaBmpAction*>(pAction);
-            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->PixelToLogic( pAct->GetBitmap().GetSizePixel() ) );
+            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->PixelToLogic( pAct->GetBitmap().GetSizePixel() ).get() );
             ImplActionBounds( aBound, ::LogicToLogic( aRect, aMapVDev->GetMapMode(), GetPrefMapMode() ), aClipStack );
         }
         break;
@@ -1601,7 +1601,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
         case MetaActionType::BMPEX:
         {
             MetaBmpExAction* pAct = static_cast<MetaBmpExAction*>(pAction);
-            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->PixelToLogic( pAct->GetBitmap().GetSizePixel() ) );
+            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->PixelToLogic( pAct->GetBitmap().GetSizePixel() ).get() );
             ImplActionBounds( aBound, ::LogicToLogic( aRect, aMapVDev->GetMapMode(), GetPrefMapMode() ), aClipStack );
         }
         break;
@@ -1609,7 +1609,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
         case MetaActionType::MASK:
         {
             MetaMaskAction* pAct = static_cast<MetaMaskAction*>(pAction);
-            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->PixelToLogic( pAct->GetBitmap().GetSizePixel() ) );
+            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->PixelToLogic( pAct->GetBitmap().GetSizePixel() ).get() );
             ImplActionBounds( aBound, ::LogicToLogic( aRect, aMapVDev->GetMapMode(), GetPrefMapMode() ), aClipStack );
         }
         break;

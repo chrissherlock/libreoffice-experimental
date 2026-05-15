@@ -99,10 +99,10 @@ void ScGridMerger::AddHorLine(bool bWorksInPixels, tools::Long nX1, tools::Long 
 {
     if ( bWorksInPixels )
     {
-        Point aPoint(pDev->PixelToLogic(Point(nX1, nY)));
+        Point aPoint(pDev->PixelToLogic(Point(nX1, nY)).get());
         nX1 = aPoint.X();
         nY = aPoint.Y();
-        nX2 = pDev->PixelToLogic(Point(nX2, 0)).X();
+        nX2 = pDev->PixelToLogic(Point(nX2, 0))->X();
     }
 
     if ( bDashed )
@@ -119,7 +119,7 @@ void ScGridMerger::AddHorLine(bool bWorksInPixels, tools::Long nX1, tools::Long 
 
         // Calculating logic values of DashLen and Distance from fixed pixel values
         Size aDashDistanceLen( pDev->PixelToLogic( Size( PAGEBREAK_LINE_DISTANCE_PIXEL,
-                                                         PAGEBREAK_LINE_DASH_LEN_PIXEL )));
+                                                         PAGEBREAK_LINE_DASH_LEN_PIXEL )).get() );
 
         aLineInfo.SetDistance( aDashDistanceLen.Width() );
         aLineInfo.SetDashLen( aDashDistanceLen.Height() );
@@ -143,10 +143,10 @@ void ScGridMerger::AddVerLine(bool bWorksInPixels, tools::Long nX, tools::Long n
 {
     if (bWorksInPixels)
     {
-        Point aPoint(pDev->PixelToLogic(Point(nX, nY1)));
+        Point aPoint(pDev->PixelToLogic(Point(nX, nY1)).get());
         nX = aPoint.X();
         nY1 = aPoint.Y();
-        nY2 = pDev->PixelToLogic(Point(0, nY2)).Y();
+        nY2 = pDev->PixelToLogic(Point(0, nY2))->Y();
     }
 
     if ( bDashed )
@@ -163,7 +163,7 @@ void ScGridMerger::AddVerLine(bool bWorksInPixels, tools::Long nX, tools::Long n
 
         // Calculating logic values of DashLen and Distance from fixed pixel values
         Size aDashDistanceLen( pDev->PixelToLogic( Size( PAGEBREAK_LINE_DISTANCE_PIXEL,
-                                                         PAGEBREAK_LINE_DASH_LEN_PIXEL )));
+                                                         PAGEBREAK_LINE_DASH_LEN_PIXEL )).get() );
 
         aLineInfo.SetDistance( aDashDistanceLen.Width() );
         aLineInfo.SetDashLen( aDashDistanceLen.Height() );

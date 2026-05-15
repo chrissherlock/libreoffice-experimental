@@ -199,7 +199,7 @@ void ImpEditEngine::SetRefDevice(OutputDevice* pRef)
     else
         mpRefDev = pSharedVCL->GetVirtualDevice();
 
-    mnOnePixelInRef = static_cast<sal_uInt16>(mpRefDev->PixelToLogic( Size( 1, 0 ) ).Width());
+    mnOnePixelInRef = static_cast<sal_uInt16>(mpRefDev->PixelToLogic( Size( 1, 0 ) )->Width());
 
     if ( IsFormatted() )
     {
@@ -220,7 +220,7 @@ void ImpEditEngine::SetRefMapMode( const MapMode& rMapMode )
     SetRefDevice(mpRefDev);
 
     mpRefDev->SetMapMode( rMapMode );
-    mnOnePixelInRef = static_cast<sal_uInt16>(mpRefDev->PixelToLogic(Size(1, 0)).Width());
+    mnOnePixelInRef = static_cast<sal_uInt16>(mpRefDev->PixelToLogic(Size(1, 0))->Width());
     if ( IsFormatted() )
     {
         FormatFullDoc();
@@ -640,7 +640,7 @@ bool ImpEditEngine::MouseButtonUp( const MouseEvent& rMEvt, EditView* pView )
         return true;
 
     const OutputDevice& rOutDev = pView->getEditViewCallbacks() ? pView->getEditViewCallbacks()->EditViewOutputDevice() : *pView->GetWindow()->GetOutDev();
-    Point aLogicClick = rOutDev.PixelToLogic(rMEvt.GetPosPixel());
+    Point aLogicClick = rOutDev.PixelToLogic(rMEvt.GetPosPixel()).get();
     const SvxFieldItem* pFld = pView->GetField(aLogicClick);
     if (!pFld)
         return true;

@@ -649,7 +649,7 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
 {
     // we need pixel coordinates
     Size aRealSize = GetSizePixel();
-    Point aRealPos = rDev.LogicToPixel(rPos);
+    Point aRealPos = rDev.LogicToPixel(rPos).get();
 
     if ((aRealSize.Width() < 3) || (aRealSize.Height() < 3))
         // we want to have two pixels frame ...
@@ -733,7 +733,7 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
             // do this before converting to logics !
 
         // the header's draw expects logic coordinates, again
-        aHeaderPos = rDev.PixelToLogic(aHeaderPos);
+        aHeaderPos = rDev.PixelToLogic(aHeaderPos).get();
 
         Size aOrigSize(pBar->GetSizePixel());
         pBar->SetSizePixel(aHeaderSize);

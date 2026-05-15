@@ -193,7 +193,7 @@ SwRect SwVisibleCursor::SetPos()
                     {
                         tools::Long nSize = pOut->GetSettings().GetStyleSettings().GetCursorSize();
                         Size aSize( nSize, nSize );
-                        aSize = pOut->PixelToLogic( aSize );
+                        aSize = pOut->PixelToLogic( aSize ).get();
                         aRect.Left( aRect.Left() - aSize.Width() );
                     }
                 }
@@ -878,7 +878,7 @@ void SwSelPaintRects::Get1PixelInLogic( const SwViewShell& rSh,
     {
         *s_pMapMode = rMM;
         Size aTmp( 1, 1 );
-        aTmp = pOut->PixelToLogic( aTmp );
+        aTmp = pOut->PixelToLogic( aTmp ).get();
         s_nPixPtX = aTmp.Width();
         s_nPixPtY = aTmp.Height();
     }

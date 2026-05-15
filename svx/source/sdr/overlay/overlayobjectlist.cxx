@@ -64,7 +64,7 @@ namespace sdr::overlay
                     if(0.0 == fLogicTolerance)
                     {
                         Size aSizeLogic(pManager->getOutputDevice().PixelToLogic(
-                            Size(DEFAULT_VALUE_FOR_HITTEST_PIXEL, DEFAULT_VALUE_FOR_HITTEST_PIXEL)));
+                            Size(DEFAULT_VALUE_FOR_HITTEST_PIXEL, DEFAULT_VALUE_FOR_HITTEST_PIXEL)).get());
 
                         // When tiled rendering, we always work in logic units, use the non-pixel default.
                         if (comphelper::LibreOfficeKit::isActive())
@@ -117,10 +117,10 @@ namespace sdr::overlay
 
                 if(pManager)
                 {
-                    const Point aPosLogic(pManager->getOutputDevice().PixelToLogic(rDiscretePosition));
+                    const Point aPosLogic(pManager->getOutputDevice().PixelToLogic(rDiscretePosition).get());
                     const basegfx::B2DPoint aPosition(aPosLogic.X(), aPosLogic.Y());
 
-                    const Size aSizeLogic(pManager->getOutputDevice().PixelToLogic(Size(nDiscreteTolerance, nDiscreteTolerance)));
+                    const Size aSizeLogic(pManager->getOutputDevice().PixelToLogic(Size(nDiscreteTolerance, nDiscreteTolerance)).get());
                     return isHitLogic(aPosition, static_cast<double>(aSizeLogic.Width()));
                 }
             }

@@ -2362,7 +2362,7 @@ bool SwFlyFrame::GetRedlineRenderModeFrame(SvxBoxItem& rBoxItem) const
 
     // Set a logic value which is roughly 1 pixel wide, so the border is visible.
     vcl::RenderContext* pOut = pViewShell->GetOut();
-    tools::Long nWidth = pOut ? pOut->PixelToLogic(Size(1, 1)).Width() : 0;
+    tools::Long nWidth = pOut ? pOut->PixelToLogic(Size(1, 1))->Width() : 0;
     aBorderLine.SetWidth(nWidth);
 
     aBorderLine.SetBorderLineStyle(SvxBorderLineStyle::SOLID);
@@ -3123,7 +3123,7 @@ Size SwFlyFrame::CalcRel( const SwFormatFrameSize &rSz ) const
         {
             nRelWidth  = pSh->GetBrowseWidth();
             nRelHeight = pSh->VisArea().Height();
-            Size aBorder = pSh->GetOut()->PixelToLogic( pSh->GetBrowseBorder() );
+            Size aBorder = pSh->GetOut()->PixelToLogic( pSh->GetBrowseBorder() ).get();
             nRelWidth  = std::min( nRelWidth,  pRel->getFramePrintArea().Width() );
             nRelHeight -= 2*aBorder.Height();
             nRelHeight = std::min( nRelHeight, pRel->getFramePrintArea().Height() );

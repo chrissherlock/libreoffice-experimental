@@ -419,7 +419,7 @@ bool GraphCtrl::KeyInput( const KeyEvent& rKEvt )
                 if(aCode.IsMod2())
                 {
                     // move in 1 pixel distance
-                    Size aLogicSizeOnePixel = rDevice.PixelToLogic(Size(1,1));
+                    Size aLogicSizeOnePixel = rDevice.PixelToLogic(Size(1,1)).get();
                     nX *= aLogicSizeOnePixel.Width();
                     nY *= aLogicSizeOnePixel.Height();
                 }
@@ -593,7 +593,7 @@ bool GraphCtrl::MouseButtonDown( const MouseEvent& rMEvt )
     {
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
 
-        const Point aLogPt( rDevice.PixelToLogic( rMEvt.GetPosPixel() ) );
+        const Point aLogPt( rDevice.PixelToLogic( rMEvt.GetPosPixel() ).get() );
 
         if ( !tools::Rectangle( Point(), maGraphSize ).Contains( aLogPt ) && !mpView->IsEditMode() )
             weld::CustomWidgetController::MouseButtonDown( rMEvt );
@@ -635,7 +635,7 @@ bool GraphCtrl::MouseButtonDown( const MouseEvent& rMEvt )
 bool GraphCtrl::MouseMove(const MouseEvent& rMEvt)
 {
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    const Point aLogPos( rDevice.PixelToLogic( rMEvt.GetPosPixel() ) );
+    const Point aLogPos( rDevice.PixelToLogic( rMEvt.GetPosPixel() ).get() );
 
     if ( mbSdrMode )
     {
@@ -680,7 +680,7 @@ bool GraphCtrl::MouseButtonUp(const MouseEvent& rMEvt)
             mpView->MouseButtonUp( rMEvt, &rDevice );
 
         ReleaseMouse();
-        SetPointer( mpView->GetPreferredPointer( rDevice.PixelToLogic( rMEvt.GetPosPixel() ), &rDevice ) );
+        SetPointer( mpView->GetPreferredPointer( rDevice.PixelToLogic( rMEvt.GetPosPixel() ).get(), &rDevice ) );
     }
     else
         weld::CustomWidgetController::MouseButtonUp( rMEvt );

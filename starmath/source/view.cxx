@@ -287,19 +287,19 @@ MapMode SmGraphicWindow::GetGraphicMapMode() const
 {
     OutputDevice& rDevice = mxGraphic->GetOutputDevice();
     MapMode aMap(rDevice.GetMapMode());
-    aMap.SetOrigin( aMap.GetOrigin() - rDevice.PixelToLogic( aPixOffset ) );
+    aMap.SetOrigin( aMap.GetOrigin() - rDevice.PixelToLogic( aPixOffset ).get() );
     return aMap;
 }
 
 void SmGraphicWindow::SetTotalSize( const Size& rNewSize )
 {
-    aTotPixSz = mxGraphic->GetOutputDevice().LogicToPixel(rNewSize);
+    aTotPixSz = mxGraphic->GetOutputDevice().LogicToPixel(rNewSize).get();
     Resize();
 }
 
 Size SmGraphicWindow::GetTotalSize() const
 {
-    return mxGraphic->GetOutputDevice().PixelToLogic(aTotPixSz);
+    return mxGraphic->GetOutputDevice().PixelToLogic(aTotPixSz).get();
 }
 
 void SmGraphicWindow::ShowContextMenu(const CommandEvent& rCEvt)
@@ -380,7 +380,7 @@ bool SmGraphicWidget::MouseButtonDown(const MouseEvent& rMEvt)
 
     OutputDevice& rDevice = GetOutputDevice();
     // get click position relative to formula
-    Point aPos(rDevice.PixelToLogic(rMEvt.GetPosPixel()) - GetFormulaDrawPos());
+    Point aPos(rDevice.PixelToLogic(rMEvt.GetPosPixel()).get() - GetFormulaDrawPos());
 
     const SmNode *pTree = GetDoc()->GetFormulaTree();
     if (!pTree)
@@ -423,7 +423,7 @@ bool SmGraphicWidget::MouseMove(const MouseEvent &rMEvt)
     if (rMEvt.IsLeft() && SmViewShell::IsInlineEditEnabled())
     {
         OutputDevice& rDevice = GetOutputDevice();
-        Point aPos(rDevice.PixelToLogic(rMEvt.GetPosPixel()) - GetFormulaDrawPos());
+        Point aPos(rDevice.PixelToLogic(rMEvt.GetPosPixel()).get() - GetFormulaDrawPos());
         GetCursor().MoveTo(&rDevice, aPos, false);
 
         CaretBlinkStop();
@@ -627,7 +627,7 @@ void SmGraphicWidget::SetTotalSize()
 {
     assert(GetDoc());
     OutputDevice& rDevice = GetOutputDevice();
-    const Size aTmp(rDevice.PixelToLogic(rDevice.LogicToPixel(GetDoc()->GetSize())));
+    const Size aTmp(rDevice.PixelToLogic(rDevice.LogicToPixel(GetDoc()->GetSize()).get()).get());
     if (aTmp != mrGraphicWindow.GetTotalSize())
         mrGraphicWindow.SetTotalSize(aTmp);
 }
@@ -900,7 +900,7 @@ void SmGraphicWindow::ZoomToFitInWindow()
     SetGraphicMapMode(MapMode(SmMapUnit()));
 
     assert(mxGraphic->GetDoc());
-    Size aSize(mxGraphic->GetOutputDevice().LogicToPixel(mxGraphic->GetDoc()->GetSize()));
+    Size aSize(mxGraphic->GetOutputDevice().LogicToPixel(mxGraphic->GetDoc()->GetSize()).get());
     Size aWindowSize(GetSizePixel());
 
     if (!aSize.IsEmpty())

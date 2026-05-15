@@ -158,15 +158,15 @@ static void ImplCursorInvert(vcl::Window* pWindow, ImplCursorData const * pData)
 
     tools::Rectangle aPaintRect = ImplCursorInvert(pRenderContext, pData);
     if (bDoubleBuffering)
-        pGuard->SetPaintRect(pRenderContext->PixelToLogic(aPaintRect));
+        pGuard->SetPaintRect(pRenderContext->PixelToLogic(aPaintRect).get());
 }
 
 bool vcl::Cursor::ImplPrepForDraw(const OutputDevice* pDevice, ImplCursorData& rData) const
 {
     if (pDevice && !rData.mbCurVisible)
     {
-        rData.maPixPos        = pDevice->LogicToPixel( maPos );
-        rData.maPixSize       = pDevice->LogicToPixel( maSize );
+        rData.maPixPos        = pDevice->LogicToPixel( maPos ).get();
+        rData.maPixSize       = pDevice->LogicToPixel( maSize ).get();
         rData.mnOrientation   = mnOrientation;
         rData.mnDirection     = mnDirection;
 

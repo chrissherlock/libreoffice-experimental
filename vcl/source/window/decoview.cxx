@@ -760,7 +760,7 @@ void DecorationView::DrawSymbol( const tools::Rectangle& rRect, SymbolType eType
                                  const Color& rColor, DrawSymbolFlags nStyle )
 {
     const StyleSettings&    rStyleSettings  = mpOutDev->GetSettings().GetStyleSettings();
-    const tools::Rectangle         aRect           = mpOutDev->LogicToPixel( rRect );
+    const tools::Rectangle         aRect           = mpOutDev->LogicToPixel( rRect ).get();
     auto popIt = mpOutDev->ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
     Color                   nColor(rColor);
     mpOutDev->SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
@@ -796,7 +796,7 @@ void DecorationView::DrawFrame( const tools::Rectangle& rRect,
                                 const Color& rLeftTopColor,
                                 const Color& rRightBottomColor )
 {
-    tools::Rectangle   aRect         = mpOutDev->LogicToPixel( rRect );
+    tools::Rectangle   aRect         = mpOutDev->LogicToPixel( rRect ).get();
     const Color aOldLineColor = mpOutDev->GetLineColor();
     const vcl::MappingPolicy eOldPolicy = mpOutDev->GetMappingPolicy();
     mpOutDev->SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
@@ -847,7 +847,7 @@ void DecorationView::DrawHighlightFrame( const tools::Rectangle& rRect )
 
 tools::Rectangle DecorationView::DrawFrame( const tools::Rectangle& rRect, DrawFrameStyle nStyle, DrawFrameFlags nFlags )
 {
-    tools::Rectangle aRect = mpOutDev->LogicToPixel( rRect );
+    tools::Rectangle aRect = mpOutDev->LogicToPixel( rRect ).get();
     vcl::MappingPolicy eOldPolicy = mpOutDev->GetMappingPolicy();
     mpOutDev->SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
@@ -863,7 +863,7 @@ tools::Rectangle DecorationView::DrawFrame( const tools::Rectangle& rRect, DrawF
     }
 
     mpOutDev->SetMappingPolicy( eOldPolicy );
-    aRect = mpOutDev->PixelToLogic( aRect );
+    aRect = mpOutDev->PixelToLogic( aRect ).get();
 
     return aRect;
 }
@@ -875,7 +875,7 @@ tools::Rectangle DecorationView::DrawButton( const tools::Rectangle& rRect, Draw
         return rRect;
     }
 
-    tools::Rectangle aRect = mpOutDev->LogicToPixel( rRect );
+    tools::Rectangle aRect = mpOutDev->LogicToPixel( rRect ).get();
     const vcl::MappingPolicy eOldPolicy = mpOutDev->GetMappingPolicy();
     mpOutDev->SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
@@ -932,7 +932,7 @@ tools::Rectangle DecorationView::DrawButton( const tools::Rectangle& rRect, Draw
     }
 
     mpOutDev->SetMappingPolicy( eOldPolicy );
-    aRect = mpOutDev->PixelToLogic( aRect );
+    aRect = mpOutDev->PixelToLogic( aRect ).get();
 
     return aRect;
 }

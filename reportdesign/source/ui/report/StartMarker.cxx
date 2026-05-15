@@ -114,7 +114,7 @@ void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
         tools::Long nSize = aSize.Width() - nVRulerWidth;
         aSize.AdjustWidth(nCornerWidth );
         rRenderContext.SetClipRegion(vcl::Region(rRenderContext.PixelToLogic(tools::Rectangle(Point(),
-                                                                             Size(nSize, aSize.Height())))));
+                                            Size(nSize, aSize.Height()))).get()));
     }
 
     tools::Rectangle aWholeRect(Point(), aSize);
@@ -159,7 +159,7 @@ void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
                         Size(aSize.Width() - nCornerWidth - nCornerWidth,
                              aSize.Height() - nCornerHeight - nCornerHeight));
         ColorChanger aColors(&rRenderContext, COL_WHITE, COL_WHITE);
-        rRenderContext.DrawPolyLine( tools::Polygon(rRenderContext.PixelToLogic(aRect)),
+        rRenderContext.DrawPolyLine( tools::Polygon(rRenderContext.PixelToLogic(aRect).get()),
                                     LineInfo(LineStyle::Solid, 2));
     }
 }

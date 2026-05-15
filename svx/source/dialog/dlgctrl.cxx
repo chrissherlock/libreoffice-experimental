@@ -1376,7 +1376,7 @@ SvxXRectPreview::SvxXRectPreview()
 
 tools::Rectangle SvxPreviewBase::GetPreviewSize() const
 {
-    tools::Rectangle aObjectSize(Point(), getBufferDevice().PixelToLogic(GetOutputSizePixel()));
+    tools::Rectangle aObjectSize(Point(), getBufferDevice().PixelToLogic(GetOutputSizePixel()).get());
     return aObjectSize;
 }
 

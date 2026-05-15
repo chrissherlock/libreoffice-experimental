@@ -647,8 +647,8 @@ private:
         }
 
         // Paint the lines
-        aSize = aVirDev->PixelToLogic( aSize );
-        tools::Long nPix = aVirDev->PixelToLogic( Size( 0, 1 ) ).Height();
+        aSize = aVirDev->PixelToLogic( aSize ).get();
+        tools::Long nPix = aVirDev->PixelToLogic( Size( 0, 1 ) )->Height();
         sal_uInt32 n1 = nLine1;
         sal_uInt32 n2 = nLine2;
         tools::Long nDist  = nDistance;
@@ -668,7 +668,7 @@ private:
         if ( aSize.Width() <= 0 )
             return;
 
-        Size aVirSize = aVirDev->LogicToPixel( aSize );
+        Size aVirSize = aVirDev->LogicToPixel( aSize ).get();
         if ( aVirDev->GetOutputSizePixel() != aVirSize )
             aVirDev->SetOutputSizePixel( aVirSize );
         aVirDev->SetFillColor( aColorDist );

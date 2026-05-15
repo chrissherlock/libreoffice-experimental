@@ -555,7 +555,7 @@ void SdrHdl::CreateB2dIAObject()
             // add offset if necessary
             if(m_pHdlList->IsMoveOutside() || mbMoveOutside)
             {
-                Size aOffset = rOutDev.PixelToLogic(Size(4, 4));
+                Size aOffset = rOutDev.PixelToLogic(Size(4, 4)).get();
 
                 if(m_eKind == SdrHdlKind::UpperLeft || m_eKind == SdrHdlKind::Upper || m_eKind == SdrHdlKind::UpperRight)
                     aMoveOutsideOffset.AdjustY( -(aOffset.Width()) );
