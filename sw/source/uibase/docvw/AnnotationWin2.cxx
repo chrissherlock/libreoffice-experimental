@@ -176,22 +176,16 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
         pPDFExtOutDevData->WrapBeginStructureElement(vcl::pdf::StructElement::NonStructElement, OUString());
     }
 
-    auto lclSizePixelToLogic = [this](Size szs) {
-        // In LOK without tiled annotations, SwAnnotationWin desn't have the
-        // right conversion when printing to PDF but mxSidebarTextControl does
-        if (comphelper::LibreOfficeKit::isActive()
-            && !comphelper::LibreOfficeKit::isTiledAnnotations())
-            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(szs);
+    auto lclSizePixelToLogic = [this](Size szs) -> Size {
+        if (comphelper::LibreOfficeKit::isActive() && !comphelper::LibreOfficeKit::isTiledAnnotations())
+            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(szs).get();
         else
             return PixelToLogic(szs);
     };
 
-    auto lclPointPixelToLogic = [this](Point pnt) {
-        // In LOK without tiled annotations, SwAnnotationWin desn't have the
-        // right conversion when printing to PDF but mxSidebarTextControl does
-        if (comphelper::LibreOfficeKit::isActive()
-            && !comphelper::LibreOfficeKit::isTiledAnnotations())
-            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(pnt);
+    auto lclPointPixelToLogic = [this](Point pnt) -> Point {
+        if (comphelper::LibreOfficeKit::isActive() && !comphelper::LibreOfficeKit::isTiledAnnotations())
+            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(pnt).get();
         else
             return PixelToLogic(pnt);
     };

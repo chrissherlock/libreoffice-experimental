@@ -209,7 +209,7 @@ void FixedText::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
 {
     ApplySettings(rDev);
 
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point aPos = rDev.LogicToPixel(rPos).get();
     Size        aSize = GetSizePixel();
     vcl::Font aFont = GetDrawPixelFont(&rDev);
 
@@ -751,7 +751,7 @@ void FixedBitmap::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
 
 void FixedBitmap::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
 {
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point aPos = rDev.LogicToPixel(rPos).get();
     Size        aSize = GetSizePixel();
     tools::Rectangle   aRect( aPos, aSize );
 
@@ -895,7 +895,7 @@ Size FixedImage::GetOptimalSize() const
 
 void FixedImage::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
 {
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point aPos = rDev.LogicToPixel(rPos).get();
     Size        aSize = GetSizePixel();
     tools::Rectangle   aRect( aPos, aSize );
 

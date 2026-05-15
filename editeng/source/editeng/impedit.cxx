@@ -56,14 +56,14 @@ using namespace css;
 
 static void lcl_AlignToPixel(Point& rPoint, const OutputDevice& rOutDev, short nDiffX, short nDiffY)
 {
-    rPoint = rOutDev.LogicToPixel( rPoint );
+    rPoint = rOutDev.LogicToPixel( rPoint ).get();
 
     if ( nDiffX )
         rPoint.AdjustX(nDiffX );
     if ( nDiffY )
         rPoint.AdjustY(nDiffY );
 
-    rPoint = rOutDev.PixelToLogic( rPoint );
+    rPoint = rOutDev.PixelToLogic( rPoint ).get();
 }
 
 LOKSpecialPositioning::LOKSpecialPositioning(const ImpEditView& rImpEditView, MapUnit eUnit,
@@ -302,7 +302,7 @@ static void lcl_translateTwips(const OutputDevice& rParent, OutputDevice& rChild
         rChild.SetMapMode(aMapMode);
         rChild.SetMappingPolicy(vcl::MappingPolicy::ApplyMapMode);
     }
-    aOffset = rChild.PixelToLogic(aOffset);
+    aOffset = rChild.PixelToLogic(aOffset).get();
     MapMode aMapMode(rChild.GetMapMode());
     aMapMode.SetOrigin(aOffset);
     aMapMode.SetMapUnit(rParent.GetMapMode().GetMapUnit());
@@ -917,7 +917,7 @@ void ImpEditView::ResetOutputArea( const tools::Rectangle& rRect )
         return;
 
     // #i119885# use grown area if needed; do when getting bigger OR smaller
-    const sal_Int32 nMore(DoInvalidateMore() ? GetOutputDevice().PixelToLogic(Size(mnInvalidateMore, 0)).Width() : 0);
+    const sal_Int32 nMore(DoInvalidateMore() ? GetOutputDevice().PixelToLogic(Size(mnInvalidateMore, 0))->Width() : 0);
 
     if (aOldArea.Left() > maOutputArea.Left())
     {
@@ -1278,7 +1278,7 @@ ImpEditView::ImplGetCursorRectAndMaybeScroll(EditPaM const& rPos,
 
     const OutputDevice& rOutDev = GetOutputDevice();
 
-    tools::Long nOnePixel = rOutDev.PixelToLogic( Size( 1, 0 ) ).Width();
+    tools::Long nOnePixel = rOutDev.PixelToLogic( Size( 1, 0 ) )->Width();
 
     if ( ( aEditCursor.Top() + nOnePixel >= GetVisDocTop() ) &&
          ( aEditCursor.Bottom() - nOnePixel <= GetVisDocBottom() ) &&
@@ -1293,7 +1293,7 @@ ImpEditView::ImplGetCursorRectAndMaybeScroll(EditPaM const& rPos,
         if ( !aCursorSz.Width() || !aCursorSz.Height() )
         {
             tools::Long nCursorSz = rOutDev.GetSettings().GetStyleSettings().GetCursorSize();
-            nCursorSz = rOutDev.PixelToLogic( Size( nCursorSz, 0 ) ).Width();
+            nCursorSz = rOutDev.PixelToLogic( Size( nCursorSz, 0 ) )->Width();
             if ( !aCursorSz.Width() )
                 aCursorSz.setWidth( nCursorSz );
             if ( !aCursorSz.Height() )
@@ -1607,8 +1607,8 @@ Pair ImpEditView::Scroll( tools::Long ndX, tools::Long ndY, ScrollRangeCheck nRa
     tools::Long nDiffY = !IsVertical() ? ( GetVisDocTop() - aNewVisArea.Top() ) : (IsTopToBottom() ? (GetVisDocLeft() - aNewVisArea.Left()) : -(GetVisDocTop() - aNewVisArea.Top()));
 
     Size aDiffs( nDiffX, nDiffY );
-    aDiffs = rOutDev.LogicToPixel( aDiffs );
-    aDiffs = rOutDev.PixelToLogic( aDiffs );
+    aDiffs = rOutDev.LogicToPixel( aDiffs ).get();
+    aDiffs = rOutDev.PixelToLogic( aDiffs ).get();
 
     tools::Long nRealDiffX = aDiffs.Width();
     tools::Long nRealDiffY = aDiffs.Height();
@@ -1632,8 +1632,8 @@ Pair ImpEditView::Scroll( tools::Long ndX, tools::Long ndY, ScrollRangeCheck nRa
         }
         // Move by aligned value does not necessarily result in aligned
         // rectangle ...
-        maVisDocStartPos = rOutDev.LogicToPixel(maVisDocStartPos);
-        maVisDocStartPos = rOutDev.PixelToLogic(maVisDocStartPos);
+        maVisDocStartPos = rOutDev.LogicToPixel(maVisDocStartPos).get();
+        maVisDocStartPos = rOutDev.PixelToLogic(maVisDocStartPos).get();
         tools::Rectangle aRect(maOutputArea);
 
         if (mpOutputWindow)
@@ -2144,7 +2144,7 @@ bool ImpEditView::IsSelectionAtPoint( const Point& rPosPixel )
 
     // Logical units ...
     const OutputDevice& rOutDev = GetOutputDevice();
-    Point aMousePos = rOutDev.PixelToLogic(rPosPixel);
+    Point aMousePos = rOutDev.PixelToLogic(rPosPixel).get();
 
     if ( ( !GetOutputArea().Contains( aMousePos ) ) && !getImpEditEngine().IsInSelectionMode() )
     {
@@ -2164,7 +2164,7 @@ bool ImpEditView::SetCursorAtPoint( const Point& rPointPixel )
 
     // Logical units ...
     const OutputDevice& rOutDev = GetOutputDevice();
-    aMousePos = rOutDev.PixelToLogic( aMousePos );
+    aMousePos = rOutDev.PixelToLogic( aMousePos ).get();
 
     if ( ( !GetOutputArea().Contains( aMousePos ) ) && !getImpEditEngine().IsInSelectionMode() )
     {
@@ -2237,7 +2237,7 @@ void ImpEditView::ShowDDCursor( const tools::Rectangle& rRect )
     rOutDev.SetFillColor( Color(4210752) );    // GRAY BRUSH_50, OLDSV, change to DDCursor!
 
     // Save background ...
-    tools::Rectangle aSaveRect( rOutDev.LogicToPixel( rRect ) );
+    tools::Rectangle aSaveRect( rOutDev.LogicToPixel( rRect ).get() );
     // prefer to save some more ...
     aSaveRect.AdjustRight(1 );
     aSaveRect.AdjustBottom(1 );
@@ -2259,7 +2259,7 @@ void ImpEditView::ShowDDCursor( const tools::Rectangle& rRect )
         DBG_ASSERT( bDone, "Virtual Device broken?" );
     }
 
-    aSaveRect = rOutDev.PixelToLogic( aSaveRect );
+    aSaveRect = rOutDev.PixelToLogic( aSaveRect ).get();
 
     mpDragAndDropInfo->pBackground->DrawOutDev( Point(0,0), aSaveRect.GetSize(),
                                 aSaveRect.TopLeft(), aSaveRect.GetSize(), rOutDev );
@@ -2296,7 +2296,7 @@ void ImpEditView::dragGestureRecognized(const css::datatransfer::dnd::DragGestur
         // Field?!
         sal_Int32 nPara;
         sal_Int32 nPos;
-        Point aMousePos = GetOutputDevice().PixelToLogic( aMousePosPixel );
+        Point aMousePos = GetOutputDevice().PixelToLogic( aMousePosPixel ).get();
         const SvxFieldItem* pField = GetField( aMousePos, &nPara, &nPos );
         if ( pField )
         {
@@ -2341,7 +2341,7 @@ void ImpEditView::dragGestureRecognized(const css::datatransfer::dnd::DragGestur
 
     // Sensitive area to be scrolled.
     Size aSz( 5, 0 );
-    aSz = GetOutputDevice().PixelToLogic( aSz );
+    aSz = GetOutputDevice().PixelToLogic( aSz ).get();
     mpDragAndDropInfo->nSensibleRange = static_cast<sal_uInt16>(aSz.Width());
     mpDragAndDropInfo->nCursorWidth = static_cast<sal_uInt16>(aSz.Width()) / 2;
     mpDragAndDropInfo->aBeginDragSel = getEditEngine().CreateESelection( aCopySel );
@@ -2560,7 +2560,7 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
     const OutputDevice& rOutDev = GetOutputDevice();
 
     Point aMousePos( rDTDE.LocationX, rDTDE.LocationY );
-    aMousePos = rOutDev.PixelToLogic( aMousePos );
+    aMousePos = rOutDev.PixelToLogic( aMousePos ).get();
 
     bool bAccept = false;
 
@@ -2652,7 +2652,7 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
                     aStartPos = GetWindowPos( aStartPos );
                     Point aEndPos( GetOutputArea().GetWidth(), nDDYPos );
                     aEndPos = GetWindowPos( aEndPos );
-                    aEditCursor = rOutDev.LogicToPixel( tools::Rectangle( aStartPos, aEndPos ) );
+                    aEditCursor = rOutDev.LogicToPixel( tools::Rectangle( aStartPos, aEndPos ) ).get();
                     if (!getEditEngine().IsEffectivelyVertical())
                     {
                         aEditCursor.AdjustTop( -1 );
@@ -2671,7 +2671,7 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
                             aEditCursor.AdjustRight( -1 );
                         }
                     }
-                    aEditCursor = rOutDev.PixelToLogic( aEditCursor );
+                    aEditCursor = rOutDev.PixelToLogic( aEditCursor ).get();
                 }
                 else
                 {
@@ -2679,8 +2679,8 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
                     Point aTopLeft( GetWindowPos( aEditCursor.TopLeft() ) );
                     aEditCursor.SetPos( aTopLeft );
                     aEditCursor.SetRight(aEditCursor.Left() + mpDragAndDropInfo->nCursorWidth);
-                    aEditCursor = rOutDev.LogicToPixel( aEditCursor );
-                    aEditCursor = rOutDev.PixelToLogic( aEditCursor );
+                    aEditCursor = rOutDev.LogicToPixel( aEditCursor ).get();
+                    aEditCursor = rOutDev.PixelToLogic( aEditCursor ).get();
                 }
 
                 bool bCursorChanged = !mpDragAndDropInfo->bVisCursor || (mpDragAndDropInfo->aCurCursor != aEditCursor);

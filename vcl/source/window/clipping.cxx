@@ -155,7 +155,7 @@ void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)
     const vcl::Region aPaintRgn(mxOwnerWindow->GetPaintRegion());
 
     if (!aPaintRgn.IsNull())
-        rDstRect.Intersection(LogicToPixel(aPaintRgn.GetBoundRect()));
+        rDstRect.Intersection(LogicToPixel(aPaintRgn.GetBoundRect()).get());
 }
 
 void Window::EnableClipSiblings( bool bClipSiblings )
@@ -677,15 +677,15 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
     if ( mxOwnerWindow->mpWindowImpl->mpPaintRegion )
     {
         vcl::Region      aClip( *mxOwnerWindow->mpWindowImpl->mpPaintRegion );
-        const Point aPixPos( LogicToPixel( rPos ) );
+        const Point aPixPos( LogicToPixel( rPos ).get() );
 
         aClip.Move( -GetDeviceOriginX(), -GetDeviceOriginY() );
-        aClip.Intersect( tools::Rectangle( aPixPos, LogicToPixel( rSize ) ) );
+        aClip.Intersect( tools::Rectangle( aPixPos, LogicToPixel( rSize ).get() ) );
 
         if ( !aClip.IsEmpty() )
         {
             const vcl::Region    aOldClip( rSaveDevice.GetClipRegion() );
-            const Point     aPixOffset( rSaveDevice.LogicToPixel( Point() ) );
+            const Point     aPixOffset( rSaveDevice.LogicToPixel( Point() ).get() );
             const vcl::MappingPolicy eOldPolicy = rSaveDevice.GetMappingPolicy();
 
             // move clip region to have the same distance to DestOffset

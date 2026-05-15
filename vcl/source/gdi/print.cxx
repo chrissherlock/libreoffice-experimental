@@ -104,8 +104,8 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
                                          const Point& rDestPt, const Size& rDestSize,
                                          const Point& rSrcPtPixel, const Size& rSrcSizePixel )
 {
-    Point       aDestPt( LogicToPixel( rDestPt ) );
-    Size        aDestSz( LogicToPixel( rDestSize ) );
+    Point       aDestPt( LogicToPixel( rDestPt ).get() );
+    Size        aDestSz( LogicToPixel( rDestSize ).get() );
     tools::Rectangle   aSrcRect( rSrcPtPixel, rSrcSizePixel );
 
     aSrcRect.Normalize();
@@ -654,8 +654,8 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
                          const Point& rDestPt, const Size& rDestSize,
                          const Point& rSrcPtPixel, const Size& rSrcSizePixel )
 {
-    Point       aDestPt( LogicToPixel( rDestPt ) );
-    Size        aDestSz( LogicToPixel( rDestSize ) );
+    Point       aDestPt( LogicToPixel( rDestPt ).get() );
+    Size        aDestSz( LogicToPixel( rDestSize ).get() );
     tools::Rectangle   aSrcRect( rSrcPtPixel, rSrcSizePixel );
 
     aSrcRect.Normalize();
@@ -1297,7 +1297,7 @@ bool Printer::SetPaperSizeUser( const Size& rSize )
     if ( mbInPrintPage )
         return false;
 
-    const Size aPixSize = LogicToPixel( rSize );
+    const Size aPixSize = LogicToPixel( rSize ).get();
     const Size aPageSize = PixelToLogic(aPixSize, MapMode(MapUnit::Map100thMM));
     bool bNeedToChange(maJobSetup.ImplGetConstData().GetPaperWidth() != aPageSize.Width() ||
         maJobSetup.ImplGetConstData().GetPaperHeight() != aPageSize.Height());
