@@ -1193,7 +1193,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
             rDevice.SetMapMode(aNewMM);
 
             // paint the background
-            rDevice.DrawRect(rDevice.PixelToLogic(aBackground).get());
+            rDevice.DrawRect(rDevice.PixelToLogic(aBackground));
 
             OutputDevice& rOtherWin = pOtherEditView->GetOutputDevice();
             const MapMode aOrigMapMode = rOtherWin.GetMapMode();
