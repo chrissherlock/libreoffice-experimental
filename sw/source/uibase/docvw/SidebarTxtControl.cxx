@@ -250,8 +250,8 @@ void SidebarTextControl::Paint(vcl::RenderContext& rRenderContext, const tools::
     if ( bIsAntiAliasing )
         rRenderContext.SetAntialiasing(AntialiasingFlags::Enable);
     rRenderContext.SetLineColor(mrSidebarWin.GetChangeColor());
-    rRenderContext.DrawLine(rRenderContext.PixelToLogic(aPos).get(), rRenderContext.PixelToLogic(aPos + Point(0, aSize.Height() * 0.95)).get());
-    rRenderContext.DrawLine(rRenderContext.PixelToLogic(aPos + Point(aSize.Width(), 0)).get(), rRenderContext.PixelToLogic(aPos + Point(aSize.Width(), aSize.Height() * 0.95)).get());
+    rRenderContext.DrawLine(rRenderContext.PixelToLogic(aPos), rRenderContext.PixelToLogic(aPos + Point(0, aSize.Height() * 0.95)));
+    rRenderContext.DrawLine(rRenderContext.PixelToLogic(aPos + Point(aSize.Width(), 0)), rRenderContext.PixelToLogic(aPos + Point(aSize.Width(), aSize.Height() * 0.95)));
 }
 void SidebarTextControl::MakeVisible()
 {

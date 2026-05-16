@@ -826,7 +826,7 @@ void EmbeddedObjectRef::DrawShading( const tools::Rectangle &rRect, OutputDevice
         else
             a2 += Point( 0, i );
 
-        pOut->DrawLine( pOut->PixelToLogic( a1 ).get(), pOut->PixelToLogic( a2 ).get() );
+        pOut->DrawLine( pOut->PixelToLogic( a1 ), pOut->PixelToLogic( a2 ) );
     }
 }
 
