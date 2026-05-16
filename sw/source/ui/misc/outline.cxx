@@ -877,7 +877,7 @@ static tools::Long lcl_DrawGraphic(vcl::RenderContext& rVDev, const SwNumFormat&
 
 void NumberingPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&)
 {
-    const Size aSize(rRenderContext.PixelToLogic(GetOutputSizePixel()).get());
+    const vcl::LogicSize aSize(rRenderContext.PixelToLogic(GetOutputSizePixel()));
 
     ScopedVclPtrInstance<VirtualDevice> pVDev(rRenderContext);
     pVDev->SetMapMode(rRenderContext.GetMapMode());
@@ -897,7 +897,7 @@ void NumberingPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Re
         tools::Long nWidthRelation = 30; // chapter dialog
         if (m_nPageWidth)
         {
-            nWidthRelation = m_nPageWidth / aSize.Width();
+            nWidthRelation = m_nPageWidth / aSize->Width();
             if (m_bPosition)
                 nWidthRelation = nWidthRelation * 2 / 3;
             else
@@ -905,8 +905,8 @@ void NumberingPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Re
         }
 
         // height per level
-        const tools::Long nXStep = aSize.Width() / (3 * MAXLEVEL * ((MAXLEVEL < 10) ? 2 : 1));
-        const tools::Long nYStep = (aSize.Height() - 6) / MAXLEVEL;
+        const tools::Long nXStep = aSize->Width() / (3 * MAXLEVEL * ((MAXLEVEL < 10) ? 2 : 1));
+        const tools::Long nYStep = (aSize->Height() - 6) / MAXLEVEL;
         tools::Long nYStart = 4;
         m_aStdFont = OutputDevice::GetDefaultFont(DefaultFontType::UI_SANS, m_eLang,
                                                   GetDefaultFontFlags::OnlyOne, &rRenderContext);
@@ -1028,14 +1028,14 @@ void NumberingPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Re
                 }
 
                 tools::Rectangle aRect1(Point(nTextXPos, nYStart + nFontHeight / 2),
-                                        Size(aSize.Width() / 2, 2));
+                                        Size(aSize->Width() / 2, 2));
                 pVDev->SetFillColor(rRenderContext.GetSettings()
                                         .GetStyleSettings()
                                         .GetWindowColor()); // COL_BLACK );
                 pVDev->DrawRect(aRect1);
 
                 tools::Rectangle aRect2(Point(nXStart, nYStart + nLineHeight + nFontHeight / 2),
-                                        Size(aSize.Width() / 2, 2));
+                                        Size(aSize->Width() / 2, 2));
                 pVDev->DrawRect(aRect2);
                 nYStart += 2 * nLineHeight;
             }
