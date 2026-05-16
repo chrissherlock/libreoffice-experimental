@@ -767,6 +767,8 @@ public:
         @see DrawPolyLine
      */
     void                        DrawPolygon( const tools::Polygon& rPoly );
+    void                        DrawPolygon( const vcl::LogicPolygon& rPoly ) { DrawPolygon(rPoly.get()); }
+    void                        DrawPolygon( const vcl::DevicePolygon& rPoly ) { DrawPolygon(rPoly.get()); }
     void                        DrawPolygon( const basegfx::B2DPolygon& );
 
     /** Render the given poly-polygon
@@ -780,6 +782,8 @@ public:
         @see DrawPolyLine
      */
     void                        DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly );
+    void                        DrawPolyPolygon( const vcl::LogicPolyPolygon& rPolyPoly ) { DrawPolyPolygon(rPolyPoly.get()); }
+    void                        DrawPolyPolygon( const vcl::DevicePolyPolygon& rPolyPoly ) { DrawPolyPolygon(rPolyPoly.get()); }
     void                        DrawPolyPolygon( const basegfx::B2DPolyPolygon& );
 
 private:
@@ -803,14 +807,20 @@ private:
 public:
 
     void                        DrawEllipse( const tools::Rectangle& rRect );
+    void                        DrawEllipse( const vcl::LogicRect& rRect ) { DrawEllipse(rRect.get()); }
+    void                        DrawEllipse( const vcl::DeviceRect& rRect ) { DrawEllipse(rRect.get()); }
 
     void                        DrawArc(
                                     const tools::Rectangle& rRect,
                                     const Point& rStartPt, const Point& rEndPt );
+    void                        DrawArc( const vcl::LogicRect& rRect, const vcl::LogicPoint& rStartPt, const vcl::LogicPoint& rEndPt ) { DrawArc(rRect.get(), rStartPt.get(), rEndPt.get()); }
+    void                        DrawArc( const vcl::DeviceRect& rRect, const vcl::DevicePoint& rStartPt, const vcl::DevicePoint& rEndPt ) { DrawArc(rRect.get(), rStartPt.get(), rEndPt.get()); }
 
     void                        DrawPie(
                                     const tools::Rectangle& rRect,
                                     const Point& rStartPt, const Point& rEndPt );
+    void                        DrawPie( const vcl::LogicRect& rRect, const vcl::LogicPoint& rStartPt, const vcl::LogicPoint& rEndPt ) { DrawPie(rRect.get(), rStartPt.get(), rEndPt.get()); }
+    void                        DrawPie( const vcl::DeviceRect& rRect, const vcl::DevicePoint& rStartPt, const vcl::DevicePoint& rEndPt ) { DrawPie(rRect.get(), rStartPt.get(), rEndPt.get()); }
 
     void                        DrawChord(
                                     const tools::Rectangle& rRect,
@@ -825,6 +835,8 @@ public:
 
 public:
     void                        DrawGradient( const tools::Rectangle& rRect, const Gradient& rGradient );
+    void                        DrawGradient( const vcl::LogicRect& rRect, const Gradient& rGradient ) { DrawGradient(rRect.get(), rGradient); }
+    void                        DrawGradient( const vcl::DeviceRect& rRect, const Gradient& rGradient ) { DrawGradient(rRect.get(), rGradient); }
     void                        DrawGradient( const tools::PolyPolygon& rPolyPoly, const Gradient& rGradient );
 
 protected:
@@ -856,6 +868,8 @@ public:
                                                  GDIMetaFile& rMtf );
 #else
     void                        DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& rHatch );
+    void                        DrawHatch( const vcl::LogicPolyPolygon& rPolyPoly, const Hatch& rHatch ) { DrawHatch(rPolyPoly.get(), rHatch); }
+    void                        DrawHatch( const vcl::DevicePolyPolygon& rPolyPoly, const Hatch& rHatch ) { DrawHatch(rPolyPoly.get(), rHatch); }
     void                        AddHatchActions( const tools::PolyPolygon& rPolyPoly,
                                                  const Hatch& rHatch,
                                                  GDIMetaFile& rMtf );
