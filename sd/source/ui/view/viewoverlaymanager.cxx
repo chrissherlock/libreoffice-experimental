@@ -200,7 +200,7 @@ void ImageButtonHdl::ShowTip()
         pDev = Application::GetDefaultDevice();
 
     OUString aHelpText(SdResId(gButtonToolTips[mnHighlightId]));
-    Point aHelpPos(pDev->LogicToPixel(GetPos()).get());
+    Point aHelpPos(pDev->LogicToPixel(GetPos()));
     if (mnHighlightId == 1)
         aHelpPos.Move(maImageSize.Width(), 0);
     else if (mnHighlightId == 2)
@@ -230,7 +230,7 @@ void ImageButtonHdl::onMouseEnter(const MouseEvent& rMEvt)
         pDev = Application::GetDefaultDevice();
 
     Point aMDPos( rMEvt.GetPosPixel() );
-    aMDPos -= pDev->LogicToPixel( GetPos() ).get();
+    aMDPos -=  pDev->LogicToPixel( GetPos() );
 
     nHighlightId += aMDPos.X() > maImageSize.Width() ? 1 : 0;
     nHighlightId += aMDPos.Y() > maImageSize.Height() ? 2 : 0;
@@ -372,7 +372,7 @@ Bitmap ChangePlaceholderTag::createOverlayImage( int nHighlight )
         if( pDev == nullptr )
             pDev = Application::GetDefaultDevice();
 
-        Size aShapeSizePix = pDev->LogicToPixel(rSnapRect.GetSize()).get();
+        Size aShapeSizePix =  pDev->LogicToPixel(rSnapRect.GetSize());
         ::tools::Long nShapeSizePix = std::min(aShapeSizePix.Width(),aShapeSizePix.Height());
 
         bool bLarge = nShapeSizePix > 250;
@@ -408,14 +408,14 @@ void ChangePlaceholderTag::addCustomHandles( SdrHdlList& rHandlerList )
     if( pDev == nullptr )
         pDev = Application::GetDefaultDevice();
 
-    Size aShapeSizePix = pDev->LogicToPixel(rSnapRect.GetSize()).get();
+    Size aShapeSizePix =  pDev->LogicToPixel(rSnapRect.GetSize());
     ::tools::Long nShapeSizePix = std::min(aShapeSizePix.Width(),aShapeSizePix.Height());
     if( 50 > nShapeSizePix )
         return;
 
     bool bLarge = nShapeSizePix > 250;
 
-    Size aButtonSize( pDev->PixelToLogic( getButtonImage(0, bLarge ).GetSizePixel()).get() );
+    Size aButtonSize( pDev->PixelToLogic( getButtonImage(0, bLarge ).GetSizePixel()));
 
     const int nColumns = 2;
     const int nRows = 2;

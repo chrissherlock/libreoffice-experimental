@@ -809,10 +809,10 @@ void EmbeddedObjectRef::DrawShading( const tools::Rectangle &rRect, OutputDevice
     auto popIt = pOut->ScopedPush();
     pOut->SetLineColor( COL_BLACK );
 
-    Size aPixSize = pOut->LogicToPixel( rRect.GetSize() ).get();
+    Size aPixSize =  pOut->LogicToPixel( rRect.GetSize() );
     aPixSize.AdjustWidth( -1 );
     aPixSize.AdjustHeight( -1 );
-    Point aPixViewPos = pOut->LogicToPixel( rRect.TopLeft() ).get();
+    Point aPixViewPos =  pOut->LogicToPixel( rRect.TopLeft() );
     sal_Int32 nMax = aPixSize.Width() + aPixSize.Height();
     for( sal_Int32 i = 5; i < nMax; i += 5 )
     {

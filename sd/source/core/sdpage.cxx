@@ -347,10 +347,10 @@ SdrObject* SdPage::CreatePresObj(PresObjKind eObjKind, bool bVertical, const ::t
             auto popIt = aOutDev.ScopedPush();
 
             aOutDev.SetMapMode( aGraphic.GetPrefMapMode() );
-            Size aSizePix = aOutDev.LogicToPixel( aGraphic.GetPrefSize() ).get();
+            Size aSizePix =  aOutDev.LogicToPixel( aGraphic.GetPrefSize() );
             aOutDev.SetMapMode(MapMode(MapUnit::Map100thMM));
 
-            Size aSize = aOutDev.PixelToLogic(aSizePix).get();
+            Size aSize =  aOutDev.PixelToLogic(aSizePix);
             Point aPnt (0, 0);
             ::tools::Rectangle aRect (aPnt, aSize);
             pSdrObj = new SdrGrafObj(getSdrModelFromSdrPage(), aGraphic, aRect);

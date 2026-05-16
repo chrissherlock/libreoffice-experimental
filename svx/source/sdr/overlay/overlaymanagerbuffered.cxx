@@ -56,7 +56,7 @@ namespace sdr::overlay
                     {
                         // get pixel bounds (tdf#149322 do subtraction in logic units before converting result back to pixel)
                         const Point aLogicOriginDiff(rOriginNew - rOriginOld);
-                        const Size aPixelOriginDiff(mpBufferDevice->LogicToPixel(Size(aLogicOriginDiff.X(), aLogicOriginDiff.Y())).get());
+                        const Size aPixelOriginDiff(mpBufferDevice->LogicToPixel(Size(aLogicOriginDiff.X(), aLogicOriginDiff.Y())));
                         const Point aDestinationOffsetPixel(aPixelOriginDiff.Width(), aPixelOriginDiff.Height());
                         const Size aOutputSizePixel(mpBufferDevice->GetOutputSizePixel());
 
