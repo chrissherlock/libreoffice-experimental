@@ -832,7 +832,7 @@ void SwVirtFlyDrawObj::NbcCrop(const basegfx::B2DPoint& rRef, double fxFact, dou
 
     if( MapUnit::MapPixel == pGraphicObject->GetPrefMapMode().GetMapUnit() )
     {
-        aGraphicSize = Application::GetDefaultDevice()->PixelToLogic( aGraphicSize, aMapMode100thmm );
+        aGraphicSize = Application::GetDefaultDevice()->WindowToLogic( aGraphicSize, aMapMode100thmm );
     }
     else
     {
@@ -1100,7 +1100,7 @@ void SwVirtFlyDrawObj::NbcResize(const Point& rRef, double xFact, double yFact)
             {
                 nRelWidth  = pSh->GetBrowseWidth();
                 nRelHeight = pSh->VisArea().Height();
-                const Size aBorder = pSh->GetOut()->PixelToLogic( pSh->GetBrowseBorder() );
+                const Size aBorder = pSh->GetOut()->WindowToLogic( pSh->GetBrowseBorder() );
                 nRelHeight -= 2*aBorder.Height();
             }
             else

@@ -59,7 +59,7 @@ bool FuConstruct::MouseButtonDown(const MouseEvent& rMEvt)
 
     aDragTimer.Start();
 
-    aMDPos = pWindow->PixelToLogic( rMEvt.GetPosPixel() );
+    aMDPos = pWindow->WindowToLogic( rMEvt.GetPosPixel() );
 
     if ( rMEvt.IsLeft() )
     {
@@ -91,7 +91,7 @@ bool FuConstruct::MouseMove(const MouseEvent& rMEvt)
 
     if (aDragTimer.IsActive() )
     {
-        Point aOldPixel = pWindow->LogicToPixel( aMDPos );
+        Point aOldPixel = pWindow->LogicToWindow( aMDPos );
         Point aNewPixel = rMEvt.GetPosPixel();
         if ( std::abs( aOldPixel.X() - aNewPixel.X() ) > SC_MAXDRAGMOVE ||
              std::abs( aOldPixel.Y() - aNewPixel.Y() ) > SC_MAXDRAGMOVE )
@@ -99,7 +99,7 @@ bool FuConstruct::MouseMove(const MouseEvent& rMEvt)
     }
 
     Point aPix(rMEvt.GetPosPixel());
-    Point aPnt( pWindow->PixelToLogic(aPix) );
+    Point aPnt( pWindow->WindowToLogic(aPix) );
 
     if ( pView->IsAction() )
     {
@@ -187,7 +187,7 @@ bool FuConstruct::SimpleMouseButtonUp(const MouseEvent& rMEvt)
         aDragTimer.Stop();
     }
 
-    Point   aPnt( pWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point   aPnt( pWindow->WindowToLogic( rMEvt.GetPosPixel() ) );
 
     if ( pView->IsDragObj() )
          pView->EndDragObj( rMEvt.IsMod1() );

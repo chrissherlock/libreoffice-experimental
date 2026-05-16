@@ -588,7 +588,7 @@ void SbRtl_TwipsPerPixelX(StarBASIC *, SbxArray & rPar, bool)
     OutputDevice* pDevice = Application::GetDefaultDevice();
     if( pDevice )
     {
-        aSize = pDevice->PixelToLogic( aSize, aMap );
+        aSize = pDevice->WindowToLogic( aSize, aMap );
         nResult = aSize.Width() / 100;
     }
     rPar.Get(0)->PutLong(nResult);
@@ -602,7 +602,7 @@ void SbRtl_TwipsPerPixelY(StarBASIC *, SbxArray & rPar, bool)
     OutputDevice* pDevice = Application::GetDefaultDevice();
     if( pDevice )
     {
-        aSize = pDevice->PixelToLogic( aSize, aMap );
+        aSize = pDevice->WindowToLogic( aSize, aMap );
         nResult = aSize.Height() / 100;
     }
     rPar.Get(0)->PutLong(nResult);
@@ -1129,8 +1129,8 @@ static double GetDialogZoomFactor( bool bX, tools::Long nValue )
         double fFracX = 1.0 / 26;
         double fFracY = 1.0 / 24;
         MapMode aMap( MapUnit::MapAppFont, Point(), fFracX, fFracY );
-        Size aScaledSize = pDevice->LogicToPixel( aRefSize, aMap );
-        aRefSize = pDevice->LogicToPixel( aRefSize, MapMode(MapUnit::MapTwip) );
+        Size aScaledSize = pDevice->LogicToWindow( aRefSize, aMap );
+        aRefSize = pDevice->LogicToWindow( aRefSize, MapMode(MapUnit::MapTwip) );
 
         double nRef, nScaled;
         if( bX )

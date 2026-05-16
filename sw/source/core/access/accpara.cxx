@@ -1452,7 +1452,7 @@ uno::Sequence< PropertyValue > SwAccessibleParagraph::getDefaultAttributes(
         PropertyValue rPropVal;
         rPropVal.Name = sMMToPixelRatio;
         const Size a100thMMSize( 1000, 1000 );
-        const Size aPixelSize = GetMap()->LogicToPixel( a100thMMSize );
+        const Size aPixelSize = GetMap()->LogicToWindow( a100thMMSize );
         const float fRatio = (static_cast<float>(a100thMMSize.Width())/100)/aPixelSize.Width();
         rPropVal.Value <<= fRatio;
         rPropVal.Handle = -1;

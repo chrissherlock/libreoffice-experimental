@@ -194,7 +194,7 @@ static Graphic ImpGetScaledGraphic( const Graphic& rGraphic, FilterConfigItem& r
     Size aOriginalSize;
     MapMode aPrefMapMode( rGraphic.GetPrefMapMode() );
     if (aPrefMapMode.GetMapUnit() == MapUnit::MapPixel)
-        aOriginalSize = Application::GetDefaultDevice()->PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
+        aOriginalSize = Application::GetDefaultDevice()->WindowToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
     else
         aOriginalSize = ::LogicToLogic(aPrefSize, aPrefMapMode, MapMode(MapUnit::Map100thMM));
     if ( !nLogicalWidth )
@@ -1525,7 +1525,7 @@ ErrCode GraphicFilter::ExportGraphic( const Graphic& rGraphic, std::u16string_vi
             nMaxMem *= 1024; // In Bytes
 
             // Calculate how big the image would normally be:
-            aSizePixel=aVirDev->LogicToPixel(aGraphic.GetPrefSize(),aGraphic.GetPrefMapMode());
+            aSizePixel=aVirDev->LogicToWindow(aGraphic.GetPrefSize(),aGraphic.GetPrefMapMode());
 
             // Calculate how much memory the image will take up
             nBitsPerPixel=aVirDev->GetBitCount();

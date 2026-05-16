@@ -58,7 +58,7 @@ bool FuConstCustomShape::MouseButtonDown(const MouseEvent& rMEvt)
     bool bReturn = FuConstruct::MouseButtonDown(rMEvt);
     if ( rMEvt.IsLeft() && !pView->IsAction() )
     {
-        Point aPnt( pWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+        Point aPnt( pWindow->WindowToLogic( rMEvt.GetPosPixel() ) );
         pWindow->CaptureMouse();
         pView->BegCreateObj(aPnt);
 

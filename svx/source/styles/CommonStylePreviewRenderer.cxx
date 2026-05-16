@@ -92,7 +92,7 @@ bool CommonStylePreviewRenderer::SetFontSize(const SfxItemSet& rSet, sal_uInt16 
     {
         const auto& rFontHeightItem = static_cast<const SvxFontHeightItem&>(rSet.Get(nWhich));
         Size aFontSize(0, rFontHeightItem.GetHeight());
-        aFontSize = mrOutputDev.LogicToPixel(aFontSize, MapMode(mrShell.GetMapUnit()));
+        aFontSize = mrOutputDev.LogicToWindow(aFontSize, MapMode(mrShell.GetMapUnit()));
         rFont.SetFontSize(aFontSize);
         mrOutputDev.SetFont(rFont);
         FontMetric aMetric(mrOutputDev.GetFontMetric());

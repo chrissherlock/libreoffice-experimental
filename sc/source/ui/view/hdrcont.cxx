@@ -99,18 +99,18 @@ ScHeaderControl::ScHeaderControl( vcl::Window* pParent, SelectionEngine* pSelect
     bBoldSet = true;
     bAutoFilterSet = false;
 
-    Size aSize = LogicToPixel( Size(
+    Size aSize = LogicToWindow( Size(
         GetTextWidth(u"8888"_ustr),
         GetTextHeight() ) );
-    aSize.AdjustWidth(8); // place for highlight border
+    aSize.AdjustWidth(4 );    // place for highlight border
     aSize.AdjustHeight(3 );
     SetSizePixel( aSize );
 
     nWidth = nSmallWidth = aSize.Width();
     // tdf#148507 - pre-calculate individual column widths
-    nMedWidth   = LogicToPixel( Size( GetTextWidth(u"88888"_ustr),   0 ) ).Width() + 8;
-    nLargeWidth = LogicToPixel( Size( GetTextWidth(u"888888"_ustr),  0 ) ).Width() + 8;
-    nBigWidth   = LogicToPixel( Size( GetTextWidth(u"8888888"_ustr), 0 ) ).Width() + 8;
+    nMedWidth   = LogicToWindow( Size( GetTextWidth(u"88888"_ustr),   0 ) ).Width() + 8;
+    nLargeWidth = LogicToWindow( Size( GetTextWidth(u"888888"_ustr),  0 ) ).Width() + 8;
+    nBigWidth   = LogicToWindow( Size( GetTextWidth(u"8888888"_ustr), 0 ) ).Width() + 8;
 
     aShowHelpTimer.SetInvokeHandler(LINK(this, ScHeaderControl, ShowDragHelpHdl));
     aShowHelpTimer.SetTimeout(GetSettings().GetMouseSettings().GetDoubleClickTime());

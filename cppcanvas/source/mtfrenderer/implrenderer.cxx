@@ -886,7 +886,7 @@ namespace cppcanvas::internal
             if( rState.textReliefStyle != FontRelief::NONE )
             {
                 // calculate relief offset (similar to outdev3.cxx)
-                sal_Int32 nReliefOffset = rParms.mrVDev.PixelToLogic( Size( 1, 1 ) )->Height();
+                sal_Int32 nReliefOffset = rParms.mrVDev.WindowToLogic( Size( 1, 1 ) )->Height();
                 nReliefOffset += nReliefOffset/2;
                 if( nReliefOffset < 1 )
                     nReliefOffset = 1;
@@ -1268,7 +1268,7 @@ namespace cppcanvas::internal
 
                                 // #121806# explicitly kept integer
                                 ::tools::Rectangle aClipRect(
-                                    rVDev.LogicToPixel(
+                                    rVDev.LogicToWindow(
                                         pClipAction->GetRegion().GetBoundRect() ).get() );
 
                                 // intersect current clip with given rect
@@ -1302,7 +1302,7 @@ namespace cppcanvas::internal
 
                         // #121806# explicitly kept integer
                         ::tools::Rectangle aClipRect(
-                            rVDev.LogicToPixel( pClipAction->GetRect() ).get() );
+                            rVDev.LogicToWindow( pClipAction->GetRect() ).get() );
 
                         // intersect current clip with given rect
                         updateClipping(
@@ -1324,7 +1324,7 @@ namespace cppcanvas::internal
 
                             // #121806# explicitly kept integer
                             ::tools::Rectangle aClipRect(
-                                rVDev.LogicToPixel( pClipAction->GetRegion().GetBoundRect() ).get() );
+                                rVDev.LogicToWindow( pClipAction->GetRegion().GetBoundRect() ).get() );
 
                             // intersect current clip with given rect
                             updateClipping(
@@ -1557,7 +1557,7 @@ namespace cppcanvas::internal
 
                         // #121806# explicitly kept integer
                         const Size aMtfSize( rSubstitute.GetPrefSize() );
-                        const Size aMtfSizePixPre( rVDev.LogicToPixel( aMtfSize,
+                        const Size aMtfSizePixPre( rVDev.LogicToWindow( aMtfSize,
                                                                        rSubstitute.GetPrefMapMode() ) );
 
                         // #i44110# correct null-sized output - there
@@ -1576,8 +1576,8 @@ namespace cppcanvas::internal
                         rVDev.Push();
                         rVDev.SetMapMode( rSubstitute.GetPrefMapMode() );
 
-                        const ::Point aPos( rVDev.LogicToPixel( pAct->GetPoint() ).get() );
-                        const ::Size  aSize( rVDev.LogicToPixel( pAct->GetSize() ).get() );
+                        const ::Point aPos( rVDev.LogicToWindow( pAct->GetPoint() ).get() );
+                        const ::Size  aSize( rVDev.LogicToWindow( pAct->GetSize() ).get() );
 
                         rStates.getState().transform.translate( aPos.X(),
                                                                 aPos.Y() );
@@ -2852,7 +2852,7 @@ namespace cppcanvas::internal
             aVDev->SetMapMode( rMtf.GetPrefMapMode() );
 
             const Size aMtfSize( rMtf.GetPrefSize() );
-            const Size aMtfSizePixPre( aVDev->LogicToPixel( aMtfSize,
+            const Size aMtfSizePixPre( aVDev->LogicToWindow( aMtfSize,
                                                            rMtf.GetPrefMapMode() ) );
 
             // #i44110# correct null-sized output - there are shapes

@@ -143,7 +143,7 @@ public:
             The same point but in screen coordinates relative to the upper
             left corner of the (current) screen.
      */
-    virtual Point LogicToPixel (const Point& rPoint) const override;
+    virtual Point LogicToWindow (const Point& rPoint) const override;
 
     /** Transform the specified size from internal coordinates to a screen
     * oriented pixel size.
@@ -154,7 +154,7 @@ public:
         @return
             The same size but in screen coordinates.
      */
-    virtual Size LogicToPixel (const Size& rSize) const override;
+    virtual Size LogicToWindow (const Size& rSize) const override;
 
     ///======== internal =====================================================
 

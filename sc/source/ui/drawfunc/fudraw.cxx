@@ -437,7 +437,7 @@ bool FuDraw::KeyInput(const KeyEvent& rKEvt)
                     if(rKEvt.GetKeyCode().IsMod2())
                     {
                         // move in 1 pixel distance
-                        Size aLogicSizeOnePixel = pWindow ? pWindow->PixelToLogic(Size(1,1)) : Size(100, 100);
+                        Size aLogicSizeOnePixel = pWindow ? pWindow->WindowToLogic(Size(1,1)) : Size(100, 100);
                         nX *= aLogicSizeOnePixel.Width();
                         nY *= aLogicSizeOnePixel.Height();
                     }
@@ -657,7 +657,7 @@ static bool lcl_UrlHit( const SdrView* pView, const Point& rPosPixel, const vcl:
     if (eHit != SdrHitKind::NONE && aVEvt.mpObj != nullptr)
     {
         if ( SvxIMapInfo::GetIMapInfo(aVEvt.mpObj) && SvxIMapInfo::GetHitIMapObject(
-                                aVEvt.mpObj, pWindow->PixelToLogic(rPosPixel), pWindow->GetOutDev() ) )
+                                aVEvt.mpObj, pWindow->WindowToLogic(rPosPixel), pWindow->GetOutDev() ) )
             return true;
 
         if (aVEvt.meEvent == SdrEventKind::ExecuteUrl)
@@ -674,7 +674,7 @@ void FuDraw::ForcePointer(const MouseEvent* pMEvt)
 
     Point aPosPixel = pWindow->GetPointerPosPixel();
     bool bAlt       = pMEvt && pMEvt->IsMod2();
-    Point aPnt      = pWindow->PixelToLogic( aPosPixel );
+    Point aPnt      = pWindow->WindowToLogic( aPosPixel );
     SdrHdl* pHdl    = pView->PickHandle(aPnt);
     SdrPageView* pPV;
     SdrObject* pMacroPickObj;
@@ -754,7 +754,7 @@ bool FuDraw::IsSizingOrMovingNote( const MouseEvent& rMEvt ) const
             SdrObject* pObj = rMarkList.GetMark( 0 )->GetMarkedSdrObj();
             if ( ScDrawLayer::IsNoteCaption( pObj ) )
             {
-                Point aMPos = pWindow->PixelToLogic( rMEvt.GetPosPixel() );
+                Point aMPos = pWindow->WindowToLogic( rMEvt.GetPosPixel() );
                 bIsSizingOrMoving =
                     pView->PickHandle( aMPos ) ||      // handles to resize the note
                     pView->IsTextEditFrameHit( aMPos );         // frame for moving the note

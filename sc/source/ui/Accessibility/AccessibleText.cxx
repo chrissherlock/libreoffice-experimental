@@ -53,8 +53,8 @@ public:
                         ScViewForwarder(ScTabViewShell* pViewShell, ScSplitPos eSplitPos);
 
     virtual bool        IsValid() const override;
-    virtual Point       LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const override;
-    virtual Point       PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point       LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point       WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
 
     void                SetInvalid();
 };
@@ -71,13 +71,13 @@ bool ScViewForwarder::IsValid() const
     return mpViewShell != nullptr;
 }
 
-Point ScViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const
+Point ScViewForwarder::LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if (mpViewShell)
     {
         vcl::Window* pWindow = mpViewShell->GetWindowByPos(meSplitPos);
         if (pWindow)
-            return pWindow->LogicToPixel( rPoint, rMapMode );
+            return pWindow->LogicToWindow( rPoint, rMapMode );
     }
     else
     {
@@ -86,13 +86,13 @@ Point ScViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMapMod
     return Point();
 }
 
-Point ScViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const
+Point ScViewForwarder::WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if (mpViewShell)
     {
         vcl::Window* pWindow = mpViewShell->GetWindowByPos(meSplitPos);
         if (pWindow)
-            return pWindow->PixelToLogic( rPoint, rMapMode );
+            return pWindow->WindowToLogic( rPoint, rMapMode );
     }
     else
     {
@@ -116,8 +116,8 @@ public:
                                                    const EditView* _pEditView);
 
     virtual bool        IsValid() const override;
-    virtual Point       LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const override;
-    virtual Point       PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point       LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point       WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
 
     void                SetInvalid();
 };
@@ -134,7 +134,7 @@ bool ScEditObjectViewForwarder::IsValid() const
     return (mpWindow != nullptr);
 }
 
-Point ScEditObjectViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const
+Point ScEditObjectViewForwarder::LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if (mpWindow)
     {
@@ -146,7 +146,7 @@ Point ScEditObjectViewForwarder::LogicToPixel( const Point& rPoint, const MapMod
             tools::Rectangle aEditViewVisArea( mpEditView->GetVisArea() );
             aPoint += aEditViewVisArea.TopLeft();
         }
-        return mpWindow->LogicToPixel( aPoint, rMapMode );
+        return mpWindow->LogicToWindow( aPoint, rMapMode );
     }
     else
     {
@@ -155,13 +155,13 @@ Point ScEditObjectViewForwarder::LogicToPixel( const Point& rPoint, const MapMod
     return Point();
 }
 
-Point ScEditObjectViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const
+Point ScEditObjectViewForwarder::WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if (mpWindow)
     {
         // #i49561# - consider offset of the visible area
         // of the EditView after converting point to logic.
-        Point aPoint( mpWindow->PixelToLogic( rPoint, rMapMode ) );
+        Point aPoint( mpWindow->WindowToLogic( rPoint, rMapMode ) );
         if ( mpEditView )
         {
             tools::Rectangle aEditViewVisArea( mpEditView->GetVisArea() );
@@ -189,8 +189,8 @@ public:
     explicit            ScPreviewViewForwarder(ScPreviewShell* pViewShell);
 
     virtual bool        IsValid() const override;
-    virtual Point       LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const override;
-    virtual Point       PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point       LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point       WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
 
     void                SetInvalid();
 };
@@ -205,7 +205,7 @@ bool ScPreviewViewForwarder::IsValid() const
     return mpViewShell != nullptr;
 }
 
-Point ScPreviewViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const
+Point ScPreviewViewForwarder::LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if (mpViewShell)
     {
@@ -214,7 +214,7 @@ Point ScPreviewViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& 
         {
             MapMode aMapMode(pWindow->GetMapMode().GetMapUnit());
             Point aPoint2( ::LogicToLogic( rPoint, rMapMode, aMapMode) );
-            return pWindow->LogicToPixel(aPoint2);
+            return pWindow->LogicToWindow(aPoint2);
         }
     }
     else
@@ -224,7 +224,7 @@ Point ScPreviewViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& 
     return Point();
 }
 
-Point ScPreviewViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const
+Point ScPreviewViewForwarder::WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if (mpViewShell)
     {
@@ -233,7 +233,7 @@ Point ScPreviewViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& 
         {
             MapMode aMapMode(pWindow->GetMapMode());
             aMapMode.SetOrigin(Point());
-            Point aPoint1( pWindow->PixelToLogic( rPoint ) );
+            Point aPoint1( pWindow->WindowToLogic( rPoint ) );
             Point aPoint2( ::LogicToLogic( aPoint1,
                                                        MapMode(aMapMode.GetMapUnit()),
                                                        rMapMode ) );
@@ -324,8 +324,8 @@ public:
                         ScEditViewForwarder(EditView* pEditView, OutputDevice* pWin);
 
     virtual bool        IsValid() const override;
-    virtual Point       LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const override;
-    virtual Point       PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point       LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point       WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
     virtual bool        GetSelection( ESelection& rSelection ) const override;
     virtual bool        SetSelection( const ESelection& rSelection ) override;
     virtual bool        Copy() override;
@@ -346,10 +346,10 @@ bool ScEditViewForwarder::IsValid() const
     return mpWindow && mpEditView;
 }
 
-Point ScEditViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const
+Point ScEditViewForwarder::LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if (mpWindow)
-        return mpWindow->LogicToPixel( rPoint, rMapMode );
+        return mpWindow->LogicToWindow( rPoint, rMapMode );
     else
     {
         OSL_FAIL("this ViewForwarder is not valid");
@@ -357,10 +357,10 @@ Point ScEditViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMa
     return Point();
 }
 
-Point ScEditViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const
+Point ScEditViewForwarder::WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if (mpWindow)
-        return mpWindow->PixelToLogic( rPoint, rMapMode );
+        return mpWindow->WindowToLogic( rPoint, rMapMode );
     else
     {
         OSL_FAIL("this ViewForwarder is not valid");
@@ -521,7 +521,7 @@ SvxTextForwarder* ScAccessibleCellTextData::GetTextForwarder()
         vcl::Window* pWin = mpViewShell->GetWindowByPos( meSplitPos );
         if ( pWin )
         {
-            aSize = pWin->PixelToLogic( aSize, pEditEngine->GetRefMapMode() );
+            aSize = pWin->WindowToLogic( aSize, pEditEngine->GetRefMapMode() );
         }
 
         /*  #i19430# Gnopernicus reads text partly if it sticks out of the cell
@@ -564,7 +564,7 @@ SvxTextForwarder* ScAccessibleCellTextData::GetTextForwarder()
         Size aTextSize;
         if ( pWin )
         {
-            aTextSize = pWin->LogicToPixel( Size( pEditEngine->CalcTextWidth(), pEditEngine->GetTextHeight() ), pEditEngine->GetRefMapMode() );
+            aTextSize = pWin->LogicToWindow( Size( pEditEngine->CalcTextWidth(), pEditEngine->GetTextHeight() ), pEditEngine->GetRefMapMode() );
         }
         tools::Long nTextWidth = aTextSize.Width();
         tools::Long nTextHeight = aTextSize.Height();
@@ -824,12 +824,12 @@ SvxTextForwarder* ScAccessibleEditLineTextData::GetTextForwarder()
 
 #if 0
                 Size aSize(pTxtWnd->GetSizePixel());
-                aSize = pTxtWnd->PixelToLogic(aSize, mpEditEngine->GetRefMapMode());
+                aSize = pTxtWnd->WindowToLogic(aSize, mpEditEngine->GetRefMapMode());
                 mpEditEngine->SetPaperSize(aSize);
 #else
                 OutputDevice& rDevice = mpTxtWnd->GetDrawingArea()->get_ref_device();
                 Size aSize(rDevice.GetOutputSizePixel());
-                aSize = rDevice.PixelToLogic(aSize, mpEditEngine->GetRefMapMode());
+                aSize = rDevice.WindowToLogic(aSize, mpEditEngine->GetRefMapMode());
                 mpEditEngine->SetPaperSize(aSize);
 #endif
 
@@ -945,7 +945,7 @@ SvxTextForwarder* ScAccessiblePreviewCellTextData::GetTextForwarder()
         Size aSize(mpViewShell->GetLocationData().GetCellOutputRect(aCellPos).GetSize());
         vcl::Window* pWin = mpViewShell->GetWindow();
         if (pWin)
-            aSize = pWin->PixelToLogic(aSize, pEditEngine->GetRefMapMode());
+            aSize = pWin->WindowToLogic(aSize, pEditEngine->GetRefMapMode());
         pEditEngine->SetPaperSize(aSize);
     }
 
@@ -1041,7 +1041,7 @@ SvxTextForwarder* ScAccessiblePreviewHeaderCellTextData::GetTextForwarder()
             tools::Rectangle aVisRect( Point(), aOutputSize );
             Size aSize(mpViewShell->GetLocationData().GetHeaderCellOutputRect(aVisRect, aCellPos, mbColHeader).GetSize());
             if (pWindow)
-                aSize = pWindow->PixelToLogic(aSize, pEditEngine->GetRefMapMode());
+                aSize = pWindow->WindowToLogic(aSize, pEditEngine->GetRefMapMode());
             pEditEngine->SetPaperSize(aSize);
         }
         pEditEngine->SetTextCurrentDefaults( maText );
@@ -1171,7 +1171,7 @@ SvxTextForwarder* ScAccessibleHeaderTextData::GetTextForwarder()
         Size aSize(aVisRect.GetSize());
         vcl::Window* pWin = mpViewShell->GetWindow();
         if (pWin)
-            aSize = pWin->PixelToLogic(aSize, mpEditEngine->GetRefMapMode());
+            aSize = pWin->WindowToLogic(aSize, mpEditEngine->GetRefMapMode());
         mpEditEngine->SetPaperSize(aSize);
     }
     if (mpEditObj)
@@ -1269,7 +1269,7 @@ SvxTextForwarder* ScAccessibleNoteTextData::GetTextForwarder()
             tools::Rectangle aVisRect( Point(), aOutputSize );
             Size aSize(mpViewShell->GetLocationData().GetNoteInRangeOutputRect(aVisRect, mbMarkNote, maCellPos).GetSize());
             if (pWindow)
-                aSize = pWindow->PixelToLogic(aSize, mpEditEngine->GetRefMapMode());
+                aSize = pWindow->WindowToLogic(aSize, mpEditEngine->GetRefMapMode());
             mpEditEngine->SetPaperSize(aSize);
         }
         mpEditEngine->SetTextCurrentDefaults( msText );
@@ -1299,8 +1299,8 @@ public:
     explicit                    ScCsvViewForwarder( OutputDevice* pWindow );
 
     virtual bool                IsValid() const override;
-    virtual Point               LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const override;
-    virtual Point               PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point               LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point               WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
 
     void                        SetInvalid();
 };
@@ -1315,16 +1315,16 @@ bool ScCsvViewForwarder::IsValid() const
     return mpWindow != nullptr;
 }
 
-Point ScCsvViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const
+Point ScCsvViewForwarder::LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if( !mpWindow ) return Point();
-    return mpWindow->LogicToPixel( rPoint, rMapMode );
+    return mpWindow->LogicToWindow( rPoint, rMapMode );
 }
 
-Point ScCsvViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const
+Point ScCsvViewForwarder::WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if( !mpWindow ) return Point();
-    return mpWindow->PixelToLogic( rPoint, rMapMode );
+    return mpWindow->WindowToLogic( rPoint, rMapMode );
 }
 
 void ScCsvViewForwarder::SetInvalid()

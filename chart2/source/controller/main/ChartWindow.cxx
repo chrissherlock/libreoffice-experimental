@@ -211,7 +211,7 @@ void ChartWindow::RequestHelp( const HelpEvent& rHEvt )
     if( ( rHEvt.GetMode() & HelpEventMode::QUICK ) &&
         m_pWindowController )
     {
-        Point aLogicHitPos = PixelToLogic( GetPointerPosPixel());
+        Point aLogicHitPos = WindowToLogic( GetPointerPosPixel());
         OUString aQuickHelpText;
         awt::Rectangle aHelpRect;
         bool bIsBalloonHelp( Help::IsBalloonHelpEnabled() );
@@ -219,7 +219,7 @@ void ChartWindow::RequestHelp( const HelpEvent& rHEvt )
 
         if( bHelpHandled )
         {
-            tools::Rectangle aPixelRect(LogicToPixel(lcl_AWTRectToVCLRect(aHelpRect)));
+            tools::Rectangle aPixelRect(LogicToWindow(lcl_AWTRectToVCLRect(aHelpRect)));
             tools::Rectangle aScreenRect(OutputToScreenPixel(aPixelRect.TopLeft()),
                                          OutputToScreenPixel(aPixelRect.BottomRight()));
 
@@ -279,7 +279,7 @@ void ChartWindow::LogicInvalidate(const tools::Rectangle* pRectangle)
         }
         else
         {
-            aRectangle = PixelToLogic(aRectangle, MapMode(MapUnit::MapTwip));
+            aRectangle = WindowToLogic(aRectangle, MapMode(MapUnit::MapTwip));
         }
 
         vcl::Window* pEditWin = GetParentEditWin();

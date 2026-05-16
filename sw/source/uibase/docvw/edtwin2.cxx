@@ -110,7 +110,7 @@ bool PSCSDFPropsQuickHelp(const HelpEvent &rEvt, SwWrtShell& rSh)
             || rView.IsSpotlightCharStyles())
     {
         SwPosition aPos(rSh.GetDoc()->GetNodes());
-        Point aPt(rSh.GetWin()->PixelToLogic(
+        Point aPt(rSh.GetWin()->WindowToLogic(
                       rSh.GetWin()->ScreenToOutputPixel(rEvt.GetMousePosPixel())));
 
         rSh.GetLayout()->GetModelPositionForViewPoint(&aPos, aPt);
@@ -234,13 +234,13 @@ bool PSCSDFPropsQuickHelp(const HelpEvent &rEvt, SwWrtShell& rSh)
 
     if (!sText.isEmpty())
     {
-        tools::Rectangle aRect(rSh.GetWin()->PixelToLogic(
+        tools::Rectangle aRect(rSh.GetWin()->WindowToLogic(
                                    rSh.GetWin()->ScreenToOutputPixel(rEvt.GetMousePosPixel())),
                                Size(1, 1));
-        Point aPt(rSh.GetWin()->OutputToScreenPixel(rSh.GetWin()->LogicToPixel(aRect.TopLeft())));
+        Point aPt(rSh.GetWin()->OutputToScreenPixel(rSh.GetWin()->LogicToWindow(aRect.TopLeft())));
         aRect.SetLeft(aPt.X());
         aRect.SetTop(aPt.Y());
-        aPt = rSh.GetWin()->OutputToScreenPixel(rSh.GetWin()->LogicToPixel(aRect.BottomRight()));
+        aPt = rSh.GetWin()->OutputToScreenPixel(rSh.GetWin()->LogicToWindow(aRect.BottomRight()));
         aRect.SetRight(aPt.X());
         aRect.SetBottom(aPt.Y());
 
@@ -309,7 +309,7 @@ OUString SwEditWin::ClipLongToolTip(const OUString& rText)
     OUString sDisplayText(rText);
     tools::Long nTextWidth = GetTextWidth(sDisplayText);
     tools::Long nMaxWidth = GetDesktopRectPixel().GetWidth() * 2 / 3;
-    nMaxWidth = PixelToLogic(Size(nMaxWidth, 0)).Width();
+    nMaxWidth = WindowToLogic(Size(nMaxWidth, 0)).Width();
     if (nTextWidth > nMaxWidth)
         sDisplayText = GetOutDev()->GetEllipsisString(sDisplayText, nMaxWidth, DrawTextFlags::CenterEllipsis);
     return sDisplayText;
@@ -400,7 +400,7 @@ void SwEditWin::RequestHelp(const HelpEvent &rEvt)
     bool bScreenTip = false;
     CurrShell aCurr(&rSh);
     OUString sText;
-    Point aPt( PixelToLogic( ScreenToOutputPixel( rEvt.GetMousePosPixel() ) ));
+    Point aPt( WindowToLogic( ScreenToOutputPixel( rEvt.GetMousePosPixel() ) ));
     bool bBalloon = bool(rEvt.GetMode() & HelpEventMode::BALLOON);
 
     SdrView *pSdrView = rSh.GetDrawView();
@@ -729,10 +729,10 @@ void SwEditWin::RequestHelp(const HelpEvent &rEvt)
                 else
                 {
                     tools::Rectangle aRect(aFieldRect.SVRect());
-                    Point aRectPt(OutputToScreenPixel(LogicToPixel(aRect.TopLeft())));
+                    Point aRectPt(OutputToScreenPixel(LogicToWindow(aRect.TopLeft())));
                     aRect.SetLeft(aRectPt.X());
                     aRect.SetTop(aRectPt.Y());
-                    aRectPt = OutputToScreenPixel(LogicToPixel(aRect.BottomRight()));
+                    aRectPt = OutputToScreenPixel(LogicToWindow(aRect.BottomRight()));
                     aRect.SetRight(aRectPt.X());
                     aRect.SetBottom(aRectPt.Y());
 

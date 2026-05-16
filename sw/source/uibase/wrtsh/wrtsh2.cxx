@@ -804,7 +804,7 @@ void SwWrtShell::NavigatorPaste(const NaviContentBookmark& rBkmk)
         xPop->set_sensitive(u"refonlyseqnoentry"_ustr, bSensitiveRefOnlySeqNoEntry);
     }
 
-    tools::Rectangle aRect(pWin->LogicToPixel(GetCursorDocPos()), Size(1, 1));
+    tools::Rectangle aRect(pWin->LogicToWindow(GetCursorDocPos()), Size(1, 1));
     weld::Window* pParent = weld::GetPopupParent(*pWin, aRect);
 
     OUString sInsert = xPop->popup_at_rect(pParent, aRect);

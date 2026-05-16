@@ -207,7 +207,7 @@ public:
     /// Unsets the given state on the internal state set and fires STATE_CHANGE event. Don't hold locks when calling this!
     void UnSetState( const sal_Int64 nStateId );
 
-    static tools::Rectangle LogicToPixel( const tools::Rectangle& rRect, const MapMode& rMapMode, SvxViewForwarder const & rForwarder );
+    static tools::Rectangle LogicToWindow( const tools::Rectangle& rRect, const MapMode& rMapMode, SvxViewForwarder const & rForwarder );
 
     SvxEditSourceAdapter& GetEditSource() const;
 

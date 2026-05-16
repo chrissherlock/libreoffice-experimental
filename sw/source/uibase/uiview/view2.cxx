@@ -714,7 +714,7 @@ void SwView::Execute(SfxRequest &rReq)
                     const Point aPt(m_aVisArea.Left(), m_pWrtShell->GetPagePos(nPage).Y());
                     Point aAlPt(AlignToPixel(aPt));
                     if(aPt.Y() != aAlPt.Y())
-                        aAlPt.AdjustY(3 * GetEditWin().PixelToLogic(Size(0, 1)).Height());
+                        aAlPt.AdjustY(3 * GetEditWin().WindowToLogic(Size(0, 1)).Height());
                     SetVisArea(aAlPt);
                     m_pWrtShell->UnlockPaint();
                 }
@@ -2061,7 +2061,7 @@ void SwView::StateStatusLine(SfxItemSet &rSet)
 
                         const MapMode aTmpMap( MapUnit::MapTwip );
                         const Size aEditSize = GetEditWin().GetOutputSizePixel();
-                        const Size aWindowSize( GetEditWin().PixelToLogic( aEditSize, aTmpMap ) );
+                        const Size aWindowSize( GetEditWin().WindowToLogic( aEditSize, aTmpMap ) );
 
                         const tools::Long nOf = pVOpt->GetDocumentBorder() * 2;
                         tools::Long nTmpWidth = bAutomaticViewLayout ? aPageSize.Width() : aRootSize.Width();

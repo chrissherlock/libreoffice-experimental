@@ -294,7 +294,7 @@ ErrCode XOutBitmap::WriteGraphic( const Graphic& rGraphic, OUString& rFileName,
             const Size* pSize = nullptr;
             if (pMtfSize_100TH_MM)
             {
-                aSize = Application::GetDefaultDevice()->LogicToPixel(*pMtfSize_100TH_MM,
+                aSize = Application::GetDefaultDevice()->LogicToWindow(*pMtfSize_100TH_MM,
                                                                       MapMode(MapUnit::Map100thMM));
                 pSize = &aSize;
             }
@@ -305,7 +305,7 @@ ErrCode XOutBitmap::WriteGraphic( const Graphic& rGraphic, OUString& rFileName,
             if (bWriteTransGrf)
             {
                 ScopedVclPtrInstance< VirtualDevice > pVDev(DeviceFormat::WITH_ALPHA);
-                const Size aSize(pVDev->LogicToPixel(*pMtfSize_100TH_MM, MapMode(MapUnit::Map100thMM)));
+                const Size aSize(pVDev->LogicToWindow(*pMtfSize_100TH_MM, MapMode(MapUnit::Map100thMM)));
 
                 if( pVDev->SetOutputSizePixel( aSize ) )
                 {
@@ -318,7 +318,7 @@ ErrCode XOutBitmap::WriteGraphic( const Graphic& rGraphic, OUString& rFileName,
             else
             {
                 ScopedVclPtrInstance< VirtualDevice > pVDev;
-                const Size aSize(pVDev->LogicToPixel(*pMtfSize_100TH_MM, MapMode(MapUnit::Map100thMM)));
+                const Size aSize(pVDev->LogicToWindow(*pMtfSize_100TH_MM, MapMode(MapUnit::Map100thMM)));
 
                 if( pVDev->SetOutputSizePixel( aSize ) )
                 {

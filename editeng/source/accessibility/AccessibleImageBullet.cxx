@@ -150,7 +150,7 @@ awt::Rectangle AccessibleImageBullet::implGetBounds(  )
         aRect.Move( -aParentRect.Left(), -aParentRect.Top() );
 
         // convert to screen coordinates
-        tools::Rectangle aScreenRect = AccessibleEditableTextPara::LogicToPixel( aRect,
+        tools::Rectangle aScreenRect = AccessibleEditableTextPara::LogicToWindow( aRect,
                                                                           rCacheTF.GetMapMode(),
                                                                           GetViewForwarder() );
 

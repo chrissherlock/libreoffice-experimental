@@ -342,7 +342,7 @@ void ScTabViewShell::UpdateOleZoom()
         if ( !aObjSize.IsEmpty() )
         {
             vcl::Window* pWin = GetActiveWin();
-            Size aWinHMM = pWin->PixelToLogic(pWin->GetOutputSizePixel(), MapMode(MapUnit::Map100thMM));
+            Size aWinHMM = pWin->WindowToLogic(pWin->GetOutputSizePixel(), MapMode(MapUnit::Map100thMM));
             SetZoomFactor( double(aWinHMM.Width()) / aObjSize.Width(),
                            double(aWinHMM.Height()) / aObjSize.Height() );
         }
@@ -366,7 +366,7 @@ void ScTabViewShell::InnerResizePixel( const Point &rOfs, const Size &rSize, boo
 
         if ( !aObjSize.IsEmpty() )
         {
-            Size aLogicSize = GetWindow()->PixelToLogic(aSize, MapMode(MapUnit::Map100thMM));
+            Size aLogicSize = GetWindow()->WindowToLogic(aSize, MapMode(MapUnit::Map100thMM));
             SfxViewShell::SetZoomFactor( double(aLogicSize.Width()) / aObjSize.Width(),
                                          double(aLogicSize.Height()) / aObjSize.Height() );
         }
@@ -443,7 +443,7 @@ void ScTabViewShell::QueryObjAreaPixel( tools::Rectangle& rRect ) const
 
     Size aPixelSize = rRect.GetSize();
     vcl::Window* pWin = const_cast<ScTabViewShell*>(this)->GetActiveWin();
-    Size aLogicSize = pWin->PixelToLogic( aPixelSize );
+    Size aLogicSize = pWin->WindowToLogic( aPixelSize );
 
     const ScViewData& rViewData = GetViewData();
     ScDocument& rDoc = rViewData.GetDocument();
@@ -463,7 +463,7 @@ void ScTabViewShell::QueryObjAreaPixel( tools::Rectangle& rRect ) const
 
     rViewData.GetDocShell()->SnapVisArea( aLogicRect );
 
-    rRect.SetSize( pWin->LogicToPixel( aLogicRect.GetSize() ) );
+    rRect.SetSize( pWin->LogicToWindow( aLogicRect.GetSize() ) );
 }
 
 void ScTabViewShell::Move()

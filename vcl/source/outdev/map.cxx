@@ -288,62 +288,62 @@ tools::Long OutputDevice::LogicHeightToDevicePixel(tools::Long nHeight) const
     return mpMapper->LogicHeightToDevicePixel(nHeight, GetMappingPolicy());
 }
 
-vcl::DevicePoint OutputDevice::LogicToPixel(const Point& rLogicPt) const
+vcl::WindowPoint OutputDevice::LogicToWindow(const Point& rLogicPt) const
 {
-    return vcl::DevicePoint(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicPt));
+    return vcl::WindowPoint(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicPt));
 }
 
-vcl::DeviceSize OutputDevice::LogicToPixel(const Size& rLogicSize) const
+vcl::WindowSize OutputDevice::LogicToWindow(const Size& rLogicSize) const
 {
-    return vcl::DeviceSize(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicSize));
+    return vcl::WindowSize(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicSize));
 }
 
-vcl::DeviceRect OutputDevice::LogicToPixel(const tools::Rectangle& rLogicRect) const
+vcl::WindowRect OutputDevice::LogicToWindow(const tools::Rectangle& rLogicRect) const
 {
-    return vcl::DeviceRect(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicRect));
+    return vcl::WindowRect(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicRect));
 }
 
-tools::Polygon OutputDevice::LogicToPixel(const tools::Polygon& rLogicPoly) const
+tools::Polygon OutputDevice::LogicToWindow(const tools::Polygon& rLogicPoly) const
 {
     return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicPoly);
 }
 
-tools::PolyPolygon OutputDevice::LogicToPixel(const tools::PolyPolygon& rLogicPolyPoly) const
+tools::PolyPolygon OutputDevice::LogicToWindow(const tools::PolyPolygon& rLogicPolyPoly) const
 {
     return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicPolyPoly);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const
+basegfx::B2DPolyPolygon OutputDevice::LogicToWindow(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const
 {
     return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicPolyPoly);
 }
 
-vcl::Region OutputDevice::LogicToPixel(const vcl::Region& rLogicRegion) const
+vcl::Region OutputDevice::LogicToWindow(const vcl::Region& rLogicRegion) const
 {
     return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}), rLogicRegion);
 }
 
-Point OutputDevice::LogicToPixel(const Point& rLogicPt, const MapMode& rMapMode) const
+Point OutputDevice::LogicToWindow(const Point& rLogicPt, const MapMode& rMapMode) const
 {
     return vcl::GeometryAdapter::Apply(vcl::TransformCompiler::Compile(mpMapper->GetViewTransformation(maMapMode, rMapMode, GetMappingPolicy())), rLogicPt);
 }
 
-Size OutputDevice::LogicToPixel(const Size& rLogicSize, const MapMode& rMapMode) const
+Size OutputDevice::LogicToWindow(const Size& rLogicSize, const MapMode& rMapMode) const
 {
     return vcl::GeometryAdapter::Apply(vcl::TransformCompiler::Compile(mpMapper->GetViewTransformation(maMapMode, rMapMode, GetMappingPolicy())), rLogicSize);
 }
 
-tools::Rectangle OutputDevice::LogicToPixel(const tools::Rectangle& rLogicRect, const MapMode& rMapMode) const
+tools::Rectangle OutputDevice::LogicToWindow(const tools::Rectangle& rLogicRect, const MapMode& rMapMode) const
 {
     return vcl::GeometryAdapter::Apply(vcl::TransformCompiler::Compile(mpMapper->GetViewTransformation(maMapMode, rMapMode, GetMappingPolicy())), rLogicRect);
 }
 
-tools::Polygon OutputDevice::LogicToPixel(const tools::Polygon& rLogicPoly, const MapMode& rMapMode) const
+tools::Polygon OutputDevice::LogicToWindow(const tools::Polygon& rLogicPoly, const MapMode& rMapMode) const
 {
     return vcl::GeometryAdapter::Apply(vcl::TransformCompiler::Compile(mpMapper->GetViewTransformation(maMapMode, rMapMode, GetMappingPolicy())), rLogicPoly);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::LogicToPixel(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
+basegfx::B2DPolyPolygon OutputDevice::LogicToWindow(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                                                    const MapMode& rMapMode) const
 {
     return vcl::GeometryAdapter::Apply(vcl::TransformCompiler::Compile(mpMapper->GetViewTransformation(maMapMode, rMapMode, GetMappingPolicy())), rLogicPolyPoly);
@@ -359,12 +359,12 @@ tools::Long OutputDevice::DevicePixelToLogicHeight(tools::Long nHeight) const
     return mpMapper->DevicePixelToLogicHeight(nHeight, GetMappingPolicy());
 }
 
-vcl::Region OutputDevice::PixelToLogic(const vcl::Region& rDeviceRegion) const
+vcl::Region OutputDevice::WindowToLogic(const vcl::Region& rDeviceRegion) const
 {
     return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDeviceRegion);
 }
 
-vcl::LogicPoint OutputDevice::PixelToLogic(const Point& rDevicePt) const
+vcl::LogicPoint OutputDevice::WindowToLogic(const Point& rDevicePt) const
 {
     return vcl::LogicPoint(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDevicePt));
 }
@@ -374,62 +374,62 @@ Point OutputDevice::SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const
     return mpMapper->WindowSubPixelToLogicUnits(rDevicePt, GetMappingPolicy());
 }
 
-vcl::LogicSize OutputDevice::PixelToLogic(const Size& rDeviceSize) const
+vcl::LogicSize OutputDevice::WindowToLogic(const Size& rDeviceSize) const
 {
     return vcl::LogicSize(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDeviceSize));
 }
 
-vcl::LogicRect OutputDevice::PixelToLogic(const tools::Rectangle& rDeviceRect) const
+vcl::LogicRect OutputDevice::WindowToLogic(const tools::Rectangle& rDeviceRect) const
 {
     return vcl::LogicRect(vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDeviceRect));
 }
 
-tools::Polygon OutputDevice::PixelToLogic(const tools::Polygon& rDevicePoly) const
+tools::Polygon OutputDevice::WindowToLogic(const tools::Polygon& rDevicePoly) const
 {
     return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDevicePoly);
 }
 
-tools::PolyPolygon OutputDevice::PixelToLogic(const tools::PolyPolygon& rDevicePolyPoly) const
+tools::PolyPolygon OutputDevice::WindowToLogic(const tools::PolyPolygon& rDevicePolyPoly) const
 {
     return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDevicePolyPoly);
 }
 
-basegfx::B2DRectangle OutputDevice::PixelToLogic(const basegfx::B2DRectangle& rDeviceRect) const
+basegfx::B2DRectangle OutputDevice::WindowToLogic(const basegfx::B2DRectangle& rDeviceRect) const
 {
     return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rDeviceRect);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly) const
+basegfx::B2DPolyPolygon OutputDevice::WindowToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly) const
 {
     return vcl::GeometryAdapter::Apply(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}), rPixelPolyPoly);
 }
 
-Point OutputDevice::PixelToLogic(const Point& rDevicePt, const MapMode& rMapMode) const
+Point OutputDevice::WindowToLogic(const Point& rDevicePt, const MapMode& rMapMode) const
 {
     return vcl::GeometryAdapter::Apply(vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy())), rDevicePt);
 }
 
-Size OutputDevice::PixelToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const
+Size OutputDevice::WindowToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const
 {
     return vcl::GeometryAdapter::Apply(vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy())), rDeviceSize);
 }
 
-tools::Rectangle OutputDevice::PixelToLogic(const tools::Rectangle& rDeviceRect, const MapMode& rMapMode) const
+tools::Rectangle OutputDevice::WindowToLogic(const tools::Rectangle& rDeviceRect, const MapMode& rMapMode) const
 {
     return vcl::GeometryAdapter::Apply(vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy())), rDeviceRect);
 }
 
-tools::Polygon OutputDevice::PixelToLogic(const tools::Polygon& rDevicePoly, const MapMode& rMapMode) const
+tools::Polygon OutputDevice::WindowToLogic(const tools::Polygon& rDevicePoly, const MapMode& rMapMode) const
 {
     return vcl::GeometryAdapter::Apply(vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy())), rDevicePoly);
 }
 
-basegfx::B2DPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolygon& rPixelPoly, const MapMode& rMapMode) const
+basegfx::B2DPolygon OutputDevice::WindowToLogic(const basegfx::B2DPolygon& rPixelPoly, const MapMode& rMapMode) const
 {
     return vcl::GeometryAdapter::Apply(vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy())), rPixelPoly);
 }
 
-basegfx::B2DPolyPolygon OutputDevice::PixelToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly, const MapMode& rMapMode) const
+basegfx::B2DPolyPolygon OutputDevice::WindowToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly, const MapMode& rMapMode) const
 {
     return vcl::GeometryAdapter::Apply(vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy())), rPixelPolyPoly);
 }

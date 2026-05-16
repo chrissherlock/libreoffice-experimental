@@ -193,7 +193,7 @@ tools::Rectangle EditView::GetInvalidateRect() const
     else
     {
         tools::Rectangle aRect(getImpl().maOutputArea);
-        tools::Long nMore = getImpl().GetOutputDevice().PixelToLogic( Size( getImpl().GetInvalidateMore(), 0 ) )->Width();
+        tools::Long nMore = getImpl().GetOutputDevice().WindowToLogic( Size( getImpl().GetInvalidateMore(), 0 ) )->Width();
         aRect.AdjustLeft( -nMore );
         aRect.AdjustRight(nMore );
         aRect.AdjustTop( -nMore );
@@ -988,7 +988,7 @@ bool EditView::IsCursorAtWrongSpelledWord()
 
 bool EditView::IsWrongSpelledWordAtPos( const Point& rPosPixel, bool bMarkIfWrong )
 {
-    Point aPos(getImpl().GetOutputDevice().PixelToLogic(rPosPixel).get());
+    Point aPos(getImpl().GetOutputDevice().WindowToLogic(rPosPixel).get());
     aPos = getImpl().GetDocPos( aPos );
     EditPaM aPaM = getEditEngine().GetPaM(aPos, false);
     return getImpl().IsWrongSpelledWord( aPaM , bMarkIfWrong );
@@ -1073,7 +1073,7 @@ bool EditView::ExecuteSpellPopup(const Point& rPosPixel, const Link<SpellCallbac
         return false;
 
     OutputDevice& rDevice = getImpl().GetOutputDevice();
-    Point aPos(rDevice.PixelToLogic(rPosPixel).get());
+    Point aPos(rDevice.WindowToLogic(rPosPixel).get());
     aPos = getImpl().GetDocPos( aPos );
     EditPaM aPaM = getEditEngine().GetPaM(aPos, false);
     Reference< linguistic2::XSpellChecker1 >  xSpeller(getImpEditEngine().GetSpeller());
@@ -1086,7 +1086,7 @@ bool EditView::ExecuteSpellPopup(const Point& rPosPixel, const Link<SpellCallbac
     // GetWindowPos works in Logical units
     aTempRect = getImpl().GetWindowPos(aTempRect);
     // Convert to pixels
-    aTempRect = rDevice.LogicToPixel(aTempRect).get();
+    aTempRect = rDevice.LogicToWindow(aTempRect).get();
 
     weld::Widget* pPopupParent = getImpl().GetPopupParent(aTempRect);
     std::unique_ptr<weld::Builder> xBuilder(Application::CreateBuilder(pPopupParent, u"editeng/ui/spellmenu.ui"_ustr));
@@ -1418,7 +1418,7 @@ const SvxFieldItem* EditView::GetFieldUnderMousePointer( sal_Int32& nPara, sal_I
     else
         aPos = getImpl().GetWindow()->GetPointerPosPixel();
     OutputDevice& rDevice = getImpl().GetOutputDevice();
-    aPos = rDevice.PixelToLogic(aPos).get();
+    aPos = rDevice.WindowToLogic(aPos).get();
     return GetField( aPos, &nPara, &nPos );
 }
 

@@ -521,7 +521,7 @@ bool Printer::PreparePrintJob(std::shared_ptr<PrinterController> xController,
             aMPS.nVerticalSpacing = nValue;
         aMPS.bDrawBorder = xController->getBoolProperty( u"NUpDrawBorder"_ustr, aMPS.bDrawBorder );
         aMPS.nOrder = static_cast<NupOrderType>(xController->getIntProperty( u"NUpSubPageOrder"_ustr, static_cast<sal_Int32>(aMPS.nOrder) ));
-        aMPS.aPaperSize = xController->getPrinter()->PixelToLogic( xController->getPrinter()->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) );
+        aMPS.aPaperSize = xController->getPrinter()->WindowToLogic( xController->getPrinter()->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) );
         css::beans::PropertyValue* pPgSizeVal = xController->getValue( u"NUpPaperSize"_ustr );
         css::awt::Size aSizeVal;
         if( pPgSizeVal && (pPgSizeVal->Value >>= aSizeVal) )
@@ -868,7 +868,7 @@ void PrinterController::setPrinter( const VclPtr<Printer>& i_rPrinter )
     // #tdf 126744 Transfer paper size and orientation settings to newly selected printer
     if ( xPrinter )
     {
-        // GetSizeOfPaper() — stable 1/100th mm, avoids PixelToLogic issues.
+        // GetSizeOfPaper() — stable 1/100th mm, avoids WindowToLogic issues.
         aPaperSize = xPrinter->GetSizeOfPaper();
         eOrientation = xPrinter->GetOrientation();
         bSavedSizeOrientation = true;
@@ -916,7 +916,7 @@ void PrinterController::setupPrinter( weld::Window* i_pParent )
     if( !xPrinter )
         return;
 
-    // GetSizeOfPaper() — stable 1/100th mm, avoids PixelToLogic issues.
+    // GetSizeOfPaper() — stable 1/100th mm, avoids WindowToLogic issues.
     Size aPaperSize(xPrinter->GetSizeOfPaper());
     Orientation eOrientation = xPrinter->GetOrientation();
     sal_uInt16 nPaperBin = xPrinter->GetPaperBin();

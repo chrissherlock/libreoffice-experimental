@@ -181,7 +181,7 @@ bool SdrView::KeyInput(const KeyEvent& rKEvt, vcl::Window* pWin)
         } // switch
         if (bRet && pWin!=nullptr) {
             pWin->SetPointer(GetPreferredPointer(
-                pWin->PixelToLogic(pWin->ScreenToOutputPixel( pWin->GetPointerPosPixel() ) ),
+                pWin->WindowToLogic(pWin->ScreenToOutputPixel( pWin->GetPointerPosPixel() ) ),
                 pWin->GetOutDev(),
                 rKEvt.GetKeyCode().GetModifier()));
         }
@@ -255,7 +255,7 @@ SdrHitKind SdrView::PickAnything(const MouseEvent& rMEvt, SdrMouseEventKind nEve
         pOut = GetFirstOutputDevice();
     }
     Point aPnt(rMEvt.GetPosPixel());
-    if (pOut!=nullptr) aPnt= pOut->PixelToLogic(aPnt);
+    if (pOut!=nullptr) aPnt= pOut->WindowToLogic(aPnt);
 
     if (mbNegativeX)
     {
@@ -530,7 +530,7 @@ SdrHitKind SdrView::PickAnything(const Point& rLogicPos, SdrViewEvent& rVEvt) co
 
         if(pOut)
         {
-            nTolerance = pOut->PixelToLogic(Size(2, 0))->Width();
+            nTolerance = pOut->WindowToLogic(Size(2, 0))->Width();
         }
 
         if( (aLocalLogicPosition.X() >= aBoundRect.Left() - nTolerance && aLocalLogicPosition.X() <= aBoundRect.Left() + nTolerance)
@@ -830,7 +830,7 @@ bool SdrView::DoMouseEvent(const SdrViewEvent& rVEvt)
 
                         if(bRet2)
                         {
-                            MouseEvent aMEvt(mpActualOutDev->LogicToPixel(aLogicPos), 1,
+                            MouseEvent aMEvt(mpActualOutDev->LogicToWindow(aLogicPos), 1,
                                              rVEvt.mnMouseMode,rVEvt.mnMouseCode,rVEvt.mnMouseCode);
 
                             OutlinerView* pOLV=GetTextEditOutlinerView();
@@ -927,7 +927,7 @@ bool SdrView::DoMouseEvent(const SdrViewEvent& rVEvt)
 
             if(bRet)
             {
-                MouseEvent aMEvt(mpActualOutDev->LogicToPixel(aLogicPos),
+                MouseEvent aMEvt(mpActualOutDev->LogicToWindow(aLogicPos),
                                  1, rVEvt.mnMouseMode, rVEvt.mnMouseCode, rVEvt.mnMouseCode);
                 OutlinerView* pOLV=GetTextEditOutlinerView();
                 if (pOLV!=nullptr) pOLV->MouseButtonDown(aMEvt); // event for the Outliner, but without double-click
@@ -969,7 +969,7 @@ PointerStyle SdrView::GetPreferredPointer(const Point& rMousePos, const OutputDe
     if (IsDragHelpLine()) return GetDraggedHelpLinePointer();
     if (IsMacroObj()) {
         SdrObjMacroHitRec aHitRec;
-        aHitRec.aPos= pOut->LogicToPixel(rMousePos);
+        aHitRec.aPos= pOut->LogicToWindow(rMousePos);
         aHitRec.nTol=m_nMacroTol;
         aHitRec.pVisiLayer=&m_pMacroPV->GetVisibleLayers();
         aHitRec.pPageView=m_pMacroPV;
@@ -987,7 +987,7 @@ PointerStyle SdrView::GetPreferredPointer(const Point& rMousePos, const OutputDe
                 return PointerStyle::Text;
         }
         // Outliner should return something here...
-        Point aPos(pOut->LogicToPixel(rMousePos));
+        Point aPos(pOut->LogicToWindow(rMousePos));
         PointerStyle aPointer(mpTextEditOutlinerView->GetPointer(aPos));
         if (aPointer==PointerStyle::Arrow)
         {

@@ -100,7 +100,7 @@ namespace sdr::contact
 
             if(MapUnit::MapPixel == GetGrafObject().GetGrafPrefMapMode().GetMapUnit())
             {
-                aPrefSize = Application::GetDefaultDevice()->PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
+                aPrefSize = Application::GetDefaultDevice()->WindowToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
             }
             else
             {
@@ -197,7 +197,7 @@ namespace sdr::contact
 
                 if(MapUnit::MapPixel == aDraftBitmap.GetPrefMapMode().GetMapUnit())
                 {
-                    aPrefSize = Application::GetDefaultDevice()->PixelToLogic(aDraftBitmap.GetSizePixel(), MapMode(MapUnit::Map100thMM));
+                    aPrefSize = Application::GetDefaultDevice()->WindowToLogic(aDraftBitmap.GetSizePixel(), MapMode(MapUnit::Map100thMM));
                 }
                 else
                 {

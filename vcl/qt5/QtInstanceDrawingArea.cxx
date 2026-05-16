@@ -135,7 +135,7 @@ bool QtInstanceDrawingArea::eventFilter(QObject* pObject, QEvent* pEvent)
 void QtInstanceDrawingArea::handlePaintEvent()
 {
     tools::Rectangle aRect(0, 0, m_pLabel->width(), m_pLabel->height());
-    aRect = m_xDevice->PixelToLogic(aRect);
+    aRect = m_xDevice->WindowToLogic(aRect);
     m_xDevice->Erase(aRect);
     m_aDrawHdl.Call(std::pair<vcl::RenderContext&, const tools::Rectangle&>(*m_xDevice, aRect));
     QPixmap aPixmap = toQPixmap(*m_xDevice);

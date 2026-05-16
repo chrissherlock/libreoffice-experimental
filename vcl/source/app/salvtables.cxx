@@ -1357,8 +1357,8 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
     aMapMode.SetScaleY(rOutput.GetMapMode().GetScaleY());
     xOutput->SetMapMode(aMapMode);
 
-    Size aTempLogicSize(xOutput->PixelToLogic(aChildSizePixel));
-    Size aRenderLogicSize(rOutput.PixelToLogic(aChildSizePixel));
+    Size aTempLogicSize(xOutput->WindowToLogic(aChildSizePixel));
+    Size aRenderLogicSize(rOutput.WindowToLogic(aChildSizePixel));
 
     switch (rOutput.GetOutDevType())
     {
@@ -1380,7 +1380,7 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
     pImpl->mbReallyVisible = pWindow->IsVisible();
 
     pWindow->ApplySettings(*xOutput);
-    pWindow->Paint(*xOutput, tools::Rectangle(Point(), pWindow->PixelToLogic(aChildSizePixel)));
+    pWindow->Paint(*xOutput, tools::Rectangle(Point(), pWindow->WindowToLogic(aChildSizePixel)));
 
     pImpl->mbReallyVisible = bRVisible;
 
@@ -5701,9 +5701,9 @@ void SalInstanceDrawingArea::set_input_context(const InputContext& rInputContext
 void SalInstanceDrawingArea::im_context_set_cursor_location(const tools::Rectangle& rCursorRect,
                                                             int nExtTextInputWidth)
 {
-    tools::Rectangle aCursorRect = m_xDrawingArea->PixelToLogic(rCursorRect);
+    tools::Rectangle aCursorRect = m_xDrawingArea->WindowToLogic(rCursorRect);
     m_xDrawingArea->SetCursorRect(
-        &aCursorRect, m_xDrawingArea->PixelToLogic(Size(nExtTextInputWidth, 0)).Width());
+        &aCursorRect, m_xDrawingArea->WindowToLogic(Size(nExtTextInputWidth, 0)).Width());
 }
 
 rtl::Reference<comphelper::OAccessible> SalInstanceDrawingArea::get_accessible_parent()

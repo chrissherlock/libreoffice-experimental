@@ -530,9 +530,9 @@ awt::Rectangle AccessibleShape::implGetBounds()
             throw uno::RuntimeException (
                 u"AccessibleShape has no valid view forwarder"_ustr,
                 getXWeak());
-        ::Size aPixelSize = maShapeTreeInfo.GetViewForwarder()->LogicToPixel (
+        ::Size aPixelSize = maShapeTreeInfo.GetViewForwarder()->LogicToWindow(
             ::Size (aBoundingBox.Width, aBoundingBox.Height));
-        ::Point aPixelPosition = maShapeTreeInfo.GetViewForwarder()->LogicToPixel (
+        ::Point aPixelPosition = maShapeTreeInfo.GetViewForwarder()->LogicToWindow(
             ::Point (aBoundingBox.X, aBoundingBox.Y));
 
         // Clip the shape's bounding box with the bounding box of its parent.

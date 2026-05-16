@@ -154,7 +154,7 @@ void SwAnnotationWin::PaintTile(vcl::RenderContext& rRenderContext, const tools:
 
 bool SwAnnotationWin::IsHitWindow(const Point& rPointLogic)
 {
-    tools::Rectangle aRectangleLogic(EditWin().PixelToLogic(tools::Rectangle(GetPosPixel(),GetSizePixel())));
+    tools::Rectangle aRectangleLogic(EditWin().WindowToLogic(tools::Rectangle(GetPosPixel(),GetSizePixel())));
     return aRectangleLogic.Contains(rPointLogic);
 }
 
@@ -178,16 +178,16 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
 
     auto lclSizePixelToLogic = [this](Size szs) -> Size {
         if (comphelper::LibreOfficeKit::isActive() && !comphelper::LibreOfficeKit::isTiledAnnotations())
-            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(szs);
+            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().WindowToLogic(szs);
         else
-            return PixelToLogic(szs);
+            return WindowToLogic(szs);
     };
 
     auto lclPointPixelToLogic = [this](Point pnt) -> Point {
         if (comphelper::LibreOfficeKit::isActive() && !comphelper::LibreOfficeKit::isTiledAnnotations())
-            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(pnt);
+            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().WindowToLogic(pnt);
         else
-            return PixelToLogic(pnt);
+            return WindowToLogic(pnt);
     };
 
     pDev->Push();
@@ -371,7 +371,7 @@ void SwAnnotationWin::InitControls()
     Rescale();
 
     mpOutlinerView->SetBackgroundColor(COL_TRANSPARENT);
-    mpOutlinerView->SetOutputArea( PixelToLogic( tools::Rectangle(0,0,1,1) ) );
+    mpOutlinerView->SetOutputArea( WindowToLogic( tools::Rectangle(0,0,1,1) ) );
 
     mxVScrollbar->set_direction(false);
     mxVScrollbar->connect_vadjustment_value_changed(LINK(this, SwAnnotationWin, ScrollHdl));
@@ -593,14 +593,14 @@ void SwAnnotationWin::SetPosAndSize()
             {
                 case sw::sidebarwindows::SidebarPosition::LEFT:
                 {
-                    aLineStart = EditWin().PixelToLogic( Point(GetPosPixel().X()+GetSizePixel().Width(),GetPosPixel().Y()-1) );
-                    aLineEnd = EditWin().PixelToLogic( Point(GetPosPixel().X(),GetPosPixel().Y()-1) );
+                    aLineStart = EditWin().WindowToLogic( Point(GetPosPixel().X()+GetSizePixel().Width(),GetPosPixel().Y()-1) );
+                    aLineEnd = EditWin().WindowToLogic( Point(GetPosPixel().X(),GetPosPixel().Y()-1) );
                 }
                 break;
                 case sw::sidebarwindows::SidebarPosition::RIGHT:
                 {
-                    aLineStart = EditWin().PixelToLogic( Point(GetPosPixel().X(),GetPosPixel().Y()-1) );
-                    aLineEnd = EditWin().PixelToLogic( Point(GetPosPixel().X()+GetSizePixel().Width(),GetPosPixel().Y()-1) );
+                    aLineStart = EditWin().WindowToLogic( Point(GetPosPixel().X(),GetPosPixel().Y()-1) );
+                    aLineEnd = EditWin().WindowToLogic( Point(GetPosPixel().X()+GetSizePixel().Width(),GetPosPixel().Y()-1) );
                 }
                 break;
                 default:
@@ -614,7 +614,7 @@ void SwAnnotationWin::SetPosAndSize()
             {
                 EditWin().SetMappingPolicy();
                 Size aSize(aLineEnd.getX() - aLineStart.getX(), aLineEnd.getY() - aLineStart.getY());
-                aSize = EditWin().PixelToLogic(aSize);
+                aSize = EditWin().WindowToLogic(aSize);
                 aLineEnd = aLineStart;
                 aLineEnd.Move(aSize.getWidth(), aSize.getHeight());
                 EditWin().SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
@@ -664,8 +664,8 @@ void SwAnnotationWin::SetPosAndSize()
 
         if (mpShadow && bChange)
         {
-            Point aStart = EditWin().PixelToLogic(GetPosPixel()+Point(0,GetSizePixel().Height()));
-            Point aEnd = EditWin().PixelToLogic(GetPosPixel()+Point(GetSizePixel().Width()-1,GetSizePixel().Height()));
+            Point aStart = EditWin().WindowToLogic(GetPosPixel()+Point(0,GetSizePixel().Height()));
+            Point aEnd = EditWin().WindowToLogic(GetPosPixel()+Point(GetSizePixel().Width()-1,GetSizePixel().Height()));
             mpShadow->SetPosition(basegfx::B2DPoint(aStart.X(),aStart.Y()), basegfx::B2DPoint(aEnd.X(),aEnd.Y()));
         }
 
@@ -790,8 +790,8 @@ void SwAnnotationWin::DoResize()
 
     aHeight -= GetMetaHeight();
 
-    mpOutliner->SetPaperSize( PixelToLogic( Size(aWidth, aHeight) ) ) ;
-    tools::Long aTextHeight = LogicToPixel( mpOutliner->CalcTextSize()).Height();
+    mpOutliner->SetPaperSize( WindowToLogic( Size(aWidth, aHeight) ) ) ;
+    tools::Long aTextHeight = LogicToWindow( mpOutliner->CalcTextSize()).Height();
 
     mxMetadataAuthor->show();
     if(IsResolved()) { mxMetadataResolved->show(); }
@@ -804,7 +804,7 @@ void SwAnnotationWin::DoResize()
         {
             // we need vertical scrollbars and have to reduce the width
             aWidth -= nThickness;
-            mpOutliner->SetPaperSize(PixelToLogic(Size(aWidth, aHeight)));
+            mpOutliner->SetPaperSize(WindowToLogic(Size(aWidth, aHeight)));
         }
         mxVScrollbar->set_vpolicy(VclPolicyType::ALWAYS);
     }
@@ -813,7 +813,7 @@ void SwAnnotationWin::DoResize()
         mxVScrollbar->set_vpolicy(VclPolicyType::NEVER);
     }
 
-    tools::Rectangle aOutputArea = PixelToLogic(tools::Rectangle(0, 0, aWidth, aHeight));
+    tools::Rectangle aOutputArea = WindowToLogic(tools::Rectangle(0, 0, aWidth, aHeight));
     if (mxVScrollbar->get_vpolicy() == VclPolicyType::NEVER)
     {
         // if we do not have a scrollbar anymore, we want to see the complete text
@@ -832,8 +832,8 @@ void SwAnnotationWin::DoResize()
     int nUpper = mpOutliner->GetTextHeight();
     int nCurrentDocPos = mpOutlinerView->GetVisArea().Top();
     int nStepIncrement = mpOutliner->GetTextHeight() / 10;
-    int nPageIncrement = PixelToLogic(Size(0,aHeight)).Height() * 8 / 10;
-    int nPageSize = PixelToLogic(Size(0,aHeight)).Height();
+    int nPageIncrement = WindowToLogic(Size(0,aHeight)).Height() * 8 / 10;
+    int nPageSize = WindowToLogic(Size(0,aHeight)).Height();
 
     /* limit the page size to below nUpper because gtk's gtk_scrolled_window_start_deceleration has
        effectively...
@@ -855,8 +855,8 @@ void SwAnnotationWin::SetSizePixel( const Size& rNewSize )
 
     if (mpShadow)
     {
-        Point aStart = EditWin().PixelToLogic(GetPosPixel()+Point(0,GetSizePixel().Height()));
-        Point aEnd = EditWin().PixelToLogic(GetPosPixel()+Point(GetSizePixel().Width()-1,GetSizePixel().Height()));
+        Point aStart = EditWin().WindowToLogic(GetPosPixel()+Point(0,GetSizePixel().Height()));
+        Point aEnd = EditWin().WindowToLogic(GetPosPixel()+Point(GetSizePixel().Width()-1,GetSizePixel().Height()));
         mpShadow->SetPosition(basegfx::B2DPoint(aStart.X(),aStart.Y()), basegfx::B2DPoint(aEnd.X(),aEnd.Y()));
     }
 }
@@ -1194,7 +1194,7 @@ SwEditWin&  SwAnnotationWin::EditWin()
 
 tools::Long SwAnnotationWin::GetPostItTextHeight()
 {
-    return mpOutliner ? LogicToPixel(mpOutliner->CalcTextSize()).Height() : 0;
+    return mpOutliner ? LogicToWindow(mpOutliner->CalcTextSize()).Height() : 0;
 }
 
 // Provides an estimation for the text height given a specific width of the annotation window.
@@ -1207,8 +1207,8 @@ tools::Long SwAnnotationWin::GuessTextHeightForWidth(tools::Long nWidth) const
         return 0;
     comphelper::ScopeGuard resetPaperSize([this, curSize = mpOutliner->GetPaperSize()]()
                                           { mpOutliner->SetPaperSize(curSize); });
-    mpOutliner->SetPaperSize(PixelToLogic(Size(nWidth, SAL_MAX_INT32)));
-    return LogicToPixel(mpOutliner->CalcTextSize()).Height();
+    mpOutliner->SetPaperSize(WindowToLogic(Size(nWidth, SAL_MAX_INT32)));
+    return LogicToWindow(mpOutliner->CalcTextSize()).Height();
 }
 
 void SwAnnotationWin::SwitchToPostIt(sal_uInt16 aDirection)
