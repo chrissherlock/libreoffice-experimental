@@ -178,7 +178,7 @@ bool Animation::Start(OutputDevice& rOut, const Point& rDestPt, const Size& rDes
         if (itAnimView != maRenderers.end())
         {
             if ((*itAnimView)->getOriginPosition() == rDestPt
-                && (*itAnimView)->getOutSizePix() == rOut.LogicToPixel(rDestSz))
+                && (*itAnimView)->getOutSizePix() == rOut.LogicToWindow(rDestSz))
             {
                 (*itAnimView)->repaint();
                 differs = false;
@@ -229,7 +229,7 @@ void Animation::Stop(const OutputDevice* pOut, tools::Long nRendererId)
 
 void Animation::Draw(OutputDevice& rOut, const Point& rDestPt) const
 {
-    Draw(rOut, rDestPt, rOut.PixelToLogic(maGlobalSize));
+    Draw(rOut, rDestPt, rOut.WindowToLogic(maGlobalSize));
 }
 
 void Animation::Draw(OutputDevice& rOut, const Point& rDestPt, const Size& rDestSz) const

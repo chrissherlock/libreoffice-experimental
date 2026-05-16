@@ -164,7 +164,7 @@ css::awt::Point SAL_CALL VCLXDevice::convertPointToLogic( const css::awt::Point&
     {
         MapMode aMode(VCLUnoHelper::ConvertToMapModeUnit(TargetUnit));
         ::Point aVCLPoint = vcl::unohelper::ConvertToVCLPoint(aPoint);
-        ::Point aDevPoint = mpOutputDevice->PixelToLogic(aVCLPoint, aMode );
+        ::Point aDevPoint = mpOutputDevice->WindowToLogic(aVCLPoint, aMode );
         aAWTPoint = vcl::unohelper::ConvertToAWTPoint(aDevPoint);
     }
 
@@ -188,7 +188,7 @@ css::awt::Point SAL_CALL VCLXDevice::convertPointToPixel( const css::awt::Point&
     {
         MapMode aMode(VCLUnoHelper::ConvertToMapModeUnit(SourceUnit));
         ::Point aVCLPoint = vcl::unohelper::ConvertToVCLPoint(aPoint);
-        ::Point aDevPoint = mpOutputDevice->LogicToPixel(aVCLPoint, aMode );
+        ::Point aDevPoint = mpOutputDevice->LogicToWindow(aVCLPoint, aMode );
         aAWTPoint = vcl::unohelper::ConvertToAWTPoint(aDevPoint);
     }
 
@@ -212,7 +212,7 @@ css::awt::Size SAL_CALL VCLXDevice::convertSizeToLogic( const css::awt::Size& aS
     {
         MapMode aMode(VCLUnoHelper::ConvertToMapModeUnit(TargetUnit));
         ::Size aVCLSize = vcl::unohelper::ConvertToVCLSize(aSize);
-        ::Size aDevSz = mpOutputDevice->PixelToLogic(aVCLSize, aMode );
+        ::Size aDevSz = mpOutputDevice->WindowToLogic(aVCLSize, aMode );
         aAWTSize = vcl::unohelper::ConvertToAWTSize(aDevSz);
     }
 
@@ -235,7 +235,7 @@ css::awt::Size SAL_CALL VCLXDevice::convertSizeToPixel( const css::awt::Size& aS
     {
         MapMode aMode(VCLUnoHelper::ConvertToMapModeUnit(SourceUnit));
         ::Size aVCLSize = vcl::unohelper::ConvertToVCLSize(aSize);
-        ::Size aDevSz = mpOutputDevice->LogicToPixel(aVCLSize, aMode );
+        ::Size aDevSz = mpOutputDevice->LogicToWindow(aVCLSize, aMode );
         aAWTSize = vcl::unohelper::ConvertToAWTSize(aDevSz);
     }
 

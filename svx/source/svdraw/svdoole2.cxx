@@ -269,7 +269,7 @@ void SAL_CALL SdrLightEmbeddedClient_Impl::notifyEvent( const document::EventObj
 
         // react to the change if the difference is bigger than one pixel
         Size aPixelDiff =
-            Application::GetDefaultDevice()->LogicToPixel(
+            Application::GetDefaultDevice()->LogicToWindow(
                 Size( aLogicRect.GetWidth() - aScaledSize.Width(),
                       aLogicRect.GetHeight() - aScaledSize.Height() ),
                 MapMode(aContainerMapUnit));
@@ -454,7 +454,7 @@ awt::Rectangle SAL_CALL SdrLightEmbeddedClient_Impl::getPlacement()
     if ( xParentVis.is() )
         aContainerMapUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xParentVis->getMapUnit( mpObj->GetAspect() ) );
 
-    aLogicRect = Application::GetDefaultDevice()->LogicToPixel(aLogicRect, MapMode(aContainerMapUnit));
+    aLogicRect = Application::GetDefaultDevice()->LogicToWindow(aLogicRect, MapMode(aContainerMapUnit));
     return vcl::unohelper::ConvertToAWTRect(aLogicRect);
 }
 
@@ -493,7 +493,7 @@ void SAL_CALL SdrLightEmbeddedClient_Impl::changedPlacement( const awt::Rectangl
     if ( xParentVis.is() )
         aContainerMapUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xParentVis->getMapUnit( mpObj->GetAspect() ) );
 
-    tools::Rectangle aNewLogicRect = Application::GetDefaultDevice()->PixelToLogic(aNewPixelRect, MapMode(aContainerMapUnit));
+    tools::Rectangle aNewLogicRect = Application::GetDefaultDevice()->WindowToLogic(aNewPixelRect, MapMode(aContainerMapUnit));
     tools::Rectangle aLogicRect = impl_getScaledRect_nothrow();
 
     if ( aNewLogicRect == aLogicRect )
@@ -511,7 +511,7 @@ void SAL_CALL SdrLightEmbeddedClient_Impl::changedPlacement( const awt::Rectangl
     aNewLogicRect.SetSize( aNewObjSize );
     // react to the change if the difference is bigger than one pixel
     Size aPixelDiff =
-        Application::GetDefaultDevice()->LogicToPixel(
+        Application::GetDefaultDevice()->LogicToWindow(
             Size( aLogicRect.GetWidth() - aNewObjSize.Width(),
                   aLogicRect.GetHeight() - aNewObjSize.Height() ),
             MapMode(aContainerMapUnit));

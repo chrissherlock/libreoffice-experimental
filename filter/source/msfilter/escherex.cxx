@@ -1201,7 +1201,7 @@ static Size lcl_SizeToEmu(Size aPrefSize, const MapMode& aPrefMapMode)
 {
     Size aRetSize;
     if (aPrefMapMode.GetMapUnit() == MapUnit::MapPixel)
-        aRetSize = Application::GetDefaultDevice()->PixelToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
+        aRetSize = Application::GetDefaultDevice()->WindowToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
     else
         aRetSize = ::LogicToLogic(aPrefSize, aPrefMapMode, MapMode(MapUnit::Map100thMM));
     return aRetSize;

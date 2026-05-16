@@ -257,7 +257,7 @@ Point pixelToLogic(const Point& rPoint, vcl::Window const * pWindow)
     if (!pWindow)
         return rPoint;
 
-    return pWindow->PixelToLogic(rPoint);
+    return pWindow->WindowToLogic(rPoint);
 }
 
 }

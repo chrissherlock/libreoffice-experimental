@@ -399,7 +399,7 @@ awt::Rectangle ScViewPaneBase::GetVisArea() const
                 pViewShell->GetViewData().GetPosY(eWhichV),
                 pViewShell->GetViewData().GetTabNumber());
             tools::Rectangle aCellRect( rDoc.GetMMRect( aCell.Col(), aCell.Row(), aCell.Col(), aCell.Row(), aCell.Tab() ) );
-            Size aVisSize( pWindow->PixelToLogic( pWindow->GetSizePixel(), pWindow->GetDrawMapMode( true ) ) );
+            Size aVisSize( pWindow->WindowToLogic( pWindow->GetSizePixel(), pWindow->GetDrawMapMode( true ) ) );
             Point aVisPos( aCellRect.TopLeft() );
             if ( rDoc.IsLayoutRTL( aCell.Tab() ) )
             {
@@ -1153,9 +1153,9 @@ uno::Reference< uno::XInterface > ScTabViewObj::GetClickedObject(const Point& rP
             if (pDrawPage && pDrawView && pDrawView->GetSdrPageView())
             {
                 vcl::Window* pActiveWin = rData.GetActiveWin();
-                Point aPos = pActiveWin->PixelToLogic(rPoint);
+                Point aPos = pActiveWin->WindowToLogic(rPoint);
 
-                double fHitLog = pActiveWin->PixelToLogic(Size(pDrawView->GetHitTolerancePixel(),0)).Width();
+                double fHitLog = pActiveWin->WindowToLogic(Size(pDrawView->GetHitTolerancePixel(),0)).Width();
 
                 for (const rtl::Reference<SdrObject>& pObj : *pDrawPage)
                 {

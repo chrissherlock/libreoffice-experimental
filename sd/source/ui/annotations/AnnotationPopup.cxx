@@ -82,7 +82,7 @@ void AnnotationPopup::openPopup()
             auto aRealPosition2D = mxAnnotation->getPosition();
             Point aPosition(::tools::Long(aRealPosition2D.X * 100.0),
                             ::tools::Long(aRealPosition2D.Y * 100.0));
-            Point aPositionPixel = pWindow->LogicToPixel(aPosition);
+            Point aPositionPixel = pWindow->LogicToWindow(aPosition);
 
             aPositionPixel.AdjustX(4);
             aPositionPixel.AdjustY(1);
@@ -90,7 +90,7 @@ void AnnotationPopup::openPopup()
             auto aRealSize2D = mxAnnotation->getSize();
             Size aSize(::tools::Long(aRealSize2D.Width * 100.0),
                        ::tools::Long(aRealSize2D.Height * 100.0));
-            Size aSizePixel = pWindow->LogicToPixel(aSize);
+            Size aSizePixel = pWindow->LogicToWindow(aSize);
 
             ::tools::Rectangle aRectangle(aPositionPixel, aSizePixel);
 

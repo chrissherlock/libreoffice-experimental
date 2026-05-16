@@ -139,7 +139,7 @@ Reference< XAccessible > SAL_CALL SvxGraphCtrlAccessibleContext::getAccessibleAt
     }
 
     Point aPnt( rPoint.X, rPoint.Y );
-    aPnt = mpControl->GetDrawingArea()->get_ref_device().PixelToLogic(aPnt);
+    aPnt = mpControl->GetDrawingArea()->get_ref_device().WindowToLogic(aPnt);
 
     SdrObject* pObj = nullptr;
 
@@ -546,11 +546,11 @@ tools::Rectangle SvxGraphCtrlAccessibleContext::GetVisibleArea() const
     return aVisArea;
 }
 
-Point SvxGraphCtrlAccessibleContext::LogicToPixel (const Point& rPoint) const
+Point SvxGraphCtrlAccessibleContext::LogicToWindow(const Point& rPoint) const
 {
     if( mpControl )
     {
-        return mpControl->GetDrawingArea()->get_ref_device().LogicToPixel(rPoint) + mpControl->GetPositionInDialog();
+        return mpControl->GetDrawingArea()->get_ref_device().LogicToWindow(rPoint) + mpControl->GetPositionInDialog();
     }
     else
     {
@@ -558,10 +558,10 @@ Point SvxGraphCtrlAccessibleContext::LogicToPixel (const Point& rPoint) const
     }
 }
 
-Size SvxGraphCtrlAccessibleContext::LogicToPixel (const Size& rSize) const
+Size SvxGraphCtrlAccessibleContext::LogicToWindow(const Size& rSize) const
 {
     if( mpControl )
-        return mpControl->GetDrawingArea()->get_ref_device().LogicToPixel(rSize);
+        return mpControl->GetDrawingArea()->get_ref_device().LogicToWindow(rSize);
     else
         return rSize;
 }

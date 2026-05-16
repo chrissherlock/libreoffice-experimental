@@ -96,7 +96,7 @@ void Window::ExpandPaintClipRegion( const vcl::Region& rRegion )
     if( !mpWindowImpl->mpPaintRegion )
         return;
 
-    vcl::Region aPixRegion = LogicToPixel( rRegion );
+    vcl::Region aPixRegion = LogicToWindow( rRegion );
     vcl::Region aDevPixRegion = GetOutDev()->GetMapper().ViewToDevice( aPixRegion );
 
     vcl::Region aWinChildRegion = ImplGetWinChildClipRegion();
@@ -147,7 +147,7 @@ vcl::Region WindowOutputDevice::GetActiveClipRegion() const
     if ( mbClipRegion )
         aRegion.Intersect( maRegion );
 
-    return PixelToLogic( aRegion );
+    return WindowToLogic( aRegion );
 }
 
 void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)
@@ -155,7 +155,7 @@ void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)
     const vcl::Region aPaintRgn(mxOwnerWindow->GetPaintRegion());
 
     if (!aPaintRgn.IsNull())
-        rDstRect.Intersection(LogicToPixel(aPaintRgn.GetBoundRect()));
+        rDstRect.Intersection(LogicToWindow(aPaintRgn.GetBoundRect()));
 }
 
 void Window::EnableClipSiblings( bool bClipSiblings )
@@ -677,15 +677,15 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
     if ( mxOwnerWindow->mpWindowImpl->mpPaintRegion )
     {
         vcl::Region      aClip( *mxOwnerWindow->mpWindowImpl->mpPaintRegion );
-        const Point aPixPos( LogicToPixel( rPos ) );
+        const Point aPixPos( LogicToWindow( rPos ) );
 
         aClip.Move( -GetDeviceOriginX(), -GetDeviceOriginY() );
-        aClip.Intersect( tools::Rectangle( aPixPos, LogicToPixel( rSize ) ) );
+        aClip.Intersect( tools::Rectangle( aPixPos, LogicToWindow( rSize ) ) );
 
         if ( !aClip.IsEmpty() )
         {
             const vcl::Region    aOldClip( rSaveDevice.GetClipRegion() );
-            const Point     aPixOffset( rSaveDevice.LogicToPixel( Point() ));
+            const Point     aPixOffset( rSaveDevice.LogicToWindow( Point() ));
             const vcl::MappingPolicy eOldPolicy = rSaveDevice.GetMappingPolicy();
 
             // move clip region to have the same distance to DestOffset

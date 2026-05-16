@@ -281,7 +281,7 @@ void SdrMediaObj::grabSnapshot(const OUString& rRealURL) const
 
 void SdrMediaObj::AdjustToMaxRect( const tools::Rectangle& rMaxRect, bool bShrinkOnly /* = false */ )
 {
-    Size aSize( Application::GetDefaultDevice()->PixelToLogic(
+    Size aSize( Application::GetDefaultDevice()->WindowToLogic(
                     static_cast< sdr::contact::ViewContactOfSdrMediaObj& >( GetViewContact() ).getPreferredSize(),
                     MapMode(MapUnit::Map100thMM)) );
     Size aMaxSize( rMaxRect.GetSize() );

@@ -496,8 +496,8 @@ public:
     ///=====  IAccessibleViewForwarder  ========================================
 
     virtual tools::Rectangle GetVisibleArea() const override;
-    virtual Point LogicToPixel (const Point& rPoint) const override;
-    virtual Size LogicToPixel (const Size& rSize) const override;
+    virtual Point LogicToWindow (const Point& rPoint) const override;
+    virtual Size LogicToWindow (const Size& rSize) const override;
 
 private:
     ScPreviewShell*                     mpViewShell;
@@ -533,13 +533,13 @@ tools::Rectangle ScIAccessibleViewForwarder::GetVisibleArea() const
         aVisRect.SetSize(pWin->GetOutputSizePixel());
         aVisRect.SetPos(Point(0, 0));
 
-        aVisRect = pWin->PixelToLogic(aVisRect, maMapMode);
+        aVisRect = pWin->WindowToLogic(aVisRect, maMapMode);
     }
 
     return aVisRect;
 }
 
-Point ScIAccessibleViewForwarder::LogicToPixel (const Point& rPoint) const
+Point ScIAccessibleViewForwarder::LogicToWindow (const Point& rPoint) const
 {
     SolarMutexGuard aGuard;
     Point aPoint;
@@ -547,19 +547,19 @@ Point ScIAccessibleViewForwarder::LogicToPixel (const Point& rPoint) const
     if (pWin && mpAccDoc)
     {
         tools::Rectangle aRect(mpAccDoc->GetBoundingBoxOnScreen());
-        aPoint = pWin->LogicToPixel(rPoint, maMapMode) + aRect.TopLeft();
+        aPoint = pWin->LogicToWindow(rPoint, maMapMode) + aRect.TopLeft();
     }
 
     return aPoint;
 }
 
-Size ScIAccessibleViewForwarder::LogicToPixel (const Size& rSize) const
+Size ScIAccessibleViewForwarder::LogicToWindow (const Size& rSize) const
 {
     SolarMutexGuard aGuard;
     Size aSize;
     vcl::Window* pWin = mpViewShell->GetWindow();
     if (pWin)
-        aSize = pWin->LogicToPixel(rSize, maMapMode);
+        aSize = pWin->LogicToWindow(rSize, maMapMode);
     return aSize;
 }
 
@@ -994,7 +994,7 @@ void ScShapeChildren::FillShapes(const tools::Rectangle& aPixelPaintRect, const 
         uno::Reference< drawing::XShape > xShape(pObj->getUnoShape(), uno::UNO_QUERY);
         if (xShape.is())
         {
-            tools::Rectangle aRect(pWin->LogicToPixel(
+            tools::Rectangle aRect(pWin->LogicToWindow(
                 tools::Rectangle(vcl::unohelper::ConvertToVCLPoint(xShape->getPosition()),
                                  vcl::unohelper::ConvertToVCLSize(xShape->getSize())), aMapMode));
             if(!aClippedPixelPaintRect.GetIntersection(aRect).IsEmpty())

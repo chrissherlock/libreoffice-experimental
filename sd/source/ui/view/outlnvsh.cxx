@@ -260,7 +260,7 @@ void OutlineViewShell::ArrangeGUIElements ()
 
     ::tools::Rectangle aWin(Point(0,0), pWindow->GetOutputSizePixel());
 
-    aWin = pWindow->PixelToLogic(aWin);
+    aWin = pWindow->WindowToLogic(aWin);
     pOutlinerView->SetOutputArea(aWin);
 
     ::tools::Rectangle aVis = pOutlinerView->GetVisArea();
@@ -495,7 +495,7 @@ void OutlineViewShell::FuSupport(SfxRequest &rReq)
                 {
                     sal_Int8 nAction = DND_ACTION_COPY;
                     pOlView->InsertData( aDataHelper,
-                                         GetActiveWindow()->PixelToLogic( ::tools::Rectangle( Point(), GetActiveWindow()->GetOutputSizePixel() ).Center() ),
+                                         GetActiveWindow()->WindowToLogic( ::tools::Rectangle( Point(), GetActiveWindow()->GetOutputSizePixel() ).Center() ),
                                          nAction, false, SotClipboardFormatId::STRING);
                 }
             }
@@ -1060,7 +1060,7 @@ void OutlineViewShell::VirtHScrollHdl(ScrollAdaptor* pHScroll)
 
     Window*       pWin          = mpContentWindow.get();
     OutlinerView* pOutlinerView = pOlView->GetViewByWindow(pWin);
-    ::tools::Long          nViewWidth    = pWin->PixelToLogic(
+    ::tools::Long          nViewWidth    = pWin->WindowToLogic(
         pWin->GetSizePixel()).Width();
     ::tools::Long          nTextWidth    = pOlView->GetPaperWidth();
     nViewWidth                  = std::max(nViewWidth, nTextWidth);
@@ -1081,7 +1081,7 @@ void OutlineViewShell::VirtVScrollHdl(ScrollAdaptor* pVScroll)
 
     Window*       pWin          = mpContentWindow.get();
     OutlinerView* pOutlinerView = pOlView->GetViewByWindow(pWin);
-    ::tools::Long          nViewHeight   = pWin->PixelToLogic(
+    ::tools::Long          nViewHeight   = pWin->WindowToLogic(
         pWin->GetSizePixel()).Height();
     ::tools::Long          nTextHeight   = pOlView->GetOutliner().GetTextHeight();
     nViewHeight                += nTextHeight;
@@ -1121,7 +1121,7 @@ void OutlineViewShell::SetZoom(::tools::Long nZoom)
         // change OutputArea of OutlinerView
         OutlinerView* pOutlinerView = pOlView->GetViewByWindow(pWindow);
         ::tools::Rectangle aWin(Point(0,0), pWindow->GetOutputSizePixel());
-        aWin = pWindow->PixelToLogic(aWin);
+        aWin = pWindow->WindowToLogic(aWin);
         pOutlinerView->SetOutputArea(aWin);
     }
 
@@ -1144,7 +1144,7 @@ void OutlineViewShell::SetZoomRect(const ::tools::Rectangle& rZoomRect)
         // change OutputArea of OutlinerView
         OutlinerView* pOutlinerView = pOlView->GetViewByWindow(pWindow);
         ::tools::Rectangle aWin(Point(0,0), pWindow->GetOutputSizePixel());
-        aWin = pWindow->PixelToLogic(aWin);
+        aWin = pWindow->WindowToLogic(aWin);
         pOutlinerView->SetOutputArea(aWin);
     }
 

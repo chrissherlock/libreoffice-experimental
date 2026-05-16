@@ -595,7 +595,7 @@ void ScTabView::MakeVisible( const tools::Rectangle& rHMMRect )
     Size aWinSize = pWin->GetOutputSizePixel();
     SCTAB nTab = aViewData.CurrentTabForData();
 
-    tools::Rectangle aRect = pWin->LogicToPixel( rHMMRect );
+    tools::Rectangle aRect = pWin->LogicToWindow( rHMMRect );
 
     tools::Long nScrollX=0, nScrollY=0;        // pixel
 

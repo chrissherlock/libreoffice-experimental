@@ -330,7 +330,7 @@ Bitmap convertPrimitive2DContainerToBitmap(primitive2d::Primitive2DContainer&& r
 
         // get system DPI
         Size aDPI(
-            Application::GetDefaultDevice()->LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)));
+            Application::GetDefaultDevice()->LogicToWindow(Size(1, 1), MapMode(MapUnit::MapInch)));
         if (rTargetDPI.has_value())
         {
             aDPI = *rTargetDPI;

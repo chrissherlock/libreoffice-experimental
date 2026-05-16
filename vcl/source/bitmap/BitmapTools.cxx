@@ -586,7 +586,7 @@ void DrawAndClipBitmap(const Point& rPos, const Size& rSize, const Bitmap& rBitm
     ScopedVclPtrInstance< VirtualDevice > pVDev;
     MapMode aMapMode( MapUnit::Map100thMM );
     aMapMode.SetOrigin( Point( -rPos.X(), -rPos.Y() ) );
-    const Size aOutputSizePixel( pVDev->LogicToPixel( rSize, aMapMode ) );
+    const Size aOutputSizePixel( pVDev->LogicToWindow( rSize, aMapMode ) );
     const Size aSizePixel( rBitmap.GetSizePixel() );
     if ( aOutputSizePixel.Width() && aOutputSizePixel.Height() )
     {

@@ -203,7 +203,7 @@ void ScTabControl::MouseButtonDown( const MouseEvent& rMEvt )
 
 void ScTabControl::MouseButtonUp( const MouseEvent& rMEvt )
 {
-    Point aPos = PixelToLogic( rMEvt.GetPosPixel() );
+    Point aPos = WindowToLogic( rMEvt.GetPosPixel() );
 
     // mouse button down and up on same page?
     if( nMouseClickPageId != GetPageId(aPos))

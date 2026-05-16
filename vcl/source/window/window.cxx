@@ -1383,7 +1383,7 @@ void Window::ImplPointToLogic(vcl::RenderContext const & rRenderContext, vcl::Fo
     aSize.AdjustHeight(72/2 );
     aSize.setHeight( aSize.Height() / 72 );
 
-    aSize =  rRenderContext.PixelToLogic(aSize);
+    aSize =  rRenderContext.WindowToLogic(aSize);
 
     rFont.SetFontSize(aSize);
 }
@@ -1391,7 +1391,7 @@ void Window::ImplPointToLogic(vcl::RenderContext const & rRenderContext, vcl::Fo
 void Window::ImplLogicToPoint(vcl::RenderContext const & rRenderContext, vcl::Font& rFont) const
 {
     Size aSize = rFont.GetFontSize();
-    aSize =  rRenderContext.LogicToPixel(aSize);
+    aSize =  rRenderContext.LogicToWindow(aSize);
 
     if (aSize.Width())
     {

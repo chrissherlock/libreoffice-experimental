@@ -149,7 +149,7 @@ Size OScrollWindowHelper::ResizeScrollBars()
     m_aVScroll->Show( bVVisible );
     m_aHScroll->Show( bHVisible );
 
-    const Point aOffset = LogicToPixel(Point(SECTION_OFFSET, SECTION_OFFSET), MapMode(MapUnit::MapAppFont));
+    const Point aOffset = LogicToWindow(Point(SECTION_OFFSET, SECTION_OFFSET), MapMode(MapUnit::MapAppFont));
     // resize scrollbars and set their ranges
     {
         double fStartWidth = (REPORT_STARTMARKER_WIDTH*m_pParent->getController().getZoomValue()) / 100.0;

@@ -51,7 +51,7 @@ Svx3DPreviewControl::Svx3DPreviewControl()
 
 void Svx3DPreviewControl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
-    Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(80, 100), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(80, 100), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     SetOutputSizePixel(aSize);
@@ -146,7 +146,7 @@ void Svx3DPreviewControl::Resize()
 {
     // size of page
     Size aSize(GetOutputSizePixel());
-    aSize = GetDrawingArea()->get_ref_device().PixelToLogic(aSize);
+    aSize = GetDrawingArea()->get_ref_device().WindowToLogic(aSize);
     mxFmPage->SetSize(aSize);
 
     // set size
@@ -456,7 +456,7 @@ void Svx3DLightControl::TrySelection(Point aPosPixel)
     if(!mpScene)
         return;
 
-    const Point aPosLogic(GetDrawingArea()->get_ref_device().PixelToLogic(aPosPixel));
+    const Point aPosLogic(GetDrawingArea()->get_ref_device().WindowToLogic(aPosPixel));
     const basegfx::B2DPoint aPoint(aPosLogic.X(), aPosLogic.Y());
     std::vector< const E3dCompoundObject* > aResult;
     getAllHit3DObjectsSortedFrontToBack(aPoint, *mpScene, aResult);
@@ -676,7 +676,7 @@ bool Svx3DLightControl::MouseButtonUp(const MouseEvent& rMEvt)
 void Svx3DLightControl::Resize()
 {
     // set size of page
-    const Size aSize(GetDrawingArea()->get_ref_device().PixelToLogic(GetOutputSizePixel()));
+    const Size aSize(GetDrawingArea()->get_ref_device().WindowToLogic(GetOutputSizePixel()));
     mxFmPage->SetSize(aSize);
 
     // set position and size of scene
@@ -922,7 +922,7 @@ SvxLightCtl3D::SvxLightCtl3D(Svx3DLightControl& rLightControl, weld::Scale& rHor
 
 void SvxLightCtl3D::Init()
 {
-    Size aSize(mrLightControl.GetDrawingArea()->get_ref_device().LogicToPixel(Size(80, 100), MapMode(MapUnit::MapAppFont)));
+    Size aSize(mrLightControl.GetDrawingArea()->get_ref_device().LogicToWindow(Size(80, 100), MapMode(MapUnit::MapAppFont)));
     mrLightControl.set_size_request(aSize.Width(), aSize.Height());
 
     // #i58240# set HelpIDs for scrollbars and switcher

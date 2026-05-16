@@ -139,7 +139,7 @@ tools::PolyPolygon SvxContourDlg::CreateAutoContour( const Graphic& rGraphic,
     {
         const Graphic   aTmpGrf( rGraphic.GetGDIMetaFile().GetMonochromeMtf( COL_BLACK ) );
         ScopedVclPtrInstance< VirtualDevice > pVDev;
-        Size            aSizePix( pVDev->LogicToPixel( aTmpGrf.GetPrefSize(), aTmpGrf.GetPrefMapMode() ) );
+        Size            aSizePix( pVDev->LogicToWindow( aTmpGrf.GetPrefSize(), aTmpGrf.GetPrefMapMode() ) );
 
         if( aSizePix.Width() && aSizePix.Height() && ( aSizePix.Width() > 512 || aSizePix.Height() > 512 ) )
         {
@@ -309,9 +309,9 @@ void SvxSuperContourDlg::SetPolyPolygon( const tools::PolyPolygon& rPolyPoly )
             Point& rPt = rPoly[ i ];
 
             if ( !bPixelMap )
-                rPt = pOutDev->LogicToPixel( rPt, aGrfMap );
+                rPt = pOutDev->LogicToWindow( rPt, aGrfMap );
 
-            rPt = pOutDev->PixelToLogic( rPt, aMap100 );
+            rPt = pOutDev->WindowToLogic( rPt, aMap100 );
         }
     }
 
@@ -336,10 +336,10 @@ tools::PolyPolygon SvxSuperContourDlg::GetPolyPolygon()
         {
             Point& rPt = rPoly[ i ];
 
-            rPt = pOutDev->LogicToPixel( rPt, aMap100  );
+            rPt = pOutDev->LogicToWindow( rPt, aMap100  );
 
             if ( !bPixelMap )
-                rPt = pOutDev->PixelToLogic( rPt, aGrfMap  );
+                rPt = pOutDev->WindowToLogic( rPt, aGrfMap  );
         }
     }
 
@@ -542,7 +542,7 @@ IMPL_LINK_NOARG(SvxSuperContourDlg, CreateHdl, Timer *, void)
 {
     aCreateIdle.Stop();
 
-    const tools::Rectangle aWorkRect = m_xContourWnd->GetDrawingArea()->get_ref_device().LogicToPixel(
+    const tools::Rectangle aWorkRect = m_xContourWnd->GetDrawingArea()->get_ref_device().LogicToWindow(
         m_xContourWnd->GetWorkRect(), MapMode( MapUnit::Map100thMM));
 
     const Graphic&  rGraphic = m_xContourWnd->GetGraphic();

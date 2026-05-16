@@ -323,7 +323,7 @@ sal_uInt16 SdrPaintView::ImpGetMinMovLogic(short nMinMov, const OutputDevice* pO
         pOut = GetFirstOutputDevice();
     }
     if (pOut!=nullptr) {
-        return short(-pOut->PixelToLogic(Size(nMinMov,0))->Width());
+        return short(-pOut->WindowToLogic(Size(nMinMov,0))->Width());
     } else {
         return 0;
     }
@@ -337,7 +337,7 @@ sal_uInt16 SdrPaintView::ImpGetHitTolLogic(short nHitTol, const OutputDevice* pO
         pOut = GetFirstOutputDevice();
     }
     if (pOut!=nullptr) {
-        return short(-pOut->PixelToLogic(Size(nHitTol,0))->Width());
+        return short(-pOut->WindowToLogic(Size(nHitTol,0))->Width());
     } else {
         return 0;
     }
@@ -353,8 +353,8 @@ void SdrPaintView::TheresNewMapMode()
         }
         else
         {
-            mnHitTolLog=static_cast<sal_uInt16>(mpActualOutDev->PixelToLogic(Size(mnHitTolPix,0))->Width());
-            mnMinMovLog=static_cast<sal_uInt16>(mpActualOutDev->PixelToLogic(Size(mnMinMovPix,0))->Width());
+            mnHitTolLog=static_cast<sal_uInt16>(mpActualOutDev->WindowToLogic(Size(mnHitTolPix,0))->Width());
+            mnMinMovLog=static_cast<sal_uInt16>(mpActualOutDev->WindowToLogic(Size(mnMinMovPix,0))->Width());
         }
     }
 }

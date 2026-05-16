@@ -217,7 +217,7 @@ namespace vcl
         Size                                    maCustomPaperSize;
         bool                                    mbHasCustomPaperEntry;
 
-        // Paper size from combobox in 1/100th mm; avoids PixelToLogic issues.
+        // Paper size from combobox in 1/100th mm; avoids WindowToLogic issues.
         Size                                    maSelectedPaperSize;
 
         Idle maUpdatePreviewIdle;

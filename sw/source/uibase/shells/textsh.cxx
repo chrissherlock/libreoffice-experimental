@@ -468,7 +468,7 @@ void SwTextShell::ExecInsert(SfxRequest &rReq)
             SwEditWin& rEdtWin = GetView().GetEditWin();
             Size aWinSize = rEdtWin.GetSizePixel();
             Point aStartPos(aWinSize.Width()/2, aWinSize.Height() / 2);
-            aStartPos = rEdtWin.PixelToLogic(aStartPos);
+            aStartPos = rEdtWin.WindowToLogic(aStartPos);
             constexpr tools::Long constTwips_2cm = o3tl::toTwips(2, o3tl::Length::cm);
             constexpr tools::Long constTwips_4cm = o3tl::toTwips(4, o3tl::Length::cm);
             aStartPos.AdjustX(-constTwips_4cm);

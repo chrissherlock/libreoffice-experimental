@@ -2730,26 +2730,26 @@ tools::Rectangle SwAccessibleMap::GetVisibleArea() const
 
 // Convert a MM100 value relative to the document root into a pixel value
 // relative to the screen!
-Point SwAccessibleMap::LogicToPixel( const Point& rPoint ) const
+Point SwAccessibleMap::LogicToWindow( const Point& rPoint ) const
 {
     Point aPoint = o3tl::toTwips( rPoint, o3tl::Length::mm100 );
     if (const vcl::Window* pWin = GetShell().GetWin())
     {
         const MapMode aMapMode = GetMapMode(aPoint);
-        aPoint = pWin->LogicToPixel( aPoint, aMapMode );
+        aPoint = pWin->LogicToWindow( aPoint, aMapMode );
         aPoint = Point(pWin->OutputToAbsoluteScreenPixel( aPoint ));
     }
 
     return aPoint;
 }
 
-Size SwAccessibleMap::LogicToPixel( const Size& rSize ) const
+Size SwAccessibleMap::LogicToWindow( const Size& rSize ) const
 {
     Size aSize( o3tl::toTwips( rSize, o3tl::Length::mm100 ) );
     if (const OutputDevice* pWin = GetShell().GetWin()->GetOutDev())
     {
         const MapMode aMapMode = GetMapMode(Point(0, 0));
-        aSize = pWin->LogicToPixel( aSize, aMapMode );
+        aSize = pWin->LogicToWindow( aSize, aMapMode );
     }
 
     return aSize;
@@ -2855,7 +2855,7 @@ Point SwAccessibleMap::PixelToCore( const Point& rPoint ) const
     if (const OutputDevice* pWin = GetShell().GetWin()->GetOutDev())
     {
         const MapMode aMapMode = GetMapMode(rPoint);
-        aPoint = pWin->PixelToLogic( rPoint, aMapMode );
+        aPoint = pWin->WindowToLogic( rPoint, aMapMode );
     }
     return aPoint;
 }
@@ -2899,9 +2899,9 @@ tools::Rectangle SwAccessibleMap::CoreToPixel( const SwRect& rRect ) const
     if (const OutputDevice* pWin = GetShell().GetWin()->GetOutDev())
     {
         const MapMode aMapMode = GetMapMode(rRect.TopLeft());
-        aRect = pWin->LogicToPixel( rRect.SVRect(), aMapMode );
+        aRect = pWin->LogicToWindow( rRect.SVRect(), aMapMode );
 
-        tools::Rectangle aTmpRect = pWin->PixelToLogic( aRect, aMapMode );
+        tools::Rectangle aTmpRect = pWin->WindowToLogic( aRect, aMapMode );
         lcl_CorrectRectangle(aRect, rRect.SVRect(), aTmpRect);
     }
 

@@ -247,7 +247,7 @@ public:
     Point GetPosForHitTest( const OutputDevice& rOut )
     {
         Point aHitTestPos( m_pHdl->GetPos() );
-        aHitTestPos =  rOut.LogicToPixel( aHitTestPos );
+        aHitTestPos =  rOut.LogicToWindow( aHitTestPos );
         if ( m_bTopRightHandle )
         {
             aHitTestPos += Point( -1, 1 );
@@ -256,7 +256,7 @@ public:
         {
             aHitTestPos += Point( 1, 1 );
         }
-        aHitTestPos =  rOut.PixelToLogic( aHitTestPos );
+        aHitTestPos =  rOut.WindowToLogic( aHitTestPos );
 
         return aHitTestPos;
     }
@@ -1094,7 +1094,7 @@ void SwEditWin::ChangeFly( Move::Direction eDir, Move::Size eDirSize, bool bWeb 
 
     if(eDirSize == Move::Size::Small)
     {
-        aSnap = PixelToLogic(Size(1,1));
+        aSnap = WindowToLogic(Size(1,1));
     }
     else
     {
@@ -1299,7 +1299,7 @@ void SwEditWin::ChangeDrawing(Move::Direction eDir, Move::Size eDirSize)
 
         if(eDirSize == Move::Size::Small)
         {
-            aSnap = PixelToLogic(Size(1,1));
+            aSnap = WindowToLogic(Size(1,1));
         }
         else if(eDirSize == Move::Size::Huge)
         {
@@ -3050,7 +3050,7 @@ void SwEditWin::MouseButtonDown(const MouseEvent& _rMEvt)
     m_bWasShdwCursor = nullptr != m_pShadCursor;
     m_pShadCursor.reset();
 
-    const Point aDocPos(PixelToLogic(aMEvt.GetPosPixel()));
+    const Point aDocPos(WindowToLogic(aMEvt.GetPosPixel()));
 
     FrameControlType eControl;
     bool bOverFly = false;
@@ -4213,7 +4213,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
         const SwNodes& rNds = rSh.GetDoc()->GetNodes();
         SwOutlineNodes::size_type nPos;
         SwContentAtPos aSwContentAtPos(IsAttrAtPos::Outline);
-        if (rSh.GetContentAtPos(PixelToLogic(rMEvt.GetPosPixel()), aSwContentAtPos))
+        if (rSh.GetContentAtPos(WindowToLogic(rMEvt.GetPosPixel()), aSwContentAtPos))
         {
             // mouse pointer is on an outline paragraph node
             if(aSwContentAtPos.aFnd.pNode && aSwContentAtPos.aFnd.pNode->IsTextNode())
@@ -4281,7 +4281,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
     //aPixPt == Point in Pixel, relative to ChildWin
     //aDocPt == Point in Twips, document coordinates
     const Point aPixPt( rMEvt.GetPosPixel() );
-    const Point aDocPt( PixelToLogic( aPixPt ) );
+    const Point aDocPt( WindowToLogic( aPixPt ) );
 
     if ( IsChainMode() )
     {
@@ -4343,7 +4343,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
     if( g_bDDTimerStarted )
     {
         Point aDD( SwEditWin::s_nDDStartPosX, SwEditWin::s_nDDStartPosY );
-        aDD = LogicToPixel( aDD );
+        aDD = LogicToWindow( aDD );
         tools::Rectangle aRect( aDD.X()-3, aDD.Y()-3, aDD.X()+3, aDD.Y()+3 );
         if ( !aRect.Contains( aPixPt ) )
             StopDDTimer( &rSh, aDocPt );
@@ -4471,7 +4471,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
                     // event processing for resizing
                     if (pSdrView && pSdrView->GetMarkedObjectList().GetMarkCount() != 0)
                     {
-                        const Point aSttPt( PixelToLogic( m_aStartPos ) );
+                        const Point aSttPt( WindowToLogic( m_aStartPos ) );
 
                         // can we start?
                         if( SdrHdlKind::User == g_eSdrMoveHdl )
@@ -4539,7 +4539,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
                     if (pSdrView)
                     {
                         // Resize proportionally when media is selected and the user drags on a corner
-                        const Point aSttPt(PixelToLogic(m_aStartPos));
+                        const Point aSttPt(WindowToLogic(m_aStartPos));
                         SdrHdl* pHdl = pSdrView->PickHandle(aSttPt);
                         if (pHdl)
                             bResizeKeepRatio = bResizeKeepRatio && pHdl->IsCornerHdl();
@@ -4786,7 +4786,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
             return; // SdrView's event evaluated
         }
 
-        const Point aDocPos(PixelToLogic(rMEvt.GetPosPixel()));
+        const Point aDocPos(WindowToLogic(rMEvt.GetPosPixel()));
         SdrHdl* pHdl(pSdrView->PickHandle(aDocPos));
 
         if (nullptr != pHdl)
@@ -4826,7 +4826,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
         return;
     }
 
-    Point aDocPt( PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aDocPt( WindowToLogic( rMEvt.GetPosPixel() ) );
 
     if ( g_bDDTimerStarted )
     {
@@ -4838,8 +4838,8 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
             g_bFrameDrag = false;
         }
         g_bNoInterrupt = false;
-        const Point aDocPos( PixelToLogic( rMEvt.GetPosPixel() ) );
-        if ((PixelToLogic(m_aStartPos).Y() == (aDocPos.Y())) && (PixelToLogic(m_aStartPos).X() == (aDocPos.X())))//To make sure it was not moved
+        const Point aDocPos( WindowToLogic( rMEvt.GetPosPixel() ) );
+        if ((WindowToLogic(m_aStartPos).Y() == (aDocPos.Y())) && (WindowToLogic(m_aStartPos).X() == (aDocPos.X())))//To make sure it was not moved
         {
             SdrPageView* pPV = nullptr;
             SdrObject* pObj = pSdrView ? pSdrView->PickObj(aDocPos, pSdrView->getHitTolLog(), pPV, SdrSearchOptions::ALSOONMASTER) : nullptr;
@@ -4917,7 +4917,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
             }
             else
             {
-                const Point aDocPos( PixelToLogic( m_aStartPos ) );
+                const Point aDocPos( WindowToLogic( m_aStartPos ) );
                 g_bValidCursorPos = !(CRSR_POSCHG & rSh.CallSetCursor(&aDocPos, false));
                 rSh.Edit();
             }
@@ -5000,7 +5000,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
                             pMacro = pFlyFormat->GetMacro().GetMacroTable().Get(nEvent);
                         if (nullptr != pMacro)
                         {
-                            const Point aSttPt( PixelToLogic( m_aStartPos ) );
+                            const Point aSttPt( WindowToLogic( m_aStartPos ) );
                             m_aRszMvHdlPt = aDocPt;
                             sal_uInt32 nPos = 0;
                             SbxArrayRef xArgs = new SbxArray;
@@ -5094,7 +5094,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
                     {   // create only temporary move context because otherwise
                         // the query to the content form doesn't work!!!
                         SwMvContext aMvContext( &rSh );
-                        const Point aDocPos( PixelToLogic( m_aStartPos ) );
+                        const Point aDocPos( WindowToLogic( m_aStartPos ) );
                         g_bValidCursorPos = !(CRSR_POSCHG & rSh.CallSetCursor(&aDocPos, false));
                     }
                     g_bNoInterrupt = bTmpNoInterrupt;
@@ -5163,7 +5163,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
                                         // create only temporary move context because otherwise
                                         // the query to the content form doesn't work!!!
                                         SwMvContext aMvContext( &rSh );
-                                        const Point aDocPos( PixelToLogic( m_aStartPos ) );
+                                        const Point aDocPos( WindowToLogic( m_aStartPos ) );
                                         g_bValidCursorPos = !(CRSR_POSCHG & rSh.CallSetCursor(&aDocPos, false));
                                     }
                                     else
@@ -5817,7 +5817,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
             if (m_rView.GetPostItMgr()->IsHit(rCEvt.GetMousePosPixel()))
                 return;
 
-            Point aDocPos( PixelToLogic( rCEvt.GetMousePosPixel() ) );
+            Point aDocPos( WindowToLogic( rCEvt.GetMousePosPixel() ) );
             if ( !rCEvt.IsMouseEvent() )
                 aDocPos = rSh.GetCharRect().Center();
 
@@ -5851,7 +5851,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
                         SelectMenuPosition(rSh, rCEvt.GetMousePosPixel());
                         m_rView.StopShellTimer();
                     }
-                    const Point aPixPos = LogicToPixel( aDocPos );
+                    const Point aPixPos = LogicToWindow( aDocPos );
 
                     if ( m_rView.GetDocShell()->IsReadOnly() )
                     {
@@ -6074,7 +6074,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
                                 &nActionFlags );
             if( EXCHG_INOUT_ACTION_NONE != nDropAction )
             {
-                const Point aDocPt( PixelToLogic( rCEvt.GetMousePosPixel() ) );
+                const Point aDocPt( WindowToLogic( rCEvt.GetMousePosPixel() ) );
                 SwTransferable::PasteData( aDataHelper, rSh, nDropAction, nActionFlags,
                                     nDropFormat, nDropDestination, false,
                                     false, &aDocPt, EXCHG_IN_ACTION_COPY,
@@ -6216,7 +6216,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
     position of the context menu request */
 void SwEditWin::SelectMenuPosition(SwWrtShell& rSh, const Point& rMousePos )
 {
-    const Point aDocPos( PixelToLogic( rMousePos ) );
+    const Point aDocPos( WindowToLogic( rMousePos ) );
     const bool bIsInsideSelectedObj( rSh.IsInsideSelectedObj( aDocPos ) );
     //create a synthetic mouse event out of the coordinates
     MouseEvent aMEvt(rMousePos);
@@ -6425,7 +6425,7 @@ void SwEditWin::SelectMenuPosition(SwWrtShell& rSh, const Point& rMousePos )
 
 void SwEditWin::DrawCommentGuideLine(Point aPointPixel)
 {
-    const Point aPointLogic = PixelToLogic(aPointPixel);
+    const Point aPointLogic = WindowToLogic(aPointPixel);
 
     sw::sidebarwindows::SidebarPosition eSidebarPosition
         = m_rView.GetPostItMgr()->GetSidebarPos(aPointLogic);
@@ -6437,14 +6437,14 @@ void SwEditWin::DrawCommentGuideLine(Point aPointPixel)
     if (eSidebarPosition == sw::sidebarwindows::SidebarPosition::RIGHT)
     {
         tools::Long nSidebarRectLeft
-            = LogicToPixel(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopLeft()).X();
+            = LogicToWindow(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopLeft()).X();
         tools::Long nPxWidth = aPointPixel.X() - nSidebarRectLeft;
         nPosX = nSidebarRectLeft + std::clamp<tools::Long>(nPxWidth, 1 * nZoom, 8 * nZoom);
     }
     else
     {
         tools::Long nSidebarRectRight
-            = LogicToPixel(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopRight()).X();
+            = LogicToWindow(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopRight()).X();
         tools::Long nPxWidth = nSidebarRectRight - aPointPixel.X();
         nPosX = nSidebarRectRight - std::clamp<tools::Long>(nPxWidth, 1 * nZoom, 8 * nZoom);
     }
@@ -6454,7 +6454,7 @@ void SwEditWin::DrawCommentGuideLine(Point aPointPixel)
     InvertTracking(aLastCommentSidebarPos, ShowTrackFlags::Clip | ShowTrackFlags::Split);
     const tools::Long nHeight = GetOutDev()->GetOutputSizePixel().Height();
     aLastCommentSidebarPos
-        = tools::Rectangle(PixelToLogic(Point(nPosX, 0)), PixelToLogic(Point(nPosX, nHeight)));
+        = tools::Rectangle(WindowToLogic(Point(nPosX, 0)), WindowToLogic(Point(nPosX, nHeight)));
     InvertTracking(aLastCommentSidebarPos, ShowTrackFlags::Clip | ShowTrackFlags::Split);
 }
 
@@ -6471,7 +6471,7 @@ void SwEditWin::SetSidebarWidth(const Point& rPointPixel)
         return;
     // aLastCommentSidebarPos right and left positions are the same so either can be used here
     m_rView.GetPostItMgr()->SetSidebarWidth(
-        Point(aLastCommentSidebarPos.Right(), PixelToLogic(rPointPixel).Y()));
+        Point(aLastCommentSidebarPos.Right(), WindowToLogic(rPointPixel).Y()));
 }
 
 static SfxShell* lcl_GetTextShellFromDispatcher( SwView const & rView )
@@ -6576,7 +6576,7 @@ void QuickHelpData::Start(SwWrtShell& rSh, const bool bRestart)
     vcl::Window& rWin = rSh.GetView().GetEditWin();
     if( m_bIsTip )
     {
-        Point aPt( rWin.OutputToScreenPixel( rWin.LogicToPixel(
+        Point aPt( rWin.OutputToScreenPixel( rWin.LogicToWindow(
                     rSh.GetCharRect().Pos() )));
         aPt.AdjustY( -3 );
         nTipId = Help::ShowPopover(&rWin, tools::Rectangle( aPt, Size( 1, 1 )),
@@ -6869,7 +6869,7 @@ bool SwEditWin::IsInHeaderFooter( const Point &rDocPt, FrameControlType &rContro
     if ( rSh.IsShowHeaderFooterSeparator( FrameControlType::Header ) || rSh.IsShowHeaderFooterSeparator( FrameControlType::Footer ) )
     {
         SwFrameControlsManager &rMgr = rSh.GetView().GetEditWin().GetFrameControlsManager();
-        Point aPoint( LogicToPixel( rDocPt ) );
+        Point aPoint( LogicToWindow( rDocPt ) );
 
         if ( rSh.IsShowHeaderFooterSeparator( FrameControlType::Header ) )
         {

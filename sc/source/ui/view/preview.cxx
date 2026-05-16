@@ -550,7 +550,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
         SetMapMode( MapMode( MapUnit::MapPixel ) );
         for( int i= aPageArea.aStart.Col(); i<= aPageArea.aEnd.Col(); i++ )
         {
-            Point aColumnTop = LogicToPixel( Point( 0, -aOffset.Y() ) ,aMMMode );
+            Point aColumnTop = LogicToWindow( Point( 0, -aOffset.Y() ) ,aMMMode );
             GetOutDev()->SetLineColor( COL_BLACK );
             GetOutDev()->SetFillColor( COL_BLACK );
             GetOutDev()->DrawRect( tools::Rectangle( Point( mvRight[i] - 2, aColumnTop.Y() ),Point( mvRight[i] + 2 , 4 + aColumnTop.Y()) ));
@@ -587,10 +587,10 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
         GetOutDev()->SetLineColor( aBorderColor );
         GetOutDev()->SetFillColor();
 
-        tools::Rectangle aPixel( LogicToPixel( tools::Rectangle( -aOffset.X(), -aOffset.Y(), nPageEndX, nPageEndY ) ) );
+        tools::Rectangle aPixel( LogicToWindow( tools::Rectangle( -aOffset.X(), -aOffset.Y(), nPageEndX, nPageEndY ) ) );
         aPixel.AdjustRight( -1 );
         aPixel.AdjustBottom( -1 );
-        GetOutDev()->DrawRect( PixelToLogic( aPixel ) );
+        GetOutDev()->DrawRect( WindowToLogic( aPixel ) );
     }
 
     //  draw shadow
@@ -600,17 +600,17 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
 
     tools::Rectangle aPixel;
 
-    aPixel = LogicToPixel( tools::Rectangle( nPageEndX, -aOffset.Y(), nPageEndX, nPageEndY ) );
+    aPixel = LogicToWindow( tools::Rectangle( nPageEndX, -aOffset.Y(), nPageEndX, nPageEndY ) );
     aPixel.AdjustTop(SC_PREVIEW_SHADOWSIZE );
     aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
     aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );
-    GetOutDev()->DrawRect( PixelToLogic( aPixel ) );
+    GetOutDev()->DrawRect( WindowToLogic( aPixel ) );
 
-    aPixel = LogicToPixel( tools::Rectangle( -aOffset.X(), nPageEndY, nPageEndX, nPageEndY ) );
+    aPixel = LogicToWindow( tools::Rectangle( -aOffset.X(), nPageEndY, nPageEndX, nPageEndY ) );
     aPixel.AdjustLeft(SC_PREVIEW_SHADOWSIZE );
     aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
     aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );
-    GetOutDev()->DrawRect( PixelToLogic( aPixel ) );
+    GetOutDev()->DrawRect( WindowToLogic( aPixel ) );
 }
 
 void ScPreview::Paint( vcl::RenderContext& /*rRenderContext*/, const tools::Rectangle& /* rRect */ )
@@ -800,7 +800,7 @@ sal_uInt16 ScPreview::GetOptimalZoom(bool bWidthOnly)
     //  desired margin is 0.25cm in default MapMode (like Writer),
     //  but some additional margin is introduced by integer scale values
     //  -> add only 0.10cm, so there is some margin in all cases.
-    Size aMarginSize( LogicToPixel(Size(100, 100), MapMode(MapUnit::Map100thMM)) );
+    Size aMarginSize( LogicToWindow(Size(100, 100), MapMode(MapUnit::Map100thMM)) );
     aWinSize.AdjustWidth( -(2 * aMarginSize.Width()) );
     aWinSize.AdjustHeight( -(2 * aMarginSize.Height()) );
 
@@ -832,7 +832,7 @@ void ScPreview::SetXOffset( tools::Long nX )
 
     if (bValid)
     {
-        tools::Long nDif = LogicToPixel(aOffset).X() - LogicToPixel(Point(nX,0)).X();
+        tools::Long nDif = LogicToWindow(aOffset).X() - LogicToWindow(Point(nX,0)).X();
         aOffset.setX( nX );
         if (nDif && !bInSetZoom)
         {
@@ -859,7 +859,7 @@ void ScPreview::SetYOffset( tools::Long nY )
 
     if (bValid)
     {
-        tools::Long nDif = LogicToPixel(aOffset).Y() - LogicToPixel(Point(0,nY)).Y();
+        tools::Long nDif = LogicToWindow(aOffset).Y() - LogicToWindow(Point(0,nY)).Y();
         aOffset.setY( nY );
         if (nDif && !bInSetZoom)
         {
@@ -960,8 +960,8 @@ void ScPreview::MouseButtonDown( const MouseEvent& rMEvt )
     double    fHorPrevZoom = 100.0 * nZoom / pDocShell->GetOutputFactor() / 10000;
     MapMode   aMMMode( MapUnit::Map100thMM, Point(), fHorPrevZoom, fPreviewZoom );
 
-    aButtonDownChangePoint = PixelToLogic( rMEvt.GetPosPixel(),aMMMode );
-    aButtonDownPt = PixelToLogic( rMEvt.GetPosPixel(),aMMMode );
+    aButtonDownChangePoint = WindowToLogic( rMEvt.GetPosPixel(),aMMMode );
+    aButtonDownPt = WindowToLogic( rMEvt.GetPosPixel(),aMMMode );
 
     CaptureMouse();
 
@@ -1029,9 +1029,9 @@ void ScPreview::MouseButtonDown( const MouseEvent& rMEvt )
 
     SetMapMode( aMMMode );
     if( nColNumberButtonDown == aPageArea.aStart.Col() )
-        DrawInvert( PixelToLogic( Point( nLeftPosition, 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+        DrawInvert( WindowToLogic( Point( nLeftPosition, 0 ),aMMMode ).X() ,PointerStyle::HSplit );
     else
-        DrawInvert( PixelToLogic( Point( mvRight[ nColNumberButtonDown-1 ], 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+        DrawInvert( WindowToLogic( Point( mvRight[ nColNumberButtonDown-1 ], 0 ),aMMMode ).X() ,PointerStyle::HSplit );
 
     DrawInvert( aButtonDownChangePoint.X(), PointerStyle::HSplit );
     bColRulerMove = true;
@@ -1043,7 +1043,7 @@ void ScPreview::MouseButtonUp( const MouseEvent& rMEvt )
         double    fHorPrevZoom = 100.0 * nZoom / pDocShell->GetOutputFactor() / 10000;
         MapMode   aMMMode( MapUnit::Map100thMM, Point(), fHorPrevZoom, fPreviewZoom );
 
-        aButtonUpPt = PixelToLogic( rMEvt.GetPosPixel(),aMMMode );
+        aButtonUpPt = WindowToLogic( rMEvt.GetPosPixel(),aMMMode );
 
         tools::Long  nWidth = lcl_GetDocPageSize(&pDocShell->GetDocument(), nTab).Width();
         tools::Long  nHeight = lcl_GetDocPageSize(&pDocShell->GetDocument(), nTab).Height();
@@ -1258,9 +1258,9 @@ void ScPreview::MouseButtonUp( const MouseEvent& rMEvt )
             {
                 bMoveRulerAction = false;
                 if( nColNumberButtonDown == aPageArea.aStart.Col() )
-                    DrawInvert( PixelToLogic( Point( nLeftPosition, 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+                    DrawInvert( WindowToLogic( Point( nLeftPosition, 0 ),aMMMode ).X() ,PointerStyle::HSplit );
                 else
-                    DrawInvert( PixelToLogic( Point( mvRight[ nColNumberButtonDown-1 ], 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+                    DrawInvert( WindowToLogic( Point( mvRight[ nColNumberButtonDown-1 ], 0 ),aMMMode ).X() ,PointerStyle::HSplit );
                 DrawInvert( aButtonUpPt.X(), PointerStyle::HSplit );
             }
             if( bMoveRulerAction )
@@ -1272,13 +1272,13 @@ void ScPreview::MouseButtonUp( const MouseEvent& rMEvt )
                 const auto m = md.first * 100, d = md.second * mnScale;
                 if( !bLayoutRTL )
                 {
-                    nNewColWidth = o3tl::convert(PixelToLogic( Point( rMEvt.GetPosPixel().X() - mvRight[ nColNumberButtonDown ], 0), aMMMode ).X(), m, d);
+                    nNewColWidth = o3tl::convert(WindowToLogic( Point( rMEvt.GetPosPixel().X() - mvRight[ nColNumberButtonDown ], 0), aMMMode ).X(), m, d);
                     nNewColWidth += pDocShell->GetDocument().GetColWidth( nColNumberButtonDown, nTab );
                 }
                 else
                 {
 
-                    nNewColWidth = o3tl::convert(PixelToLogic( Point( mvRight[ nColNumberButtonDown ] - rMEvt.GetPosPixel().X(), 0), aMMMode ).X(), m, d);
+                    nNewColWidth = o3tl::convert(WindowToLogic( Point( mvRight[ nColNumberButtonDown ] - rMEvt.GetPosPixel().X(), 0), aMMMode ).X(), m, d);
                     nNewColWidth += pDocShell->GetDocument().GetColWidth( nColNumberButtonDown, nTab );
                 }
 
@@ -1306,7 +1306,7 @@ void ScPreview::MouseMove( const MouseEvent& rMEvt )
     double   fPreviewZoom = double(nZoom) / 100;
     double   fHorPrevZoom = 100.0 * nZoom / pDocShell->GetOutputFactor() / 10000;
     MapMode  aMMMode( MapUnit::Map100thMM, Point(), fHorPrevZoom, fPreviewZoom );
-    Point    aMouseMovePoint = PixelToLogic( rMEvt.GetPosPixel(), aMMMode );
+    Point    aMouseMovePoint = WindowToLogic( rMEvt.GetPosPixel(), aMMMode );
 
     tools::Long    nLeftMargin = 0;
     tools::Long    nRightMargin = 0;
@@ -1347,21 +1347,21 @@ void ScPreview::MouseMove( const MouseEvent& rMEvt )
     }
 
     Point   aPixPt( rMEvt.GetPosPixel() );
-    Point   aLeftTop = LogicToPixel( Point( nLeftMargin, -aOffset.Y() ) , aMMMode );
-    Point   aLeftBottom = LogicToPixel( Point( nLeftMargin, o3tl::convert(nHeight, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.Y()), aMMMode );
-    Point   aRightTop = LogicToPixel( Point( nRightMargin, -aOffset.Y() ), aMMMode );
-    Point   aTopLeft = LogicToPixel( Point( -aOffset.X(), nTopMargin ), aMMMode );
-    Point   aTopRight = LogicToPixel( Point( o3tl::convert(nWidth, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.X(), nTopMargin ), aMMMode );
-    Point   aBottomLeft = LogicToPixel( Point( -aOffset.X(), nBottomMargin ), aMMMode );
-    Point   aHeaderLeft = LogicToPixel( Point(  -aOffset.X(), nHeaderHeight ), aMMMode );
-    Point   aFooderLeft = LogicToPixel( Point( -aOffset.X(), nFooterHeight ), aMMMode );
+    Point   aLeftTop = LogicToWindow( Point( nLeftMargin, -aOffset.Y() ) , aMMMode );
+    Point   aLeftBottom = LogicToWindow( Point( nLeftMargin, o3tl::convert(nHeight, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.Y()), aMMMode );
+    Point   aRightTop = LogicToWindow( Point( nRightMargin, -aOffset.Y() ), aMMMode );
+    Point   aTopLeft = LogicToWindow( Point( -aOffset.X(), nTopMargin ), aMMMode );
+    Point   aTopRight = LogicToWindow( Point( o3tl::convert(nWidth, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.X(), nTopMargin ), aMMMode );
+    Point   aBottomLeft = LogicToWindow( Point( -aOffset.X(), nBottomMargin ), aMMMode );
+    Point   aHeaderLeft = LogicToWindow( Point(  -aOffset.X(), nHeaderHeight ), aMMMode );
+    Point   aFooderLeft = LogicToWindow( Point( -aOffset.X(), nFooterHeight ), aMMMode );
 
     bool bOnColRulerChange = false;
 
     for( SCCOL i=aPageArea.aStart.Col(); i<= aPageArea.aEnd.Col(); i++ )
     {
-        Point   aColumnTop = LogicToPixel( Point( 0, -aOffset.Y() ) ,aMMMode );
-        Point   aColumnBottom = LogicToPixel( Point( 0, o3tl::convert(nHeight, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.Y()), aMMMode );
+        Point   aColumnTop = LogicToWindow( Point( 0, -aOffset.Y() ) ,aMMMode );
+        Point   aColumnBottom = LogicToWindow( Point( 0, o3tl::convert(nHeight, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.Y()), aMMMode );
         tools::Long nRight = i < static_cast<SCCOL>(mvRight.size()) ? mvRight[i] : 0;
         if( aPixPt.X() < ( nRight + 2 ) && ( aPixPt.X() > ( nRight - 2 ) ) && ( aPixPt.X() < aRightTop.X() ) && ( aPixPt.X() > aLeftTop.X() )
             && ( aPixPt.Y() > aColumnTop.Y() ) && ( aPixPt.Y() < aColumnBottom.Y() ) && !bLeftRulerMove && !bRightRulerMove

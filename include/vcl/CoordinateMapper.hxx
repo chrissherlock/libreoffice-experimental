@@ -33,6 +33,14 @@
 #include <concepts>
 #include <type_traits>
 
+namespace vcl
+{
+struct SpaceLogic;
+struct SpaceWindow;
+struct SpaceDevice;
+template <typename Space, typename T> struct TypedGeom;
+}
+
 class LineInfo;
 
 template <typename T>
@@ -366,6 +374,16 @@ private:
 
     void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX, double& rTransY,
                                vcl::MappingPolicy ePolicy) const;
+
+    template <typename Geom>
+    vcl::TypedGeom<vcl::SpaceWindow, Geom>
+    MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogicGeom,
+                const MapMode& rCustomMapMode) const;
+
+    template <typename Geom>
+    vcl::TypedGeom<vcl::SpaceDevice, Geom>
+    MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogicGeom,
+                const MapMode& rCustomMapMode) const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

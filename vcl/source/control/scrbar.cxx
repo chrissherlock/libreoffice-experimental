@@ -380,7 +380,7 @@ void ScrollBar::ImplCalc( bool bUpdate )
 
 void ScrollBar::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point aPos  =  rDev.LogicToWindow( rPos );
 
     auto popIt = rDev.ScopedPush();
     rDev.SetMapMode();
@@ -612,7 +612,7 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
         nStyle = DrawButtonFlags::NoLightBorder;
         if (mnStateFlags & SCRBAR_STATE_BTN1_DOWN)
             nStyle |= DrawButtonFlags::Pressed;
-        aTempRect = aDecoView.DrawButton( PixelToLogic(maBtn1Rect), nStyle );
+        aTempRect = aDecoView.DrawButton( WindowToLogic(maBtn1Rect), nStyle );
         ImplCalcSymbolRect( aTempRect );
         DrawSymbolFlags nSymbolStyle = DrawSymbolFlags::NONE;
         if ((mnStateFlags & SCRBAR_STATE_BTN1_DISABLE) || !bEnabled)
@@ -629,7 +629,7 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
         nStyle = DrawButtonFlags::NoLightBorder;
         if (mnStateFlags & SCRBAR_STATE_BTN2_DOWN)
             nStyle |= DrawButtonFlags::Pressed;
-        aTempRect = aDecoView.DrawButton(PixelToLogic(maBtn2Rect), nStyle);
+        aTempRect = aDecoView.DrawButton(WindowToLogic(maBtn2Rect), nStyle);
         ImplCalcSymbolRect(aTempRect);
         DrawSymbolFlags nSymbolStyle = DrawSymbolFlags::NONE;
         if ((mnStateFlags & SCRBAR_STATE_BTN2_DISABLE) || !bEnabled)
@@ -650,12 +650,12 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
             if (bEnabled)
             {
                 nStyle = DrawButtonFlags::NoLightBorder;
-                aTempRect = aDecoView.DrawButton(PixelToLogic(maThumbRect), nStyle);
+                aTempRect = aDecoView.DrawButton(WindowToLogic(maThumbRect), nStyle);
             }
             else
             {
                 rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-                rRenderContext.DrawRect(PixelToLogic(maThumbRect));
+                rRenderContext.DrawRect(WindowToLogic(maThumbRect));
             }
         }
     }
@@ -666,7 +666,7 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
             rRenderContext.SetFillColor(rStyleSettings.GetShadowColor());
         else
             rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-        rRenderContext.DrawRect(PixelToLogic(maPage1Rect));
+        rRenderContext.DrawRect(WindowToLogic(maPage1Rect));
     }
     if (!ImplDrawNative(rRenderContext, SCRBAR_DRAW_PAGE2))
     {
@@ -674,7 +674,7 @@ void ScrollBar::ImplDraw(vcl::RenderContext& rRenderContext)
             rRenderContext.SetFillColor(rStyleSettings.GetShadowColor());
         else
             rRenderContext.SetFillColor(rStyleSettings.GetCheckedColor());
-        rRenderContext.DrawRect(PixelToLogic(maPage2Rect));
+        rRenderContext.DrawRect(WindowToLogic(maPage2Rect));
     }
 }
 
@@ -959,7 +959,7 @@ void ScrollBar::MouseButtonDown( const MouseEvent& rMEvt )
         MapMode aMapMode = GetMapMode();
         aMapMode.SetOrigin(Point(0, 0));
         SetMapMode(aMapMode);
-        aPosPixel = LogicToPixel(rMEvt.GetPosPixel());
+        aPosPixel = LogicToWindow(rMEvt.GetPosPixel());
     }
     const Point&        rMousePos = (GetMapMode().GetMapUnit() != MapUnit::MapTwip ? rMEvt.GetPosPixel() : aPosPixel);
     StartTrackingFlags  nTrackFlags = StartTrackingFlags::NONE;
@@ -1115,7 +1115,7 @@ void ScrollBar::Tracking( const TrackingEvent& rTEvt )
             MapMode aMapMode = GetMapMode();
             aMapMode.SetOrigin(Point(0, 0));
             SetMapMode(aMapMode);
-            aPosPixel = LogicToPixel(rTEvt.GetMouseEvent().GetPosPixel());
+            aPosPixel = LogicToWindow(rTEvt.GetMouseEvent().GetPosPixel());
         }
         const Point rMousePos = (GetMapMode().GetMapUnit() != MapUnit::MapTwip ? rTEvt.GetMouseEvent().GetPosPixel() : aPosPixel);
 

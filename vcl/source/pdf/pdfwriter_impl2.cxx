@@ -122,7 +122,7 @@ void PDFWriterImpl::implWriteBitmapEx( const Point& i_rPoint, const Size& i_rSiz
         && aBmpSize.getHeight() > 50)
     {
         // do downsampling if necessary
-        const Size      aDstSizeTwip( i_pDummyVDev->PixelToLogic(i_pDummyVDev->LogicToPixel(aSize), MapMode(MapUnit::MapTwip)) );
+        const Size      aDstSizeTwip( i_pDummyVDev->WindowToLogic(i_pDummyVDev->LogicToWindow(aSize), MapMode(MapUnit::MapTwip)) );
         const double    fBmpPixelX = aBmpSize.Width();
         const double    fBmpPixelY = aBmpSize.Height();
         const double fMaxPixelX
@@ -454,7 +454,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                     }
                     else
                     {
-                        const Size aDstSizeTwip( pDummyVDev->PixelToLogic(pDummyVDev->LogicToPixel(rSize), MapMode(MapUnit::MapTwip)) );
+                        const Size aDstSizeTwip( pDummyVDev->WindowToLogic(pDummyVDev->LogicToWindow(rSize), MapMode(MapUnit::MapTwip)) );
 
                         // i#115962# Always use at least 300 DPI for bitmap conversion of transparence gradients,
                         // else the quality is not acceptable (see bugdoc as example)
@@ -479,7 +479,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                                 aMapMode.SetOrigin( aPoint );
                                 xVDev->SetMapMode( aMapMode );
                                 const vcl::MappingPolicy eVDevOldPolicy = xVDev->GetMappingPolicy();
-                                Size aDstSize( xVDev->PixelToLogic( aDstSizePixel ));
+                                Size aDstSize( xVDev->WindowToLogic( aDstSizePixel ));
 
                                 Point   aMtfOrigin( aTmpMtf.GetPrefMapMode().GetOrigin() );
                                 if ( aMtfOrigin.X() || aMtfOrigin.Y() )
@@ -743,7 +743,7 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                     Size aSize( ::LogicToLogic( aBitmap.GetPrefSize(),
                                                             aBitmap.GetPrefMapMode(), pDummyVDev->GetMapMode() ) );
                     if( ! ( aSize.Width() && aSize.Height() ) )
-                        aSize =  pDummyVDev->PixelToLogic( aBitmap.GetSizePixel() );
+                        aSize =  pDummyVDev->WindowToLogic( aBitmap.GetSizePixel() );
 
                     Graphic aGraphic = i_pOutDevData ? i_pOutDevData->GetCurrentGraphic() : Graphic();
                     implWriteBitmapEx( pA->GetPoint(), aSize, aBitmap, aGraphic, pDummyVDev, i_rContext );

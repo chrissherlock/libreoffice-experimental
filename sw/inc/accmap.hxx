@@ -259,8 +259,8 @@ public:
     // IAccessibleViewForwarder
 
     virtual tools::Rectangle GetVisibleArea() const override;
-    virtual Point LogicToPixel (const Point& rPoint) const override;
-    virtual Size LogicToPixel (const Size& rSize) const override;
+    virtual Point LogicToWindow (const Point& rPoint) const override;
+    virtual Size LogicToWindow (const Size& rSize) const override;
 
     // IAccessibleParent
     virtual bool ReplaceChild (
@@ -283,7 +283,7 @@ public:
     bool Contains(const SwFrame *pFrame) const;
 
 private:
-    /** get mapping mode for LogicToPixel and PixelToLogic conversions
+    /** get mapping mode for LogicToWindow and WindowToLogic conversions
 
         Replacement method <PreviewAdjust(..)> by new method <GetMapMode>.
         Method returns mapping mode of current output device and adjusts it,

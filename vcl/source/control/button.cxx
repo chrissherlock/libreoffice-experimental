@@ -1042,8 +1042,8 @@ void PushButton::ImplDrawPushButton(vcl::RenderContext& rRenderContext)
         // prepare single line hint (needed on mac to decide between normal push button and
         // rectangular bevel button look)
         Size aFontSize(Application::GetSettings().GetStyleSettings().GetPushButtonFont().GetFontSize());
-        aFontSize = rRenderContext.LogicToPixel(aFontSize, MapMode(MapUnit::MapPoint));
-        Size aInRectSize(rRenderContext.LogicToPixel(Size(aInRect.GetWidth(), aInRect.GetHeight())));
+        aFontSize = rRenderContext.LogicToWindow(aFontSize, MapMode(MapUnit::MapPoint));
+        Size aInRectSize(rRenderContext.LogicToWindow(Size(aInRect.GetWidth(), aInRect.GetHeight())));
         aControlValue.mbSingleLine = (aInRectSize.Height() < 2 * aFontSize.Height());
 
         if (!aControlValue.m_bFlatButton || (nState & ControlState::ROLLOVER) || (nState & ControlState::PRESSED)
@@ -1332,7 +1332,7 @@ void PushButton::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
 
 void PushButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point       aPos  =  rDev.LogicToWindow( rPos );
     Size        aSize = GetSizePixel();
     tools::Rectangle   aRect( aPos, aSize );
     vcl::Font aFont = GetDrawPixelFont(&rDev);
@@ -2436,12 +2436,12 @@ void RadioButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFla
     if ( !maImage )
     {
         MapMode     aResMapMode( MapUnit::Map100thMM );
-        Point aPos = rDev.LogicToPixel(rPos);
+        Point       aPos  =  rDev.LogicToWindow(rPos);
         Size        aSize = GetSizePixel();
-        Size aImageSize = rDev.LogicToPixel(Size(300, 300), aResMapMode);
-        Size aBrd1Size = rDev.LogicToPixel(Size(20, 20), aResMapMode);
-        Size aBrd2Size = rDev.LogicToPixel(Size(60, 60), aResMapMode);
-        vcl::Font aFont = GetDrawPixelFont(&rDev);
+        Size        aImageSize = rDev.LogicToWindow( Size(300, 300), aResMapMode );
+        Size        aBrd1Size = rDev.LogicToWindow(Size( 20, 20), aResMapMode );
+        Size        aBrd2Size = rDev.LogicToWindow(Size( 60, 60), aResMapMode );
+        vcl::Font   aFont = GetDrawPixelFont(&rDev);
         tools::Rectangle   aStateRect;
         tools::Rectangle   aMouseRect;
 
@@ -3231,13 +3231,13 @@ void CheckBox::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&
 void CheckBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
     MapMode     aResMapMode( MapUnit::Map100thMM );
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point       aPos  =  rDev.LogicToWindow( rPos );
     Size        aSize = GetSizePixel();
-    Size aImageSize = rDev.LogicToPixel(Size(300, 300), aResMapMode);
-    Size aBrd1Size = rDev.LogicToPixel(Size(20, 20), aResMapMode);
-    Size aBrd2Size = rDev.LogicToPixel(Size(30, 30), aResMapMode);
-    tools::Long nCheckWidth = rDev.LogicToPixel(Size(20, 20), aResMapMode).Width();
-    vcl::Font aFont = GetDrawPixelFont(&rDev);
+    Size        aImageSize = rDev.LogicToWindow( Size( 300, 300 ), aResMapMode );
+    Size        aBrd1Size = rDev.LogicToWindow( Size( 20, 20 ), aResMapMode );
+    Size        aBrd2Size = rDev.LogicToWindow( Size( 30, 30 ), aResMapMode );
+    tools::Long        nCheckWidth = rDev.LogicToWindow( Size( 20, 20 ), aResMapMode ).Width();
+    vcl::Font   aFont = GetDrawPixelFont( &rDev );
     tools::Rectangle   aStateRect;
     tools::Rectangle   aMouseRect;
 
