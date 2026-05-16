@@ -155,6 +155,11 @@ template <typename Space, typename T> struct TypedGeom
         using ReturnType = std::invoke_result_t<Func, const T&>;
         return TypedGeom<Space, ReturnType>(f(maData));
     }
+
+    template <typename Func> constexpr auto and_then(Func&& f) const
+    {
+        return std::invoke(std::forward<Func>(f), maData);
+    }
 };
 
 // --- Type Aliases for the Modern API ---
