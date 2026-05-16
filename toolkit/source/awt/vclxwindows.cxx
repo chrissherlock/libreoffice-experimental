@@ -2291,7 +2291,7 @@ void SAL_CALL VCLXDialog::draw( sal_Int32 nX, sal_Int32 nY )
             pDev = pWindow->GetParent()->GetOutDev();
 
         Point aPos = pDev->PixelToLogic( Point( nX, nY ) ).get();
-        pWindow->Draw( pDev, aPos, SystemTextColorFlags::NoControls );
+        pWindow->Draw(*pDev, aPos, SystemTextColorFlags::NoControls);
     }
 }
 
