@@ -380,7 +380,7 @@ void ScrollBar::ImplCalc( bool bUpdate )
 
 void ScrollBar::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
-    Point aPos = rDev.LogicToPixel(rPos).get();
+    Point aPos = rDev.LogicToPixel(rPos);
 
     auto popIt = rDev.ScopedPush();
     rDev.SetMapMode();

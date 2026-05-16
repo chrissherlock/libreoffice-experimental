@@ -187,7 +187,7 @@ Bitmap DrawDocShell::GetPagePreviewBitmap(SdPage* pPage)
 
     pVDev->SetMapMode( aMapMode );
 
-    const Size  aPixSize( pVDev->LogicToPixel( aSize ).get() );
+    const Size  aPixSize( pVDev->LogicToPixel( aSize ));
     const sal_uLong nMaxEdgePix = std::max( aPixSize.Width(), aPixSize.Height() );
     double fFrac = double(nMaxEdgePixel) / nMaxEdgePix;
 

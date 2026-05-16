@@ -74,7 +74,7 @@ static void SetMappingForVirtDev(  const Point&    _rNewOrigin,
                             vcl::RenderContext*  _pVirDev )
 {
         // new solution: set pixel offset at virtual output device
-        Point aPixelOffset = _pOrgOutDev->LogicToPixel( _rNewOrigin ).get();
+        Point aPixelOffset =  _pOrgOutDev->LogicToPixel( _rNewOrigin );
         _pVirDev->SetPixelOffset( Size( -aPixelOffset.X(), -aPixelOffset.Y() ) );
 }
 
@@ -141,11 +141,11 @@ void SwLayVout::Enter(  SwViewShell *pShell, SwRect &rRect, bool bOn )
         return;
 
     m_pOut = pO;
-    Size aPixSz( m_pOut->PixelToLogic( Size( 1,1 )).get() );
+    Size aPixSz( m_pOut->PixelToLogic( Size( 1,1 )));
     SwRect aTmp( rRect );
     aTmp.AddWidth(aPixSz.Width()/2 + 1 );
     aTmp.AddHeight(aPixSz.Height()/2 + 1 );
-    tools::Rectangle aTmpRect( pO->LogicToPixel( aTmp.SVRect() ).get() );
+    tools::Rectangle aTmpRect( pO->LogicToPixel( aTmp.SVRect() ));
 
     OSL_ENSURE( !m_pShell->GetWin()->IsReallyVisible() ||
             aTmpRect.GetWidth() <= m_pShell->GetWin()->GetOutputSizePixel().Width() + 2,
@@ -157,7 +157,7 @@ void SwLayVout::Enter(  SwViewShell *pShell, SwRect &rRect, bool bOn )
         return;
     }
 
-    m_aRect = SwRect( pO->PixelToLogic( aTmpRect ).get() );
+    m_aRect = SwRect( pO->PixelToLogic( aTmpRect ));
 
     SetOutDev( m_pShell, m_pVirDev );
 

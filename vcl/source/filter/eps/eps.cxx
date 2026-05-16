@@ -788,7 +788,7 @@ void PSWriter::ImplWriteActions( const GDIMetaFile& rMtf, VirtualDevice& rVDev )
                 if ( mbGrayScale )
                     aBitmap.Convert( BmpConversion::N8BitGreys );
                 Point aPoint = static_cast<const MetaBmpAction*>(pMA)->GetPoint();
-                Size aSize( rVDev.PixelToLogic( aBitmap.GetSizePixel() ).get() );
+                Size aSize( rVDev.PixelToLogic( aBitmap.GetSizePixel() ));
                 ImplBmp( &aBitmap, nullptr, aPoint, aSize.Width(), aSize.Height() );
             }
             break;
@@ -825,7 +825,7 @@ void PSWriter::ImplWriteActions( const GDIMetaFile& rMtf, VirtualDevice& rVDev )
                     aBitmap.Convert( BmpConversion::N8BitGreys );
                 const AlphaMask aMask( aBitmapEx.CreateAlphaMask() );
                 Point aPoint( static_cast<const MetaBmpExAction*>(pMA)->GetPoint() );
-                Size aSize( rVDev.PixelToLogic( aBitmap.GetSizePixel() ).get() );
+                Size aSize( rVDev.PixelToLogic( aBitmap.GetSizePixel() ));
                 ImplBmp( &aBitmap, &aMask, aPoint, aSize.Width(), aSize.Height() );
             }
             break;

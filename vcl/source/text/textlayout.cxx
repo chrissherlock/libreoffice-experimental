@@ -683,7 +683,7 @@ namespace vcl
         // our caller gives us the left border of the draw position, regardless of script type, text layout,
         // and the like in our ctor, we set the map mode of the target device from pixel to twip, but our caller doesn't know this,
         // but passed pixel coordinates. So, adjust the rect.
-        tools::Rectangle aRect( m_rTargetDevice.PixelToLogic( _rRect ).get() );
+        tools::Rectangle aRect( m_rTargetDevice.PixelToLogic( _rRect ));
         if (i_pDeviceSize)
         {
             //if i_pDeviceSize is passed in here, it was the original pre logic-to-pixel size of _rRect
@@ -709,14 +709,14 @@ namespace vcl
 
         // similar to above, the text rect now contains TWIPs (or whatever unit the ref device has), but the caller
         // expects pixel coordinates
-        aTextRect = m_rTargetDevice.LogicToPixel( aTextRect ).get();
+        aTextRect =  m_rTargetDevice.LogicToPixel( aTextRect );
 
         // convert the metric vector
         if ( _pVector )
         {
             for ( auto& rCharRect : *_pVector )
             {
-                rCharRect = m_rTargetDevice.LogicToPixel( rCharRect ).get();
+                rCharRect =  m_rTargetDevice.LogicToPixel( rCharRect );
             }
         }
 
@@ -737,7 +737,7 @@ namespace vcl
         // our caller gives us the left border of the draw position, regardless of script type, text layout,
         // and the like in our ctor, we set the map mode of the target device from pixel to twip, but our caller doesn't know this,
         // but passed pixel coordinates. So, adjust the rect.
-        tools::Rectangle aRect( m_rTargetDevice.PixelToLogic( _rRect ).get() );
+        tools::Rectangle aRect( m_rTargetDevice.PixelToLogic( _rRect ));
 
         tools::Rectangle aTextRect = m_rTargetDevice.GetTextRect( aRect, _rText, _nStyle, nullptr, this );
 
@@ -749,7 +749,7 @@ namespace vcl
 
         // similar to above, the text rect now contains TWIPs (or whatever unit the ref device has), but the caller
         // expects pixel coordinates
-        aTextRect = m_rTargetDevice.LogicToPixel( aTextRect ).get();
+        aTextRect =  m_rTargetDevice.LogicToPixel( aTextRect );
 
         return aTextRect;
     }

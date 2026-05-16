@@ -1486,7 +1486,7 @@ Image SvtLineListBox::GetLineImage(const ImpLineListData& rLineListData)
     }
 
     // Paint the lines
-    aSize = aVirDev->PixelToLogic( aSize ).get();
+    aSize =  aVirDev->PixelToLogic( aSize );
     tools::Long nPix = aVirDev->PixelToLogic( Size( 0, 1 ) )->Height();
     sal_uInt32 n1 = nLine1;
     sal_uInt32 n2 = nLine2;
@@ -1507,7 +1507,7 @@ Image SvtLineListBox::GetLineImage(const ImpLineListData& rLineListData)
     if ( aSize.Width() <= 0 )
         return {};
 
-    Size aVirSize = aVirDev->LogicToPixel( aSize ).get();
+    Size aVirSize =  aVirDev->LogicToPixel( aSize );
     if ( aVirDev->GetOutputSizePixel() != aVirSize )
         aVirDev->SetOutputSizePixel( aVirSize );
     aVirDev->SetFillColor( aColorDist );

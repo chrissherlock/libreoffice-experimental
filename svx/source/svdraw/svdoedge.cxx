@@ -2208,7 +2208,7 @@ bool SdrEdgeObj::ImpFindConnector(const Point& rPt, const SdrPageView& rPV, SdrO
     if (comphelper::LibreOfficeKit::isActive() && pOut->GetMapMode().GetMapUnit() == MapUnit::Map100thMM)
         aHalfConSiz=pOut->PixelToLogic(aHalfConSiz, MapMode(MapUnit::Map100thMM));
     else
-        aHalfConSiz=pOut->PixelToLogic(aHalfConSiz).get();
+        aHalfConSiz= pOut->PixelToLogic(aHalfConSiz);
     tools::Rectangle aMouseRect(rPt,rPt);
     aMouseRect.AdjustLeft( -(aHalfConSiz.Width()) );
     aMouseRect.AdjustTop( -(aHalfConSiz.Height()) );

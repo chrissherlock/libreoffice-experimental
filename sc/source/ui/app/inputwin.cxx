@@ -1375,7 +1375,7 @@ void ScTextWnd::Resize()
     {
         Size aOutputSize = GetOutputSizePixel();
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        tools::Rectangle aOutputArea = rDevice.PixelToLogic( tools::Rectangle( Point(), aOutputSize )).get();
+        tools::Rectangle aOutputArea =  rDevice.PixelToLogic( tools::Rectangle( Point(), aOutputSize ));
         m_xEditView->SetOutputArea( aOutputArea );
 
         // Don't leave an empty area at the bottom if we can move the text down.
@@ -1385,7 +1385,7 @@ void ScTextWnd::Resize()
             m_xEditView->Scroll(0, m_xEditView->GetVisArea().Top() - nMaxVisAreaTop);
         }
 
-        m_xEditEngine->SetPaperSize( rDevice.PixelToLogic( Size( aOutputSize.Width(), 10000 ) ).get() );
+        m_xEditEngine->SetPaperSize( rDevice.PixelToLogic( Size( aOutputSize.Width(), 10000 ) ));
     }
 
     // skip WeldEditView's Resize();
@@ -1540,7 +1540,7 @@ void ScTextWnd::InitEditEngine()
 
     Size barSize = GetOutputSizePixel();
     m_xEditEngine->SetUpdateLayout( false );
-    m_xEditEngine->SetPaperSize( GetDrawingArea()->get_ref_device().PixelToLogic(Size(barSize.Width(),10000)).get() );
+    m_xEditEngine->SetPaperSize( GetDrawingArea()->get_ref_device().PixelToLogic(Size(barSize.Width(),10000)));
     m_xEditEngine->SetWordDelimiters(
                     ScEditUtil::ModifyDelimiters( m_xEditEngine->GetWordDelimiters() ) );
     m_xEditEngine->SetReplaceLeadingSingleQuotationMark( false );

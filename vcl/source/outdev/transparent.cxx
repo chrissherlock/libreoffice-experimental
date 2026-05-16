@@ -1019,7 +1019,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
         case MetaActionType::BMP:
             aActionBounds = tools::Rectangle( static_cast<const MetaBmpAction&>(rAct).GetPoint(),
-                                       rOut.PixelToLogic( static_cast<const MetaBmpAction&>(rAct).GetBitmap().GetSizePixel() ).get() );
+                                       rOut.PixelToLogic( static_cast<const MetaBmpAction&>(rAct).GetBitmap().GetSizePixel() ));
             break;
 
         case MetaActionType::BMPSCALE:
@@ -1034,7 +1034,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
         case MetaActionType::BMPEX:
             aActionBounds = tools::Rectangle( static_cast<const MetaBmpExAction&>(rAct).GetPoint(),
-                                       rOut.PixelToLogic( static_cast<const MetaBmpExAction&>(rAct).GetBitmap().GetSizePixel() ).get() );
+                                       rOut.PixelToLogic( static_cast<const MetaBmpExAction&>(rAct).GetBitmap().GetSizePixel() ));
             break;
 
         case MetaActionType::BMPEXSCALE:
@@ -1049,7 +1049,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
         case MetaActionType::MASK:
             aActionBounds = tools::Rectangle( static_cast<const MetaMaskAction&>(rAct).GetPoint(),
-                                       rOut.PixelToLogic( static_cast<const MetaMaskAction&>(rAct).GetBitmap().GetSizePixel() ).get() );
+                                       rOut.PixelToLogic( static_cast<const MetaMaskAction&>(rAct).GetBitmap().GetSizePixel() ));
             break;
 
         case MetaActionType::MASKSCALE:
@@ -1141,7 +1141,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
                 if( pSalLayout )
                 {
                     tools::Rectangle aBoundRect( rOut.ImplGetTextBoundRect( *pSalLayout ) );
-                    aActionBounds = rOut.PixelToLogic( aBoundRect ).get();
+                    aActionBounds =  rOut.PixelToLogic( aBoundRect );
                 }
             }
         }
@@ -1170,7 +1170,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
                 if( pSalLayout )
                 {
                     tools::Rectangle aBoundRect( rOut.ImplGetTextBoundRect( *pSalLayout ) );
-                    aActionBounds = rOut.PixelToLogic( aBoundRect ).get();
+                    aActionBounds =  rOut.PixelToLogic( aBoundRect );
                 }
             }
         }
@@ -1742,7 +1742,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                                             pCurrAct->Execute( aMapVDev.get() );
 
                                             MapMode     aMtfMap( aMapVDev->GetMapMode() );
-                                            const Point aNewOrg( aMapVDev->PixelToLogic( aDstPtPix ).get() );
+                                            const Point aNewOrg( aMapVDev->PixelToLogic( aDstPtPix ));
 
                                             aMtfMap.SetOrigin( Point( -aNewOrg.X(), -aNewOrg.Y() ) );
                                             aPaintVDev->SetMapMode( aMtfMap );

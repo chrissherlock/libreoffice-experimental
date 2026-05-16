@@ -255,7 +255,7 @@ SdrHitKind SdrView::PickAnything(const MouseEvent& rMEvt, SdrMouseEventKind nEve
         pOut = GetFirstOutputDevice();
     }
     Point aPnt(rMEvt.GetPosPixel());
-    if (pOut!=nullptr) aPnt=pOut->PixelToLogic(aPnt).get();
+    if (pOut!=nullptr) aPnt= pOut->PixelToLogic(aPnt);
 
     if (mbNegativeX)
     {
@@ -830,7 +830,7 @@ bool SdrView::DoMouseEvent(const SdrViewEvent& rVEvt)
 
                         if(bRet2)
                         {
-                            MouseEvent aMEvt(mpActualOutDev->LogicToPixel(aLogicPos).get(), 1,
+                            MouseEvent aMEvt(mpActualOutDev->LogicToPixel(aLogicPos), 1,
                                              rVEvt.mnMouseMode,rVEvt.mnMouseCode,rVEvt.mnMouseCode);
 
                             OutlinerView* pOLV=GetTextEditOutlinerView();
@@ -927,7 +927,7 @@ bool SdrView::DoMouseEvent(const SdrViewEvent& rVEvt)
 
             if(bRet)
             {
-                MouseEvent aMEvt(mpActualOutDev->LogicToPixel(aLogicPos).get(),
+                MouseEvent aMEvt(mpActualOutDev->LogicToPixel(aLogicPos),
                                  1, rVEvt.mnMouseMode, rVEvt.mnMouseCode, rVEvt.mnMouseCode);
                 OutlinerView* pOLV=GetTextEditOutlinerView();
                 if (pOLV!=nullptr) pOLV->MouseButtonDown(aMEvt); // event for the Outliner, but without double-click
@@ -969,7 +969,7 @@ PointerStyle SdrView::GetPreferredPointer(const Point& rMousePos, const OutputDe
     if (IsDragHelpLine()) return GetDraggedHelpLinePointer();
     if (IsMacroObj()) {
         SdrObjMacroHitRec aHitRec;
-        aHitRec.aPos=pOut->LogicToPixel(rMousePos).get();
+        aHitRec.aPos= pOut->LogicToPixel(rMousePos);
         aHitRec.nTol=m_nMacroTol;
         aHitRec.pVisiLayer=&m_pMacroPV->GetVisibleLayers();
         aHitRec.pPageView=m_pMacroPV;
@@ -987,7 +987,7 @@ PointerStyle SdrView::GetPreferredPointer(const Point& rMousePos, const OutputDe
                 return PointerStyle::Text;
         }
         // Outliner should return something here...
-        Point aPos(pOut->LogicToPixel(rMousePos).get());
+        Point aPos(pOut->LogicToPixel(rMousePos));
         PointerStyle aPointer(mpTextEditOutlinerView->GetPointer(aPos));
         if (aPointer==PointerStyle::Arrow)
         {

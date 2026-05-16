@@ -989,7 +989,7 @@ void SpinField::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
     if ( (nFlags & SystemTextColorFlags::NoControls ) || !( nFieldStyle & (WB_SPIN|WB_DROPDOWN) ) )
         return;
 
-    Point aPos = rDev.LogicToPixel(rPos).get();
+    Point aPos = rDev.LogicToPixel(rPos);
     Size aSize = GetSizePixel();
     AllSettings aOldSettings = rDev.GetSettings();
 
