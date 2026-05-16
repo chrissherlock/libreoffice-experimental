@@ -1191,7 +1191,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
             return rOut.LogicToPixel(
                 rOut.GetClipRegion().GetBoundRect().Intersection( aActionBounds ) ).get();
         else
-            return rOut.LogicToPixel( aActionBounds ).get();
+            return rOut.LogicToPixel( aActionBounds );
     }
     else
         return tools::Rectangle();
@@ -1777,7 +1777,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
 
                                     // scale down bitmap, if requested
                                     if( bDownsampleBitmaps )
-                                        aBandBmp = vcl::bitmap::GetDownsampledBitmap(PixelToLogic(LogicToPixel(aDstSzPix).get(), MapMode(MapUnit::MapTwip)),
+                                        aBandBmp = vcl::bitmap::GetDownsampledBitmap(PixelToLogic(LogicToPixel(aDstSzPix), MapMode(MapUnit::MapTwip)),
                                                                          Point(), aBandBmp.GetSizePixel(),
                                                                          aBandBmp, nMaxBmpDPIX, nMaxBmpDPIY);
 

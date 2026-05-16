@@ -270,7 +270,7 @@ rtl::Reference< sdr::overlay::OverlayManager > const & SdrPaintWindow::GetOverla
 tools::Rectangle SdrPaintWindow::GetVisibleArea() const
 {
     Size aVisSizePixel(GetOutputDevice().GetOutputSizePixel());
-    return GetOutputDevice().PixelToLogic(tools::Rectangle(Point(0,0), aVisSizePixel)).get();
+    return GetOutputDevice().PixelToLogic(tools::Rectangle(Point(0,0), aVisSizePixel));
 }
 
 bool SdrPaintWindow::OutputToRecordingMetaFile() const

@@ -146,7 +146,7 @@ void Svx3DPreviewControl::Resize()
 {
     // size of page
     Size aSize(GetOutputSizePixel());
-    aSize = GetDrawingArea()->get_ref_device().PixelToLogic(aSize).get();
+    aSize = GetDrawingArea()->get_ref_device().PixelToLogic(aSize);
     mxFmPage->SetSize(aSize);
 
     // set size

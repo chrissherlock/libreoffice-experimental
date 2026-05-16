@@ -45,11 +45,11 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Bitmap& rBitmap )
 
     if (!rBitmap.HasAlpha())
     {
-        DrawBitmap(rDestPt, PixelToLogic(aSizePix).get(), Point(), aSizePix, rBitmap, MetaActionType::BMP);
+        DrawBitmap(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmap, MetaActionType::BMP);
         return;
     }
 
-    DrawAlphaBitmap(rDestPt, PixelToLogic(aSizePix).get(), Point(), aSizePix, rBitmap, MetaActionType::BMPEX);
+    DrawAlphaBitmap(rDestPt, PixelToLogic(aSizePix), Point(), aSizePix, rBitmap, MetaActionType::BMPEX);
 }
 
 void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize, const Bitmap& rBitmap )
@@ -465,18 +465,6 @@ bool OutputDevice::DrawTransformedBitmap(
         *this);
 };
 
-void OutputDevice::DrawBitmap(const Point& rDestPt, const vcl::LogicSize& rLogicSize,
-                    const Point& rSrcPt, const Size& rSrcSizePixel, const Bitmap& rBitmap)
-{
-    DrawBitmap(rDestPt, rLogicSize.get(), rSrcPt, rSrcSizePixel, rBitmap);
-}
-
-void OutputDevice::DrawAlphaBitmap(const Point& rDestPt, const vcl::LogicSize& rLogicSize,
-                                   const Point& rSrcPt, const Size& rSrcSizePixel, const Bitmap& rBitmap)
-{
-    // Pass MetaActionType::BMPEX explicitly down to the core layout implementation
-    DrawAlphaBitmap(rDestPt, rLogicSize.get(), rSrcPt, rSrcSizePixel, rBitmap, MetaActionType::BMPEX);
-}
 
 void OutputDevice::DrawImage( const Point& rPos, const Image& rImage, DrawImageFlags nStyle )
 {
