@@ -203,7 +203,7 @@ void  SwPagePreviewWin::Paint(vcl::RenderContext& rRenderContext, const tools::R
         mpPgPreviewLayout->Prepare(1, Point(0,0), maPxWinSize,
                                    mnSttPage, maPaintedPreviewDocRect);
         SetSelectedPage(1);
-        mpPgPreviewLayout->Paint(rRenderContext, rRenderContext.PixelToLogic(aRect).get());
+        mpPgPreviewLayout->Paint(rRenderContext, rRenderContext.PixelToLogic(aRect));
         SetPagePreview(mnRow, mnCol);
     }
     else

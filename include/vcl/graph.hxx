@@ -18,6 +18,7 @@
  */
 
 #pragma once
+#include <vcl/TransformTypes.hxx>
 
 #include <memory>
 #include <vcl/dllapi.h>
@@ -156,6 +157,9 @@ public:
 
     void            Draw(OutputDevice& rOutDev, const Point& rDestPt,
                          const Size& rDestSize) const;
+    void Draw(OutputDevice& rOutDev, const vcl::LogicPoint& rPt, const vcl::LogicSize& rSz) const { Draw(rOutDev, rPt.get(), rSz.get()); }
+    void Draw(OutputDevice& rOutDev, const vcl::DevicePoint& rPt, const vcl::DeviceSize& rSz) const { Draw(rOutDev, rPt.get(), rSz.get()); }
+    void Draw(OutputDevice& rOutDev, const Point& rPt, const vcl::LogicSize& rSz) const { Draw(rOutDev, rPt, rSz.get()); }
     static void     DrawEx(OutputDevice& rOutDev, const OUString& rText,
                            vcl::Font& rFont, const Bitmap& rBitmap,
                            const Point& rDestPt, const Size& rDestSize);

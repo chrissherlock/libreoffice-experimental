@@ -415,6 +415,7 @@ public:
     virtual void                DrawOutDev(
                                     const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPt,  const Size& rSrcSize );
+    void DrawOutDev( const Point& rDestPt, const Size& rDestSize, const Point& rSrcPt, const vcl::LogicSize& rSrcSize, OutputDevice& rOutDev ) { DrawOutDev(rDestPt, rDestSize, rSrcPt, rSrcSize.get(), rOutDev); }
 
     virtual void                DrawOutDev(
                                     const Point& rDestPt, const Size& rDestSize,
