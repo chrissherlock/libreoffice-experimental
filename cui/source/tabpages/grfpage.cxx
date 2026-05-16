@@ -763,17 +763,17 @@ void SvxCropExample::Paint(vcl::RenderContext& rRenderContext, const ::tools::Re
     rRenderContext.SetMapMode(m_aMapMode);
 
     // Win BG
-    const Size aWinSize(rRenderContext.PixelToLogic(GetOutputSizePixel()).get());
+    const vcl::LogicSize aWinSize(rRenderContext.PixelToLogic(GetOutputSizePixel()));
     rRenderContext.SetLineColor();
     rRenderContext.SetFillColor(rRenderContext.GetSettings().GetStyleSettings().GetWindowColor());
-    rRenderContext.DrawRect(::tools::Rectangle(Point(), aWinSize));
+    rRenderContext.DrawRect(::tools::Rectangle(Point(), aWinSize.get()));
 
     // use AA, the Graphic may be a metafile/svg and would then look ugly
     rRenderContext.SetAntialiasing(AntialiasingFlags::Enable);
 
     // draw Graphic
     ::tools::Rectangle aRect(
-        Point((aWinSize.Width() - m_aFrameSize.Width())/2, (aWinSize.Height() - m_aFrameSize.Height())/2),
+        Point((aWinSize->Width() - m_aFrameSize.Width())/2, (aWinSize->Height() - m_aFrameSize.Height())/2),
         m_aFrameSize);
     m_aGrf.Draw(rRenderContext, aRect.TopLeft(), aRect.GetSize());
 

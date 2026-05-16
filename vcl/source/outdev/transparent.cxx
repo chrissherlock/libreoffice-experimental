@@ -503,12 +503,12 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
     else
     {
         GDIMetaFile* pOldMetaFile = mpMetaFile;
-        tools::Rectangle aOutRect( LogicToPixel( tools::Rectangle(rPos, rSize) ).get() );
+        vcl::DeviceRect aOutRect( LogicToPixel( tools::Rectangle(rPos, rSize) ) );
         Point aPoint;
         tools::Rectangle aDstRect( aPoint, GetOutputSizePixel() );
 
         mpMetaFile = nullptr;
-        aDstRect.Intersection( aOutRect );
+        aDstRect.Intersection( aOutRect.get() );
 
         ClipToPaintRegion( aDstRect );
 
@@ -539,8 +539,8 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
 
                     // create MapMode for buffer (offset needed) and set
                     MapMode aMap(GetMapMode());
-                    const Point aOutPos(PixelToLogic(aDstRect.TopLeft()).get());
-                    aMap.SetOrigin(Point(-aOutPos.X(), -aOutPos.Y()));
+                    const vcl::LogicPoint aOutPos( PixelToLogic( aDstRect.TopLeft() ) );
+                    aMap.SetOrigin(Point(-aOutPos->X(), -aOutPos->Y()));
                     xVDev->SetMapMode(aMap);
 
                     // copy MapMode state and disable for target
@@ -595,10 +595,10 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
                 else
                 {
                     MapMode aMap( GetMapMode() );
-                    Point aOutPos( PixelToLogic( aDstRect.TopLeft() ).get() );
+                    vcl::LogicPoint aOutPos( PixelToLogic( aDstRect.TopLeft() ) );
                     const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
-                    aMap.SetOrigin( Point( -aOutPos.X(), -aOutPos.Y() ) );
+                    aMap.SetOrigin( Point( -aOutPos->X(), -aOutPos->Y() ) );
                     xVDev->SetMapMode( aMap );
                     const vcl::MappingPolicy eVDevOldPolicy = xVDev->GetMappingPolicy();
 

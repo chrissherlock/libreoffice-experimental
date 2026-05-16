@@ -6458,7 +6458,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
 
         pOut->SetFillColor(SwViewOption::GetCurrentViewOptions().GetAppBackgroundColor());
         pOut->SetLineColor();
-        pOut->DrawRect(pOut->PixelToLogic(aRect).get());
+        pOut->DrawRect(pOut->PixelToLogic(aRect));
     }
 
     // Tiled render if necessary
@@ -6473,8 +6473,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
         tools::Rectangle aRender = aComplete.GetIntersection(aTile);
         if (aRender.IsEmpty())
             break;
-        pOut->DrawBitmap(pOut->PixelToLogic(aRender.TopLeft()).get(),
-                           pOut->PixelToLogic(aRender.GetSize()).get(),
+        pOut->DrawBitmap(pOut->PixelToLogic(aRender.TopLeft()), pOut->PixelToLogic(aRender.GetSize()),
                            Point(0, 0), aRender.GetSize(),
                            rBitmap);
     }
@@ -6580,10 +6579,8 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
     // Right shadow & corners
     if ( bPaintRightShadow )
     {
-        pOut->DrawBitmap( pOut->PixelToLogic( Point( aPaintRect.Right(), aPagePxRect.Bottom() + 1 - (aPageBottomRightShadow.GetSizePixel().Height() - snShadowPxWidth) ) ).get(),
-            aPageBottomRightShadow );
-        pOut->DrawBitmap( pOut->PixelToLogic( Point( aPaintRect.Right(), aPagePxRect.Top() - snShadowPxWidth ) ).get(),
-            aPageTopRightShadow );
+        pOut->DrawBitmap(pOut->PixelToLogic( Point( aPaintRect.Right(), aPagePxRect.Bottom() + 1 - (aPageBottomRightShadow.GetSizePixel().Height() - snShadowPxWidth) ) ), aPageBottomRightShadow);
+        pOut->DrawBitmap(pOut->PixelToLogic( Point( aPaintRect.Right(), aPagePxRect.Top() - snShadowPxWidth ) ), aPageTopRightShadow);
 
         if (aPagePxRect.Height() > 2 * snShadowPxWidth)
         {
@@ -6604,8 +6601,8 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
     {
         const tools::Long lLeft = aPaintRect.Left() - aPageBottomLeftShadow.GetSizePixel().Width();
         pOut->DrawBitmap( pOut->PixelToLogic( Point( lLeft,
-            aPagePxRect.Bottom() + 1 + snShadowPxWidth - aPageBottomLeftShadow.GetSizePixel().Height() ) ).get(), aPageBottomLeftShadow );
-        pOut->DrawBitmap( pOut->PixelToLogic( Point( lLeft, aPagePxRect.Top() - snShadowPxWidth ) ).get(), aPageTopLeftShadow );
+            aPagePxRect.Bottom() + 1 + snShadowPxWidth - aPageBottomLeftShadow.GetSizePixel().Height() ) ), aPageBottomLeftShadow );
+        pOut->DrawBitmap(pOut->PixelToLogic( Point( lLeft, aPagePxRect.Top() - snShadowPxWidth ) ), aPageTopLeftShadow);
         if (aPagePxRect.Height() > 2 * snShadowPxWidth)
         {
             const tools::Long nWidth = aPageLeftShadow.GetSizePixel().Width();
