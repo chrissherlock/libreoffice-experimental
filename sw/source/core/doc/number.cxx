@@ -22,6 +22,7 @@
 
 #include <utility>
 #include <vcl/font.hxx>
+#include <vcl/mapconvert.hxx>
 #include <editeng/brushitem.hxx>
 #include <editeng/numitem.hxx>
 #include <svl/grabbagitem.hxx>
@@ -609,7 +610,7 @@ public:
         {
             Size aPixelSize = aGrf.GetSizePixel();
             if (aPixelSize.Width() && aPixelSize.Height())
-                aSize = OutputDevice::LogicToLogic(aPixelSize,
+                aSize = ::LogicToLogic(aPixelSize,
                             MapMode(MapUnit::MapPixel),
                             MapMode(MapUnit::MapTwip));
         }

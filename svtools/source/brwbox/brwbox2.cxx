@@ -645,11 +645,11 @@ void BrowseBox::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
     }
 }
 
-void BrowseBox::Draw( OutputDevice* pDev, const Point& rPos, SystemTextColorFlags nFlags )
+void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
     // we need pixel coordinates
     Size aRealSize = GetSizePixel();
-    Point aRealPos = rDev.LogicToPixel(rPos.get());
+    Point aRealPos = rDev.LogicToPixel(rPos).get();
 
     if ((aRealSize.Width() < 3) || (aRealSize.Height() < 3))
         // we want to have two pixels frame ...

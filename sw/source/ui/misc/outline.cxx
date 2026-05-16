@@ -869,7 +869,7 @@ static tools::Long lcl_DrawGraphic(vcl::RenderContext& rVDev, const SwNumFormat&
             aGSize.setWidth(aGSize.Width() / nDivision);
             nRet = aGSize.Width();
             aGSize.setHeight(aGSize.Height() / nDivision);
-            pGraphic->Draw(rVDev, Point(nXStart, nYStart), rVDev.PixelToLogic(aGSize).get());
+            pGraphic->Draw(rVDev, Point(nXStart, nYStart), rVDev.PixelToLogic(aGSize));
         }
     }
     return nRet;
