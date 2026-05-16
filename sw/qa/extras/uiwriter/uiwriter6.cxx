@@ -1468,11 +1468,11 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf44773)
     // double the row height
     Point ptTo(rCellA1Rect.Left() + rCellA1Rect.Width() / 2, rCellA1Rect.Top() + 2 * nRowHeight);
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFrom = rEditWin.LogicToPixel(ptFrom);
+    Point aFrom = rEditWin.LogicToWindow(ptFrom);
     MouseEvent aClickEvent(aFrom, 1, MouseEventModifiers::SIMPLECLICK | MouseEventModifiers::SELECT,
                            MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);
-    Point aTo = rEditWin.LogicToPixel(ptTo);
+    Point aTo = rEditWin.LogicToWindow(ptTo);
     MouseEvent aMoveEvent(aTo, 1, MouseEventModifiers::SIMPLECLICK | MouseEventModifiers::SELECT,
                           MOUSE_LEFT);
     TrackingEvent aTEvt(aMoveEvent, TrackingEventFlags::Repeat);
@@ -1533,12 +1533,12 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf157833)
     // double the row height
     Point ptTo(rCellA1Rect.Left() + rCellA1Rect.Width() / 2, rCellA1Rect.Top() + 2 * nRowHeight);
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFrom = rEditWin.LogicToPixel(ptFrom);
+    Point aFrom = rEditWin.LogicToWindow(ptFrom);
     Point aArea(aFrom.X(), aFrom.Y() + 2);
     MouseEvent aClickEvent(aArea, 1, MouseEventModifiers::SIMPLECLICK | MouseEventModifiers::SELECT,
                            MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);
-    Point aTo = rEditWin.LogicToPixel(ptTo);
+    Point aTo = rEditWin.LogicToWindow(ptTo);
     MouseEvent aMoveEvent(aTo, 1, MouseEventModifiers::SIMPLECLICK | MouseEventModifiers::SELECT,
                           MOUSE_LEFT);
     TrackingEvent aTEvt(aMoveEvent, TrackingEventFlags::Repeat);
@@ -1600,12 +1600,12 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf155692)
     // double the row height
     Point ptTo(rCellA1Rect.Left() + rCellA1Rect.Width() / 2, rCellA1Rect.Top() + 2 * nRowHeight);
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFrom = rEditWin.LogicToPixel(ptFrom);
+    Point aFrom = rEditWin.LogicToWindow(ptFrom);
     Point aArea(aFrom.X(), aFrom.Y() + 5);
     MouseEvent aClickEvent(aArea, 1, MouseEventModifiers::SIMPLECLICK | MouseEventModifiers::SELECT,
                            MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);
-    Point aTo = rEditWin.LogicToPixel(ptTo);
+    Point aTo = rEditWin.LogicToWindow(ptTo);
     MouseEvent aMoveEvent(aTo, 1, MouseEventModifiers::SIMPLECLICK | MouseEventModifiers::SELECT,
                           MOUSE_LEFT);
     TrackingEvent aTEvt(aMoveEvent, TrackingEventFlags::Repeat);
@@ -1650,7 +1650,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf160842)
     // select center of the bottom cell
     Point ptFrom(rCellA2Rect.Left() + rCellA2Rect.Width() / 2, rCellA2Rect.Top() + nRowHeight / 2);
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFrom = rEditWin.LogicToPixel(ptFrom);
+    Point aFrom = rEditWin.LogicToWindow(ptFrom);
     MouseEvent aClickEvent(aFrom, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);
     rEditWin.MouseButtonUp(aClickEvent);
@@ -1687,11 +1687,11 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf160836)
     // halve the row height
     Point ptTo(rCellA1Rect.Left() + rCellA1Rect.Width() / 2, rCellA1Rect.Top() + 0.5 * nRowHeight);
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFrom = rEditWin.LogicToPixel(ptFrom);
+    Point aFrom = rEditWin.LogicToWindow(ptFrom);
     MouseEvent aClickEvent(aFrom, 1, MouseEventModifiers::SIMPLECLICK | MouseEventModifiers::SELECT,
                            MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);
-    Point aTo = rEditWin.LogicToPixel(ptTo);
+    Point aTo = rEditWin.LogicToWindow(ptTo);
     MouseEvent aMoveEvent(aTo, 1, MouseEventModifiers::SIMPLECLICK | MouseEventModifiers::SELECT,
                           MOUSE_LEFT);
     TrackingEvent aTEvt(aMoveEvent, TrackingEventFlags::Repeat);
@@ -1736,7 +1736,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf161261)
     // select image by clicking on it at the center of the upper cell
     Point ptFrom(rCellA1Rect.Left() + rCellA1Rect.Width() / 2, rCellA1Rect.Top() + nRowHeight / 2);
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFrom = rEditWin.LogicToPixel(ptFrom);
+    Point aFrom = rEditWin.LogicToWindow(ptFrom);
     MouseEvent aClickEvent(aFrom, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);
     rEditWin.MouseButtonUp(aClickEvent);
@@ -1751,9 +1751,9 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf161261)
     // zoom image by drag & drop using right bottom handle of the image
     const SwRect& rSelRect = pWrtShell->GetAnyCurRect(CurRectType::Frame);
     Point ptFromHandle(rSelRect.Right(), rSelRect.Bottom());
-    Point aFromHandle = rEditWin.LogicToPixel(ptFromHandle);
+    Point aFromHandle = rEditWin.LogicToWindow(ptFromHandle);
     Point ptTo(rSelRect.Left() + rSelRect.Width() * 1.5, rSelRect.Top() + rSelRect.Height() * 1.5);
-    Point aTo = rEditWin.LogicToPixel(ptTo);
+    Point aTo = rEditWin.LogicToWindow(ptTo);
     MouseEvent aClickEvent2(aFromHandle, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent2);
     MouseEvent aClickEvent3(aTo, 0, MouseEventModifiers::SIMPLEMOVE, MOUSE_LEFT);
@@ -1797,7 +1797,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf161332)
     // select text frame by clicking on it at the right side of the upper cell
     Point ptFrom(rCellA1Rect.Left() + rCellA1Rect.Width(), rCellA1Rect.Top() + nRowHeight / 2);
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFrom = rEditWin.LogicToPixel(ptFrom);
+    Point aFrom = rEditWin.LogicToWindow(ptFrom);
     MouseEvent aClickEvent(aFrom, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);
     rEditWin.MouseButtonUp(aClickEvent);
@@ -1818,7 +1818,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf161332)
     const SwRect& rCellA2Rect = pCellA2->getFrameArea();
     auto nRow2Height = rCellA2Rect.Height();
     Point ptFrom2(rCellA2Rect.Left() + rCellA2Rect.Width(), rCellA2Rect.Top() + nRow2Height / 2);
-    Point aFrom2 = rEditWin.LogicToPixel(ptFrom2);
+    Point aFrom2 = rEditWin.LogicToWindow(ptFrom2);
     MouseEvent aClickEvent2(aFrom2, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent2);
     rEditWin.MouseButtonUp(aClickEvent2);
@@ -1858,7 +1858,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf161426)
     // select text frame by clicking on it at the right side of the upper right cell
     Point ptFrom(rCellB1Rect.Left() + rCellB1Rect.Width(), rCellB1Rect.Top() + nRowHeight / 2);
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFrom = rEditWin.LogicToPixel(ptFrom);
+    Point aFrom = rEditWin.LogicToWindow(ptFrom);
     MouseEvent aClickEvent(aFrom, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);
     rEditWin.MouseButtonUp(aClickEvent);
@@ -1880,7 +1880,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf161426)
     const SwRect& rCellB2Rect = pCellB2->getFrameArea();
     auto nRow2Height = rCellB2Rect.Height();
     Point ptFrom2(rCellB2Rect.Left() + rCellB2Rect.Width(), rCellB2Rect.Top() + nRow2Height / 2);
-    Point aFrom2 = rEditWin.LogicToPixel(ptFrom2);
+    Point aFrom2 = rEditWin.LogicToWindow(ptFrom2);
     MouseEvent aClickEvent2(aFrom2, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent2);
     rEditWin.MouseButtonUp(aClickEvent2);
@@ -1919,7 +1919,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf161426_content)
     // select content of the B1 by clicking on the center of it
     Point ptFrom(rCellB1Rect.Left() + rCellB1Rect.Width() / 2, rCellB1Rect.Top() + nRowHeight / 2);
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFrom = rEditWin.LogicToPixel(ptFrom);
+    Point aFrom = rEditWin.LogicToWindow(ptFrom);
     MouseEvent aClickEvent(aFrom, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);
     rEditWin.MouseButtonUp(aClickEvent);
@@ -1941,7 +1941,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf161426_content)
     auto nRow2Height = rCellB2Rect.Height();
     Point ptFrom2(rCellB2Rect.Left() + rCellB2Rect.Width() / 2,
                   rCellB2Rect.Top() + nRow2Height / 2);
-    Point aFrom2 = rEditWin.LogicToPixel(ptFrom2);
+    Point aFrom2 = rEditWin.LogicToWindow(ptFrom2);
     MouseEvent aClickEvent2(aFrom2, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent2);
     rEditWin.MouseButtonUp(aClickEvent2);
@@ -1956,7 +1956,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf161426_content)
     const SwRect& rCellA2Rect = pCellA2->getFrameArea();
     Point ptFrom3(rCellA2Rect.Left() + rCellA2Rect.Width() / 2,
                   rCellA2Rect.Top() + nRow2Height / 2);
-    Point aFrom3 = rEditWin.LogicToPixel(ptFrom3);
+    Point aFrom3 = rEditWin.LogicToWindow(ptFrom3);
     MouseEvent aClickEvent3(aFrom3, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent3);
     rEditWin.MouseButtonUp(aClickEvent3);
@@ -1972,7 +1972,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf161426_content)
     auto nRow1Height = rCellA1Rect.Height();
     Point ptFrom4(rCellA1Rect.Left() + rCellA1Rect.Width() / 2,
                   rCellA1Rect.Top() + nRow1Height / 2);
-    Point aFrom4 = rEditWin.LogicToPixel(ptFrom4);
+    Point aFrom4 = rEditWin.LogicToWindow(ptFrom4);
     MouseEvent aClickEvent4(aFrom4, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent4);
     rEditWin.MouseButtonUp(aClickEvent4);
@@ -2010,7 +2010,7 @@ CPPUNIT_TEST_FIXTURE(SwUiWriterTest6, testTdf161360)
     // select image by clicking on it at the center of the upper cell
     Point ptFrom(rCellA1Rect.Left() + rCellA1Rect.Width() / 2, rCellA1Rect.Top() + nRowHeight / 2);
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFrom = rEditWin.LogicToPixel(ptFrom);
+    Point aFrom = rEditWin.LogicToWindow(ptFrom);
     MouseEvent aClickEvent(aFrom, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);
     rEditWin.MouseButtonUp(aClickEvent);

@@ -1444,27 +1444,27 @@ public:
     Size                        GetOutputSizePixel() const;
     SAL_DLLPRIVATE tools::Rectangle GetOutputRectPixel() const;
 
-    Point                       LogicToPixel( const Point& rLogicPt ) const;
-    Size                        LogicToPixel( const Size& rLogicSize ) const;
-    tools::Rectangle            LogicToPixel( const tools::Rectangle& rLogicRect ) const;
-    vcl::Region                 LogicToPixel( const vcl::Region& rLogicRegion )const;
-    Point                       LogicToPixel( const Point& rLogicPt,
+    Point                       LogicToWindow( const Point& rLogicPt ) const;
+    Size                        LogicToWindow( const Size& rLogicSize ) const;
+    tools::Rectangle            LogicToWindow( const tools::Rectangle& rLogicRect ) const;
+    vcl::Region                 LogicToWindow( const vcl::Region& rLogicRegion )const;
+    Point                       LogicToWindow( const Point& rLogicPt,
                                               const MapMode& rMapMode ) const;
-    Size                        LogicToPixel( const Size& rLogicSize,
+    Size                        LogicToWindow( const Size& rLogicSize,
                                               const MapMode& rMapMode ) const;
-    tools::Rectangle            LogicToPixel( const tools::Rectangle& rLogicRect,
+    tools::Rectangle            LogicToWindow( const tools::Rectangle& rLogicRect,
                                               const MapMode& rMapMode ) const;
 
-    Point                       PixelToLogic( const Point& rDevicePt ) const;
-    Size                        PixelToLogic( const Size& rDeviceSize ) const;
-    tools::Rectangle                   PixelToLogic( const tools::Rectangle& rDeviceRect ) const;
-    tools::PolyPolygon          PixelToLogic( const tools::PolyPolygon& rDevicePolyPoly ) const;
-    SAL_DLLPRIVATE vcl::Region  PixelToLogic( const vcl::Region& rDeviceRegion ) const;
-    Point                       PixelToLogic( const Point& rDevicePt,
+    Point                       WindowToLogic( const Point& rDevicePt ) const;
+    Size                        WindowToLogic( const Size& rDeviceSize ) const;
+    tools::Rectangle                   WindowToLogic( const tools::Rectangle& rDeviceRect ) const;
+    tools::PolyPolygon          WindowToLogic( const tools::PolyPolygon& rDevicePolyPoly ) const;
+    SAL_DLLPRIVATE vcl::Region  WindowToLogic( const vcl::Region& rDeviceRegion ) const;
+    Point                       WindowToLogic( const Point& rDevicePt,
                                               const MapMode& rMapMode ) const;
-    Size                        PixelToLogic( const Size& rDeviceSize,
+    Size                        WindowToLogic( const Size& rDeviceSize,
                                               const MapMode& rMapMode ) const;
-    tools::Rectangle            PixelToLogic( const tools::Rectangle& rDeviceRect,
+    tools::Rectangle            WindowToLogic( const tools::Rectangle& rDeviceRect,
                                               const MapMode& rMapMode ) const;
 
     Size                        LogicToLogic( const Size&       rSzSource,

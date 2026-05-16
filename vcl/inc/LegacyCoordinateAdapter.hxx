@@ -9,29 +9,50 @@
 
 #pragma once
 
-#include <sal/types.h>
-#include <tools/long.hxx>
 #include <tools/gen.hxx>
 #include <tools/mapunit.hxx>
-#include <vcl/dllapi.h>
-#include <vcl/mapmod.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 #include <basegfx/matrix/b2dhommatrix.hxx>
 
-// Global legacy helpers extracted from CoordinateMapper
+#include <vcl/dllapi.h>
+#include <vcl/TransformTypes.hxx>
+#include <vcl/mapmod.hxx>
+
+class MapMode;
+
 VCL_DLLPUBLIC Point LogicToLogic(const Point& rPtSource, const MapMode& rMapModeSource,
                                  const MapMode& rMapModeDest);
+
 VCL_DLLPUBLIC Size LogicToLogic(const Size& rSzSource, const MapMode& rMapModeSource,
                                 const MapMode& rMapModeDest);
+
 VCL_DLLPUBLIC tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
                                             const MapMode& rMapModeSource,
                                             const MapMode& rMapModeDest);
+
 VCL_DLLPUBLIC tools::Long LogicToLogic(tools::Long nLongSource, MapUnit eUnitSource,
                                        MapUnit eUnitDest);
+
 VCL_DLLPUBLIC basegfx::B2DPolygon LogicToLogic(const basegfx::B2DPolygon& rPolySource,
                                                const MapMode& rMapModeSource,
                                                const MapMode& rMapModeDest);
+
 VCL_DLLPUBLIC basegfx::B2DHomMatrix LogicToLogic(const MapMode& rMapModeSource,
                                                  const MapMode& rMapModeDest);
+
+namespace vcl
+{
+template <typename Geom>
+vcl::TypedGeom<vcl::SpaceLogic, Geom>
+ConvertLogic(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rGeom, const MapMode& rSourceMode,
+             const MapMode& rDestMode)
+{
+    if (rSourceMode == rDestMode)
+        return rGeom;
+
+    return vcl::TypedGeom<vcl::SpaceLogic, Geom>(
+        ::LogicToLogic(rGeom.get(), rSourceMode, rDestMode));
+}
+}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

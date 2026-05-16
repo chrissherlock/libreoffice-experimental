@@ -316,7 +316,7 @@ void SvxBitmapTabPage::Reset( const SfxItemSet* rAttrs )
 
     Bitmap aBmp(pGraphicObject->GetGraphic().GetBitmap());
     Size aTempBitmapSize = aBmp.GetSizePixel();
-    m_aBitmapSize = Application::GetDefaultDevice()->PixelToLogic(aTempBitmapSize,
+    m_aBitmapSize = Application::GetDefaultDevice()->WindowToLogic(aTempBitmapSize,
                                                                   MapMode(MapUnit::Map100thMM));
     CalculateBitmapPresetSize();
 

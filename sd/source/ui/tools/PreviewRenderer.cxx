@@ -122,8 +122,8 @@ Image PreviewRenderer::RenderPage (
 
                 Size aSize (mpPreviewDevice->GetOutputSizePixel());
                 aPreview = Image(mpPreviewDevice->GetBitmap(
-                    mpPreviewDevice->PixelToLogic(Point(0,0)),
-                    mpPreviewDevice->PixelToLogic(aSize)));
+                    mpPreviewDevice->WindowToLogic(Point(0,0)),
+                    mpPreviewDevice->WindowToLogic(aSize)));
 
                 mpView->HideSdrPage();
             }
@@ -163,7 +163,7 @@ Image PreviewRenderer::RenderSubstitution (
         aMapMode.SetScaleX(fFinalScale);
         aMapMode.SetScaleY(fFinalScale);
         const sal_Int32 nFrameWidth (mbHasFrame ? snFrameWidth : 0);
-        aMapMode.SetOrigin(mpPreviewDevice->PixelToLogic(
+        aMapMode.SetOrigin(mpPreviewDevice->WindowToLogic(
             Point(nFrameWidth,nFrameWidth),aMapMode));
         mpPreviewDevice->SetMapMode (aMapMode);
 
@@ -184,8 +184,8 @@ Image PreviewRenderer::RenderSubstitution (
 
         const Size aSize (mpPreviewDevice->GetOutputSizePixel());
         aPreview = Image(mpPreviewDevice->GetBitmap(
-            mpPreviewDevice->PixelToLogic(Point(0,0)),
-            mpPreviewDevice->PixelToLogic(aSize)));
+            mpPreviewDevice->WindowToLogic(Point(0,0)),
+            mpPreviewDevice->WindowToLogic(aSize)));
     }
     catch (const css::uno::Exception&)
     {
@@ -312,14 +312,14 @@ void PreviewRenderer::PaintSubstitutionText (const OUString& rSubstitutionText)
     // Set the font size.
     const vcl::Font& rOriginalFont (mpPreviewDevice->GetFont());
     vcl::Font aFont (mpPreviewDevice->GetSettings().GetStyleSettings().GetAppFont());
-    sal_Int32 nHeight (mpPreviewDevice->PixelToLogic(Size(0,snSubstitutionTextSize))->Height());
+    sal_Int32 nHeight (mpPreviewDevice->WindowToLogic(Size(0,snSubstitutionTextSize))->Height());
     aFont.SetFontHeight(nHeight);
     mpPreviewDevice->SetFont (aFont);
 
     // Paint the substitution text.
     ::tools::Rectangle aTextBox (
         Point(0,0),
-        mpPreviewDevice->PixelToLogic(
+        mpPreviewDevice->WindowToLogic(
             mpPreviewDevice->GetOutputSizePixel()).get());
     DrawTextFlags const nTextStyle =
         DrawTextFlags::Center
@@ -366,7 +366,7 @@ void PreviewRenderer::SetupOutputSize (
             double(rFramePixelSize.Width()-2*nFrameWidth-1) / aPageModelSize.Width());
         aMapMode.SetScaleY(
             double(rFramePixelSize.Height()-2*nFrameWidth-1) / aPageModelSize.Height());
-        aMapMode.SetOrigin(mpPreviewDevice->PixelToLogic(Point(nFrameWidth,nFrameWidth),aMapMode));
+        aMapMode.SetOrigin(mpPreviewDevice->WindowToLogic(Point(nFrameWidth,nFrameWidth),aMapMode));
     }
     else
     {

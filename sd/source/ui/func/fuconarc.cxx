@@ -108,9 +108,9 @@ bool FuConstructArc::MouseButtonDown( const MouseEvent& rMEvt )
 
     if ( rMEvt.IsLeft() && !mpView->IsAction() )
     {
-        Point aPnt( mpWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+        Point aPnt( mpWindow->WindowToLogic( rMEvt.GetPosPixel() ) );
         mpWindow->CaptureMouse();
-        sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+        sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
         mpView->BegCreateObj(aPnt, nullptr, nDrgLog);
 
         SdrObject* pObj = mpView->GetCreateObj();

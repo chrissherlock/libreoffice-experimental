@@ -46,31 +46,31 @@ tools::Rectangle AccessibleViewForwarder::GetVisibleArea() const
     tools::Rectangle aVisibleArea;
     if ( m_pWindow )
     {
-        aVisibleArea = m_pWindow->PixelToLogic(
+        aVisibleArea = m_pWindow->WindowToLogic(
             tools::Rectangle( Point( 0, 0 ), m_pWindow->GetOutputSizePixel() ),
             m_aMapMode );
     }
     return aVisibleArea;
 }
 
-Point AccessibleViewForwarder::LogicToPixel( const Point& rPoint ) const
+Point AccessibleViewForwarder::LogicToWindow( const Point& rPoint ) const
 {
     Point aPoint;
     if ( m_pAccChartView && m_pWindow )
     {
         awt::Point aLocation = m_pAccChartView->getLocationOnScreen();
         Point aTopLeft( aLocation.X, aLocation.Y );
-        aPoint = m_pWindow->LogicToPixel( rPoint, m_aMapMode ) + aTopLeft;
+        aPoint = m_pWindow->LogicToWindow( rPoint, m_aMapMode ) + aTopLeft;
     }
     return aPoint;
 }
 
-Size AccessibleViewForwarder::LogicToPixel( const Size& rSize ) const
+Size AccessibleViewForwarder::LogicToWindow( const Size& rSize ) const
 {
     Size aSize;
     if ( m_pWindow )
     {
-        aSize = m_pWindow->LogicToPixel( rSize, m_aMapMode );
+        aSize = m_pWindow->LogicToWindow( rSize, m_aMapMode );
     }
     return aSize;
 }

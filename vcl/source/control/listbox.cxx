@@ -331,7 +331,7 @@ void ListBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags n
 {
     mpImplLB->GetMainWindow()->ApplySettings(rDev);
 
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point aPos =  rDev.LogicToWindow( rPos );
     Size aSize = GetSizePixel();
     vcl::Font aFont = mpImplLB->GetMainWindow()->GetDrawPixelFont(&rDev);
 
@@ -675,10 +675,10 @@ tools::Long ListBox::GetIndexForPoint( const Point& rPoint, sal_Int32& rPos ) co
         ImplListBoxWindow* rMain = mpImplLB->GetMainWindow();
 
         // Convert coordinates to ImplListBoxWindow pixel coordinate space
-        Point aConvPoint = LogicToPixel( rPoint );
+        Point aConvPoint = LogicToWindow( rPoint );
         AbsoluteScreenPixelPoint aConvPointAbs = OutputToAbsoluteScreenPixel( aConvPoint );
         aConvPoint = rMain->AbsoluteScreenToOutputPixel( aConvPointAbs );
-        aConvPoint = rMain->PixelToLogic( aConvPoint );
+        aConvPoint = rMain->WindowToLogic( aConvPoint );
 
         // Try to find entry
         sal_Int32 nEntry = rMain->GetEntryPosForPoint( aConvPoint );
@@ -688,7 +688,7 @@ tools::Long ListBox::GetIndexForPoint( const Point& rPoint, sal_Int32& rPos ) co
             if( mpImplWin && mpImplWin->IsReallyVisible() )
             {
                 // Convert to impl window pixel coordinates
-                aConvPoint = LogicToPixel( rPoint );
+                aConvPoint = LogicToWindow( rPoint );
                 aConvPointAbs = OutputToAbsoluteScreenPixel( aConvPoint );
                 aConvPoint = mpImplWin->AbsoluteScreenToOutputPixel( aConvPointAbs );
 

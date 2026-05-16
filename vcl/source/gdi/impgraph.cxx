@@ -589,7 +589,7 @@ Bitmap ImpGraphic::getBitmap(const GraphicConversionParameters& rParameters) con
         {
             // calculate size
             ScopedVclPtrInstance< VirtualDevice > aVDev;
-            Size aDrawSize(aVDev->LogicToPixel(maMetaFile.GetPrefSize(), maMetaFile.GetPrefMapMode()));
+            Size aDrawSize(aVDev->LogicToWindow(maMetaFile.GetPrefSize(), maMetaFile.GetPrefMapMode()));
 
             if(rParameters.getSizePixel().Width() && rParameters.getSizePixel().Height())
             {
@@ -1060,7 +1060,7 @@ void ImpGraphic::draw(OutputDevice& rOutDev,
             }
             else if (maVectorGraphicData)
             {
-                updateBitmapFromVectorGraphic(rOutDev.LogicToPixel(rDestSize));
+                updateBitmapFromVectorGraphic(rOutDev.LogicToWindow(rDestSize));
                 getBitmapRef().Draw(&rOutDev, rDestPt, rDestSize);
             }
         }

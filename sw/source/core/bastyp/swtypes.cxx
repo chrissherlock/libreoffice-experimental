@@ -42,7 +42,7 @@ Size GetGraphicSizeTwip(const Graphic& rGraphic, vcl::RenderContext* pOutDev)
     {
         if (!pOutDev)
             pOutDev = Application::GetDefaultDevice();
-        aSize = pOutDev->PixelToLogic(aSize, aMapTwip);
+        aSize = pOutDev->WindowToLogic(aSize, aMapTwip);
     }
     else
     {

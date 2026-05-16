@@ -83,7 +83,7 @@ namespace cppcanvastools
             const ::Size aSizeLogic( 0x00010000L,
                                      0x00010000L );
 
-            const ::Size aSizePixel( rVDev.LogicToPixel( aSizeLogic ).get() );
+            const ::Size aSizePixel( rVDev.LogicToWindow( aSizeLogic ).get() );
 
             o_rMatrix = basegfx::utils::createScaleB2DHomMatrix(
                 aSizePixel.Width() / static_cast<double>(aSizeLogic.Width()),
@@ -101,7 +101,7 @@ namespace cppcanvastools
             // translate according to curr map mode/pref map mode offset
             const ::Point aEmptyPoint;
             const ::Point aTranslatedPoint(
-                rVDev.LogicToPixel( aEmptyPoint ).get());
+                rVDev.LogicToWindow( aEmptyPoint ).get());
 
             o_rMatrix.translate(aTranslatedPoint.X(),
                                 aTranslatedPoint.Y());

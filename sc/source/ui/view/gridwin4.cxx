@@ -381,7 +381,7 @@ void ScGridWindow::Paint( vcl::RenderContext& /*rRenderContext*/, const tools::R
         else
         {
             bNeedsRepaint = true;
-            aRepaintPixel = LogicToPixel(rRect);    // only affected ranges
+            aRepaintPixel = LogicToWindow(rRect);    // only affected ranges
             ScDocument::EnsureIdleUpdate();
         }
         return;
@@ -396,7 +396,7 @@ void ScGridWindow::Paint( vcl::RenderContext& /*rRenderContext*/, const tools::R
 
     bIsInPaint = true;
 
-    tools::Rectangle aPixRect = LogicToPixel( rRect );
+    tools::Rectangle aPixRect = LogicToWindow( rRect );
 
     SCCOL nX1 = mrViewData.GetPosX(eHWhich);
     SCROW nY1 = mrViewData.GetPosY(eVWhich);
@@ -767,7 +767,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
         // the same as editeng and drawinglayer), and get rid of all the
         // SetMapMode's and other unnecessary fun we have with pixels
         // See also ScGridWindow::GetDrawMapMode() for the rest of this hack
-        aDrawMode.SetOrigin(PixelToLogic(Point(nScrX, nScrY), aDrawMode));
+        aDrawMode.SetOrigin(WindowToLogic(Point(nScrX, nScrY), aDrawMode));
     }
     tools::Rectangle aDrawingRectLogic;
     bool bLayoutRTL = rDoc.IsLayoutRTL( nTab );
@@ -803,7 +803,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
         }
 
         // get logic positions
-        aDrawingRectLogic = PixelToLogic(aDrawingRectPixel, aDrawMode);
+        aDrawingRectLogic = WindowToLogic(aDrawingRectPixel, aDrawMode);
     }
 
     bool bInPlaceEditing = bEditMode && (mrViewData.GetRefTabNo() == nViewTab);
@@ -1194,7 +1194,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
             rDevice.SetMapMode(aNewMM);
 
             // paint the background
-            rDevice.DrawRect(rDevice.PixelToLogic(aBackground));
+            rDevice.DrawRect(rDevice.WindowToLogic(aBackground));
 
             OutputDevice& rOtherWin = pOtherEditView->GetOutputDevice();
             const MapMode aOrigMapMode = rOtherWin.GetMapMode();
@@ -1239,7 +1239,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
                 if (aNewOutputArea.IsEmpty())
                 {
                     // same zoom level as view used for painting
-                    aNewOutputArea =  rDevice.LogicToPixel(aOrigOutputArea);
+                    aNewOutputArea =  rDevice.LogicToWindow(aOrigOutputArea);
                 }
                 // a small workaround for getting text position matching cursor position horizontally.
                 const tools::Long nCursorGapPx = 2;
@@ -1256,7 +1256,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
             if (aNewOutputArea.IsEmpty())
             {
                 // same zoom level and not RTL: no need to change the output area before painting
-                pOtherEditView->DrawText_ToEditView(rDevice.PixelToLogic(aTileRectPx), &rDevice);
+                pOtherEditView->DrawText_ToEditView(rDevice.WindowToLogic(aTileRectPx), &rDevice);
             }
             else
             {
@@ -1270,8 +1270,8 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
                 // to be tweaked temporarily to match the current view's zoom.
                 SuppressEditViewMessagesGuard aGuard(*pOtherEditView);
 
-                pOtherEditView->SetOutputArea(rDevice.PixelToLogic(aNewOutputArea));
-                pOtherEditView->DrawText_ToEditView(rDevice.PixelToLogic(aTileRectPx), &rDevice);
+                pOtherEditView->SetOutputArea(rDevice.WindowToLogic(aNewOutputArea));
+                pOtherEditView->DrawText_ToEditView(rDevice.WindowToLogic(aTileRectPx), &rDevice);
 
                 // EditView will do the cursor notifications correctly if we're in
                 // print-twips messaging mode.
@@ -1292,7 +1292,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
 
                     aBGAbs.AdjustLeft(1);
                     aBGAbs.AdjustTop(1);
-                    aCursorRect = GetOutDev()->PixelToLogic(aBGAbs, aMM);
+                    aCursorRect = GetOutDev()->WindowToLogic(aBGAbs, aMM);
                     aCursorRect.setWidth(0);
                     aCursorRect.Move(aCursPos.getX(), 0);
                     // Sends view cursor position to views of all matching zooms if needed (avoids duplicates).
@@ -1672,7 +1672,7 @@ void ScGridWindow::LogicInvalidatePart(const tools::Rectangle* pRectangle, int n
             }
         }
         else
-            aRectangle = PixelToLogic(aRectangle, MapMode(MapUnit::MapTwip));
+            aRectangle = WindowToLogic(aRectangle, MapMode(MapUnit::MapTwip));
         pResultRectangle = &aRectangle;
     }
 
@@ -1710,7 +1710,7 @@ bool ScGridWindow::InvalidateByForeignEditView(EditView* pEditView)
     tools::Long nY = rViewData.GetCurYForTab(nRefTabNo);
 
     tools::Rectangle aPixRect = getViewData().GetEditArea(eWhich, nX, nY, this, nullptr, true);
-    tools::Rectangle aLogicRect = PixelToLogic(aPixRect, getViewData().GetLogicMode());
+    tools::Rectangle aLogicRect = WindowToLogic(aPixRect, getViewData().GetLogicMode());
     Invalidate(pEditView->IsNegativeX() ? lcl_negateRectX(aLogicRect) : aLogicRect);
 
     return true;
@@ -1796,7 +1796,7 @@ void ScGridWindow::CheckNeedsRepaint()
     if (aRepaintPixel.IsEmpty())
         Invalidate();
     else
-        Invalidate(PixelToLogic(aRepaintPixel));
+        Invalidate(WindowToLogic(aRepaintPixel));
     aRepaintPixel = tools::Rectangle();
 
     // selection function in status bar might also be invalid

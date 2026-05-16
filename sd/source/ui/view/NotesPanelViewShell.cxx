@@ -711,7 +711,7 @@ void NotesPanelViewShell::FuTemporary(SfxRequest& rReq)
         {
             SetZoom(std::min<::tools::Long>(GetActiveWindow()->GetZoom() * 2,
                                             GetActiveWindow()->GetMaxZoom()));
-            ::tools::Rectangle aVisAreaWin = GetActiveWindow()->PixelToLogic(
+            ::tools::Rectangle aVisAreaWin = GetActiveWindow()->WindowToLogic(
                 ::tools::Rectangle(Point(0, 0), GetActiveWindow()->GetOutputSizePixel()));
             mpZoomList->InsertZoomRect(aVisAreaWin);
             Invalidate(SID_ATTR_ZOOM);
@@ -726,7 +726,7 @@ void NotesPanelViewShell::FuTemporary(SfxRequest& rReq)
         case SID_SIZE_REAL:
         {
             SetZoom(100);
-            ::tools::Rectangle aVisAreaWin = GetActiveWindow()->PixelToLogic(
+            ::tools::Rectangle aVisAreaWin = GetActiveWindow()->WindowToLogic(
                 ::tools::Rectangle(Point(0, 0), GetActiveWindow()->GetOutputSizePixel()));
             mpZoomList->InsertZoomRect(aVisAreaWin);
             Invalidate(SID_ATTR_ZOOM);
@@ -740,7 +740,7 @@ void NotesPanelViewShell::FuTemporary(SfxRequest& rReq)
         {
             SetZoom(std::max<::tools::Long>(GetActiveWindow()->GetZoom() / 2,
                                             GetActiveWindow()->GetMinZoom()));
-            ::tools::Rectangle aVisAreaWin = GetActiveWindow()->PixelToLogic(
+            ::tools::Rectangle aVisAreaWin = GetActiveWindow()->WindowToLogic(
                 ::tools::Rectangle(Point(0, 0), GetActiveWindow()->GetOutputSizePixel()));
             mpZoomList->InsertZoomRect(aVisAreaWin);
             Invalidate(SID_ATTR_ZOOM);
@@ -1220,7 +1220,7 @@ void NotesPanelViewShell::FuSupport(SfxRequest& rReq)
                     sal_Int8 nAction = DND_ACTION_COPY;
                     mpNotesPanelView->InsertData(
                         aDataHelper,
-                        GetActiveWindow()->PixelToLogic(
+                        GetActiveWindow()->WindowToLogic(
                             ::tools::Rectangle(Point(), GetActiveWindow()->GetOutputSizePixel())
                                 .Center()),
                         nAction, false, SotClipboardFormatId::STRING);

@@ -147,8 +147,8 @@ bool FuSelection::MouseButtonDown(const MouseEvent& rMEvt)
         return true;
     }
 
-    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
-    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
+    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(HITPIX,0)).Width() );
 
     if (comphelper::LibreOfficeKit::isActive())
     {
@@ -659,7 +659,7 @@ bool FuSelection::MouseMove(const MouseEvent& rMEvt)
     if (mpView->IsAction())
     {
         Point aPix(rMEvt.GetPosPixel());
-        Point aPnt(mpWindow->PixelToLogic(aPix));
+        Point aPnt(mpWindow->WindowToLogic(aPix));
 
         ForceScroll(aPix);
 
@@ -695,9 +695,9 @@ bool FuSelection::MouseButtonUp(const MouseEvent& rMEvt)
     if( !mpView )
         return false;
 
-    Point aPnt( mpWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
-    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
-    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+    Point aPnt( mpWindow->WindowToLogic( rMEvt.GetPosPixel() ) );
+    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(HITPIX,0)).Width() );
+    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
     svx::diagram::DiagramFrameHdl* pDiagramFrameHdl(dynamic_cast<svx::diagram::DiagramFrameHdl*>(pHdl));
 
     bool bWasDragged = false;
@@ -975,8 +975,8 @@ bool FuSelection::MouseButtonUp(const MouseEvent& rMEvt)
             {
                 mpView->EndAction();
 
-                sal_uInt16 nDrgLog2 = sal_uInt16 ( mpWindow->PixelToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
-                Point aPos = mpWindow->PixelToLogic( rMEvt.GetPosPixel() );
+                sal_uInt16 nDrgLog2 = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+                Point aPos = mpWindow->WindowToLogic( rMEvt.GetPosPixel() );
 
                 if (std::abs(aMDPos.X() - aPos.X()) < nDrgLog2 &&
                     std::abs(aMDPos.Y() - aPos.Y()) < nDrgLog2 &&
@@ -1063,7 +1063,7 @@ bool FuSelection::KeyInput(const KeyEvent& rKEvt)
 
                 Point centerPoint;
                 ::tools::Rectangle rect = mpView->GetMarkedObjRect();
-                centerPoint = mpWindow->LogicToPixel(rect.Center());
+                centerPoint = mpWindow->LogicToWindow(rect.Center());
                 Point aPoint = bMovedToCenterPoint? oldPoint:centerPoint;
                 Point ePoint = aPoint + Point(nX,nY);
                 mpWindow->SetPointerPosPixel(ePoint);
@@ -1310,7 +1310,7 @@ bool FuSelection::HandleImageMapClick(const SdrObject* pObj, const Point& rPos)
     }
 
     const SdrLayerIDSet* pVisiLayer = &mpView->GetSdrPageView()->GetVisibleLayers();
-    double fHitLog = mpWindow->PixelToLogic(Size(HITPIX, 0)).Width();
+    double fHitLog = mpWindow->WindowToLogic(Size(HITPIX, 0)).Width();
     const ::tools::Long n2HitLog = fHitLog * 2;
     Point aHitPosR(rPos);
     Point aHitPosL(rPos);
@@ -1381,7 +1381,7 @@ bool FuSelection::cancel()
 SdrObject* FuSelection::pickObject (const Point& rTestPoint)
 {
     SdrPageView* pPageView;
-    sal_uInt16 nHitLog = sal_uInt16 (mpWindow->PixelToLogic(Size(HITPIX,0)).Width());
+    sal_uInt16 nHitLog = sal_uInt16 (mpWindow->WindowToLogic(Size(HITPIX,0)).Width());
     return mpView->PickObj(rTestPoint, nHitLog, pPageView, SdrSearchOptions::PICKMARKABLE);
 }
 

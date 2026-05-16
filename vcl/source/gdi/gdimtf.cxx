@@ -383,7 +383,7 @@ bool GDIMetaFile::ImplPlayWithRenderer(OutputDevice& rOut, const Point& rPos, Si
     if (!m_bUseCanvas)
         return false;
 
-    Size rDestSize(rOut.LogicToPixel(rLogicDestSize));
+    Size rDestSize(rOut.LogicToWindow(rLogicDestSize));
 
     const vcl::Window* win = rOut.GetOwnerWindow();
 
@@ -451,7 +451,7 @@ void GDIMetaFile::Play(OutputDevice& rOut, const Point& rPos,
                        const Size& rSize)
 {
     MapMode aDrawMap( GetPrefMapMode() );
-    Size    aDestSize(rOut.LogicToPixel(rSize));
+    Size    aDestSize(rOut.LogicToWindow(rSize));
 
     if (aDestSize.Width() <= 0 || aDestSize.Height() <= 0)
         return;
@@ -465,7 +465,7 @@ void GDIMetaFile::Play(OutputDevice& rOut, const Point& rPos,
     if (ImplPlayWithRenderer(rOut, rPos, rSize))
         return;
 
-    Size aTmpPrefSize(rOut.LogicToPixel(GetPrefSize(), aDrawMap));
+    Size aTmpPrefSize(rOut.LogicToWindow(GetPrefSize(), aDrawMap));
 
     if( !aTmpPrefSize.Width() )
         aTmpPrefSize.setWidth( aDestSize.Width() );
@@ -490,12 +490,12 @@ void GDIMetaFile::Play(OutputDevice& rOut, const Point& rPos,
     // even _if_ aDrawMap is similar to pOutDev's current mapmode,
     // it's _still_ undesirable to have pixel offset unequal zero,
     // because one would still get round-off errors (the
-    // round-trip error for LogicToPixel( PixelToLogic() ) was the
+    // round-trip error for LogicToWindow( WindowToLogic() ) was the
     // reason for having pixel offset in the first place).
     const Size aOldOffset(rOut.GetPixelOffset());
     const Size aEmptySize;
     rOut.SetPixelOffset(aEmptySize);
-    aDrawMap.SetOrigin(rOut.PixelToLogic(rOut.LogicToPixel(rPos), aDrawMap));
+    aDrawMap.SetOrigin(rOut.WindowToLogic(rOut.LogicToWindow(rPos), aDrawMap));
     rOut.SetPixelOffset(aOldOffset);
 
     auto popIt = rOut.ScopedPush();
@@ -690,7 +690,7 @@ void GDIMetaFile::Move( tools::Long nX, tools::Long nY, tools::Long nDPIX, tools
             pModAct->Execute( aMapVDev.get() );
             if( aMapVDev->GetMapMode().GetMapUnit() == MapUnit::MapPixel )
             {
-                aOffset = aMapVDev->LogicToPixel( aBaseOffset, GetPrefMapMode() );
+                aOffset = aMapVDev->LogicToWindow( aBaseOffset, GetPrefMapMode() );
                 MapMode aMap( aMapVDev->GetMapMode() );
                 aOffset.setWidth( static_cast<tools::Long>(aOffset.Width() * aMap.GetScaleX()) );
                 aOffset.setHeight( static_cast<tools::Long>(aOffset.Height() * aMap.GetScaleY()) );
@@ -1317,7 +1317,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
             MetaPixelAction* pAct = static_cast<MetaPixelAction*>(pAction);
             ImplActionBounds( aBound,
                               tools::Rectangle( ::LogicToLogic( pAct->GetPoint(), aMapVDev->GetMapMode(), GetPrefMapMode() ),
-                                       aMapVDev->PixelToLogic( Size( 1, 1 ), GetPrefMapMode() ) ),
+                                       aMapVDev->WindowToLogic( Size( 1, 1 ), GetPrefMapMode() ) ),
                              aClipStack );
         }
         break;
@@ -1327,7 +1327,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
             MetaPointAction* pAct = static_cast<MetaPointAction*>(pAction);
             ImplActionBounds( aBound,
                               tools::Rectangle( ::LogicToLogic( pAct->GetPoint(), aMapVDev->GetMapMode(), GetPrefMapMode() ),
-                                       aMapVDev->PixelToLogic( Size( 1, 1 ), GetPrefMapMode() ) ),
+                                       aMapVDev->WindowToLogic( Size( 1, 1 ), GetPrefMapMode() ) ),
                              aClipStack );
         }
         break;
@@ -1593,7 +1593,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
         case MetaActionType::BMP:
         {
             MetaBmpAction* pAct = static_cast<MetaBmpAction*>(pAction);
-            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->PixelToLogic( pAct->GetBitmap().GetSizePixel() ));
+            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->WindowToLogic( pAct->GetBitmap().GetSizePixel() ));
             ImplActionBounds( aBound, ::LogicToLogic( aRect, aMapVDev->GetMapMode(), GetPrefMapMode() ), aClipStack );
         }
         break;
@@ -1601,7 +1601,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
         case MetaActionType::BMPEX:
         {
             MetaBmpExAction* pAct = static_cast<MetaBmpExAction*>(pAction);
-            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->PixelToLogic( pAct->GetBitmap().GetSizePixel() ));
+            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->WindowToLogic( pAct->GetBitmap().GetSizePixel() ));
             ImplActionBounds( aBound, ::LogicToLogic( aRect, aMapVDev->GetMapMode(), GetPrefMapMode() ), aClipStack );
         }
         break;
@@ -1609,7 +1609,7 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
         case MetaActionType::MASK:
         {
             MetaMaskAction* pAct = static_cast<MetaMaskAction*>(pAction);
-            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->PixelToLogic( pAct->GetBitmap().GetSizePixel() ));
+            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->WindowToLogic( pAct->GetBitmap().GetSizePixel() ));
             ImplActionBounds( aBound, ::LogicToLogic( aRect, aMapVDev->GetMapMode(), GetPrefMapMode() ), aClipStack );
         }
         break;
@@ -2211,9 +2211,9 @@ bool GDIMetaFile::CreateThumbnail(Bitmap& rBitmap, BmpConversion eColorConversio
     // note: this is similar to DocumentToGraphicRenderer::renderToGraphic
     aVDev->SetAntialiasing(AntialiasingFlags::Enable | aVDev->GetAntialiasing());
     const Point     aNullPt;
-    const Point     aTLPix( aVDev->LogicToPixel( aNullPt, GetPrefMapMode() ) );
-    const Point     aBRPix( aVDev->LogicToPixel( Point( GetPrefSize().Width() - 1, GetPrefSize().Height() - 1 ), GetPrefMapMode() ) );
-    Size            aDrawSize( aVDev->LogicToPixel( GetPrefSize(), GetPrefMapMode() ) );
+    const Point     aTLPix( aVDev->LogicToWindow( aNullPt, GetPrefMapMode() ) );
+    const Point     aBRPix( aVDev->LogicToWindow( Point( GetPrefSize().Width() - 1, GetPrefSize().Height() - 1 ), GetPrefMapMode() ) );
+    Size            aDrawSize( aVDev->LogicToWindow( GetPrefSize(), GetPrefMapMode() ) );
     Size            aSizePix( std::abs( aBRPix.X() - aTLPix.X() ) + 1, std::abs( aBRPix.Y() - aTLPix.Y() ) + 1 );
     sal_uInt32      nMaximumExtent = 512;
 

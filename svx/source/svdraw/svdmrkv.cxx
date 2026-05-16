@@ -298,7 +298,7 @@ void SdrMarkView::modelHasChangedLOKit()
                     if (pViewShellWindow && pViewShellWindow->IsAncestorOf(*pWin))
                     {
                         Point aOffsetPx = pWin->GetOffsetPixelFrom(*pViewShellWindow);
-                        Point aLogicOffset = pWin->PixelToLogic(aOffsetPx);
+                        Point aLogicOffset = pWin->WindowToLogic(aOffsetPx);
                         aSelection.Move(aLogicOffset.getX(), aLogicOffset.getY());
                     }
                 }
@@ -919,7 +919,7 @@ void SdrMarkView::SetMarkHandlesForLOKit(tools::Rectangle const & rRect, const S
                         aOffsetPx.setX(pViewShellWindow->GetDeviceOriginX() + pViewShellWindow->GetSizePixel().Width()
                             - pWin->GetDeviceOriginX() - pWin->GetSizePixel().Width());
                     }
-                    Point aLogicOffset = pWin->PixelToLogic(aOffsetPx);
+                    Point aLogicOffset = pWin->WindowToLogic(aOffsetPx);
                     addLogicOffset = aLogicOffset;
                     aSelection.Move(aLogicOffset.getX(), aLogicOffset.getY());
                 }
@@ -1110,7 +1110,7 @@ void SdrMarkView::SetMarkHandlesForLOKit(tools::Rectangle const & rRect, const S
                                                 // are for making them understandable by the JSON parser
 
                                                 Point aOffsetPx = pWin->GetOffsetPixelFrom(*pViewShellWindow);
-                                                Point aLogicOffset = pWin->PixelToLogic(aOffsetPx);
+                                                Point aLogicOffset = pWin->WindowToLogic(aOffsetPx);
                                                 OStringBuffer sPolygonElem("<polygon points=\\\"");
                                                 for (sal_uInt32 nIndex = 0; nIndex < nPolySize; ++nIndex)
                                                 {
@@ -1861,7 +1861,7 @@ bool SdrMarkView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
         SdrHdl* pMouseOverHdl = nullptr;
         if( !rMEvt.IsLeaveWindow() && pWin )
         {
-            Point aMDPos( pWin->PixelToLogic( rMEvt.GetPosPixel() ));
+            Point aMDPos( pWin->WindowToLogic( rMEvt.GetPosPixel() ));
             pMouseOverHdl = PickHandle(aMDPos);
         }
 
@@ -1934,12 +1934,12 @@ void SdrMarkView::ForceRefToMarked()
             OutputDevice* pOut=GetFirstOutputDevice();
             if (pOut!=nullptr) {
                 // minimum length: 50 pixels
-                nMinLen=pOut->PixelToLogic(Size(0,50))->Height();
+                nMinLen=pOut->WindowToLogic(Size(0,50))->Height();
                 // 20 pixels distance to the Obj for the reference point
-                nObjDst=pOut->PixelToLogic(Size(0,20))->Height();
+                nObjDst=pOut->WindowToLogic(Size(0,20))->Height();
                 // MinY/MaxY
                 // margin = minimum length = 10 pixels
-                tools::Long nDst=pOut->PixelToLogic(Size(0,10))->Height();
+                tools::Long nDst=pOut->WindowToLogic(Size(0,10))->Height();
                 nOutMin=-pOut->GetMapMode().GetOrigin().Y();
                 nOutMax=pOut->GetOutputSize().Height()-1+nOutMin;
                 nOutMin+=nDst;

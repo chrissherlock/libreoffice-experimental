@@ -388,7 +388,7 @@ ErrCode ScHTMLLayoutParser::Read( SvStream& rStream, const OUString& rBaseURL )
     for ( sal_uInt16 j = 1; j < nCount; j++ )
     {
         aSize.setWidth( maColOffset[j] - nOff );
-        aSize = pDefaultDev->PixelToLogic( aSize, MapMode( MapUnit::MapTwip ) );
+        aSize = pDefaultDev->WindowToLogic( aSize, MapMode( MapUnit::MapTwip ) );
         maColWidths[ j-1 ] = aSize.Width();
         nOff = maColOffset[j];
     }
@@ -1539,9 +1539,9 @@ void ScHTMLLayoutParser::Image( HtmlImportInfo* pInfo )
     {
         OutputDevice* pDefaultDev = Application::GetDefaultDevice();
         if (pImage->oGraphic->IsNone())
-            pImage->aSize = pDefaultDev->LogicToPixel(Size(2000, 1000), MapMode(MapUnit::Map100thMM));
+            pImage->aSize = pDefaultDev->LogicToWindow(Size(2000, 1000), MapMode(MapUnit::Map100thMM));
         else
-            pImage->aSize = pDefaultDev->LogicToPixel( pImage->oGraphic->GetPrefSize(),
+            pImage->aSize = pDefaultDev->LogicToWindow( pImage->oGraphic->GetPrefSize(),
                 pImage->oGraphic->GetPrefMapMode() );
     }
     if (mxActEntry->maImageList.empty())

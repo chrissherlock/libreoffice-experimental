@@ -85,7 +85,7 @@ bool FuSelection::MouseButtonDown(const MouseEvent& rMEvt)
     if (aLogicPosition)
         aMDPos = *aLogicPosition;
     else
-        aMDPos = pWindow->PixelToLogic(rMEvt.GetPosPixel());
+        aMDPos = pWindow->WindowToLogic(rMEvt.GetPosPixel());
 
     if (comphelper::LibreOfficeKit::isActive())
     {
@@ -313,7 +313,7 @@ bool FuSelection::MouseMove(const MouseEvent& rMEvt)
 
     if (aDragTimer.IsActive() )
     {
-        Point aOldPixel = pWindow->LogicToPixel( aMDPos );
+        Point aOldPixel = pWindow->LogicToWindow( aMDPos );
         Point aNewPixel = rMEvt.GetPosPixel();
         if ( std::abs( aOldPixel.X() - aNewPixel.X() ) > SC_MAXDRAGMOVE ||
              std::abs( aOldPixel.Y() - aNewPixel.Y() ) > SC_MAXDRAGMOVE )
@@ -323,7 +323,7 @@ bool FuSelection::MouseMove(const MouseEvent& rMEvt)
     if ( pView->IsAction() )
     {
         Point aPix(rMEvt.GetPosPixel());
-        Point aPnt(pWindow->PixelToLogic(aPix));
+        Point aPnt(pWindow->WindowToLogic(aPix));
 
         ForceScroll(aPix);
         pView->MovAction(aPnt);
@@ -349,9 +349,9 @@ bool FuSelection::MouseButtonUp(const MouseEvent& rMEvt)
         aDragTimer.Stop();
     }
 
-    sal_uInt16 nDrgLog = sal_uInt16 ( pWindow->PixelToLogic(Size(SC_MINDRAGMOVE,0)).Width() );
+    sal_uInt16 nDrgLog = sal_uInt16 ( pWindow->WindowToLogic(Size(SC_MINDRAGMOVE,0)).Width() );
     auto aLogicPosition = rMEvt.getLogicPosition();
-    Point aPnt(aLogicPosition ? *aLogicPosition : pWindow->PixelToLogic(rMEvt.GetPosPixel()));
+    Point aPnt(aLogicPosition ? *aLogicPosition : pWindow->WindowToLogic(rMEvt.GetPosPixel()));
 
     bool bCopy = false;
     ScViewData& rViewData = rViewShell.GetViewData();

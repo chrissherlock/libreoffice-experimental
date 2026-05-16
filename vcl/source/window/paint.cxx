@@ -134,8 +134,8 @@ PaintBufferGuard::~PaintBufferGuard()
             }
             else
             {
-                tools::Rectangle aRectanglePixel = m_pWindow->LogicToPixel(m_aPaintRect);
-                aPaintRectSize = m_pWindow->PixelToLogic(aRectanglePixel.GetSize());
+                tools::Rectangle aRectanglePixel = m_pWindow->LogicToWindow(m_aPaintRect);
+                aPaintRectSize = m_pWindow->WindowToLogic(aRectanglePixel.GetSize());
             }
 
             m_pWindow->GetOutDev()->DrawOutDev(m_aPaintRect.TopLeft(), aPaintRectSize, m_aPaintRect.TopLeft(), aPaintRectSize, *mpFrameData->mpBuffer);
@@ -988,7 +988,7 @@ vcl::Region Window::GetPaintRegion() const
     {
         vcl::Region aRegion = *mpWindowImpl->mpPaintRegion;
         aRegion.Move( -GetOutDev()->GetDeviceOriginX(), -GetOutDev()->GetDeviceOriginY() );
-        return PixelToLogic( aRegion );
+        return WindowToLogic( aRegion );
     }
     else
     {
@@ -1040,7 +1040,7 @@ void Window::Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags )
     }
     else
     {
-        vcl::Region aRegion = GetOutDev()->GetMapper().ViewToDevice( LogicToPixel( rRegion ) );
+        vcl::Region aRegion = GetOutDev()->GetMapper().ViewToDevice( LogicToWindow( rRegion ) );
         if ( !aRegion.IsEmpty() )
         {
             ImplInvalidate( &aRegion, nFlags );
@@ -1281,7 +1281,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 
         Paint(*pDevice, tools::Rectangle(Point(), GetOutputSizePixel()));
 
-        rTargetOutDev.DrawOutDev(i_rPos, aSize, Point(), pDevice->PixelToLogic(aSize).get(), *pDevice);
+        rTargetOutDev.DrawOutDev(i_rPos, aSize, Point(), pDevice->WindowToLogic(aSize), *pDevice);
 
         bool bHasMirroredGraphics = pDevice->HasMirroredGraphics();
 

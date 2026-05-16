@@ -171,7 +171,7 @@ namespace ww8
         Size    aSize( rGrf.GetPrefSize() );
         if ( MapUnit::MapPixel == rGrf.GetPrefMapMode().GetMapUnit() )
         {
-            aSize = Application::GetDefaultDevice()->PixelToLogic(aSize, aMap100mm );
+            aSize = Application::GetDefaultDevice()->WindowToLogic(aSize, aMap100mm );
         }
         else
         {

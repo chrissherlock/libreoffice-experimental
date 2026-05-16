@@ -178,7 +178,7 @@ lcl_PaintTransparentFormControls(SwViewShell const & rShell, SwRect const& rRect
     if (rShell.GetWin())
     {
         vcl::Window& rWindow = *(rShell.GetWin());
-        const tools::Rectangle aRectanglePixel(rShell.GetOut()->LogicToPixel(rRect.SVRect()));
+        const tools::Rectangle aRectanglePixel(rShell.GetOut()->LogicToWindow(rRect.SVRect()));
         PaintTransparentChildren(rWindow, aRectanglePixel);
     }
 }
@@ -1409,7 +1409,7 @@ void SwViewShell::VisPortChgd( const SwRect &rRect)
                     //selected and have handles attached.
                     if ( pPage->GetSortedObjs() )
                     {
-                        const tools::Long nOfst = GetOut()->PixelToLogic(
+                        const tools::Long nOfst = GetOut()->WindowToLogic(
                             Size(Imp()->GetDrawView()->GetMarkHdlSizePixel()/2,0))->Width();
                         for (SwAnchoredObject* pObj : *pPage->GetSortedObjs())
                         {
@@ -1529,7 +1529,7 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
         const SwRect aOldVis( VisArea() );
 
         //create virtual device and set.
-        const Size aPixSz = GetWin()->PixelToLogic(Size(1,1));
+        const Size aPixSz = GetWin()->WindowToLogic(Size(1,1));
         ScopedVclPtrInstance<VirtualDevice> pVout(*GetWin()->GetOutDev());
         pVout->SetLineColor( GetWin()->GetOutDev()->GetLineColor() );
         pVout->SetFillColor( GetWin()->GetOutDev()->GetFillColor() );
@@ -1555,8 +1555,8 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
             aRect.SetPosY(lYDiff < 0 ? aOldVis.Bottom() - aPixSz.Height()
                                          : aRect.Top() - aSize.Height() + aPixSz.Height() );
             aRect.SetPosX(std::max(tools::Long(0), aRect.Left() - aPixSz.Width()));
-            aRect.Pos(GetWin()->PixelToLogic(GetWin()->LogicToPixel(aRect.Pos())));
-            aRect.SSize( GetWin()->PixelToLogic( GetWin()->LogicToPixel( aRect.SSize())) );
+            aRect.Pos(GetWin()->WindowToLogic(GetWin()->LogicToWindow(aRect.Pos())));
+            aRect.SSize( GetWin()->WindowToLogic( GetWin()->LogicToWindow( aRect.SSize())) );
             maVisArea = aRect;
             const Point aPt( -aRect.Left(), -aRect.Top() );
             aMapMode.SetOrigin( aPt );
@@ -1633,7 +1633,7 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
 
                 const SwRect aTmpOldVis = VisArea();
                 maVisArea.SetPosY(maVisArea.Pos().Y() - lScroll);
-                maVisArea.Pos(GetWin()->PixelToLogic(GetWin()->LogicToPixel(VisArea().Pos())));
+                maVisArea.Pos(GetWin()->WindowToLogic(GetWin()->LogicToWindow(VisArea().Pos())));
                 lScroll = aTmpOldVis.Top() - VisArea().Top();
                 if ( pRect )
                 {
@@ -1680,10 +1680,10 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
 
                             // get target rectangle in discrete pixels
                             OutputDevice& rTargetDevice = mpTargetPaintWindow->GetTargetOutputDevice();
-                            const tools::Rectangle aTargetPixel(rTargetDevice.LogicToPixel(aTargetLogic));
+                            const tools::Rectangle aTargetPixel(rTargetDevice.LogicToWindow(aTargetLogic));
 
                             // get source top-left in discrete pixels
-                            const Point aSourceTopLeft(pVout->LogicToPixel(aTargetLogic.TopLeft()));
+                            const Point aSourceTopLeft(pVout->LogicToWindow(aTargetLogic.TopLeft()));
 
                             // switch off MapModes
                             const vcl::MappingPolicy bMapModeWasEnabledDest(rTargetDevice.GetMappingPolicy());
@@ -2197,7 +2197,7 @@ void SwViewShell::PaintTile(VirtualDevice &rDevice, int contextWidth, int contex
     }
 
     tools::Rectangle aOutRect(Point(tilePosX, tilePosY),
-                              rDevice.PixelToLogic(Size(contextWidth, contextHeight)));
+                              rDevice.WindowToLogic(Size(contextWidth, contextHeight)));
 
     // Make the requested area visible -- we can't use MakeVisible as that will
     // only scroll the contents, but won't zoom/resize if needed.
@@ -2275,10 +2275,10 @@ sal_Int32 SwViewShell::GetBrowseWidth() const
         Size aBorder( maBrowseBorder );
         aBorder.AdjustWidth(maBrowseBorder.Width() );
         aBorder.AdjustWidth(pPostItMgr->GetSidebarWidth(true) + pPostItMgr->GetSidebarBorderWidth(true) );
-        return maVisArea.Width() - GetOut()->PixelToLogic(aBorder)->Width();
+        return maVisArea.Width() - GetOut()->WindowToLogic(aBorder)->Width();
     }
     else
-        return maVisArea.Width() - 2 * GetOut()->PixelToLogic(maBrowseBorder)->Width();
+        return maVisArea.Width() - 2 * GetOut()->WindowToLogic(maBrowseBorder)->Width();
 }
 
 void SwViewShell::InvalidateLayout( bool bSizeChanged )

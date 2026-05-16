@@ -63,8 +63,8 @@ namespace accessibility
 
         // the view forwarder
         virtual bool        IsValid() const override;
-        virtual Point       LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const override;
-        virtual Point       PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
+        virtual Point       LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const override;
+        virtual Point       WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
 
         // SfxListener
         virtual void        Notify( SfxBroadcaster& rBC, const SfxHint& rHint ) override;

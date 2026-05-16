@@ -53,7 +53,7 @@ public:
     {
         mpOrigGraphic = pOrigGraphic;
         maModifyHdl = rLink;
-        maOrigGraphicSizePixel = GetDrawingArea()->get_ref_device().LogicToPixel(mpOrigGraphic->GetPrefSize(),
+        maOrigGraphicSizePixel = GetDrawingArea()->get_ref_device().LogicToWindow(mpOrigGraphic->GetPrefSize(),
                                                                                  mpOrigGraphic->GetPrefMapMode());
         ScaleImageToFit();
     }

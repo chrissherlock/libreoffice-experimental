@@ -83,7 +83,7 @@ CPPUNIT_TEST_FIXTURE(SwUibaseUnoTest, testCreateTextRangeByPixelPosition)
     Point aLogic = pWrtShell->GetCharRect().Center();
     SwView* pView = pDocShell->GetView();
     SwEditWin& rEditWin = pView->GetEditWin();
-    Point aPixel = rEditWin.LogicToPixel(aLogic);
+    Point aPixel = rEditWin.LogicToWindow(aLogic);
 
     // When converting that pixel position to a document model position (text range):
     uno::Reference<frame::XModel2> xModel(mxComponent, uno::UNO_QUERY);
@@ -99,7 +99,7 @@ CPPUNIT_TEST_FIXTURE(SwUibaseUnoTest, testCreateTextRangeByPixelPosition)
     SwPaM aPaM(pDoc->GetNodes());
     pTextRange->GetPositions(aPaM);
     sal_Int32 nActual = aPaM.GetPoint()->GetContentIndex();
-    // Without the needed PixelToLogic() call in place, this test would have failed with:
+    // Without the needed WindowToLogic() call in place, this test would have failed with:
     // - Expected: 1
     // - Actual  : 0
     // i.e. the returned text range pointed before the first character, not between the first and
@@ -135,7 +135,7 @@ CPPUNIT_TEST_FIXTURE(SwUibaseUnoTest, testCreateTextRangeByPixelPositionGraphic)
     Point aLogic = pAnchored->GetObjRect().Center();
     SwView* pView = pDocShell->GetView();
     SwEditWin& rEditWin = pView->GetEditWin();
-    Point aPixel = rEditWin.LogicToPixel(aLogic);
+    Point aPixel = rEditWin.LogicToWindow(aLogic);
 
     // When converting that pixel position to a document model position (text range):
     uno::Reference<frame::XModel2> xModel(mxComponent, uno::UNO_QUERY);
@@ -184,7 +184,7 @@ CPPUNIT_TEST_FIXTURE(SwUibaseUnoTest, testCreateTextRangeByPixelPositionAtPageGr
     Point aLogic = pAnchored->GetObjRect().Center();
     SwView* pView = pDocShell->GetView();
     SwEditWin& rEditWin = pView->GetEditWin();
-    Point aPixel = rEditWin.LogicToPixel(aLogic);
+    Point aPixel = rEditWin.LogicToWindow(aLogic);
 
     // When asking for the doc model pos of the image's anchor by pixel position:
     uno::Reference<frame::XModel2> xModel(mxComponent, uno::UNO_QUERY);

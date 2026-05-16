@@ -77,7 +77,7 @@ namespace cppcanvastools
             coordinate system.
 
             This method calculates a matrix that approximates the
-            VirtualDevice's LogicToPixel conversion (disregarding any
+            VirtualDevice's LogicToWindow conversion (disregarding any
             offset components, thus the 'linear' in the method name -
             the returned matrix is guaranteed to be linear).
 
@@ -94,7 +94,7 @@ namespace cppcanvastools
             coordinate system.
 
             This method calculates a matrix that approximates the
-            VirtualDevice's LogicToPixel conversion.
+            VirtualDevice's LogicToWindow conversion.
 
             @param o_rMatrix
             This matrix will receive the calculated transform, and is

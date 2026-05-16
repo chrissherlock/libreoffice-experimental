@@ -390,11 +390,11 @@ namespace frm
         Size aViewportPlaygroundPixel( aPlaygroundSizePixel );
         aViewportPlaygroundPixel.setWidth( ::std::max( tools::Long( 10 ), tools::Long( aViewportPlaygroundPixel.Width() - nScrollBarWidth ) ) );
         aViewportPlaygroundPixel.setHeight( ::std::max( tools::Long( 10 ), tools::Long( aViewportPlaygroundPixel.Height() - nScrollBarHeight ) ) );
-        Size aViewportPlaygroundLogic( m_pViewport->PixelToLogic( aViewportPlaygroundPixel ) );
+        Size aViewportPlaygroundLogic( m_pViewport->WindowToLogic( aViewportPlaygroundPixel ) );
 
         const tools::Long nOffset = 2;
         Size aViewportSizePixel( aViewportPlaygroundPixel.Width() - 2 * nOffset, aViewportPlaygroundPixel.Height() - 2 * nOffset );
-        Size aViewportSizeLogic( m_pViewport->PixelToLogic( aViewportSizePixel ) );
+        Size aViewportSizeLogic( m_pViewport->WindowToLogic( aViewportSizePixel ) );
 
         // position the viewport
         m_pViewport->SetPosSizePixel( Point( nOffset, nOffset ), aViewportSizePixel );
@@ -565,8 +565,8 @@ namespace frm
         Size aSize( _rSize );
         if ( aOriginalMapMode.GetMapUnit() == MapUnit::MapPixel )
         {
-            aPos = _pDev->PixelToLogic( _rPos, aNormalizedMapMode );
-            aSize = _pDev->PixelToLogic( _rSize, aNormalizedMapMode );
+            aPos = _pDev->WindowToLogic( _rPos, aNormalizedMapMode );
+            aSize = _pDev->WindowToLogic( _rSize, aNormalizedMapMode );
         }
         else
         {
@@ -575,7 +575,7 @@ namespace frm
         }
 
         tools::Rectangle aPlayground( aPos, aSize );
-        Size aOnePixel( _pDev->PixelToLogic( Size( 1, 1 ) ).get() );
+        Size aOnePixel( _pDev->WindowToLogic( Size( 1, 1 ) ).get() );
         aPlayground.AdjustRight( -(aOnePixel.Width()) );
         aPlayground.AdjustBottom( -(aOnePixel.Height()) );
 

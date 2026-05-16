@@ -317,7 +317,7 @@ public:
 
     Size GetOutputSize() const
     {
-        return mpBufferDevice->PixelToLogic(GetOutputSizePixel()).get();
+        return mpBufferDevice->WindowToLogic(GetOutputSizePixel()).get();
     }
 
     // dada read access

@@ -152,7 +152,7 @@ IMapRectangleObject::IMapRectangleObject( const tools::Rectangle& rRect,
 void IMapRectangleObject::ImpConstruct( const tools::Rectangle& rRect, bool bPixel )
 {
     if ( bPixel )
-        aRect = Application::GetDefaultDevice()->PixelToLogic( rRect, MapMode( MapUnit::Map100thMM ) );
+        aRect = Application::GetDefaultDevice()->WindowToLogic( rRect, MapMode( MapUnit::Map100thMM ) );
     else
         aRect = rRect;
 }
@@ -212,7 +212,7 @@ tools::Rectangle IMapRectangleObject::GetRectangle( bool bPixelCoords ) const
     tools::Rectangle   aNewRect;
 
     if ( bPixelCoords )
-        aNewRect = Application::GetDefaultDevice()->LogicToPixel( aRect, MapMode( MapUnit::Map100thMM ) );
+        aNewRect = Application::GetDefaultDevice()->LogicToWindow( aRect, MapMode( MapUnit::Map100thMM ) );
     else
         aNewRect = aRect;
 
@@ -257,8 +257,8 @@ void IMapCircleObject::ImpConstruct( const Point& rCenter, sal_Int32 nRad, bool 
     {
         MapMode aMap100( MapUnit::Map100thMM );
 
-        aCenter = Application::GetDefaultDevice()->PixelToLogic( rCenter, aMap100 );
-        nRadius = Application::GetDefaultDevice()->PixelToLogic( Size( nRad, 0 ), aMap100 ).Width();
+        aCenter = Application::GetDefaultDevice()->WindowToLogic( rCenter, aMap100 );
+        nRadius = Application::GetDefaultDevice()->WindowToLogic( Size( nRad, 0 ), aMap100 ).Width();
     }
     else
     {
@@ -331,7 +331,7 @@ Point IMapCircleObject::GetCenter( bool bPixelCoords ) const
     Point aNewPoint;
 
     if ( bPixelCoords )
-        aNewPoint = Application::GetDefaultDevice()->LogicToPixel( aCenter, MapMode( MapUnit::Map100thMM ) );
+        aNewPoint = Application::GetDefaultDevice()->LogicToWindow( aCenter, MapMode( MapUnit::Map100thMM ) );
     else
         aNewPoint = aCenter;
 
@@ -343,7 +343,7 @@ sal_Int32 IMapCircleObject::GetRadius( bool bPixelCoords ) const
     sal_Int32 nNewRadius;
 
     if ( bPixelCoords )
-        nNewRadius = Application::GetDefaultDevice()->LogicToPixel( Size( nRadius, 0 ), MapMode( MapUnit::Map100thMM ) ).Width();
+        nNewRadius = Application::GetDefaultDevice()->LogicToWindow( Size( nRadius, 0 ), MapMode( MapUnit::Map100thMM ) ).Width();
     else
         nNewRadius = nRadius;
 
@@ -389,7 +389,7 @@ IMapPolygonObject::IMapPolygonObject( const tools::Polygon& rPoly,
 void IMapPolygonObject::ImpConstruct( const tools::Polygon& rPoly, bool bPixel )
 {
     if ( bPixel )
-        aPoly = Application::GetDefaultDevice()->PixelToLogic( rPoly, MapMode( MapUnit::Map100thMM ) );
+        aPoly = Application::GetDefaultDevice()->WindowToLogic( rPoly, MapMode( MapUnit::Map100thMM ) );
     else
         aPoly = rPoly;
 }
@@ -459,7 +459,7 @@ tools::Polygon IMapPolygonObject::GetPolygon( bool bPixelCoords ) const
     tools::Polygon aNewPoly;
 
     if ( bPixelCoords )
-        aNewPoly = Application::GetDefaultDevice()->LogicToPixel( aPoly, MapMode( MapUnit::Map100thMM ) );
+        aNewPoly = Application::GetDefaultDevice()->LogicToWindow( aPoly, MapMode( MapUnit::Map100thMM ) );
     else
         aNewPoly = aPoly;
 

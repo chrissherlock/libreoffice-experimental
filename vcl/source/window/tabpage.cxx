@@ -164,7 +164,7 @@ void TabPage::Paint( vcl::RenderContext& rRenderContext, const tools::Rectangle&
 
 void TabPage::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
 {
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point aPos =  rDev.LogicToWindow( rPos );
     Size aSize = GetSizePixel();
 
     Wallpaper aWallpaper = GetBackground();

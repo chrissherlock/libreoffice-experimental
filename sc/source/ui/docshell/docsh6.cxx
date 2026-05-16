@@ -113,7 +113,7 @@ void ScDocShell::SetVisAreaOrSize( const tools::Rectangle& rVisArea )
     {
         vcl::Window* pWin = pEnv->GetEditWin();
         pEnv->MakeScale( aArea.GetSize(), MapUnit::Map100thMM,
-                            pWin->LogicToPixel( aArea.GetSize() ) );
+                            pWin->LogicToWindow( aArea.GetSize() ) );
     } */
 
     //TODO/LATER: formerly in SvInplaceObject

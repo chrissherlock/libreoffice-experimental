@@ -2336,7 +2336,7 @@ static void lcl_PDFExportHelper(const OutputDevice* pDev, const ScDocument& rDoc
         if (pPDF->GetIsExportBookmarks())
         {
             // the sheet starts at the top of the page
-            tools::Rectangle aArea(pDev->PixelToLogic(tools::Rectangle(0, 0, 0, 0)));
+            tools::Rectangle aArea(pDev->WindowToLogic(tools::Rectangle(0, 0, 0, 0)));
             nDestID = pPDF->CreateDest(aArea);
             // top-level
             pPDF->CreateOutlineItem(-1/*nParent*/, rTabName, nDestID);
@@ -2344,7 +2344,7 @@ static void lcl_PDFExportHelper(const OutputDevice* pDev, const ScDocument& rDoc
         // #i56629# add the named destination stuff
         if (pPDF->GetIsExportNamedDestinations())
         {
-            tools::Rectangle aArea(pDev->PixelToLogic(tools::Rectangle(0, 0, 0, 0)));
+            tools::Rectangle aArea(pDev->WindowToLogic(tools::Rectangle(0, 0, 0, 0)));
             //need the PDF page number here
             pPDF->CreateNamedDest(rTabName, aArea);
         }
@@ -2410,7 +2410,7 @@ static void lcl_PDFExportBookmarkHelper(OutputDevice* pDev, ScDocument& rDoc,
                     //  Get first page for sheet (if nothing from that sheet is printed,
                     //  this page can show a different sheet)
                     nPage = pPrintFuncCache->GetTabStart(aTargetRange.aStart.Tab());
-                    aArea =  pDev->PixelToLogic(tools::Rectangle(0, 0, 0, 0));
+                    aArea =  pDev->WindowToLogic(tools::Rectangle(0, 0, 0, 0));
                 }
                 else
                 {
@@ -2466,9 +2466,9 @@ static void lcl_PDFExportBookmarkHelper(OutputDevice* pDev, ScDocument& rDoc,
                             nY2 = aLocationPixel.Bottom();
 
                         // The link target area is interpreted using the device's MapMode at
-                        // the time of the CreateDest call, so PixelToLogic can be used here,
+                        // the time of the CreateDest call, so WindowToLogic can be used here,
                         // regardless of the MapMode that is actually selected.
-                        aArea =  pDev->PixelToLogic(tools::Rectangle(nX1, nY1, nX2, nY2));
+                        aArea =  pDev->WindowToLogic(tools::Rectangle(nX1, nY1, nX2, nY2));
                     }
                 }
 

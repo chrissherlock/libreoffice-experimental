@@ -456,7 +456,7 @@ tools::Long ScColumn::GetNeededSize(
             double fWidthFactor = bInPrintTwips ? 1.0 : nPPTX;
             if ( bTextWysiwyg )
             {
-                //  if text is formatted for printer, don't use PixelToLogic,
+                //  if text is formatted for printer, don't use WindowToLogic,
                 //  to ensure the exact same paper width (and same line breaks) as in
                 //  ScEditUtil::GetEditArea, used for output.
 
@@ -488,7 +488,7 @@ tools::Long ScColumn::GetNeededSize(
             {
                 aPaper = bInPrintTwips ?
                         o3tl::convert(aPaper, o3tl::Length::twip, o3tl::Length::mm100) :
-                        pDev->PixelToLogic(aPaper, aHMMMode);
+                        pDev->WindowToLogic(aPaper, aHMMMode);
             }
         }
         pEngine->SetPaperSize(aPaper);
@@ -543,7 +543,7 @@ tools::Long ScColumn::GetNeededSize(
 
             Size aTextSize = bInPrintTwips ?
                     o3tl::toTwips(aSize, o3tl::Length::mm100) :
-                    pDev->LogicToPixel(aSize, aHMMMode);
+                    pDev->LogicToWindow(aSize, aHMMMode);
 
             if ( bEdWidth )
                 nValue = aTextSize.Width();
@@ -569,7 +569,7 @@ tools::Long ScColumn::GetNeededSize(
                 sal_uInt32 aTextSize(pEngine->CalcTextWidth());
                 nValue = bInPrintTwips ?
                         o3tl::toTwips(aTextSize, o3tl::Length::mm100) :
-                        pDev->LogicToPixel(Size(aTextSize, 0), aHMMMode).Width();
+                        pDev->LogicToWindow(Size(aTextSize, 0), aHMMMode).Width();
             }
         }
         else            // height
@@ -577,7 +577,7 @@ tools::Long ScColumn::GetNeededSize(
             sal_uInt32 aTextSize(pEngine->GetTextHeight());
             nValue = bInPrintTwips ?
                     o3tl::toTwips(aTextSize, o3tl::Length::mm100) :
-                    pDev->LogicToPixel(Size(0, aTextSize), aHMMMode).Height();
+                    pDev->LogicToWindow(Size(0, aTextSize), aHMMMode).Height();
         }
 
         if ( nValue && bAddMargin )

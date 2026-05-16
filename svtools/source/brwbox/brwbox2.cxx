@@ -649,7 +649,7 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
 {
     // we need pixel coordinates
     Size aRealSize = GetSizePixel();
-    Point aRealPos = rDev.LogicToPixel(rPos);
+    Point aRealPos = rDev.LogicToWindow(rPos);
 
     if ((aRealSize.Width() < 3) || (aRealSize.Height() < 3))
         // we want to have two pixels frame ...
@@ -688,9 +688,9 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
     // (as it is based on the settings of our data window, not the foreign device)
     if (!m_nDataRowHeight)
         ImpGetDataRowHeight();
-    tools::Long nHeightLogic = PixelToLogic(Size(0, m_nDataRowHeight), MapMode(MapUnit::Map10thMM)).Height();
+    tools::Long nHeightLogic = WindowToLogic(Size(0, m_nDataRowHeight), MapMode(MapUnit::Map10thMM)).Height();
     tools::Long nForeignHeightPixel
-        = rDev.LogicToPixel(Size(0, nHeightLogic), MapMode(MapUnit::Map10thMM)).Height();
+        = rDev.LogicToWindow(Size(0, nHeightLogic), MapMode(MapUnit::Map10thMM)).Height();
 
     tools::Long nOriginalHeight = m_nDataRowHeight;
     m_nDataRowHeight = nForeignHeightPixel;
@@ -701,9 +701,9 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
     {
         BrowserColumn* pCurrent = mvCols[ nPos ].get();
 
-        tools::Long nWidthLogic = PixelToLogic(Size(pCurrent->Width(), 0), MapMode(MapUnit::Map10thMM)).Width();
+        tools::Long nWidthLogic = WindowToLogic(Size(pCurrent->Width(), 0), MapMode(MapUnit::Map10thMM)).Width();
         tools::Long nForeignWidthPixel
-            = rDev.LogicToPixel(Size(nWidthLogic, 0), MapMode(MapUnit::Map10thMM)).Width();
+            = rDev.LogicToWindow(Size(nWidthLogic, 0), MapMode(MapUnit::Map10thMM)).Width();
 
         pCurrent->SetWidth(nForeignWidthPixel, GetZoom());
         if ( pBar )
@@ -720,9 +720,9 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
     if ( pBar )
     {
         // the title height with respect to the font set for the given device
-        tools::Long nTitleHeight = PixelToLogic(Size(0, GetTitleHeight()), MapMode(MapUnit::Map10thMM)).Height();
+        tools::Long nTitleHeight = WindowToLogic(Size(0, GetTitleHeight()), MapMode(MapUnit::Map10thMM)).Height();
         nTitleHeight
-            = rDev.LogicToPixel(Size(0, nTitleHeight), MapMode(MapUnit::Map10thMM)).Height();
+            = rDev.LogicToWindow(Size(0, nTitleHeight), MapMode(MapUnit::Map10thMM)).Height();
 
         BrowserColumn* pFirstCol = !mvCols.empty() ? mvCols[ 0 ].get() : nullptr;
 
@@ -733,7 +733,7 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
             // do this before converting to logics !
 
         // the header's draw expects logic coordinates, again
-        aHeaderPos = rDev.PixelToLogic(aHeaderPos);
+        aHeaderPos = rDev.WindowToLogic(aHeaderPos);
 
         Size aOrigSize(pBar->GetSizePixel());
         pBar->SetSizePixel(aHeaderSize);
@@ -765,7 +765,7 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
 
     // draw our own content (with clipping)
     vcl::Region aRegion(tools::Rectangle(aRealPos, aRealSize));
-    rDev.SetClipRegion(rDev.PixelToLogic(aRegion));
+    rDev.SetClipRegion(rDev.WindowToLogic(aRegion));
 
     // do we have to paint the background
     bool bBackground = pDataWin->IsControlBackground();
@@ -784,9 +784,8 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
     {
         BrowserColumn* pCurrent = mvCols[ nPos ].get();
 
-        tools::Long nForeignWidthLogic
-            = rDev.PixelToLogic(Size(pCurrent->Width(), 0), MapMode(MapUnit::Map10thMM)).Width();
-        tools::Long nWidthPixel = LogicToPixel(Size(nForeignWidthLogic, 0), MapMode(MapUnit::Map10thMM)).Width();
+        tools::Long nForeignWidthLogic = rDev.WindowToLogic(Size(pCurrent->Width(), 0), MapMode(MapUnit::Map10thMM)).Width();
+        tools::Long nWidthPixel = LogicToWindow(Size(nForeignWidthLogic, 0), MapMode(MapUnit::Map10thMM)).Width();
 
         pCurrent->SetWidth(nWidthPixel, GetZoom());
         if ( pBar )

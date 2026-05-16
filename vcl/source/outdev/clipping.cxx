@@ -36,7 +36,7 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
 vcl::Region OutputDevice::GetClipRegion() const
 {
 
-    return PixelToLogic( maRegion );
+    return WindowToLogic( maRegion );
 }
 
 void OutputDevice::SetClipRegion()
@@ -105,10 +105,6 @@ void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
     mbInitClipRegion    = true;
 }
 
-void OutputDevice::IntersectClipRegion(const vcl::LogicRect& rLogicRect)
-{
-    IntersectClipRegion(rLogicRect.get());
-}
 
 void OutputDevice::IntersectClipRegion( const vcl::Region& rRegion )
 {

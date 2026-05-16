@@ -322,7 +322,7 @@ tools::Long SvxRuler::MakePositionSticky(tools::Long aPosition, tools::Long aPoi
     if (mbCoarseSnapping)
         aTick = GetCurrentRulerUnit().nTick2;
 
-    tools::Long aTickPixel = m_pEditWin->LogicToPixel(Size(aTick, 0), GetCurrentMapMode()).Width();
+    tools::Long aTickPixel = m_pEditWin->LogicToWindow(Size(aTick, 0), GetCurrentMapMode()).Width();
 
     double aHalfTick = aTick / 2.0;
     double aHalfTickPixel = aTickPixel / 2.0;
@@ -342,33 +342,33 @@ tools::Long SvxRuler::MakePositionSticky(tools::Long aPosition, tools::Long aPoi
     // Move "coordinate system" to frame position so ticks are calculated correctly
     tools::Long aTranslatedPosition = aPosition - aPointOfReferencePixel;
     // Convert position to current selected map mode
-    tools::Long aPositionLogic = m_pEditWin->PixelToLogic(Size(aTranslatedPosition, 0), GetCurrentMapMode()).Width();
+    tools::Long aPositionLogic = m_pEditWin->WindowToLogic(Size(aTranslatedPosition, 0), GetCurrentMapMode()).Width();
     // Normalize -- snap to nearest tick
     aPositionLogic = rtl::math::round((aPositionLogic + aHalfTick) / aTick) * aTick;
     // Convert back to pixels
-    aPosition = m_pEditWin->LogicToPixel(Size(aPositionLogic, 0), GetCurrentMapMode()).Width();
+    aPosition = m_pEditWin->LogicToWindow(Size(aPositionLogic, 0), GetCurrentMapMode()).Width();
     // Move "coordinate system" back to original position
     return aPosition + aPointOfReferencePixel;
 }
 
 tools::Long SvxRuler::ConvertHPosPixel(tools::Long nVal) const
 {
-    return m_pEditWin->LogicToPixel(Size(nVal, 0)).Width();
+    return m_pEditWin->LogicToWindow(Size(nVal, 0)).Width();
 }
 
 tools::Long SvxRuler::ConvertVPosPixel(tools::Long nVal) const
 {
-    return m_pEditWin->LogicToPixel(Size(0, nVal)).Height();
+    return m_pEditWin->LogicToWindow(Size(0, nVal)).Height();
 }
 
 tools::Long SvxRuler::ConvertHSizePixel(tools::Long nVal) const
 {
-    return m_pEditWin->LogicToPixel(Size(nVal, 0)).Width();
+    return m_pEditWin->LogicToWindow(Size(nVal, 0)).Width();
 }
 
 tools::Long SvxRuler::ConvertVSizePixel(tools::Long nVal) const
 {
-    return m_pEditWin->LogicToPixel(Size(0, nVal)).Height();
+    return m_pEditWin->LogicToWindow(Size(0, nVal)).Height();
 }
 
 tools::Long SvxRuler::ConvertPosPixel(tools::Long nVal) const
@@ -383,22 +383,22 @@ tools::Long SvxRuler::ConvertSizePixel(tools::Long nVal) const
 
 inline tools::Long SvxRuler::ConvertHPosLogic(tools::Long nVal) const
 {
-    return m_pEditWin->PixelToLogic(Size(nVal, 0)).Width();
+    return m_pEditWin->WindowToLogic(Size(nVal, 0)).Width();
 }
 
 inline tools::Long SvxRuler::ConvertVPosLogic(tools::Long nVal) const
 {
-    return m_pEditWin->PixelToLogic(Size(0, nVal)).Height();
+    return m_pEditWin->WindowToLogic(Size(0, nVal)).Height();
 }
 
 inline tools::Long SvxRuler::ConvertHSizeLogic(tools::Long nVal) const
 {
-    return m_pEditWin->PixelToLogic(Size(nVal, 0)).Width();
+    return m_pEditWin->WindowToLogic(Size(nVal, 0)).Width();
 }
 
 inline tools::Long SvxRuler::ConvertVSizeLogic(tools::Long nVal) const
 {
-    return m_pEditWin->PixelToLogic(Size(0, nVal)).Height();
+    return m_pEditWin->WindowToLogic(Size(0, nVal)).Height();
 }
 
 inline tools::Long SvxRuler::ConvertPosLogic(tools::Long nVal) const
@@ -927,15 +927,15 @@ void SvxRuler::UpdatePage()
         if(m_bHorz)
         {
             SetPagePos(
-                m_pEditWin->LogicToPixel(mxPagePosItem->GetPos()).X(),
-                m_pEditWin->LogicToPixel(Size(mxPagePosItem->GetWidth(), 0)).
+                m_pEditWin->LogicToWindow(mxPagePosItem->GetPos()).X(),
+                m_pEditWin->LogicToWindow(Size(mxPagePosItem->GetWidth(), 0)).
                 Width());
         }
         else
         {
             SetPagePos(
-                m_pEditWin->LogicToPixel(mxPagePosItem->GetPos()).Y(),
-                m_pEditWin->LogicToPixel(Size(0, mxPagePosItem->GetHeight())).
+                m_pEditWin->LogicToWindow(mxPagePosItem->GetPos()).Y(),
+                m_pEditWin->LogicToWindow(Size(0, mxPagePosItem->GetHeight())).
                 Height());
         }
         if(m_bAppSetNullOffset)

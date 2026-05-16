@@ -694,12 +694,12 @@ namespace vcl
         // our caller gives us the left border of the draw position, regardless of script type, text layout,
         // and the like in our ctor, we set the map mode of the target device from pixel to twip, but our caller doesn't know this,
         // but passed pixel coordinates. So, adjust the rect.
-        tools::Rectangle aRect( m_rTargetDevice.PixelToLogic( _rRect ));
+        tools::Rectangle aRect( m_rTargetDevice.WindowToLogic( _rRect ));
         if (i_pDeviceSize)
         {
             //if i_pDeviceSize is passed in here, it was the original pre logic-to-pixel size of _rRect
-            SAL_WARN_IF(std::abs(_rRect.GetSize().Width() - m_rTargetDevice.LogicToPixel(*i_pDeviceSize)->Width()) > 1, "vcl", "DeviceSize width was expected to match Pixel width");
-            SAL_WARN_IF(std::abs(_rRect.GetSize().Height() - m_rTargetDevice.LogicToPixel(*i_pDeviceSize)->Height()) > 1, "vcl", "DeviceSize height was expected to match Pixel height");
+            SAL_WARN_IF(std::abs(_rRect.GetSize().Width() - m_rTargetDevice.LogicToWindow(*i_pDeviceSize)->Width()) > 1, "vcl", "DeviceSize width was expected to match Pixel width");
+            SAL_WARN_IF(std::abs(_rRect.GetSize().Height() - m_rTargetDevice.LogicToWindow(*i_pDeviceSize)->Height()) > 1, "vcl", "DeviceSize height was expected to match Pixel height");
             aRect.SetSize(*i_pDeviceSize);
         }
 
@@ -720,14 +720,14 @@ namespace vcl
 
         // similar to above, the text rect now contains TWIPs (or whatever unit the ref device has), but the caller
         // expects pixel coordinates
-        aTextRect =  m_rTargetDevice.LogicToPixel( aTextRect );
+        aTextRect =  m_rTargetDevice.LogicToWindow( aTextRect );
 
         // convert the metric vector
         if ( _pVector )
         {
             for ( auto& rCharRect : *_pVector )
             {
-                rCharRect =  m_rTargetDevice.LogicToPixel( rCharRect );
+                rCharRect =  m_rTargetDevice.LogicToWindow( rCharRect );
             }
         }
 
@@ -748,7 +748,7 @@ namespace vcl
         // our caller gives us the left border of the draw position, regardless of script type, text layout,
         // and the like in our ctor, we set the map mode of the target device from pixel to twip, but our caller doesn't know this,
         // but passed pixel coordinates. So, adjust the rect.
-        tools::Rectangle aRect( m_rTargetDevice.PixelToLogic( _rRect ));
+        tools::Rectangle aRect( m_rTargetDevice.WindowToLogic( _rRect ));
 
         tools::Rectangle aTextRect = m_rTargetDevice.GetTextRect( aRect, _rText, _nStyle, nullptr, this );
 
@@ -760,7 +760,7 @@ namespace vcl
 
         // similar to above, the text rect now contains TWIPs (or whatever unit the ref device has), but the caller
         // expects pixel coordinates
-        aTextRect =  m_rTargetDevice.LogicToPixel( aTextRect );
+        aTextRect =  m_rTargetDevice.LogicToWindow( aTextRect );
 
         return aTextRect;
     }

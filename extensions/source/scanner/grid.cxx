@@ -59,13 +59,13 @@ class GridWindow : public weld::CustomWidgetController
 
         void draw(vcl::RenderContext& rRenderContext, const Bitmap& rBitmap)
         {
-            const Point aOffset(rRenderContext.PixelToLogic(Point(mnOffX, mnOffY)).get());
+            const Point aOffset(rRenderContext.WindowToLogic(Point(mnOffX, mnOffY)).get());
             rRenderContext.DrawBitmap(maPos - aOffset, rBitmap);
         }
 
         bool isHit(OutputDevice const & rWin, const Point& rPos)
         {
-            const Point aOffset(rWin.PixelToLogic(Point(mnOffX, mnOffY)).get());
+            const Point aOffset(rWin.WindowToLogic(Point(mnOffX, mnOffY)).get());
             const tools::Rectangle aTarget(maPos - aOffset, maPos + aOffset);
             return aTarget.Contains(rPos);
         }
@@ -200,7 +200,7 @@ void GridWindow::onResize()
 
 void GridWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
-    Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(240, 200), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(240, 200), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     SetOutputSizePixel(aSize);

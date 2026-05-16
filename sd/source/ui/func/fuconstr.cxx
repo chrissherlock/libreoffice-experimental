@@ -76,8 +76,8 @@ bool FuConstruct::MouseButtonDown(const MouseEvent& rMEvt)
     bFirstMouseMove = true;
     aDragTimer.Start();
 
-    aMDPos = mpWindow->PixelToLogic( rMEvt.GetPosPixel() );
-    sal_uInt16 nHitLog = sal_uInt16 (mpWindow->PixelToLogic(Size(HITPIX,0)).Width());
+    aMDPos = mpWindow->WindowToLogic( rMEvt.GetPosPixel() );
+    sal_uInt16 nHitLog = sal_uInt16 (mpWindow->WindowToLogic(Size(HITPIX,0)).Width());
 
     if (rMEvt.IsLeft() && mpView->IsExtendedMouseEventDispatcherEnabled())
     {
@@ -88,7 +88,7 @@ bool FuConstruct::MouseButtonDown(const MouseEvent& rMEvt)
         const SdrMarkList& rMarkList = mpView->GetMarkedObjectList();
         if ( pHdl != nullptr || mpView->IsMarkedHit(aMDPos, nHitLog) )
         {
-            sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+            sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
             mpView->BegDragObj(aMDPos, nullptr, pHdl, nDrgLog);
             bReturn = true;
         }
@@ -115,7 +115,7 @@ bool FuConstruct::MouseMove(const MouseEvent& rMEvt)
     }
 
     Point aPix(rMEvt.GetPosPixel());
-    Point aPnt( mpWindow->PixelToLogic(aPix) );
+    Point aPnt( mpWindow->WindowToLogic(aPix) );
 
     if ( mpView->IsAction() )
     {
@@ -138,7 +138,7 @@ bool FuConstruct::MouseButtonUp(const MouseEvent& rMEvt)
 
     FuDraw::MouseButtonUp(rMEvt);
 
-    Point aPnt( mpWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aPnt( mpWindow->WindowToLogic( rMEvt.GetPosPixel() ) );
 
     if ( mpView && mpView->IsDragObj() )
     {
@@ -165,13 +165,13 @@ bool FuConstruct::MouseButtonUp(const MouseEvent& rMEvt)
     if ( mpView &&  !mpView->IsAction() )
     {
         mpWindow->ReleaseMouse();
-        sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+        sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
 
         const SdrMarkList& rMarkList = mpView->GetMarkedObjectList();
         if ( rMarkList.GetMarkCount() == 0 )
         {
             SdrPageView* pPV;
-            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
+            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(HITPIX,0)).Width() );
 
             SdrObject* pObj = mpView->PickObj(aPnt, mpView->getHitTolLog(), pPV);
             if (!pObj)

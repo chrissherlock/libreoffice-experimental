@@ -183,7 +183,7 @@ void SfxObjectShell::DoDraw_Impl( OutputDevice* pDev,
     if( pDev->IsClipRegion() && pDev->GetOutDevType() != OUTDEV_PRINTER )
     {
         aRegion = pDev->GetClipRegion();
-        aRegion = pDev->LogicToPixel( aRegion );
+        aRegion = pDev->LogicToWindow( aRegion );
     }
     pDev->SetRelativeMapMode( aMapMode );
 
@@ -197,7 +197,7 @@ void SfxObjectShell::DoDraw_Impl( OutputDevice* pDev,
     }
     if( pDev->IsClipRegion() && pDev->GetOutDevType() != OUTDEV_PRINTER )
     {
-        aRegion = pDev->PixelToLogic( aRegion );
+        aRegion = pDev->WindowToLogic( aRegion );
         pDev->SetClipRegion( aRegion );
     }
     if( pMtf )

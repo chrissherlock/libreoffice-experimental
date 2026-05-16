@@ -279,7 +279,7 @@ void DrawViewShell::StartRulerDrag (
 {
     GetActiveWindow()->CaptureMouse();
 
-    Point aWPos = GetActiveWindow()->PixelToLogic(GetActiveWindow()->GetPointerPosPixel());
+    Point aWPos = GetActiveWindow()->WindowToLogic(GetActiveWindow()->GetPointerPosPixel());
 
     if ( rRuler.GetExtraRect().Contains(rMEvt.GetPosPixel()) )
     {
@@ -410,14 +410,14 @@ void DrawViewShell::MouseMove(const MouseEvent& rMEvt, ::sd::Window* pWin)
 
     if ( mbIsRulerDrag )
     {
-        Point aLogPos = GetActiveWindow()->PixelToLogic(maMousePos);
+        Point aLogPos = GetActiveWindow()->WindowToLogic(maMousePos);
         mpDrawView->MovAction(aLogPos);
     }
 
     if ( mpDrawView->IsAction() )
     {
         mpDrawView->TakeActionRect(aRect);
-        aRect = GetActiveWindow()->LogicToPixel(aRect);
+        aRect = GetActiveWindow()->LogicToWindow(aRect);
     }
     else
     {
@@ -449,7 +449,7 @@ void DrawViewShell::MouseMove(const MouseEvent& rMEvt, ::sd::Window* pWin)
     {
         for( ::tools::Long nX = nStartX; nX <= nEndX; nX++ )
         {
-            const Color aCol( pWin->GetOutDev()->GetPixel( pWin->PixelToLogic( Point( nX, nY ) ) ) );
+            const Color aCol( pWin->GetOutDev()->GetPixel( pWin->WindowToLogic( Point( nX, nY ) ) ) );
 
             nRed += aCol.GetRed();
             nGreen += aCol.GetGreen();
@@ -541,7 +541,7 @@ void DrawViewShell::Command(const CommandEvent& rCEvt, ::sd::Window* pWin)
             sal_Int8    nDnDAction = DND_ACTION_COPY;
 
             if( GetActiveWindow() )
-                aPos = GetActiveWindow()->PixelToLogic( rCEvt.GetMousePosPixel() );
+                aPos = GetActiveWindow()->WindowToLogic( rCEvt.GetMousePosPixel() );
 
             if( !mpDrawView->InsertData( aDataHelper, aPos, nDnDAction, false ) )
             {
@@ -566,8 +566,8 @@ void DrawViewShell::Command(const CommandEvent& rCEvt, ::sd::Window* pWin)
 
         // is there a snap object under the cursor?
         SdrPageView* pPV;
-        Point   aMPos = pWin->PixelToLogic( maMousePos );
-        sal_uInt16  nHitLog = static_cast<sal_uInt16>(GetActiveWindow()->PixelToLogic(
+        Point   aMPos = pWin->WindowToLogic( maMousePos );
+        sal_uInt16  nHitLog = static_cast<sal_uInt16>(GetActiveWindow()->WindowToLogic(
             Size(FuPoor::HITPIX, 0 ) ).Width());
         sal_uInt16  nHelpLine;
         // for gluepoints
@@ -670,7 +670,7 @@ void DrawViewShell::Command(const CommandEvent& rCEvt, ::sd::Window* pWin)
 
                                 if( !rCEvt.IsMouseEvent() )
                                 {
-                                    aPos = GetActiveWindow()->LogicToPixel( pOutlinerView->GetEditView().GetCursor()->GetPos() );
+                                    aPos = GetActiveWindow()->LogicToWindow( pOutlinerView->GetEditView().GetCursor()->GetPos() );
                                 }
                                 // While showing the spell context menu
                                 // we lock the input so that another
@@ -824,7 +824,7 @@ void DrawViewShell::Command(const CommandEvent& rCEvt, ::sd::Window* pWin)
                 {
                     ::tools::Rectangle aMarkRect;
                     rMarkList.TakeBoundRect(nullptr,aMarkRect);
-                    aMenuPos = GetActiveWindow()->LogicToPixel( aMarkRect.Center() );
+                    aMenuPos = GetActiveWindow()->LogicToWindow( aMarkRect.Center() );
 
                     //move the point into the visible window area
                     if( aMenuPos.X() < 0 )

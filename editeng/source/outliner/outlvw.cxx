@@ -253,7 +253,7 @@ sal_Int32 OutlinerView::ImpCheckMousePos(const Point& rPosPix, MouseTarget& reTa
 {
     sal_Int32 nPara = EE_PARA_MAX;
 
-    Point aMousePosWin = pEditView->GetOutputDevice().PixelToLogic( rPosPix ).get();
+    Point aMousePosWin = pEditView->GetOutputDevice().WindowToLogic( rPosPix ).get();
     if( !pEditView->GetOutputArea().Contains( aMousePosWin ) )
     {
         reTarget = MouseTarget::Outside;
@@ -297,7 +297,7 @@ bool OutlinerView::MouseMove( const MouseEvent& rMEvt )
     if( ( rOwner.GetOutlinerMode() == OutlinerMode::TextObject ) || pEditView->getEditEngine().IsInSelectionMode())
         return pEditView->MouseMove( rMEvt );
 
-    Point aMousePosWin( pEditView->GetOutputDevice().PixelToLogic( rMEvt.GetPosPixel() ).get() );
+    Point aMousePosWin( pEditView->GetOutputDevice().WindowToLogic( rMEvt.GetPosPixel() ).get() );
     if( !pEditView->GetOutputArea().Contains( aMousePosWin ) )
         return false;
 
@@ -312,7 +312,7 @@ bool OutlinerView::MouseButtonDown( const MouseEvent& rMEvt )
     if ( ( rOwner.GetOutlinerMode() == OutlinerMode::TextObject ) || pEditView->getEditEngine().IsInSelectionMode() )
         return pEditView->MouseButtonDown( rMEvt );
 
-    Point aMousePosWin( pEditView->GetOutputDevice().PixelToLogic( rMEvt.GetPosPixel() ).get() );
+    Point aMousePosWin( pEditView->GetOutputDevice().WindowToLogic( rMEvt.GetPosPixel() ).get() );
     if( !pEditView->GetOutputArea().Contains( aMousePosWin ) )
         return false;
 
@@ -359,7 +359,7 @@ bool OutlinerView::MouseButtonUp( const MouseEvent& rMEvt )
     if ( ( rOwner.GetOutlinerMode() == OutlinerMode::TextObject ) || pEditView->getEditEngine().IsInSelectionMode() )
         return pEditView->MouseButtonUp( rMEvt );
 
-    Point aMousePosWin( pEditView->GetOutputDevice().PixelToLogic( rMEvt.GetPosPixel() ).get() );
+    Point aMousePosWin( pEditView->GetOutputDevice().WindowToLogic( rMEvt.GetPosPixel() ).get() );
     if( !pEditView->GetOutputArea().Contains( aMousePosWin ) )
         return false;
 

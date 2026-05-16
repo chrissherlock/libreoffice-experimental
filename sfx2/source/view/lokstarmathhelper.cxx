@@ -176,7 +176,7 @@ bool LokStarMathHelper::postMouseEvent(int nType, int nX, int nY, int nCount, in
             // 3. Take window own scaling into account (reverses the conversion done in
             // SmGraphicWidget::MouseButtonDown, albeit incompletely - it does not handle
             // GetFormulaDrawPos; hopefully, in lok/in-place case, it's always [ 0, 0 ]?)
-            aMousePos = pWindow->LogicToPixel(aMousePos);
+            aMousePos = pWindow->LogicToWindow(aMousePos);
 
             LokMouseEventData aMouseEventData(
                 nType, aMousePos, nCount, MouseEventModifiers::SIMPLECLICK, nButtons, nModifier);

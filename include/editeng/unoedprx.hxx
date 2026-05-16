@@ -120,8 +120,8 @@ public:
 
     // SvxViewForwarder interface
     virtual bool        IsValid() const override;
-    virtual Point       LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const override;
-    virtual Point       PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point       LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const override;
+    virtual Point       WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const override;
 
     // SvxEditViewForwarder interface
     virtual bool        GetSelection( ESelection& rSelection ) const override;
