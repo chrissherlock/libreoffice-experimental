@@ -2162,7 +2162,7 @@ static void lcl_AdjustRectToPixelSize( SwRect& io_aSwRect, const vcl::RenderCont
     // local object of class <Rectangle> in Twip coordinates
     // calculated from given rectangle aligned to pixel centers.
     const tools::Rectangle aPxCenterRect = aOut.PixelToLogic(
-            aOut.LogicToPixel( io_aSwRect.SVRect() )).get();
+            aOut.LogicToPixel( io_aSwRect.SVRect() ));
 
     // local constant object of class <Rectangle> representing given rectangle
     // in pixel.
@@ -6478,9 +6478,10 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
         tools::Rectangle aRender = aComplete.GetIntersection(aTile);
         if (aRender.IsEmpty())
             break;
-        pOut->DrawBitmap(pOut->PixelToLogic(aRender.TopLeft()), pOut->PixelToLogic(aRender.GetSize()),
-                           Point(0, 0), aRender.GetSize(),
-                           rBitmap);
+        pOut->DrawBitmap(static_cast<const Point&>(pOut->PixelToLogic(aRender.TopLeft())),
+                         static_cast<const Size&>(pOut->PixelToLogic(aRender.GetSize())),
+                         Point(0, 0), aRender.GetSize(),
+                         rBitmap);
     }
 
 }

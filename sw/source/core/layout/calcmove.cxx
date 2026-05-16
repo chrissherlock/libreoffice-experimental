@@ -1235,7 +1235,7 @@ void SwContentFrame::MakePrtArea( const SwBorderAttrs &rAttrs )
                 }
             }
 
-            const Size aBorder = pSh->GetOut()->PixelToLogic( pSh->GetBrowseBorder() ).get();
+            const Size aBorder = pSh->GetOut()->PixelToLogic( pSh->GetBrowseBorder() );
             tools::Long nWidth = nWidthArea - 2 * ( IsVertical() ? aBorder.Height() : aBorder.Width() );
             nWidth -= aRectFnSet.GetLeft(getFramePrintArea());
             nWidth -= rAttrs.CalcRightLine();

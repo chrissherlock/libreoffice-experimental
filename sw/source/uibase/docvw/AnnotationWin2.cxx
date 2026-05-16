@@ -181,7 +181,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
         // right conversion when printing to PDF but mxSidebarTextControl does
         if (comphelper::LibreOfficeKit::isActive()
             && !comphelper::LibreOfficeKit::isTiledAnnotations())
-            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(szs);
+            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(szs).get();
         else
             return PixelToLogic(szs);
     };
@@ -191,7 +191,7 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
         // right conversion when printing to PDF but mxSidebarTextControl does
         if (comphelper::LibreOfficeKit::isActive()
             && !comphelper::LibreOfficeKit::isTiledAnnotations())
-            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(pnt);
+            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(pnt).get();
         else
             return PixelToLogic(pnt);
     };
