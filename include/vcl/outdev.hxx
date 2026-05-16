@@ -588,6 +588,8 @@ public:
 public:
 
     void                        DrawRect( const tools::Rectangle& rRect );
+    void                        DrawRect( const vcl::LogicRect& rRect ) { DrawRect(rRect.get()); }
+    void                        DrawRect( const vcl::DeviceRect& rRect ) { DrawRect(rRect.get()); }
     void                        DrawRect( const tools::Rectangle& rRect,
                                           sal_uLong nHorzRound, sal_uLong nVertRound );
 
@@ -664,6 +666,8 @@ public:
 public:
 
     void                        DrawLine( const Point& rStartPt, const Point& rEndPt );
+    void                        DrawLine( const vcl::LogicPoint& rStartPt, const vcl::LogicPoint& rEndPt ) { DrawLine(rStartPt.get(), rEndPt.get()); }
+    void                        DrawLine( const vcl::DevicePoint& rStartPt, const vcl::DevicePoint& rEndPt ) { DrawLine(rStartPt.get(), rEndPt.get()); }
 
     void                        DrawLine( const Point& rStartPt, const Point& rEndPt,
                                           const LineInfo& rLineInfo );
@@ -1343,11 +1347,15 @@ public:
     void                        DrawBitmap(
                                     const Point& rDestPt,
                                     const Bitmap& rBitmap );
+    void                        DrawBitmap( const vcl::LogicPoint& rDestPt, const Bitmap& rBitmap ) { DrawBitmap(rDestPt.get(), rBitmap); }
+    void                        DrawBitmap( const vcl::DevicePoint& rDestPt, const Bitmap& rBitmap ) { DrawBitmap(rDestPt.get(), rBitmap); }
 
     void                        DrawBitmap(
                                     const Point& rDestPt,
                                     const Size& rDestSize,
                                     const Bitmap& rBitmap );
+    void                        DrawBitmap( const vcl::LogicPoint& rDestPt, const vcl::LogicSize& rDestSize, const Bitmap& rBitmap ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rBitmap); }
+    void                        DrawBitmap( const vcl::DevicePoint& rDestPt, const vcl::DeviceSize& rDestSize, const Bitmap& rBitmap ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rBitmap); }
 
     void                        DrawBitmap(
                                     const Point& rDestPt,
@@ -1363,6 +1371,11 @@ public:
                                     const Size& rSrcSizePixel,
                                     const Bitmap& rBitmap,
                                     MetaActionType nAction );
+    void DrawBitmap( const vcl::LogicPoint& rDestPt, const vcl::LogicSize& rDestSize, const Point& rSrcPtPixel, const Size& rSrcSizePixel, const Bitmap& rBitmap ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rSrcPtPixel, rSrcSizePixel, rBitmap); }
+    void DrawBitmap( const vcl::DevicePoint& rDestPt, const vcl::DeviceSize& rDestSize, const Point& rSrcPtPixel, const Size& rSrcSizePixel, const Bitmap& rBitmap ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rSrcPtPixel, rSrcSizePixel, rBitmap); }
+    void DrawBitmap( const vcl::LogicPoint& rDestPt, const vcl::LogicSize& rDestSize, const Point& rSrcPtPixel, const Size& rSrcSizePixel, const Bitmap& rBitmap, MetaActionType nAction ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rSrcPtPixel, rSrcSizePixel, rBitmap, nAction); }
+    void DrawBitmap( const vcl::DevicePoint& rDestPt, const vcl::DeviceSize& rDestSize, const Point& rSrcPtPixel, const Size& rSrcSizePixel, const Bitmap& rBitmap, MetaActionType nAction ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rSrcPtPixel, rSrcSizePixel, rBitmap, nAction); }
+
 
     /** @overload
         virtual void DrawImage(
@@ -1472,6 +1485,7 @@ private:
                                     const Size& rSrcSizePixel,
                                     const Bitmap& rBitmap,
                                     MetaActionType nAction );
+
 
     SAL_DLLPRIVATE void         DrawDeviceAlphaBitmap(
                                     const Bitmap& rBmp,
