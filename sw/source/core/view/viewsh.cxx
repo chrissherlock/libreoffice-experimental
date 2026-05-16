@@ -178,7 +178,7 @@ lcl_PaintTransparentFormControls(SwViewShell const & rShell, SwRect const& rRect
     if (rShell.GetWin())
     {
         vcl::Window& rWindow = *(rShell.GetWin());
-        const tools::Rectangle aRectanglePixel(rShell.GetOut()->LogicToPixel(rRect.SVRect()).get());
+        const tools::Rectangle aRectanglePixel(rShell.GetOut()->LogicToPixel(rRect.SVRect()));
         PaintTransparentChildren(rWindow, aRectanglePixel);
     }
 }
@@ -2197,7 +2197,7 @@ void SwViewShell::PaintTile(VirtualDevice &rDevice, int contextWidth, int contex
     }
 
     tools::Rectangle aOutRect(Point(tilePosX, tilePosY),
-                              rDevice.PixelToLogic(Size(contextWidth, contextHeight)).get());
+                              rDevice.PixelToLogic(Size(contextWidth, contextHeight)));
 
     // Make the requested area visible -- we can't use MakeVisible as that will
     // only scroll the contents, but won't zoom/resize if needed.

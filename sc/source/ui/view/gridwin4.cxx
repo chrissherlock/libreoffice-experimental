@@ -1239,7 +1239,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
                 if (aNewOutputArea.IsEmpty())
                 {
                     // same zoom level as view used for painting
-                    aNewOutputArea = rDevice.LogicToPixel(aOrigOutputArea).get();
+                    aNewOutputArea =  rDevice.LogicToPixel(aOrigOutputArea);
                 }
                 // a small workaround for getting text position matching cursor position horizontally.
                 const tools::Long nCursorGapPx = 2;
@@ -1256,7 +1256,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
             if (aNewOutputArea.IsEmpty())
             {
                 // same zoom level and not RTL: no need to change the output area before painting
-                pOtherEditView->DrawText_ToEditView(rDevice.PixelToLogic(aTileRectPx).get(), &rDevice);
+                pOtherEditView->DrawText_ToEditView(rDevice.PixelToLogic(aTileRectPx), &rDevice);
             }
             else
             {
@@ -1270,8 +1270,8 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
                 // to be tweaked temporarily to match the current view's zoom.
                 SuppressEditViewMessagesGuard aGuard(*pOtherEditView);
 
-                pOtherEditView->SetOutputArea(rDevice.PixelToLogic(aNewOutputArea).get());
-                pOtherEditView->DrawText_ToEditView(rDevice.PixelToLogic(aTileRectPx).get(), &rDevice);
+                pOtherEditView->SetOutputArea(rDevice.PixelToLogic(aNewOutputArea));
+                pOtherEditView->DrawText_ToEditView(rDevice.PixelToLogic(aTileRectPx), &rDevice);
 
                 // EditView will do the cursor notifications correctly if we're in
                 // print-twips messaging mode.

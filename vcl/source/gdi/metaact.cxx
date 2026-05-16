@@ -216,8 +216,8 @@ MetaLineAction::MetaLineAction( const Point& rStart, const Point& rEnd,
 
 void MetaLineAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowPoint(pOut->LogicToPixel(maStartPt).get()) ||
-        !AllowPoint(pOut->LogicToPixel(maEndPt).get()))
+    if (!AllowPoint(pOut->LogicToPixel(maStartPt)) ||
+        !AllowPoint(pOut->LogicToPixel(maEndPt)))
     {
         return;
     }
@@ -258,7 +258,7 @@ MetaRectAction::MetaRectAction( const tools::Rectangle& rRect ) :
 
 void MetaRectAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maRect).get()))
+    if (!AllowRect(pOut->LogicToPixel(maRect)))
         return;
 
     pOut->DrawRect( maRect );
@@ -292,7 +292,7 @@ MetaRoundRectAction::MetaRoundRectAction( const tools::Rectangle& rRect,
 
 void MetaRoundRectAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maRect).get()))
+    if (!AllowRect(pOut->LogicToPixel(maRect)))
         return;
 
     pOut->DrawRect( maRect, mnHorzRound, mnVertRound );
@@ -325,7 +325,7 @@ MetaEllipseAction::MetaEllipseAction( const tools::Rectangle& rRect ) :
 
 void MetaEllipseAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maRect).get()))
+    if (!AllowRect(pOut->LogicToPixel(maRect)))
         return;
 
     pOut->DrawEllipse( maRect );
@@ -359,7 +359,7 @@ MetaArcAction::MetaArcAction( const tools::Rectangle& rRect,
 
 void MetaArcAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maRect).get()))
+    if (!AllowRect(pOut->LogicToPixel(maRect)))
         return;
 
     pOut->DrawArc( maRect, maStartPt, maEndPt );
@@ -397,7 +397,7 @@ MetaPieAction::MetaPieAction( const tools::Rectangle& rRect,
 
 void MetaPieAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maRect).get()))
+    if (!AllowRect(pOut->LogicToPixel(maRect)))
         return;
 
     pOut->DrawPie( maRect, maStartPt, maEndPt );
@@ -435,7 +435,7 @@ MetaChordAction::MetaChordAction( const tools::Rectangle& rRect,
 
 void MetaChordAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maRect).get()))
+    if (!AllowRect(pOut->LogicToPixel(maRect)))
         return;
 
     pOut->DrawChord( maRect, maStartPt, maEndPt );
@@ -476,7 +476,7 @@ MetaPolyLineAction::MetaPolyLineAction( tools::Polygon aPoly, LineInfo aLineInfo
 
 void MetaPolyLineAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maPoly.GetBoundRect()).get()))
+    if (!AllowRect(pOut->LogicToPixel(maPoly.GetBoundRect())))
         return;
     if (!AllowDim(pOut->LogicToPixel(Size(maLineInfo.GetWidth(), 0))->Width()))
         return;
@@ -513,7 +513,7 @@ MetaPolygonAction::MetaPolygonAction( tools::Polygon aPoly ) :
 
 void MetaPolygonAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maPoly.GetBoundRect()).get()))
+    if (!AllowRect(pOut->LogicToPixel(maPoly.GetBoundRect())))
         return;
     pOut->DrawPolygon( maPoly );
 }
@@ -543,7 +543,7 @@ MetaPolyPolygonAction::MetaPolyPolygonAction( tools::PolyPolygon aPolyPoly ) :
 
 void MetaPolyPolygonAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maPolyPoly.GetBoundRect()).get()))
+    if (!AllowRect(pOut->LogicToPixel(maPolyPoly.GetBoundRect())))
         return;
 
     pOut->DrawPolyPolygon( maPolyPoly );
@@ -667,7 +667,7 @@ MetaTextArrayAction::~MetaTextArrayAction()
 
 void MetaTextArrayAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowPoint(pOut->LogicToPixel(maStartPt).get()))
+    if (!AllowPoint(pOut->LogicToPixel(maStartPt)))
         return;
 
     if (mnLayoutContextIndex >= 0)
@@ -718,7 +718,7 @@ MetaStretchTextAction::MetaStretchTextAction( const Point& rPt, sal_uInt32 nWidt
 
 void MetaStretchTextAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maPt, Size(mnWidth, pOut->GetTextHeight()))).get()))
+    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maPt, Size(mnWidth, pOut->GetTextHeight())))))
         return;
 
     static bool bFuzzing = comphelper::IsFuzzing();
@@ -770,7 +770,7 @@ MetaTextRectAction::MetaTextRectAction( const tools::Rectangle& rRect,
 
 void MetaTextRectAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maRect).get()))
+    if (!AllowRect(pOut->LogicToPixel(maRect)))
         return;
 
     pOut->DrawText( maRect, maStr, mnStyle );
@@ -813,7 +813,7 @@ void MetaTextLineAction::Execute( OutputDevice* pOut )
         SAL_WARN("vcl", "skipping line with negative width: " << mnWidth);
         return;
     }
-    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maPos, Size(mnWidth, pOut->GetTextHeight()))).get()))
+    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maPos, Size(mnWidth, pOut->GetTextHeight())))))
         return;
 
     pOut->DrawTextLine( maPos, mnWidth, meStrikeout, meUnderline, meOverline );
@@ -925,8 +925,8 @@ static bool AllowScale(const Size& rSource, const Size& rDest)
 void MetaBmpScaleAction::Execute( OutputDevice* pOut )
 {
     assert(!maBmp.HasAlpha() && "caller should be using MetaBmpExScaleAction");
-    Size aPixelSize(pOut->LogicToPixel(maSz).get());
-    if (!AllowRect(tools::Rectangle(pOut->LogicToPixel(maPt).get(), aPixelSize)) ||
+    Size aPixelSize(pOut->LogicToPixel(maSz));
+    if (!AllowRect(tools::Rectangle(pOut->LogicToPixel(maPt), aPixelSize)) ||
         !AllowScale(maBmp.GetSizePixel(), aPixelSize))
     {
         return;
@@ -972,7 +972,7 @@ MetaBmpScalePartAction::MetaBmpScalePartAction( const Point& rDstPt, const Size&
 void MetaBmpScalePartAction::Execute( OutputDevice* pOut )
 {
     assert(!maBmp.HasAlpha() && "caller should be using MetaBmpExScalePartAction");
-    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maDstPt, maDstSz)).get()))
+    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maDstPt, maDstSz))))
         return;
 
     pOut->DrawBitmap( maDstPt, maDstSz, maSrcPt, maSrcSz, maBmp );
@@ -1038,9 +1038,9 @@ MetaBmpExScaleAction::MetaBmpExScaleAction( const Point& rPt, const Size& rSz,
 
 void MetaBmpExScaleAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowScale(maBmp.GetSizePixel(), pOut->LogicToPixel(maSz).get()))
+    if (!AllowScale(maBmp.GetSizePixel(), pOut->LogicToPixel(maSz)))
         return;
-    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maPt, maSz)).get()))
+    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maPt, maSz))))
         return;
 
     pOut->DrawBitmap( maPt, maSz, maBmp );
@@ -1080,7 +1080,7 @@ MetaBmpExScalePartAction::MetaBmpExScalePartAction( const Point& rDstPt, const S
 
 void MetaBmpExScalePartAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maDstPt, maDstSz)).get()))
+    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maDstPt, maDstSz))))
         return;
 
     pOut->DrawBitmap( maDstPt, maDstSz, maSrcPt, maSrcSz, maBmp );
@@ -1118,7 +1118,7 @@ MetaMaskAction::MetaMaskAction( const Point& rPt,
 
 void MetaMaskAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowPoint(pOut->LogicToPixel(maPt).get()))
+    if (!AllowPoint(pOut->LogicToPixel(maPt)))
         return;
     pOut->DrawMask( maPt, maBmp, maColor );
 }
@@ -1153,7 +1153,7 @@ MetaMaskScaleAction::MetaMaskScaleAction( const Point& rPt, const Size& rSz,
 
 void MetaMaskScaleAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maPt, maSz)).get()))
+    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maPt, maSz))))
         return;
     pOut->DrawMask( maPt, maSz, maBmp, maColor );
 }
@@ -1194,7 +1194,7 @@ MetaMaskScalePartAction::MetaMaskScalePartAction( const Point& rDstPt, const Siz
 
 void MetaMaskScalePartAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maDstPt, maDstSz)).get()))
+    if (!AllowRect(pOut->LogicToPixel(tools::Rectangle(maDstPt, maDstSz))))
         return;
 
     pOut->DrawMask( maDstPt, maDstSz, maSrcPt, maSrcSz, maBmp, maColor, MetaActionType::MASKSCALE );
@@ -1229,7 +1229,7 @@ MetaGradientAction::MetaGradientAction( const tools::Rectangle& rRect, Gradient 
 
 void MetaGradientAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maRect).get()))
+    if (!AllowRect(pOut->LogicToPixel(maRect)))
         return;
     pOut->DrawGradient( maRect, maGradient );
 }
@@ -1293,7 +1293,7 @@ MetaHatchAction::MetaHatchAction( tools::PolyPolygon aPolyPoly, const Hatch& rHa
 
 void MetaHatchAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maPolyPoly.GetBoundRect()).get()))
+    if (!AllowRect(pOut->LogicToPixel(maPolyPoly.GetBoundRect())))
         return;
     if (!AllowDim(pOut->LogicToPixel(Point(maHatch.GetDistance(), 0))->X()))
         return;
@@ -1360,7 +1360,7 @@ void MetaClipRegionAction::Execute( OutputDevice* pOut )
 {
     if( mbClip )
     {
-        if (!AllowRect(pOut->LogicToPixel(maRegion.GetBoundRect()).get()))
+        if (!AllowRect(pOut->LogicToPixel(maRegion.GetBoundRect())))
             return;
         pOut->SetClipRegion( maRegion );
     }
@@ -1422,7 +1422,7 @@ MetaISectRegionClipRegionAction::MetaISectRegionClipRegionAction( vcl::Region aR
 
 void MetaISectRegionClipRegionAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maRegion.GetBoundRect()).get()))
+    if (!AllowRect(pOut->LogicToPixel(maRegion.GetBoundRect())))
         return;
 
     pOut->IntersectClipRegion( maRegion );
@@ -1454,7 +1454,7 @@ MetaMoveClipRegionAction::MetaMoveClipRegionAction( tools::Long nHorzMove, tools
 
 void MetaMoveClipRegionAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowPoint(pOut->LogicToPixel(Point(mnHorzMove, mnVertMove)).get()))
+    if (!AllowPoint(pOut->LogicToPixel(Point(mnHorzMove, mnVertMove))))
         return;
     pOut->MoveClipRegion( mnHorzMove, mnVertMove );
 }
@@ -1748,7 +1748,7 @@ MetaTransparentAction::MetaTransparentAction( tools::PolyPolygon aPolyPoly, sal_
 
 void MetaTransparentAction::Execute( OutputDevice* pOut )
 {
-    if (!AllowRect(pOut->LogicToPixel(maPolyPoly.GetBoundRect()).get()))
+    if (!AllowRect(pOut->LogicToPixel(maPolyPoly.GetBoundRect())))
         return;
 
     pOut->DrawTransparent( maPolyPoly, mnTransPercent );

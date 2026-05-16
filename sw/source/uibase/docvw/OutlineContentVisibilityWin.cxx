@@ -141,10 +141,8 @@ void SwOutlineContentVisibilityWin::Set()
     SwRect aCharRect;
     pTextFrame->GetCharRect(aCharRect, SwPosition(*(pTextFrame->GetTextNodeForParaProps())),
                             &aMoveState);
-    Point aPxPt(GetEditWin()
-                    ->GetOutDev()
-                    ->LogicToPixel(Point(aCharRect.Left(), aFrameAreaRect.Center().getY()))
-                    .get());
+    Point aPxPt(GetEditWin()->GetOutDev()->LogicToPixel(
+        Point(aCharRect.Left(), aFrameAreaRect.Center().getY())));
     if (pTextFrame->IsRightToLeft())
         aPxPt.AdjustX(2);
     else

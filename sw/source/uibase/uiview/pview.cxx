@@ -199,11 +199,11 @@ void  SwPagePreviewWin::Paint(vcl::RenderContext& rRenderContext, const tools::R
         if (!maPxWinSize.Height() || !maPxWinSize.Width())
             maPxWinSize = GetOutputSizePixel();
 
-        tools::Rectangle aRect(rRenderContext.LogicToPixel(rRect).get());
+        vcl::DeviceRect aRect(rRenderContext.LogicToPixel(rRect));
         mpPgPreviewLayout->Prepare(1, Point(0,0), maPxWinSize,
                                    mnSttPage, maPaintedPreviewDocRect);
         SetSelectedPage(1);
-        mpPgPreviewLayout->Paint(rRenderContext, rRenderContext.PixelToLogic(aRect).get());
+        mpPgPreviewLayout->Paint(rRenderContext, rRenderContext.PixelToLogic(aRect));
         SetPagePreview(mnRow, mnCol);
     }
     else

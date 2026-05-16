@@ -331,7 +331,7 @@ void ListBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags n
 {
     mpImplLB->GetMainWindow()->ApplySettings(rDev);
 
-    Point aPos = rDev.LogicToPixel(rPos).get();
+    Point aPos = rDev.LogicToPixel(rPos);
     Size aSize = GetSizePixel();
     vcl::Font aFont = mpImplLB->GetMainWindow()->GetDrawPixelFont(&rDev);
 

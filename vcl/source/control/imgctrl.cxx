@@ -147,7 +147,7 @@ void ImageControl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
 
 void ImageControl::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
 {
-    const Point aPos = rDev.LogicToPixel(rPos).get();
+    const Point aPos = rDev.LogicToPixel(rPos);
     const Size      aSize = GetSizePixel();
     tools::Rectangle aRect( aPos, aSize );
 

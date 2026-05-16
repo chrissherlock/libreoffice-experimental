@@ -10,6 +10,7 @@
 #pragma once
 
 #include <tools/gen.hxx>
+#include <tools/poly.hxx>
 #include <basegfx/point/b2dpoint.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 
@@ -129,6 +130,20 @@ template <typename Space, typename T> struct TypedGeom
     const T* operator->() const { return &maData; }
     T* operator->() { return &maData; }
 
+    // Transparent data extraction via dereference operators
+    const T& operator*() const { return maData; }
+    T& operator*() { return maData; }
+
+    // Implicit conversion operators back to legacy primitives
+    // Safely clears member/assignment bottlenecks down the call stack
+    operator const T&() const { return maData; }
+    operator T&() { return maData; }
+
+    // Type-isolated structural equality operators
+    // Ensures macros like OSL_ENSURE can evaluate wrapper comparisons seamlessly
+    constexpr bool operator==(const TypedGeom& rOther) const { return maData == rOther.maData; }
+    constexpr bool operator!=(const TypedGeom& rOther) const { return maData != rOther.maData; }
+
     /**
      * The Monadic Map Operation
      * Takes a callable function/lambda, applies it to the underlying geometry,
@@ -162,6 +177,10 @@ using LogicPolygon = TypedGeom<SpaceLogic, tools::Polygon>;
 using ViewPolygon = TypedGeom<SpaceView, tools::Polygon>;
 using WindowPolygon = TypedGeom<SpaceWindow, tools::Polygon>;
 using DevicePolygon = TypedGeom<SpaceDevice, tools::Polygon>;
+
+// PolyPolygon
+using LogicPolyPolygon = TypedGeom<SpaceLogic, tools::PolyPolygon>;
+using DevicePolyPolygon = TypedGeom<SpaceDevice, tools::PolyPolygon>;
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

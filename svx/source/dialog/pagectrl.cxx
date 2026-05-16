@@ -88,7 +88,7 @@ void SvxPageWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
         aMapMode.SetScaleY(aXScale);
     }
     rRenderContext.SetMapMode(aMapMode);
-    Size aSz(rRenderContext.PixelToLogic(GetOutputSizePixel()).get());
+    Size aSz(rRenderContext.PixelToLogic(GetOutputSizePixel()));
     tools::Long nYPos = (aSz.Height() - m_aSize.Height()) / 2;
 
     if (m_eUsage == SvxPageUsage::All)
@@ -105,7 +105,7 @@ void SvxPageWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
             aMapMode.SetScaleX(aX);
             aMapMode.SetScaleY(aY);
             rRenderContext.SetMapMode(aMapMode);
-            aSz = rRenderContext.PixelToLogic(GetOutputSizePixel()).get();
+            aSz =  rRenderContext.PixelToLogic(GetOutputSizePixel());
             nYPos = (aSz.Height() - m_aSize.Height()) / 2;
             tools::Long nXPos = (aSz.Width() - m_aSize.Width()) / 2;
             DrawPage(rRenderContext, Point(nXPos,nYPos),false,true);
@@ -390,7 +390,7 @@ void SvxPageWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     m_aWinSize.AdjustHeight( -4 );
     m_aWinSize.AdjustWidth( -4 );
 
-    m_aWinSize = rRefDevice.PixelToLogic(m_aWinSize).get();
+    m_aWinSize =  rRefDevice.PixelToLogic(m_aWinSize);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

@@ -358,7 +358,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice& rOut, const Point& rPosPixel,
                                    const Size& rTileSizePixel, const GraphicAttr* pAttr ) const
 {
     Point   aCurrPos( rPosPixel );
-    Size    aTileSizeLogic( rOut.PixelToLogic( rTileSizePixel ).get() );
+    Size    aTileSizeLogic( rOut.PixelToLogic( rTileSizePixel ));
     int     nX, nY;
 
     // #107607# Use logical coordinates for metafile playing, too
@@ -385,7 +385,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice& rOut, const Point& rPosPixel,
             // update return value. This method should return true, if
             // at least one of the looped Draws succeeded.
             bRet |= Draw(rOut,
-                         bDrawInPixel ? aCurrPos : rOut.PixelToLogic(aCurrPos).get(),
+                         bDrawInPixel ? aCurrPos : rOut.PixelToLogic(aCurrPos),
                          bDrawInPixel ? rTileSizePixel : aTileSizeLogic,
                          pAttr);
 

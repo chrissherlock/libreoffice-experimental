@@ -1146,7 +1146,7 @@ void ComboBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags 
 {
     GetMainWindow()->ApplySettings(rDev);
 
-    const Point aPos = rDev.LogicToPixel(rPos).get();
+    const Point aPos = rDev.LogicToPixel(rPos);
     const Size aSize = GetSizePixel();
     const vcl::Font aFont = GetMainWindow()->GetDrawPixelFont(&rDev);
 

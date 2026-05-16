@@ -1060,7 +1060,7 @@ void ImpGraphic::draw(OutputDevice& rOutDev,
             }
             else if (maVectorGraphicData)
             {
-                updateBitmapFromVectorGraphic(rOutDev.LogicToPixel(rDestSize).get());
+                updateBitmapFromVectorGraphic(rOutDev.LogicToPixel(rDestSize));
                 getBitmapRef().Draw(&rOutDev, rDestPt, rDestSize);
             }
         }

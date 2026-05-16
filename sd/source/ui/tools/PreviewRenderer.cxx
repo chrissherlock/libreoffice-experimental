@@ -122,8 +122,8 @@ Image PreviewRenderer::RenderPage (
 
                 Size aSize (mpPreviewDevice->GetOutputSizePixel());
                 aPreview = Image(mpPreviewDevice->GetBitmap(
-                    mpPreviewDevice->PixelToLogic(Point(0,0)).get(),
-                    mpPreviewDevice->PixelToLogic(aSize).get()));
+                    mpPreviewDevice->PixelToLogic(Point(0,0)),
+                    mpPreviewDevice->PixelToLogic(aSize)));
 
                 mpView->HideSdrPage();
             }
@@ -184,8 +184,8 @@ Image PreviewRenderer::RenderSubstitution (
 
         const Size aSize (mpPreviewDevice->GetOutputSizePixel());
         aPreview = Image(mpPreviewDevice->GetBitmap(
-            mpPreviewDevice->PixelToLogic(Point(0,0)).get(),
-            mpPreviewDevice->PixelToLogic(aSize).get()));
+            mpPreviewDevice->PixelToLogic(Point(0,0)),
+            mpPreviewDevice->PixelToLogic(aSize)));
     }
     catch (const css::uno::Exception&)
     {
