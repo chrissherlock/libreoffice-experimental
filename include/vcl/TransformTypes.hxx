@@ -10,6 +10,7 @@
 #pragma once
 
 #include <tools/gen.hxx>
+#include <tools/poly.hxx>
 #include <basegfx/point/b2dpoint.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 
@@ -162,6 +163,10 @@ using LogicPolygon = TypedGeom<SpaceLogic, tools::Polygon>;
 using ViewPolygon = TypedGeom<SpaceView, tools::Polygon>;
 using WindowPolygon = TypedGeom<SpaceWindow, tools::Polygon>;
 using DevicePolygon = TypedGeom<SpaceDevice, tools::Polygon>;
+
+// PolyPolygon
+using LogicPolyPolygon = TypedGeom<SpaceLogic, tools::PolyPolygon>;
+using DevicePolyPolygon = TypedGeom<SpaceDevice, tools::PolyPolygon>;
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
