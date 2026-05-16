@@ -453,13 +453,13 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getPlacement()
         vcl::MappingPolicy eOldPolicy = pEditWin->GetMappingPolicy();
         if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode)
             pEditWin->SetMappingPolicy();
-        aRealObjArea = pEditWin->LogicToPixel(aRealObjArea);
+        aRealObjArea = pEditWin->LogicToWindow(aRealObjArea);
         if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode  && pEditWin->GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode)
             pEditWin->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     }
     else
     {
-        aRealObjArea = pEditWin->LogicToPixel(aRealObjArea);
+        aRealObjArea = pEditWin->LogicToWindow(aRealObjArea);
     }
 
     return vcl::unohelper::ConvertToAWTRect(aRealObjArea);
@@ -483,13 +483,13 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getClipRectangle()
         vcl::MappingPolicy eOldPolicy = pEditWin->GetMappingPolicy();
         if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode)
             pEditWin->SetMappingPolicy();
-        aRealObjArea = pEditWin->LogicToPixel(aRealObjArea);
+        aRealObjArea = pEditWin->LogicToWindow(aRealObjArea);
         if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode  && pEditWin->GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode)
             pEditWin->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     }
     else
     {
-        aRealObjArea = pEditWin->LogicToPixel(aRealObjArea);
+        aRealObjArea = pEditWin->LogicToWindow(aRealObjArea);
     }
 
     return vcl::unohelper::ConvertToAWTRect(aRealObjArea);
@@ -527,7 +527,7 @@ void SAL_CALL SfxInPlaceClient_Impl::changedPlacement( const awt::Rectangle& aPo
         return;
 
     // new scaled object area
-    tools::Rectangle aNewLogicRect = m_pClient->GetEditWin()->PixelToLogic( aNewPixelRect );
+    tools::Rectangle aNewLogicRect = m_pClient->GetEditWin()->WindowToLogic( aNewPixelRect );
 
     // all the size changes in this method should happen without scaling
     // SfxBooleanFlagGuard aGuard( m_bResizeNoScale, sal_True );

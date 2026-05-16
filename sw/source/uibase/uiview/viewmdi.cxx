@@ -79,7 +79,7 @@ void SwView::SetZoom( SvxZoomType eZoomType, short nFactor, bool bViewOnly )
 
     // tdf#172903 - Web View renders paragraph spotlight markers off canvas
     if (IsSpotlightParaStyles())
-        m_pWrtShell->SetBrowseBorder(Size(GetWindow()->LogicToPixel(Size(375, 0)).Width(),
+        m_pWrtShell->SetBrowseBorder(Size(GetWindow()->LogicToWindow(Size(375, 0)).Width(),
                                           m_pWrtShell->GetBrowseBorder().Height()));
 
     Invalidate(SID_ZOOM_IN);
@@ -124,7 +124,7 @@ void SwView::SetZoom_( const Size &rEditSize, SvxZoomType eZoomType,
             aPageSize.AdjustWidth(pPostItMgr->GetSidebarWidth() + pPostItMgr->GetSidebarBorderWidth() );
 
         const MapMode aTmpMap( MapUnit::MapTwip );
-        const Size aWindowSize( GetEditWin().PixelToLogic( rEditSize, aTmpMap ) );
+        const Size aWindowSize( GetEditWin().WindowToLogic( rEditSize, aTmpMap ) );
 
         if( SvxZoomType::OPTIMAL == eZoomType )
         {
@@ -362,7 +362,7 @@ void SwView::MoveNavigation(bool bNext)
             // If there is a difference, has been truncated --> then add one pixel,
             // so that no residue of the previous page is visible.
             if(aPt.Y() != aAlPt.Y())
-                aAlPt.AdjustY(3 * GetEditWin().PixelToLogic(Size(0, 1)).Height());
+                aAlPt.AdjustY(3 * GetEditWin().WindowToLogic(Size(0, 1)).Height());
             SetVisArea(aAlPt);
         }
         break;

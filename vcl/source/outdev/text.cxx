@@ -1605,7 +1605,7 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
                         const double fScaleX = aTransform.get(0, 0);
                         const double fScaleY = aTransform.get(1, 1);
 
-                        Point aTempPos =  rTargetDevice.LogicToPixel( aPos );
+                        Point aTempPos =  rTargetDevice.LogicToWindow( aPos );
                         nMnemonicX = std::round(rTargetDevice.GetDeviceOriginX() + aTempPos.X() + (std::min(lc_x1, lc_x2) * fScaleX));
                         nMnemonicY = std::round(rTargetDevice.GetDeviceOriginY() + aTempPos.Y() + (rTargetDevice.GetFontMetric().GetAscent() * fScaleY));
                         rTargetDevice.ImplDrawMnemonicLine( nMnemonicX, nMnemonicY, nMnemonicWidth );
@@ -1678,7 +1678,7 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
             const double fScaleX = aTransform.get(0, 0);
             const double fScaleY = aTransform.get(1, 1);
 
-            Point aTempPos =  rTargetDevice.LogicToPixel( aPos );
+            Point aTempPos =  rTargetDevice.LogicToWindow( aPos );
             nMnemonicX = std::round(rTargetDevice.GetDeviceOriginX() + aTempPos.X() + (std::min(lc_x1, lc_x2) * fScaleX));
             nMnemonicY = std::round(rTargetDevice.GetDeviceOriginY() + aTempPos.Y() + (rTargetDevice.GetFontMetric().GetAscent() * fScaleY));
         }
@@ -2101,7 +2101,7 @@ bool OutputDevice::GetTextBoundRect(basegfx::B2DRectangle& rRect, const OUString
         {
             basegfx::B2DPoint aPos = pSalLayout->GetDrawPosition(basegfx::B2DPoint(nXOffset, 0));
             aPixelRect.translate(mnTextOffX - aPos.getX(), mnTextOffY - aPos.getY());
-            rRect = PixelToLogic( aPixelRect );
+            rRect = WindowToLogic( aPixelRect );
             if ((GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode))
             {
                 rRect.translate(mpMapper->GetMappingXOffset(), mpMapper->GetMappingYOffset());

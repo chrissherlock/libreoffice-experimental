@@ -183,7 +183,7 @@ void SmartTagSet::deselect()
 
 bool SmartTagSet::MouseButtonDown( const MouseEvent& rMEvt )
 {
-    Point aMDPos( mrView.GetViewShell()->GetActiveWindow()->PixelToLogic( rMEvt.GetPosPixel() ) );
+    Point aMDPos( mrView.GetViewShell()->GetActiveWindow()->WindowToLogic( rMEvt.GetPosPixel() ) );
     SdrHdl* pHdl = mrView.PickHandle(aMDPos);
 
     // check if a smart tag is selected and no handle is hit
@@ -229,7 +229,7 @@ bool SmartTagSet::Command( const CommandEvent& rCEvt )
 {
     if( rCEvt.IsMouseEvent() )
     {
-        Point aMDPos( mrView.GetViewShell()->GetActiveWindow()->PixelToLogic( rCEvt.GetMousePosPixel() ) );
+        Point aMDPos( mrView.GetViewShell()->GetActiveWindow()->WindowToLogic( rCEvt.GetMousePosPixel() ) );
         SdrHdl* pHdl = mrView.PickHandle(aMDPos);
 
         if( pHdl )

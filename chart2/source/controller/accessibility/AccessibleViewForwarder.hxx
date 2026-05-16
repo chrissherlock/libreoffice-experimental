@@ -39,8 +39,8 @@ public:
 
     // ________ IAccessibleViewforwarder ________
     virtual tools::Rectangle GetVisibleArea() const override;
-    virtual Point LogicToPixel(const Point& rPoint) const override;
-    virtual Size LogicToPixel(const Size& rSize) const override;
+    virtual Point LogicToWindow(const Point& rPoint) const override;
+    virtual Size LogicToWindow(const Size& rSize) const override;
 
 private:
     AccessibleViewForwarder(AccessibleViewForwarder const&) = delete;

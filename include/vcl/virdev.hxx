@@ -123,7 +123,7 @@ public:
                                                                    sal_uInt8* pBuffer);
 
     bool                SetOutputSize( const Size& rNewSize )
-                            { return SetOutputSizePixel( LogicToPixel( rNewSize ).get() ); }
+                            { return SetOutputSizePixel( LogicToWindow( rNewSize ).get() ); }
 
     void                SetReferenceDevice( RefDevMode );
 

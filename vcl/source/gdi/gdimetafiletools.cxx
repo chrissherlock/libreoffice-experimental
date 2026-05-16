@@ -720,7 +720,7 @@ void clipMetafileContentAgainstOwnRegions(GDIMetaFile& rSource)
 
                     if(MapUnit::MapPixel == rBitmap.GetPrefMapMode().GetMapUnit())
                     {
-                        aLogicalSize = Application::GetDefaultDevice()->PixelToLogic(aLogicalSize, aMapModes.back());
+                        aLogicalSize = Application::GetDefaultDevice()->WindowToLogic(aLogicalSize, aMapModes.back());
                     }
                     else
                     {
@@ -747,7 +747,7 @@ void clipMetafileContentAgainstOwnRegions(GDIMetaFile& rSource)
 
                     if(MapUnit::MapPixel == rBitmap.GetPrefMapMode().GetMapUnit())
                     {
-                        aLogicalSize = Application::GetDefaultDevice()->PixelToLogic(aLogicalSize, aMapModes.back());
+                        aLogicalSize = Application::GetDefaultDevice()->WindowToLogic(aLogicalSize, aMapModes.back());
                     }
                     else
                     {

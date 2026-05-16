@@ -257,8 +257,8 @@ css::awt::Rectangle AccessibleCell::implGetBounds()
         if (maShapeTreeInfo.GetViewForwarder() == nullptr)
             throw uno::RuntimeException (u"AccessibleCell has no valid view forwarder"_ustr, getXWeak());
 
-        ::Size aPixelSize( maShapeTreeInfo.GetViewForwarder()->LogicToPixel(::Size(aCellRect.GetWidth(), aCellRect.GetHeight())) );
-        ::Point aPixelPosition( maShapeTreeInfo.GetViewForwarder()->LogicToPixel( aCellRect.TopLeft() ));
+        ::Size aPixelSize( maShapeTreeInfo.GetViewForwarder()->LogicToWindow(::Size(aCellRect.GetWidth(), aCellRect.GetHeight())) );
+        ::Point aPixelPosition( maShapeTreeInfo.GetViewForwarder()->LogicToWindow( aCellRect.TopLeft() ));
 
         // Clip the shape's bounding box with the bounding box of its parent.
         Reference<XAccessibleComponent> xParentComponent ( getAccessibleParent(), uno::UNO_QUERY);

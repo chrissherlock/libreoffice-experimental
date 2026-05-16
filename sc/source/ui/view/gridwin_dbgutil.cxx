@@ -32,11 +32,11 @@ std::ostream& operator<<(std::ostream& rStrm, const ScAddress& rAddr)
 void dumpScDrawObjData(const ScGridWindow& rWindow, const ScDrawObjData& rData, MapUnit eMapUnit)
 {
     const Point& rStartOffset = rData.maStartOffset;
-    Point aStartOffsetPixel = rWindow.LogicToPixel(rStartOffset, MapMode(eMapUnit));
+    Point aStartOffsetPixel = rWindow.LogicToWindow(rStartOffset, MapMode(eMapUnit));
     std::cout << "  Start: " << rData.maStart << ", Offset: " << aStartOffsetPixel << std::endl;
 
     const Point& rEndOffset = rData.maEndOffset;
-    Point aEndOffsetPixel = rWindow.LogicToPixel(rEndOffset, MapMode(eMapUnit));
+    Point aEndOffsetPixel = rWindow.LogicToWindow(rEndOffset, MapMode(eMapUnit));
     std::cout << "  End: : " << rData.maEnd << ", Offset: " << aEndOffsetPixel << std::endl;
 }
 
@@ -49,7 +49,7 @@ void ScGridWindow::dumpColumnInformationPixel()
     for (SCCOL nCol = 0; nCol <= 20; ++nCol)
     {
         sal_uInt16 nWidth = rDoc.GetColWidth(nCol, nTab);
-        tools::Long nPixel = LogicToPixel(Point(nWidth, 0), MapMode(MapUnit::MapTwip)).getX();
+        tools::Long nPixel = LogicToWindow(Point(nWidth, 0), MapMode(MapUnit::MapTwip)).getX();
         std::cout << "Column: " << nCol << ", Width: " << nPixel << "px" << std::endl;
     }
 }
@@ -158,7 +158,7 @@ void ScGridWindow::dumpGraphicInformation()
                 dumpScDrawObjData(*this, *pObjData, pDrawLayer->GetScaleUnit());
 
             const tools::Rectangle& rRect = pObj->GetSnapRect();
-            tools::Rectangle aRect = LogicToPixel(rRect, MapMode(pDrawLayer->GetScaleUnit()));
+            tools::Rectangle aRect = LogicToWindow(rRect, MapMode(pDrawLayer->GetScaleUnit()));
             std::cout << "Snap Rectangle (in pixel): " << aRect << std::endl;
         }
     }

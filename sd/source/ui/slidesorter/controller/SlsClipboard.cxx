@@ -481,7 +481,7 @@ void Clipboard::CreateSlideTransferable (
 
     assert(pActionWindow);
 
-    pTransferable->SetStartPos (pActionWindow->PixelToLogic(
+    pTransferable->SetStartPos (pActionWindow->WindowToLogic(
         pActionWindow->GetPointerPosPixel()));
     pTransferable->SetObjectDescriptor (std::move(pObjDesc));
 
@@ -727,7 +727,7 @@ sal_Int8 Clipboard::ExecuteDrop (
         {
             SdTransferable* pDragTransferable = SdModule::get()->pTransferDrag;
             const Point aEventModelPosition (
-                pTargetWindow->PixelToLogic (rEvent.maPosPixel));
+                pTargetWindow->WindowToLogic (rEvent.maPosPixel));
             const sal_Int32 nXOffset (std::abs (pDragTransferable->GetStartPos().X()
                 - aEventModelPosition.X()));
             const sal_Int32 nYOffset (std::abs (pDragTransferable->GetStartPos().Y()

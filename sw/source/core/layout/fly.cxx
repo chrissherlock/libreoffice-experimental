@@ -2299,7 +2299,7 @@ void SwFlyFrame::UpdateUnfloatButton(SwWrtShell* pWrtSh, bool bShow) const
 
     SwEditWin& rEditWin = pWrtSh->GetView().GetEditWin();
     SwFrameControlsManager& rMngr = rEditWin.GetFrameControlsManager();
-    Point aTopRightPixel = rEditWin.LogicToPixel( getFrameArea().TopRight() );
+    Point aTopRightPixel = rEditWin.LogicToWindow( getFrameArea().TopRight() );
     rMngr.SetUnfloatTableButton(this, bShow,  aTopRightPixel);
 }
 
@@ -2362,7 +2362,7 @@ bool SwFlyFrame::GetRedlineRenderModeFrame(SvxBoxItem& rBoxItem) const
 
     // Set a logic value which is roughly 1 pixel wide, so the border is visible.
     vcl::RenderContext* pOut = pViewShell->GetOut();
-    tools::Long nWidth = pOut ? pOut->PixelToLogic(Size(1, 1))->Width() : 0;
+    tools::Long nWidth = pOut ? pOut->WindowToLogic(Size(1, 1))->Width() : 0;
     aBorderLine.SetWidth(nWidth);
 
     aBorderLine.SetBorderLineStyle(SvxBorderLineStyle::SOLID);
@@ -3123,7 +3123,7 @@ Size SwFlyFrame::CalcRel( const SwFormatFrameSize &rSz ) const
         {
             nRelWidth  = pSh->GetBrowseWidth();
             nRelHeight = pSh->VisArea().Height();
-            Size aBorder = pSh->GetOut()->PixelToLogic( pSh->GetBrowseBorder() );
+            Size aBorder = pSh->GetOut()->WindowToLogic( pSh->GetBrowseBorder() );
             nRelWidth  = std::min( nRelWidth,  pRel->getFramePrintArea().Width() );
             nRelHeight -= 2*aBorder.Height();
             nRelHeight = std::min( nRelHeight, pRel->getFramePrintArea().Height() );
@@ -3322,7 +3322,7 @@ bool SwFlyFrame::GetContour( tools::PolyPolygon&   rContour,
                     bool            bPixelMap = aGrfMap.GetMapUnit() == MapUnit::MapPixel;
 
                     if ( bPixelMap )
-                        aOrgSize = pOutDev->PixelToLogic( aGrfSize, aDispMap );
+                        aOrgSize = pOutDev->WindowToLogic( aGrfSize, aDispMap );
                     else
                         aOrgSize = ::LogicToLogic( aGrfSize, aGrfMap, aDispMap );
 
@@ -3338,7 +3338,7 @@ bool SwFlyFrame::GetContour( tools::PolyPolygon&   rContour,
                             for ( sal_uInt16 i = 0, nCount = rPoly.GetSize(); i < nCount; i++ )
                             {
                                 if ( bPixelMap )
-                                    aNewPoint = pOutDev->PixelToLogic( rPoly[ i ], aDispMap  );
+                                    aNewPoint = pOutDev->WindowToLogic( rPoly[ i ], aDispMap  );
                                 else
                                     aNewPoint = ::LogicToLogic( rPoly[ i ], aGrfMap, aDispMap  );
 

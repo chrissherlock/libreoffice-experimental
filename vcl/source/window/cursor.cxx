@@ -158,15 +158,15 @@ static void ImplCursorInvert(vcl::Window* pWindow, ImplCursorData const * pData)
 
     tools::Rectangle aPaintRect = ImplCursorInvert(pRenderContext, pData);
     if (bDoubleBuffering)
-        pGuard->SetPaintRect(pRenderContext->PixelToLogic(aPaintRect));
+        pGuard->SetPaintRect(pRenderContext->WindowToLogic(aPaintRect));
 }
 
 bool vcl::Cursor::ImplPrepForDraw(const OutputDevice* pDevice, ImplCursorData& rData) const
 {
     if (pDevice && !rData.mbCurVisible)
     {
-        rData.maPixPos        =  pDevice->LogicToPixel( maPos );
-        rData.maPixSize       =  pDevice->LogicToPixel( maSize );
+        rData.maPixPos        =  pDevice->LogicToWindow( maPos );
+        rData.maPixSize       =  pDevice->LogicToWindow( maSize );
         rData.mnOrientation   = mnOrientation;
         rData.mnDirection     = mnDirection;
 
@@ -272,11 +272,11 @@ namespace
 
 tools::Rectangle calcualteCursorRect(Point const& rPosition, Size const rSize, vcl::Window* pWindow, vcl::Window* pParent)
 {
-    Point aPositionPixel = pWindow->LogicToPixel(rPosition);
+    Point aPositionPixel = pWindow->LogicToWindow(rPosition);
     const tools::Long nX = pWindow->GetDeviceOriginX() + aPositionPixel.X() - pParent->GetDeviceOriginX();
     const tools::Long nY = pWindow->GetDeviceOriginY() + aPositionPixel.Y() - pParent->GetDeviceOriginY();
 
-    Size aSizePixel = pWindow->LogicToPixel(rSize);
+    Size aSizePixel = pWindow->LogicToWindow(rSize);
     if (!aSizePixel.Width())
         aSizePixel.setWidth( pWindow->GetSettings().GetStyleSettings().GetCursorSize() );
 
@@ -321,7 +321,7 @@ void vcl::Cursor::LOKNotify(vcl::Window* pWindow, const OUString& rAction)
                 aRect = calcualteCursorRect(GetPos(), GetSize(), pWindow, pWindow->GetParent()->GetParent());
 
             OutputDevice* pDevice = mpData->mpWindow->GetOutDev();
-            const tools::Rectangle aRectTwip = pDevice->PixelToLogic(aRect, MapMode(MapUnit::MapTwip));
+            const tools::Rectangle aRectTwip = pDevice->WindowToLogic(aRect, MapMode(MapUnit::MapTwip));
 
             if (pWindow->IsFormControl())
                 pNotifier->notifyCursorInvalidation(&aRectTwip, true, pWindow->GetLOKWindowId());

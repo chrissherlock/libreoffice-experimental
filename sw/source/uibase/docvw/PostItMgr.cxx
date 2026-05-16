@@ -1022,7 +1022,7 @@ void SwPostItMgr::LayoutPostIts()
                             if (pPage->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT )
                             {
                                 // x value for notes positioning
-                                mlPageBorder = mpEditWin->LogicToPixel(Point(pPage->mPageRect.Left(), 0)).X() - nSidebarWidth;// - GetSidebarBorderWidth(true);
+                                mlPageBorder = mpEditWin->LogicToWindow(Point(pPage->mPageRect.Left(), 0)).X() - nSidebarWidth;// - GetSidebarBorderWidth(true);
                                 //bending point
                                 mlPageEnd =
                                     mpWrtShell->getIDocumentSettingAccess().get(DocumentSettingId::BROWSE_MODE)
@@ -1032,7 +1032,7 @@ void SwPostItMgr::LayoutPostIts()
                             else if (pPage->eSidebarPosition == sw::sidebarwindows::SidebarPosition::RIGHT )
                             {
                                 // x value for notes positioning
-                                mlPageBorder = mpEditWin->LogicToPixel( Point(pPage->mPageRect.Right(), 0)).X() + GetSidebarBorderWidth(true);
+                                mlPageBorder = mpEditWin->LogicToWindow( Point(pPage->mPageRect.Right(), 0)).X() + GetSidebarBorderWidth(true);
                                 //bending point
                                 mlPageEnd =
                                     mpWrtShell->getIDocumentSettingAccess().get(DocumentSettingId::BROWSE_MODE)
@@ -1040,7 +1040,7 @@ void SwPostItMgr::LayoutPostIts()
                                     pPage->mPageRect.Right() - 350;
                             }
 
-                            tools::Long Y = mpEditWin->LogicToPixel( Point(0,pItem->maLayoutInfo.mPosition.Bottom())).Y();
+                            tools::Long Y = mpEditWin->LogicToWindow( Point(0,pItem->maLayoutInfo.mPosition.Bottom())).Y();
 
                             // Without taking new width into account, the text height will be wrong.
                             // GuessTextHeightForWidth is expensive, only use it when necessary.
@@ -1052,7 +1052,7 @@ void SwPostItMgr::LayoutPostIts()
 
                             tools::Long postItPixelTextHeight
                                 = (comphelper::LibreOfficeKit::isActive()
-                                       ? mpEditWin->LogicToPixel(Point(0, nTextHeight)).Y()
+                                       ? mpEditWin->LogicToWindow(Point(0, nTextHeight)).Y()
                                        : nTextHeight);
                             aPostItHeight
                                 = (postItPixelTextHeight < pPostIt->GetMinimumSizeWithoutMeta()
@@ -1103,13 +1103,13 @@ void SwPostItMgr::LayoutPostIts()
                     else if (sal_Int32 nScrollSize = GetScrollSize())
                     {
                         //when we changed our zoom level, the offset value can be too big, so let's check for the largest possible zoom value
-                        tools::Long aAvailableHeight = mpEditWin->LogicToPixel(Size(0,pPage->mPageRect.Height())).Height() - 2 * GetSidebarScrollerHeight();
+                        tools::Long aAvailableHeight = mpEditWin->LogicToWindow(Size(0,pPage->mPageRect.Height())).Height() - 2 * GetSidebarScrollerHeight();
                         tools::Long lOffset = -1 * nScrollSize * (aVisiblePostItList.size() - aAvailableHeight / nScrollSize);
                         if (pPage->lOffset < lOffset)
                             pPage->lOffset = lOffset;
                     }
                     bUpdate = (bOldScrollbar != pPage->bScrollbar) || bUpdate;
-                    const tools::Long aSidebarheight = pPage->bScrollbar ? mpEditWin->PixelToLogic(Size(0,GetSidebarScrollerHeight())).Height() : 0;
+                    const tools::Long aSidebarheight = pPage->bScrollbar ? mpEditWin->WindowToLogic(Size(0,GetSidebarScrollerHeight())).Height() : 0;
                     /*
                                        TODO
                                        - enlarge all notes till GetNextBorder(), as we resized to average value before
@@ -1120,8 +1120,8 @@ void SwPostItMgr::LayoutPostIts()
                         if (pPage->lOffset != 0)
                             visiblePostIt->TranslateTopPosition(pPage->lOffset);
 
-                        bool bBottom  = mpEditWin->PixelToLogic(Point(0,visiblePostIt->VirtualPos().Y()+visiblePostIt->VirtualSize().Height())).Y() <= (pPage->mPageRect.Bottom()-aSidebarheight);
-                        bool bTop = mpEditWin->PixelToLogic(Point(0,visiblePostIt->VirtualPos().Y())).Y() >= (pPage->mPageRect.Top()+aSidebarheight);
+                        bool bBottom  = mpEditWin->WindowToLogic(Point(0,visiblePostIt->VirtualPos().Y()+visiblePostIt->VirtualSize().Height())).Y() <= (pPage->mPageRect.Bottom()-aSidebarheight);
+                        bool bTop = mpEditWin->WindowToLogic(Point(0,visiblePostIt->VirtualPos().Y())).Y() >= (pPage->mPageRect.Top()+aSidebarheight);
                         if ( bBottom && bTop )
                         {
                             // When tiled rendering, make sure that only the
@@ -1138,7 +1138,7 @@ void SwPostItMgr::LayoutPostIts()
                         }
                         else
                         {
-                            if (mpEditWin->PixelToLogic(Point(0,visiblePostIt->VirtualPos().Y())).Y() < (pPage->mPageRect.Top()+aSidebarheight))
+                            if (mpEditWin->WindowToLogic(Point(0,visiblePostIt->VirtualPos().Y())).Y() < (pPage->mPageRect.Top()+aSidebarheight))
                             {
                                 if ( pPage->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT )
                                     visiblePostIt->ShowAnchorOnly(Point( pPage->mPageRect.Left(),
@@ -1259,8 +1259,8 @@ bool SwPostItMgr::BorderOverPageBorder(tools::ULong aPage) const
     OSL_ENSURE ((*aItem)->mpPostIt,"BorderOverPageBorder: NULL postIt, should never happen");
     if ((*aItem)->mpPostIt)
     {
-        const tools::Long aSidebarheight = mPages[aPage-1]->bScrollbar ? mpEditWin->PixelToLogic(Size(0,GetSidebarScrollerHeight())).Height() : 0;
-        const tools::Long aEndValue = mpEditWin->PixelToLogic(Point(0,(*aItem)->mpPostIt->GetPosPixel().Y()+(*aItem)->mpPostIt->GetSizePixel().Height())).Y();
+        const tools::Long aSidebarheight = mPages[aPage-1]->bScrollbar ? mpEditWin->WindowToLogic(Size(0,GetSidebarScrollerHeight())).Height() : 0;
+        const tools::Long aEndValue = mpEditWin->WindowToLogic(Point(0,(*aItem)->mpPostIt->GetPosPixel().Y()+(*aItem)->mpPostIt->GetSizePixel().Height())).Y();
         return aEndValue <= mPages[aPage-1]->mPageRect.Bottom()-aSidebarheight;
     }
     else
@@ -1280,7 +1280,7 @@ void SwPostItMgr::DrawNotesForPage(OutputDevice *pOutDev, sal_uInt32 nPage)
         SwAnnotationWin* pPostIt = pItem->mpPostIt;
         if (!pPostIt)
             continue;
-        Point aPoint(mpEditWin->PixelToLogic(pPostIt->GetPosPixel()));
+        Point aPoint(mpEditWin->WindowToLogic(pPostIt->GetPosPixel()));
         pPostIt->DrawForPage(pOutDev, aPoint);
     }
     if (bEnableMapMode)
@@ -1298,11 +1298,11 @@ void SwPostItMgr::PaintTile(OutputDevice& rRenderContext)
         bool bEnableMapMode = (mpEditWin->GetMappingPolicy() == vcl::MappingPolicy::IgnoreMapMode);
         mpEditWin->SetMappingPolicy();
         rRenderContext.Push(vcl::PushFlags::MAPMODE);
-        Point aOffset(mpEditWin->PixelToLogic(pPostIt->GetPosPixel()));
+        Point aOffset(mpEditWin->WindowToLogic(pPostIt->GetPosPixel()));
         MapMode aMapMode(rRenderContext.GetMapMode());
         aMapMode.SetOrigin(aMapMode.GetOrigin() + aOffset);
         rRenderContext.SetMapMode(aMapMode);
-        Size aSize(rRenderContext.PixelToLogic(pPostIt->GetSizePixel()));
+        Size aSize(rRenderContext.WindowToLogic(pPostIt->GetSizePixel()));
         tools::Rectangle aRectangle(Point(0, 0), aSize);
 
         pPostIt->PaintTile(rRenderContext, aRectangle);
@@ -1322,7 +1322,7 @@ void SwPostItMgr::Scroll(const tools::Long lScroll,const tools::ULong aPage)
 
     const bool bOldUp = ArrowEnabled(KEY_PAGEUP,aPage);
     const bool bOldDown = ArrowEnabled(KEY_PAGEDOWN,aPage);
-    const tools::Long aSidebarheight = mpEditWin->PixelToLogic(Size(0,GetSidebarScrollerHeight())).Height();
+    const tools::Long aSidebarheight = mpEditWin->WindowToLogic(Size(0,GetSidebarScrollerHeight())).Height();
     for (auto const& item : mPages[aPage-1]->mvSidebarItems)
     {
         SwAnnotationWin* pPostIt = item->mpPostIt;
@@ -1332,15 +1332,15 @@ void SwPostItMgr::Scroll(const tools::Long lScroll,const tools::ULong aPage)
 
         if (item->mbShow)
         {
-            bool bBottom  = mpEditWin->PixelToLogic(Point(0,pPostIt->VirtualPos().Y()+pPostIt->VirtualSize().Height())).Y() <= (mPages[aPage-1]->mPageRect.Bottom()-aSidebarheight);
-            bool bTop = mpEditWin->PixelToLogic(Point(0,pPostIt->VirtualPos().Y())).Y() >=   (mPages[aPage-1]->mPageRect.Top()+aSidebarheight);
+            bool bBottom  = mpEditWin->WindowToLogic(Point(0,pPostIt->VirtualPos().Y()+pPostIt->VirtualSize().Height())).Y() <= (mPages[aPage-1]->mPageRect.Bottom()-aSidebarheight);
+            bool bTop = mpEditWin->WindowToLogic(Point(0,pPostIt->VirtualPos().Y())).Y() >=   (mPages[aPage-1]->mPageRect.Top()+aSidebarheight);
             if ( bBottom && bTop)
             {
                     pPostIt->ShowNote();
             }
             else
             {
-                if ( mpEditWin->PixelToLogic(Point(0,pPostIt->VirtualPos().Y())).Y() < (mPages[aPage-1]->mPageRect.Top()+aSidebarheight))
+                if ( mpEditWin->WindowToLogic(Point(0,pPostIt->VirtualPos().Y())).Y() < (mPages[aPage-1]->mPageRect.Top()+aSidebarheight))
                 {
                     if (mPages[aPage-1]->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT)
                         pPostIt->ShowAnchorOnly(Point(mPages[aPage-1]->mPageRect.Left(),mPages[aPage-1]->mPageRect.Top()));
@@ -1371,13 +1371,13 @@ void SwPostItMgr::AutoScroll(const SwAnnotationWin* pPostIt,const tools::ULong a
     if (!mPages[aPage-1]->bScrollbar)
         return;
 
-    const tools::Long aSidebarheight = mpEditWin->PixelToLogic(Size(0,GetSidebarScrollerHeight())).Height();
-    const bool bBottom  = mpEditWin->PixelToLogic(Point(0,pPostIt->GetPosPixel().Y()+pPostIt->GetSizePixel().Height())).Y() <= (mPages[aPage-1]->mPageRect.Bottom()-aSidebarheight);
-    const bool bTop = mpEditWin->PixelToLogic(Point(0,pPostIt->GetPosPixel().Y())).Y() >= (mPages[aPage-1]->mPageRect.Top()+aSidebarheight);
+    const tools::Long aSidebarheight = mpEditWin->WindowToLogic(Size(0,GetSidebarScrollerHeight())).Height();
+    const bool bBottom  = mpEditWin->WindowToLogic(Point(0,pPostIt->GetPosPixel().Y()+pPostIt->GetSizePixel().Height())).Y() <= (mPages[aPage-1]->mPageRect.Bottom()-aSidebarheight);
+    const bool bTop = mpEditWin->WindowToLogic(Point(0,pPostIt->GetPosPixel().Y())).Y() >= (mPages[aPage-1]->mPageRect.Top()+aSidebarheight);
     if ( !(bBottom && bTop))
     {
-        const tools::Long aDiff = bBottom ? mpEditWin->LogicToPixel(Point(0,mPages[aPage-1]->mPageRect.Top() + aSidebarheight)).Y() - pPostIt->GetPosPixel().Y() :
-                                        mpEditWin->LogicToPixel(Point(0,mPages[aPage-1]->mPageRect.Bottom() - aSidebarheight)).Y() - (pPostIt->GetPosPixel().Y()+pPostIt->GetSizePixel().Height());
+        const tools::Long aDiff = bBottom ? mpEditWin->LogicToWindow(Point(0,mPages[aPage-1]->mPageRect.Top() + aSidebarheight)).Y() - pPostIt->GetPosPixel().Y() :
+                                        mpEditWin->LogicToWindow(Point(0,mPages[aPage-1]->mPageRect.Bottom() - aSidebarheight)).Y() - (pPostIt->GetPosPixel().Y()+pPostIt->GetSizePixel().Height());
         // this just adds the missing value to get the next a* GetScrollSize() after aDiff
         // e.g aDiff= 61 POSTIT_SCROLL=50 --> lScroll = 100
         const auto nScrollSize = GetScrollSize();
@@ -1408,7 +1408,7 @@ void SwPostItMgr::MakeVisible(const SwAnnotationWin* pPostIt )
         AutoScroll(pPostIt,aPage);
     tools::Rectangle aNoteRect (Point(pPostIt->GetPosPixel().X(),pPostIt->GetPosPixel().Y()-5),pPostIt->GetSizePixel());
     if (!aNoteRect.IsEmpty())
-        mpWrtShell->MakeVisible(SwRect(mpEditWin->PixelToLogic(aNoteRect)));
+        mpWrtShell->MakeVisible(SwRect(mpEditWin->WindowToLogic(aNoteRect)));
 }
 
 bool SwPostItMgr::ArrowEnabled(sal_uInt16 aDirection,tools::ULong aPage) const
@@ -1451,7 +1451,7 @@ bool SwPostItMgr::LayoutByPage(std::vector<SwAnnotationWin*> &aVisiblePostItList
     //  - then the real layout starts
 
     //rBorder is the page rect
-    const tools::Rectangle aBorder         = mpEditWin->LogicToPixel(rBorder);
+    const tools::Rectangle aBorder         = mpEditWin->LogicToWindow(rBorder);
     tools::Long            lTopBorder      = aBorder.Top() + 5;
     tools::Long            lBottomBorder   = aBorder.Bottom() - 5;
     const tools::Long      lVisibleHeight  = lBottomBorder - lTopBorder; //aBorder.GetHeight() ;
@@ -2121,7 +2121,7 @@ tools::Long SwPostItMgr::GetNextBorder()
                 {
                     //if this is the last item, return the bottom border otherwise the next item
                     if (aNext == pPage->mvSidebarItems.end())
-                        return mpEditWin->LogicToPixel(Point(0,pPage->mPageRect.Bottom())).Y() - GetSpaceBetween();
+                        return mpEditWin->LogicToWindow(Point(0,pPage->mPageRect.Bottom())).Y() - GetSpaceBetween();
                     else
                         return (*aNext)->mpPostIt->GetPosPixel().Y() - GetSpaceBetween();
                 }
@@ -2212,7 +2212,7 @@ bool SwPostItMgr::IsHit(const Point& aPointPixel)
     if (!HasNotes() || !ShowNotes())
         return false;
 
-    const Point aPoint = mpEditWin->PixelToLogic(aPointPixel);
+    const Point aPoint = mpEditWin->WindowToLogic(aPointPixel);
     tools::Rectangle aRect(GetSidebarRect(aPoint));
     if (!aRect.Contains(aPoint))
         return false;
@@ -2282,7 +2282,7 @@ bool SwPostItMgr::IsHitSidebarDragArea(const Point& rPointPx)
     if (!HasNotes() || !ShowNotes())
         return false;
 
-    const Point aPointLogic = mpEditWin->PixelToLogic(rPointPx);
+    const Point aPointLogic = mpEditWin->WindowToLogic(rPointPx);
     sw::sidebarwindows::SidebarPosition eSidebarPosition = GetSidebarPos(aPointLogic);
     if (eSidebarPosition == sw::sidebarwindows::SidebarPosition::NONE)
         return false;
@@ -2304,9 +2304,9 @@ tools::Rectangle SwPostItMgr::GetBottomScrollRect(const tools::ULong aPage) cons
 {
     SwRect aPageRect = mPages[aPage-1]->mPageRect;
     Point aPointBottom = mPages[aPage-1]->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT
-                         ? Point(aPageRect.Left() - GetSidebarWidth() - GetSidebarBorderWidth() + mpEditWin->PixelToLogic(Size(2,0)).Width(),aPageRect.Bottom()- mpEditWin->PixelToLogic(Size(0,2+GetSidebarScrollerHeight())).Height())
-                         : Point(aPageRect.Right() + GetSidebarBorderWidth() + mpEditWin->PixelToLogic(Size(2,0)).Width(),aPageRect.Bottom()- mpEditWin->PixelToLogic(Size(0,2+GetSidebarScrollerHeight())).Height());
-    Size aSize(GetSidebarWidth() - mpEditWin->PixelToLogic(Size(4,0)).Width(), mpEditWin->PixelToLogic(Size(0,GetSidebarScrollerHeight())).Height()) ;
+                         ? Point(aPageRect.Left() - GetSidebarWidth() - GetSidebarBorderWidth() + mpEditWin->WindowToLogic(Size(2,0)).Width(),aPageRect.Bottom()- mpEditWin->WindowToLogic(Size(0,2+GetSidebarScrollerHeight())).Height())
+                         : Point(aPageRect.Right() + GetSidebarBorderWidth() + mpEditWin->WindowToLogic(Size(2,0)).Width(),aPageRect.Bottom()- mpEditWin->WindowToLogic(Size(0,2+GetSidebarScrollerHeight())).Height());
+    Size aSize(GetSidebarWidth() - mpEditWin->WindowToLogic(Size(4,0)).Width(), mpEditWin->WindowToLogic(Size(0,GetSidebarScrollerHeight())).Height()) ;
     return tools::Rectangle(aPointBottom,aSize);
 }
 
@@ -2314,9 +2314,9 @@ tools::Rectangle SwPostItMgr::GetTopScrollRect(const tools::ULong aPage) const
 {
     SwRect aPageRect = mPages[aPage-1]->mPageRect;
     Point aPointTop = mPages[aPage-1]->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT
-                      ? Point(aPageRect.Left() - GetSidebarWidth() -GetSidebarBorderWidth()+ mpEditWin->PixelToLogic(Size(2,0)).Width(),aPageRect.Top() + mpEditWin->PixelToLogic(Size(0,2)).Height())
-                      : Point(aPageRect.Right() + GetSidebarBorderWidth() + mpEditWin->PixelToLogic(Size(2,0)).Width(),aPageRect.Top() + mpEditWin->PixelToLogic(Size(0,2)).Height());
-    Size aSize(GetSidebarWidth() - mpEditWin->PixelToLogic(Size(4,0)).Width(), mpEditWin->PixelToLogic(Size(0,GetSidebarScrollerHeight())).Height()) ;
+                      ? Point(aPageRect.Left() - GetSidebarWidth() -GetSidebarBorderWidth()+ mpEditWin->WindowToLogic(Size(2,0)).Width(),aPageRect.Top() + mpEditWin->WindowToLogic(Size(0,2)).Height())
+                      : Point(aPageRect.Right() + GetSidebarBorderWidth() + mpEditWin->WindowToLogic(Size(2,0)).Width(),aPageRect.Top() + mpEditWin->WindowToLogic(Size(0,2)).Height());
+    Size aSize(GetSidebarWidth() - mpEditWin->WindowToLogic(Size(4,0)).Width(), mpEditWin->WindowToLogic(Size(0,GetSidebarScrollerHeight())).Height()) ;
     return tools::Rectangle(aPointTop,aSize);
 }
 
@@ -2325,12 +2325,12 @@ bool SwPostItMgr::ScrollbarHit(const tools::ULong aPage,const Point &aPoint)
 {
     SwRect aPageRect = mPages[aPage-1]->mPageRect;
     Point aPointBottom = mPages[aPage-1]->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT
-                         ? Point(aPageRect.Left() - GetSidebarWidth()-GetSidebarBorderWidth() + mpEditWin->PixelToLogic(Size(2,0)).Width(),aPageRect.Bottom()- mpEditWin->PixelToLogic(Size(0,2+GetSidebarScrollerHeight())).Height())
-                         : Point(aPageRect.Right() + GetSidebarBorderWidth()+ mpEditWin->PixelToLogic(Size(2,0)).Width(),aPageRect.Bottom()- mpEditWin->PixelToLogic(Size(0,2+GetSidebarScrollerHeight())).Height());
+                         ? Point(aPageRect.Left() - GetSidebarWidth()-GetSidebarBorderWidth() + mpEditWin->WindowToLogic(Size(2,0)).Width(),aPageRect.Bottom()- mpEditWin->WindowToLogic(Size(0,2+GetSidebarScrollerHeight())).Height())
+                         : Point(aPageRect.Right() + GetSidebarBorderWidth()+ mpEditWin->WindowToLogic(Size(2,0)).Width(),aPageRect.Bottom()- mpEditWin->WindowToLogic(Size(0,2+GetSidebarScrollerHeight())).Height());
 
     Point aPointTop = mPages[aPage-1]->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT
-                      ? Point(aPageRect.Left() - GetSidebarWidth()-GetSidebarBorderWidth()+ mpEditWin->PixelToLogic(Size(2,0)).Width(),aPageRect.Top() + mpEditWin->PixelToLogic(Size(0,2)).Height())
-                      : Point(aPageRect.Right()+GetSidebarBorderWidth()+ mpEditWin->PixelToLogic(Size(2,0)).Width(),aPageRect.Top() + mpEditWin->PixelToLogic(Size(0,2)).Height());
+                      ? Point(aPageRect.Left() - GetSidebarWidth()-GetSidebarBorderWidth()+ mpEditWin->WindowToLogic(Size(2,0)).Width(),aPageRect.Top() + mpEditWin->WindowToLogic(Size(0,2)).Height())
+                      : Point(aPageRect.Right()+GetSidebarBorderWidth()+ mpEditWin->WindowToLogic(Size(2,0)).Width(),aPageRect.Top() + mpEditWin->WindowToLogic(Size(0,2)).Height());
 
     tools::Rectangle aRectBottom(GetBottomScrollRect(aPage));
     tools::Rectangle aRectTop(GetTopScrollRect(aPage));
@@ -2375,10 +2375,10 @@ void SwPostItMgr::CorrectPositions()
     // yeah, I know,    if this is a left page it could be wrong, but finding the page and the note is probably not even faster than just doing it
     // check, if anchor overlay object exists.
     const tools::Long aAnchorX = pFirstPostIt->Anchor()
-                          ? mpEditWin->LogicToPixel( Point(static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getX()),0)).X()
+                          ? mpEditWin->LogicToWindow( Point(static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getX()),0)).X()
                           : 0;
     const tools::Long aAnchorY = pFirstPostIt->Anchor()
-                          ? mpEditWin->LogicToPixel( Point(0,static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getY()))).Y() + 1
+                          ? mpEditWin->LogicToWindow( Point(0,static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getY()))).Y() + 1
                           : 0;
     if (Point(aAnchorX,aAnchorY) == pFirstPostIt->GetPosPixel())
         return;
@@ -2393,9 +2393,9 @@ void SwPostItMgr::CorrectPositions()
             if ( item->mbShow && item->mpPostIt && item->mpPostIt->Anchor() )
             {
                 aAnchorPosX = pPage->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT
-                    ? mpEditWin->LogicToPixel( Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSeventhPosition().getX()),0)).X()
-                    : mpEditWin->LogicToPixel( Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getX()),0)).X();
-                aAnchorPosY = mpEditWin->LogicToPixel( Point(0,static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getY()))).Y() + 1;
+                    ? mpEditWin->LogicToWindow( Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSeventhPosition().getX()),0)).X()
+                    : mpEditWin->LogicToWindow( Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getX()),0)).X();
+                aAnchorPosY = mpEditWin->LogicToWindow( Point(0,static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getY()))).Y() + 1;
                 item->mpPostIt->SetPosPixel(Point(aAnchorPosX,aAnchorPosY));
             }
         }
@@ -2432,7 +2432,7 @@ void SwPostItMgr::SetSidebarWidth(const Point& rPointLogic)
 
     // The zoom level is conveniently used as reference to define the minimum width
     const sal_uInt16 nZoom = mpWrtShell->GetViewOptions()->GetZoom();
-    double nFactor = static_cast<double>(mpEditWin->LogicToPixel(Point(nLogicWidth, 0)).X())
+    double nFactor = static_cast<double>(mpEditWin->LogicToWindow(Point(nLogicWidth, 0)).X())
                      / static_cast<double>(nZoom);
     // The width may vary from 1x to 8x the zoom factor
     nFactor = std::clamp(nFactor, 1.0, 8.0);
@@ -2479,7 +2479,7 @@ tools::ULong SwPostItMgr::GetSidebarWidth(bool bPx) const
         if (bEnableMapMode)
             // The output device is the window.
             mpWrtShell->GetOut()->SetMappingPolicy();
-        tools::Long nRet = mpWrtShell->GetOut()->PixelToLogic(Size(aWidth, 0))->Width();
+        tools::Long nRet = mpWrtShell->GetOut()->WindowToLogic(Size(aWidth, 0))->Width();
         if (bEnableMapMode)
             mpWrtShell->GetOut()->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
         return nRet;
@@ -2491,7 +2491,7 @@ tools::ULong SwPostItMgr::GetSidebarBorderWidth(bool bPx) const
     if (bPx)
         return 2;
     else
-        return mpWrtShell->GetOut()->PixelToLogic(Size(2,0))->Width();
+        return mpWrtShell->GetOut()->WindowToLogic(Size(2,0))->Width();
 }
 
 Color SwPostItMgr::GetColorDark(std::size_t aAuthorIndex)

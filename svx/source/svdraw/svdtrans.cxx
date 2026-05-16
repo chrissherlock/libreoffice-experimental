@@ -580,15 +580,15 @@ static FrPair GetInchOrMM(MapUnit eU)
         case MapUnit::MapPixel      : {
             ScopedVclPtrInstance< VirtualDevice > pVD;
             pVD->SetMapMode(MapMode(MapUnit::Map100thMM));
-            Point aP(pVD->PixelToLogic(Point(64,64))); // 64 pixels for more accuracy
+            Point aP(pVD->WindowToLogic(Point(64,64))); // 64 pixels for more accuracy
             return FrPair(6400,aP.X(),6400,aP.Y());
         }
         case MapUnit::MapAppFont: case MapUnit::MapSysFont: {
             ScopedVclPtrInstance< VirtualDevice > pVD;
             pVD->SetMapMode(MapMode(eU));
-            Point aP(pVD->LogicToPixel(Point(32,32))); // 32 units for more accuracy
+            Point aP(pVD->LogicToWindow(Point(32,32))); // 32 units for more accuracy
             pVD->SetMapMode(MapMode(MapUnit::Map100thMM));
-            aP= pVD->PixelToLogic(aP);
+            aP= pVD->WindowToLogic(aP);
             return FrPair(3200,aP.X(),3200,aP.Y());
         }
         default: break;

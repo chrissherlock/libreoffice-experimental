@@ -176,9 +176,9 @@ bool DlgEdObj::TransformSdrToControlCoordinates(
     DBG_ASSERT( pDevice, "DlgEdObj::TransformSdrToControlCoordinates: missing default device!" );
     if ( !pDevice )
         return false;
-    aPos = pDevice->LogicToPixel( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->LogicToPixel( aSize, MapMode( MapUnit::Map100thMM ) );
-    aFormPos = pDevice->LogicToPixel( aFormPos, MapMode( MapUnit::Map100thMM ) );
+    aPos = pDevice->LogicToWindow( aPos, MapMode( MapUnit::Map100thMM ) );
+    aSize = pDevice->LogicToWindow( aSize, MapMode( MapUnit::Map100thMM ) );
+    aFormPos = pDevice->LogicToWindow( aFormPos, MapMode( MapUnit::Map100thMM ) );
 
     // subtract form position
     aPos.AdjustWidth( -(aFormPos.Width()) );
@@ -199,8 +199,8 @@ bool DlgEdObj::TransformSdrToControlCoordinates(
     }
 
     // convert pixel to logic units
-    aPos = pDevice->PixelToLogic(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->PixelToLogic(aSize, MapMode(MapUnit::MapAppFont));
+    aPos = pDevice->WindowToLogic(aPos, MapMode(MapUnit::MapAppFont));
+    aSize = pDevice->WindowToLogic(aSize, MapMode(MapUnit::MapAppFont));
 
     // set out parameters
     nXOut = aPos.Width();
@@ -224,8 +224,8 @@ bool DlgEdObj::TransformSdrToFormCoordinates(
     DBG_ASSERT( pDevice, "DlgEdObj::TransformSdrToFormCoordinates: missing default device!" );
     if ( !pDevice )
         return false;
-    aPos = pDevice->LogicToPixel( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->LogicToPixel( aSize, MapMode( MapUnit::Map100thMM ) );
+    aPos = pDevice->LogicToWindow( aPos, MapMode( MapUnit::Map100thMM ) );
+    aSize = pDevice->LogicToWindow( aSize, MapMode( MapUnit::Map100thMM ) );
 
     // take window borders into account
     DlgEdForm* pForm = nullptr;
@@ -246,8 +246,8 @@ bool DlgEdObj::TransformSdrToFormCoordinates(
         aSize.AdjustHeight( -(aDeviceInfo.TopInset + aDeviceInfo.BottomInset) );
     }
     // convert pixel to logic units
-    aPos = pDevice->PixelToLogic(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->PixelToLogic(aSize, MapMode(MapUnit::MapAppFont));
+    aPos = pDevice->WindowToLogic(aPos, MapMode(MapUnit::MapAppFont));
+    aSize = pDevice->WindowToLogic(aSize, MapMode(MapUnit::MapAppFont));
 
     // set out parameters
     nXOut = aPos.Width();
@@ -285,9 +285,9 @@ bool DlgEdObj::TransformControlToSdrCoordinates(
     DBG_ASSERT( pDevice, "DlgEdObj::TransformControlToSdrCoordinates: missing default device!" );
     if ( !pDevice )
         return false;
-    aPos = pDevice->LogicToPixel(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
-    aFormPos = pDevice->LogicToPixel(aFormPos, MapMode(MapUnit::MapAppFont));
+    aPos = pDevice->LogicToWindow(aPos, MapMode(MapUnit::MapAppFont));
+    aSize = pDevice->LogicToWindow(aSize, MapMode(MapUnit::MapAppFont));
+    aFormPos = pDevice->LogicToWindow(aFormPos, MapMode(MapUnit::MapAppFont));
 
     // add form position
     aPos.AdjustWidth(aFormPos.Width() );
@@ -304,8 +304,8 @@ bool DlgEdObj::TransformControlToSdrCoordinates(
     }
 
     // convert pixel to 100th_mm
-    aPos = pDevice->PixelToLogic( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->PixelToLogic( aSize, MapMode( MapUnit::Map100thMM ) );
+    aPos = pDevice->WindowToLogic( aPos, MapMode( MapUnit::Map100thMM ) );
+    aSize = pDevice->WindowToLogic( aSize, MapMode( MapUnit::Map100thMM ) );
 
     // set out parameters
     nXOut = aPos.Width();
@@ -335,8 +335,8 @@ bool DlgEdObj::TransformFormToSdrCoordinates(
     if ( !lcl_getDlgEdForm( this, pForm ) )
         return false;
 
-    aPos = pDevice->LogicToPixel(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->LogicToPixel(aSize, MapMode(MapUnit::MapAppFont));
+    aPos = pDevice->LogicToWindow(aPos, MapMode(MapUnit::MapAppFont));
+    aSize = pDevice->LogicToWindow(aSize, MapMode(MapUnit::MapAppFont));
 
     // take window borders into account
     Reference< beans::XPropertySet > xPSetForm( pForm->GetUnoControlModel(), UNO_QUERY );
@@ -353,8 +353,8 @@ bool DlgEdObj::TransformFormToSdrCoordinates(
     }
 
     // convert pixel to 100th_mm
-    aPos = pDevice->PixelToLogic( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->PixelToLogic( aSize, MapMode( MapUnit::Map100thMM ) );
+    aPos = pDevice->WindowToLogic( aPos, MapMode( MapUnit::Map100thMM ) );
+    aSize = pDevice->WindowToLogic( aSize, MapMode( MapUnit::Map100thMM ) );
 
     // set out parameters
     nXOut = aPos.Width();

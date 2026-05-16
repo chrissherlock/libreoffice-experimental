@@ -66,7 +66,7 @@ namespace Move {
     the buffered layout.
 
     To translate the pixel positions from the buffer OutputDevice to the real
-    pixel positions, use the PixelToLogic methods of this class.
+    pixel positions, use the WindowToLogic methods of this class.
   */
 class SAL_DLLPUBLIC_RTTI SwEditWin final : public vcl::DocWindow,
                 public DropTargetHelper, public DragSourceHelper

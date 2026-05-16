@@ -108,7 +108,7 @@ namespace vcl
         mpRoadmap->SetPosPixel( Point( 0, 0 ) );
         mpRoadmap->SetItemSelectHdl( LINK( this, RoadmapWizard, OnRoadmapItemSelected ) );
 
-        Size aRoadmapSize = LogicToPixel(Size(85, 0), MapMode(MapUnit::MapAppFont));
+        Size aRoadmapSize = LogicToWindow(Size(85, 0), MapMode(MapUnit::MapAppFont));
         aRoadmapSize.setHeight( GetSizePixel().Height() );
         mpRoadmap->SetSizePixel( aRoadmapSize );
 
@@ -318,7 +318,7 @@ namespace vcl
 
     tools::Long RoadmapWizard::LogicalCoordinateToPixel(int iCoordinate) const
     {
-        Size aLocSize = LogicToPixel(Size(iCoordinate, 0), MapMode(MapUnit::MapAppFont));
+        Size aLocSize = LogicToWindow(Size(iCoordinate, 0), MapMode(MapUnit::MapAppFont));
         int iPixelCoordinate =  aLocSize.Width();
         return iPixelCoordinate;
     }
@@ -409,7 +409,7 @@ namespace vcl
         // create buttons
         // the help button
         m_pHelp= VclPtr<HelpButton>::Create(this, WB_TABSTOP);
-        m_pHelp->SetSizePixel(LogicToPixel(Size(50, 14), MapMode(MapUnit::MapAppFont)));
+        m_pHelp->SetSizePixel(LogicToWindow(Size(50, 14), MapMode(MapUnit::MapAppFont)));
         m_pHelp->Show();
         m_pHelp->set_id(u"help"_ustr);
         AddButton( m_pHelp, WIZARDDIALOG_BUTTON_STDOFFSET_X);
@@ -417,7 +417,7 @@ namespace vcl
         // the previous button
         m_pPrevPage = VclPtr<PushButton>::Create(this, WB_TABSTOP);
         m_pPrevPage->SetHelpId( HID_WIZARD_PREVIOUS );
-        m_pPrevPage->SetSizePixel(LogicToPixel(Size(50, 14), MapMode(MapUnit::MapAppFont)));
+        m_pPrevPage->SetSizePixel(LogicToWindow(Size(50, 14), MapMode(MapUnit::MapAppFont)));
         m_pPrevPage->SetText(VclResId(STR_WIZDLG_PREVIOUS));
         m_pPrevPage->Show();
         m_pPrevPage->set_id(u"previous"_ustr);
@@ -428,7 +428,7 @@ namespace vcl
         // the next button
         m_pNextPage = VclPtr<PushButton>::Create(this, WB_TABSTOP);
         m_pNextPage->SetHelpId( HID_WIZARD_NEXT );
-        m_pNextPage->SetSizePixel(LogicToPixel(Size(50, 14), MapMode(MapUnit::MapAppFont)));
+        m_pNextPage->SetSizePixel(LogicToWindow(Size(50, 14), MapMode(MapUnit::MapAppFont)));
         m_pNextPage->SetText(VclResId(STR_WIZDLG_NEXT));
         m_pNextPage->Show();
         m_pNextPage->set_id(u"next"_ustr);
@@ -438,7 +438,7 @@ namespace vcl
 
         // the finish button
         m_pFinish = VclPtr<OKButton>::Create(this, WB_TABSTOP);
-        m_pFinish->SetSizePixel(LogicToPixel(Size(50, 14), MapMode(MapUnit::MapAppFont)));
+        m_pFinish->SetSizePixel(LogicToWindow(Size(50, 14), MapMode(MapUnit::MapAppFont)));
         m_pFinish->SetText(VclResId(STR_WIZDLG_FINISH));
         m_pFinish->Show();
         m_pFinish->set_id(u"finish"_ustr);
@@ -447,7 +447,7 @@ namespace vcl
 
         // the cancel button
         m_pCancel = VclPtr<CancelButton>::Create(this, WB_TABSTOP);
-        m_pCancel->SetSizePixel(LogicToPixel(Size(50, 14), MapMode(MapUnit::MapAppFont)));
+        m_pCancel->SetSizePixel(LogicToWindow(Size(50, 14), MapMode(MapUnit::MapAppFont)));
         m_pCancel->Show();
         AddButton( m_pCancel, WIZARDDIALOG_BUTTON_STDOFFSET_X );
     }

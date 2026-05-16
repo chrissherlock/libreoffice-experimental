@@ -473,20 +473,20 @@ tools::Rectangle TableControl_Impl::impl_getAllVisibleDataCellArea() const
 void TableControl_Impl::impl_ni_updateCachedTableMetrics()
 {
     m_nRowHeightPixel
-        = m_rAntiImpl.LogicToPixel(Size(0, m_pModel->getRowHeight()), MapMode(MapUnit::MapAppFont))
+        = m_rAntiImpl.LogicToWindow(Size(0, m_pModel->getRowHeight()), MapMode(MapUnit::MapAppFont))
               .Height();
 
     m_nColHeaderHeightPixel = 0;
     if (m_pModel->hasColumnHeaders())
         m_nColHeaderHeightPixel = m_rAntiImpl
-                                      .LogicToPixel(Size(0, m_pModel->getColumnHeaderHeight()),
+                                      .LogicToWindow(Size(0, m_pModel->getColumnHeaderHeight()),
                                                     MapMode(MapUnit::MapAppFont))
                                       .Height();
 
     m_nRowHeaderWidthPixel = 0;
     if (m_pModel->hasRowHeaders())
         m_nRowHeaderWidthPixel = m_rAntiImpl
-                                     .LogicToPixel(Size(m_pModel->getRowHeaderWidth(), 0),
+                                     .LogicToWindow(Size(m_pModel->getRowHeaderWidth(), 0),
                                                    MapMode(MapUnit::MapAppFont))
                                      .Width();
 }
@@ -1677,12 +1677,12 @@ void TableControl_Impl::invalidate(TableArea const i_what)
 
 tools::Long TableControl_Impl::pixelWidthToAppFont(tools::Long const i_pixels) const
 {
-    return m_pDataWindow->PixelToLogic(Size(i_pixels, 0), MapMode(MapUnit::MapAppFont)).Width();
+    return m_pDataWindow->WindowToLogic(Size(i_pixels, 0), MapMode(MapUnit::MapAppFont)).Width();
 }
 
 tools::Long TableControl_Impl::appFontWidthToPixel(tools::Long const i_appFontUnits) const
 {
-    return m_pDataWindow->LogicToPixel(Size(i_appFontUnits, 0), MapMode(MapUnit::MapAppFont))
+    return m_pDataWindow->LogicToWindow(Size(i_appFontUnits, 0), MapMode(MapUnit::MapAppFont))
         .Width();
 }
 

@@ -97,7 +97,7 @@ GEOMETRY convert(const MapMode& _rSource, const MapMode& _rDest, OutputDevice* _
     GEOMETRY aPoint;
     if (MapUnit::MapPixel == _rSource.GetMapUnit())
     {
-        aPoint = _pPixelConversion->PixelToLogic(_rObject, _rDest);
+        aPoint = _pPixelConversion->WindowToLogic(_rObject, _rDest);
     }
     else
     {

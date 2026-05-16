@@ -72,7 +72,7 @@ AccessibleViewForwarder::~AccessibleViewForwarder()
     coordinates of the window origin are added to make the point coordinates
     absolute.
 */
-Point AccessibleViewForwarder::LogicToPixel(const Point& rPoint) const
+Point AccessibleViewForwarder::LogicToWindow(const Point& rPoint) const
 {
     assert(mpView != nullptr);
     if (static_cast<sal_uInt32>(mnWindowId) < mpView->PaintWindowCount())
@@ -80,20 +80,20 @@ Point AccessibleViewForwarder::LogicToPixel(const Point& rPoint) const
         SdrPaintWindow* pPaintWindow = mpView->GetPaintWindow(static_cast<sal_uInt32>(mnWindowId));
         OutputDevice& rOutDev = pPaintWindow->GetOutputDevice();
         ::tools::Rectangle aBBox(rOutDev.GetOwnerWindow()->GetWindowExtentsAbsolute());
-        return rOutDev.LogicToPixel(rPoint) + aBBox.TopLeft();
+        return rOutDev.LogicToWindow(rPoint) + aBBox.TopLeft();
     }
     else
         return Point();
 }
 
-Size AccessibleViewForwarder::LogicToPixel(const Size& rSize) const
+Size AccessibleViewForwarder::LogicToWindow(const Size& rSize) const
 {
     assert(mpView != nullptr);
     if (static_cast<sal_uInt32>(mnWindowId) < mpView->PaintWindowCount())
     {
         SdrPaintWindow* pPaintWindow = mpView->GetPaintWindow(static_cast<sal_uInt32>(mnWindowId));
         OutputDevice& rOutDev = pPaintWindow->GetOutputDevice();
-        return rOutDev.LogicToPixel(rSize);
+        return rOutDev.LogicToWindow(rSize);
     }
     else
         return Size();

@@ -15,22 +15,22 @@
 
 Size getParagraphPreviewOptimalSize(const OutputDevice& rReference)
 {
-    return rReference.LogicToPixel(Size(68, 112), MapMode(MapUnit::MapAppFont));
+    return rReference.LogicToWindow(Size(68, 112), MapMode(MapUnit::MapAppFont));
 }
 
 Size getDrawPreviewOptimalSize(const OutputDevice& rReference)
 {
-    return rReference.LogicToPixel(Size(88, 42), MapMode(MapUnit::MapAppFont));
+    return rReference.LogicToWindow(Size(88, 42), MapMode(MapUnit::MapAppFont));
 }
 
 Size getPreviewStripSize(const OutputDevice& rReference)
 {
-    return rReference.LogicToPixel(Size(70, 40), MapMode(MapUnit::MapAppFont));
+    return rReference.LogicToWindow(Size(70, 40), MapMode(MapUnit::MapAppFont));
 }
 
 Size getPreviewOptionsSize(const OutputDevice& rReference)
 {
-    return rReference.LogicToPixel(Size(70, 27), MapMode(MapUnit::MapAppFont));
+    return rReference.LogicToWindow(Size(70, 27), MapMode(MapUnit::MapAppFont));
 }
 
 OUString getWidestDateTime(const LocaleDataWrapper& rWrapper, bool bWithSec)

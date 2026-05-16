@@ -1602,7 +1602,7 @@ void MSWordExportBase::BulletDefinitions()
         const Graphic& rGraphic = *m_vecBulletPic[i];
         Size aSize(rGraphic.GetPrefSize());
         if (MapUnit::MapPixel == rGraphic.GetPrefMapMode().GetMapUnit())
-            aSize = Application::GetDefaultDevice()->PixelToLogic(aSize, aMapMode);
+            aSize = Application::GetDefaultDevice()->WindowToLogic(aSize, aMapMode);
         else
             aSize = ::LogicToLogic(aSize,rGraphic.GetPrefMapMode(), aMapMode);
 

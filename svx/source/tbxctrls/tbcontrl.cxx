@@ -647,8 +647,8 @@ private:
         }
 
         // Paint the lines
-        aSize =  aVirDev->PixelToLogic( aSize );
-        tools::Long nPix = aVirDev->PixelToLogic( Size( 0, 1 ) )->Height();
+        aSize =  aVirDev->WindowToLogic( aSize );
+        tools::Long nPix = aVirDev->WindowToLogic( Size( 0, 1 ) )->Height();
         sal_uInt32 n1 = nLine1;
         sal_uInt32 n2 = nLine2;
         tools::Long nDist  = nDistance;
@@ -668,7 +668,7 @@ private:
         if ( aSize.Width() <= 0 )
             return;
 
-        Size aVirSize =  aVirDev->LogicToPixel( aSize );
+        Size aVirSize =  aVirDev->LogicToWindow( aSize );
         if ( aVirDev->GetOutputSizePixel() != aVirSize )
             aVirDev->SetOutputSizePixel( aVirSize );
         aVirDev->SetFillColor( aColorDist );
@@ -1152,7 +1152,7 @@ void SvxStyleBox_Impl::SetOptimalSize()
     // set width in chars low so the size request will not be overridden
     m_xWidget->set_entry_width_chars(1);
     // tdf#132338 purely using this calculation to keep things their traditional width
-    Size aSize(LogicToPixel(Size((COMBO_WIDTH_IN_CHARS + 3) * 4, 0), MapMode(MapUnit::MapAppFont)));
+    Size aSize(LogicToWindow(Size((COMBO_WIDTH_IN_CHARS + 3) * 4, 0), MapMode(MapUnit::MapAppFont)));
     m_xWidget->set_size_request(aSize.Width(), -1);
 
     SetSizePixel(get_preferred_size());
@@ -1351,7 +1351,7 @@ static bool SetFontSize(const vcl::RenderContext& rRenderContext, const SfxItemS
         if (SfxObjectShell *pShell = SfxObjectShell::Current())
         {
             Size aFontSize(0, rFontHeightItem.GetHeight());
-            Size aPixelSize(rRenderContext.LogicToPixel(aFontSize, MapMode(pShell->GetMapUnit())));
+            Size aPixelSize(rRenderContext.LogicToWindow(aFontSize, MapMode(pShell->GetMapUnit())));
             rFont.SetFontSize(aPixelSize);
             return true;
         }
@@ -1894,7 +1894,7 @@ void SvxFontNameBox_Impl::SetOptimalSize()
     // set width in chars low so the size request will not be overridden
     m_xWidget->set_entry_width_chars(1);
     // tdf#132338 purely using this calculation to keep things their traditional width
-    Size aSize(LogicToPixel(Size((COMBO_WIDTH_IN_CHARS +5) * 4, 0), MapMode(MapUnit::MapAppFont)));
+    Size aSize(LogicToWindow(Size((COMBO_WIDTH_IN_CHARS +5) * 4, 0), MapMode(MapUnit::MapAppFont)));
     m_xWidget->set_size_request(aSize.Width(), -1);
 
     SetSizePixel(get_preferred_size());

@@ -443,7 +443,7 @@ void SdrObjEditView::ModelHasChanged()
                 { // invalidate old OutlinerView area
                     tools::Rectangle aTmpRect(aOldArea);
                     sal_uInt16 nPixSiz = pOLV->GetInvalidateMore() + 1;
-                    Size aMore(pWin->PixelToLogic(Size(nPixSiz, nPixSiz)));
+                    Size aMore(pWin->WindowToLogic(Size(nPixSiz, nPixSiz)));
                     aTmpRect.AdjustLeft(-(aMore.Width()));
                     aTmpRect.AdjustRight(aMore.Width());
                     aTmpRect.AdjustTop(-(aMore.Height()));
@@ -821,7 +821,7 @@ void TextEditOverlayObject::checkSelectionChange()
 
     std::vector<tools::Rectangle> aLogicRects;
     std::vector<basegfx::B2DRange> aLogicRanges;
-    const Size aLogicPixel(getOverlayManager()->getOutputDevice().PixelToLogic(Size(1, 1)));
+    const Size aLogicPixel(getOverlayManager()->getOutputDevice().WindowToLogic(Size(1, 1)));
 
     // get logic selection
     getOutlinerView().GetSelectionRectangles(aLogicRects);
@@ -965,7 +965,7 @@ void SdrObjEditView::ImpPaintOutlinerView(OutlinerView& rOutlView, const tools::
     bool bModified(mpTextEditOutliner->IsModified());
     tools::Rectangle aBlankRect(rOutlView.GetOutputArea());
     aBlankRect.Union(m_aMinTextEditArea);
-    tools::Rectangle aPixRect(rTargetDevice.LogicToPixel(aBlankRect));
+    tools::Rectangle aPixRect(rTargetDevice.LogicToWindow(aBlankRect));
 
     // in the tiled rendering case, the setup is incomplete, and we very
     // easily get an empty rRect on input - that will cause that everything is
@@ -1027,7 +1027,7 @@ void SdrObjEditView::ImpInvalidateOutlinerView(OutlinerView const& rOutlView) co
 
     tools::Rectangle aBlankRect(rOutlView.GetOutputArea());
     aBlankRect.Union(m_aMinTextEditArea);
-    tools::Rectangle aPixRect(pWin->LogicToPixel(aBlankRect));
+    tools::Rectangle aPixRect(pWin->LogicToWindow(aBlankRect));
     sal_uInt16 nPixSiz(rOutlView.GetInvalidateMore() - 1);
 
     aPixRect.AdjustLeft(-1);
@@ -1868,12 +1868,12 @@ SdrEndTextEditKind SdrObjEditView::SdrEndTextEdit(bool bDontDeleteReally)
             }
             aRect.Union(m_aTextEditArea);
             aRect.Union(m_aMinTextEditArea);
-            aRect = pWin->LogicToPixel(aRect);
+            aRect = pWin->LogicToWindow(aRect);
             aRect.AdjustLeft(-nMorePix);
             aRect.AdjustTop(-nMorePix);
             aRect.AdjustRight(nMorePix);
             aRect.AdjustBottom(nMorePix);
-            aRect = pWin->PixelToLogic(aRect);
+            aRect = pWin->WindowToLogic(aRect);
             InvalidateOneWin(*pWin->GetOutDev(), aRect);
             pWin->GetOutDev()->SetFillColor();
             pWin->GetOutDev()->SetLineColor(COL_BLACK);
@@ -1997,7 +1997,7 @@ bool SdrObjEditView::IsTextEditFrameHit(const Point& rHit) const
                 aEditArea.Union(pOLV->GetOutputArea());
                 if (!aEditArea.Contains(rHit))
                 {
-                    Size aSiz(pWin->PixelToLogic(Size(nPixSiz, nPixSiz)));
+                    Size aSiz(pWin->WindowToLogic(Size(nPixSiz, nPixSiz)));
                     aEditArea.AdjustLeft(-(aSiz.Width()));
                     aEditArea.AdjustTop(-(aSiz.Height()));
                     aEditArea.AdjustRight(aSiz.Width());
@@ -2078,9 +2078,9 @@ bool SdrObjEditView::MouseButtonDown(const MouseEvent& rMEvt, OutputDevice* pWin
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin != nullptr)
-                aPt = pWin->PixelToLogic(aPt);
+                aPt = pWin->WindowToLogic(aPt);
             else if (mpTextEditWin != nullptr)
-                aPt = mpTextEditWin->PixelToLogic(aPt);
+                aPt = mpTextEditWin->WindowToLogic(aPt);
             bPostIt = IsTextEditHit(aPt);
         }
         if (bPostIt)
@@ -2088,7 +2088,7 @@ bool SdrObjEditView::MouseButtonDown(const MouseEvent& rMEvt, OutputDevice* pWin
             Point aPixPos(rMEvt.GetPosPixel());
             if (pWin)
             {
-                tools::Rectangle aR(pWin->LogicToPixel(mpTextEditOutlinerView->GetOutputArea()));
+                tools::Rectangle aR(pWin->LogicToWindow(mpTextEditOutlinerView->GetOutputArea()));
                 if (aPixPos.X() < aR.Left())
                     aPixPos.setX(aR.Left());
                 if (aPixPos.X() > aR.Right())
@@ -2122,15 +2122,15 @@ bool SdrObjEditView::MouseButtonUp(const MouseEvent& rMEvt, OutputDevice* pWin)
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin != nullptr)
-                aPt = pWin->PixelToLogic(aPt);
+                aPt = pWin->WindowToLogic(aPt);
             else if (mpTextEditWin != nullptr)
-                aPt = mpTextEditWin->PixelToLogic(aPt);
+                aPt = mpTextEditWin->WindowToLogic(aPt);
             bPostIt = IsTextEditHit(aPt);
         }
         if (bPostIt && pWin)
         {
             Point aPixPos(rMEvt.GetPosPixel());
-            tools::Rectangle aR(pWin->LogicToPixel(mpTextEditOutlinerView->GetOutputArea()));
+            tools::Rectangle aR(pWin->LogicToWindow(mpTextEditOutlinerView->GetOutputArea()));
             if (aPixPos.X() < aR.Left())
                 aPixPos.setX(aR.Left());
             if (aPixPos.X() > aR.Right())
@@ -2161,9 +2161,9 @@ bool SdrObjEditView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin)
-                aPt = pWin->PixelToLogic(aPt);
+                aPt = pWin->WindowToLogic(aPt);
             else if (mpTextEditWin)
-                aPt = mpTextEditWin->PixelToLogic(aPt);
+                aPt = mpTextEditWin->WindowToLogic(aPt);
             bPostIt = IsTextEditHit(aPt);
         }
         if (bPostIt)
@@ -2171,9 +2171,9 @@ bool SdrObjEditView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
             Point aPixPos(rMEvt.GetPosPixel());
             tools::Rectangle aR(mpTextEditOutlinerView->GetOutputArea());
             if (pWin)
-                aR = pWin->LogicToPixel(aR);
+                aR = pWin->LogicToWindow(aR);
             else if (mpTextEditWin)
-                aR = mpTextEditWin->LogicToPixel(aR);
+                aR = mpTextEditWin->LogicToWindow(aR);
             if (aPixPos.X() < aR.Left())
                 aPixPos.setX(aR.Left());
             if (aPixPos.X() > aR.Right())
@@ -2206,9 +2206,9 @@ bool SdrObjEditView::Command(const CommandEvent& rCEvt, vcl::Window* pWin)
             {
                 Point aPt(rCEvt.GetMousePosPixel());
                 if (pWin != nullptr)
-                    aPt = pWin->PixelToLogic(aPt);
+                    aPt = pWin->WindowToLogic(aPt);
                 else if (mpTextEditWin != nullptr)
-                    aPt = mpTextEditWin->PixelToLogic(aPt);
+                    aPt = mpTextEditWin->WindowToLogic(aPt);
                 bPostIt = IsTextEditHit(aPt);
             }
             if (bPostIt)
@@ -2217,7 +2217,7 @@ bool SdrObjEditView::Command(const CommandEvent& rCEvt, vcl::Window* pWin)
                 if (rCEvt.IsMouseEvent() && pWin)
                 {
                     tools::Rectangle aR(
-                        pWin->LogicToPixel(mpTextEditOutlinerView->GetOutputArea()));
+                        pWin->LogicToWindow(mpTextEditOutlinerView->GetOutputArea()));
                     if (aPixPos.X() < aR.Left())
                         aPixPos.setX(aR.Left());
                     if (aPixPos.X() > aR.Right())

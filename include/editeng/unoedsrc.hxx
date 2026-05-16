@@ -462,7 +462,7 @@ public:
 
         @return the point in screen coordinates
      */
-    virtual Point       LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const = 0;
+    virtual Point       LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const = 0;
 
     /** Convert from screen to logical, EditEngine-relative coordinates
 
@@ -474,7 +474,7 @@ public:
 
         @return the point in logical coordinates.
      */
-    virtual Point       PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const = 0;
+    virtual Point       WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const = 0;
 
 };
 

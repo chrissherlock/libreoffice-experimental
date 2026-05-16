@@ -326,7 +326,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCombinedScaleAndOrigin)
 
     Point aResult = ::LogicToLogic(aPt, aSource, aDest);
 
-    // We assert 2000 to enforce consistency with LogicToPixel and historical rendering.
+    // We assert 2000 to enforce consistency with LogicToWindow and historical rendering.
     CPPUNIT_ASSERT_EQUAL(tools::Long(2000), aResult.X());
 }
 
@@ -338,18 +338,18 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testBasicLogicToPixel)
     // 1. Default MapMode (MapPixel)
     // In MapPixel, Logic == Pixel
     Point aLogicPt(100, 100);
-    Point aPixelPt = pDev->LogicToPixel(aLogicPt);
+    Point aPixelPt = pDev->LogicToWindow(aLogicPt);
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Default MapMode should map 1:1", aLogicPt, aPixelPt);
 
-    // 2. LogicToPixel with specific MapMode override
+    // 2. LogicToWindow with specific MapMode override
     // 100th MM to Pixel.
     // Assuming 96 DPI for the test VirtualDevice (standard for headless)
     // 1 inch = 2540 100th MM.
     // 96 pixels = 2540 logic units.
     // 1000 logic units = (1000 * 96) / 2540 ~= 37 pixels.
     MapMode aMap100thMM(MapUnit::Map100thMM);
-    Point aConverted = pDev->LogicToPixel(Point(1000, 1000), aMap100thMM);
+    Point aConverted = pDev->LogicToWindow(Point(1000, 1000), aMap100thMM);
 
     // We allow a small margin for integer arithmetic rounding, though 37 is exact-ish
     CPPUNIT_ASSERT(aConverted.X() >= 37);
@@ -404,7 +404,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testSetRelativeMapMode)
     // 1000 logic units * 2 (scale) -> converted to pixels
     // 1000 units normally ~37 pixels. Scaled by 2 should be ~75 pixels.
     Point aPt(1000, 1000);
-    Point aPix = pDev->LogicToPixel(aPt);
+    Point aPix = pDev->LogicToWindow(aPt);
 
     CPPUNIT_ASSERT(aPix.X() > 70);
     CPPUNIT_ASSERT(aPix.X() < 80);
@@ -430,11 +430,11 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testViewTransformation)
 
     // Transform using the convenience function
     Point aLogicPt(1000, 1000);
-    Point aPix = pDev->LogicToPixel(aLogicPt);
+    Point aPix = pDev->LogicToWindow(aLogicPt);
 
     // Compare Matrix result vs Helper result
     // Matrix result includes floating point precision, Helper rounds.
-    // LogicToPixel = (Logic * Scale) + Offset
+    // LogicToWindow = (Logic * Scale) + Offset
     // Offset is 10. 1000 100thMM is approx 37.8 pixels. Total ~47.8.
 
     CPPUNIT_ASSERT_DOUBLES_EQUAL(double(aPix.X()), aPt.getX(), 1.0);
@@ -458,7 +458,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testB2DPolygonAsymmetricDPI)
 
     // Test Point Scaling (Public API)
     Point aLogicPt(2540, 2540);
-    Point aPixelPt = pVDev->LogicToPixel(aLogicPt);
+    Point aPixelPt = pVDev->LogicToWindow(aLogicPt);
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("X-axis scaling failed", tools::Long(100), aPixelPt.X());
 
@@ -467,7 +467,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testB2DPolygonAsymmetricDPI)
 
     // Test Size Scaling (Public API)
     Size aLogicSize(2540, 2540);
-    Size aPixelSize = pVDev->LogicToPixel(aLogicSize);
+    Size aPixelSize = pVDev->LogicToWindow(aLogicSize);
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Size Width scaling failed", tools::Long(100), aPixelSize.Width());
 
@@ -519,21 +519,21 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModeInvalidation)
 
     // Capture the initial logic-to-pixel result
     Point aLogicPt(1000, 1000);
-    Point aPixelPt1 = pVDev->LogicToPixel(aLogicPt);
+    Point aPixelPt1 = pVDev->LogicToWindow(aLogicPt);
 
     // DISABLE MapMode
     // This is where your bug lived!
     pVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
-    Point aPixelPt2 = pVDev->LogicToPixel(aLogicPt);
+    Point aPixelPt2 = pVDev->LogicToWindow(aLogicPt);
 
-    // In 'false' mode, LogicToPixel should be an identity (1:1)
+    // In 'false' mode, LogicToWindow should be an identity (1:1)
     CPPUNIT_ASSERT_EQUAL(aLogicPt.X(), aPixelPt2.X());
     CPPUNIT_ASSERT_EQUAL(aLogicPt.Y(), aPixelPt2.Y());
 
     // RE-ENABLE MapMode
     // This verifies the 'true' restoration correctly invalidates the cache
     pVDev->SetMappingPolicy(vcl::MappingPolicy::ApplyMapMode);
-    Point aPixelPt3 = pVDev->LogicToPixel(aLogicPt);
+    Point aPixelPt3 = pVDev->LogicToWindow(aLogicPt);
 
     // This should match the very first calculation
     CPPUNIT_ASSERT_EQUAL(aPixelPt1.X(), aPixelPt3.X());

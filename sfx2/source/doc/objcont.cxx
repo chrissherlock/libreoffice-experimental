@@ -165,7 +165,7 @@ bool SfxObjectShell::CreatePreview_Impl( bool bFullContent, bool bOutputForScree
     {
         // Use pixel size, that's also what DoDraw() requires in this case,
         // despite the metafile case (needlessly?) setting mapmode.
-        Size aSizePix = pDevice->LogicToPixel( aTmpSize, aMode );
+        Size aSizePix = pDevice->LogicToWindow( aTmpSize, aMode );
         // Code based on GDIMetaFile::CreateThumbnail().
         sal_uInt32      nMaximumExtent = 512;
         // determine size that has the same aspect ratio as image size and

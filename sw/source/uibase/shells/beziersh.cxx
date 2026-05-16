@@ -192,7 +192,7 @@ void SwBezierShell::Execute(SfxRequest const &rReq)
                     {
                         SdrPathObj* pPathObj = static_cast<SdrPathObj*>( rMarkList.GetMark(0)->GetMarkedSdrObj() );
                         pSdrView->UnmarkAllPoints();
-                        // Size aDist(GetView().GetEditWin().PixelToLogic(Size(8,8)));
+                        // Size aDist(GetView().GetEditWin().WindowToLogic(Size(8,8)));
                         pPathObj->ToggleClosed(); // aDist.Width());
                         break;
                     }

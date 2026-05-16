@@ -853,7 +853,7 @@ bool ViewShell::HandleScrollCommand(const CommandEvent& rCEvt, ::sd::Window* pWi
                     {
                         const sal_uInt16  nOldZoom = GetActiveWindow()->GetZoom();
                         sal_uInt16        nNewZoom;
-                        Point aOldMousePos = GetActiveWindow()->PixelToLogic(rCEvt.GetMousePosPixel());
+                        Point aOldMousePos = GetActiveWindow()->WindowToLogic(rCEvt.GetMousePosPixel());
 
                         if( pData->GetDelta() < 0 )
                             nNewZoom = std::max<sal_uInt16>( pWin->GetMinZoom(), basegfx::zoomtools::zoomOut( nOldZoom ));
@@ -862,7 +862,7 @@ bool ViewShell::HandleScrollCommand(const CommandEvent& rCEvt, ::sd::Window* pWi
 
                         SetZoom( nNewZoom );
                         // Keep mouse at same doc point before zoom
-                        Point aNewMousePos = GetActiveWindow()->PixelToLogic(rCEvt.GetMousePosPixel());
+                        Point aNewMousePos = GetActiveWindow()->WindowToLogic(rCEvt.GetMousePosPixel());
                         SetWinViewPos(GetWinViewPos() - (aNewMousePos - aOldMousePos));
 
                         Invalidate( SID_ATTR_ZOOM );
@@ -922,7 +922,7 @@ bool ViewShell::HandleScrollCommand(const CommandEvent& rCEvt, ::sd::Window* pWi
                 {
                     const ::tools::Long nOldZoom = GetActiveWindow()->GetZoom();
                     ::tools::Long nNewZoom;
-                    Point aOldMousePos = GetActiveWindow()->PixelToLogic(rCEvt.GetMousePosPixel());
+                    Point aOldMousePos = GetActiveWindow()->WindowToLogic(rCEvt.GetMousePosPixel());
 
                     // Accumulate fractional zoom to avoid small zoom changes from being ignored
                     mfAccumulatedZoom += deltaBetweenEvents;
@@ -936,7 +936,7 @@ bool ViewShell::HandleScrollCommand(const CommandEvent& rCEvt, ::sd::Window* pWi
                     SetZoom(nNewZoom);
 
                     // Keep mouse at same doc point before zoom
-                    Point aNewMousePos = GetActiveWindow()->PixelToLogic(rCEvt.GetMousePosPixel());
+                    Point aNewMousePos = GetActiveWindow()->WindowToLogic(rCEvt.GetMousePosPixel());
                     SetWinViewPos(GetWinViewPos() - (aNewMousePos - aOldMousePos));
 
                     Invalidate(SID_ATTR_ZOOM);

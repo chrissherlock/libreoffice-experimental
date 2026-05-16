@@ -620,7 +620,7 @@ void ImplListBoxWindow::ImplUpdateEntryMetrics( ImplEntryType& rEntry )
         if( rEntry.mnFlags & ListBoxEntryFlags::MultiLine )
         {
             // multiline case
-            Size aCurSize( PixelToLogic( GetSizePixel() ) );
+            Size aCurSize( WindowToLogic( GetSizePixel() ) );
             // set the current size to a large number
             // GetTextRect should shrink it to the actual size
             aCurSize.setHeight( 0x7fffff );
@@ -806,7 +806,7 @@ bool ImplListBoxWindow::IsVisible( sal_Int32 i_nEntry ) const
     if( i_nEntry >= mnTop )
     {
         if( maEntryList.GetAddedHeight( i_nEntry, mnTop ) <
-            PixelToLogic( GetSizePixel() ).Height() )
+            WindowToLogic( GetSizePixel() ).Height() )
         {
             bRet = true;
         }
@@ -1862,7 +1862,7 @@ void ImplListBoxWindow::SetTopEntry( sal_Int32 nTop )
     if( maEntryList.GetEntryCount() == 0 )
         return;
 
-    tools::Long nWHeight = PixelToLogic( GetSizePixel() ).Height();
+    tools::Long nWHeight = WindowToLogic( GetSizePixel() ).Height();
 
     sal_Int32 nLastEntry = maEntryList.GetEntryCount()-1;
     if( nTop > nLastEntry )
@@ -1889,7 +1889,7 @@ void ImplListBoxWindow::SetTopEntry( sal_Int32 nTop )
 void ImplListBoxWindow::ShowProminentEntry( sal_Int32 nEntryPos )
 {
     sal_Int32 nPos = nEntryPos;
-    auto nWHeight = PixelToLogic( GetSizePixel() ).Height();
+    auto nWHeight = WindowToLogic( GetSizePixel() ).Height();
     while( nEntryPos > 0 && maEntryList.GetAddedHeight( nPos+1, nEntryPos ) < nWHeight/2 )
         nEntryPos--;
 

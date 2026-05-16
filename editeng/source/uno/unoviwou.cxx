@@ -51,7 +51,7 @@ bool SvxDrawOutlinerViewForwarder::IsValid() const
     return true;
 }
 
-Point SvxDrawOutlinerViewForwarder::LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const
+Point SvxDrawOutlinerViewForwarder::LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const
 {
     OutputDevice* pOutDev = mrOutlinerView.GetWindow()->GetOutDev();
 
@@ -67,13 +67,13 @@ Point SvxDrawOutlinerViewForwarder::LogicToPixel( const Point& rPoint, const Map
         Point aPoint2( ::LogicToLogic( aPoint1, rMapMode,
                                                MapMode(aMapMode.GetMapUnit())));
         aMapMode.SetOrigin(Point());
-        return pOutDev->LogicToPixel( aPoint2, aMapMode );
+        return pOutDev->LogicToWindow( aPoint2, aMapMode );
     }
 
     return Point();
 }
 
-Point SvxDrawOutlinerViewForwarder::PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const
+Point SvxDrawOutlinerViewForwarder::WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const
 {
     OutputDevice* pOutDev = mrOutlinerView.GetWindow()->GetOutDev();
 
@@ -81,7 +81,7 @@ Point SvxDrawOutlinerViewForwarder::PixelToLogic( const Point& rPoint, const Map
     {
         MapMode aMapMode(pOutDev->GetMapMode());
         aMapMode.SetOrigin(Point());
-        Point aPoint1( pOutDev->PixelToLogic( rPoint, aMapMode ) );
+        Point aPoint1( pOutDev->WindowToLogic( rPoint, aMapMode ) );
         Point aPoint2( ::LogicToLogic( aPoint1,
                                                MapMode(aMapMode.GetMapUnit()),
                                                    rMapMode ) );

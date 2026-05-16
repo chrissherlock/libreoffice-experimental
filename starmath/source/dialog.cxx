@@ -372,7 +372,7 @@ void SmShowFont::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
 void SmShowFont::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(111 , 31), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(111 , 31), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
 }
 
@@ -1225,7 +1225,7 @@ bool SmShowSymbolSet::KeyInput(const KeyEvent& rKEvt)
 void SmShowSymbolSet::calccols(const vcl::RenderContext& rRenderContext)
 {
     // Height of 16pt in pixels (matching 'aOutputSize')
-    nLen = rRenderContext.LogicToPixel(Size(0, 16), MapMode(MapUnit::MapPoint)).Height();
+    nLen = rRenderContext.LogicToWindow(Size(0, 16), MapMode(MapUnit::MapPoint)).Height();
 
     Size aOutputSize(GetOutputSizePixel());
 

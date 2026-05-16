@@ -510,7 +510,7 @@ void ScGlobal::InitPPT()
     {
         // Avoid cumulative placement errors by intentionally limiting
         // precision.
-        Point aPix1000 = pDev->LogicToPixel(Point(1000, 1000), MapMode(MapUnit::MapTwip));
+        Point aPix1000 = pDev->LogicToWindow(Point(1000, 1000), MapMode(MapUnit::MapTwip));
         nScreenPPTX = aPix1000.X() / 1000.0;
         nScreenPPTY = aPix1000.Y() / 1000.0;
     }
@@ -542,7 +542,7 @@ void ScGlobal::InitTextHeight(SfxItemPool& rPool)
     rDefaultCellAttribute.fillFontOnly(aDefFont, pVirtWindow); // Font color doesn't matter here
     pVirtWindow->SetFont(aDefFont);
     sal_uInt16 nTest = static_cast<sal_uInt16>(
-        pVirtWindow->PixelToLogic(Size(0, pVirtWindow->GetTextHeight()), MapMode(MapUnit::MapTwip)).Height());
+        pVirtWindow->WindowToLogic(Size(0, pVirtWindow->GetTextHeight()), MapMode(MapUnit::MapTwip)).Height());
 
     if (nTest > nDefFontHeight)
         nDefFontHeight = nTest;

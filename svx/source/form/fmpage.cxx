@@ -101,7 +101,7 @@ bool FmFormPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
 
     Point aPos = rEvt.GetMousePosPixel();
     aPos = pWindow->ScreenToOutputPixel( aPos );
-    aPos = pWindow->PixelToLogic( aPos );
+    aPos = pWindow->WindowToLogic( aPos );
 
     SdrPageView* pPV = nullptr;
     SdrObject* pObj = pView->PickObj(aPos, 0, pPV, SdrSearchOptions::DEEP);
@@ -142,7 +142,7 @@ bool FmFormPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
 
     // display the help
     tools::Rectangle aItemRect = pObj->GetCurrentBoundRect();
-    aItemRect = pWindow->LogicToPixel( aItemRect );
+    aItemRect = pWindow->LogicToWindow( aItemRect );
     Point aPt = pWindow->OutputToScreenPixel( aItemRect.TopLeft() );
     aItemRect.SetLeft( aPt.X() );
     aItemRect.SetTop( aPt.Y() );

@@ -31,7 +31,7 @@ IMPL_LINK_NOARG( DlgEdFunc, ScrollTimeout, Timer *, void )
 {
     vcl::Window& rWindow = rParent.GetWindow();
     Point aPos = rWindow.ScreenToOutputPixel( rWindow.GetPointerPosPixel() );
-    aPos = rWindow.PixelToLogic( aPos );
+    aPos = rWindow.WindowToLogic( aPos );
     ForceScroll( aPos );
 }
 
@@ -43,7 +43,7 @@ void DlgEdFunc::ForceScroll( const Point& rPos )
 
     static const Point aDefPoint;
     tools::Rectangle aOutRect( aDefPoint, rWindow.GetOutputSizePixel() );
-    aOutRect = rWindow.PixelToLogic( aOutRect );
+    aOutRect = rWindow.WindowToLogic( aOutRect );
 
     ScrollAdaptor* pHScroll = rParent.GetHScroll();
     ScrollAdaptor* pVScroll = rParent.GetVScroll();
@@ -206,7 +206,7 @@ bool DlgEdFunc::KeyInput( const KeyEvent& rKEvt )
                 if ( aCode.IsMod2() )
                 {
                     // move in 1 pixel distance
-                    Size aPixelSize = rWindow.PixelToLogic(Size(1, 1));
+                    Size aPixelSize = rWindow.WindowToLogic(Size(1, 1));
                     nX *= aPixelSize.Width();
                     nY *= aPixelSize.Height();
                 }
@@ -344,9 +344,9 @@ void DlgEdFuncInsert::MouseButtonDown( const MouseEvent& rMEvt )
     vcl::Window& rWindow = rParent.GetWindow();
     rView.SetActualWin(rWindow.GetOutDev());
 
-    Point aPos = rWindow.PixelToLogic( rMEvt.GetPosPixel() );
-    sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.PixelToLogic(Size(3, 0)).Width());
-    sal_uInt16 nDrgLog = static_cast<sal_uInt16>(rWindow.PixelToLogic(Size(3, 0)).Width());
+    Point aPos = rWindow.WindowToLogic( rMEvt.GetPosPixel() );
+    sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.WindowToLogic(Size(3, 0)).Width());
+    sal_uInt16 nDrgLog = static_cast<sal_uInt16>(rWindow.WindowToLogic(Size(3, 0)).Width());
 
     rWindow.CaptureMouse();
 
@@ -389,8 +389,8 @@ bool DlgEdFuncInsert::MouseButtonUp( const MouseEvent& rMEvt )
 
         if ( rView.GetMarkedObjectList().GetMarkCount() == 0 )
         {
-            sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.PixelToLogic(Size(3, 0)).Width());
-            Point aPos( rWindow.PixelToLogic( rMEvt.GetPosPixel() ) );
+            sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.WindowToLogic(Size(3, 0)).Width());
+            Point aPos( rWindow.WindowToLogic( rMEvt.GetPosPixel() ) );
             rView.MarkObj(aPos, nHitLog);
         }
 
@@ -410,8 +410,8 @@ void DlgEdFuncInsert::MouseMove( const MouseEvent& rMEvt )
     vcl::Window& rWindow = rParent.GetWindow();
     rView.SetActualWin(rWindow.GetOutDev());
 
-    Point aPos = rWindow.PixelToLogic(rMEvt.GetPosPixel());
-    sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.PixelToLogic(Size(3, 0)).Width());
+    Point aPos = rWindow.WindowToLogic(rMEvt.GetPosPixel());
+    sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.WindowToLogic(Size(3, 0)).Width());
 
     if (rView.IsAction())
     {
@@ -438,9 +438,9 @@ void DlgEdFuncSelect::MouseButtonDown( const MouseEvent& rMEvt )
     vcl::Window& rWindow = rParent.GetWindow();
     rView.SetActualWin(rWindow.GetOutDev());
 
-    sal_uInt16 nDrgLog = static_cast<sal_uInt16>(rWindow.PixelToLogic(Size(3, 0)).Width());
-    sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.PixelToLogic(Size(3, 0)).Width());
-    Point aMDPos = rWindow.PixelToLogic(rMEvt.GetPosPixel());
+    sal_uInt16 nDrgLog = static_cast<sal_uInt16>(rWindow.WindowToLogic(Size(3, 0)).Width());
+    sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.WindowToLogic(Size(3, 0)).Width());
+    Point aMDPos = rWindow.WindowToLogic(rMEvt.GetPosPixel());
 
     if ( rMEvt.IsLeft() && rMEvt.GetClicks() == 1 )
     {
@@ -499,8 +499,8 @@ bool DlgEdFuncSelect::MouseButtonUp( const MouseEvent& rMEvt )
     vcl::Window& rWindow = rParent.GetWindow();
     rView.SetActualWin(rWindow.GetOutDev());
 
-    Point aPnt = rWindow.PixelToLogic(rMEvt.GetPosPixel());
-    sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.PixelToLogic(Size(3, 0)).Width());
+    Point aPnt = rWindow.WindowToLogic(rMEvt.GetPosPixel());
+    sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.WindowToLogic(Size(3, 0)).Width());
 
     if ( rMEvt.IsLeft() )
     {
@@ -528,13 +528,13 @@ void DlgEdFuncSelect::MouseMove( const MouseEvent& rMEvt )
     vcl::Window& rWindow = rParent.GetWindow();
     rView.SetActualWin(rWindow.GetOutDev());
 
-    Point aPnt = rWindow.PixelToLogic(rMEvt.GetPosPixel());
-    sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.PixelToLogic(Size(3, 0)).Width());
+    Point aPnt = rWindow.WindowToLogic(rMEvt.GetPosPixel());
+    sal_uInt16 nHitLog = static_cast<sal_uInt16>(rWindow.WindowToLogic(Size(3, 0)).Width());
 
     if ( rView.IsAction() )
     {
         Point aPix = rMEvt.GetPosPixel();
-        Point aPnt_ = rWindow.PixelToLogic(aPix);
+        Point aPnt_ = rWindow.WindowToLogic(aPix);
 
         ForceScroll(aPnt_);
         rView.MovAction(aPnt_);

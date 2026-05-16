@@ -665,10 +665,10 @@ void SmElementsControl::addElement(const OUString& aElementVisual, const OUStrin
 
     AutoColorVisitor(pNode.get(), GetTextColor());
 
-    Size aSize = pDevice->LogicToPixel(Size(pNode->GetWidth(), pNode->GetHeight())).get();
+    Size aSize = pDevice->LogicToWindow(Size(pNode->GetWidth(), pNode->GetHeight())).get();
     aSize.extendBy(10, 0); // Add 5 pixels from both sides to accommodate extending parts of italics
     pDevice->SetOutputSizePixel(aSize);
-    SmDrawingVisitor(*pDevice, pDevice->PixelToLogic(Point(5, 0)).get(), pNode.get(), maFormat);
+    SmDrawingVisitor(*pDevice, pDevice->WindowToLogic(Point(5, 0)).get(), pNode.get(), maFormat);
 
     maItemDatas.push_back(std::make_unique<ElementData>(aElementSource, aHelpText, maItemDatas.size()));
     const OUString aId(weld::toId(maItemDatas.back().get()));

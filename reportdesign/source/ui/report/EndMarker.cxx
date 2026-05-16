@@ -64,14 +64,14 @@ void OEndMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
     Gradient aGradient(css::awt::GradientStyle_LINEAR, aStartColor, aEndColor);
     aGradient.SetSteps(static_cast<sal_uInt16>(aSize.Height()));
 
-    rRenderContext.DrawGradient(PixelToLogic(aPoly), aGradient);
+    rRenderContext.DrawGradient(WindowToLogic(aPoly), aGradient);
     if (m_bMarked)
     {
         tools::Rectangle aRect(Point(-nCornerSpace, nCornerSpace),
                          Size(aSize.Width() - nCornerSpace,
                               aSize.Height() - nCornerSpace - nCornerSpace));
         ColorChanger aColors(GetOutDev(), COL_WHITE, COL_WHITE);
-        rRenderContext.DrawPolyLine( tools::Polygon(PixelToLogic(aRect)), LineInfo(LineStyle::Solid, 2));
+        rRenderContext.DrawPolyLine( tools::Polygon(WindowToLogic(aRect)), LineInfo(LineStyle::Solid, 2));
     }
 }
 

@@ -141,68 +141,68 @@ bool Window::IsRTLEnabled() const { return GetOutDev()->IsRTLEnabled(); }
 TextAlign Window::GetTextAlign() const { return GetOutDev()->GetTextAlign(); }
 const AllSettings& Window::GetSettings() const { return GetOutDev()->GetSettings(); }
 
-Point Window::LogicToPixel(const Point& rLogicPt) const
+Point Window::LogicToWindow(const Point& rLogicPt) const
 {
-    return GetOutDev()->LogicToPixel(rLogicPt);
+    return GetOutDev()->LogicToWindow(rLogicPt);
 }
-Size Window::LogicToPixel(const Size& rLogicSize) const
+Size Window::LogicToWindow(const Size& rLogicSize) const
 {
-    return GetOutDev()->LogicToPixel(rLogicSize);
+    return GetOutDev()->LogicToWindow(rLogicSize);
 }
-tools::Rectangle Window::LogicToPixel(const tools::Rectangle& rLogicRect) const
+tools::Rectangle Window::LogicToWindow(const tools::Rectangle& rLogicRect) const
 {
-    return GetOutDev()->LogicToPixel(rLogicRect);
+    return GetOutDev()->LogicToWindow(rLogicRect);
 }
-vcl::Region Window::LogicToPixel(const vcl::Region& rLogicRegion) const
+vcl::Region Window::LogicToWindow(const vcl::Region& rLogicRegion) const
 {
-    return GetOutDev()->LogicToPixel(rLogicRegion);
+    return GetOutDev()->LogicToWindow(rLogicRegion);
 }
-Point Window::LogicToPixel(const Point& rLogicPt, const MapMode& rMapMode) const
+Point Window::LogicToWindow(const Point& rLogicPt, const MapMode& rMapMode) const
 {
-    return GetOutDev()->LogicToPixel(rLogicPt, rMapMode);
+    return GetOutDev()->LogicToWindow(rLogicPt, rMapMode);
 }
-Size Window::LogicToPixel(const Size& rLogicSize, const MapMode& rMapMode) const
+Size Window::LogicToWindow(const Size& rLogicSize, const MapMode& rMapMode) const
 {
-    return GetOutDev()->LogicToPixel(rLogicSize, rMapMode);
+    return GetOutDev()->LogicToWindow(rLogicSize, rMapMode);
 }
-tools::Rectangle Window::LogicToPixel(const tools::Rectangle& rLogicRect,
-                                      const MapMode& rMapMode) const
+tools::Rectangle Window::LogicToWindow(const tools::Rectangle& rLogicRect,
+                                       const MapMode& rMapMode) const
 {
-    return GetOutDev()->LogicToPixel(rLogicRect, rMapMode);
+    return GetOutDev()->LogicToWindow(rLogicRect, rMapMode);
 }
 
-Point Window::PixelToLogic(const Point& rDevicePt) const
+Point Window::WindowToLogic(const Point& rDevicePt) const
 {
-    return GetOutDev()->PixelToLogic(rDevicePt);
+    return GetOutDev()->WindowToLogic(rDevicePt);
 }
-Size Window::PixelToLogic(const Size& rDeviceSize) const
+Size Window::WindowToLogic(const Size& rDeviceSize) const
 {
-    return GetOutDev()->PixelToLogic(rDeviceSize);
+    return GetOutDev()->WindowToLogic(rDeviceSize);
 }
-tools::Rectangle Window::PixelToLogic(const tools::Rectangle& rDeviceRect) const
+tools::Rectangle Window::WindowToLogic(const tools::Rectangle& rDeviceRect) const
 {
-    return GetOutDev()->PixelToLogic(rDeviceRect);
+    return GetOutDev()->WindowToLogic(rDeviceRect);
 }
-tools::PolyPolygon Window::PixelToLogic(const tools::PolyPolygon& rDevicePolyPoly) const
+tools::PolyPolygon Window::WindowToLogic(const tools::PolyPolygon& rDevicePolyPoly) const
 {
-    return GetOutDev()->PixelToLogic(rDevicePolyPoly);
+    return GetOutDev()->WindowToLogic(rDevicePolyPoly);
 }
-vcl::Region Window::PixelToLogic(const vcl::Region& rDeviceRegion) const
+vcl::Region Window::WindowToLogic(const vcl::Region& rDeviceRegion) const
 {
-    return GetOutDev()->PixelToLogic(rDeviceRegion);
+    return GetOutDev()->WindowToLogic(rDeviceRegion);
 }
-Point Window::PixelToLogic(const Point& rDevicePt, const MapMode& rMapMode) const
+Point Window::WindowToLogic(const Point& rDevicePt, const MapMode& rMapMode) const
 {
-    return GetOutDev()->PixelToLogic(rDevicePt, rMapMode);
+    return GetOutDev()->WindowToLogic(rDevicePt, rMapMode);
 }
-Size Window::PixelToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const
+Size Window::WindowToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const
 {
-    return GetOutDev()->PixelToLogic(rDeviceSize, rMapMode);
+    return GetOutDev()->WindowToLogic(rDeviceSize, rMapMode);
 }
-tools::Rectangle Window::PixelToLogic(const tools::Rectangle& rDeviceRect,
-                                      const MapMode& rMapMode) const
+tools::Rectangle Window::WindowToLogic(const tools::Rectangle& rDeviceRect,
+                                       const MapMode& rMapMode) const
 {
-    return GetOutDev()->PixelToLogic(rDeviceRect, rMapMode);
+    return GetOutDev()->WindowToLogic(rDeviceRect, rMapMode);
 }
 
 Size Window::LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,

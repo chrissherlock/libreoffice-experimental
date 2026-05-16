@@ -161,7 +161,7 @@ void GraphCtrl::SetGraphic( const Graphic& rGraphic, bool bNewModel )
     mxVD->SetOutputSizePixel(Size(0, 0)); //force redraw
 
     if ( maGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
-        maGraphSize = Application::GetDefaultDevice()->PixelToLogic( maGraphic.GetPrefSize(), maMap100 );
+        maGraphSize = Application::GetDefaultDevice()->WindowToLogic( maGraphic.GetPrefSize(), maMap100 );
     else
         maGraphSize = ::LogicToLogic( maGraphic.GetPrefSize(), maGraphic.GetPrefMapMode(), maMap100 );
 
@@ -197,7 +197,7 @@ void GraphCtrl::Resize()
         Point           aNewPos;
         Size            aNewSize;
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        const Size      aWinSize = rDevice.PixelToLogic( GetOutputSizePixel(), aDisplayMap );
+        const Size      aWinSize = rDevice.WindowToLogic( GetOutputSizePixel(), aDisplayMap );
         const tools::Long      nWidth = aWinSize.Width();
         const tools::Long      nHeight = aWinSize.Height();
         double          fGrfWH = static_cast<double>(maGraphSize.Width()) / maGraphSize.Height();
@@ -419,7 +419,7 @@ bool GraphCtrl::KeyInput( const KeyEvent& rKEvt )
                 if(aCode.IsMod2())
                 {
                     // move in 1 pixel distance
-                    Size aLogicSizeOnePixel =  rDevice.PixelToLogic(Size(1,1));
+                    Size aLogicSizeOnePixel =  rDevice.WindowToLogic(Size(1,1));
                     nX *= aLogicSizeOnePixel.Width();
                     nY *= aLogicSizeOnePixel.Height();
                 }
@@ -593,7 +593,7 @@ bool GraphCtrl::MouseButtonDown( const MouseEvent& rMEvt )
     {
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
 
-        const Point aLogPt( rDevice.PixelToLogic( rMEvt.GetPosPixel() ));
+        const Point aLogPt( rDevice.WindowToLogic( rMEvt.GetPosPixel() ));
 
         if ( !tools::Rectangle( Point(), maGraphSize ).Contains( aLogPt ) && !mpView->IsEditMode() )
             weld::CustomWidgetController::MouseButtonDown( rMEvt );
@@ -635,7 +635,7 @@ bool GraphCtrl::MouseButtonDown( const MouseEvent& rMEvt )
 bool GraphCtrl::MouseMove(const MouseEvent& rMEvt)
 {
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    const Point aLogPos( rDevice.PixelToLogic( rMEvt.GetPosPixel() ));
+    const Point aLogPos( rDevice.WindowToLogic( rMEvt.GetPosPixel() ));
 
     if ( mbSdrMode )
     {
@@ -680,7 +680,7 @@ bool GraphCtrl::MouseButtonUp(const MouseEvent& rMEvt)
             mpView->MouseButtonUp( rMEvt, &rDevice );
 
         ReleaseMouse();
-        SetPointer( mpView->GetPreferredPointer( rDevice.PixelToLogic( rMEvt.GetPosPixel() ), &rDevice ) );
+        SetPointer( mpView->GetPreferredPointer( rDevice.WindowToLogic( rMEvt.GetPosPixel() ), &rDevice ) );
     }
     else
         weld::CustomWidgetController::MouseButtonUp( rMEvt );

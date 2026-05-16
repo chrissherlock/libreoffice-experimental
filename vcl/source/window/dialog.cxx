@@ -1348,7 +1348,7 @@ void Dialog::GetDrawWindowBorder( sal_Int32& rLeftBorder, sal_Int32& rTopBorder,
 
 void Dialog::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
 {
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point aPos =  rDev.LogicToWindow( rPos );
     Size aSize = GetSizePixel();
 
     Wallpaper aWallpaper = GetBackground();

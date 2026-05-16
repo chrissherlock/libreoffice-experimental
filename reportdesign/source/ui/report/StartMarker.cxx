@@ -94,7 +94,7 @@ sal_Int32 OStartMarker::getMinHeight() const
 {
     double fExtraWidth(tools::Long(2 * REPORT_EXTRA_SPACE));
     fExtraWidth *= GetMapMode().GetScaleX();
-    return LogicToPixel(Size(0, GetTextHeight())).Height() + tools::Long(fExtraWidth);
+    return LogicToWindow(Size(0, GetTextHeight())).Height() + tools::Long(fExtraWidth);
 }
 
 void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& /*rRect*/)
@@ -113,7 +113,7 @@ void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
         const tools::Long nVRulerWidth = m_aVRuler->GetSizePixel().Width();
         tools::Long nSize = aSize.Width() - nVRulerWidth;
         aSize.AdjustWidth(nCornerWidth );
-        rRenderContext.SetClipRegion(vcl::Region(rRenderContext.PixelToLogic(tools::Rectangle(Point(),
+        rRenderContext.SetClipRegion(vcl::Region(rRenderContext.WindowToLogic(tools::Rectangle(Point(),
                                             Size(nSize, aSize.Height()))).get()));
     }
 
@@ -134,7 +134,7 @@ void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
         Gradient aGradient(css::awt::GradientStyle_LINEAR,aStartColor,aEndColor);
         aGradient.SetSteps(static_cast<sal_uInt16>(aSize.Height()));
 
-        rRenderContext.DrawGradient(PixelToLogic(aPoly) ,aGradient);
+        rRenderContext.DrawGradient(WindowToLogic(aPoly) ,aGradient);
     }
 
     {
@@ -159,7 +159,7 @@ void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
                         Size(aSize.Width() - nCornerWidth - nCornerWidth,
                              aSize.Height() - nCornerHeight - nCornerHeight));
         ColorChanger aColors(&rRenderContext, COL_WHITE, COL_WHITE);
-        rRenderContext.DrawPolyLine( tools::Polygon(rRenderContext.PixelToLogic(aRect).get()),
+        rRenderContext.DrawPolyLine( tools::Polygon(rRenderContext.WindowToLogic(aRect).get()),
                                     LineInfo(LineStyle::Solid, 2));
     }
 }
@@ -232,11 +232,11 @@ void OStartMarker::Resize()
     tools::Long nExtraWidth = tools::Long(REPORT_EXTRA_SPACE * rMapMode.GetScaleX());
 
     Point aPos(aImageSize.Width() + (nExtraWidth * 2), nExtraWidth);
-    const tools::Long nHeight = ::std::max<sal_Int32>(nOutputHeight - 2*aPos.Y(),LogicToPixel(Size(0, GetTextHeight())).Height());
+    const tools::Long nHeight = ::std::max<sal_Int32>(nOutputHeight - 2*aPos.Y(),LogicToWindow(Size(0, GetTextHeight())).Height());
     m_aTextRect = tools::Rectangle(aPos, Size(aRulerPos.X() - aPos.X(),nHeight));
 
     aPos.setX( nExtraWidth );
-    aPos.AdjustY(static_cast<sal_Int32>((LogicToPixel(Size(0, GetTextHeight())).Height() - aImageSize.Height()) * 0.5) ) ;
+    aPos.AdjustY(static_cast<sal_Int32>((LogicToWindow(Size(0, GetTextHeight())).Height() - aImageSize.Height()) * 0.5) ) ;
     m_aImageRect = tools::Rectangle(aPos, aImageSize);
 
     OColorListener::Resize();

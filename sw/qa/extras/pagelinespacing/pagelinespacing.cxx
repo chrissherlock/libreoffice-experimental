@@ -460,8 +460,8 @@ void SwPageLineSpacingTest::resizeObjectUpward(const SdrObject* pObject,
     const Point aDestinationPoint(aDragPoint.X(), aDragPoint.Y() - nDragDistance);
 
     vcl::Window& rEditWin = pView->GetEditWin();
-    const Point aFromPixels = rEditWin.LogicToPixel(aDragPoint);
-    const Point aToPixels = rEditWin.LogicToPixel(aDestinationPoint);
+    const Point aFromPixels = rEditWin.LogicToWindow(aDragPoint);
+    const Point aToPixels = rEditWin.LogicToWindow(aDestinationPoint);
 
     const MouseEvent aClickEvent(aFromPixels, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);

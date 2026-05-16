@@ -145,10 +145,10 @@ std::shared_ptr<vcl::Font> Theme::GetFont (
     {
         // Transform the point size to pixel size.
         const MapMode aFontMapMode (MapUnit::MapPoint);
-        const Size aFontSize (rDevice.LogicToPixel(pFont->GetFontSize(), aFontMapMode));
+        const Size aFontSize (rDevice.LogicToWindow(pFont->GetFontSize(), aFontMapMode));
 
         // Transform the font size to the logical coordinates of the device.
-        pFont->SetFontSize(rDevice.PixelToLogic(aFontSize));
+        pFont->SetFontSize(rDevice.WindowToLogic(aFontSize));
     }
 
     return pFont;

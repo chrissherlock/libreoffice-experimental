@@ -63,8 +63,8 @@ public:
 
     // the SvxViewForwarder interface
     virtual bool        IsValid() const override;
-    virtual Point       LogicToPixel( const Point&, const MapMode& ) const override;
-    virtual Point       PixelToLogic( const Point&, const MapMode& ) const override;
+    virtual Point       LogicToWindow( const Point&, const MapMode& ) const override;
+    virtual Point       WindowToLogic( const Point&, const MapMode& ) const override;
 
     void UpdateOutliner();
 

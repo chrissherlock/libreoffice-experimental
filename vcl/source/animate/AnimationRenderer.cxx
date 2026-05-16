@@ -35,7 +35,7 @@ AnimationRenderer::AnimationRenderer( Animation* pParent, OutputDevice* pOut,
         mnRendererId    ( nRendererId ),
         maOriginPt      ( rPt ),
         maLogicalSize   ( rSz ),
-        maSizePx        ( mpRenderContext->LogicToPixel( maLogicalSize )),
+        maSizePx        ( mpRenderContext->LogicToWindow( maLogicalSize )),
         maClip          ( mpRenderContext->GetClipRegion() ),
         mpBackground    ( VclPtr<VirtualDevice>::Create() ),
         mpRestore       ( VclPtr<VirtualDevice>::Create() ),
@@ -185,7 +185,7 @@ void AnimationRenderer::draw( sal_uLong nIndex, VirtualDevice* pVDev )
         pRenderContext = pGuard->GetRenderContext();
     }
 
-    tools::Rectangle aOutRect( pRenderContext->PixelToLogic( Point() ), pRenderContext->GetOutputSize() );
+    tools::Rectangle aOutRect( pRenderContext->WindowToLogic( Point() ), pRenderContext->GetOutputSize() );
 
     // check, if output lies out of display
     if( aOutRect.Intersection( tools::Rectangle( maDispPt, maDispSz ) ).IsEmpty() )

@@ -193,7 +193,7 @@ SwRect SwVisibleCursor::SetPos()
                     {
                         tools::Long nSize = pOut->GetSettings().GetStyleSettings().GetCursorSize();
                         Size aSize( nSize, nSize );
-                        aSize =  pOut->PixelToLogic( aSize );
+                        aSize =  pOut->WindowToLogic( aSize );
                         aRect.Left( aRect.Left() - aSize.Width() );
                     }
                 }
@@ -797,7 +797,7 @@ void SwSelPaintRects::HighlightContentControl()
             SwFrameControlsManager& rMngr = rEditWin.GetFrameControlsManager();
             if (pContentControl && !pContentControl->GetAlias().isEmpty())
             {
-                Point aTopLeftPixel = rEditWin.LogicToPixel(aFirstPortionPaintArea.TopLeft());
+                Point aTopLeftPixel = rEditWin.LogicToWindow(aFirstPortionPaintArea.TopLeft());
                 rMngr.SetContentControlAliasButton(pContentControl.get(), aTopLeftPixel);
             }
             else
@@ -878,7 +878,7 @@ void SwSelPaintRects::Get1PixelInLogic( const SwViewShell& rSh,
     {
         *s_pMapMode = rMM;
         Size aTmp( 1, 1 );
-        aTmp =  pOut->PixelToLogic( aTmp );
+        aTmp =  pOut->WindowToLogic( aTmp );
         s_nPixPtX = aTmp.Width();
         s_nPixPtY = aTmp.Height();
     }

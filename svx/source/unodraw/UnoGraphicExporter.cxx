@@ -313,7 +313,7 @@ VclPtr<VirtualDevice> GraphicExporter::CreatePageVDev( SdrPage* pPage, tools::Lo
     // use scaling?
     if( nWidthPixel != 0 )
     {
-        const double fFrac = double( nWidthPixel ) / pVDev->LogicToPixel( aPageSize, aMM ).Width();
+        const double fFrac = double( nWidthPixel ) / pVDev->LogicToWindow( aPageSize, aMM ).Width();
 
         aMM.SetScaleX( fFrac );
 
@@ -323,7 +323,7 @@ VclPtr<VirtualDevice> GraphicExporter::CreatePageVDev( SdrPage* pPage, tools::Lo
 
     if( nHeightPixel != 0 )
     {
-        const double fFrac = double( nHeightPixel ) / pVDev->LogicToPixel( aPageSize, aMM ).Height();
+        const double fFrac = double( nHeightPixel ) / pVDev->LogicToWindow( aPageSize, aMM ).Height();
 
         if( nWidthPixel == 0 )
             aMM.SetScaleX( fFrac );
@@ -622,7 +622,7 @@ bool GraphicExporter::GetGraphic( ExportSettings const & rSettings, Graphic& aGr
                 }
                 else
                 {
-                    const Size aSizePix( Application::GetDefaultDevice()->LogicToPixel( aSize, aMap ) );
+                    const Size aSizePix( Application::GetDefaultDevice()->LogicToWindow( aSize, aMap ) );
                     if (aSizePix.Width() > MAX_EXT_PIX || aSizePix.Height() > MAX_EXT_PIX)
                     {
                         if (aSizePix.Width() > MAX_EXT_PIX)
@@ -894,7 +894,7 @@ bool GraphicExporter::GetGraphic( ExportSettings const & rSettings, Graphic& aGr
 
             MapMode aOutMap( aMap );
             const Size aOnePixelInMtf(
-                Application::GetDefaultDevice()->PixelToLogic(
+                Application::GetDefaultDevice()->WindowToLogic(
                     Size(1, 1),
                     aMap));
             const Size aHalfPixelInMtf(
@@ -1284,7 +1284,7 @@ Bitmap GetBitmapFromMetaFile(const GDIMetaFile& rMtf, const Size* pSize)
         // use 100th mm for primitive bitmap converter tool, input is pixel
         // use a real OutDev to get the correct DPI, the static LogicToLogic assumes 72dpi which is wrong (!)
         const Size aSize100th(
-            Application::GetDefaultDevice()->PixelToLogic(*pSize, MapMode(MapUnit::Map100thMM)));
+            Application::GetDefaultDevice()->WindowToLogic(*pSize, MapMode(MapUnit::Map100thMM)));
 
         aRange.expand(basegfx::B2DPoint(aSize100th.Width(), aSize100th.Height()));
 

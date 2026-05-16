@@ -446,7 +446,7 @@ public:
 
 // - Hit tolerances:
 //   It has to be declared in logical coordinates. So please translate the
-//   wanted pixel value with PixelToLogic in Logical values.
+//   wanted pixel value with WindowToLogic in Logical values.
 //   Taking as example a logical value of 100:
 //   - For a horizontal hairline (Object with height 0), the generated data is +/-100, i.e.
 //     a vertical area of 200 logical units is sensitive.

@@ -216,7 +216,7 @@ void EMFWriter::ImplWritePlusColor( const Color& rColor, sal_uInt32 nTrans )
 void EMFWriter::ImplWritePlusPoint( const Point& rPoint )
 {
     // Convert to pixels
-    const Point aPoint(maVDev->LogicToPixel( rPoint, maDestMapMode ));
+    const Point aPoint(maVDev->LogicToWindow( rPoint, maDestMapMode ));
     m_rStm.WriteInt16(aPoint.X()).WriteInt16(aPoint.Y());
 }
 
@@ -250,7 +250,7 @@ bool EMFWriter::WriteEMF(const GDIMetaFile& rMtf)
     mnLineHandle = mnFillHandle = mnTextHandle = HANDLE_INVALID;
     mnHorTextAlign = 0;
 
-    const Size aMtfSizePix( maVDev->LogicToPixel( rMtf.GetPrefSize(), rMtf.GetPrefMapMode() ) );
+    const Size aMtfSizePix( maVDev->LogicToWindow( rMtf.GetPrefSize(), rMtf.GetPrefMapMode() ) );
     const Size aMtfSizeLog( ::LogicToLogic(rMtf.GetPrefSize(), rMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
 
     // seek over header
@@ -1261,7 +1261,7 @@ void EMFWriter::ImplWrite( const GDIMetaFile& rMtf )
             case MetaActionType::BMP:
             {
                 const MetaBmpAction* pA = static_cast<const MetaBmpAction *>(pAction);
-                ImplWriteBmpRecord( pA->GetBitmap(), pA->GetPoint(), maVDev->PixelToLogic( pA->GetBitmap().GetSizePixel() ), WIN_SRCCOPY );
+                ImplWriteBmpRecord( pA->GetBitmap(), pA->GetPoint(), maVDev->WindowToLogic( pA->GetBitmap().GetSizePixel() ), WIN_SRCCOPY );
             }
             break;
 
@@ -1291,8 +1291,8 @@ void EMFWriter::ImplWrite( const GDIMetaFile& rMtf )
                 {
                     auto [ aBmp, aMsk ] = rBmpEx.SplitIntoColorAndAlpha();
                     aBmp.Replace( aMsk, COL_WHITE );
-                    ImplWriteBmpRecord( aMsk.GetBitmap(), pA->GetPoint(), maVDev->PixelToLogic( aMsk.GetSizePixel() ), WIN_SRCPAINT );
-                    ImplWriteBmpRecord( aBmp, pA->GetPoint(), maVDev->PixelToLogic( aBmp.GetSizePixel() ), WIN_SRCAND );
+                    ImplWriteBmpRecord( aMsk.GetBitmap(), pA->GetPoint(), maVDev->WindowToLogic( aMsk.GetSizePixel() ), WIN_SRCPAINT );
+                    ImplWriteBmpRecord( aBmp, pA->GetPoint(), maVDev->WindowToLogic( aBmp.GetSizePixel() ), WIN_SRCAND );
                 }
                 else
                     ImplWriteBmpRecord(rBmpEx, pA->GetPoint(), rBmpEx.GetSizePixel(), WIN_SRCCOPY);

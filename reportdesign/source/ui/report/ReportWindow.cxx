@@ -148,7 +148,7 @@ sal_Int32 OReportWindow::GetTotalWidth() const
         fStartWidth *= fZoom;
         sal_Int32 nPaperWidth = getStyleProperty<awt::Size>(m_pView->getController().getReportDefinition(),PROPERTY_PAPERSIZE).Width;
         nPaperWidth = tools::Long(nPaperWidth * fZoom);
-        const Size aPageSize = LogicToPixel(Size(nPaperWidth,0));
+        const Size aPageSize = LogicToWindow(Size(nPaperWidth,0));
         nWidth = aPageSize.Width() + tools::Long(fStartWidth);
     }
     return nWidth;
@@ -163,15 +163,15 @@ void OReportWindow::Resize()
     const Size aTotalOutputSize = GetOutputSizePixel();
     double fStartWidth = REPORT_STARTMARKER_WIDTH * m_pView->getController().getZoomValue() / 100.0;
 
-    const Point aOffset = LogicToPixel(Point(SECTION_OFFSET, 0), MapMode(MapUnit::MapAppFont));
+    const Point aOffset = LogicToWindow(Point(SECTION_OFFSET, 0), MapMode(MapUnit::MapAppFont));
     Point aStartPoint(static_cast<tools::Long>(fStartWidth) + aOffset.X(),0);
     uno::Reference<report::XReportDefinition> xReportDefinition = getReportView()->getController().getReportDefinition();
     const sal_Int32 nPaperWidth = getStyleProperty<awt::Size>(xReportDefinition,PROPERTY_PAPERSIZE).Width;
     sal_Int32 nLeftMargin = getStyleProperty<sal_Int32>(xReportDefinition,PROPERTY_LEFTMARGIN);
     sal_Int32 nRightMargin = getStyleProperty<sal_Int32>(xReportDefinition,PROPERTY_RIGHTMARGIN);
-    Size aPageSize  = m_aViewsWindow->LogicToPixel(Size(nPaperWidth ,0));
-    nLeftMargin     = m_aViewsWindow->LogicToPixel(Size(nLeftMargin,0)).Width();
-    nRightMargin    = m_aViewsWindow->LogicToPixel(Size(nRightMargin,0)).Width();
+    Size aPageSize  = m_aViewsWindow->LogicToWindow(Size(nPaperWidth ,0));
+    nLeftMargin     = m_aViewsWindow->LogicToWindow(Size(nLeftMargin,0)).Width();
+    nRightMargin    = m_aViewsWindow->LogicToWindow(Size(nRightMargin,0)).Width();
 
     aPageSize.setHeight( m_aHRuler->GetSizePixel().Height() );
 
@@ -385,7 +385,7 @@ sal_Int32 OReportWindow::impl_getRealPixelWidth() const
 {
     const sal_Int32 nPaperWidth = getStyleProperty<awt::Size>(m_pView->getController().getReportDefinition(),PROPERTY_PAPERSIZE).Width;
     MapMode aMap( MapUnit::Map100thMM );
-    const Size aPageSize = LogicToPixel(Size(nPaperWidth,0),aMap);
+    const Size aPageSize = LogicToWindow(Size(nPaperWidth,0),aMap);
     return aPageSize.Width() + REPORT_ENDMARKER_WIDTH + REPORT_STARTMARKER_WIDTH + SECTION_OFFSET;
 }
 
@@ -404,7 +404,7 @@ sal_uInt16 OReportWindow::getZoomFactor(SvxZoomType _eType) const
             {
                 nZoom = static_cast<sal_uInt16>(static_cast<tools::Long>(aSize.Width()*100.0 / impl_getRealPixelWidth()));
                 MapMode aMap( MapUnit::Map100thMM );
-                const Size aHeight = m_aViewsWindow->LogicToPixel(m_aViewsWindow->PixelToLogic(Size(0,GetTotalHeight() + m_aHRuler->GetSizePixel().Height())),aMap);
+                const Size aHeight = m_aViewsWindow->LogicToWindow(m_aViewsWindow->WindowToLogic(Size(0,GetTotalHeight() + m_aHRuler->GetSizePixel().Height())),aMap);
                 nZoom = ::std::min(nZoom,static_cast<sal_uInt16>(static_cast<tools::Long>(aSize.Height()*100.0 / aHeight.Height())));
             }
             break;

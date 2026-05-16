@@ -1479,7 +1479,7 @@ AccessibleTextHelper_Impl::getAccessibleAtPoint(const awt::Point& _aPoint)
 
     // convert to EditEngine coordinate system
     SvxTextForwarder& rCacheTF = GetTextForwarder();
-    Point aLogPoint( GetViewForwarder().PixelToLogic( aPoint, rCacheTF.GetMapMode() ) );
+    Point aLogPoint( GetViewForwarder().WindowToLogic( aPoint, rCacheTF.GetMapMode() ) );
 
     // iterate over all visible children (including those not yet created)
     sal_Int64 nChild;

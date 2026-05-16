@@ -120,7 +120,7 @@ void Splitter::ImplDrawSplitter()
         aInvRect.SetBottom( maDragPos.Y() + 1 );
     }
 
-    mpRefWin->InvertTracking( mpRefWin->PixelToLogic(aInvRect), ShowTrackFlags::Split );
+    mpRefWin->InvertTracking( mpRefWin->WindowToLogic(aInvRect), ShowTrackFlags::Split );
 }
 
 Splitter::Splitter( vcl::Window* pParent, WinBits nStyle ) :
@@ -693,7 +693,7 @@ void Splitter::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&
 
 Size Splitter::GetOptimalSize() const
 {
-    return LogicToPixel(Size(3, 3), MapMode(MapUnit::MapAppFont));
+    return LogicToWindow(Size(3, 3), MapMode(MapUnit::MapAppFont));
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

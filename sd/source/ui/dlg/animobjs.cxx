@@ -113,7 +113,7 @@ void SdDisplay::SetScale( double rFrac )
 void SdDisplay::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(147, 87), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(147, 87), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     SetOutputSizePixel(aSize);
 }
@@ -877,7 +877,7 @@ void AnimationWindow::CreateAnimObj (::sd::View& rView )
     Size                aMaxSizeLog;
     Size                aMaxSizePix;
     Size                aTemp( pOutWin->GetOutputSizePixel() );
-    const Point         aWindowCenter( pOutWin->PixelToLogic( Point( aTemp.Width() >> 1, aTemp.Height() >> 1 ) ) );
+    const Point         aWindowCenter( pOutWin->WindowToLogic( Point( aTemp.Width() >> 1, aTemp.Height() >> 1 ) ) );
     const OutputDevice* pDefDev = Application::GetDefaultDevice();
     const size_t nCount = m_FrameList.size();
     BitmapAdjustment    eBA = static_cast<BitmapAdjustment>(m_xLbAdjustment->get_active());
@@ -891,7 +891,7 @@ void AnimationWindow::CreateAnimObj (::sd::View& rView )
         const Size      aTmpSizePix( rBmp.GetSizePixel() );
 
         if ( aGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
-            aTmpSizeLog = pDefDev->PixelToLogic( aGraphic.GetPrefSize(), aMap100 );
+            aTmpSizeLog = pDefDev->WindowToLogic( aGraphic.GetPrefSize(), aMap100 );
         else
             aTmpSizeLog = ::LogicToLogic( aGraphic.GetPrefSize(), aGraphic.GetPrefMapMode(), aMap100 );
 

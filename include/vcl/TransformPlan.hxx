@@ -38,8 +38,47 @@ struct TransformPlan
     {
         return maContract.maPreserved.test(static_cast<size_t>(GeometryInvariant::AxisAlignment));
     }
+
+    TransformPlan compose(const TransformPlan& rNextPlan) const
+    {
+        // Fast paths for Identity
+        if (this->meMode == TransformMode::Identity)
+            return rNextPlan;
+        if (rNextPlan.meMode == TransformMode::Identity)
+            return *this;
+
+        TransformPlan aComposite;
+
+        // Matrix composition: basegfx uses column vectors (M * p).
+        // To apply `this` THEN `rNextPlan`, we must multiply `rNextPlan * this`
+        aComposite.maMatrix = rNextPlan.maMatrix * this->maMatrix;
+
+        // Combine Device Translation offsets
+        aComposite.mnDeviceTx = this->mnDeviceTx + rNextPlan.mnDeviceTx;
+        aComposite.mnDeviceTy = this->mnDeviceTy + rNextPlan.mnDeviceTy;
+
+        // Determine new mode
+        if (this->meMode == TransformMode::AffineFallback
+            || rNextPlan.meMode == TransformMode::AffineFallback)
+            aComposite.meMode = TransformMode::AffineFallback;
+        else if (this->meMode == TransformMode::Translation
+                 && rNextPlan.meMode == TransformMode::Translation)
+            aComposite.meMode = TransformMode::Translation;
+        else
+            aComposite.meMode = TransformMode::AxisAlignedAffine;
+
+        // Intersect the geometric contracts
+        aComposite.maContract.maPreserved
+            = this->maContract.maPreserved & rNextPlan.maContract.maPreserved;
+
+        return aComposite;
+    }
+
+    template <typename T> auto apply(const T& rGeom) const;
 };
 
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
+
+#include <vcl/GeometryAdapter.hxx>

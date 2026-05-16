@@ -281,7 +281,7 @@ sal_uInt16 ScHTMLExport::ToPixel( sal_uInt16 nVal )
 {
     if( nVal )
     {
-        nVal = static_cast<sal_uInt16>(pAppWin->LogicToPixel(
+        nVal = static_cast<sal_uInt16>(pAppWin->LogicToWindow(
                     Size( nVal, nVal ), MapMode( MapUnit::MapTwip ) ).Width());
         if( !nVal ) // If there's a Twip there should also be a Pixel
             nVal = 1;
@@ -291,7 +291,7 @@ sal_uInt16 ScHTMLExport::ToPixel( sal_uInt16 nVal )
 
 Size ScHTMLExport::MMToPixel( const Size& rSize )
 {
-    Size aSize = pAppWin->LogicToPixel( rSize, MapMode( MapUnit::Map100thMM ) );
+    Size aSize = pAppWin->LogicToWindow( rSize, MapMode( MapUnit::Map100thMM ) );
     // If there's something there should also be a Pixel
     if ( !aSize.Width() && rSize.Width() )
         aSize.setWidth( 1 );

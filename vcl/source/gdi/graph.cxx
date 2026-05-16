@@ -43,7 +43,7 @@ void ImplDrawDefault(OutputDevice& rOutDev, const OUString* pText,
                      vcl::Font* pFont, const Bitmap* pBitmap,
                      const Point& rDestPt, const Size& rDestSize)
 {
-    sal_uInt16  nPixel = static_cast<sal_uInt16>(rOutDev.PixelToLogic( Size( 1, 1 ) )->Width());
+    sal_uInt16  nPixel = static_cast<sal_uInt16>(rOutDev.WindowToLogic( Size( 1, 1 ) )->Width());
     sal_uInt16  nPixelWidth = nPixel;
     Point       aPoint( rDestPt.X() + nPixelWidth, rDestPt.Y() + nPixelWidth );
     Size        aSize( rDestSize.Width() - ( nPixelWidth << 1 ), rDestSize.Height() - ( nPixelWidth << 1 ) );
@@ -64,7 +64,7 @@ void ImplDrawDefault(OutputDevice& rOutDev, const OUString* pText,
 
     if( !aSize.IsEmpty() && pBitmap && !pBitmap->IsEmpty() )
     {
-        Size aBitmapSize( rOutDev.PixelToLogic( pBitmap->GetSizePixel() ));
+        Size aBitmapSize( rOutDev.WindowToLogic( pBitmap->GetSizePixel() ));
 
         if( aSize.Height() > aBitmapSize.Height() && aSize.Width() > aBitmapSize.Width() )
         {
@@ -406,7 +406,7 @@ Size Graphic::GetSizePixel( const OutputDevice* pRefDevice ) const
     if( GraphicType::Bitmap == mxImpGraphic->getType() )
         aRet = mxImpGraphic->getSizePixel();
     else
-        aRet = ( pRefDevice ? pRefDevice : Application::GetDefaultDevice() )->LogicToPixel( GetPrefSize(), GetPrefMapMode() );
+        aRet = ( pRefDevice ? pRefDevice : Application::GetDefaultDevice() )->LogicToWindow( GetPrefSize(), GetPrefMapMode() );
 
     return aRet;
 }
