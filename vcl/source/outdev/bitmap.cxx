@@ -465,6 +465,19 @@ bool OutputDevice::DrawTransformedBitmap(
         *this);
 };
 
+void OutputDevice::DrawBitmap(const Point& rDestPt, const vcl::LogicSize& rLogicSize,
+                    const Point& rSrcPt, const Size& rSrcSizePixel, const Bitmap& rBitmap)
+{
+    DrawBitmap(rDestPt, rLogicSize.get(), rSrcPt, rSrcSizePixel, rBitmap);
+}
+
+void OutputDevice::DrawAlphaBitmap(const Point& rDestPt, const vcl::LogicSize& rLogicSize,
+                                   const Point& rSrcPt, const Size& rSrcSizePixel, const Bitmap& rBitmap)
+{
+    // Pass MetaActionType::BMPEX explicitly down to the core layout implementation
+    DrawAlphaBitmap(rDestPt, rLogicSize.get(), rSrcPt, rSrcSizePixel, rBitmap, MetaActionType::BMPEX);
+}
+
 void OutputDevice::DrawImage( const Point& rPos, const Image& rImage, DrawImageFlags nStyle )
 {
     assert(!is_double_buffered_window());
