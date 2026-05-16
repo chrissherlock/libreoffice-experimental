@@ -819,7 +819,7 @@ void TextEditOverlayObject::checkSelectionChange()
 
     std::vector<tools::Rectangle> aLogicRects;
     std::vector<basegfx::B2DRange> aLogicRanges;
-    const Size aLogicPixel(getOverlayManager()->getOutputDevice().PixelToLogic(Size(1, 1)).get());
+    const Size aLogicPixel(getOverlayManager()->getOutputDevice().PixelToLogic(Size(1, 1)));
 
     // get logic selection
     getOutlinerView().GetSelectionRectangles(aLogicRects);
@@ -963,7 +963,7 @@ void SdrObjEditView::ImpPaintOutlinerView(OutlinerView& rOutlView, const tools::
     bool bModified(mpTextEditOutliner->IsModified());
     tools::Rectangle aBlankRect(rOutlView.GetOutputArea());
     aBlankRect.Union(m_aMinTextEditArea);
-    tools::Rectangle aPixRect(rTargetDevice.LogicToPixel(aBlankRect).get());
+    tools::Rectangle aPixRect(rTargetDevice.LogicToPixel(aBlankRect));
 
     // in the tiled rendering case, the setup is incomplete, and we very
     // easily get an empty rRect on input - that will cause that everything is
@@ -2076,7 +2076,7 @@ bool SdrObjEditView::MouseButtonDown(const MouseEvent& rMEvt, OutputDevice* pWin
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin != nullptr)
-                aPt = pWin->PixelToLogic(aPt).get();
+                aPt = pWin->PixelToLogic(aPt);
             else if (mpTextEditWin != nullptr)
                 aPt = mpTextEditWin->PixelToLogic(aPt);
             bPostIt = IsTextEditHit(aPt);
@@ -2086,8 +2086,7 @@ bool SdrObjEditView::MouseButtonDown(const MouseEvent& rMEvt, OutputDevice* pWin
             Point aPixPos(rMEvt.GetPosPixel());
             if (pWin)
             {
-                tools::Rectangle aR(
-                    pWin->LogicToPixel(mpTextEditOutlinerView->GetOutputArea()).get());
+                tools::Rectangle aR(pWin->LogicToPixel(mpTextEditOutlinerView->GetOutputArea()));
                 if (aPixPos.X() < aR.Left())
                     aPixPos.setX(aR.Left());
                 if (aPixPos.X() > aR.Right())
@@ -2121,7 +2120,7 @@ bool SdrObjEditView::MouseButtonUp(const MouseEvent& rMEvt, OutputDevice* pWin)
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin != nullptr)
-                aPt = pWin->PixelToLogic(aPt).get();
+                aPt = pWin->PixelToLogic(aPt);
             else if (mpTextEditWin != nullptr)
                 aPt = mpTextEditWin->PixelToLogic(aPt);
             bPostIt = IsTextEditHit(aPt);
@@ -2129,7 +2128,7 @@ bool SdrObjEditView::MouseButtonUp(const MouseEvent& rMEvt, OutputDevice* pWin)
         if (bPostIt && pWin)
         {
             Point aPixPos(rMEvt.GetPosPixel());
-            tools::Rectangle aR(pWin->LogicToPixel(mpTextEditOutlinerView->GetOutputArea()).get());
+            tools::Rectangle aR(pWin->LogicToPixel(mpTextEditOutlinerView->GetOutputArea()));
             if (aPixPos.X() < aR.Left())
                 aPixPos.setX(aR.Left());
             if (aPixPos.X() > aR.Right())
@@ -2160,7 +2159,7 @@ bool SdrObjEditView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin)
-                aPt = pWin->PixelToLogic(aPt).get();
+                aPt = pWin->PixelToLogic(aPt);
             else if (mpTextEditWin)
                 aPt = mpTextEditWin->PixelToLogic(aPt);
             bPostIt = IsTextEditHit(aPt);
@@ -2170,7 +2169,7 @@ bool SdrObjEditView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
             Point aPixPos(rMEvt.GetPosPixel());
             tools::Rectangle aR(mpTextEditOutlinerView->GetOutputArea());
             if (pWin)
-                aR = pWin->LogicToPixel(aR).get();
+                aR = pWin->LogicToPixel(aR);
             else if (mpTextEditWin)
                 aR = mpTextEditWin->LogicToPixel(aR);
             if (aPixPos.X() < aR.Left())

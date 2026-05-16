@@ -1357,8 +1357,8 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
     aMapMode.SetScaleY(rOutput.GetMapMode().GetScaleY());
     xOutput->SetMapMode(aMapMode);
 
-    Size aTempLogicSize(xOutput->PixelToLogic(aChildSizePixel).get());
-    Size aRenderLogicSize(rOutput.PixelToLogic(aChildSizePixel).get());
+    Size aTempLogicSize(xOutput->PixelToLogic(aChildSizePixel));
+    Size aRenderLogicSize(rOutput.PixelToLogic(aChildSizePixel));
 
     switch (rOutput.GetOutDevType())
     {

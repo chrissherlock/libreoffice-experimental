@@ -395,8 +395,8 @@ void SdrPageView::DrawPageViewGrid(OutputDevice& rOut, const tools::Rectangle& r
         nMinDotPix=2;
         nMinLinPix=4;
     }
-    Size aMinDotDist(rOut.PixelToLogic(Size(nMinDotPix,nMinDotPix)).get());
-    Size aMinLinDist(rOut.PixelToLogic(Size(nMinLinPix,nMinLinPix)).get());
+    Size aMinDotDist(rOut.PixelToLogic(Size(nMinDotPix,nMinDotPix)));
+    Size aMinLinDist(rOut.PixelToLogic(Size(nMinLinPix,nMinLinPix)));
     bool bHoriSolid=nx2<aMinDotDist.Width();
     bool bVertSolid=ny2<aMinDotDist.Height();
     // enlarge line offset (minimum 4 pixels)
@@ -475,7 +475,7 @@ void SdrPageView::DrawPageViewGrid(OutputDevice& rOut, const tools::Rectangle& r
         }
         const tools::Rectangle aGridBoundingBox(x1, y1, x2, y2);
         if (!rRect.IsEmpty()) {
-            Size a1PixSiz(rOut.PixelToLogic(Size(1,1)).get());
+            Size a1PixSiz(rOut.PixelToLogic(Size(1,1)));
             tools::Long nX1Pix=a1PixSiz.Width();  // add 1 pixel of tolerance
             tools::Long nY1Pix=a1PixSiz.Height();
             if (x1<rRect.Left()  -nX1Pix) x1=rRect.Left()  -nX1Pix;
@@ -758,7 +758,7 @@ void SdrPageView::ImpInvalidateHelpLineArea(sal_uInt16 nNum) const
         {
             OutputDevice& rOutDev = pCandidate->GetOutputDevice();
             tools::Rectangle aR(rHL.GetBoundRect(rOutDev));
-            Size aSiz(rOutDev.PixelToLogic(Size(1,1)).get());
+            Size aSiz(rOutDev.PixelToLogic(Size(1,1)));
             aR.AdjustLeft( -(aSiz.Width()) );
             aR.AdjustRight(aSiz.Width() );
             aR.AdjustTop( -(aSiz.Height()) );
