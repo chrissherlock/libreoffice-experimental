@@ -93,7 +93,7 @@ Size AccessibleViewForwarder::LogicToPixel(const Size& rSize) const
     {
         SdrPaintWindow* pPaintWindow = mpView->GetPaintWindow(static_cast<sal_uInt32>(mnWindowId));
         OutputDevice& rOutDev = pPaintWindow->GetOutputDevice();
-        return rOutDev.LogicToPixel(rSize).get();
+        return rOutDev.LogicToPixel(rSize);
     }
     else
         return Size();
