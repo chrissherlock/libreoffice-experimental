@@ -2162,7 +2162,7 @@ static void lcl_AdjustRectToPixelSize( SwRect& io_aSwRect, const vcl::RenderCont
     // local object of class <Rectangle> in Twip coordinates
     // calculated from given rectangle aligned to pixel centers.
     const tools::Rectangle aPxCenterRect = aOut.PixelToLogic(
-            aOut.LogicToPixel( io_aSwRect.SVRect() )).get();
+            aOut.LogicToPixel( io_aSwRect.SVRect() ));
 
     // local constant object of class <Rectangle> representing given rectangle
     // in pixel.

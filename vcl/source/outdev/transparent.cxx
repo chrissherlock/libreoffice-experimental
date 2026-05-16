@@ -1191,7 +1191,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
             return rOut.LogicToPixel(
                 rOut.GetClipRegion().GetBoundRect().Intersection( aActionBounds ) ).get();
         else
-            return rOut.LogicToPixel( aActionBounds ).get();
+            return rOut.LogicToPixel( aActionBounds );
     }
     else
         return tools::Rectangle();
