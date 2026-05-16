@@ -155,7 +155,7 @@ void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)
     const vcl::Region aPaintRgn(mxOwnerWindow->GetPaintRegion());
 
     if (!aPaintRgn.IsNull())
-        rDstRect.Intersection(LogicToPixel(aPaintRgn.GetBoundRect()).get());
+        rDstRect.Intersection(LogicToPixel(aPaintRgn.GetBoundRect()));
 }
 
 void Window::EnableClipSiblings( bool bClipSiblings )
@@ -677,10 +677,10 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
     if ( mxOwnerWindow->mpWindowImpl->mpPaintRegion )
     {
         vcl::Region      aClip( *mxOwnerWindow->mpWindowImpl->mpPaintRegion );
-        const Point aPixPos( LogicToPixel( rPos ).get() );
+        const Point aPixPos( LogicToPixel( rPos ) );
 
         aClip.Move( -GetDeviceOriginX(), -GetDeviceOriginY() );
-        aClip.Intersect( tools::Rectangle( aPixPos, LogicToPixel( rSize ).get() ) );
+        aClip.Intersect( tools::Rectangle( aPixPos, LogicToPixel( rSize ) ) );
 
         if ( !aClip.IsEmpty() )
         {

@@ -139,7 +139,7 @@ Reference< XAccessible > SAL_CALL SvxGraphCtrlAccessibleContext::getAccessibleAt
     }
 
     Point aPnt( rPoint.X, rPoint.Y );
-    aPnt = mpControl->GetDrawingArea()->get_ref_device().PixelToLogic(aPnt).get();
+    aPnt = mpControl->GetDrawingArea()->get_ref_device().PixelToLogic(aPnt);
 
     SdrObject* pObj = nullptr;
 
@@ -561,7 +561,7 @@ Point SvxGraphCtrlAccessibleContext::LogicToPixel (const Point& rPoint) const
 Size SvxGraphCtrlAccessibleContext::LogicToPixel (const Size& rSize) const
 {
     if( mpControl )
-        return mpControl->GetDrawingArea()->get_ref_device().LogicToPixel(rSize).get();
+        return mpControl->GetDrawingArea()->get_ref_device().LogicToPixel(rSize);
     else
         return rSize;
 }
