@@ -145,4 +145,11 @@ void OutputDevice::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     }
 }
 
+void OutputDevice::DrawMask(const Point& rDestPt, const vcl::LogicSize& rLogicSize,
+                  const Point& rSrcPt, const Size& rSrcSizePixel,
+                  const Bitmap& rBitmap, const Color& rMaskColor)
+{
+    DrawMask(rDestPt, rLogicSize.get(), rSrcPt, rSrcSizePixel, rBitmap, rMaskColor);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

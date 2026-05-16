@@ -543,6 +543,7 @@ public:
 
     void                        MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove );
     void                        IntersectClipRegion( const tools::Rectangle& rRect );
+    void                        IntersectClipRegion(const vcl::LogicRect& rLogicRect);
     void                        IntersectClipRegion( const vcl::Region& rRegion );
 
     virtual vcl::Region         GetActiveClipRegion() const;
@@ -1402,6 +1403,8 @@ public:
     void DrawBitmap( const vcl::LogicPoint& rDestPt, const vcl::LogicSize& rDestSize, const Point& rSrcPtPixel, const Size& rSrcSizePixel, const Bitmap& rBitmap, MetaActionType nAction ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rSrcPtPixel, rSrcSizePixel, rBitmap, nAction); }
     void DrawBitmap( const vcl::DevicePoint& rDestPt, const vcl::DeviceSize& rDestSize, const Point& rSrcPtPixel, const Size& rSrcSizePixel, const Bitmap& rBitmap, MetaActionType nAction ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rSrcPtPixel, rSrcSizePixel, rBitmap, nAction); }
 
+    void DrawBitmap(const Point& rDestPt, const vcl::LogicSize& rLogicSize,
+                    const Point& rSrcPt, const Size& rSrcSizePixel, const Bitmap& rBitmap);
 
     /** @overload
         virtual void DrawImage(
@@ -1520,6 +1523,9 @@ private:
                                     const Point& rSrcPtPixel,
                                     const Size& rSrcSizePixel );
 
+    void DrawAlphaBitmap(const Point& rDestPt, const vcl::LogicSize& rLogicSize,
+                         const Point& rSrcPt, const Size& rSrcSizePixel, const Bitmap& rBitmap);
+
     ///@}
 
 
@@ -1595,6 +1601,10 @@ public:
                                           const Point& rSrcPtPixel, const Size& rSrcSizePixel,
                                           const Bitmap& rBitmap, const Color& rMaskColor,
                                           MetaActionType nAction );
+
+    void DrawMask(const Point& rDestPt, const vcl::LogicSize& rLogicSize,
+                  const Point& rSrcPt, const Size& rSrcSizePixel,
+                  const Bitmap& rBitmap, const Color& rMaskColor);
 
 protected:
 
