@@ -1423,7 +1423,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
             // i_rPos *may* be in logical coordinates if a MapMode is set at
             // i_pTargetOutDev. To not mix values of different coordinate systems
             // it *needs* to be converted (which does nothing if no MapMode)
-            Point aDelta(rTargetOutDev.PixelToLogic(Point(nDeltaX, nDeltaY)).get());
+            Point aDelta(rTargetOutDev.PixelToLogic(Point(nDeltaX, nDeltaY)));
             aPos += aDelta;
             pChild->ImplPaintToDevice(rTargetOutDev, aPos);
         }

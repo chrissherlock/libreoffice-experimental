@@ -1043,7 +1043,7 @@ void PushButton::ImplDrawPushButton(vcl::RenderContext& rRenderContext)
         // rectangular bevel button look)
         Size aFontSize(Application::GetSettings().GetStyleSettings().GetPushButtonFont().GetFontSize());
         aFontSize = rRenderContext.LogicToPixel(aFontSize, MapMode(MapUnit::MapPoint));
-        Size aInRectSize(rRenderContext.LogicToPixel(Size(aInRect.GetWidth(), aInRect.GetHeight())).get());
+        Size aInRectSize(rRenderContext.LogicToPixel(Size(aInRect.GetWidth(), aInRect.GetHeight())));
         aControlValue.mbSingleLine = (aInRectSize.Height() < 2 * aFontSize.Height());
 
         if (!aControlValue.m_bFlatButton || (nState & ControlState::ROLLOVER) || (nState & ControlState::PRESSED)
@@ -1332,7 +1332,7 @@ void PushButton::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
 
 void PushButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
-    Point aPos = rDev.LogicToPixel(rPos).get();
+    Point aPos = rDev.LogicToPixel(rPos);
     Size        aSize = GetSizePixel();
     tools::Rectangle   aRect( aPos, aSize );
     vcl::Font aFont = GetDrawPixelFont(&rDev);
@@ -2436,7 +2436,7 @@ void RadioButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFla
     if ( !maImage )
     {
         MapMode     aResMapMode( MapUnit::Map100thMM );
-        Point aPos = rDev.LogicToPixel(rPos).get();
+        Point aPos = rDev.LogicToPixel(rPos);
         Size        aSize = GetSizePixel();
         Size aImageSize = rDev.LogicToPixel(Size(300, 300), aResMapMode);
         Size aBrd1Size = rDev.LogicToPixel(Size(20, 20), aResMapMode);
@@ -3231,7 +3231,7 @@ void CheckBox::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&
 void CheckBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
     MapMode     aResMapMode( MapUnit::Map100thMM );
-    Point aPos = rDev.LogicToPixel(rPos).get();
+    Point aPos = rDev.LogicToPixel(rPos);
     Size        aSize = GetSizePixel();
     Size aImageSize = rDev.LogicToPixel(Size(300, 300), aResMapMode);
     Size aBrd1Size = rDev.LogicToPixel(Size(20, 20), aResMapMode);
@@ -3316,8 +3316,8 @@ void CheckBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags 
                 aTempPos21.setX( aPos21.X()-nDX );
                 aTempPos22.setX( aPos22.X()-nDX );
             }
-            rDev.DrawLine(aTempPos11, aTempPos12);
-            rDev.DrawLine(aTempPos21, aTempPos22);
+            rDev.DrawLine( aTempPos11, aTempPos12 );
+            rDev.DrawLine( aTempPos21, aTempPos22 );
         }
     }
 }

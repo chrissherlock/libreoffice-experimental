@@ -2793,7 +2793,7 @@ void BmpWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
         aGrfSize = ::GetGraphicSizeTwip(m_aGraphic, &rRenderContext);
     //it should show the default bitmap also if no graphic can be found
     if (!aGrfSize.Width() && !aGrfSize.Height())
-        aGrfSize = rRenderContext.PixelToLogic(m_aBmp.GetSizePixel()).get();
+        aGrfSize =  rRenderContext.PixelToLogic(m_aBmp.GetSizePixel());
 
     tools::Long nRelGrf = aGrfSize.Width() * 100 / aGrfSize.Height();
     tools::Long nRelWin = aPntSz.Width() * 100 / aPntSz.Height();

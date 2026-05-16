@@ -248,7 +248,7 @@ void FontWorkGalleryDialog::insertSelectedFontwork()
     {
         Size aSize = pOutDev->GetOutputSizePixel();
         tools::Rectangle aPixelVisRect(Point(0,0), aSize);
-        tools::Rectangle aVisArea = pOutDev->PixelToLogic(aPixelVisRect).get();
+        tools::Rectangle aVisArea =  pOutDev->PixelToLogic(aPixelVisRect);
 
         aPagePos = aVisArea.Center();
     }

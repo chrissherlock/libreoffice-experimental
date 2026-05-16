@@ -88,7 +88,7 @@ void SidebarTextControl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     OutputDevice& rDevice = pDrawingArea->get_ref_device();
     rDevice.SetMapMode(MapMode(MapUnit::MapTwip));
     rDevice.SetBackground(aBgColor);
-    Size aOutputSize(rDevice.PixelToLogic(aSize).get());
+    Size aOutputSize(rDevice.PixelToLogic(aSize));
     EditView* pEditView = GetEditView();
     pEditView->setEditViewCallbacks(this);
     EditEngine& rEditEngine = pEditView->getEditEngine();
@@ -136,7 +136,7 @@ OUString SidebarTextControl::RequestHelp(tools::Rectangle& rHelpRect)
     {
         Point aPos = rHelpRect.TopLeft();
         const OutputDevice& rOutDev = pEditView->GetOutputDevice();
-        Point aLogicClick = rOutDev.PixelToLogic(aPos).get();
+        vcl::LogicPoint aLogicClick = rOutDev.PixelToLogic(aPos);
         const SvxFieldItem* pItem = pEditView->GetField(aLogicClick);
         if (pItem)
         {
@@ -190,7 +190,7 @@ void SidebarTextControl::DrawForPage(OutputDevice* pDev, const Point& rPt)
 {
     //Take the control's height, but overwrite the scrollbar area if there was one
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    Size aSize(rDevice.PixelToLogic(GetOutputSizePixel()).get());
+    Size aSize(rDevice.PixelToLogic(GetOutputSizePixel()));
     if (OutlinerView* pOutlinerView = mrSidebarWin.GetOutlinerView())
     {
         pOutlinerView->GetOutliner().SetPaperSize(aSize);
@@ -217,12 +217,12 @@ void SidebarTextControl::Paint(vcl::RenderContext& rRenderContext, const tools::
     {
         if (mrSidebarWin.IsMouseOverSidebarWin() || HasFocus())
         {
-            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.PixelToLogic(aSize).get()),
+            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.PixelToLogic(aSize)),
                                         Gradient(css::awt::GradientStyle_LINEAR, mrSidebarWin.ColorDark(), mrSidebarWin.ColorDark()));
         }
         else
         {
-            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.PixelToLogic(aSize).get()),
+            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.PixelToLogic(aSize)),
                            Gradient(css::awt::GradientStyle_LINEAR, mrSidebarWin.ColorLight(), mrSidebarWin.ColorDark()));
         }
     }
@@ -329,7 +329,7 @@ bool SidebarTextControl::MouseButtonDown(const MouseEvent& rMEvt)
         if ( !bExecuteMod || (rMEvt.GetModifier() == KEY_MOD1))
         {
             const OutputDevice& rOutDev = pEditView->GetOutputDevice();
-            Point aLogicClick = rOutDev.PixelToLogic(rMEvt.GetPosPixel()).get();
+            vcl::LogicPoint aLogicClick = rOutDev.PixelToLogic(rMEvt.GetPosPixel());
             if (const SvxFieldItem* pItem = pEditView->GetField(aLogicClick))
             {
                 const SvxFieldData* pField = pItem->GetField();

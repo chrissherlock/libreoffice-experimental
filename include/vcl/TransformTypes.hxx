@@ -130,6 +130,20 @@ template <typename Space, typename T> struct TypedGeom
     const T* operator->() const { return &maData; }
     T* operator->() { return &maData; }
 
+    // Transparent data extraction via dereference operators
+    const T& operator*() const { return maData; }
+    T& operator*() { return maData; }
+
+    // Implicit conversion operators back to legacy primitives
+    // Safely clears member/assignment bottlenecks down the call stack
+    operator const T&() const { return maData; }
+    operator T&() { return maData; }
+
+    // Type-isolated structural equality operators
+    // Ensures macros like OSL_ENSURE can evaluate wrapper comparisons seamlessly
+    constexpr bool operator==(const TypedGeom& rOther) const { return maData == rOther.maData; }
+    constexpr bool operator!=(const TypedGeom& rOther) const { return maData != rOther.maData; }
+
     /**
      * The Monadic Map Operation
      * Takes a callable function/lambda, applies it to the underlying geometry,

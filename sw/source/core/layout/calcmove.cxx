@@ -868,7 +868,7 @@ void SwPageFrame::MakeAll(vcl::RenderContext* pRenderContext)
                            !pSh->GetViewOptions()->getDraftView())
                 {
                     // In BrowseView, we use fixed settings
-                    const Size aBorder = pRenderContext->PixelToLogic( pSh->GetBrowseBorder() ).get();
+                    const Size aBorder =  pRenderContext->PixelToLogic( pSh->GetBrowseBorder() );
                     const tools::Long nTop    = pAttrs->CalcTopLine()   + aBorder.Height();
                     const tools::Long nBottom = pAttrs->CalcBottomLine()+ aBorder.Height();
 

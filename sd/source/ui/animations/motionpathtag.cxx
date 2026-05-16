@@ -446,7 +446,7 @@ bool MotionPathTag::MouseButtonDown( const MouseEvent& rMEvt, SmartHdl& rHdl )
         else if( rMEvt.IsLeft() )
         {
             OutputDevice* pOut = mrView.GetViewShell()->GetActiveWindow()->GetOutDev();
-            Point aMDPos( pOut->PixelToLogic( rMEvt.GetPosPixel() ).get() );
+            Point aMDPos( pOut->PixelToLogic( rMEvt.GetPosPixel() ));
 
             if( !mrView.IsFrameDragSingles() && mrView.IsInsObjPointMode() && (rHdl.GetObjHdlNum() == SMART_TAG_HDL_NUM) )
             {
@@ -687,7 +687,7 @@ bool MotionPathTag::OnMove( const KeyEvent& rKEvt )
     if(rKEvt.GetKeyCode().IsMod2())
     {
         OutputDevice* pOut = mrView.GetViewShell()->GetActiveWindow()->GetOutDev();
-        Size aLogicSizeOnePixel = pOut ? pOut->PixelToLogic(Size(1,1)).get() : Size(100, 100);
+        Size aLogicSizeOnePixel = pOut ? pOut->PixelToLogic(Size(1,1)) : Size(100, 100);
         nX *= aLogicSizeOnePixel.Width();
         nY *= aLogicSizeOnePixel.Height();
     }

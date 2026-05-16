@@ -741,7 +741,7 @@ void ScDrawStringsVars::SetAutoText( const OUString& rAutoText )
 
     nOriginalWidth = aTextSize.Width();
     if ( bPixelToLogic )
-        aTextSize = pRefDevice->LogicToPixel( aTextSize ).get();
+        aTextSize =  pRefDevice->LogicToPixel( aTextSize );
 
     maLastCell.clear();       // the same text may fit in the next cell
 }
@@ -817,7 +817,7 @@ void ScDrawStringsVars::TextChanged()
 
     nOriginalWidth = aTextSize.Width();
     if ( bPixelToLogic )
-        aTextSize = pRefDevice->LogicToPixel( aTextSize ).get();
+        aTextSize =  pRefDevice->LogicToPixel( aTextSize );
 }
 
 bool ScDrawStringsVars::HasEditCharacters() const
@@ -2141,7 +2141,7 @@ void ScOutputData::LayoutStringsImpl(bool const bPixelToLogic, RowInfo* const pT
                 //  aClipRect is not used after SetClipRegion/IntersectClipRegion,
                 //  so it can be modified here
                 if (bPixelToLogic)
-                    aAreaParam.maClipRect = mpRefDevice->PixelToLogic( aAreaParam.maClipRect ).get();
+                    aAreaParam.maClipRect =  mpRefDevice->PixelToLogic( aAreaParam.maClipRect );
 
                 if (mbMetaFile)
                 {
@@ -2182,7 +2182,7 @@ void ScOutputData::LayoutStringsImpl(bool const bPixelToLogic, RowInfo* const pT
                 if (bRightAdjusted)
                     aDrawTextPos.AdjustX(aVars.GetTextSize().Width() );
 
-                aDrawTextPos = mpRefDevice->PixelToLogic( aDrawTextPos ).get();
+                aDrawTextPos =  mpRefDevice->PixelToLogic( aDrawTextPos );
 
                 //  redo text width adjustment in logic units
                 if (bRightAdjusted)
@@ -2766,7 +2766,7 @@ void ScOutputData::DrawEditParam::calcStartPosForVertical(
     OSL_ENSURE(isVerticallyOriented(), "Use this only for vertically oriented cell!");
 
     if (mbPixelToLogic)
-        rLogicStart = pRefDevice->PixelToLogic(rLogicStart).get();
+        rLogicStart =  pRefDevice->PixelToLogic(rLogicStart);
 
     if (!mbBreak)
         return;
@@ -3036,7 +3036,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
     OSL_ASSERT(rParam.meOrient == SvxCellOrientation::Standard);
     OSL_ASSERT(!rParam.mbAsianVertical);
 
-    Size aRefOne = mpRefDevice->PixelToLogic(Size(1,1)).get();
+    Size aRefOne =  mpRefDevice->PixelToLogic(Size(1,1));
 
     bool bRepeat = (rParam.meHorJustAttr == SvxCellHorJustify::Repeat && !rParam.mbBreak);
     bool bShrink = !rParam.mbBreak && !bRepeat && lcl_GetBoolValue(*rParam.mpPattern, ATTR_SHRINKTOFIT, rParam.mpCondSet);
@@ -3102,7 +3102,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
     }
     if (rParam.mbPixelToLogic)
     {
-        Size aLogicSize = mpRefDevice->PixelToLogic(aPaperSize).get();
+        Size aLogicSize =  mpRefDevice->PixelToLogic(aPaperSize);
         if ( rParam.mbBreak && !rParam.mbAsianVertical && mpRefDevice != pFmtDevice )
         {
             // #i85342# screen display and formatting for printer,
@@ -3217,7 +3217,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
         {
             aPaperSize.setWidth( nNeededPixel + 1 );
             if (rParam.mbPixelToLogic)
-                rParam.mpEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize).get());
+                rParam.mpEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
             else
                 rParam.mpEngine->SetPaperSize(aPaperSize);
         }
@@ -3257,7 +3257,7 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
 
     Size aCellSize;         // output area, excluding margins, in logical units
     if (rParam.mbPixelToLogic)
-        aCellSize = mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) ).get();
+        aCellSize =  mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) );
     else
         aCellSize = Size( nOutWidth, nOutHeight );
 
@@ -3314,12 +3314,11 @@ void ScOutputData::DrawEditStandard(DrawEditParam& rParam)
     Point aURLStart;
 
     {   // Clip marks are already handled in GetOutputArea
-        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->PixelToLogic(aAreaParam.maClipRect).get()
-                                : aAreaParam.maClipRect, bClip, bSimClip, mpDev, mbMetaFile);
+        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->PixelToLogic(aAreaParam.maClipRect) : aAreaParam.maClipRect, bClip, bSimClip, mpDev, mbMetaFile);
 
         Point aLogicStart;
         if (rParam.mbPixelToLogic)
-            aLogicStart = mpRefDevice->PixelToLogic( Point(nStartX,nStartY) ).get();
+            aLogicStart =  mpRefDevice->PixelToLogic( Point(nStartX,nStartY) );
         else
             aLogicStart = Point(nStartX, nStartY);
 
@@ -3461,7 +3460,7 @@ ClearableClipRegionPtr ScOutputData::Clip( DrawEditParam& rParam, const Size& aC
     bool bClip = AdjustAreaParamClipRect(aAreaParam) || aAreaParam.mbLeftClip || aAreaParam.mbRightClip || bWrapFields;
     bool bSimClip = false;
 
-    const Size aRefOne = mpRefDevice->PixelToLogic(Size(1,1)).get();
+    const Size aRefOne =  mpRefDevice->PixelToLogic(Size(1,1));
     if ( nEngineWidth >= aCellSize.Width() + aRefOne.Width() )
     {
         const ScMergeAttr* pMerge = &rParam.mpPattern->GetItem(ATTR_MERGE);
@@ -3483,8 +3482,7 @@ ClearableClipRegionPtr ScOutputData::Clip( DrawEditParam& rParam, const Size& aC
 
         // Clip marks are already handled in GetOutputArea
     return ClearableClipRegionPtr(new ClearableClipRegion(rParam.mbPixelToLogic ?
-                                                mpRefDevice->PixelToLogic(aAreaParam.maClipRect).get()
-                                              : aAreaParam.maClipRect, bClip, bSimClip, mpDev, mbMetaFile));
+                                                mpRefDevice->PixelToLogic(aAreaParam.maClipRect) : aAreaParam.maClipRect, bClip, bSimClip, mpDev, mbMetaFile));
 }
 
 void ScOutputData::DrawEditBottomTop(DrawEditParam& rParam)
@@ -3533,7 +3531,7 @@ void ScOutputData::DrawEditBottomTop(DrawEditParam& rParam)
     }
     if (rParam.mbPixelToLogic)
     {
-        Size aLogicSize = mpRefDevice->PixelToLogic(aPaperSize).get();
+        Size aLogicSize =  mpRefDevice->PixelToLogic(aPaperSize);
         rParam.mpEngine->SetPaperSize(aLogicSize);
     }
     else
@@ -3654,8 +3652,7 @@ void ScOutputData::DrawEditBottomTop(DrawEditParam& rParam)
 
     // output area, excluding margins, in logical units
     const Size aCellSize = rParam.mbPixelToLogic
-        ? mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) ).get()
-        : Size( nOutWidth, nOutHeight );
+        ? mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) ) : Size( nOutWidth, nOutHeight );
 
     Point aURLStart;
 
@@ -3776,7 +3773,7 @@ void ScOutputData::DrawEditTopBottom(DrawEditParam& rParam)
     }
     if (rParam.mbPixelToLogic)
     {
-        Size aLogicSize = mpRefDevice->PixelToLogic(aPaperSize).get();
+        Size aLogicSize =  mpRefDevice->PixelToLogic(aPaperSize);
         rParam.mpEngine->SetPaperSize(aLogicSize);
     }
     else
@@ -3900,8 +3897,7 @@ void ScOutputData::DrawEditTopBottom(DrawEditParam& rParam)
 
     // output area, excluding margins, in logical units
     const Size aCellSize = rParam.mbPixelToLogic
-        ? mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) ).get()
-        : Size( nOutWidth, nOutHeight );
+        ? mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) ) : Size( nOutWidth, nOutHeight );
 
     Point aURLStart;
 
@@ -3970,7 +3966,7 @@ void ScOutputData::DrawEditTopBottom(DrawEditParam& rParam)
 void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
 {
     OSL_ASSERT(rParam.meHorJustAttr != SvxCellHorJustify::Repeat);
-    Size aRefOne = mpRefDevice->PixelToLogic(Size(1,1)).get();
+    Size aRefOne =  mpRefDevice->PixelToLogic(Size(1,1));
 
     bool bRepeat = (rParam.meHorJustAttr == SvxCellHorJustify::Repeat && !rParam.mbBreak);
     bool bShrink = !rParam.mbBreak && !bRepeat && lcl_GetBoolValue(*rParam.mpPattern, ATTR_SHRINKTOFIT, rParam.mpCondSet);
@@ -4023,7 +4019,7 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
 
     if (rParam.mbPixelToLogic)
     {
-        Size aLogicSize = mpRefDevice->PixelToLogic(aPaperSize).get();
+        Size aLogicSize =  mpRefDevice->PixelToLogic(aPaperSize);
         if ( rParam.mbBreak && mpRefDevice != pFmtDevice )
         {
             // #i85342# screen display and formatting for printer,
@@ -4093,7 +4089,7 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
         {
             aPaperSize.setWidth( nNeededPixel + 1 );
             if (rParam.mbPixelToLogic)
-                rParam.mpEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize).get());
+                rParam.mpEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
             else
                 rParam.mpEngine->SetPaperSize(aPaperSize);
         }
@@ -4133,7 +4129,7 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
 
     Size aCellSize;         // output area, excluding margins, in logical units
     if (rParam.mbPixelToLogic)
-        aCellSize = mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) ).get();
+        aCellSize =  mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) );
     else
         aCellSize = Size( nOutWidth, nOutHeight );
 
@@ -4185,12 +4181,11 @@ void ScOutputData::DrawEditStacked(DrawEditParam& rParam)
     Point aURLStart;
 
     {   // Clip marks are already handled in GetOutputArea
-        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->PixelToLogic(aAreaParam.maClipRect).get()
-                                : aAreaParam.maClipRect, bClip, bSimClip, mpDev, mbMetaFile);
+        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->PixelToLogic(aAreaParam.maClipRect) : aAreaParam.maClipRect, bClip, bSimClip, mpDev, mbMetaFile);
 
         Point aLogicStart;
         if (rParam.mbPixelToLogic)
-            aLogicStart = mpRefDevice->PixelToLogic( Point(nStartX,nStartY) ).get();
+            aLogicStart =  mpRefDevice->PixelToLogic( Point(nStartX,nStartY) );
         else
             aLogicStart = Point(nStartX, nStartY);
 
@@ -4259,7 +4254,7 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
     OSL_ASSERT(rParam.mbAsianVertical);
     OSL_ASSERT(rParam.meHorJustAttr != SvxCellHorJustify::Repeat);
 
-    Size aRefOne = mpRefDevice->PixelToLogic(Size(1,1)).get();
+    Size aRefOne =  mpRefDevice->PixelToLogic(Size(1,1));
 
     bool bHidden = false;
     bool bShrink = !rParam.mbBreak && lcl_GetBoolValue(*rParam.mpPattern, ATTR_SHRINKTOFIT, rParam.mpCondSet);
@@ -4319,7 +4314,7 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
 
     if (rParam.mbPixelToLogic)
     {
-        Size aLogicSize = mpRefDevice->PixelToLogic(aPaperSize).get();
+        Size aLogicSize =  mpRefDevice->PixelToLogic(aPaperSize);
         if ( rParam.mbBreak && !rParam.mbAsianVertical && mpRefDevice != pFmtDevice )
         {
             // #i85342# screen display and formatting for printer,
@@ -4393,7 +4388,7 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
     {
         aPaperSize.setWidth( nNeededPixel + 1 );
         if (rParam.mbPixelToLogic)
-            rParam.mpEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize).get());
+            rParam.mpEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
         else
             rParam.mpEngine->SetPaperSize(aPaperSize);
     }
@@ -4420,7 +4415,7 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
 
     Size aCellSize;         // output area, excluding margins, in logical units
     if (rParam.mbPixelToLogic)
-        aCellSize = mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) ).get();
+        aCellSize =  mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) );
     else
         aCellSize = Size( nOutWidth, nOutHeight );
 
@@ -4473,12 +4468,11 @@ void ScOutputData::DrawEditAsianVertical(DrawEditParam& rParam)
     Point aURLStart;
 
     {   // Clip marks are already handled in GetOutputArea
-        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->PixelToLogic(aAreaParam.maClipRect).get()
-                                : aAreaParam.maClipRect, bClip, bSimClip, mpDev, mbMetaFile);
+        ClearableClipRegion aClip(rParam.mbPixelToLogic ? mpRefDevice->PixelToLogic(aAreaParam.maClipRect) : aAreaParam.maClipRect, bClip, bSimClip, mpDev, mbMetaFile);
 
         Point aLogicStart;
         if (rParam.mbPixelToLogic)
-            aLogicStart = mpRefDevice->PixelToLogic( Point(nStartX,nStartY) ).get();
+            aLogicStart =  mpRefDevice->PixelToLogic( Point(nStartX,nStartY) );
         else
             aLogicStart = Point(nStartX, nStartY);
 
@@ -5001,7 +4995,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                                     aPaperSize.setWidth( nOutHeight - 1 );
                             }
                             if (bPixelToLogic)
-                                mxOutputEditEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize).get());
+                                mxOutputEditEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
                             else
                                 mxOutputEditEngine->SetPaperSize(aPaperSize);  // scale is always 1
 
@@ -5077,7 +5071,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                                         // set paper width and get new text height
                                         aPaperSize.setWidth( nNewWidth );
                                         if (bPixelToLogic)
-                                            mxOutputEditEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize).get());
+                                            mxOutputEditEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
                                         else
                                             mxOutputEditEngine->SetPaperSize(aPaperSize);  // Scale is always 1
                                         //mxOutputEditEngine->QuickFormatDoc( sal_True );
@@ -5121,7 +5115,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
 
                                 Size aCellSize;
                                 if (bPixelToLogic)
-                                    aCellSize = mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) ).get();
+                                    aCellSize =  mpRefDevice->PixelToLogic( Size( nOutWidth, nOutHeight ) );
                                 else
                                     aCellSize = Size( nOutWidth, nOutHeight );  // scale is one
 
@@ -5228,7 +5222,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
 
                                 Point aLogicStart;
                                 if (bPixelToLogic)
-                                    aLogicStart = mpRefDevice->PixelToLogic( Point(nStartX,nStartY) ).get();
+                                    aLogicStart =  mpRefDevice->PixelToLogic( Point(nStartX,nStartY) );
                                 else
                                     aLogicStart = Point(nStartX, nStartY);
                                 if ( eOrient!=SvxCellOrientation::Standard || !bBreak )
@@ -5266,7 +5260,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
 
                                             aPaperSize.setWidth( nOutWidth );
                                             if (bPixelToLogic)
-                                                mxOutputEditEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize).get());
+                                                mxOutputEditEngine->SetPaperSize(mpRefDevice->PixelToLogic(aPaperSize));
                                             else
                                                 mxOutputEditEngine->SetPaperSize(aPaperSize);
 

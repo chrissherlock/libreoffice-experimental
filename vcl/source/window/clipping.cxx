@@ -685,7 +685,7 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
         if ( !aClip.IsEmpty() )
         {
             const vcl::Region    aOldClip( rSaveDevice.GetClipRegion() );
-            const Point     aPixOffset( rSaveDevice.LogicToPixel( Point() ).get() );
+            const Point     aPixOffset( rSaveDevice.LogicToPixel( Point() ));
             const vcl::MappingPolicy eOldPolicy = rSaveDevice.GetMappingPolicy();
 
             // move clip region to have the same distance to DestOffset

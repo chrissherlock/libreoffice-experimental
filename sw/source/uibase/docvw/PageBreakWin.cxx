@@ -175,7 +175,7 @@ void SwPageBreakWin::PaintButton()
     if (!m_xVirDev)
         return;
 
-    const ::tools::Rectangle aRect(::tools::Rectangle(Point(0, 0), m_xVirDev->PixelToLogic(GetSizePixel()).get()));
+    const ::tools::Rectangle aRect(::tools::Rectangle(Point(0, 0), m_xVirDev->PixelToLogic(GetSizePixel())));
 
     // Properly paint the control
     BColor aColor = SwViewOption::GetCurrentViewOptions().GetPageBreakColor().getBColor();

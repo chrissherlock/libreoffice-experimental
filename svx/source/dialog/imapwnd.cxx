@@ -455,7 +455,7 @@ SdrObject* IMapWindow::GetHitSdrObj( const Point& rPosPixel ) const
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
 
     SdrObject*  pObj = nullptr;
-    Point       aPt = rDevice.PixelToLogic( rPosPixel ).get();
+    Point       aPt =  rDevice.PixelToLogic( rPosPixel );
 
     if ( tools::Rectangle( Point(), GetGraphicSize() ).Contains( aPt ) )
     {
@@ -590,7 +590,7 @@ OUString IMapWindow::RequestHelp(tools::Rectangle& rHelpArea)
 {
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
 
-    Point aPos = rDevice.PixelToLogic(rHelpArea.TopLeft()).get();
+    Point aPos =  rDevice.PixelToLogic(rHelpArea.TopLeft());
 
     SdrPageView* pPageView = nullptr;
     SdrObject* pSdrObj = mpView->PickObj(aPos, mpView->getHitTolLog(), pPageView);
@@ -602,7 +602,7 @@ OUString IMapWindow::RequestHelp(tools::Rectangle& rHelpArea)
             OUString aStr = pIMapObj->GetURL();
             if ( !aStr.isEmpty() )
             {
-                rHelpArea = rDevice.LogicToPixel(tools::Rectangle( Point(), GetGraphicSize())).get();
+                rHelpArea =  rDevice.LogicToPixel(tools::Rectangle( Point(), GetGraphicSize()));
                 return aStr;
             }
         }

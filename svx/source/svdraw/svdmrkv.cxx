@@ -1861,7 +1861,7 @@ bool SdrMarkView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
         SdrHdl* pMouseOverHdl = nullptr;
         if( !rMEvt.IsLeaveWindow() && pWin )
         {
-            Point aMDPos( pWin->PixelToLogic( rMEvt.GetPosPixel() ).get() );
+            Point aMDPos( pWin->PixelToLogic( rMEvt.GetPosPixel() ));
             pMouseOverHdl = PickHandle(aMDPos);
         }
 

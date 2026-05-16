@@ -1302,7 +1302,7 @@ void SwPostItMgr::PaintTile(OutputDevice& rRenderContext)
         MapMode aMapMode(rRenderContext.GetMapMode());
         aMapMode.SetOrigin(aMapMode.GetOrigin() + aOffset);
         rRenderContext.SetMapMode(aMapMode);
-        Size aSize(rRenderContext.PixelToLogic(pPostIt->GetSizePixel()).get());
+        Size aSize(rRenderContext.PixelToLogic(pPostIt->GetSizePixel()));
         tools::Rectangle aRectangle(Point(0, 0), aSize);
 
         pPostIt->PaintTile(rRenderContext, aRectangle);

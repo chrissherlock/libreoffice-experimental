@@ -77,7 +77,7 @@ void SvxRatioConnector::Paint(vcl::RenderContext& rRenderContext, const tools::R
     rRenderContext.SetLineColor(rRenderContext.GetSettings().GetStyleSettings().GetDisableColor());
     rRenderContext.SetBackground(rRenderContext.GetSettings().GetStyleSettings().GetDialogColor());
 
-    Size aSize(rRenderContext.PixelToLogic(GetOutputSizePixel()).get());
+    Size aSize(rRenderContext.PixelToLogic(GetOutputSizePixel()));
     const sal_Int16 aWidth = aSize.Width() / 2;
     const sal_Int16 aHeight = aSize.Height() - 1;
 
