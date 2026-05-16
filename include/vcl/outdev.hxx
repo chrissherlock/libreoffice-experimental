@@ -414,7 +414,7 @@ public:
     virtual void                DrawOutDev(
                                     const Point& rDestPt, const Size& rDestSize,
                                     const Point& rSrcPt,  const Size& rSrcSize );
-    void DrawOutDev( const Point& rDestPt, const Size& rDestSize, const Point& rSrcPt, const vcl::LogicSize& rSrcSize, OutputDevice& rOutDev ) { DrawOutDev(rDestPt, rDestSize, rSrcPt, rSrcSize.get(), rOutDev); }
+
 
     virtual void                DrawOutDev(
                                     const Point& rDestPt, const Size& rDestSize,
@@ -1387,10 +1387,10 @@ public:
                                     const Size& rSrcSizePixel,
                                     const Bitmap& rBitmap,
                                     MetaActionType nAction );
-    void DrawBitmap( const vcl::LogicPoint& rDestPt, const vcl::LogicSize& rDestSize, const Point& rSrcPtPixel, const Size& rSrcSizePixel, const Bitmap& rBitmap ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rSrcPtPixel, rSrcSizePixel, rBitmap); }
-    void DrawBitmap( const vcl::DevicePoint& rDestPt, const vcl::DeviceSize& rDestSize, const Point& rSrcPtPixel, const Size& rSrcSizePixel, const Bitmap& rBitmap ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rSrcPtPixel, rSrcSizePixel, rBitmap); }
-    void DrawBitmap( const vcl::LogicPoint& rDestPt, const vcl::LogicSize& rDestSize, const Point& rSrcPtPixel, const Size& rSrcSizePixel, const Bitmap& rBitmap, MetaActionType nAction ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rSrcPtPixel, rSrcSizePixel, rBitmap, nAction); }
-    void DrawBitmap( const vcl::DevicePoint& rDestPt, const vcl::DeviceSize& rDestSize, const Point& rSrcPtPixel, const Size& rSrcSizePixel, const Bitmap& rBitmap, MetaActionType nAction ) { DrawBitmap(rDestPt.get(), rDestSize.get(), rSrcPtPixel, rSrcSizePixel, rBitmap, nAction); }
+
+
+
+
 
     void DrawBitmap(const Point& rDestPt, const vcl::LogicSize& rLogicSize,
                     const Point& rSrcPt, const Size& rSrcSizePixel, const Bitmap& rBitmap);

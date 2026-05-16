@@ -108,7 +108,7 @@ void SidebarTextControl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 }
 void SidebarTextControl::SetCursorLogicPosition(const Point& rPosition, bool bPoint, bool bClearMark)
 {
-    Point aMousePos = EditViewOutputDevice().PixelToLogic(rPosition).get();
+    Point aMousePos = EditViewOutputDevice().PixelToLogic(rPosition);
     m_xEditView->SetCursorLogicPosition(aMousePos, bPoint, bClearMark);
 }
 void SidebarTextControl::GetFocus()
