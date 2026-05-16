@@ -1777,7 +1777,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
 
                                     // scale down bitmap, if requested
                                     if( bDownsampleBitmaps )
-                                        aBandBmp = vcl::bitmap::GetDownsampledBitmap(PixelToLogic(LogicToPixel(aDstSzPix).get(), MapMode(MapUnit::MapTwip)),
+                                        aBandBmp = vcl::bitmap::GetDownsampledBitmap(PixelToLogic(LogicToPixel(aDstSzPix), MapMode(MapUnit::MapTwip)),
                                                                          Point(), aBandBmp.GetSizePixel(),
                                                                          aBandBmp, nMaxBmpDPIX, nMaxBmpDPIY);
 

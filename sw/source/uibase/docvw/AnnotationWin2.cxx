@@ -178,14 +178,14 @@ void SwAnnotationWin::DrawForPage(OutputDevice* pDev, const Point& rPt)
 
     auto lclSizePixelToLogic = [this](Size szs) -> Size {
         if (comphelper::LibreOfficeKit::isActive() && !comphelper::LibreOfficeKit::isTiledAnnotations())
-            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(szs).get();
+            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(szs);
         else
             return PixelToLogic(szs);
     };
 
     auto lclPointPixelToLogic = [this](Point pnt) -> Point {
         if (comphelper::LibreOfficeKit::isActive() && !comphelper::LibreOfficeKit::isTiledAnnotations())
-            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(pnt).get();
+            return mxSidebarTextControl->GetDrawingArea()->get_ref_device().PixelToLogic(pnt);
         else
             return PixelToLogic(pnt);
     };

@@ -1177,7 +1177,7 @@ Point ScTextWndGroup::GetCursorScreenPixelPos(bool bBelow)
     Point aLogicPos = pCur->GetPos();
     if (bBelow)
         aLogicPos.AdjustY(pCur->GetHeight());
-    aPos = GetEditViewDevice().LogicToPixel(aLogicPos).get();
+    aPos = GetEditViewDevice().LogicToPixel(aLogicPos);
     bool bRTL = mrParent.IsRTLEnabled();
     if (bRTL)
         aPos.setX(mxTextWnd->GetOutputSizePixel().Width() - aPos.X() + gnBorderWidth);
@@ -2059,7 +2059,7 @@ void ScTextWnd::SetTextString( const OUString& rNewString, bool bKitUpdate )
                 else
                     nTextSize = GetOutputSizePixel().Width(); // Overflow
 
-                Point aLogicStart = GetDrawingArea()->get_ref_device().PixelToLogic(Point(0,0)).get();
+                Point aLogicStart = GetDrawingArea()->get_ref_device().PixelToLogic(Point(0,0));
                 tools::Long nStartPos = aLogicStart.X();
                 tools::Long nInvPos = nStartPos;
                 if (nDifPos)
