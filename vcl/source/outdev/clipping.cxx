@@ -105,6 +105,11 @@ void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
     mbInitClipRegion    = true;
 }
 
+void OutputDevice::IntersectClipRegion(const vcl::LogicRect& rLogicRect)
+{
+    IntersectClipRegion(rLogicRect.get());
+}
+
 void OutputDevice::IntersectClipRegion( const vcl::Region& rRegion )
 {
     if(!rRegion.IsNull())

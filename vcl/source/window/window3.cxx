@@ -143,15 +143,15 @@ const AllSettings& Window::GetSettings() const { return GetOutDev()->GetSettings
 
 Point Window::LogicToPixel(const Point& rLogicPt) const
 {
-    return GetOutDev()->LogicToPixel(rLogicPt).get();
+    return GetOutDev()->LogicToPixel(rLogicPt);
 }
 Size Window::LogicToPixel(const Size& rLogicSize) const
 {
-    return GetOutDev()->LogicToPixel(rLogicSize).get();
+    return GetOutDev()->LogicToPixel(rLogicSize);
 }
 tools::Rectangle Window::LogicToPixel(const tools::Rectangle& rLogicRect) const
 {
-    return GetOutDev()->LogicToPixel(rLogicRect).get();
+    return GetOutDev()->LogicToPixel(rLogicRect);
 }
 vcl::Region Window::LogicToPixel(const vcl::Region& rLogicRegion) const
 {
@@ -173,15 +173,15 @@ tools::Rectangle Window::LogicToPixel(const tools::Rectangle& rLogicRect,
 
 Point Window::PixelToLogic(const Point& rDevicePt) const
 {
-    return GetOutDev()->PixelToLogic(rDevicePt).get();
+    return GetOutDev()->PixelToLogic(rDevicePt);
 }
 Size Window::PixelToLogic(const Size& rDeviceSize) const
 {
-    return GetOutDev()->PixelToLogic(rDeviceSize).get();
+    return GetOutDev()->PixelToLogic(rDeviceSize);
 }
 tools::Rectangle Window::PixelToLogic(const tools::Rectangle& rDeviceRect) const
 {
-    return GetOutDev()->PixelToLogic(rDeviceRect).get();
+    return GetOutDev()->PixelToLogic(rDeviceRect);
 }
 tools::PolyPolygon Window::PixelToLogic(const tools::PolyPolygon& rDevicePolyPoly) const
 {
