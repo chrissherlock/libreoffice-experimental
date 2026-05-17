@@ -643,7 +643,7 @@ void ScViewFunc::PasteDraw()
     SCCOL nPosX = rViewData.GetCurX();
     SCROW nPosY = rViewData.GetCurY();
     vcl::Window* pWin = GetActiveWin();
-    Point aPos = pWin->PixelToLogic( rViewData.GetScrPos( nPosX, nPosY,
+    Point aPos = pWin->WindowToLogic( rViewData.GetScrPos( nPosX, nPosY,
                                      rViewData.GetActivePart() ) );
     const ScDrawTransferObj* pDrawClip = ScDrawTransferObj::GetOwnClipboard(ScTabViewShell::GetClipData(rViewData.GetActiveWin()));
     if (pDrawClip)
@@ -810,7 +810,7 @@ void ScViewFunc::PasteFromTransferable( const uno::Reference<datatransfer::XTran
         SCCOL nPosX = rViewData.GetCurX();
         SCROW nPosY = rViewData.GetCurY();
         vcl::Window* pWin = GetActiveWin();
-        Point aPos = pWin->PixelToLogic( rViewData.GetScrPos( nPosX, nPosY, rViewData.GetActivePart() ) );
+        Point aPos = pWin->WindowToLogic( rViewData.GetScrPos( nPosX, nPosY, rViewData.GetActivePart() ) );
         PasteDraw(
             aPos, pDrawClip->GetModel(), false,
             pDrawClip->GetShellID(), SfxObjectShell::CreateShellID(rViewData.GetDocShell()));

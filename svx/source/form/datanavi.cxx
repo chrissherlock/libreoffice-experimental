@@ -2031,7 +2031,7 @@ namespace svxform
         SetText( SvxResId( RID_STR_DATANAVIGATOR ) );
 
         Size aSize = GetOptimalSize();
-        Size aLogSize = PixelToLogic(aSize, MapMode(MapUnit::MapAppFont));
+        Size aLogSize = WindowToLogic(aSize, MapMode(MapUnit::MapAppFont));
         SfxDockingWindow::SetFloatingSize( aLogSize );
     }
 

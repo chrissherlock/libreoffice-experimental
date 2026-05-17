@@ -1023,7 +1023,7 @@ void RTFDocumentImpl::resolvePict(bool const bInline, uno::Reference<drawing::XS
         Size aSize(aGraphic.GetPrefSize());
         MapMode aMap(MapUnit::Map100thMM);
         if (aGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
-            aSize = Application::GetDefaultDevice()->PixelToLogic(aSize, aMap);
+            aSize = Application::GetDefaultDevice()->WindowToLogic(aSize, aMap);
         else
             aSize = ::LogicToLogic(aSize, aGraphic.GetPrefMapMode(), aMap);
         m_aStates.top().getPicture().nWidth = aSize.Width();

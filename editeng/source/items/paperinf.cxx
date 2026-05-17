@@ -70,7 +70,7 @@ Size SvxPaperInfo::GetPaperSize( const Printer* pPrinter )
 
         if ( aMap1 == aMap2 )
             aPaperSize =
-                pPrinter->PixelToLogic( aPaperSize, MapMode( MapUnit::MapTwip ) );
+                pPrinter->WindowToLogic( aPaperSize, MapMode( MapUnit::MapTwip ) );
         return aPaperSize;
     }
 

@@ -3413,7 +3413,7 @@ void ImpEditEngine::DrawText_ToRectangle( OutputDevice& rOutDev, const tools::Re
 
     // get aOutRect and align to the pixel boundary, so that it
     // becomes exactly the same as Paint()
-    const tools::Rectangle aOutRect(rOutDev.PixelToLogic(rOutDev.LogicToPixel(rOutRect).get()).get());
+    const tools::Rectangle aOutRect(rOutDev.WindowToLogic(rOutDev.LogicToWindow(rOutRect).get()).get());
     const tools::Rectangle aClipRect(0, 0, aOutRect.GetWidth(), aOutRect.GetHeight());
 
     // extract Primitives

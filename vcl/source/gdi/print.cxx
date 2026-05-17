@@ -104,8 +104,8 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
                                          const Point& rDestPt, const Size& rDestSize,
                                          const Point& rSrcPtPixel, const Size& rSrcSizePixel )
 {
-    Point       aDestPt( LogicToPixel( rDestPt ) );
-    Size        aDestSz( LogicToPixel( rDestSize ) );
+    Point       aDestPt( LogicToWindow( rDestPt ) );
+    Size        aDestSz( LogicToWindow( rDestSize ) );
     tools::Rectangle   aSrcRect( rSrcPtPixel, rSrcSizePixel );
 
     aSrcRect.Normalize();
@@ -215,8 +215,8 @@ void Printer::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     mpMetaFile = nullptr;
 
-    tools::Rectangle       aPolyRect( LogicToPixel( rPolyPoly ).GetBoundRect() );
-    const Size      aDPISize( LogicToPixel(Size(1, 1), MapMode(MapUnit::MapInch)) );
+    tools::Rectangle       aPolyRect( LogicToWindow( rPolyPoly ).GetBoundRect() );
+    const Size      aDPISize( LogicToWindow(Size(1, 1), MapMode(MapUnit::MapInch)) );
     const tools::Long      nBaseExtent = std::max<tools::Long>( basegfx::fround<tools::Long>( aDPISize.Width() / 300. ), 1 );
     tools::Long            nMove;
     const sal_uInt16    nTrans = ( nTransparencePercent < 13 ) ? 0 :
@@ -654,8 +654,8 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
                          const Point& rDestPt, const Size& rDestSize,
                          const Point& rSrcPtPixel, const Size& rSrcSizePixel )
 {
-    Point       aDestPt( LogicToPixel( rDestPt ) );
-    Size        aDestSz( LogicToPixel( rDestSize ) );
+    Point       aDestPt( LogicToWindow( rDestPt ) );
+    Size        aDestSz( LogicToWindow( rDestSize ) );
     tools::Rectangle   aSrcRect( rSrcPtPixel, rSrcSizePixel );
 
     aSrcRect.Normalize();
@@ -921,7 +921,7 @@ void Printer::dispose()
 
 Size Printer::GetButtonBorderSize()
 {
-    Size aBrdSize(LogicToPixel(Size(20, 20), MapMode(MapUnit::Map100thMM)));
+    Size aBrdSize(LogicToWindow(Size(20, 20), MapMode(MapUnit::Map100thMM)));
 
     if (!aBrdSize.Width())
         aBrdSize.setWidth(1);
@@ -1297,8 +1297,8 @@ bool Printer::SetPaperSizeUser( const Size& rSize )
     if ( mbInPrintPage )
         return false;
 
-    const Size aPixSize = LogicToPixel( rSize );
-    const Size aPageSize = PixelToLogic(aPixSize, MapMode(MapUnit::Map100thMM));
+    const Size aPixSize = LogicToWindow( rSize );
+    const Size aPageSize = WindowToLogic(aPixSize, MapMode(MapUnit::Map100thMM));
     bool bNeedToChange(maJobSetup.ImplGetConstData().GetPaperWidth() != aPageSize.Width() ||
         maJobSetup.ImplGetConstData().GetPaperHeight() != aPageSize.Height());
 

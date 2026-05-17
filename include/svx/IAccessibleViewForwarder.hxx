@@ -76,7 +76,7 @@ public:
             The same point but in screen coordinates relative to the upper
             left corner of the (current) screen.
      */
-    virtual Point LogicToPixel(const Point& rPoint) const = 0;
+    virtual Point LogicToWindow(const Point& rPoint) const = 0;
 
     /** Transform the specified size from internal coordinates in 100th of
         mm to a screen oriented pixel size.
@@ -87,7 +87,7 @@ public:
         @return
             The same size but in screen coordinates.
      */
-    virtual Size LogicToPixel(const Size& rSize) const = 0;
+    virtual Size LogicToWindow(const Size& rSize) const = 0;
 };
 
 } // end of namespace accessibility

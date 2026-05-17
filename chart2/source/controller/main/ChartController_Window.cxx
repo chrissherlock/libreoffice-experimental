@@ -243,7 +243,7 @@ void SAL_CALL ChartController::setPosSize(
     if(!(m_xViewWindow.is() && pChartWindow))
         return;
 
-    Size aLogicSize = pChartWindow->PixelToLogic( Size( Width, Height ), MapMode( MapUnit::Map100thMM )  );
+    Size aLogicSize = pChartWindow->WindowToLogic( Size( Width, Height ), MapMode( MapUnit::Map100thMM )  );
 
     //todo: for standalone chart: detect whether we are standalone
     //change map mode to fit new size
@@ -520,7 +520,7 @@ void ChartController::execute_MouseButtonDown( const MouseEvent& rMEvt )
     if(!pChartWindow || !pDrawViewWrapper )
         return;
 
-    Point aMPos = pChartWindow->PixelToLogic(rMEvt.GetPosPixel());
+    Point aMPos = pChartWindow->WindowToLogic(rMEvt.GetPosPixel());
 
     // Check if button was clicked
     SdrObject* pObject = pDrawViewWrapper->getHitObject(aMPos);
@@ -625,7 +625,7 @@ void ChartController::execute_MouseButtonDown( const MouseEvent& rMEvt )
         && !rMEvt.IsRight() )
     {
         //start drag
-        sal_uInt16  nDrgLog = static_cast<sal_uInt16>(pChartWindow->PixelToLogic(Size(DRGPIX,0)).Width());
+        sal_uInt16  nDrgLog = static_cast<sal_uInt16>(pChartWindow->WindowToLogic(Size(DRGPIX,0)).Width());
         SdrDragMethod* pDragMethod = nullptr;
 
         //change selection to 3D scene if rotate mode
@@ -678,7 +678,7 @@ void ChartController::execute_MouseMove( const MouseEvent& rMEvt )
 
     if(pDrawViewWrapper->IsAction())
     {
-        pDrawViewWrapper->MovAction( pChartWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+        pDrawViewWrapper->MovAction( pChartWindow->WindowToLogic( rMEvt.GetPosPixel() ) );
     }
 
     impl_SetMousePointer( rMEvt );
@@ -699,7 +699,7 @@ void ChartController::execute_MouseButtonUp( const MouseEvent& rMEvt )
         if(!pChartWindow || !pDrawViewWrapper)
             return;
 
-        Point aMPos = pChartWindow->PixelToLogic(rMEvt.GetPosPixel());
+        Point aMPos = pChartWindow->WindowToLogic(rMEvt.GetPosPixel());
 
         // Check if button was clicked
         if (m_bFieldButtonDown)
@@ -1393,7 +1393,7 @@ bool ChartController::execute_KeyInput( const KeyEvent& rKEvt )
                     if (bAlternate)
                     {
                         // together with Alt-key: 1 px in each direction
-                        Size aPixelSize = pChartWindow->PixelToLogic( Size( 2, 2 ));
+                        Size aPixelSize = pChartWindow->WindowToLogic( Size( 2, 2 ));
                         fGrowAmountX = static_cast< double >( aPixelSize.Width());
                         fGrowAmountY = static_cast< double >( aPixelSize.Height());
                     }
@@ -1420,7 +1420,7 @@ bool ChartController::execute_KeyInput( const KeyEvent& rKEvt )
                     if (bAlternate)
                     {
                         // together with Alt-key: 1 px
-                        Size aPixelSize = pChartWindow->PixelToLogic( Size( 1, 1 ));
+                        Size aPixelSize = pChartWindow->WindowToLogic( Size( 1, 1 ));
                         fShiftAmountX = static_cast< double >( aPixelSize.Width());
                         fShiftAmountY = static_cast< double >( aPixelSize.Height());
                     }
@@ -1827,7 +1827,7 @@ void ChartController::impl_SetMousePointer( const MouseEvent & rEvent )
     if (!m_pDrawViewWrapper || !pChartWindow)
         return;
 
-    Point aMousePos( pChartWindow->PixelToLogic( rEvent.GetPosPixel()));
+    Point aMousePos( pChartWindow->WindowToLogic( rEvent.GetPosPixel()));
     sal_uInt16 nModifier = rEvent.GetModifier();
     bool bLeftDown = rEvent.IsLeft();
 

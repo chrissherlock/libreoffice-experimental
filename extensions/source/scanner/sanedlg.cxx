@@ -213,7 +213,7 @@ public:
     }
     virtual void SetDrawingArea(weld::DrawingArea* pDrawingArea) override
     {
-        Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(PREVIEW_WIDTH, PREVIEW_HEIGHT), MapMode(MapUnit::MapAppFont)));
+        Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(PREVIEW_WIDTH, PREVIEW_HEIGHT), MapMode(MapUnit::MapAppFont)));
         aSize.setWidth(aSize.getWidth()+1);
         aSize.setHeight(aSize.getHeight()+1);
         pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
@@ -1226,12 +1226,12 @@ Point ScanPreview::GetPixelPos( const Point& rIn) const
           / ( maMaxBottomRight.Y() - maMinTopLeft.Y() ) )
         );
 
-    return GetDrawingArea()->get_ref_device().LogicToPixel(aConvert, MapMode(MapUnit::MapAppFont));
+    return GetDrawingArea()->get_ref_device().LogicToWindow(aConvert, MapMode(MapUnit::MapAppFont));
 }
 
 Point ScanPreview::GetLogicPos(const Point& rIn) const
 {
-    Point aConvert = GetDrawingArea()->get_ref_device().PixelToLogic(rIn, MapMode(MapUnit::MapAppFont));
+    Point aConvert = GetDrawingArea()->get_ref_device().WindowToLogic(rIn, MapMode(MapUnit::MapAppFont));
     if( aConvert.X() < 0 )
         aConvert.setX( 0 );
     if( aConvert.X() >= PREVIEW_WIDTH )

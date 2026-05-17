@@ -60,7 +60,7 @@ void ScDrawUtil::CalcScale( const ScDocument& rDoc, SCTAB nTab,
     }
 
     MapMode aHMMMode( MapUnit::Map100thMM, Point(), fZoomX, fZoomY );
-    Point aPixelLog = pDev->PixelToLogic( Point( nPixelX,nPixelY ), aHMMMode );
+    Point aPixelLog = pDev->WindowToLogic( Point( nPixelX,nPixelY ), aHMMMode );
 
     //  Fraction(double) ctor can be used here (and avoid overflows of PixelLog * Zoom)
     //  because ReduceInaccurate is called later anyway.

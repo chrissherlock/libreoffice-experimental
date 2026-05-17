@@ -470,7 +470,7 @@ void ImplCalculateCropRect( ::Graphic const & rGraphic, const text::GraphicCrop&
     }
     else
     {
-        aSize100thMM = Application::GetDefaultDevice()->PixelToLogic(rGraphic.GetPrefSize(), MapMode(MapUnit::Map100thMM));
+        aSize100thMM = Application::GetDefaultDevice()->WindowToLogic(rGraphic.GetPrefSize(), MapMode(MapUnit::Map100thMM));
     }
     if ( aSize100thMM.Width() && aSize100thMM.Height() )
     {
@@ -641,8 +641,8 @@ void ImplApplyFilterData( ::Graphic& rGraphic, const uno::Sequence< beans::Prope
                             aSize = pScaleAction->GetSize();
                         }
                         ::Graphic aGraphic( aBmp );
-                        const Size aSize100thmm( aDummyVDev->LogicToPixel( aSize ));
-                        Size aSize100thmm2( aDummyVDev->PixelToLogic(aSize100thmm, MapMode(MapUnit::Map100thMM)) );
+                        const Size aSize100thmm( aDummyVDev->LogicToWindow( aSize ));
+                        Size aSize100thmm2( aDummyVDev->WindowToLogic(aSize100thmm, MapMode(MapUnit::Map100thMM)) );
 
                         ImplApplyBitmapResolution( aGraphic, nImageResolution,
                             aGraphic.GetSizePixel(), awt::Size( aSize100thmm2.Width(), aSize100thmm2.Height() ) );

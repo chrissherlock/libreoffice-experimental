@@ -113,8 +113,8 @@ bool FuFormatPaintBrush::MouseButtonDown(const MouseEvent& rMEvt)
         if( (eHit == SdrHitKind::TextEdit) || (eHit == SdrHitKind::TextEditObj && ( mrViewShell.GetFrameView()->IsQuickEdit() || dynamic_cast<sdr::table::SdrTableObj*>(aVEvt.mpObj) != nullptr ) ))
         {
             SdrPageView* pPV=nullptr;
-            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
-            SdrObject* pPickObj = mpView->PickObj(mpWindow->PixelToLogic(rMEvt.GetPosPixel()),nHitLog, pPV, SdrSearchOptions::PICKMARKABLE);
+            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(HITPIX,0)).Width() );
+            SdrObject* pPickObj = mpView->PickObj(mpWindow->WindowToLogic(rMEvt.GetPosPixel()),nHitLog, pPV, SdrSearchOptions::PICKMARKABLE);
             if( (pPickObj != nullptr) && !pPickObj->IsEmptyPresObj() )
             {
                 // if we text hit another shape than the one currently selected, unselect the old one now
@@ -148,8 +148,8 @@ bool FuFormatPaintBrush::MouseButtonDown(const MouseEvent& rMEvt)
 
         if (aVEvt.mpObj)
         {
-            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
-            mpView->MarkObj(mpWindow->PixelToLogic( rMEvt.GetPosPixel() ), nHitLog, false/*bToggle*/);
+            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(HITPIX,0)).Width() );
+            mpView->MarkObj(mpWindow->WindowToLogic( rMEvt.GetPosPixel() ), nHitLog, false/*bToggle*/);
             return true;
         }
 
@@ -169,9 +169,9 @@ bool FuFormatPaintBrush::MouseMove(const MouseEvent& rMEvt)
         }
         else
         {
-            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(HITPIX,0)).Width() );
+            sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(HITPIX,0)).Width() );
             SdrPageView* pPV=nullptr;
-            SdrObject* pObj = mpView->PickObj(mpWindow->PixelToLogic( rMEvt.GetPosPixel() ),nHitLog, pPV, SdrSearchOptions::PICKMARKABLE);
+            SdrObject* pObj = mpView->PickObj(mpWindow->WindowToLogic( rMEvt.GetPosPixel() ),nHitLog, pPV, SdrSearchOptions::PICKMARKABLE);
             if (pObj && HasContentForThisType(pObj->GetObjInventor(),pObj->GetObjIdentifier()) )
                 mpWindow->SetPointer(PointerStyle::Fill);
             else

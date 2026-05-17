@@ -147,7 +147,7 @@ void SdrPreRenderDevice::PreparePreRenderDevice()
 void SdrPreRenderDevice::OutputPreRenderDevice(const vcl::Region& rExpandedRegion)
 {
     // region to pixels
-    const vcl::Region aRegionPixel(mpOutputDevice->LogicToPixel(rExpandedRegion));
+    const vcl::Region aRegionPixel(mpOutputDevice->LogicToWindow(rExpandedRegion));
     //RegionHandle aRegionHandle(aRegionPixel.BeginEnumRects());
     //Rectangle aRegionRectanglePixel;
 
@@ -270,7 +270,7 @@ rtl::Reference< sdr::overlay::OverlayManager > const & SdrPaintWindow::GetOverla
 tools::Rectangle SdrPaintWindow::GetVisibleArea() const
 {
     Size aVisSizePixel(GetOutputDevice().GetOutputSizePixel());
-    return GetOutputDevice().PixelToLogic(tools::Rectangle(Point(0,0), aVisSizePixel));
+    return GetOutputDevice().WindowToLogic(tools::Rectangle(Point(0,0), aVisSizePixel));
 }
 
 bool SdrPaintWindow::OutputToRecordingMetaFile() const

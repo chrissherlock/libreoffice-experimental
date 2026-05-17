@@ -64,7 +64,7 @@ GalleryPreview::~GalleryPreview()
 void GalleryPreview::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
-    Size aSize = pDrawingArea->get_ref_device().LogicToPixel(Size(70, 88), MapMode(MapUnit::MapAppFont));
+    Size aSize = pDrawingArea->get_ref_device().LogicToWindow(Size(70, 88), MapMode(MapUnit::MapAppFont));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     SetOutputSizePixel(aSize);
 
@@ -76,7 +76,7 @@ namespace
     bool ImplGetGraphicCenterRect(const weld::CustomWidgetController& rWidget, const Graphic& rGraphic, tools::Rectangle& rResultRect)
     {
         const Size  aWinSize(rWidget.GetOutputSizePixel());
-        Size        aNewSize(rWidget.GetDrawingArea()->get_ref_device().LogicToPixel(rGraphic.GetPrefSize(), rGraphic.GetPrefMapMode()));
+        Size        aNewSize(rWidget.GetDrawingArea()->get_ref_device().LogicToWindow(rGraphic.GetPrefSize(), rGraphic.GetPrefMapMode()));
         bool        bRet = false;
 
         if( aNewSize.Width() && aNewSize.Height() )
@@ -225,7 +225,7 @@ DialogGalleryPreview::DialogGalleryPreview()
 void DialogGalleryPreview::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(70, 88), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(70, 88), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
 }
 

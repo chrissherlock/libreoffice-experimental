@@ -17906,7 +17906,7 @@ private:
 #endif
 
         tools::Rectangle aRect(Point(rect.x, rect.y), Size(rect.width, rect.height));
-        aRect = m_xDevice->PixelToLogic(aRect);
+        aRect = m_xDevice->WindowToLogic(aRect);
         m_xDevice->Erase(aRect);
         m_aDrawHdl.Call(std::pair<vcl::RenderContext&, const tools::Rectangle&>(*m_xDevice, aRect));
         cairo_surface_mark_dirty(m_pSurface);
@@ -18184,7 +18184,7 @@ public:
     {
 #if !GTK_CHECK_VERSION(4, 0, 0)
         tools::Rectangle aRect(Point(x, y), Size(width, height));
-        aRect = m_xDevice->LogicToPixel(aRect);
+        aRect = m_xDevice->LogicToWindow(aRect);
 
         x = aRect.Left();
         if (SwapForRTL())

@@ -3752,7 +3752,7 @@ void DesktopLOKTest::testJumpCursor()
     Scheduler::ProcessEventsToIdle();
 
     // There is a cursor jump to (0, 0) due to
-    // mpOutlinerView->SetOutputArea( PixelToLogic( tools::Rectangle(0,0,1,1) ) );
+    // mpOutlinerView->SetOutputArea( WindowToLogic( tools::Rectangle(0,0,1,1) ) );
     // when creating a comment
     ViewCallback aView1(pDocument);
 

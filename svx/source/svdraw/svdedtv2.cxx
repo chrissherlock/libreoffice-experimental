@@ -1069,7 +1069,7 @@ void SdrEditView::MergeMarkedObjects(SdrMergeMode eMode)
                 const GraphicObject* pGraphicObject = &pGrafObj->GetGraphicObject();
                 Size aGraphicSize(pGraphicObject->GetPrefSize());
                 if (MapUnit::MapPixel == pGraphicObject->GetPrefMapMode().GetMapUnit())
-                    aGraphicSize = Application::GetDefaultDevice()->PixelToLogic(aGraphicSize, aMapMode100thmm);
+                    aGraphicSize = Application::GetDefaultDevice()->WindowToLogic(aGraphicSize, aMapMode100thmm);
                 else
                     aGraphicSize = ::LogicToLogic(aGraphicSize, pGraphicObject->GetPrefMapMode(), aMapMode100thmm);
 

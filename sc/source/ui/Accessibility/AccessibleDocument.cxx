@@ -1894,7 +1894,7 @@ tools::Rectangle ScAccessibleDocument::GetVisibleArea_Impl()
 
         ScGridWindow* pWin = static_cast<ScGridWindow*>(mpViewShell->GetWindowByPos(meSplitPos));
         if (pWin)
-            aVisRect = pWin->PixelToLogic(aVisRect, pWin->GetDrawMapMode());
+            aVisRect = pWin->WindowToLogic(aVisRect, pWin->GetDrawMapMode());
     }
 
     return aVisRect;
@@ -1907,7 +1907,7 @@ tools::Rectangle ScAccessibleDocument::GetVisibleArea() const
     return maVisArea;
 }
 
-Point ScAccessibleDocument::LogicToPixel (const Point& rPoint) const
+Point ScAccessibleDocument::LogicToWindow (const Point& rPoint) const
 {
     SolarMutexGuard aGuard;
     ensureAlive();
@@ -1915,20 +1915,20 @@ Point ScAccessibleDocument::LogicToPixel (const Point& rPoint) const
     ScGridWindow* pWin = static_cast<ScGridWindow*>(mpViewShell->GetWindowByPos(meSplitPos));
     if (pWin)
     {
-        aPoint = pWin->LogicToPixel(rPoint, pWin->GetDrawMapMode());
+        aPoint = pWin->LogicToWindow(rPoint, pWin->GetDrawMapMode());
         aPoint += Point(pWin->GetWindowExtentsAbsolute().TopLeft());
     }
     return aPoint;
 }
 
-Size ScAccessibleDocument::LogicToPixel (const Size& rSize) const
+Size ScAccessibleDocument::LogicToWindow (const Size& rSize) const
 {
     SolarMutexGuard aGuard;
     ensureAlive();
     Size aSize;
     ScGridWindow* pWin = static_cast<ScGridWindow*>(mpViewShell->GetWindowByPos(meSplitPos));
     if (pWin)
-        aSize = pWin->LogicToPixel(rSize, pWin->GetDrawMapMode());
+        aSize = pWin->LogicToWindow(rSize, pWin->GetDrawMapMode());
     return aSize;
 }
 

@@ -732,7 +732,7 @@ bool Vectorizer::vectorize(Bitmap const& rBitmap, GDIMetaFile& rMetafile)
         {
             MapMode         aMap( MapUnit::Map100thMM );
             ScopedVclPtrInstance< VirtualDevice > aVDev;
-            const Size      aLogSize1( aVDev->PixelToLogic( Size( 1, 1 ), aMap ) );
+            const Size      aLogSize1( aVDev->WindowToLogic( Size( 1, 1 ), aMap ) );
 
             rMetafile.SetPrefMapMode( aMap );
             rMetafile.SetPrefSize( Size( nWidth + 2, nHeight + 2 ) );

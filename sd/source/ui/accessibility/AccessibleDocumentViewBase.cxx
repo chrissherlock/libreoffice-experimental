@@ -298,10 +298,10 @@ awt::Rectangle AccessibleDocumentViewBase::implGetBounds()
     ::tools::Rectangle aVisibleArea (
         maShapeTreeInfo.GetViewForwarder()->GetVisibleArea());
     ::Point aPixelTopLeft (
-        maShapeTreeInfo.GetViewForwarder()->LogicToPixel (
+        maShapeTreeInfo.GetViewForwarder()->LogicToWindow (
             aVisibleArea.TopLeft()));
     ::Point aPixelSize (
-        maShapeTreeInfo.GetViewForwarder()->LogicToPixel (
+        maShapeTreeInfo.GetViewForwarder()->LogicToWindow (
             aVisibleArea.BottomRight())
         - aPixelTopLeft);
 

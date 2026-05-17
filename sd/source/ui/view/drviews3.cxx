@@ -347,7 +347,7 @@ void  DrawViewShell::ExecCtrl(SfxRequest& rReq)
             {
                 const SfxRectangleItem& rRect =
                     rReq.GetArgs()->Get(SID_OBJECTRESIZE);
-                ::tools::Rectangle aRect( GetActiveWindow()->PixelToLogic( rRect.GetValue() ) );
+                ::tools::Rectangle aRect( GetActiveWindow()->WindowToLogic( rRect.GetValue() ) );
 
                 if ( rMarkList.GetMarkCount() != 0 )
                 {
@@ -1117,8 +1117,8 @@ void  DrawViewShell::ExecStatusBar(SfxRequest& rReq)
 void  DrawViewShell::GetSnapItemState( SfxItemSet &rSet )
 {
     SdrPageView* pPV;
-    Point   aMPos = GetActiveWindow()->PixelToLogic(maMousePos);
-    sal_uInt16  nHitLog = static_cast<sal_uInt16>(GetActiveWindow()->PixelToLogic(
+    Point   aMPos = GetActiveWindow()->WindowToLogic(maMousePos);
+    sal_uInt16  nHitLog = static_cast<sal_uInt16>(GetActiveWindow()->WindowToLogic(
         Size(FuPoor::HITPIX,0)).Width());
     sal_uInt16  nHelpLine;
 

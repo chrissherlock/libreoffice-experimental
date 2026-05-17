@@ -62,7 +62,7 @@ drawinglayer::primitive2d::Primitive2DContainer ScOverlayHint::createOverlaySequ
     pDefaultDev->SetMapMode(rMapMode);
 
     vcl::Font aTextFont = m_aTextFont;
-    aTextFont.SetFontSize(pDefaultDev->PixelToLogic(aTextFont.GetFontSize(), rMapMode));
+    aTextFont.SetFontSize(pDefaultDev->WindowToLogic(aTextFont.GetFontSize(), rMapMode));
     vcl::Font aHeadFont = aTextFont;
     aHeadFont.SetWeight(WEIGHT_BOLD);
 
@@ -72,8 +72,8 @@ drawinglayer::primitive2d::Primitive2DContainer ScOverlayHint::createOverlaySequ
         drawinglayer::primitive2d::getFontAttributeFromVclFont(aFontSize, aHeadFont, false, false);
 
     FontMetric aFontMetric = pDefaultDev->GetFontMetric(aHeadFont);
-    Size aHintMargin = pDefaultDev->PixelToLogic(Size(HINT_MARGIN, HINT_MARGIN), rMapMode);
-    Size aIndent = pDefaultDev->PixelToLogic(Size(HINT_INDENT, HINT_LINESPACE), rMapMode);
+    Size aHintMargin = pDefaultDev->WindowToLogic(Size(HINT_MARGIN, HINT_MARGIN), rMapMode);
+    Size aIndent = pDefaultDev->WindowToLogic(Size(HINT_INDENT, HINT_LINESPACE), rMapMode);
     double nTextOffsetY = nTop + aHintMargin.Height() + aFontMetric.GetAscent();
     Point aTextPos(nLeft + aHintMargin.Width() , nTextOffsetY);
     rRange = basegfx::B2DRange(nLeft, nTop, nLeft + aHintMargin.Width(), nTop + aHintMargin.Height());

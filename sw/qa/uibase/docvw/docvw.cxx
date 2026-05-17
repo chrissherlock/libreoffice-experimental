@@ -63,7 +63,7 @@ CPPUNIT_TEST_FIXTURE(Test, testShiftClickOnImage)
     CPPUNIT_ASSERT(pFrameFormat);
     SwFlyFrame* pFlyFrame = pFrameFormat->GetFrame();
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFlyCenter = rEditWin.LogicToPixel(pFlyFrame->getFrameArea().Center());
+    Point aFlyCenter = rEditWin.LogicToWindow(pFlyFrame->getFrameArea().Center());
     MouseEvent aClickEvent(aFlyCenter, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT, KEY_SHIFT);
     rEditWin.MouseButtonDown(aClickEvent);
     rEditWin.MouseButtonUp(aClickEvent);
@@ -178,7 +178,7 @@ CPPUNIT_TEST_FIXTURE(Test, testShiftDoubleClickOnImage)
     CPPUNIT_ASSERT(pFrameFormat);
     SwFlyFrame* pFlyFrame = pFrameFormat->GetFrame();
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    Point aFlyCenter = rEditWin.LogicToPixel(pFlyFrame->getFrameArea().Center());
+    Point aFlyCenter = rEditWin.LogicToWindow(pFlyFrame->getFrameArea().Center());
     MouseEvent aClickEvent(aFlyCenter, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT, KEY_SHIFT);
     rEditWin.MouseButtonDown(aClickEvent);
     rEditWin.MouseButtonUp(aClickEvent);

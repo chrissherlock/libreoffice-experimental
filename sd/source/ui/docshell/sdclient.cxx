@@ -173,7 +173,7 @@ void Client::ViewChanged()
 
     // react to the change if the difference is bigger than one pixel
     Size aPixelDiff =
-        Application::GetDefaultDevice()->LogicToPixel(
+        Application::GetDefaultDevice()->LogicToWindow(
             Size( aLogicRect.GetWidth() - aScaledSize.Width(),
                   aLogicRect.GetHeight() - aScaledSize.Height() ),
             aMap100 );

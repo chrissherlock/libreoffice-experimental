@@ -154,7 +154,7 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
     {
         Point aPos( rEvt.GetMousePosPixel() );
         aPos = pWindow->ScreenToOutputPixel( aPos );
-        aPos = pWindow->PixelToLogic( aPos );
+        aPos = pWindow->WindowToLogic( aPos );
 
         SdrPageView* pPV;
         SdrObject* pObj = pView->PickObj(aPos, 0, pPV, SdrSearchOptions::PICKMACRO);
@@ -166,7 +166,7 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
         {
             SwFlyFrame *pFly = pDrawObj->GetFlyFrame();
 
-            aPixRect = pWindow->LogicToPixel(pFly->getFrameArea().SVRect());
+            aPixRect = pWindow->LogicToWindow(pFly->getFrameArea().SVRect());
 
             const SwFormatURL &rURL = pFly->GetFormat()->GetURL();
             if (!pFly->GetFormat()->GetObjTooltip().isEmpty())
@@ -200,7 +200,7 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
                     aPt -= pFly->getFrameArea().Pos();
                     // without MapMode-Offset !!!!!
                     // without MapMode-Offset, without Offset, w ... !!!!!
-                    aPt = pWindow->LogicToPixel(
+                    aPt = pWindow->LogicToWindow(
                             aPt, MapMode( MapUnit::MapTwip ) );
                     sText += "?" + OUString::number( aPt.getX() )
                           + "," + OUString::number( aPt.getY() );
@@ -216,7 +216,7 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
             if (aVEvt.meEvent == SdrEventKind::ExecuteUrl && aVEvt.mpURLField)
             {
                 sText = aVEvt.mpURLField->GetURL();
-                aPixRect = pWindow->LogicToPixel(aVEvt.mpObj->GetLogicRect());
+                aPixRect = pWindow->LogicToWindow(aVEvt.mpObj->GetLogicRect());
             }
         }
 

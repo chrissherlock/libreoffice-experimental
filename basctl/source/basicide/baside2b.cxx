@@ -1505,7 +1505,7 @@ void BreakPointWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Re
         GetImage(RID_BMP_BRKENABLED)
     };
 
-    Size const aBmpSz = rRenderContext.PixelToLogic(aBrk[1].GetSizePixel()).get();
+    Size const aBmpSz = rRenderContext.WindowToLogic(aBrk[1].GetSizePixel()).get();
     Point const aBmpOff((aOutSz.Width() - aBmpSz.Width()) / 2,
                         (nLineHeight - aBmpSz.Height()) / 2);
 
@@ -1530,7 +1530,7 @@ void BreakPointWindow::ShowMarker(vcl::RenderContext& rRenderContext)
     Image aMarker = GetImage(bErrorMarker ? RID_BMP_ERRORMARKER : RID_BMP_STEPMARKER);
 
     Size aMarkerSz(aMarker.GetSizePixel());
-    aMarkerSz = rRenderContext.PixelToLogic(aMarkerSz).get();
+    aMarkerSz = rRenderContext.WindowToLogic(aMarkerSz).get();
     Point aMarkerOff(0, 0);
     aMarkerOff.setX( (aOutSz.Width() - aMarkerSz.Width()) / 2 );
     aMarkerOff.setY( (nLineHeight - aMarkerSz.Height()) / 2 );
@@ -1584,7 +1584,7 @@ void BreakPointWindow::MouseButtonDown( const MouseEvent& rMEvt )
 {
     if ( rMEvt.GetClicks() == 2 )
     {
-        Point aMousePos( PixelToLogic( rMEvt.GetPosPixel() ) );
+        Point aMousePos( WindowToLogic( rMEvt.GetPosPixel() ) );
         tools::Long nLineHeight = GetTextHeight();
         if(nLineHeight)
         {
@@ -1607,7 +1607,7 @@ void BreakPointWindow::Command( const CommandEvent& rCEvt )
 
     std::unique_ptr<weld::Builder> xUIBuilder(Application::CreateBuilder(pPopupParent, u"modules/BasicIDE/ui/breakpointmenus.ui"_ustr));
 
-    Point aEventPos( PixelToLogic( aPos ) );
+    Point aEventPos( WindowToLogic( aPos ) );
     BreakPoint* pBrk = rCEvt.IsMouseEvent() ? FindBreakPoint( aEventPos ) : nullptr;
     if ( pBrk )
     {
@@ -1731,7 +1731,7 @@ WatchWindow::WatchWindow(Layout* pParent)
 
     m_xEdit->set_accessible_name(IDEResId(RID_STR_WATCHNAME));
     m_xEdit->set_help_id(HID_BASICIDE_WATCHWINDOW_EDIT);
-    m_xEdit->set_size_request(LogicToPixel(Size(80, 0), MapMode(MapUnit::MapAppFont)).Width(), -1);
+    m_xEdit->set_size_request(LogicToWindow(Size(80, 0), MapMode(MapUnit::MapAppFont)).Width(), -1);
     m_xEdit->connect_activate(LINK( this, WatchWindow, ActivateHdl));
     m_xEdit->connect_key_press(LINK( this, WatchWindow, KeyInputHdl));
     m_xTreeListBox->set_accessible_name(IDEResId(RID_STR_WATCHNAME));

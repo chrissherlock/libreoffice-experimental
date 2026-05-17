@@ -1296,11 +1296,11 @@ void ControlContainerBase::ImplSetPosSize( Reference< XControl >& rxCtrl )
     if ( pOutDev )
     {
         ::Size aTmp( nX, nY );
-        aTmp = pOutDev->LogicToPixel( aTmp, aMode );
+        aTmp = pOutDev->LogicToWindow( aTmp, aMode );
         nX = aTmp.Width();
         nY = aTmp.Height();
         aTmp = ::Size( nWidth, nHeight );
-        aTmp = pOutDev->LogicToPixel( aTmp, aMode );
+        aTmp = pOutDev->LogicToWindow( aTmp, aMode );
         nWidth = aTmp.Width();
         nHeight = aTmp.Height();
     }

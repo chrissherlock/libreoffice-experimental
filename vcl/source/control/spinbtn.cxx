@@ -120,7 +120,7 @@ void SpinButton::Resize()
 
 void SpinButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
-    Point aPos = rDev.LogicToPixel(rPos);
+    Point aPos  =  rDev.LogicToWindow(rPos);
     Size aSize = GetSizePixel();
 
     auto popIt = rDev.ScopedPush();

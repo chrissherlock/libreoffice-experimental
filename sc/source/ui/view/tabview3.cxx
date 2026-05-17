@@ -862,7 +862,7 @@ void ScTabView::TestHintWindow()
                 Point aHintPos = calcHintWindowPosition(
                     aPos, Size(nCellSizeX,nCellSizeY), aWinSize, aHintWndSize);
 
-                pOverlay->SetPos(pWin->PixelToLogic(aHintPos, pWin->GetDrawMapMode()), pWin->GetDrawMapMode());
+                pOverlay->SetPos(pWin->WindowToLogic(aHintPos, pWin->GetDrawMapMode()), pWin->GetDrawMapMode());
                 for (VclPtr<ScGridWindow> & pWindow : pGridWin)
                 {
                     if (!pWindow)
@@ -888,7 +888,7 @@ void ScTabView::TestHintWindow()
                                                                                        aCommentBack,
                                                                                        aCommentText,
                                                                                        pFrameWin->GetFont()));
-                        Point aFooPos(pWindow->PixelToLogic(aOtherPos, pWindow->GetDrawMapMode()));
+                        Point aFooPos(pWindow->WindowToLogic(aOtherPos, pWindow->GetDrawMapMode()));
                         pOtherOverlay->SetPos(aFooPos, pWindow->GetDrawMapMode());
                         xOverlayManager->add(*pOtherOverlay);
                         mxInputHintOO->append(std::move(pOtherOverlay));
@@ -2934,7 +2934,7 @@ void ScTabView::PaintArea( SCCOL nStartCol, SCROW nStartRow, SCCOL nEndCol, SCRO
             aStart.AdjustX( -(nMarkPixel * nLayoutSign) );
         }
 
-        pGridWin[i]->Invalidate( pGridWin[i]->PixelToLogic( tools::Rectangle( aStart,aEnd ) ) );
+        pGridWin[i]->Invalidate( pGridWin[i]->WindowToLogic( tools::Rectangle( aStart,aEnd ) ) );
     }
 
     // #i79909# Calling UpdateAllOverlays here isn't necessary and would lead to overlay calls from a timer,
@@ -3132,10 +3132,10 @@ void ScTabView::DoDPFieldPopup(std::u16string_view rPivotTableName, sal_Int32 nD
 
     pDPObject->BuildAllDimensionMembers();
 
-    Point aPos = pWin->LogicToPixel(aPoint);
+    Point aPos = pWin->LogicToWindow(aPoint);
     bool bLOK = comphelper::LibreOfficeKit::isActive();
     Point aScreenPoint = bLOK ? aPos : pWin->OutputToScreenPixel(aPos);
-    Size aScreenSize = pWin->LogicToPixel(aSize);
+    Size aScreenSize = pWin->LogicToWindow(aSize);
 
     pWin->DPLaunchFieldPopupMenu(aScreenPoint, aScreenSize, nDimensionIndex, pDPObject);
 }

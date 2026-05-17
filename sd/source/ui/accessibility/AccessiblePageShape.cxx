@@ -94,9 +94,9 @@ awt::Rectangle AccessiblePageShape::implGetBounds()
         }
 
         // Transform coordinates from internal to pixel.
-        ::Size aPixelSize = maShapeTreeInfo.GetViewForwarder()->LogicToPixel (
+        ::Size aPixelSize = maShapeTreeInfo.GetViewForwarder()->LogicToWindow (
             ::Size (aBoundingBox.Width, aBoundingBox.Height));
-        ::Point aPixelPosition = maShapeTreeInfo.GetViewForwarder()->LogicToPixel (
+        ::Point aPixelPosition = maShapeTreeInfo.GetViewForwarder()->LogicToWindow (
             ::Point (aBoundingBox.X, aBoundingBox.Y));
 
         // Clip the shape's bounding box with the bounding box of its parent.
