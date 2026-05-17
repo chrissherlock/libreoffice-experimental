@@ -317,10 +317,10 @@ bool FuConstruct3dObject::MouseButtonDown(const MouseEvent& rMEvt)
 
     if ( rMEvt.IsLeft() && !mpView->IsAction() )
     {
-        Point aPnt( mpWindow->PixelToLogic( rMEvt.GetPosPixel() ) );
+        Point aPnt( mpWindow->WindowToLogic( rMEvt.GetPosPixel() ) );
 
         mpWindow->CaptureMouse();
-        sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->PixelToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+        sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
 
         weld::WaitObject aWait(mrViewShell.GetFrameWeld());
 
@@ -363,7 +363,7 @@ bool FuConstruct3dObject::MouseButtonUp(const MouseEvent& rMEvt)
         else
         {
             //Drag was too small to create object, so insert default object at click pos
-            Point aClickPos(mpWindow->PixelToLogic(rMEvt.GetPosPixel()));
+            Point aClickPos(mpWindow->WindowToLogic(rMEvt.GetPosPixel()));
             sal_uInt32 nDefaultObjectSize(1000);
             sal_Int32 nCenterOffset(-sal_Int32(nDefaultObjectSize / 2));
             aClickPos.AdjustX(nCenterOffset);

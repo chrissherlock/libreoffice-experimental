@@ -140,8 +140,8 @@ public:
 
     bool                    IsValid() const;
 
-    Point                   LogicToPixel( const Point&, const MapMode& rMapMode );
-    Point                   PixelToLogic( const Point&, const MapMode& rMapMode );
+    Point                   LogicToWindow( const Point&, const MapMode& rMapMode );
+    Point                   WindowToLogic( const Point&, const MapMode& rMapMode );
 
     DECL_LINK( NotifyHdl, EENotify&, void );
 
@@ -830,7 +830,7 @@ bool SvxTextEditSourceImpl::IsValid() const
     return mpView && mpWindow;
 }
 
-Point SvxTextEditSourceImpl::LogicToPixel( const Point& rPoint, const MapMode& rMapMode )
+Point SvxTextEditSourceImpl::LogicToWindow( const Point& rPoint, const MapMode& rMapMode )
 {
     // The responsibilities of ViewForwarder happen to be
     // somewhat mixed in this case. On the one hand, we need the
@@ -843,7 +843,7 @@ Point SvxTextEditSourceImpl::LogicToPixel( const Point& rPoint, const MapMode& r
         SvxEditViewForwarder* pForwarder = GetEditViewForwarder(false);
 
         if( pForwarder )
-            return pForwarder->LogicToPixel( rPoint, rMapMode );
+            return pForwarder->LogicToWindow( rPoint, rMapMode );
     }
     else if( IsValid() && mpModel )
     {
@@ -855,13 +855,13 @@ Point SvxTextEditSourceImpl::LogicToPixel( const Point& rPoint, const MapMode& r
                                                    MapMode(mpModel->GetScaleUnit()) ) );
         MapMode aMapMode(mpWindow->GetMapMode());
         aMapMode.SetOrigin(Point());
-        return mpWindow->LogicToPixel( aPoint2, aMapMode );
+        return mpWindow->LogicToWindow( aPoint2, aMapMode );
     }
 
     return Point();
 }
 
-Point SvxTextEditSourceImpl::PixelToLogic( const Point& rPoint, const MapMode& rMapMode )
+Point SvxTextEditSourceImpl::WindowToLogic( const Point& rPoint, const MapMode& rMapMode )
 {
     // The responsibilities of ViewForwarder happen to be
     // somewhat mixed in this case. On the one hand, we need the
@@ -874,13 +874,13 @@ Point SvxTextEditSourceImpl::PixelToLogic( const Point& rPoint, const MapMode& r
         SvxEditViewForwarder* pForwarder = GetEditViewForwarder(false);
 
         if( pForwarder )
-            return pForwarder->PixelToLogic( rPoint, rMapMode );
+            return pForwarder->WindowToLogic( rPoint, rMapMode );
     }
     else if( IsValid() && mpModel )
     {
         MapMode aMapMode(mpWindow->GetMapMode());
         aMapMode.SetOrigin(Point());
-        Point aPoint1( mpWindow->PixelToLogic( rPoint, aMapMode ) );
+        Point aPoint1( mpWindow->WindowToLogic( rPoint, aMapMode ) );
         Point aPoint2( ::LogicToLogic( aPoint1,
                                                    MapMode(mpModel->GetScaleUnit()),
                                                    rMapMode ) );
@@ -978,14 +978,14 @@ bool SvxTextEditSource::IsValid() const
     return mpImpl->IsValid();
 }
 
-Point SvxTextEditSource::LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const
+Point SvxTextEditSource::LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const
 {
-    return mpImpl->LogicToPixel( rPoint, rMapMode );
+    return mpImpl->LogicToWindow( rPoint, rMapMode );
 }
 
-Point SvxTextEditSource::PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const
+Point SvxTextEditSource::WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const
 {
-    return mpImpl->PixelToLogic( rPoint, rMapMode );
+    return mpImpl->WindowToLogic( rPoint, rMapMode );
 }
 
 void SvxTextEditSource::addRange( SvxUnoTextRangeBase* pNewRange )

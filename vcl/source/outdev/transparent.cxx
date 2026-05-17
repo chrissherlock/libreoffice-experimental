@@ -279,7 +279,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     mpMetaFile = nullptr;
 
-    tools::PolyPolygon aPolyPoly( LogicToPixel( rPolyPoly ) );
+    tools::PolyPolygon aPolyPoly( LogicToWindow( rPolyPoly ) );
     tools::Rectangle aPolyRect( aPolyPoly.GetBoundRect() );
     tools::Rectangle aDstRect( Point(), GetOutputSizePixel() );
 
@@ -503,7 +503,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
     else
     {
         GDIMetaFile* pOldMetaFile = mpMetaFile;
-        vcl::DeviceRect aOutRect( LogicToPixel( tools::Rectangle(rPos, rSize) ) );
+        vcl::DeviceRect aOutRect( LogicToWindow( tools::Rectangle(rPos, rSize) ) );
         Point aPoint;
         tools::Rectangle aDstRect( aPoint, GetOutputSizePixel() );
 
@@ -539,7 +539,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
 
                     // create MapMode for buffer (offset needed) and set
                     MapMode aMap(GetMapMode());
-                    const vcl::LogicPoint aOutPos( PixelToLogic( aDstRect.TopLeft() ) );
+                    const vcl::LogicPoint aOutPos( WindowToLogic( aDstRect.TopLeft() ) );
                     aMap.SetOrigin(Point(-aOutPos->X(), -aOutPos->Y()));
                     xVDev->SetMapMode(aMap);
 
@@ -595,7 +595,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
                 else
                 {
                     MapMode aMap( GetMapMode() );
-                    vcl::LogicPoint aOutPos( PixelToLogic( aDstRect.TopLeft() ) );
+                    vcl::LogicPoint aOutPos( WindowToLogic( aDstRect.TopLeft() ) );
                     const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
                     aMap.SetOrigin( Point( -aOutPos->X(), -aOutPos->Y() ) );
@@ -695,7 +695,7 @@ bool doesRectCoverWithUniformColor(
 {
     // shape needs to fully cover previous content, and have uniform
     // color
-    return (rMapModeVDev.LogicToPixel(rCurrRect)->Contains(rPrevRect) &&
+    return (rMapModeVDev.LogicToWindow(rCurrRect)->Contains(rPrevRect) &&
         rMapModeVDev.IsFillColor());
 }
 
@@ -1019,7 +1019,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
         case MetaActionType::BMP:
             aActionBounds = tools::Rectangle( static_cast<const MetaBmpAction&>(rAct).GetPoint(),
-                                       rOut.PixelToLogic( static_cast<const MetaBmpAction&>(rAct).GetBitmap().GetSizePixel() ));
+                                       rOut.WindowToLogic( static_cast<const MetaBmpAction&>(rAct).GetBitmap().GetSizePixel() ));
             break;
 
         case MetaActionType::BMPSCALE:
@@ -1034,7 +1034,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
         case MetaActionType::BMPEX:
             aActionBounds = tools::Rectangle( static_cast<const MetaBmpExAction&>(rAct).GetPoint(),
-                                       rOut.PixelToLogic( static_cast<const MetaBmpExAction&>(rAct).GetBitmap().GetSizePixel() ));
+                                       rOut.WindowToLogic( static_cast<const MetaBmpExAction&>(rAct).GetBitmap().GetSizePixel() ));
             break;
 
         case MetaActionType::BMPEXSCALE:
@@ -1049,7 +1049,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
         case MetaActionType::MASK:
             aActionBounds = tools::Rectangle( static_cast<const MetaMaskAction&>(rAct).GetPoint(),
-                                       rOut.PixelToLogic( static_cast<const MetaMaskAction&>(rAct).GetBitmap().GetSizePixel() ));
+                                       rOut.WindowToLogic( static_cast<const MetaMaskAction&>(rAct).GetBitmap().GetSizePixel() ));
             break;
 
         case MetaActionType::MASKSCALE:
@@ -1141,7 +1141,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
                 if( pSalLayout )
                 {
                     tools::Rectangle aBoundRect( rOut.ImplGetTextBoundRect( *pSalLayout ) );
-                    aActionBounds =  rOut.PixelToLogic( aBoundRect );
+                    aActionBounds =  rOut.WindowToLogic( aBoundRect );
                 }
             }
         }
@@ -1170,7 +1170,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
                 if( pSalLayout )
                 {
                     tools::Rectangle aBoundRect( rOut.ImplGetTextBoundRect( *pSalLayout ) );
-                    aActionBounds =  rOut.PixelToLogic( aBoundRect );
+                    aActionBounds =  rOut.WindowToLogic( aBoundRect );
                 }
             }
         }
@@ -1188,10 +1188,10 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
     {
         // fdo#40421 limit current action's output to clipped area
         if( rOut.IsClipRegion() )
-            return rOut.LogicToPixel(
+            return rOut.LogicToWindow(
                 rOut.GetClipRegion().GetBoundRect().Intersection( aActionBounds ) ).get();
         else
-            return rOut.LogicToPixel( aActionBounds );
+            return rOut.LogicToWindow( aActionBounds );
     }
     else
         return tools::Rectangle();
@@ -1642,7 +1642,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         if( meOutDevType == OUTDEV_PDF )
         {
             auto pPdfWriter = static_cast<vcl::PDFWriterImpl*>(this);
-            aTmpSize = LogicToPixel(pPdfWriter->getCurPageSize(), MapMode(MapUnit::MapPoint));
+            aTmpSize = LogicToWindow(pPdfWriter->getCurPageSize(), MapMode(MapUnit::MapPoint));
 
             // also add error code to PDFWriter
             pPdfWriter->insertError(vcl::PDFWriter::Warning_Transparency_Converted);
@@ -1742,7 +1742,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                                             pCurrAct->Execute( aMapVDev.get() );
 
                                             MapMode     aMtfMap( aMapVDev->GetMapMode() );
-                                            const Point aNewOrg( aMapVDev->PixelToLogic( aDstPtPix ));
+                                            const Point aNewOrg( aMapVDev->WindowToLogic( aDstPtPix ));
 
                                             aMtfMap.SetOrigin( Point( -aNewOrg.X(), -aNewOrg.Y() ) );
                                             aPaintVDev->SetMapMode( aMtfMap );
@@ -1777,7 +1777,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
 
                                     // scale down bitmap, if requested
                                     if( bDownsampleBitmaps )
-                                        aBandBmp = vcl::bitmap::GetDownsampledBitmap(PixelToLogic(LogicToPixel(aDstSzPix), MapMode(MapUnit::MapTwip)),
+                                        aBandBmp = vcl::bitmap::GetDownsampledBitmap(WindowToLogic(LogicToWindow(aDstSzPix), MapMode(MapUnit::MapTwip)),
                                                                          Point(), aBandBmp.GetSizePixel(),
                                                                          aBandBmp, nMaxBmpDPIX, nMaxBmpDPIY);
 
@@ -1860,7 +1860,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
             else
                 rOutMtf.AddAction( new MetaLineColorAction( COL_BLUE, true) );
 
-            rOutMtf.AddAction( new MetaRectAction( aMapModeVDev->PixelToLogic( aCurr.aBounds ) ) );
+            rOutMtf.AddAction( new MetaRectAction( aMapModeVDev->WindowToLogic( aCurr.aBounds ) ) );
         }
 #endif
     }

@@ -159,7 +159,7 @@ void ScrollBarManager::UpdateScrollBars(bool bUseScrolling)
 {
     ::tools::Rectangle aModelArea (mrSlideSorter.GetView().GetModelArea());
     sd::Window *pWindow (mrSlideSorter.GetContentWindow().get());
-    Size aWindowModelSize (pWindow->PixelToLogic(pWindow->GetSizePixel()));
+    Size aWindowModelSize (pWindow->WindowToLogic(pWindow->GetSizePixel()));
 
     // The horizontal scroll bar is only shown when the window is
     // horizontally smaller than the view.
@@ -174,7 +174,7 @@ void ScrollBarManager::UpdateScrollBars(bool bUseScrolling)
 
         mpHorizontalScrollBar->SetVisibleSize (aWindowModelSize.Width());
 
-        const ::tools::Long nWidth (mpContentWindow->PixelToLogic(
+        const ::tools::Long nWidth (mpContentWindow->WindowToLogic(
             mpContentWindow->GetSizePixel()).Width());
         // Make the line size about 10% of the visible width.
         mpHorizontalScrollBar->SetLineSize (nWidth / 10);
@@ -197,7 +197,7 @@ void ScrollBarManager::UpdateScrollBars(bool bUseScrolling)
 
         mpVerticalScrollBar->SetVisibleSize (aWindowModelSize.Height());
 
-        const ::tools::Long nHeight (mpContentWindow->PixelToLogic(
+        const ::tools::Long nHeight (mpContentWindow->WindowToLogic(
             mpContentWindow->GetSizePixel()).Height());
         // Make the line size about 10% of the visible height.
         mpVerticalScrollBar->SetLineSize (nHeight / 10);
@@ -346,7 +346,7 @@ bool ScrollBarManager::TestScrollBarVisibilities (
     if (bRearrangeSuccess)
     {
         Size aPageSize = mrSlideSorter.GetView().GetLayouter().GetTotalBoundingBox().GetSize();
-        Size aWindowModelSize = mpContentWindow->PixelToLogic(aBrowserSize);
+        Size aWindowModelSize = mpContentWindow->WindowToLogic(aBrowserSize);
 
         // The content may be clipped, i.e. not fully visible, in one
         // direction only when the scroll bar is visible in that direction.
@@ -415,7 +415,7 @@ void ScrollBarManager::CalcAutoScrollOffset (const Point& rMouseWindowPosition)
     Size aWindowSize = pWindow->GetOutputSizePixel();
     ::tools::Rectangle aWindowArea (pWindow->GetPosPixel(), aWindowSize);
     ::tools::Rectangle aViewPixelArea (
-        pWindow->LogicToPixel(mrSlideSorter.GetView().GetModelArea()));
+        pWindow->LogicToWindow(mrSlideSorter.GetView().GetModelArea()));
 
     if (aWindowSize.Width() > maScrollBorder.Width() * 3
         && mpHorizontalScrollBar != nullptr

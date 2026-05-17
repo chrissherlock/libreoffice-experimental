@@ -88,7 +88,7 @@ void SvRTLInputBox::PositionDialog(tools::Long nXTwips, tools::Long nYTwips)
         OutputDevice* pDefaultDevice = Application::GetDefaultDevice();
         pDefaultDevice->Push(vcl::PushFlags::MAPMODE);
         pDefaultDevice->SetMapMode(MapMode( MapUnit::MapAppFont));
-        aDlgPosApp = pDefaultDevice->LogicToPixel(aDlgPosApp, MapMode(MapUnit::MapTwip));
+        aDlgPosApp = pDefaultDevice->LogicToWindow(aDlgPosApp, MapMode(MapUnit::MapTwip));
         pDefaultDevice->Pop();
         m_xDialog->window_move(aDlgPosApp.X(), aDlgPosApp.Y());
     }

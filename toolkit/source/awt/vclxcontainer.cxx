@@ -228,7 +228,7 @@ void SAL_CALL VCLXContainer::setProperty(
             TabPage* pScrollTabPage = dynamic_cast< TabPage* >( pWindow.get() );
             if ( pWindow && (pScrollable || pScrollTabPage) )
             {
-                aSize = pWindow->LogicToPixel( aSize, aMode );
+                aSize = pWindow->LogicToWindow( aSize, aMode );
                 switch ( nPropType )
                 {
                     case BASEPROPERTY_SCROLLHEIGHT:

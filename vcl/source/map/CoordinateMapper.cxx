@@ -623,3 +623,59 @@ CoordinateMapper::WindowToLogicUnits<basegfx::B2DRange>(const basegfx::B2DRange&
                                                         const vcl::detail::MapConversion&) const;
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
+
+template <typename Geom>
+vcl::TypedGeom<vcl::SpaceWindow, Geom>
+CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogicGeom,
+                              const MapMode& rCustomMapMode) const
+{
+    vcl::detail::MapConversion aConv
+        = ResolveMap(MapMode(), rCustomMapMode, vcl::MappingPolicy::ApplyMapMode);
+    vcl::TransformPlan aPlan = vcl::TransformCompiler::Compile(GetViewTransformation(aConv));
+    return vcl::TypedGeom<vcl::SpaceWindow, Geom>(
+        vcl::GeometryAdapter::Apply(aPlan, rLogicGeom.get()));
+}
+
+template <typename Geom>
+vcl::TypedGeom<vcl::SpaceDevice, Geom>
+CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogicGeom,
+                              const MapMode& rCustomMapMode) const
+{
+    vcl::detail::MapConversion aConv
+        = ResolveMap(MapMode(), rCustomMapMode, vcl::MappingPolicy::ApplyMapMode);
+    basegfx::B2DHomMatrix aMat = GetViewTransformation(aConv);
+    aMat.translate(static_cast<double>(maState.GetDeviceToWindowOffsetX()),
+                   static_cast<double>(maState.GetDeviceToWindowOffsetY()));
+    vcl::TransformPlan aPlan = vcl::TransformCompiler::Compile(aMat);
+    return vcl::TypedGeom<vcl::SpaceDevice, Geom>(
+        vcl::GeometryAdapter::Apply(aPlan, rLogicGeom.get()));
+}
+
+// Explicit Instantiations to satisfy the linker
+template vcl::TypedGeom<vcl::SpaceWindow, Point>
+CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, Point>&, const MapMode&) const;
+template vcl::TypedGeom<vcl::SpaceWindow, Size>
+CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, Size>&, const MapMode&) const;
+template vcl::TypedGeom<vcl::SpaceWindow, tools::Rectangle>
+CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, tools::Rectangle>&,
+                              const MapMode&) const;
+template vcl::TypedGeom<vcl::SpaceWindow, tools::Polygon>
+CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, tools::Polygon>&,
+                              const MapMode&) const;
+template vcl::TypedGeom<vcl::SpaceWindow, tools::PolyPolygon>
+CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, tools::PolyPolygon>&,
+                              const MapMode&) const;
+
+template vcl::TypedGeom<vcl::SpaceDevice, Point>
+CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, Point>&, const MapMode&) const;
+template vcl::TypedGeom<vcl::SpaceDevice, Size>
+CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, Size>&, const MapMode&) const;
+template vcl::TypedGeom<vcl::SpaceDevice, tools::Rectangle>
+CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, tools::Rectangle>&,
+                              const MapMode&) const;
+template vcl::TypedGeom<vcl::SpaceDevice, tools::Polygon>
+CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, tools::Polygon>&,
+                              const MapMode&) const;
+template vcl::TypedGeom<vcl::SpaceDevice, tools::PolyPolygon>
+CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, tools::PolyPolygon>&,
+                              const MapMode&) const;

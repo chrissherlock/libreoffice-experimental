@@ -210,7 +210,7 @@ void DialogWindow::Command( const CommandEvent& rCEvt )
             {
                 tools::Rectangle aMarkedRect( rView.GetMarkedRect() );
                 Point MarkedCenter( aMarkedRect.Center() );
-                Point PosPixel( LogicToPixel( MarkedCenter ) );
+                Point PosPixel( LogicToWindow( MarkedCenter ) );
                 SfxDispatcher::ExecutePopup( this, &PosPixel );
             }
             else

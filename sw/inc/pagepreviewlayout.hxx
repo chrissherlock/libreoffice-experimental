@@ -309,7 +309,7 @@ public:
     */
     bool Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rOutRect) const;
     bool Paint(vcl::RenderContext& rRenderContext, const vcl::LogicRect& rOutRect) const { return Paint(rRenderContext, rOutRect.get()); }
-    bool Paint(vcl::RenderContext& rRenderContext, const vcl::DeviceRect& rOutRect) const { return Paint(rRenderContext, rOutRect.get()); }
+    bool Paint(vcl::RenderContext& rRenderContext, const vcl::WindowRect& rOutRect) const { return Paint(rRenderContext, rOutRect.get()); }
 
     /** repaint pages on page preview
 

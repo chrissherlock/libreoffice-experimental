@@ -542,7 +542,7 @@ rtl::Reference<SdrObject> EnhancedCustomShape3d::Create3DObject(
 
                         //Size aLogicalSize = aFillBmp.GetPrefSize();
                         //if ( aFillBmp.GetPrefMapMode() == MapUnit::MapPixel )
-                        //  aLogicalSize = Application::GetDefaultDevice()->PixelToLogic( aLogicalSize, MapUnit::Map100thMM );
+                        //  aLogicalSize = Application::GetDefaultDevice()->WindowToLogic( aLogicalSize, MapUnit::Map100thMM );
                         //else
                         //  aLogicalSize = OutputDevice::LogicToLogic( aLogicalSize, aFillBmp.GetPrefMapMode(), MapUnit::Map100thMM );
                         //aLogicalSize.Width()  *= 5;           ;//             :-(     nice scaling, look at engine3d/obj3d.cxx

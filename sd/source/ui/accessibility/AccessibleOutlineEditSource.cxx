@@ -121,7 +121,7 @@ namespace accessibility
         return false;
     }
 
-    Point AccessibleOutlineEditSource::LogicToPixel( const Point& rPoint, const MapMode& rMapMode ) const
+    Point AccessibleOutlineEditSource::LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const
     {
         if (IsValid())
         {
@@ -129,19 +129,19 @@ namespace accessibility
                                                       MapMode(mrView.GetModel().GetScaleUnit()) ) );
             MapMode aMapMode(mrWindow.GetMapMode());
             aMapMode.SetOrigin(Point());
-            return mrWindow.LogicToPixel( aPoint, aMapMode );
+            return mrWindow.LogicToWindow( aPoint, aMapMode );
         }
 
         return Point();
     }
 
-    Point AccessibleOutlineEditSource::PixelToLogic( const Point& rPoint, const MapMode& rMapMode ) const
+    Point AccessibleOutlineEditSource::WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const
     {
         if (IsValid())
         {
             MapMode aMapMode(mrWindow.GetMapMode());
             aMapMode.SetOrigin(Point());
-            Point aPoint( mrWindow.PixelToLogic( rPoint, aMapMode ) );
+            Point aPoint( mrWindow.WindowToLogic( rPoint, aMapMode ) );
             return ::LogicToLogic( aPoint,
                                                MapMode(mrView.GetModel().GetScaleUnit()),
                                                rMapMode );

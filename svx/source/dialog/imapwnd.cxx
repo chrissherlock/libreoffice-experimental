@@ -92,7 +92,7 @@ IMapWindow::~IMapWindow()
 void IMapWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     weld::CustomWidgetController::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToPixel(Size(270, 170), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(270, 170), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     SetOutputSizePixel(aSize);
 
@@ -455,7 +455,7 @@ SdrObject* IMapWindow::GetHitSdrObj( const Point& rPosPixel ) const
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
 
     SdrObject*  pObj = nullptr;
-    Point       aPt =  rDevice.PixelToLogic( rPosPixel );
+    Point       aPt =  rDevice.WindowToLogic( rPosPixel );
 
     if ( tools::Rectangle( Point(), GetGraphicSize() ).Contains( aPt ) )
     {
@@ -590,7 +590,7 @@ OUString IMapWindow::RequestHelp(tools::Rectangle& rHelpArea)
 {
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
 
-    Point aPos =  rDevice.PixelToLogic(rHelpArea.TopLeft());
+    Point aPos =  rDevice.WindowToLogic(rHelpArea.TopLeft());
 
     SdrPageView* pPageView = nullptr;
     SdrObject* pSdrObj = mpView->PickObj(aPos, mpView->getHitTolLog(), pPageView);
@@ -602,7 +602,7 @@ OUString IMapWindow::RequestHelp(tools::Rectangle& rHelpArea)
             OUString aStr = pIMapObj->GetURL();
             if ( !aStr.isEmpty() )
             {
-                rHelpArea =  rDevice.LogicToPixel(tools::Rectangle( Point(), GetGraphicSize()));
+                rHelpArea =  rDevice.LogicToWindow(tools::Rectangle( Point(), GetGraphicSize()));
                 return aStr;
             }
         }

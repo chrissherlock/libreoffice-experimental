@@ -311,8 +311,8 @@ bool GraphicObject::ImplDrawTiled(OutputDevice& rOut, const tools::Rectangle& rA
     }
     else
     {
-        const Size      aOutOffset( rOut.LogicToPixel( rOffset, aOutMapMode ) );
-        const tools::Rectangle aOutArea( rOut.LogicToPixel( rArea, aOutMapMode ) );
+        const Size      aOutOffset( rOut.LogicToWindow( rOffset, aOutMapMode ) );
+        const tools::Rectangle aOutArea( rOut.LogicToWindow( rArea, aOutMapMode ) );
 
         // number of invisible (because out-of-area) tiles
         int nInvisibleTilesX;
@@ -331,7 +331,7 @@ bool GraphicObject::ImplDrawTiled(OutputDevice& rOut, const tools::Rectangle& rA
             nInvisibleTilesY = aOutOffset.Height() / rSizePixel.Height();
 
         // origin from where to 'virtually' start drawing in pixel
-        const Point aOutOrigin( rOut.LogicToPixel( Point( rArea.Left() - rOffset.Width(),
+        const Point aOutOrigin( rOut.LogicToWindow( Point( rArea.Left() - rOffset.Width(),
                                                            rArea.Top() - rOffset.Height() ) ) .get() );
         // position in pixel from where to really start output
         const Point aOutStart( aOutOrigin.X() + nInvisibleTilesX*rSizePixel.Width(),
@@ -358,7 +358,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice& rOut, const Point& rPosPixel,
                                    const Size& rTileSizePixel, const GraphicAttr* pAttr ) const
 {
     Point   aCurrPos( rPosPixel );
-    Size    aTileSizeLogic( rOut.PixelToLogic( rTileSizePixel ));
+    Size    aTileSizeLogic( rOut.WindowToLogic( rTileSizePixel ));
     int     nX, nY;
 
     // #107607# Use logical coordinates for metafile playing, too
@@ -385,7 +385,7 @@ bool GraphicObject::ImplDrawTiled( OutputDevice& rOut, const Point& rPosPixel,
             // update return value. This method should return true, if
             // at least one of the looped Draws succeeded.
             bRet |= Draw(rOut,
-                         bDrawInPixel ? aCurrPos : rOut.PixelToLogic(aCurrPos),
+                         bDrawInPixel ? aCurrPos : rOut.WindowToLogic(aCurrPos),
                          bDrawInPixel ? rTileSizePixel : aTileSizeLogic,
                          pAttr);
 

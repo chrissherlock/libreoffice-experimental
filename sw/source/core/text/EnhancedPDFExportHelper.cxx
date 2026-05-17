@@ -2410,8 +2410,8 @@ void SwEnhancedPDFExportHelper::EnhancedPDFExport(LanguageType const eLanguageDe
                             const SwRect& aAnnotRect = pWin->GetAnchorRect();
                             if (aAnnotRect.Contains(rNoteRect))
                             {
-                                Point aPt(pDoc->GetEditShell()->GetWin()->PixelToLogic(pWin->GetPosPixel()));
-                                Size aSize(pDoc->GetEditShell()->GetWin()->PixelToLogic(pWin->GetSizePixel()));
+                                Point aPt(pDoc->GetEditShell()->GetWin()->WindowToLogic(pWin->GetPosPixel()));
+                                Size aSize(pDoc->GetEditShell()->GetWin()->WindowToLogic(pWin->GetSizePixel()));
                                 aPopupRect = tools::Rectangle(aPt, aSize);
                             }
                         }

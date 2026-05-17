@@ -462,11 +462,11 @@ sal_Int32 AccessibleEditableTextPara::GetBulletTextLength() const
     return nBulletLen;
 }
 
-tools::Rectangle AccessibleEditableTextPara::LogicToPixel( const tools::Rectangle& rRect, const MapMode& rMapMode, SvxViewForwarder const & rForwarder )
+tools::Rectangle AccessibleEditableTextPara::LogicToWindow( const tools::Rectangle& rRect, const MapMode& rMapMode, SvxViewForwarder const & rForwarder )
 {
     // convert to screen coordinates
-    return tools::Rectangle( rForwarder.LogicToPixel( rRect.TopLeft(), rMapMode ),
-                      rForwarder.LogicToPixel( rRect.BottomRight(), rMapMode ) );
+    return tools::Rectangle( rForwarder.LogicToWindow( rRect.TopLeft(), rMapMode ),
+                      rForwarder.LogicToWindow( rRect.BottomRight(), rMapMode ) );
 }
 
 
@@ -812,7 +812,7 @@ uno::Reference< XAccessible > SAL_CALL AccessibleEditableTextPara::getAccessible
 
         // convert to EditEngine coordinate system
         SvxTextForwarder& rCacheTF = GetTextForwarder();
-        Point aLogPoint( GetViewForwarder().PixelToLogic( aPoint, rCacheTF.GetMapMode() ) );
+        Point aLogPoint( GetViewForwarder().WindowToLogic( aPoint, rCacheTF.GetMapMode() ) );
 
         EBulletInfo aBulletInfo = rCacheTF.GetBulletInfo(GetParagraphIndex());
 
@@ -840,7 +840,7 @@ awt::Rectangle AccessibleEditableTextPara::implGetBounds()
     tools::Rectangle aRect = rCacheTF.GetParaBounds( GetParagraphIndex() );
 
     // convert to screen coordinates
-    tools::Rectangle aScreenRect = AccessibleEditableTextPara::LogicToPixel( aRect,
+    tools::Rectangle aScreenRect = AccessibleEditableTextPara::LogicToWindow( aRect,
                                                                       rCacheTF.GetMapMode(),
                                                                       GetViewForwarder() );
 
@@ -1027,7 +1027,7 @@ awt::Rectangle SAL_CALL AccessibleEditableTextPara::getCharacterBounds( sal_Int3
     tools::Rectangle aRect = rCacheTF.GetCharBounds(GetParagraphIndex(), nIndex);
 
     // convert to screen
-    tools::Rectangle aScreenRect = AccessibleEditableTextPara::LogicToPixel( aRect,
+    tools::Rectangle aScreenRect = AccessibleEditableTextPara::LogicToWindow( aRect,
                                                                       rCacheTF.GetMapMode(),
                                                                       GetViewForwarder() );
     // #109864# offset from parent (paragraph), but in screen
@@ -1068,7 +1068,7 @@ sal_Int32 SAL_CALL AccessibleEditableTextPara::getIndexAtPoint( const awt::Point
 
     // convert to logical coordinates
     SvxTextForwarder& rCacheTF = GetTextForwarder();
-    Point aLogPoint( GetViewForwarder().PixelToLogic( aPoint, rCacheTF.GetMapMode() ) );
+    Point aLogPoint( GetViewForwarder().WindowToLogic( aPoint, rCacheTF.GetMapMode() ) );
 
     // re-offset to parent (paragraph)
     tools::Rectangle aParaRect = rCacheTF.GetParaBounds( GetParagraphIndex() );

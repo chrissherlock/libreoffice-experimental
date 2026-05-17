@@ -56,7 +56,7 @@ namespace sdr::overlay
                     {
                         // get pixel bounds (tdf#149322 do subtraction in logic units before converting result back to pixel)
                         const Point aLogicOriginDiff(rOriginNew - rOriginOld);
-                        const Size aPixelOriginDiff(mpBufferDevice->LogicToPixel(Size(aLogicOriginDiff.X(), aLogicOriginDiff.Y())));
+                        const Size aPixelOriginDiff(mpBufferDevice->LogicToWindow(Size(aLogicOriginDiff.X(), aLogicOriginDiff.Y())));
                         const Point aDestinationOffsetPixel(aPixelOriginDiff.Width(), aPixelOriginDiff.Height());
                         const Size aOutputSizePixel(mpBufferDevice->GetOutputSizePixel());
 
@@ -141,14 +141,14 @@ namespace sdr::overlay
             ImpPrepareBufferDevice();
 
             // build region which needs to be copied
-            vcl::Region aRegion(rSource.LogicToPixel(rRegion));
+            vcl::Region aRegion(rSource.LogicToWindow(rRegion));
 
             // limit to PaintRegion if it's a window. This will be evtl. the expanded one,
             // but always the exact redraw area
             if(OUTDEV_WINDOW == rSource.GetOutDevType())
             {
                 vcl::Window& rWindow = *rSource.GetOwnerWindow();
-                vcl::Region aPaintRegionPixel = rWindow.LogicToPixel(rWindow.GetPaintRegion());
+                vcl::Region aPaintRegionPixel = rWindow.LogicToWindow(rWindow.GetPaintRegion());
                 aRegion.Intersect(aPaintRegionPixel);
 
                 // #i72754# Make sure content is completely rendered, the window
@@ -445,7 +445,7 @@ namespace sdr::overlay
 
             // add the discrete range to the remembered region
             // #i75163# use double precision and floor/ceil rounding to get overlapped pixel region, even
-            // when the given logic region has a width/height of 0.0. This does NOT work with LogicToPixel
+            // when the given logic region has a width/height of 0.0. This does NOT work with LogicToWindow
             // since it just transforms the top left and bottom right points equally without taking
             // discrete pixel coverage into account. An empty B2DRange and thus empty logic Rectangle translated
             // to an also empty discrete pixel rectangle - what is wrong.

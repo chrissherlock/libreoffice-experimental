@@ -100,8 +100,8 @@ public:
 
     // IAccessibleViewforwarder
     virtual tools::Rectangle GetVisibleArea() const override;
-    virtual Point LogicToPixel (const Point& rPoint) const override;
-    virtual Size LogicToPixel (const Size& rSize) const override;
+    virtual Point LogicToWindow(const Point& rPoint) const override;
+    virtual Size LogicToWindow(const Size& rSize) const override;
 
     /** This method is used by the graph control to tell the
         accessibility object about a new model and view.

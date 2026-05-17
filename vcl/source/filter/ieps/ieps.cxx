@@ -136,7 +136,7 @@ static void MakeAsMeta(Graphic &rGraphic)
     Size            aSize = rGraphic.GetPrefSize();
 
     if( !aSize.Width() || !aSize.Height() )
-        aSize = Application::GetDefaultDevice()->PixelToLogic(
+        aSize = Application::GetDefaultDevice()->WindowToLogic(
             rGraphic.GetSizePixel(), MapMode(MapUnit::Map100thMM));
     else
         aSize = ::LogicToLogic( aSize,

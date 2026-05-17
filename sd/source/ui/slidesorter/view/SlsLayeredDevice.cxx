@@ -316,7 +316,7 @@ bool LayeredDevice::HandleMapModeChange()
         return false;
 
     const ::tools::Rectangle aLogicWindowBox (
-        mpTargetWindow->PixelToLogic(::tools::Rectangle(Point(0,0), mpTargetWindow->GetSizePixel())));
+        mpTargetWindow->WindowToLogic(::tools::Rectangle(Point(0,0), mpTargetWindow->GetSizePixel())));
     if (maSavedMapMode.GetScaleX() != rMapMode.GetScaleX()
         || maSavedMapMode.GetScaleY() != rMapMode.GetScaleY()
         || maSavedMapMode.GetMapUnit() != rMapMode.GetMapUnit())
@@ -331,31 +331,31 @@ bool LayeredDevice::HandleMapModeChange()
         const Point aDelta (rMapMode.GetOrigin() - maSavedMapMode.GetOrigin());
         mpBackBuffer->CopyArea(
             aLogicWindowBox.TopLeft(),
-            mpTargetWindow->PixelToLogic(Point(0,0), maSavedMapMode),
+            mpTargetWindow->WindowToLogic(Point(0,0), maSavedMapMode),
             aLogicWindowBox.GetSize());
 
         // Invalidate the area(s) that have been exposed.
         const ::tools::Rectangle aWindowBox (Point(0,0), mpTargetWindow->GetSizePixel());
         if (aDelta.Y() < 0)
-            InvalidateAllLayers(mpTargetWindow->PixelToLogic(::tools::Rectangle(
+            InvalidateAllLayers(mpTargetWindow->WindowToLogic(::tools::Rectangle(
                 aWindowBox.Left(),
                 aWindowBox.Bottom()+aDelta.Y(),
                 aWindowBox.Right(),
                 aWindowBox.Bottom())));
         else if (aDelta.Y() > 0)
-            InvalidateAllLayers(mpTargetWindow->PixelToLogic(::tools::Rectangle(
+            InvalidateAllLayers(mpTargetWindow->WindowToLogic(::tools::Rectangle(
                 aWindowBox.Left(),
                 aWindowBox.Top(),
                 aWindowBox.Right(),
                 aWindowBox.Top()+aDelta.Y())));
         if (aDelta.X() < 0)
-            InvalidateAllLayers(mpTargetWindow->PixelToLogic(::tools::Rectangle(
+            InvalidateAllLayers(mpTargetWindow->WindowToLogic(::tools::Rectangle(
                 aWindowBox.Right()+aDelta.X(),
                 aWindowBox.Top(),
                 aWindowBox.Right(),
                 aWindowBox.Bottom())));
         else if (aDelta.X() > 0)
-            InvalidateAllLayers(mpTargetWindow->PixelToLogic(::tools::Rectangle(
+            InvalidateAllLayers(mpTargetWindow->WindowToLogic(::tools::Rectangle(
                 aWindowBox.Left(),
                 aWindowBox.Top(),
                 aWindowBox.Left()+aDelta.X(),

@@ -99,7 +99,7 @@ ScHeaderControl::ScHeaderControl( vcl::Window* pParent, SelectionEngine* pSelect
     bBoldSet = true;
     bAutoFilterSet = false;
 
-    Size aSize = LogicToPixel( Size(
+    Size aSize = LogicToWindow( Size(
         GetTextWidth(u"8888"_ustr),
         GetTextHeight() ) );
     aSize.AdjustWidth(4 );    // place for highlight border
@@ -107,7 +107,7 @@ ScHeaderControl::ScHeaderControl( vcl::Window* pParent, SelectionEngine* pSelect
     SetSizePixel( aSize );
 
     nWidth = nSmallWidth = aSize.Width();
-    nBigWidth = LogicToPixel( Size( GetTextWidth(u"8888888"_ustr), 0 ) ).Width() + 5;
+    nBigWidth = LogicToWindow( Size( GetTextWidth(u"8888888"_ustr), 0 ) ).Width() + 5;
 
     aShowHelpTimer.SetInvokeHandler(LINK(this, ScHeaderControl, ShowDragHelpHdl));
     aShowHelpTimer.SetTimeout(GetSettings().GetMouseSettings().GetDoubleClickTime());
