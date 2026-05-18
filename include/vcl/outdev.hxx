@@ -1637,6 +1637,14 @@ protected:
     virtual void ImplInitMapModeObjects();
 
 public:
+    // UNIFIED COORDINATE SPACE CASTING INTERFACE
+    template <typename TargetType, typename SourceType>
+    SAL_WARN_UNUSED_RESULT auto convertTo(const SourceType& rSourceGeom) const
+    {
+        // This relies on specialized helper structures to select the correct route
+        return vcl::detail::CoordinateCastTraits<TargetType, SourceType>::cast(*this, rSourceGeom);
+    }
+
     /** Set an offset in pixel
 
         This method offsets every drawing operation that converts its
