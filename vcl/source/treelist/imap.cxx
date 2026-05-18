@@ -258,7 +258,7 @@ void IMapCircleObject::ImpConstruct( const Point& rCenter, sal_Int32 nRad, bool 
         MapMode aMap100( MapUnit::Map100thMM );
 
         aCenter = Application::GetDefaultDevice()->WindowToLogic( rCenter, aMap100 );
-        nRadius = Application::GetDefaultDevice()->WindowToLogic( Size( nRad, 0 ), aMap100 ).Width();
+        nRadius = Application::GetDefaultDevice()->WindowToLogic( Size( nRad, 0 ), aMap100 )->Width();
     }
     else
     {
@@ -343,7 +343,7 @@ sal_Int32 IMapCircleObject::GetRadius( bool bPixelCoords ) const
     sal_Int32 nNewRadius;
 
     if ( bPixelCoords )
-        nNewRadius = Application::GetDefaultDevice()->LogicToWindow( Size( nRadius, 0 ), MapMode( MapUnit::Map100thMM ) ).Width();
+        nNewRadius = Application::GetDefaultDevice()->LogicToWindow( Size( nRadius, 0 ), MapMode( MapUnit::Map100thMM ) )->Width();
     else
         nNewRadius = nRadius;
 

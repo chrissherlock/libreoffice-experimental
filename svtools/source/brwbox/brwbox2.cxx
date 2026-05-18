@@ -689,8 +689,7 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
     if (!m_nDataRowHeight)
         ImpGetDataRowHeight();
     tools::Long nHeightLogic = WindowToLogic(Size(0, m_nDataRowHeight), MapMode(MapUnit::Map10thMM)).Height();
-    tools::Long nForeignHeightPixel
-        = rDev.LogicToWindow(Size(0, nHeightLogic), MapMode(MapUnit::Map10thMM)).Height();
+    tools::Long nForeignHeightPixel = rDev.LogicToWindow(Size(0, nHeightLogic), MapMode(MapUnit::Map10thMM))->Height();
 
     tools::Long nOriginalHeight = m_nDataRowHeight;
     m_nDataRowHeight = nForeignHeightPixel;
@@ -702,8 +701,7 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
         BrowserColumn* pCurrent = mvCols[ nPos ].get();
 
         tools::Long nWidthLogic = WindowToLogic(Size(pCurrent->Width(), 0), MapMode(MapUnit::Map10thMM)).Width();
-        tools::Long nForeignWidthPixel
-            = rDev.LogicToWindow(Size(nWidthLogic, 0), MapMode(MapUnit::Map10thMM)).Width();
+        tools::Long nForeignWidthPixel = rDev.LogicToWindow(Size(nWidthLogic, 0), MapMode(MapUnit::Map10thMM))->Width();
 
         pCurrent->SetWidth(nForeignWidthPixel, GetZoom());
         if ( pBar )
@@ -721,8 +719,7 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
     {
         // the title height with respect to the font set for the given device
         tools::Long nTitleHeight = WindowToLogic(Size(0, GetTitleHeight()), MapMode(MapUnit::Map10thMM)).Height();
-        nTitleHeight
-            = rDev.LogicToWindow(Size(0, nTitleHeight), MapMode(MapUnit::Map10thMM)).Height();
+        nTitleHeight = rDev.LogicToWindow(Size(0, nTitleHeight), MapMode(MapUnit::Map10thMM))->Height();
 
         BrowserColumn* pFirstCol = !mvCols.empty() ? mvCols[ 0 ].get() : nullptr;
 
@@ -765,7 +762,7 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
 
     // draw our own content (with clipping)
     vcl::Region aRegion(tools::Rectangle(aRealPos, aRealSize));
-    rDev.SetClipRegion(rDev.WindowToLogic(aRegion));
+    rDev.SetClipRegion( rDev.WindowToLogic( aRegion ) );
 
     // do we have to paint the background
     bool bBackground = pDataWin->IsControlBackground();
@@ -784,7 +781,7 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
     {
         BrowserColumn* pCurrent = mvCols[ nPos ].get();
 
-        tools::Long nForeignWidthLogic = rDev.WindowToLogic(Size(pCurrent->Width(), 0), MapMode(MapUnit::Map10thMM)).Width();
+        tools::Long nForeignWidthLogic = rDev.WindowToLogic(Size(pCurrent->Width(), 0), MapMode(MapUnit::Map10thMM))->Width();
         tools::Long nWidthPixel = LogicToWindow(Size(nForeignWidthLogic, 0), MapMode(MapUnit::Map10thMM)).Width();
 
         pCurrent->SetWidth(nWidthPixel, GetZoom());

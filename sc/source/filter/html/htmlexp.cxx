@@ -282,7 +282,7 @@ sal_uInt16 ScHTMLExport::ToPixel( sal_uInt16 nVal )
     if( nVal )
     {
         nVal = static_cast<sal_uInt16>(pAppWin->LogicToWindow(
-                    Size( nVal, nVal ), MapMode( MapUnit::MapTwip ) ).Width());
+                    Size( nVal, nVal ), MapMode( MapUnit::MapTwip ) )->Width());
         if( !nVal ) // If there's a Twip there should also be a Pixel
             nVal = 1;
     }

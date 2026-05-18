@@ -3236,7 +3236,7 @@ void CheckBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags 
     Size        aImageSize = rDev.LogicToWindow( Size( 300, 300 ), aResMapMode );
     Size        aBrd1Size = rDev.LogicToWindow( Size( 20, 20 ), aResMapMode );
     Size        aBrd2Size = rDev.LogicToWindow( Size( 30, 30 ), aResMapMode );
-    tools::Long        nCheckWidth = rDev.LogicToWindow( Size( 20, 20 ), aResMapMode ).Width();
+    tools::Long        nCheckWidth = rDev.LogicToWindow( Size( 20, 20 ), aResMapMode )->Width();
     vcl::Font   aFont = GetDrawPixelFont( &rDev );
     tools::Rectangle   aStateRect;
     tools::Rectangle   aMouseRect;

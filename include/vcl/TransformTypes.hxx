@@ -93,6 +93,8 @@ struct TransformContract
 
 namespace vcl
 {
+class Region;
+
 // The Phantom Tags (Representing Coordinate Spaces)
 struct SpaceView
 {
@@ -181,15 +183,18 @@ using DeviceRect = TypedGeom<SpaceDevice, tools::Rectangle>;
 using LogicPolygon = TypedGeom<SpaceLogic, tools::Polygon>;
 using ViewPolygon = TypedGeom<SpaceView, tools::Polygon>;
 using WindowPolygon = TypedGeom<SpaceWindow, tools::Polygon>;
+using DevicePolygon = TypedGeom<SpaceDevice, tools::Polygon>;
+
 using LogicPolyPolygon = TypedGeom<SpaceLogic, tools::PolyPolygon>;
 using ViewPolyPolygon = TypedGeom<SpaceView, tools::PolyPolygon>;
 using WindowPolyPolygon = TypedGeom<SpaceWindow, tools::PolyPolygon>;
 using DevicePolyPolygon = TypedGeom<SpaceDevice, tools::PolyPolygon>;
-using DevicePolygon = TypedGeom<SpaceDevice, tools::Polygon>;
 
-// PolyPolygon
-using LogicPolyPolygon = TypedGeom<SpaceLogic, tools::PolyPolygon>;
-using DevicePolyPolygon = TypedGeom<SpaceDevice, tools::PolyPolygon>;
+using LogicRegion = TypedGeom<SpaceLogic, vcl::Region>;
+using ViewRegion = TypedGeom<SpaceView, vcl::Region>;
+using WindowRegion = TypedGeom<SpaceWindow, vcl::Region>;
+using DeviceRegion = TypedGeom<SpaceDevice, vcl::Region>;
+
 } // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

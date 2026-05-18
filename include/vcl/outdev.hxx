@@ -1686,13 +1686,13 @@ public:
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE vcl::WindowPolygon LogicToWindow(const tools::Polygon& rLogicPoly) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE vcl::WindowPolyPolygon LogicToWindow(const tools::PolyPolygon& rLogicPolyPoly) const;
     SAL_WARN_UNUSED_RESULT basegfx::B2DPolyPolygon LogicToWindow(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
-    SAL_WARN_UNUSED_RESULT vcl::Region LogicToWindow(const vcl::Region& rLogicRegion)const;
-    SAL_WARN_UNUSED_RESULT Point LogicToWindow(const Point& rLogicPt, const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT Size LogicToWindow(const Size& rLogicSize, const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT tools::Rectangle LogicToWindow(const tools::Rectangle& rLogicRect,
+    SAL_WARN_UNUSED_RESULT vcl::WindowRegion LogicToWindow(const vcl::Region& rLogicRegion) const;
+    SAL_WARN_UNUSED_RESULT vcl::WindowPoint LogicToWindow(const Point& rLogicPt, const MapMode& rMapMode) const;
+    SAL_WARN_UNUSED_RESULT vcl::WindowSize LogicToWindow(const Size& rLogicSize, const MapMode& rMapMode) const;
+    SAL_WARN_UNUSED_RESULT vcl::WindowRect LogicToWindow(const tools::Rectangle& rLogicRect,
                                                          const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon LogicToWindow(const tools::Polygon& rLogicPoly,
-                                                       const MapMode& rMapMode) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE vcl::WindowPolygon LogicToWindow(const tools::Polygon& rLogicPoly,
+                                                                           const MapMode& rMapMode) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon LogicToWindow(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
                                                                 const MapMode& rMapMode) const;
 
@@ -1703,13 +1703,13 @@ public:
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE vcl::LogicPolyPolygon WindowToLogic(const tools::PolyPolygon& rDevicePolyPoly) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon WindowToLogic(const basegfx::B2DPolyPolygon& rDevicePolyPoly) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DRectangle WindowToLogic(const basegfx::B2DRectangle& rDeviceRect) const;
-    SAL_WARN_UNUSED_RESULT vcl::Region WindowToLogic(const vcl::Region& rDeviceRegion) const;
-    SAL_WARN_UNUSED_RESULT Point WindowToLogic(const Point& rDevicePt, const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT Size WindowToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT tools::Rectangle WindowToLogic(const tools::Rectangle& rDeviceRect,
+    SAL_WARN_UNUSED_RESULT vcl::LogicRegion WindowToLogic(const vcl::Region& rDeviceRegion) const;
+    SAL_WARN_UNUSED_RESULT vcl::LogicPoint WindowToLogic(const Point& rDevicePt, const MapMode& rMapMode) const;
+    SAL_WARN_UNUSED_RESULT vcl::LogicSize WindowToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const;
+    SAL_WARN_UNUSED_RESULT vcl::LogicRect WindowToLogic(const tools::Rectangle& rDeviceRect,
                                                          const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE tools::Polygon WindowToLogic(const tools::Polygon& rDevicePoly,
-                                                       const MapMode& rMapMode) const;
+    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE vcl::LogicPolygon WindowToLogic(const tools::Polygon& rDevicePoly,
+                                                                           const MapMode& rMapMode) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolygon WindowToLogic(const basegfx::B2DPolygon& rDevicePoly,
                                                             const MapMode& rMapMode) const;
     SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon WindowToLogic(const basegfx::B2DPolyPolygon& rDevicePolyPoly,

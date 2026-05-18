@@ -1225,7 +1225,7 @@ bool SmShowSymbolSet::KeyInput(const KeyEvent& rKEvt)
 void SmShowSymbolSet::calccols(const vcl::RenderContext& rRenderContext)
 {
     // Height of 16pt in pixels (matching 'aOutputSize')
-    nLen = rRenderContext.LogicToWindow(Size(0, 16), MapMode(MapUnit::MapPoint)).Height();
+    nLen = rRenderContext.LogicToWindow(Size(0, 16), MapMode(MapUnit::MapPoint))->Height();
 
     Size aOutputSize(GetOutputSizePixel());
 
