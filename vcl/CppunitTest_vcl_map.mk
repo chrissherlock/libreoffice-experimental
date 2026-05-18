@@ -23,6 +23,7 @@ $(eval $(call gb_CppunitTest_add_exception_objects,vcl_map, \
 	vcl/qa/cppunit/map/GeometryAdapterTest \
 	vcl/qa/cppunit/map/LegacyCoordinateAdapterTest \
 	vcl/qa/cppunit/map/TransformPlanTest \
+	vcl/qa/cppunit/map/UnifiedToInterfaceTest \
 ))
 
 $(eval $(call gb_CppunitTest_use_libraries,vcl_map, \
