@@ -552,8 +552,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                     tools::Long nNextX
                         = nPosX + o3tl::convert(nDocW, o3tl::Length::twip, o3tl::Length::mm100);
 
-                    tools::Long nPixelStart = pWindow->LogicToWindow( Size( nPosX, 0 ), aCellMapMode ).Width();
-                    tools::Long nPixelEnd = pWindow->LogicToWindow( Size( nNextX, 0 ), aCellMapMode ).Width() - 1;
+                    tools::Long nPixelStart = pWindow->LogicToWindow( Size( nPosX, 0 ), aCellMapMode )->Width();
+                    tools::Long nPixelEnd = pWindow->LogicToWindow( Size( nNextX, 0 ), aCellMapMode )->Width() - 1;
                     pColInfo[nColPos].Set( false, nCol,
                                                 aRepeatRect.Left() + nPixelStart,
                                                 aRepeatRect.Left() + nPixelEnd );
@@ -572,8 +572,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                     tools::Long nNextX
                         = nPosX + o3tl::convert(nDocW, o3tl::Length::twip, o3tl::Length::mm100);
 
-                    tools::Long nPixelStart = pWindow->LogicToWindow( Size( nPosX, 0 ), aCellMapMode ).Width();
-                    tools::Long nPixelEnd = pWindow->LogicToWindow( Size( nNextX, 0 ), aCellMapMode ).Width() - 1;
+                    tools::Long nPixelStart = pWindow->LogicToWindow( Size( nPosX, 0 ), aCellMapMode )->Width();
+                    tools::Long nPixelEnd = pWindow->LogicToWindow( Size( nNextX, 0 ), aCellMapMode )->Width() - 1;
                     pColInfo[nColPos].Set( false, nCol,
                                                 aMainRect.Left() + nPixelStart,
                                                 aMainRect.Left() + nPixelEnd );
@@ -619,8 +619,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                 tools::Long nNextY
                     = nPosY + o3tl::convert(nDocH, o3tl::Length::twip, o3tl::Length::mm100);
 
-                tools::Long nPixelStart = pWindow->LogicToWindow( Size( 0, nPosY ), aCellMapMode ).Height();
-                tools::Long nPixelEnd = pWindow->LogicToWindow( Size( 0, nNextY ), aCellMapMode ).Height() - 1;
+                tools::Long nPixelStart = pWindow->LogicToWindow( Size( 0, nPosY ), aCellMapMode )->Height();
+                tools::Long nPixelEnd = pWindow->LogicToWindow( Size( 0, nNextY ), aCellMapMode )->Height() - 1;
                 pRowInfo[nRowPos].Set( false, nRow,
                         aRepeatRect.Top() + nPixelStart,
                         aRepeatRect.Top() + nPixelEnd );
@@ -641,8 +641,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                 tools::Long nNextY
                     = nPosY + o3tl::convert(nDocH, o3tl::Length::twip, o3tl::Length::mm100);
 
-                tools::Long nPixelStart = pWindow->LogicToWindow( Size( 0, nPosY ), aCellMapMode ).Height();
-                tools::Long nPixelEnd = pWindow->LogicToWindow( Size( 0, nNextY ), aCellMapMode ).Height() - 1;
+                tools::Long nPixelStart = pWindow->LogicToWindow( Size( 0, nPosY ), aCellMapMode )->Height();
+                tools::Long nPixelEnd = pWindow->LogicToWindow( Size( 0, nNextY ), aCellMapMode )->Height() - 1;
                 pRowInfo[nRowPos].Set( false, nRow,
                         aMainRect.Top() + nPixelStart,
                         aMainRect.Top() + nPixelEnd );
