@@ -271,43 +271,37 @@ CoordinateMapper::GetInverseViewTransformation(const MapMode& rBaseline, const M
 template <typename T>
 T CoordinateMapper::LogicToDevicePixel(const T& rObj, vcl::MappingPolicy ePolicy) const
 {
-    return vcl::GeometryAdapter::Apply(
-        Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }), rObj);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).apply(rObj);
 }
 
 template <typename T>
 T CoordinateMapper::DevicePixelToLogic(const T& rObj, vcl::MappingPolicy ePolicy) const
 {
-    return vcl::GeometryAdapter::Apply(
-        Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }), rObj);
+    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).apply(rObj);
 }
 
 template <typename T>
 T CoordinateMapper::LogicToWindowUnits(const T& rObj, vcl::MappingPolicy ePolicy) const
 {
-    return vcl::GeometryAdapter::Apply(
-        Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }), rObj);
+    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).apply(rObj);
 }
 
 template <typename T>
 T CoordinateMapper::WindowToLogicUnits(const T& rObj, vcl::MappingPolicy ePolicy) const
 {
-    return vcl::GeometryAdapter::Apply(
-        Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }), rObj);
+    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).apply(rObj);
 }
 
 template <typename T>
 T CoordinateMapper::LogicToWindowUnits(const T& rObj, const vcl::detail::MapConversion& rConv) const
 {
-    return vcl::GeometryAdapter::Apply(
-        vcl::TransformCompiler::Compile(GetViewTransformation(rConv)), rObj);
+    return vcl::TransformCompiler::Compile(GetViewTransformation(rConv)).apply(rObj);
 }
 
 template <typename T>
 T CoordinateMapper::WindowToLogicUnits(const T& rObj, const vcl::detail::MapConversion& rConv) const
 {
-    return vcl::GeometryAdapter::Apply(
-        vcl::TransformCompiler::Compile(GetInverseViewTransformation(rConv)), rObj);
+    return vcl::TransformCompiler::Compile(GetInverseViewTransformation(rConv)).apply(rObj);
 }
 
 basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPt,
@@ -632,8 +626,7 @@ CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogi
     vcl::detail::MapConversion aConv
         = ResolveMap(MapMode(), rCustomMapMode, vcl::MappingPolicy::ApplyMapMode);
     vcl::TransformPlan aPlan = vcl::TransformCompiler::Compile(GetViewTransformation(aConv));
-    return vcl::TypedGeom<vcl::SpaceWindow, Geom>(
-        vcl::GeometryAdapter::Apply(aPlan, rLogicGeom.get()));
+    return vcl::TypedGeom<vcl::SpaceWindow, Geom>(aPlan.apply(rLogicGeom.get()));
 }
 
 template <typename Geom>
@@ -647,8 +640,7 @@ CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogi
     aMat.translate(static_cast<double>(maState.GetDeviceToWindowOffsetX()),
                    static_cast<double>(maState.GetDeviceToWindowOffsetY()));
     vcl::TransformPlan aPlan = vcl::TransformCompiler::Compile(aMat);
-    return vcl::TypedGeom<vcl::SpaceDevice, Geom>(
-        vcl::GeometryAdapter::Apply(aPlan, rLogicGeom.get()));
+    return vcl::TypedGeom<vcl::SpaceDevice, Geom>(aPlan.apply(rLogicGeom.get()));
 }
 
 // Explicit Instantiations to satisfy the linker
