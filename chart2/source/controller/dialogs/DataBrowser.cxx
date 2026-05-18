@@ -296,11 +296,11 @@ void SeriesHeader::SetPos()
     // series name edit field
     m_spSeriesName->set_margin_start(2);
 
-    sal_Int32 nHeightPx = m_xDevice->LogicToWindow(Size(0, 12), MapMode(MapUnit::MapAppFont)).Height();
+    sal_Int32 nHeightPx = m_xDevice->LogicToWindow(Size(0, 12), MapMode(MapUnit::MapAppFont))->Height();
     m_spSeriesName->set_size_request(m_nWidth - aSize.Width() - 2, nHeightPx);
 
     // color bar
-    nHeightPx = m_xDevice->LogicToWindow(Size(0, 3), MapMode(MapUnit::MapAppFont)).Height();
+    nHeightPx = m_xDevice->LogicToWindow(Size(0, 3), MapMode(MapUnit::MapAppFont))->Height();
     m_spColorBar->set_size_request(m_nWidth, nHeightPx);
 
     ScopedVclPtr<VirtualDevice> xVirDev(m_spColorBar->create_virtual_device());

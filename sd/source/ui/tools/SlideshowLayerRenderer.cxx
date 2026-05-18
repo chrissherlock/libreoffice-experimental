@@ -120,11 +120,11 @@ public:
 
         MapMode aMapMode(MapUnit::Map100thMM);
         const double fFracX = double(rSlideSize.Width())
-                              / maVirtualDevice->LogicToWindow(aPageSize, aMapMode).Width();
+                              / maVirtualDevice->LogicToWindow(aPageSize, aMapMode)->Width();
         aMapMode.SetScaleX(fFracX);
 
         const double fFracY = double(rSlideSize.Height())
-                              / maVirtualDevice->LogicToWindow(aPageSize, aMapMode).Height();
+                              / maVirtualDevice->LogicToWindow(aPageSize, aMapMode)->Height();
         aMapMode.SetScaleY(fFracY);
 
         maVirtualDevice->SetMapMode(aMapMode);

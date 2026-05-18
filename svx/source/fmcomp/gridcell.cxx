@@ -1731,7 +1731,7 @@ void DbCheckBox::PaintCell(OutputDevice& rDev, const tools::Rectangle& rRect)
             Size aImageSize = rDev.LogicToWindow(Size(300, 300), aResMapMode);
             Size aBrd1Size = rDev.LogicToWindow(Size(20, 20), aResMapMode);
             Size aBrd2Size = rDev.LogicToWindow(Size(30, 30), aResMapMode);
-            int nCheckWidth = rDev.LogicToWindow(Size(20, 20), aResMapMode).Width();
+            int nCheckWidth = rDev.LogicToWindow(Size(20, 20), aResMapMode)->Width();
 
             tools::Rectangle aStateRect;
             aStateRect.SetLeft(rRect.Left() + ((rRect.GetWidth() - aImageSize.Width()) / 2));
