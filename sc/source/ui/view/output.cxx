@@ -969,7 +969,7 @@ void drawIconSets(vcl::RenderContext& rRenderContext, const ScIconSetInfo* pOldI
     {
         if (comphelper::LibreOfficeKit::isActive())
         {
-            aHeight = rRenderContext.LogicToWindow(Size(0, pOldIconSetInfo->mnHeight), MapMode(MapUnit::MapTwip)).Height();
+            aHeight = rRenderContext.LogicToWindow(Size(0, pOldIconSetInfo->mnHeight), MapMode(MapUnit::MapTwip))->Height();
             aHeight *= comphelper::LibreOfficeKit::getDPIScale();
         }
         else

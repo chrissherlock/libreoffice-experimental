@@ -313,7 +313,7 @@ VclPtr<VirtualDevice> GraphicExporter::CreatePageVDev( SdrPage* pPage, tools::Lo
     // use scaling?
     if( nWidthPixel != 0 )
     {
-        const double fFrac = double( nWidthPixel ) / pVDev->LogicToWindow( aPageSize, aMM ).Width();
+        const double fFrac = double( nWidthPixel ) / pVDev->LogicToWindow( aPageSize, aMM )->Width();
 
         aMM.SetScaleX( fFrac );
 
@@ -323,7 +323,7 @@ VclPtr<VirtualDevice> GraphicExporter::CreatePageVDev( SdrPage* pPage, tools::Lo
 
     if( nHeightPixel != 0 )
     {
-        const double fFrac = double( nHeightPixel ) / pVDev->LogicToWindow( aPageSize, aMM ).Height();
+        const double fFrac = double( nHeightPixel ) / pVDev->LogicToWindow( aPageSize, aMM )->Height();
 
         if( nWidthPixel == 0 )
             aMM.SetScaleX( fFrac );
