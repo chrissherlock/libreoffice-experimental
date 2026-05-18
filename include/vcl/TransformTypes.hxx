@@ -14,9 +14,12 @@
 #include <basegfx/point/b2dpoint.hxx>
 #include <basegfx/polygon/b2dpolygon.hxx>
 
+#include <vcl/dllapi.h>
 #include <vcl/MappingPolicy.hxx>
 
 #include <bitset>
+
+class OutputDevice;
 
 namespace tools
 {
@@ -44,7 +47,7 @@ struct TransformRequest
 {
     CoordinateSpace eFrom = CoordinateSpace::Logic;
     CoordinateSpace eTo = CoordinateSpace::Device;
-    vcl::MappingPolicy Policy = vcl::MappingPolicy::ApplyMapMode; // Changed from bool
+    vcl::MappingPolicy Policy = vcl::MappingPolicy::ApplyMapMode;
 };
 
 /**
@@ -137,12 +140,10 @@ template <typename Space, typename T> struct TypedGeom
     T& operator*() { return maData; }
 
     // Implicit conversion operators back to legacy primitives
-    // Safely clears member/assignment bottlenecks down the call stack
     operator const T&() const { return maData; }
     operator T&() { return maData; }
 
     // Type-isolated structural equality operators
-    // Ensures macros like OSL_ENSURE can evaluate wrapper comparisons seamlessly
     constexpr bool operator==(const TypedGeom& rOther) const { return maData == rOther.maData; }
     constexpr bool operator!=(const TypedGeom& rOther) const { return maData != rOther.maData; }
 
@@ -153,7 +154,6 @@ template <typename Space, typename T> struct TypedGeom
      */
     template <typename Func> constexpr auto map(Func&& f) const
     {
-        // std::invoke_result_t automatically deduces the return type of the function
         using ReturnType = std::invoke_result_t<Func, const T&>;
         return TypedGeom<Space, ReturnType>(f(maData));
     }
@@ -194,7 +194,79 @@ using LogicRegion = TypedGeom<SpaceLogic, vcl::Region>;
 using ViewRegion = TypedGeom<SpaceView, vcl::Region>;
 using WindowRegion = TypedGeom<SpaceWindow, vcl::Region>;
 using DeviceRegion = TypedGeom<SpaceDevice, vcl::Region>;
-
 } // namespace vcl
+
+// ========================================================================
+// UNIFIED CAST TRAITS REGISTRY (Aligned to Global vcl::detail Scope)
+// ========================================================================
+namespace vcl::detail
+{
+// Primary template - triggers a clear error if an unregistered mapping is tried
+template <typename Target, typename Source> struct CoordinateCastTraits
+{
+    static_assert(sizeof(Target) == 0,
+                  "Unsupported or type-mismatched coordinate space conversion!");
+};
+
+// Points
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowPoint, vcl::LogicPoint>
+{
+    static vcl::WindowPoint cast(const OutputDevice& rDev, const vcl::LogicPoint& rSrc);
+};
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPoint, vcl::WindowPoint>
+{
+    static vcl::LogicPoint cast(const OutputDevice& rDev, const vcl::WindowPoint& rSrc);
+};
+
+// Sizes
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowSize, vcl::LogicSize>
+{
+    static vcl::WindowSize cast(const OutputDevice& rDev, const vcl::LogicSize& rSrc);
+};
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicSize, vcl::WindowSize>
+{
+    static vcl::LogicSize cast(const OutputDevice& rDev, const vcl::WindowSize& rSrc);
+};
+
+// Rectangles
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRect, vcl::LogicRect>
+{
+    static vcl::WindowRect cast(const OutputDevice& rDev, const vcl::LogicRect& rSrc);
+};
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRect, vcl::WindowRect>
+{
+    static vcl::LogicRect cast(const OutputDevice& rDev, const vcl::WindowRect& rSrc);
+};
+
+// Polygons
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowPolygon, vcl::LogicPolygon>
+{
+    static vcl::WindowPolygon cast(const OutputDevice& rDev, const vcl::LogicPolygon& rSrc);
+};
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPolygon, vcl::WindowPolygon>
+{
+    static vcl::LogicPolygon cast(const OutputDevice& rDev, const vcl::WindowPolygon& rSrc);
+};
+
+// PolyPolygons
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowPolyPolygon, vcl::LogicPolyPolygon>
+{
+    static vcl::WindowPolyPolygon cast(const OutputDevice& rDev, const vcl::LogicPolyPolygon& rSrc);
+};
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPolyPolygon, vcl::WindowPolyPolygon>
+{
+    static vcl::LogicPolyPolygon cast(const OutputDevice& rDev, const vcl::WindowPolyPolygon& rSrc);
+};
+
+// Regions
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>
+{
+    static vcl::WindowRegion cast(const OutputDevice& rDev, const vcl::LogicRegion& rSrc);
+};
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>
+{
+    static vcl::LogicRegion cast(const OutputDevice& rDev, const vcl::WindowRegion& rSrc);
+};
+} // namespace vcl::detail
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
