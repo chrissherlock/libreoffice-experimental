@@ -303,14 +303,14 @@ vcl::WindowRect OutputDevice::LogicToWindow(const tools::Rectangle& rLogicRect) 
     return vcl::WindowRect(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}).apply(rLogicRect));
 }
 
-tools::Polygon OutputDevice::LogicToWindow(const tools::Polygon& rLogicPoly) const
+vcl::WindowPolygon OutputDevice::LogicToWindow(const tools::Polygon& rLogicPoly) const
 {
-    return mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}).apply(rLogicPoly);
+    return vcl::WindowPolygon(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}).apply(rLogicPoly));
 }
 
-tools::PolyPolygon OutputDevice::LogicToWindow(const tools::PolyPolygon& rLogicPolyPoly) const
+vcl::WindowPolyPolygon OutputDevice::LogicToWindow(const tools::PolyPolygon& rLogicPolyPoly) const
 {
-    return mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}).apply(rLogicPolyPoly);
+    return vcl::WindowPolyPolygon(mpMapper->Compile({CoordinateSpace::Logic, CoordinateSpace::Window, GetMappingPolicy()}).apply(rLogicPolyPoly));
 }
 
 basegfx::B2DPolyPolygon OutputDevice::LogicToWindow(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const
@@ -384,14 +384,14 @@ vcl::LogicRect OutputDevice::WindowToLogic(const tools::Rectangle& rDeviceRect) 
     return vcl::LogicRect(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rDeviceRect));
 }
 
-tools::Polygon OutputDevice::WindowToLogic(const tools::Polygon& rDevicePoly) const
+vcl::LogicPolygon OutputDevice::WindowToLogic(const tools::Polygon& rDevicePoly) const
 {
-    return mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rDevicePoly);
+    return vcl::LogicPolygon(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rDevicePoly));
 }
 
-tools::PolyPolygon OutputDevice::WindowToLogic(const tools::PolyPolygon& rDevicePolyPoly) const
+vcl::LogicPolyPolygon OutputDevice::WindowToLogic(const tools::PolyPolygon& rDevicePolyPoly) const
 {
-    return mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rDevicePolyPoly);
+    return vcl::LogicPolyPolygon(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rDevicePolyPoly));
 }
 
 basegfx::B2DRectangle OutputDevice::WindowToLogic(const basegfx::B2DRectangle& rDeviceRect) const
