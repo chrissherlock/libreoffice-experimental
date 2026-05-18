@@ -1,4 +1,3 @@
-
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -20,23 +19,41 @@
 #include <vcl/lineinfo.hxx>
 #include <vcl/TransformPlan.hxx>
 
+namespace vcl
+{
+struct TransformPlan;
+}
+
 namespace vcl::GeometryAdapter
 {
-VCL_DLLPUBLIC Point Apply(const TransformPlan& rPlan, const Point& rPt);
-VCL_DLLPUBLIC Size Apply(const TransformPlan& rPlan, const Size& rSize);
-VCL_DLLPUBLIC tools::Rectangle Apply(const TransformPlan& rPlan, const tools::Rectangle& rRect);
+VCL_DLLPUBLIC Point Apply(const vcl::TransformPlan& rPlan, const Point& rPt);
+VCL_DLLPUBLIC Size Apply(const vcl::TransformPlan& rPlan, const Size& rSize);
+VCL_DLLPUBLIC tools::Rectangle Apply(const vcl::TransformPlan& rPlan,
+                                     const tools::Rectangle& rRect);
 
-VCL_DLLPUBLIC tools::Polygon Apply(const TransformPlan& rPlan, const tools::Polygon& rPoly);
-VCL_DLLPUBLIC tools::PolyPolygon Apply(const TransformPlan& rPlan,
+VCL_DLLPUBLIC tools::Polygon Apply(const vcl::TransformPlan& rPlan, const tools::Polygon& rPoly);
+VCL_DLLPUBLIC tools::PolyPolygon Apply(const vcl::TransformPlan& rPlan,
                                        const tools::PolyPolygon& rPolyPoly);
-VCL_DLLPUBLIC vcl::Region Apply(const TransformPlan& rPlan, const vcl::Region& rRegion);
-VCL_DLLPUBLIC LineInfo Apply(const TransformPlan& rPlan, const LineInfo& rLine);
+VCL_DLLPUBLIC vcl::Region Apply(const vcl::TransformPlan& rPlan, const vcl::Region& rRegion);
+VCL_DLLPUBLIC LineInfo Apply(const vcl::TransformPlan& rPlan, const LineInfo& rLine);
 
-VCL_DLLPUBLIC basegfx::B2DPolygon Apply(const TransformPlan& rPlan,
+VCL_DLLPUBLIC basegfx::B2DPolygon Apply(const vcl::TransformPlan& rPlan,
                                         const basegfx::B2DPolygon& rPoly);
-VCL_DLLPUBLIC basegfx::B2DPolyPolygon Apply(const TransformPlan& rPlan,
+VCL_DLLPUBLIC basegfx::B2DPolyPolygon Apply(const vcl::TransformPlan& rPlan,
                                             const basegfx::B2DPolyPolygon& rPolyPoly);
-VCL_DLLPUBLIC basegfx::B2DRange Apply(const TransformPlan& rPlan, const basegfx::B2DRange& rRange);
+VCL_DLLPUBLIC basegfx::B2DRange Apply(const vcl::TransformPlan& rPlan,
+                                      const basegfx::B2DRange& rRange);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
+
+// ========================================================================
+// Inline execution adapter (Must be defined AFTER Apply declarations)
+// ========================================================================
+namespace vcl
+{
+template <typename T> inline auto TransformPlan::apply(const T& rGeom) const
+{
+    return vcl::GeometryAdapter::Apply(*this, rGeom);
+}
+}
