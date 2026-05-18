@@ -181,6 +181,10 @@ using DeviceRect = TypedGeom<SpaceDevice, tools::Rectangle>;
 using LogicPolygon = TypedGeom<SpaceLogic, tools::Polygon>;
 using ViewPolygon = TypedGeom<SpaceView, tools::Polygon>;
 using WindowPolygon = TypedGeom<SpaceWindow, tools::Polygon>;
+using LogicPolyPolygon = TypedGeom<SpaceLogic, tools::PolyPolygon>;
+using ViewPolyPolygon = TypedGeom<SpaceView, tools::PolyPolygon>;
+using WindowPolyPolygon = TypedGeom<SpaceWindow, tools::PolyPolygon>;
+using DevicePolyPolygon = TypedGeom<SpaceDevice, tools::PolyPolygon>;
 using DevicePolygon = TypedGeom<SpaceDevice, tools::Polygon>;
 
 // PolyPolygon

@@ -226,7 +226,7 @@ void Printer::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     mpMetaFile = nullptr;
 
-    tools::Rectangle       aPolyRect( LogicToWindow( rPolyPoly ).GetBoundRect() );
+    tools::Rectangle       aPolyRect( LogicToWindow( rPolyPoly )->GetBoundRect() );
     const Size      aDPISize( LogicToWindow(Size(1, 1), MapMode(MapUnit::MapInch)) );
     const tools::Long      nBaseExtent = std::max<tools::Long>( basegfx::fround<tools::Long>( aDPISize.Width() / 300. ), 1 );
     tools::Long            nMove;
