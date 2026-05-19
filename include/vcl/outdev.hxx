@@ -1645,6 +1645,13 @@ public:
         return vcl::detail::CoordinateCastTraits<TargetType, SourceType>::cast(*this, rSourceGeom);
     }
 
+    // OVERLOAD: Accept on-the-fly MapMode overrides
+    template <typename TargetType, typename SourceType>
+    SAL_WARN_UNUSED_RESULT auto convertTo(const SourceType& rSourceGeom, const MapMode& rMapModeOverride) const
+    {
+        return vcl::detail::CoordinateCastTraits<TargetType, SourceType>::cast(*this, rSourceGeom, &rMapModeOverride);
+    }
+
     /** Set an offset in pixel
 
         This method offsets every drawing operation that converts its
