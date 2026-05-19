@@ -272,6 +272,34 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionRectilinearCollapsePreventi
                                  aBound.GetHeight());
 }
 
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionCollapsePrevention)
+{
+    CoordinateMapper aMapper;
+    aMapper.SetDPIX(100);
+    aMapper.SetDPIY(100);
+
+    // Force extreme minification: 0.001 scale factor.
+    // A 10x10 logical rect (100 units area) * 0.001 = 0.01 pixel footprint.
+    // This will force the rounding logic to confront 0-pixel dimensions.
+    aMapper.SetMapResolutionScaleX(0.001);
+    aMapper.SetMapResolutionScaleY(0.001);
+
+    vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(10, 10)));
+
+    const auto& rTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
+    vcl::Region aTransformed = rTransform.apply(aRegion);
+
+    CPPUNIT_ASSERT_MESSAGE("Region collapsed to empty during minification!",
+                           !aTransformed.IsEmpty());
+
+    // Verify the footprint clamp (the "nW=1" guard)
+    tools::Rectangle aBound = aTransformed.GetBoundRect();
+    CPPUNIT_ASSERT_MESSAGE("Region width should be clamped to at least 1 pixel",
+                           aBound.GetWidth() >= 1);
+    CPPUNIT_ASSERT_MESSAGE("Region height should be clamped to at least 1 pixel",
+                           aBound.GetHeight() >= 1);
+}
+
 CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionTransformationCoverage)
 {
     CoordinateMapper aMapper;
@@ -508,6 +536,67 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testGhostPixelCollapse)
         "0.4px width must collapse to empty in Legacy Mode to prevent ghost pixels",
         aResult.IsEmpty());
     CPPUNIT_ASSERT_EQUAL(tools::Long(0), aResult.GetWidth());
+}
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testHairlinePreservation)
+{
+    CoordinateMapper aMapper;
+    // Set a scale that would make a 1-unit line mathematically 0.1 pixels.
+    aMapper.SetMapResolutionScaleX(0.1);
+
+    // 1-unit logical line.
+    vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(1, 1)));
+
+    const auto& rTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
+    vcl::Region aTransformed = rTransform.apply(aRegion);
+
+    // The clamp MUST force it to a 1x1 pixel footprint.
+    CPPUNIT_ASSERT_MESSAGE("Hairline collapsed!", !aTransformed.IsEmpty());
+    CPPUNIT_ASSERT_EQUAL(tools::Long(1), aTransformed.GetBoundRect().GetWidth());
+}
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMirroringSymmetry)
+{
+    CoordinateMapper aMapper;
+    // Force a mirror (negative scale)
+    aMapper.SetMapResolutionScaleX(-1.0);
+
+    // A rectangle at (10, 10) with size 20x20
+    tools::Rectangle aRect(Point(10, 10), Size(20, 20));
+
+    const auto& rTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
+    tools::Rectangle aTransformed = rTransform.apply(aRect);
+
+    // The scale includes the custom -1.0 AND the system DPI (e.g., -72 on macOS)
+    const double fScaleX = rTransform.maMatrix.get(0, 0);
+
+    // Under proper AABB sorting with a negative scale, the old Right bound
+    // mathematically becomes the new Left bound.
+    // Logical Right bound = 10 + 20 = 30.
+    tools::Long nExpectedLeft = static_cast<tools::Long>(30.0 * fScaleX);
+    tools::Long nExpectedWidth = static_cast<tools::Long>(20.0 * std::abs(fScaleX));
+
+    CPPUNIT_ASSERT_EQUAL(nExpectedLeft, aTransformed.Left());
+    CPPUNIT_ASSERT_EQUAL(nExpectedWidth, aTransformed.GetWidth());
+}
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testPolicySwitchInvalidation)
+{
+    CoordinateMapper aMapper;
+    Point aLogicPt(100, 100);
+
+    // 1. Test Applied Mode
+    aMapper.SetMapResolutionScaleX(2.0);
+    auto aTransform1 = aMapper.Compile(
+        { CoordinateSpace::Logic, CoordinateSpace::Device, vcl::MappingPolicy::ApplyMapMode });
+    Point aDevPt1 = aTransform1.apply(aLogicPt);
+    CPPUNIT_ASSERT(aDevPt1.X() > 100); // Scale applied
+
+    // 2. Test Ignore Mode (Should be identity/direct)
+    auto aTransform2 = aMapper.Compile(
+        { CoordinateSpace::Logic, CoordinateSpace::Device, vcl::MappingPolicy::IgnoreMapMode });
+    Point aDevPt2 = aTransform2.apply(aLogicPt);
+    CPPUNIT_ASSERT_EQUAL(aLogicPt.X(), aDevPt2.X()); // Identity logic
 }
 
 } // namespace
