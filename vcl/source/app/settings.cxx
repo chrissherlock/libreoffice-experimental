@@ -2111,13 +2111,20 @@ void StyleSettings::SetListBoxPreviewDefaultLogicSize(Size const& rSize)
     mxData->maListBoxPreviewDefaultPixelSize = {}; // recalc
 }
 
+static vcl::WindowSize GetDefaultPreviewSize(const Size& rLogicSize)
+{
+    auto* pDev = Application::GetDefaultDevice();
+    // Uses your trait-based interface
+    return pDev->convertTo<vcl::WindowSize>(
+        vcl::LogicSize(rLogicSize),
+        MapMode(MapUnit::MapAppFont)
+    );
+}
+
 const Size& StyleSettings::GetListBoxPreviewDefaultPixelSize() const
 {
-    if(0 == mxData->maListBoxPreviewDefaultPixelSize.Width() || 0 == mxData->maListBoxPreviewDefaultPixelSize.Height())
-    {
-        mxData->maListBoxPreviewDefaultPixelSize =
-            Application::GetDefaultDevice()->LogicToWindow(mxData->maListBoxPreviewDefaultLogicSize, MapMode(MapUnit::MapAppFont));
-    }
+    if(mxData->maListBoxPreviewDefaultPixelSize.Width() == 0 || mxData->maListBoxPreviewDefaultPixelSize.Height() == 0)
+        mxData->maListBoxPreviewDefaultPixelSize = GetDefaultPreviewSize(mxData->maListBoxPreviewDefaultLogicSize).get();
 
     return mxData->maListBoxPreviewDefaultPixelSize;
 }
