@@ -136,4 +136,52 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testB2DPolygonScale)
     CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0, aDevicePoly->getB2DPoint(1).getY(), 0.001);
 }
 
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapModeOriginShift)
+{
+    VclPtr<VirtualDevice> pDevice = VclPtr<VirtualDevice>::Create();
+    MapMode aOverride(MapUnit::Map100thMM, Point(100, 100), 2.0, 2.0);
+
+    // Construct basegfx::B2DPoint first, then wrap it
+    vcl::LogicB2DPoint aLogicPt(basegfx::B2DPoint(10.0, 10.0));
+
+    // Check your class for the correct pointer/reference member (e.g., m_xDevice)
+    auto aDevicePt = pDevice->convertTo<vcl::DeviceB2DPoint>(aLogicPt, aOverride);
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(120.0, aDevicePt.get().getX(), 0.001);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(120.0, aDevicePt.get().getY(), 0.001);
+}
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testUnifiedRoundTripPrecision)
+{
+    VclPtr<VirtualDevice> pDevice = VclPtr<VirtualDevice>::Create();
+    MapMode aOverride(MapUnit::Map100thMM, Point(50, 50), 1.5, 1.5);
+
+    vcl::LogicB2DPoint aOriginal(basegfx::B2DPoint(20.0, 30.0));
+
+    // Replace pDevice with the actual member name from your class header
+    auto aDevicePt = pDevice->convertTo<vcl::DeviceB2DPoint>(aOriginal, aOverride);
+    auto aResultPt = pDevice->convertTo<vcl::LogicB2DPoint>(aDevicePt, aOverride);
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOriginal.get().getX(), aResultPt.get().getX(), 1e-6);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(aOriginal.get().getY(), aResultPt.get().getY(), 1e-6);
+}
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testComplexPolygonTransform)
+{
+    VclPtr<VirtualDevice> pDevice = VclPtr<VirtualDevice>::Create();
+    MapMode aOverride(MapUnit::Map100thMM, Point(10, 10), 3.0, 3.0);
+
+    basegfx::B2DPolygon aPoly;
+    aPoly.append(basegfx::B2DPoint(0, 0));
+    aPoly.append(basegfx::B2DPoint(10, 10));
+    vcl::LogicB2DPolygon aLogicPoly(aPoly);
+
+    auto aDevicePoly = pDevice->convertTo<vcl::DeviceB2DPolygon>(aLogicPoly, aOverride);
+
+    // aDevicePoly.get() returns the basegfx::B2DPolygon directly.
+    // Use .getB2DPoint(index) on that object.
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(10.0, aDevicePoly.get().getB2DPoint(0).getX(), 0.001);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(40.0, aDevicePoly.get().getB2DPoint(1).getX(), 0.001);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
