@@ -113,6 +113,19 @@ struct SpaceDevice
 {
 };
 
+// Helper to get the first type from a pack
+template <typename... Args> struct first_type;
+
+template <typename T, typename... Rest> struct first_type<T, Rest...>
+{
+    using type = T;
+};
+
+// Concept to check if Args... is exactly one argument of type T
+template <typename T, typename... Args>
+concept IsDirectConstruction
+    = (sizeof...(Args) == 1) && std::same_as<T, std::decay_t<typename first_type<Args...>::type>>;
+
 // The Universal Strongly-Typed Wrapper
 template <typename Space, typename T> struct TypedGeom
 {
@@ -130,7 +143,7 @@ template <typename Space, typename T> struct TypedGeom
 
     // Variadic forwarding constructor
     template <typename... Args>
-    explicit TypedGeom(Args&&... args)
+    requires(!IsDirectConstruction<T, Args...>) explicit TypedGeom(Args&&... args)
         : maData(std::forward<Args>(args)...)
     {
     }
