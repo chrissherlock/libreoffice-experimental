@@ -31,6 +31,7 @@
 #include <sal/log.hxx>
 #include <tools/json_writer.hxx>
 #include <tools/stream.hxx>
+#include <vcl/TransformTypes.hxx>
 
 #define FIXEDLINE_TEXT_BORDER    4
 
@@ -209,7 +210,7 @@ void FixedText::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
 {
     ApplySettings(rDev);
 
-    Point       aPos  =  rDev.LogicToWindow( rPos );
+    Point       aPos  =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
     Size        aSize = GetSizePixel();
     vcl::Font aFont = GetDrawPixelFont(&rDev);
 
@@ -751,7 +752,7 @@ void FixedBitmap::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
 
 void FixedBitmap::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
 {
-    Point       aPos  =  rDev.LogicToWindow( rPos );
+    Point       aPos  =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
     Size        aSize = GetSizePixel();
     tools::Rectangle   aRect( aPos, aSize );
 
@@ -895,7 +896,7 @@ Size FixedImage::GetOptimalSize() const
 
 void FixedImage::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
 {
-    Point       aPos  =  rDev.LogicToWindow( rPos );
+    Point       aPos  =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
     Size        aSize = GetSizePixel();
     tools::Rectangle   aRect( aPos, aSize );
 

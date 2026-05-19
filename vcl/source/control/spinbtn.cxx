@@ -25,6 +25,7 @@
 #include <vcl/vclevent.hxx>
 
 #include <spin.hxx>
+#include <vcl/TransformTypes.hxx>
 
 SpinButton::SpinButton( vcl::Window* pParent, WinBits nStyle )
     : Control(WindowType::SPINBUTTON)
@@ -120,7 +121,7 @@ void SpinButton::Resize()
 
 void SpinButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
-    Point aPos  =  rDev.LogicToWindow(rPos);
+    Point aPos  =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
     Size aSize = GetSizePixel();
 
     auto popIt = rDev.ScopedPush();
