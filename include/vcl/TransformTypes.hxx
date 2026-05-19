@@ -128,6 +128,13 @@ template <typename Space, typename T> struct TypedGeom
     {
     }
 
+    // Variadic forwarding constructor
+    template <typename... Args>
+    explicit TypedGeom(Args&&... args)
+        : maData(std::forward<Args>(args)...)
+    {
+    }
+
     // Allow explicit unwrapping when interfacing with legacy APIs
     const T& get() const { return maData; }
     T& get() { return maData; }
