@@ -1146,7 +1146,7 @@ void ComboBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags 
 {
     GetMainWindow()->ApplySettings(rDev);
 
-    const Point aPos =  rDev.LogicToWindow( rPos );
+    const Point aPos =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
     const Size aSize = GetSizePixel();
     const vcl::Font aFont = GetMainWindow()->GetDrawPixelFont(&rDev);
 
@@ -1453,7 +1453,7 @@ tools::Long ComboBox::GetIndexForPoint( const Point& rPoint, sal_Int32& rPos ) c
         ImplListBoxWindow* rMain = GetMainWindow();
 
         // convert coordinates to ImplListBoxWindow pixel coordinate space
-        Point aConvPoint = LogicToWindow( rPoint );
+        Point aConvPoint = GetOutDev()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPoint)).get();
         const AbsoluteScreenPixelPoint aConvPointAbs = OutputToAbsoluteScreenPixel( aConvPoint );
         aConvPoint = rMain->AbsoluteScreenToOutputPixel( aConvPointAbs );
         aConvPoint = rMain->WindowToLogic( aConvPoint );
