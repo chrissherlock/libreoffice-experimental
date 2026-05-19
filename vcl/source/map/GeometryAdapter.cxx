@@ -98,17 +98,23 @@ VCL_DLLPUBLIC tools::Rectangle Apply(const TransformPlan& rPlan, const tools::Re
         const double fBottom = static_cast<double>(rRect.Bottom() + 1) * rPlan.maMatrix.get(1, 1)
                                + rPlan.maMatrix.get(1, 2);
 
-        // Round to physical pixel indices
+        // Round to physical pixel indices (Standard AABB)
         tools::Long nL = vcl::detail::RoundToLong(std::min(fLeft, fRight));
         tools::Long nT = vcl::detail::RoundToLong(std::min(fTop, fBottom));
         tools::Long nR = vcl::detail::RoundToLong(std::max(fLeft, fRight)) - 1;
         tools::Long nB = vcl::detail::RoundToLong(std::max(fTop, fBottom)) - 1;
 
         // Hairline & Sub-pixel Boundary Clamp:
-        // Ensure rounding doesn't collapse valid geometry into negative/empty bounds
         if (nR < nL && !rRect.IsWidthEmpty())
             nR = nL;
         if (nB < nT && !rRect.IsHeightEmpty())
+            nB = nT;
+
+        // --- INVARIANT PATCH: Hairline Preservation ---
+        // Force 1-unit logical lines to strictly occupy 1 physical pixel
+        if (rRect.GetWidth() == 1)
+            nR = nL;
+        if (rRect.GetHeight() == 1)
             nB = nT;
 
         tools::Rectangle aRet(nL, nT, nR, nB);
@@ -129,6 +135,12 @@ VCL_DLLPUBLIC tools::Rectangle Apply(const TransformPlan& rPlan, const tools::Re
     if (nR < nL && !rRect.IsWidthEmpty())
         nR = nL;
     if (nB < nT && !rRect.IsHeightEmpty())
+        nB = nT;
+
+    // --- INVARIANT PATCH: Hairline Preservation (Rotation) ---
+    if (rRect.GetWidth() == 1)
+        nR = nL;
+    if (rRect.GetHeight() == 1)
         nB = nT;
 
     tools::Rectangle aRet(nL, nT, nR, nB);
@@ -226,6 +238,16 @@ VCL_DLLPUBLIC vcl::Region Apply(const TransformPlan& rPlan, const vcl::Region& r
     for (const auto& rRect : aRectangles)
     {
         aRegion.Union(Apply(rPlan, rRect));
+    }
+
+    // --- EXTREME FALLBACK: Polygon Region Collapse Prevention ---
+    // If a complex region completely collapses down to nothing during minification,
+    // force it to retain at least a 1x1 physical point footprint to prevent VCL
+    // from triggering empty-viewport crashes (e.g., SwVirtFlyDrawObj bug).
+    if (aRegion.IsEmpty() && !rRegion.IsEmpty())
+    {
+        Point aCenter = Apply(rPlan, rRegion.GetBoundRect().Center());
+        return vcl::Region(tools::Rectangle(aCenter, Size(1, 1)));
     }
 
     return aRegion;
