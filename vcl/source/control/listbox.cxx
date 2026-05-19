@@ -37,6 +37,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <tools/json_writer.hxx>
+#include <vcl/TransformTypes.hxx>
 
 ListBox::ListBox(WindowType eType)
     : Control(eType)
@@ -331,7 +332,7 @@ void ListBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags n
 {
     mpImplLB->GetMainWindow()->ApplySettings(rDev);
 
-    Point aPos =  rDev.LogicToWindow( rPos );
+    Point aPos =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
     Size aSize = GetSizePixel();
     vcl::Font aFont = mpImplLB->GetMainWindow()->GetDrawPixelFont(&rDev);
 
@@ -675,7 +676,7 @@ tools::Long ListBox::GetIndexForPoint( const Point& rPoint, sal_Int32& rPos ) co
         ImplListBoxWindow* rMain = mpImplLB->GetMainWindow();
 
         // Convert coordinates to ImplListBoxWindow pixel coordinate space
-        Point aConvPoint = LogicToWindow( rPoint );
+        Point aConvPoint = GetOutDev()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPoint)).get();
         AbsoluteScreenPixelPoint aConvPointAbs = OutputToAbsoluteScreenPixel( aConvPoint );
         aConvPoint = rMain->AbsoluteScreenToOutputPixel( aConvPointAbs );
         aConvPoint = rMain->WindowToLogic( aConvPoint );
@@ -688,7 +689,7 @@ tools::Long ListBox::GetIndexForPoint( const Point& rPoint, sal_Int32& rPos ) co
             if( mpImplWin && mpImplWin->IsReallyVisible() )
             {
                 // Convert to impl window pixel coordinates
-                aConvPoint = LogicToWindow( rPoint );
+                aConvPoint = GetOutDev()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPoint)).get();
                 aConvPointAbs = OutputToAbsoluteScreenPixel( aConvPoint );
                 aConvPoint = mpImplWin->AbsoluteScreenToOutputPixel( aConvPointAbs );
 

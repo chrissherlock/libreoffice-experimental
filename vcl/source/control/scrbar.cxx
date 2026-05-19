@@ -49,6 +49,7 @@
 */
 
 #include "thumbpos.hxx"
+#include <vcl/TransformTypes.hxx>
 
 #define SCRBAR_DRAW_BTN1            (sal_uInt16(0x0001))
 #define SCRBAR_DRAW_BTN2            (sal_uInt16(0x0002))
@@ -380,7 +381,7 @@ void ScrollBar::ImplCalc( bool bUpdate )
 
 void ScrollBar::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
-    Point aPos  =  rDev.LogicToWindow( rPos );
+    Point aPos  =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
 
     auto popIt = rDev.ScopedPush();
     rDev.SetMapMode();

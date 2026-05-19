@@ -21,6 +21,7 @@
 
 #include <com/sun/star/awt/ImageScaleMode.hpp>
 #include <osl/diagnose.h>
+#include <vcl/TransformTypes.hxx>
 
 namespace ImageScaleMode = css::awt::ImageScaleMode;
 
@@ -147,7 +148,7 @@ void ImageControl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
 
 void ImageControl::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
 {
-    const Point     aPos  =  rDev.LogicToWindow( rPos );
+    const Point     aPos  =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
     const Size      aSize = GetSizePixel();
     tools::Rectangle aRect( aPos, aSize );
 
