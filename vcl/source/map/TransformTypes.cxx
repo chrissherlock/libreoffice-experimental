@@ -205,6 +205,159 @@ vcl::LogicRegion CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>::cast
             .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
             .apply(rSrc.get()));
 }
+
+// BASEGFX B2DPOINT
+vcl::DeviceB2DPoint CoordinateCastTraits<vcl::DeviceB2DPoint, vcl::LogicB2DPoint>::cast(
+    const OutputDevice& rDev, const vcl::LogicB2DPoint& rSrc, const MapMode* pMap)
+{
+    const auto& rMapper = rDev.GetMapper();
+    basegfx::B2DHomMatrix aMat;
+    if (pMap)
+        aMat = rMapper.GetViewTransformation(
+            rMapper.ResolveMap(MapMode(), *pMap, rDev.GetMappingPolicy()));
+    else
+        aMat = rMapper.GetLogicToDeviceMatrix(rDev.GetMappingPolicy());
+
+    return vcl::DeviceB2DPoint(aMat * rSrc.get());
+}
+
+vcl::LogicB2DPoint CoordinateCastTraits<vcl::LogicB2DPoint, vcl::DeviceB2DPoint>::cast(
+    const OutputDevice& rDev, const vcl::DeviceB2DPoint& rSrc, const MapMode* pMap)
+{
+    const auto& rMapper = rDev.GetMapper();
+    basegfx::B2DHomMatrix aMat;
+    if (pMap)
+        aMat = rMapper.GetViewTransformation(
+            rMapper.ResolveMap(MapMode(), *pMap, rDev.GetMappingPolicy()));
+    else
+        aMat = rMapper.GetLogicToDeviceMatrix(rDev.GetMappingPolicy());
+
+    aMat.invert();
+
+    return vcl::LogicB2DPoint(aMat * rSrc.get());
+}
+
+// BASEGFX B2DPOLYGON
+vcl::DeviceB2DPolygon CoordinateCastTraits<vcl::DeviceB2DPolygon, vcl::LogicB2DPolygon>::cast(
+    const OutputDevice& rDev, const vcl::LogicB2DPolygon& rSrc, const MapMode* pMap)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    // If pMap is null, we use the device's current MapMode;
+    // otherwise, we resolve the override.
+    MapMode aMode = pMap ? *pMap : rDev.GetMapMode();
+
+    // Obtain the transformation matrix for this specific mode
+    basegfx::B2DHomMatrix aMat = rMapper.GetViewTransformation(
+        rMapper.ResolveMap(MapMode(), aMode, rDev.GetMappingPolicy()));
+
+    basegfx::B2DPolygon aResult(rSrc.get());
+    aResult.transform(aMat);
+    return vcl::DeviceB2DPolygon(aResult);
+}
+
+vcl::LogicB2DPolygon CoordinateCastTraits<vcl::LogicB2DPolygon, vcl::DeviceB2DPolygon>::cast(
+    const OutputDevice& rDev, const vcl::DeviceB2DPolygon& rSrc, const MapMode* pMap)
+{
+    const auto& rMapper = rDev.GetMapper();
+    basegfx::B2DHomMatrix aMat;
+    if (pMap)
+        aMat = rMapper.GetViewTransformation(
+            rMapper.ResolveMap(MapMode(), *pMap, rDev.GetMappingPolicy()));
+    else
+        aMat = rMapper.GetLogicToDeviceMatrix(rDev.GetMappingPolicy());
+
+    aMat.invert();
+
+    // Use transform() instead of operator*
+    basegfx::B2DPolygon aResult(rSrc.get());
+    aResult.transform(aMat);
+    return vcl::LogicB2DPolygon(aResult);
+}
+
+// BASEGFX B2DRANGE
+vcl::DeviceB2DRange CoordinateCastTraits<vcl::DeviceB2DRange, vcl::LogicB2DRange>::cast(
+    const OutputDevice& rDev, const vcl::LogicB2DRange& rSrc, const MapMode* pMap)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    // Prioritize the override MapMode if provided, otherwise use the device's current state
+    MapMode aMode = pMap ? *pMap : rDev.GetMapMode();
+
+    // Obtain the transformation matrix for this mode
+    // We use ResolveMap to bridge the logic and device spaces correctly
+    basegfx::B2DHomMatrix aMat = rMapper.GetViewTransformation(
+        rMapper.ResolveMap(MapMode(), aMode, rDev.GetMappingPolicy()));
+
+    // Ranges require the transform() method for batch-processing the bounds
+    basegfx::B2DRange aResult(rSrc.get());
+    aResult.transform(aMat);
+
+    return vcl::DeviceB2DRange(aResult);
+}
+
+vcl::LogicB2DRange CoordinateCastTraits<vcl::LogicB2DRange, vcl::DeviceB2DRange>::cast(
+    const OutputDevice& rDev, const vcl::DeviceB2DRange& rSrc, const MapMode* pMap)
+{
+    const auto& rMapper = rDev.GetMapper();
+    basegfx::B2DHomMatrix aMat;
+
+    if (pMap)
+        aMat = rMapper.GetViewTransformation(
+            rMapper.ResolveMap(MapMode(), *pMap, rDev.GetMappingPolicy()));
+    else
+        aMat = rMapper.GetLogicToDeviceMatrix(rDev.GetMappingPolicy());
+
+    aMat.invert();
+
+    // Ranges require the transform() method
+    basegfx::B2DRange aResult(rSrc.get());
+    aResult.transform(aMat);
+    return vcl::LogicB2DRange(aResult);
+}
+
+// BASEGFX B2DPOLYPOLYGON
+vcl::DeviceB2DPolyPolygon
+CoordinateCastTraits<vcl::DeviceB2DPolyPolygon, vcl::LogicB2DPolyPolygon>::cast(
+    const OutputDevice& rDev, const vcl::LogicB2DPolyPolygon& rSrc, const MapMode* pMap)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    // Fallback to the device's map mode if pMap is nullptr
+    MapMode aMode = pMap ? *pMap : rDev.GetMapMode();
+
+    // Obtain the transformation matrix for this mode
+    basegfx::B2DHomMatrix aMat = rMapper.GetViewTransformation(
+        rMapper.ResolveMap(MapMode(), aMode, rDev.GetMappingPolicy()));
+
+    // PolyPolygons require the transform() method
+    basegfx::B2DPolyPolygon aResult(rSrc.get());
+    aResult.transform(aMat);
+
+    return vcl::DeviceB2DPolyPolygon(aResult);
+}
+
+vcl::LogicB2DPolyPolygon
+CoordinateCastTraits<vcl::LogicB2DPolyPolygon, vcl::DeviceB2DPolyPolygon>::cast(
+    const OutputDevice& rDev, const vcl::DeviceB2DPolyPolygon& rSrc, const MapMode* pMap)
+{
+    const auto& rMapper = rDev.GetMapper();
+    basegfx::B2DHomMatrix aMat;
+
+    if (pMap)
+        aMat = rMapper.GetViewTransformation(
+            rMapper.ResolveMap(MapMode(), *pMap, rDev.GetMappingPolicy()));
+    else
+        aMat = rMapper.GetLogicToDeviceMatrix(rDev.GetMappingPolicy());
+
+    aMat.invert();
+
+    // PolyPolygons require the transform() method
+    basegfx::B2DPolyPolygon aResult(rSrc.get());
+    aResult.transform(aMat);
+    return vcl::LogicB2DPolyPolygon(aResult);
+}
+
 } // namespace vcl::detail
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

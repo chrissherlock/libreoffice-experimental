@@ -61,11 +61,9 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testDynamicMapModeOverride)
 {
     VclPtr<VirtualDevice> pDevice = VclPtr<VirtualDevice>::Create();
 
-    // 1. Establish a base device state
     MapMode aBaseMode(MapUnit::Map100thMM);
     pDevice->SetMapMode(aBaseMode);
 
-    // 2. Define an override state (different unit, with scaling and translation)
     MapMode aOverrideMode(MapUnit::MapTwip, Point(50, 50), 2.0, 2.0);
 
     vcl::LogicPoint aLogicPt(Point(1000, 1000));
@@ -106,6 +104,36 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCompileTimeGatekeepingDocumentati
 
     CPPUNIT_ASSERT_MESSAGE("Traits protection gatekeeping verified compile-time pure structure.",
                            true);
+}
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testB2DPointRoundTrip)
+{
+    VclPtr<VirtualDevice> pDevice = VclPtr<VirtualDevice>::Create();
+    vcl::LogicB2DPoint aLogic(basegfx::B2DPoint(100.0, 200.0));
+
+    auto aDevice = pDevice->convertTo<vcl::DeviceB2DPoint>(aLogic);
+    auto aRoundTrip = pDevice->convertTo<vcl::LogicB2DPoint>(aDevice);
+
+    CPPUNIT_ASSERT_MESSAGE("Logic point should survive round-trip to Device space",
+                           basegfx::fTools::equal(aLogic->getX(), aRoundTrip->getX())
+                               && basegfx::fTools::equal(aLogic->getY(), aRoundTrip->getY()));
+}
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testB2DPolygonScale)
+{
+    VclPtr<VirtualDevice> pDevice = VclPtr<VirtualDevice>::Create();
+
+    basegfx::B2DPolygon aPoly;
+    aPoly.append(basegfx::B2DPoint(0, 0));
+    aPoly.append(basegfx::B2DPoint(10, 10));
+
+    MapMode aOverride(MapUnit::Map100thMM, Point(0, 0), 2.0, 2.0);
+
+    vcl::LogicB2DPolygon aLogicPoly(aPoly);
+    auto aDevicePoly = pDevice->convertTo<vcl::DeviceB2DPolygon>(aLogicPoly, aOverride);
+
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0, aDevicePoly->getB2DPoint(1).getX(), 0.001);
+    CPPUNIT_ASSERT_DOUBLES_EQUAL(20.0, aDevicePoly->getB2DPoint(1).getY(), 0.001);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

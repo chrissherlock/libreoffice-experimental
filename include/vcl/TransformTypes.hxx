@@ -195,13 +195,25 @@ using LogicRegion = TypedGeom<SpaceLogic, vcl::Region>;
 using ViewRegion = TypedGeom<SpaceView, vcl::Region>;
 using WindowRegion = TypedGeom<SpaceWindow, vcl::Region>;
 using DeviceRegion = TypedGeom<SpaceDevice, vcl::Region>;
-} // namespace vcl
 
+using LogicB2DPoint = TypedGeom<SpaceLogic, basegfx::B2DPoint>;
+using DeviceB2DPoint = TypedGeom<SpaceDevice, basegfx::B2DPoint>;
+
+using LogicB2DRange = TypedGeom<SpaceLogic, basegfx::B2DRange>;
+using DeviceB2DRange = TypedGeom<SpaceDevice, basegfx::B2DRange>;
+
+using LogicB2DPolygon = TypedGeom<SpaceLogic, basegfx::B2DPolygon>;
+using DeviceB2DPolygon = TypedGeom<SpaceDevice, basegfx::B2DPolygon>;
+
+using LogicB2DPolyPolygon = TypedGeom<SpaceLogic, basegfx::B2DPolyPolygon>;
+using DeviceB2DPolyPolygon = TypedGeom<SpaceDevice, basegfx::B2DPolyPolygon>;
+
+namespace detail
+{
 // ========================================================================
 // UNIFIED CAST TRAITS REGISTRY (Aligned to Global vcl::detail Scope)
 // ========================================================================
-namespace vcl::detail
-{
+
 // Primary template - triggers a clear error if an unregistered mapping is tried
 template <typename Target, typename Source> struct CoordinateCastTraits
 {
@@ -215,6 +227,7 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowPoint, vcl::Log
     static vcl::WindowPoint cast(const OutputDevice& rDev, const vcl::LogicPoint& rSrc,
                                  const MapMode* pMapOverride = nullptr);
 };
+
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPoint, vcl::WindowPoint>
 {
     static vcl::LogicPoint cast(const OutputDevice& rDev, const vcl::WindowPoint& rSrc,
@@ -227,6 +240,7 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowSize, vcl::Logi
     static vcl::WindowSize cast(const OutputDevice& rDev, const vcl::LogicSize& rSrc,
                                 const MapMode* pMapOverride = nullptr);
 };
+
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicSize, vcl::WindowSize>
 {
     static vcl::LogicSize cast(const OutputDevice& rDev, const vcl::WindowSize& rSrc,
@@ -239,6 +253,7 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRect, vcl::Logi
     static vcl::WindowRect cast(const OutputDevice& rDev, const vcl::LogicRect& rSrc,
                                 const MapMode* pMapOverride = nullptr);
 };
+
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRect, vcl::WindowRect>
 {
     static vcl::LogicRect cast(const OutputDevice& rDev, const vcl::WindowRect& rSrc,
@@ -251,6 +266,7 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowPolygon, vcl::L
     static vcl::WindowPolygon cast(const OutputDevice& rDev, const vcl::LogicPolygon& rSrc,
                                    const MapMode* pMapOverride = nullptr);
 };
+
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPolygon, vcl::WindowPolygon>
 {
     static vcl::LogicPolygon cast(const OutputDevice& rDev, const vcl::WindowPolygon& rSrc,
@@ -263,6 +279,7 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowPolyPolygon, vc
     static vcl::WindowPolyPolygon cast(const OutputDevice& rDev, const vcl::LogicPolyPolygon& rSrc,
                                        const MapMode* pMapOverride = nullptr);
 };
+
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPolyPolygon, vcl::WindowPolyPolygon>
 {
     static vcl::LogicPolyPolygon cast(const OutputDevice& rDev, const vcl::WindowPolyPolygon& rSrc,
@@ -275,11 +292,69 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRegion, vcl::Lo
     static vcl::WindowRegion cast(const OutputDevice& rDev, const vcl::LogicRegion& rSrc,
                                   const MapMode* pMapOverride = nullptr);
 };
+
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>
 {
     static vcl::LogicRegion cast(const OutputDevice& rDev, const vcl::WindowRegion& rSrc,
                                  const MapMode* pMapOverride = nullptr);
 };
-} // namespace vcl::detail
+
+// Basegfx Points (Logic <-> Device)
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::DeviceB2DPoint, vcl::LogicB2DPoint>
+{
+    static vcl::DeviceB2DPoint cast(const OutputDevice& rDev, const vcl::LogicB2DPoint& rSrc,
+                                    const MapMode* pMapOverride = nullptr);
+};
+
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicB2DPoint, vcl::DeviceB2DPoint>
+{
+    static vcl::LogicB2DPoint cast(const OutputDevice& rDev, const vcl::DeviceB2DPoint& rSrc,
+                                   const MapMode* pMapOverride = nullptr);
+};
+
+// Basegfx Ranges (Logic <-> Device)
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::DeviceB2DRange, vcl::LogicB2DRange>
+{
+    static vcl::DeviceB2DRange cast(const OutputDevice& rDev, const vcl::LogicB2DRange& rSrc,
+                                    const MapMode* pMapOverride = nullptr);
+};
+
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicB2DRange, vcl::DeviceB2DRange>
+{
+    static vcl::LogicB2DRange cast(const OutputDevice& rDev, const vcl::DeviceB2DRange& rSrc,
+                                   const MapMode* pMapOverride = nullptr);
+};
+
+// Basegfx Polygons (Logic <-> Device)
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::DeviceB2DPolygon, vcl::LogicB2DPolygon>
+{
+    static vcl::DeviceB2DPolygon cast(const OutputDevice& rDev, const vcl::LogicB2DPolygon& rSrc,
+                                      const MapMode* pMapOverride = nullptr);
+};
+
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicB2DPolygon, vcl::DeviceB2DPolygon>
+{
+    static vcl::LogicB2DPolygon cast(const OutputDevice& rDev, const vcl::DeviceB2DPolygon& rSrc,
+                                     const MapMode* pMapOverride = nullptr);
+};
+
+// Basegfx PolyPolygons (Logic <-> Device)
+template <>
+struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::DeviceB2DPolyPolygon, vcl::LogicB2DPolyPolygon>
+{
+    static vcl::DeviceB2DPolyPolygon cast(const OutputDevice& rDev,
+                                          const vcl::LogicB2DPolyPolygon& rSrc,
+                                          const MapMode* pMapOverride = nullptr);
+};
+
+template <>
+struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicB2DPolyPolygon, vcl::DeviceB2DPolyPolygon>
+{
+    static vcl::LogicB2DPolyPolygon cast(const OutputDevice& rDev,
+                                         const vcl::DeviceB2DPolyPolygon& rSrc,
+                                         const MapMode* pMapOverride = nullptr);
+};
+} // namespace vcl::details
+} // namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
