@@ -30,7 +30,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testUnifiedPointRoundTrip)
     vcl::LogicPoint aOriginalLogic(Point(50, 50));
 
     // Express transformations like a natural left-to-right monadic pipeline!
-    // LogicPoint -> WindowPoint -> LogicPoint
+    // Notice how we NO LONGER need .get() to extract the value!
     vcl::WindowPoint aWindowPt = pDevice->convertTo<vcl::WindowPoint>(aOriginalLogic);
     vcl::LogicPoint aReturnedLogic = pDevice->convertTo<vcl::LogicPoint>(aWindowPt);
 
@@ -44,17 +44,49 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testUnifiedRectRoundTrip)
 {
     VclPtr<VirtualDevice> pDevice = VclPtr<VirtualDevice>::Create();
 
-    // Use MapPixel so the base conversion ratio is exactly 1:1 before our 2.0 scale applies!
+    // Use MapPixel so the base conversion ratio is exactly 1:1 before our 2.0 scale applies,
+    // avoiding the Continuous-to-Discrete sub-pixel truncation trap.
     MapMode aMapMode(MapUnit::MapPixel, Point(100, 100), 2.0, 2.0);
     pDevice->SetMapMode(aMapMode);
 
     vcl::LogicRect aOriginalRect(tools::Rectangle(10, 10, 500, 500));
 
-    // Clean, self-documenting syntax replaces clunky MemberName selectors
     vcl::WindowRect aWindowRect = pDevice->convertTo<vcl::WindowRect>(aOriginalRect);
     vcl::LogicRect aReturnedRect = pDevice->convertTo<vcl::LogicRect>(aWindowRect);
 
     CPPUNIT_ASSERT_EQUAL(aOriginalRect.get(), aReturnedRect.get());
+}
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testDynamicMapModeOverride)
+{
+    VclPtr<VirtualDevice> pDevice = VclPtr<VirtualDevice>::Create();
+
+    // 1. Establish a base device state
+    MapMode aBaseMode(MapUnit::Map100thMM);
+    pDevice->SetMapMode(aBaseMode);
+
+    // 2. Define an override state (different unit, with scaling and translation)
+    MapMode aOverrideMode(MapUnit::MapTwip, Point(50, 50), 2.0, 2.0);
+
+    vcl::LogicPoint aLogicPt(Point(1000, 1000));
+
+    // Route A: Use the device's internal MapMode
+    vcl::WindowPoint aBaseResult = pDevice->convertTo<vcl::WindowPoint>(aLogicPt);
+
+    // Route B: Inject the override MapMode
+    vcl::WindowPoint aOverrideResult
+        = pDevice->convertTo<vcl::WindowPoint>(aLogicPt, aOverrideMode);
+
+    // Assert that the override successfully bypassed the device state
+    CPPUNIT_ASSERT_MESSAGE("Dynamic MapMode override was ignored by the Affine Mapper!",
+                           aBaseResult.get() != aOverrideResult.get());
+
+    // Assert that round-tripping with the override works flawlessly
+    vcl::LogicPoint aRoundTrip
+        = pDevice->convertTo<vcl::LogicPoint>(aOverrideResult, aOverrideMode);
+
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Round-trip failed while using MapMode override!",
+                                 aLogicPt.get().X(), aRoundTrip.get().X());
 }
 
 CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCompileTimeGatekeepingDocumentation)
