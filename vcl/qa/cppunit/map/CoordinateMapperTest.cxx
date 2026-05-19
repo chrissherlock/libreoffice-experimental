@@ -265,6 +265,34 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionRectilinearCollapsePreventi
                                  aBound.GetHeight());
 }
 
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionCollapsePrevention)
+{
+    CoordinateMapper aMapper;
+    aMapper.SetDPIX(100);
+    aMapper.SetDPIY(100);
+
+    // Force extreme minification: 0.001 scale factor.
+    // A 10x10 logical rect (100 units area) * 0.001 = 0.01 pixel footprint.
+    // This will force the rounding logic to confront 0-pixel dimensions.
+    aMapper.SetMapResolutionScaleX(0.001);
+    aMapper.SetMapResolutionScaleY(0.001);
+
+    vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(10, 10)));
+
+    const auto& rTransform = aMapper.Compile(true);
+    vcl::Region aTransformed = rTransform.Apply(aRegion);
+
+    CPPUNIT_ASSERT_MESSAGE("Region collapsed to empty during minification!",
+                           !aTransformed.IsEmpty());
+
+    // Verify the footprint clamp (the "nW=1" guard)
+    tools::Rectangle aBound = aTransformed.GetBoundRect();
+    CPPUNIT_ASSERT_MESSAGE("Region width should be clamped to at least 1 pixel",
+                           aBound.GetWidth() >= 1);
+    CPPUNIT_ASSERT_MESSAGE("Region height should be clamped to at least 1 pixel",
+                           aBound.GetHeight() >= 1);
+}
+
 CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionTransformationCoverage)
 {
     CoordinateMapper aMapper;
