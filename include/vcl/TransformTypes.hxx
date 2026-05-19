@@ -20,6 +20,7 @@
 #include <bitset>
 
 class OutputDevice;
+class MapMode;
 
 namespace tools
 {
@@ -211,61 +212,73 @@ template <typename Target, typename Source> struct CoordinateCastTraits
 // Points
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowPoint, vcl::LogicPoint>
 {
-    static vcl::WindowPoint cast(const OutputDevice& rDev, const vcl::LogicPoint& rSrc);
+    static vcl::WindowPoint cast(const OutputDevice& rDev, const vcl::LogicPoint& rSrc,
+                                 const MapMode* pMapOverride = nullptr);
 };
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPoint, vcl::WindowPoint>
 {
-    static vcl::LogicPoint cast(const OutputDevice& rDev, const vcl::WindowPoint& rSrc);
+    static vcl::LogicPoint cast(const OutputDevice& rDev, const vcl::WindowPoint& rSrc,
+                                const MapMode* pMapOverride = nullptr);
 };
 
 // Sizes
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowSize, vcl::LogicSize>
 {
-    static vcl::WindowSize cast(const OutputDevice& rDev, const vcl::LogicSize& rSrc);
+    static vcl::WindowSize cast(const OutputDevice& rDev, const vcl::LogicSize& rSrc,
+                                const MapMode* pMapOverride = nullptr);
 };
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicSize, vcl::WindowSize>
 {
-    static vcl::LogicSize cast(const OutputDevice& rDev, const vcl::WindowSize& rSrc);
+    static vcl::LogicSize cast(const OutputDevice& rDev, const vcl::WindowSize& rSrc,
+                               const MapMode* pMapOverride = nullptr);
 };
 
 // Rectangles
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRect, vcl::LogicRect>
 {
-    static vcl::WindowRect cast(const OutputDevice& rDev, const vcl::LogicRect& rSrc);
+    static vcl::WindowRect cast(const OutputDevice& rDev, const vcl::LogicRect& rSrc,
+                                const MapMode* pMapOverride = nullptr);
 };
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRect, vcl::WindowRect>
 {
-    static vcl::LogicRect cast(const OutputDevice& rDev, const vcl::WindowRect& rSrc);
+    static vcl::LogicRect cast(const OutputDevice& rDev, const vcl::WindowRect& rSrc,
+                               const MapMode* pMapOverride = nullptr);
 };
 
 // Polygons
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowPolygon, vcl::LogicPolygon>
 {
-    static vcl::WindowPolygon cast(const OutputDevice& rDev, const vcl::LogicPolygon& rSrc);
+    static vcl::WindowPolygon cast(const OutputDevice& rDev, const vcl::LogicPolygon& rSrc,
+                                   const MapMode* pMapOverride = nullptr);
 };
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPolygon, vcl::WindowPolygon>
 {
-    static vcl::LogicPolygon cast(const OutputDevice& rDev, const vcl::WindowPolygon& rSrc);
+    static vcl::LogicPolygon cast(const OutputDevice& rDev, const vcl::WindowPolygon& rSrc,
+                                  const MapMode* pMapOverride = nullptr);
 };
 
 // PolyPolygons
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowPolyPolygon, vcl::LogicPolyPolygon>
 {
-    static vcl::WindowPolyPolygon cast(const OutputDevice& rDev, const vcl::LogicPolyPolygon& rSrc);
+    static vcl::WindowPolyPolygon cast(const OutputDevice& rDev, const vcl::LogicPolyPolygon& rSrc,
+                                       const MapMode* pMapOverride = nullptr);
 };
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPolyPolygon, vcl::WindowPolyPolygon>
 {
-    static vcl::LogicPolyPolygon cast(const OutputDevice& rDev, const vcl::WindowPolyPolygon& rSrc);
+    static vcl::LogicPolyPolygon cast(const OutputDevice& rDev, const vcl::WindowPolyPolygon& rSrc,
+                                      const MapMode* pMapOverride = nullptr);
 };
 
 // Regions
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>
 {
-    static vcl::WindowRegion cast(const OutputDevice& rDev, const vcl::LogicRegion& rSrc);
+    static vcl::WindowRegion cast(const OutputDevice& rDev, const vcl::LogicRegion& rSrc,
+                                  const MapMode* pMapOverride = nullptr);
 };
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>
 {
-    static vcl::LogicRegion cast(const OutputDevice& rDev, const vcl::WindowRegion& rSrc);
+    static vcl::LogicRegion cast(const OutputDevice& rDev, const vcl::WindowRegion& rSrc,
+                                 const MapMode* pMapOverride = nullptr);
 };
 } // namespace vcl::detail
 
