@@ -184,4 +184,26 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testComplexPolygonTransform)
     CPPUNIT_ASSERT_DOUBLES_EQUAL(40.0, aDevicePoly.get().getB2DPoint(1).getX(), 0.001);
 }
 
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testConceptLogic)
+{
+    // Compile-time verification of the Concept logic
+    static_assert(vcl::IsDirectConstruction<Size, Size>, "Size(Size) must be direct");
+    static_assert(!vcl::IsDirectConstruction<Size, int, int>, "Size(int, int) must NOT be direct");
+    static_assert(!vcl::IsDirectConstruction<Size, Point>, "Size(Point) must NOT be direct");
+}
+
+CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testConstructorBehavior)
+{
+    // Runtime verification that the constructors resolve as expected
+    Size aSource(20, 20);
+
+    // Tests the direct constructor (using copy/move)
+    vcl::LogicSize aDirect(aSource);
+    CPPUNIT_ASSERT_EQUAL(aSource, aDirect.get());
+
+    // Tests the forwarding constructor (variadic)
+    vcl::LogicSize aForward(20, 20);
+    CPPUNIT_ASSERT_EQUAL(aSource, aForward.get());
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
