@@ -178,7 +178,8 @@ bool Animation::Start(OutputDevice& rOut, const Point& rDestPt, const Size& rDes
         if (itAnimView != maRenderers.end())
         {
             if ((*itAnimView)->getOriginPosition() == rDestPt
-                && (*itAnimView)->getOutSizePix() == rOut.LogicToWindow(rDestSz))
+                && (*itAnimView)->getOutSizePix()
+                       == rOut.convertTo<vcl::WindowSize>(vcl::LogicSize(rDestSz)).get())
             {
                 (*itAnimView)->repaint();
                 differs = false;

@@ -54,6 +54,7 @@
 #include <tools/json_writer.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
+#include <vcl/TransformTypes.hxx>
 
 
 using namespace css;
@@ -1332,7 +1333,7 @@ void PushButton::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangl
 
 void PushButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
-    Point       aPos  =  rDev.LogicToWindow( rPos );
+    Point       aPos  =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
     Size        aSize = GetSizePixel();
     tools::Rectangle   aRect( aPos, aSize );
     vcl::Font aFont = GetDrawPixelFont(&rDev);
@@ -2436,7 +2437,7 @@ void RadioButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFla
     if ( !maImage )
     {
         MapMode     aResMapMode( MapUnit::Map100thMM );
-        Point       aPos  =  rDev.LogicToWindow(rPos);
+        Point       aPos  =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
         Size        aSize = GetSizePixel();
         Size        aImageSize = rDev.LogicToWindow( Size(300, 300), aResMapMode );
         Size        aBrd1Size = rDev.LogicToWindow(Size( 20, 20), aResMapMode );
@@ -3231,7 +3232,7 @@ void CheckBox::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&
 void CheckBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
     MapMode     aResMapMode( MapUnit::Map100thMM );
-    Point       aPos  =  rDev.LogicToWindow( rPos );
+    Point       aPos  =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
     Size        aSize = GetSizePixel();
     Size        aImageSize = rDev.LogicToWindow( Size( 300, 300 ), aResMapMode );
     Size        aBrd1Size = rDev.LogicToWindow( Size( 20, 20 ), aResMapMode );
