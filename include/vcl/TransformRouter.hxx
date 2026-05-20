@@ -14,8 +14,7 @@
 #include <vcl/CoordinateState.hxx>
 #include <vcl/TransformPlan.hxx>
 #include <vcl/TransformTypes.hxx>
-
-#include <TransformCache.hxx>
+#include <vcl/TransformCache.hxx>
 
 namespace vcl
 {
