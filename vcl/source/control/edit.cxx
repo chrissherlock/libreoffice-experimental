@@ -1706,7 +1706,7 @@ void Edit::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFla
 {
     ApplySettings(rDev);
 
-    Point aPos =  rDev.LogicToWindow( rPos );
+    Point aPos = rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get();
     Size aSize = GetSizePixel();
     vcl::Font aFont = GetDrawPixelFont(&rDev);
 
