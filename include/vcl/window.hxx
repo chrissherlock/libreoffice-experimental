@@ -462,6 +462,18 @@ private:
 
 public:
 
+    template <typename TargetType, typename SourceType>
+    auto convertTo(const SourceType& rSource, const MapMode& rMapMode) const
+    {
+        return GetOutDev()->convertTo<TargetType>(rSource, rMapMode);
+    }
+
+    template <typename TargetType, typename SourceType>
+    auto convertTo(const SourceType& rSource) const
+    {
+        return GetOutDev()->convertTo<TargetType>(rSource);
+    }
+
     DECL_DLLPRIVATE_LINK( ImplHandlePaintHdl, Timer*, void );
     DECL_DLLPRIVATE_LINK( ImplGenerateMouseMoveHdl, void*, void );
     DECL_DLLPRIVATE_LINK( ImplTrackTimerHdl, Timer*, void );
