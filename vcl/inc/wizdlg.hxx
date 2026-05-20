@@ -63,7 +63,7 @@ namespace vcl
         <code>n2</code>, which share at least the first <code>k</code> states (where <code>k</code>
         is at least 1), and an arbitrary number of other states.
     */
-    class RoadmapWizard final : public Dialog
+    class VCL_DLLPUBLIC RoadmapWizard final : public Dialog
     {
     private:
         Idle                    maWizardLayoutIdle;
