@@ -198,8 +198,15 @@ public:
 void RoadmapImpl::initItemSize()
 {
     Size aLabelSize( m_rAntiImpl.GetOutputSizePixel() );
-    aLabelSize.setHeight( m_rAntiImpl.LogicToWindow(Size(0, LABELBASEMAPHEIGHT), MapMode(MapUnit::MapAppFont)).Height() );
-    aLabelSize.AdjustWidth( -(m_rAntiImpl.LogicToWindow(Size(2 * ROADMAP_INDENT_X, 0), MapMode(MapUnit::MapAppFont)).Width()) );
+
+    MapMode aAppFontMode(MapUnit::MapAppFont);
+
+    tools::Long nHeight = m_rAntiImpl.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, LABELBASEMAPHEIGHT)), aAppFontMode).get().Height();
+    aLabelSize.setHeight(nHeight);
+
+    tools::Long nIndentWidth = m_rAntiImpl.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(2 * ROADMAP_INDENT_X, 0)), aAppFontMode).get().Width();
+    aLabelSize.AdjustWidth(-nIndentWidth);
+
     m_aItemSizePixel = aLabelSize;
 }
 
@@ -742,7 +749,8 @@ void RoadmapItem::SetPosition(RoadmapItem const * _pOldItem)
     Point aIDPos;
     if ( _pOldItem == nullptr )
     {
-        aIDPos = mpID->LogicToWindow(Point(ROADMAP_INDENT_X, ROADMAP_INDENT_Y), MapMode(MapUnit::MapAppFont));
+        vcl::LogicPoint aLogicPos(Point(ROADMAP_INDENT_X, ROADMAP_INDENT_Y));
+        aIDPos = mpID->convertTo<vcl::WindowPoint>(aLogicPos, MapMode(MapUnit::MapAppFont)).get();
     }
     else
     {
@@ -750,7 +758,9 @@ void RoadmapItem::SetPosition(RoadmapItem const * _pOldItem)
 
         aIDPos = _pOldItem->mpID->GetPosPixel();
         aIDPos.AdjustY(aOldSize.Height() );
-        aIDPos.AdjustY(mpID->GetParent()->LogicToWindow( Size( 0, ROADMAP_ITEM_DISTANCE_Y ) ).Height() );
+
+        vcl::WindowSize aDistanceSize = mpID->GetParent()->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, ROADMAP_ITEM_DISTANCE_Y)));
+        aIDPos.AdjustY(aDistanceSize->Height());
     }
     mpID->SetPosPixel( aIDPos );
 
