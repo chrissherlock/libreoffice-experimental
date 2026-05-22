@@ -960,7 +960,7 @@ void ScrollBar::MouseButtonDown( const MouseEvent& rMEvt )
         MapMode aMapMode = GetMapMode();
         aMapMode.SetOrigin(Point(0, 0));
         SetMapMode(aMapMode);
-        aPosPixel = LogicToWindow(rMEvt.GetPosPixel());
+        aPosPixel = convertTo<vcl::WindowPoint>(vcl::LogicPoint(rMEvt.GetPosPixel()));
     }
     const Point&        rMousePos = (GetMapMode().GetMapUnit() != MapUnit::MapTwip ? rMEvt.GetPosPixel() : aPosPixel);
     StartTrackingFlags  nTrackFlags = StartTrackingFlags::NONE;
@@ -1116,7 +1116,7 @@ void ScrollBar::Tracking( const TrackingEvent& rTEvt )
             MapMode aMapMode = GetMapMode();
             aMapMode.SetOrigin(Point(0, 0));
             SetMapMode(aMapMode);
-            aPosPixel = LogicToWindow(rTEvt.GetMouseEvent().GetPosPixel());
+            aPosPixel = convertTo<vcl::WindowPoint>(vcl::LogicPoint(rTEvt.GetMouseEvent().GetPosPixel()));
         }
         const Point rMousePos = (GetMapMode().GetMapUnit() != MapUnit::MapTwip ? rTEvt.GetMouseEvent().GetPosPixel() : aPosPixel);
 

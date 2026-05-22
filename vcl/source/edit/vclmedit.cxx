@@ -1281,7 +1281,7 @@ void VclMultiLineEdit::Draw(OutputDevice& rDev, const Point& rPos, SystemTextCol
 {
     ImplInitSettings(true);
 
-    Point aPos = rDev.LogicToWindow( rPos );
+    Point aPos =  rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos ));
     Size aSize = GetSizePixel();
 
     vcl::Font aFont = pImpVclMEdit->GetTextWindow()->GetDrawPixelFont(&rDev);
