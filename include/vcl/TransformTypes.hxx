@@ -129,6 +129,9 @@ concept IsDirectConstruction
 // The Universal Strongly-Typed Wrapper
 template <typename Space, typename T> struct TypedGeom
 {
+    using space_type = Space;
+    using value_type = T;
+
     T maData;
 
     // Explicit constructor prevents accidental implicit conversions
@@ -179,7 +182,9 @@ template <typename Space, typename T> struct TypedGeom
         return TypedGeom<Space, ReturnType>(f(maData));
     }
 
-    template <typename Func> constexpr auto and_then(Func&& f) const
+    template <typename Func>
+    constexpr auto and_then(Func&& f) const requires
+        std::same_as<Space, typename std::invoke_result_t<Func, const T&>::space_type>
     {
         return std::invoke(std::forward<Func>(f), maData);
     }
