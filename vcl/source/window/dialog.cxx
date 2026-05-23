@@ -1363,7 +1363,7 @@ void Dialog::GetDrawWindowBorder( sal_Int32& rLeftBorder, sal_Int32& rTopBorder,
 
 void Dialog::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
 {
-    Point aPos =  rDev.LogicToWindow( rPos );
+    const auto aPos = rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos), rDev.GetMapMode());
     Size aSize = GetSizePixel();
 
     Wallpaper aWallpaper = GetBackground();
@@ -1375,22 +1375,22 @@ void Dialog::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
     rDev.SetLineColor();
 
     if ( aWallpaper.IsBitmap() )
-        rDev.DrawBitmap(aPos, aSize, aWallpaper.GetBitmap());
+        rDev.DrawBitmap(aPos.get(), aSize, aWallpaper.GetBitmap());
     else
     {
-        rDev.SetFillColor(aWallpaper.GetColor());
-        rDev.DrawRect(tools::Rectangle(aPos, aSize));
+        rDev.SetFillColor( aWallpaper.GetColor() );
+        rDev.DrawRect(tools::Rectangle(aPos.get(), aSize));
     }
 
     if (!( GetStyle() & WB_NOBORDER ))
     {
         ScopedVclPtrInstance< ImplBorderWindow > aImplWin( this, WB_BORDER|WB_STDWORK, BorderWindowStyle::Overlap );
         aImplWin->SetText( GetText() );
-        aImplWin->setPosSizePixel( aPos.X(), aPos.Y(), aSize.Width(), aSize.Height() );
+        aImplWin->setPosSizePixel(aPos->X(), aPos->Y(), aSize.Width(), aSize.Height());
         aImplWin->SetDisplayActive( true );
         aImplWin->InitView();
 
-        aImplWin->Draw(&rDev, aPos);
+        aImplWin->Draw(&rDev, aPos.get());
     }
 }
 
