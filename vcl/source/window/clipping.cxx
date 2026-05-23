@@ -96,8 +96,8 @@ void Window::ExpandPaintClipRegion( const vcl::Region& rRegion )
     if( !mpWindowImpl->mpPaintRegion )
         return;
 
-    vcl::Region aPixRegion = LogicToWindow( rRegion );
-    vcl::Region aDevPixRegion = GetOutDev()->GetMapper().ViewToDevice( aPixRegion );
+    WindowRegion aPixRegion(rRegion);
+    vcl::Region aDevPixRegion = GetOutDev()->GetMapper().ViewToDevice(aPixRegion.get());
 
     vcl::Region aWinChildRegion = ImplGetWinChildClipRegion();
     // only this region is in frame coordinates, so re-mirror it
@@ -155,7 +155,7 @@ void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)
     const vcl::Region aPaintRgn(mxOwnerWindow->GetPaintRegion());
 
     if (!aPaintRgn.IsNull())
-        rDstRect.Intersection(LogicToWindow(aPaintRgn.GetBoundRect()));
+        rDstRect.Intersection(convertTo<vcl::WindowRect>(vcl::LogicRect(aPaintRgn.GetBoundRect()), GetMapMode()).get());
 }
 
 void Window::EnableClipSiblings( bool bClipSiblings )
@@ -677,19 +677,21 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
     if ( mxOwnerWindow->mpWindowImpl->mpPaintRegion )
     {
         vcl::Region      aClip( *mxOwnerWindow->mpWindowImpl->mpPaintRegion );
-        const Point aPixPos( LogicToWindow( rPos ) );
-
         aClip.Move( -GetDeviceOriginX(), -GetDeviceOriginY() );
-        aClip.Intersect( tools::Rectangle( aPixPos, LogicToWindow( rSize ) ) );
+
+        const WindowPoint aPixPos(rPos);
+        const auto boundRect = convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle(rPos, rSize)), GetMapMode());
+
+        aClip.Intersect(boundRect.get());
 
         if ( !aClip.IsEmpty() )
         {
             const vcl::Region    aOldClip( rSaveDevice.GetClipRegion() );
-            const Point     aPixOffset( rSaveDevice.LogicToWindow( Point() ));
+            const auto aPixOffset = rSaveDevice.convertTo<vcl::WindowPoint>(vcl::LogicPoint(0, 0), rSaveDevice.GetMapMode());
             const vcl::MappingPolicy eOldPolicy = rSaveDevice.GetMappingPolicy();
 
             // move clip region to have the same distance to DestOffset
-            aClip.Move( aPixOffset.X() - aPixPos.X(), aPixOffset.Y() - aPixPos.Y() );
+            aClip.Move(aPixOffset->X() - aPixPos->X(), aPixOffset->Y() - aPixPos->Y());
 
             // set pixel clip region
             rSaveDevice.SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
