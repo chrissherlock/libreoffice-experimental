@@ -247,7 +247,7 @@ public:
     Point GetPosForHitTest( const OutputDevice& rOut )
     {
         Point aHitTestPos( m_pHdl->GetPos() );
-        aHitTestPos =  rOut.LogicToWindow( aHitTestPos );
+        aHitTestPos =  rOut.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aHitTestPos));
         if ( m_bTopRightHandle )
         {
             aHitTestPos += Point( -1, 1 );
@@ -4343,7 +4343,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
     if( g_bDDTimerStarted )
     {
         Point aDD( SwEditWin::s_nDDStartPosX, SwEditWin::s_nDDStartPosY );
-        aDD = LogicToWindow( aDD );
+        aDD = convertTo<vcl::WindowPoint>(vcl::LogicPoint(aDD));
         tools::Rectangle aRect( aDD.X()-3, aDD.Y()-3, aDD.X()+3, aDD.Y()+3 );
         if ( !aRect.Contains( aPixPt ) )
             StopDDTimer( &rSh, aDocPt );
@@ -5849,7 +5849,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
                         SelectMenuPosition(rSh, rCEvt.GetMousePosPixel());
                         m_rView.StopShellTimer();
                     }
-                    const Point aPixPos = LogicToWindow( aDocPos );
+                    const Point aPixPos = convertTo<vcl::WindowPoint>(vcl::LogicPoint(aDocPos));
 
                     if ( m_rView.GetDocShell()->IsReadOnly() )
                     {
@@ -6435,14 +6435,14 @@ void SwEditWin::DrawCommentGuideLine(Point aPointPixel)
     if (eSidebarPosition == sw::sidebarwindows::SidebarPosition::RIGHT)
     {
         tools::Long nSidebarRectLeft
-            = LogicToWindow(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopLeft()).X();
+            = convertTo<vcl::WindowPoint>(vcl::LogicPoint(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopLeft()))->X();
         tools::Long nPxWidth = aPointPixel.X() - nSidebarRectLeft;
         nPosX = nSidebarRectLeft + std::clamp<tools::Long>(nPxWidth, 1 * nZoom, 8 * nZoom);
     }
     else
     {
         tools::Long nSidebarRectRight
-            = LogicToWindow(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopRight()).X();
+            = convertTo<vcl::WindowPoint>(vcl::LogicPoint(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopRight()))->X();
         tools::Long nPxWidth = nSidebarRectRight - aPointPixel.X();
         nPosX = nSidebarRectRight - std::clamp<tools::Long>(nPxWidth, 1 * nZoom, 8 * nZoom);
     }
@@ -6574,8 +6574,12 @@ void QuickHelpData::Start(SwWrtShell& rSh, const bool bRestart)
     vcl::Window& rWin = rSh.GetView().GetEditWin();
     if( m_bIsTip )
     {
-        Point aPt( rWin.OutputToScreenPixel( rWin.LogicToWindow(
-                    rSh.GetCharRect().Pos() )));
+        Point aPt(rWin.OutputToScreenPixel(
+            rWin.convertTo<vcl::WindowPoint>(
+                vcl::LogicPoint(rSh.GetCharRect().Pos())
+            ).get()
+        ));
+
         aPt.AdjustY( -3 );
         nTipId = Help::ShowPopover(&rWin, tools::Rectangle( aPt, Size( 1, 1 )),
                         CurStr(),
@@ -6867,7 +6871,7 @@ bool SwEditWin::IsInHeaderFooter( const Point &rDocPt, FrameControlType &rContro
     if ( rSh.IsShowHeaderFooterSeparator( FrameControlType::Header ) || rSh.IsShowHeaderFooterSeparator( FrameControlType::Footer ) )
     {
         SwFrameControlsManager &rMgr = rSh.GetView().GetEditWin().GetFrameControlsManager();
-        Point aPoint( LogicToWindow( rDocPt ) );
+        Point aPoint( convertTo<vcl::WindowPoint>(vcl::LogicPoint(rDocPt)) );
 
         if ( rSh.IsShowHeaderFooterSeparator( FrameControlType::Header ) )
         {

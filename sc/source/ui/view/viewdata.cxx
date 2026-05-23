@@ -1844,7 +1844,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
         // #i49561# Important note:
         // The set offset of the visible area of the EditView for centered and
         // right alignment in horizontal layout is consider by instances of
-        // class <ScEditObjectViewForwarder> in its methods <LogicToWindow(..)>
+        // class <ScEditObjectViewForwarder> in its methods <convertTo<vcl::WindowSize>(vcl::LogicSize(..))>
         // and <WindowToLogic(..)>. This is needed for the correct visibility
         // of paragraphs in edit mode at the accessibility API.
         pEditView[eWhich]->SetVisArea(aVis);
@@ -3828,8 +3828,11 @@ void ScViewData::ReadExtOptions( const ScExtDocOptions& rDocOpt )
             }
             else
             {
-                Point aPixel = Application::GetDefaultDevice()->LogicToWindow(
-                                rTabSett.maSplitPos, MapMode( MapUnit::MapTwip ) );  //! Zoom?
+                Point aPixel = Application::GetDefaultDevice()->convertTo<vcl::WindowPoint>(
+                    vcl::LogicPoint(rTabSett.maSplitPos),
+                    MapMode(MapUnit::MapTwip)
+                ).get();
+
                 // the test for use of printer metrics for text formatting here
                 // effectively results in the nFactor = 1.0 regardless of the Option setting.
                 if (pDocShell && ScModule::get()->GetInputOptions().GetTextWysiwyg())

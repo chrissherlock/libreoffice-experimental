@@ -129,7 +129,7 @@ namespace accessibility
                                                       MapMode(mrView.GetModel().GetScaleUnit()) ) );
             MapMode aMapMode(mrWindow.GetMapMode());
             aMapMode.SetOrigin(Point());
-            return mrWindow.LogicToWindow( aPoint, aMapMode );
+            return mrWindow.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aPoint), aMapMode);
         }
 
         return Point();

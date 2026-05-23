@@ -2736,7 +2736,7 @@ Point SwAccessibleMap::LogicToWindow( const Point& rPoint ) const
     if (const vcl::Window* pWin = GetShell().GetWin())
     {
         const MapMode aMapMode = GetMapMode(aPoint);
-        aPoint = pWin->LogicToWindow( aPoint, aMapMode );
+        aPoint = pWin->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aPoint), aMapMode);
         aPoint = Point(pWin->OutputToAbsoluteScreenPixel( aPoint ));
     }
 
@@ -2749,7 +2749,7 @@ Size SwAccessibleMap::LogicToWindow( const Size& rSize ) const
     if (const OutputDevice* pWin = GetShell().GetWin()->GetOutDev())
     {
         const MapMode aMapMode = GetMapMode(Point(0, 0));
-        aSize = pWin->LogicToWindow( aSize, aMapMode );
+        aSize = pWin->convertTo<vcl::WindowSize>(vcl::LogicSize(aSize), aMapMode);
     }
 
     return aSize;
@@ -2899,7 +2899,7 @@ tools::Rectangle SwAccessibleMap::CoreToPixel( const SwRect& rRect ) const
     if (const OutputDevice* pWin = GetShell().GetWin()->GetOutDev())
     {
         const MapMode aMapMode = GetMapMode(rRect.TopLeft());
-        aRect = pWin->LogicToWindow( rRect.SVRect(), aMapMode );
+        aRect = pWin->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect.SVRect()), aMapMode);
 
         tools::Rectangle aTmpRect = pWin->WindowToLogic( aRect, aMapMode );
         lcl_CorrectRectangle(aRect, rRect.SVRect(), aTmpRect);

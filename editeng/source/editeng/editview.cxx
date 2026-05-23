@@ -1084,7 +1084,7 @@ bool EditView::ExecuteSpellPopup(const Point& rPosPixel, const Link<SpellCallbac
     // GetWindowPos works in Logical units
     aTempRect = getImpl().GetWindowPos(aTempRect);
     // Convert to pixels
-    aTempRect = rDevice.LogicToWindow(aTempRect).get();
+    aTempRect = rDevice.convertTo<vcl::WindowRect>(vcl::LogicRect(aTempRect)).get();
 
     weld::Widget* pPopupParent = getImpl().GetPopupParent(aTempRect);
     std::unique_ptr<weld::Builder> xBuilder(Application::CreateBuilder(pPopupParent, u"editeng/ui/spellmenu.ui"_ustr));

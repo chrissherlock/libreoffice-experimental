@@ -1173,7 +1173,7 @@ bool FuText::RequestHelp(const HelpEvent& rHEvt)
         }
         if (!aHelpText.isEmpty())
         {
-            ::tools::Rectangle aLogicPix = mpWindow->LogicToWindow(mxTextObj.get()->GetLogicRect());
+            ::tools::Rectangle aLogicPix = mpWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(mxTextObj.get()->GetLogicRect()));
             ::tools::Rectangle aScreenRect(mpWindow->OutputToScreenPixel(aLogicPix.TopLeft()),
                                   mpWindow->OutputToScreenPixel(aLogicPix.BottomRight()));
 

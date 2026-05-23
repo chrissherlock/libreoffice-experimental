@@ -43,8 +43,10 @@ SvxXConnectionPreview::SvxXConnectionPreview()
 void SvxXConnectionPreview::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     weld::CustomWidgetController::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(118 , 121), MapMode(MapUnit::MapAppFont)));
-    pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
+
+    auto aSize = pDrawingArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(118, 121)), MapMode(MapUnit::MapAppFont));
+
+    pDrawingArea->set_size_request(aSize->Width(), aSize->Height());
     SetOutputSizePixel(aSize);
 }
 

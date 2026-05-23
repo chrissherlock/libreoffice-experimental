@@ -85,13 +85,15 @@ ScHTMLImport::ScHTMLImport( ScDocument& rDoc, const OUString& rBaseURL, const Sc
         }
         aPageSize.AdjustWidth( -(nLeftMargin + nRightMargin) );
         aPageSize.AdjustHeight( -(nTopMargin + nBottomMargin) );
-        aPageSize = pDefaultDev->LogicToWindow( aPageSize, MapMode( MapUnit::MapTwip ) );
+        aPageSize = pDefaultDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aPageSize), MapMode( MapUnit::MapTwip ));
     }
     else
     {
         OSL_FAIL("no StyleSheet?!?");
-        aPageSize = pDefaultDev->LogicToWindow(
-            SvxPaperInfo::GetPaperSize( PAPER_A4 ), MapMode( MapUnit::MapTwip ) );
+        aPageSize = pDefaultDev->convertTo<vcl::WindowSize>(
+            vcl::LogicSize(SvxPaperInfo::GetPaperSize(PAPER_A4)),
+            MapMode(MapUnit::MapTwip)
+        ).get();
     }
     if( bCalcWidthHeight )
         mpParser.reset( new ScHTMLLayoutParser( mpEngine.get(), rBaseURL, aPageSize, rDoc ));

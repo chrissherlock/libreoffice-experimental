@@ -139,7 +139,7 @@ DrawViewShell::DrawViewShell( ViewShellBase& rViewShellBase, vcl::Window* pParen
     {
         // get the full page size in pixels
         mpContentWindow->SetMappingPolicy();
-        Size aSize(mpContentWindow->LogicToWindow(GetView()->GetSdrPageView()->GetPage()->GetSize()));
+        Size aSize(mpContentWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(GetView()->GetSdrPageView()->GetPage()->GetSize())));
         // Disable map mode, so that it's possible to send mouse event
         // coordinates in logic units
         mpContentWindow->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);

@@ -415,7 +415,7 @@ void ScrollBarManager::CalcAutoScrollOffset (const Point& rMouseWindowPosition)
     Size aWindowSize = pWindow->GetOutputSizePixel();
     ::tools::Rectangle aWindowArea (pWindow->GetPosPixel(), aWindowSize);
     ::tools::Rectangle aViewPixelArea (
-        pWindow->LogicToWindow(mrSlideSorter.GetView().GetModelArea()));
+        pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(mrSlideSorter.GetView().GetModelArea())).get());
 
     if (aWindowSize.Width() > maScrollBorder.Width() * 3
         && mpHorizontalScrollBar != nullptr

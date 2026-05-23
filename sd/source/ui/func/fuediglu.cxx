@@ -300,7 +300,7 @@ bool FuEditGluePoints::KeyInput(const KeyEvent& rKEvt)
                 }
                 Point centerPoint;
                 ::tools::Rectangle rect = mpView->GetMarkedObjRect();
-                centerPoint = mpWindow->LogicToWindow(rect.Center());
+                centerPoint = mpWindow->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rect.Center()));
                 Point aPoint = bBeginInsertPoint? oldPoint:centerPoint;
                 Point ePoint = aPoint + Point(nX,nY);
                 mpWindow->SetPointerPosPixel(ePoint);

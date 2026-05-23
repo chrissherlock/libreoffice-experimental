@@ -397,7 +397,7 @@ void AnnotationWindow::DoResize()
     aHeight -= POSTIT_META_HEIGHT;
 
     mpOutliner->SetPaperSize( rDevice.WindowToLogic( Size(aWidth, aHeight) )) ;
-    ::tools::Long aTextHeight = rDevice.LogicToWindow(mpOutliner->CalcTextSize())->Height();
+    ::tools::Long aTextHeight = rDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(mpOutliner->CalcTextSize()))->Height();
 
     if( aTextHeight > aHeight )
     {
@@ -488,7 +488,7 @@ void AnnotationWindow::ToggleInsMode()
 ::tools::Long AnnotationWindow::GetPostItTextHeight()
 {
     OutputDevice& rDevice = mxTextControl->GetDrawingArea()->get_ref_device();
-    return mpOutliner ? rDevice.LogicToWindow(mpOutliner->CalcTextSize())->Height() : 0;
+    return mpOutliner ? rDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(mpOutliner->CalcTextSize()))->Height() : 0;
 }
 
 IMPL_LINK(AnnotationWindow, ScrollHdl, weld::ScrolledWindow&, rScrolledWindow, void)

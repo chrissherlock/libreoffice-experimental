@@ -1555,7 +1555,7 @@ bool SwCursorShell::GetContentAtPos( const Point& rPt,
         rContentAtPos.aFnd.pNode = sw::GetParaPropsNode(*GetLayout(), aPos.GetNode());
 
         Size aSizeLogic(aTmpState.m_nInNumPortionOffset, 0);
-        Size aSizePixel = GetWin()->LogicToWindow(aSizeLogic);
+        Size aSizePixel = GetWin()->convertTo<vcl::WindowSize>(vcl::LogicSize(aSizeLogic));
         rContentAtPos.nDist = aSizePixel.Width();
     }
     else if( bCursorFoundExact && pTextNd )

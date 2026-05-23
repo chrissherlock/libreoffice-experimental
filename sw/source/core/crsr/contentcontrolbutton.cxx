@@ -60,8 +60,10 @@ void SwContentControlButton::CalcPosAndSize(const SwRect& rPortionPaintArea)
 {
     assert(GetParent());
 
-    Point aBoxPos = GetParent()->LogicToWindow(rPortionPaintArea.Pos());
-    Size aBoxSize = GetParent()->LogicToWindow(rPortionPaintArea.SSize());
+    Point aBoxPos
+        = GetParent()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPortionPaintArea.Pos()));
+    Size aBoxSize
+        = GetParent()->convertTo<vcl::WindowSize>(vcl::LogicSize(rPortionPaintArea.SSize()));
 
     // First calculate the size of the frame around the content control's last portion
     int nPadding = aBoxSize.Height() / 4;
@@ -75,9 +77,13 @@ void SwContentControlButton::CalcPosAndSize(const SwRect& rPortionPaintArea)
     // Then extend the size with the button area
     if (m_bRTL)
     {
-        aBoxPos.AdjustX(-GetParent()->LogicToWindow(rPortionPaintArea.SSize()).Height());
+        aBoxPos.AdjustX(-GetParent()
+                             ->convertTo<vcl::WindowSize>(vcl::LogicSize(rPortionPaintArea.SSize()))
+                             ->Height());
     }
-    aBoxSize.AdjustWidth(GetParent()->LogicToWindow(rPortionPaintArea.SSize()).Height());
+    aBoxSize.AdjustWidth(GetParent()
+                             ->convertTo<vcl::WindowSize>(vcl::LogicSize(rPortionPaintArea.SSize()))
+                             ->Height());
 
     if (aBoxPos != GetPosPixel() || aBoxSize != GetSizePixel())
     {

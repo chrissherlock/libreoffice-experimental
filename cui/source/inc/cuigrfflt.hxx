@@ -53,8 +53,12 @@ public:
     {
         mpOrigGraphic = pOrigGraphic;
         maModifyHdl = rLink;
-        maOrigGraphicSizePixel = GetDrawingArea()->get_ref_device().LogicToWindow(mpOrigGraphic->GetPrefSize(),
-                                                                                 mpOrigGraphic->GetPrefMapMode());
+
+        maOrigGraphicSizePixel = GetDrawingArea()->get_ref_device().convertTo<vcl::WindowSize>(
+            vcl::LogicSize(mpOrigGraphic->GetPrefSize()),
+            mpOrigGraphic->GetPrefMapMode()
+        ).get();
+
         ScaleImageToFit();
     }
 

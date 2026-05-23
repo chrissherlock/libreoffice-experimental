@@ -507,9 +507,13 @@ void ScGlobal::InitPPT()
     {
         // Avoid cumulative placement errors by intentionally limiting
         // precision.
-        Point aPix1000 = pDev->LogicToWindow(Point(1000, 1000), MapMode(MapUnit::MapTwip));
-        nScreenPPTX = aPix1000.X() / 1000.0;
-        nScreenPPTY = aPix1000.Y() / 1000.0;
+        const auto aPix1000 = pDev->convertTo<vcl::WindowPoint>(
+            vcl::LogicPoint(Point(1000, 1000)),
+            MapMode(MapUnit::MapTwip)
+        );
+
+        nScreenPPTX = aPix1000->X() / 1000.0;
+        nScreenPPTY = aPix1000->Y() / 1000.0;
     }
 }
 

@@ -748,8 +748,10 @@ void SvxCropExample::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     OutputDevice& rDevice = pDrawingArea->get_ref_device();
-    Size aSize(rDevice.LogicToWindow(Size(78, 78), MapMode(MapUnit::MapAppFont)));
-    pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
+
+    auto aSize = rDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(78, 78)), MapMode(MapUnit::MapAppFont));
+
+    pDrawingArea->set_size_request(aSize->Width(), aSize->Height());
 
     m_aMapMode = rDevice.GetMapMode();
     m_aFrameSize = ::LogicToLogic(

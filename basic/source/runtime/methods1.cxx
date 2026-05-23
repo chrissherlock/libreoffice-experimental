@@ -1125,26 +1125,29 @@ static double GetDialogZoomFactor( bool bX, tools::Long nValue )
     double nResult = 0;
     if( pDevice )
     {
-        Size aRefSize( nValue, nValue );
+        vcl::LogicSize aLogicRefSize(nValue, nValue);
         double fFracX = 1.0 / 26;
         double fFracY = 1.0 / 24;
         MapMode aMap( MapUnit::MapAppFont, Point(), fFracX, fFracY );
-        Size aScaledSize = pDevice->LogicToWindow( aRefSize, aMap );
-        aRefSize = pDevice->LogicToWindow( aRefSize, MapMode(MapUnit::MapTwip) );
+
+        auto aScaledSize = pDevice->convertTo<vcl::WindowSize>(aLogicRefSize, aMap);
+        auto aWindowRefSize = pDevice->convertTo<vcl::WindowSize>(aLogicRefSize, MapMode(MapUnit::MapTwip));
 
         double nRef, nScaled;
         if( bX )
         {
-            nRef = aRefSize.Width();
-            nScaled = aScaledSize.Width();
+            nRef = aWindowRefSize->Width();
+            nScaled = aScaledSize->Width();
         }
         else
         {
-            nRef = aRefSize.Height();
-            nScaled = aScaledSize.Height();
+            nRef = aWindowRefSize->Height();
+            nScaled = aScaledSize->Height();
         }
+
         nResult = nScaled / nRef;
     }
+
     return nResult;
 }
 

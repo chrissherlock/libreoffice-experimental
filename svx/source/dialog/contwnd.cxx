@@ -262,9 +262,9 @@ void ContourWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
 void ContourWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     GraphCtrl::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(270, 170), MapMode(MapUnit::MapAppFont)));
-    pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
-    SetOutputSizePixel(aSize);
+    const auto aSize = pDrawingArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(270, 170)), MapMode(MapUnit::MapAppFont));
+    pDrawingArea->set_size_request(aSize->Width(), aSize->Height());
+    SetOutputSizePixel(aSize.get());
     SetSdrMode(true);
 }
 

@@ -775,7 +775,7 @@ void SvxShowText::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     auto popIt = m_xVirDev->ScopedPush(PUSH_ALLFONT);
     m_xVirDev->SetFont(aFont);
     pDrawingArea->set_size_request(m_xVirDev->approximate_digit_width() + 2 * 12,
-                                   m_xVirDev->LogicToWindow(aFontSize)->Height() * 2);
+                                   m_xVirDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aFontSize))->Height() * 2);
 }
 
 void SvxShowText::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&)

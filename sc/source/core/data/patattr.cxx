@@ -741,7 +741,12 @@ void ScPatternAttr::fillFontOnly(
         MapMode aDestMode = pOutDev->GetMapMode();
         MapMode aSrcMode( MapUnit::MapTwip, Point(), fFraction, fFraction );
         if (aDestMode.GetMapUnit() == MapUnit::MapPixel && pOutDev->GetDPIX() > 0)
-            aEffSize = pOutDev->LogicToWindow( aSize, aSrcMode );
+        {
+            aEffSize = pOutDev->convertTo<vcl::WindowSize>(
+                vcl::LogicSize(aSize),
+                aSrcMode
+            ).get();
+        }
         else
         {
             double fFractOne(1.0);

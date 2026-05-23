@@ -1267,13 +1267,11 @@ namespace cppcanvas::internal
                                                "region encountered, falling back to bounding box!" );
 
                                 // #121806# explicitly kept integer
-                                ::tools::Rectangle aClipRect(
-                                    rVDev.LogicToWindow(
-                                        pClipAction->GetRegion().GetBoundRect() ).get() );
+                                auto aClipRect = rVDev.convertTo<vcl::WindowRect>(vcl::LogicRect(pClipAction->GetRegion().GetBoundRect()));
 
                                 // intersect current clip with given rect
                                 updateClipping(
-                                    aClipRect,
+                                    aClipRect.get(),
                                     rFactoryParms,
                                     false );
                             }
@@ -1301,12 +1299,11 @@ namespace cppcanvas::internal
                         MetaISectRectClipRegionAction* pClipAction = static_cast<MetaISectRectClipRegionAction*>(pCurrAct);
 
                         // #121806# explicitly kept integer
-                        ::tools::Rectangle aClipRect(
-                            rVDev.LogicToWindow( pClipAction->GetRect() ).get() );
+                        auto aClipRect = rVDev.convertTo<vcl::WindowRect>(vcl::LogicRect(pClipAction->GetRect()));
 
                         // intersect current clip with given rect
                         updateClipping(
-                            aClipRect,
+                            aClipRect.get(),
                             rFactoryParms,
                             true );
 
@@ -1323,12 +1320,11 @@ namespace cppcanvas::internal
                                            "region encountered, falling back to bounding box!" );
 
                             // #121806# explicitly kept integer
-                            ::tools::Rectangle aClipRect(
-                                rVDev.LogicToWindow( pClipAction->GetRegion().GetBoundRect() ).get() );
+                            auto aClipRect = rVDev.convertTo<vcl::WindowRect>(vcl::LogicRect(pClipAction->GetRegion().GetBoundRect()));
 
                             // intersect current clip with given rect
                             updateClipping(
-                                aClipRect,
+                                aClipRect.get(),
                                 rFactoryParms,
                                 true );
                         }
@@ -1557,16 +1553,15 @@ namespace cppcanvas::internal
 
                         // #121806# explicitly kept integer
                         const Size aMtfSize( rSubstitute.GetPrefSize() );
-                        const Size aMtfSizePixPre( rVDev.LogicToWindow( aMtfSize,
-                                                                       rSubstitute.GetPrefMapMode() ) );
+                        const auto aMtfSizePixPre = rVDev.convertTo<vcl::WindowSize>(vcl::LogicSize(aMtfSize), rSubstitute.GetPrefMapMode());
 
                         // #i44110# correct null-sized output - there
                         // are metafiles which have zero size in at
                         // least one dimension
 
                         // Remark the 1L cannot be replaced, that would cause max to compare long/int
-                        const Size aMtfSizePix( std::max( aMtfSizePixPre.Width(), ::tools::Long(1) ),
-                                                std::max( aMtfSizePixPre.Height(), ::tools::Long(1) ) );
+                        const Size aMtfSizePix( std::max( aMtfSizePixPre->Width(), ::tools::Long(1) ),
+                                                std::max( aMtfSizePixPre->Height(), ::tools::Long(1) ) );
 
                         // Setup local transform, such that the
                         // metafile renders itself into the given
@@ -1576,13 +1571,12 @@ namespace cppcanvas::internal
                         rVDev.Push();
                         rVDev.SetMapMode( rSubstitute.GetPrefMapMode() );
 
-                        const ::Point aPos( rVDev.LogicToWindow( pAct->GetPoint() ).get() );
-                        const ::Size  aSize( rVDev.LogicToWindow( pAct->GetSize() ).get() );
+                        auto aPos = rVDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(pAct->GetPoint()));
+                        auto aSize = rVDev.convertTo<vcl::WindowSize>(vcl::LogicSize(pAct->GetSize()));
 
-                        rStates.getState().transform.translate( aPos.X(),
-                                                                aPos.Y() );
-                        rStates.getState().transform.scale( static_cast<double>(aSize.Width()) / aMtfSizePix.Width(),
-                                                             static_cast<double>(aSize.Height()) / aMtfSizePix.Height() );
+                        rStates.getState().transform.translate(aPos->X(), aPos->Y());
+                        rStates.getState().transform.scale(static_cast<double>(aSize->Width()) / aMtfSizePix.Width(),
+                                                           static_cast<double>(aSize->Height()) / aMtfSizePix.Height());
 
                         createActions( const_cast<GDIMetaFile&>(pAct->GetSubstitute()),
                                        rFactoryParms,
@@ -2852,14 +2846,13 @@ namespace cppcanvas::internal
             aVDev->SetMapMode( rMtf.GetPrefMapMode() );
 
             const Size aMtfSize( rMtf.GetPrefSize() );
-            const Size aMtfSizePixPre( aVDev->LogicToWindow( aMtfSize,
-                                                           rMtf.GetPrefMapMode() ) );
+            const auto aMtfSizePixPre = aVDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aMtfSize), rMtf.GetPrefMapMode());
 
             // #i44110# correct null-sized output - there are shapes
             // which have zero size in at least one dimension
             // Remark the 1L cannot be replaced, that would cause max to compare long/int
-            const Size aMtfSizePix( std::max( aMtfSizePixPre.Width(), ::tools::Long(1) ),
-                                    std::max( aMtfSizePixPre.Height(), ::tools::Long(1) ) );
+            const Size aMtfSizePix(std::max(aMtfSizePixPre->Width(), ::tools::Long(1)),
+                                   std::max(aMtfSizePixPre->Height(), ::tools::Long(1)));
 
             sal_Int32 nCurrActions(0);
             ActionFactoryParameters aParms(aStateStack,

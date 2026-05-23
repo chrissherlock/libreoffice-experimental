@@ -114,8 +114,11 @@ SwMailMergeLayoutPage::SwMailMergeLayoutPage(weld::Container* pPage, SwMailMerge
     m_xExampleFrame.reset(new SwOneExampleFrame(EX_SHOW_DEFAULT_PAGE, &aLink, &m_sExampleURL));
     m_xExampleContainerWIN.reset(new weld::CustomWeld(*m_xBuilder, u"example"_ustr, *m_xExampleFrame));
 
-    Size aSize = m_xExampleFrame->GetDrawingArea()->get_ref_device().LogicToWindow(
-            Size(124, 159), MapMode(MapUnit::MapAppFont));
+    Size aSize = m_xExampleFrame->GetDrawingArea()->get_ref_device().convertTo<vcl::WindowSize>(
+        vcl::LogicSize(Size(124, 159)),
+        MapMode(MapUnit::MapAppFont)
+    ).get();
+
     m_xExampleFrame->set_size_request(aSize.Width(), aSize.Height());
 
     m_xExampleContainerWIN->hide();

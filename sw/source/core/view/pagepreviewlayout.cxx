@@ -697,7 +697,7 @@ bool SwPagePreviewLayout::SetBookPreviewMode( const bool _bEnableBookPreview,
                 aProposedStartPos.setY( maPreviewDocRect.Bottom() );
             }
             Prepare( 0, aProposedStartPos,
-                     mrParentViewShell.GetOut()->LogicToWindow( maWinSize ),
+                     mrParentViewShell.GetOut()->convertTo<vcl::WindowSize>(vcl::LogicSize(maWinSize)),
                      _onStartPageNum, _orDocPreviewPaintRect );
             mbBookPreviewModeToggled = false;
         }
@@ -1044,7 +1044,7 @@ bool SwPagePreviewLayout::Paint(vcl::RenderContext& rRenderContext, const tools:
     }
 
     // prepare data for paint of pages
-    const vcl::WindowRect aPxOutRect(pOutputDev->LogicToWindow(rOutRect));
+    const vcl::WindowRect aPxOutRect(pOutputDev->convertTo<vcl::WindowRect>(vcl::LogicRect(rOutRect)));
 
     MapMode aMapMode( pOutputDev->GetMapMode() );
     MapMode aSavedMapMode = aMapMode;
@@ -1059,7 +1059,7 @@ bool SwPagePreviewLayout::Paint(vcl::RenderContext& rRenderContext, const tools:
         tools::Rectangle aPageRect( rpPreviewPage->aLogicPos, rpPreviewPage->aPageSize );
         aMapMode.SetOrigin( rpPreviewPage->aMapOffset );
         pOutputDev->SetMapMode( aMapMode );
-        tools::Rectangle aPxPaintRect =  pOutputDev->LogicToWindow( aPageRect );
+        tools::Rectangle aPxPaintRect =  pOutputDev->convertTo<vcl::WindowRect>(vcl::LogicRect(aPageRect));
         if ( aPxOutRect->Overlaps( aPxPaintRect) )
         {
             const SwPageFrame* pPage = rpPreviewPage->pPage;
@@ -1228,7 +1228,7 @@ void SwPagePreviewLayout::PaintSelectMarkAtPage(vcl::RenderContext& rRenderConte
     // OD 19.02.2003 #107369# - use aligned page rectangle, as it is used for
     // page border and shadow paint - see <SwPageFrame::PaintBorderAndShadow(..)>
     ::SwAlignRect( aPageRect, &mrParentViewShell, pOutputDev );
-    tools::Rectangle aPxPageRect =  pOutputDev->LogicToWindow( aPageRect.SVRect() );
+    tools::Rectangle aPxPageRect =  pOutputDev->convertTo<vcl::WindowRect>(vcl::LogicRect(aPageRect.SVRect()));
 
     // draw two rectangle
     // OD 19.02.2003 #107369# - adjust position of select mark rectangle
@@ -1267,7 +1267,7 @@ void SwPagePreviewLayout::MarkNewSelectedPage( const sal_uInt16 _nSelectedPage )
         SwRect aPageRect( pOldSelectedPreviewPage->aPreviewWinPos,
                               pOldSelectedPreviewPage->aPageSize );
         ::SwAlignRect( aPageRect, &mrParentViewShell, pOutputDev );
-        tools::Rectangle aPxPageRect =  pOutputDev->LogicToWindow( aPageRect.SVRect() );
+        tools::Rectangle aPxPageRect =  pOutputDev->convertTo<vcl::WindowRect>(vcl::LogicRect(aPageRect.SVRect()));
         // invalidate top mark line
         tools::Rectangle aInvalPxRect( aPxPageRect.Left(), aPxPageRect.Top(),
                                 aPxPageRect.Right(), aPxPageRect.Top()+1 );

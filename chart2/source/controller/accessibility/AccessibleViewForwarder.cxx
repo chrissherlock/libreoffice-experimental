@@ -55,24 +55,23 @@ tools::Rectangle AccessibleViewForwarder::GetVisibleArea() const
 
 Point AccessibleViewForwarder::LogicToWindow( const Point& rPoint ) const
 {
-    Point aPoint;
-    if ( m_pAccChartView && m_pWindow )
-    {
-        awt::Point aLocation = m_pAccChartView->getLocationOnScreen();
-        Point aTopLeft( aLocation.X, aLocation.Y );
-        aPoint = m_pWindow->LogicToWindow( rPoint, m_aMapMode ) + aTopLeft;
-    }
-    return aPoint;
+    if (!m_pAccChartView && m_pWindow )
+        return Point();
+
+    awt::Point aLocation = m_pAccChartView->getLocationOnScreen();
+    Point aTopLeft( aLocation.X, aLocation.Y );
+    return m_pWindow->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPoint), m_aMapMode).get() + aTopLeft;
 }
 
 Size AccessibleViewForwarder::LogicToWindow( const Size& rSize ) const
 {
-    Size aSize;
-    if ( m_pWindow )
-    {
-        aSize = m_pWindow->LogicToWindow( rSize, m_aMapMode );
-    }
-    return aSize;
+    if (!m_pWindow)
+        return Size();
+
+    return m_pWindow->convertTo<vcl::WindowSize>(
+        vcl::LogicSize(rSize),
+        m_aMapMode
+    ).get();
 }
 
 } // namespace chart

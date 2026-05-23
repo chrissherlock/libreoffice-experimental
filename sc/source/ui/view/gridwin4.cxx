@@ -380,7 +380,7 @@ void ScGridWindow::Paint( vcl::RenderContext& /*rRenderContext*/, const tools::R
         else
         {
             bNeedsRepaint = true;
-            aRepaintPixel = LogicToWindow(rRect);    // only affected ranges
+            aRepaintPixel = convertTo<vcl::WindowRect>(vcl::LogicRect(rRect));    // only affected ranges
             ScDocument::EnsureIdleUpdate();
         }
         return;
@@ -395,7 +395,7 @@ void ScGridWindow::Paint( vcl::RenderContext& /*rRenderContext*/, const tools::R
 
     bIsInPaint = true;
 
-    tools::Rectangle aPixRect = LogicToWindow( rRect );
+    tools::Rectangle aPixRect = convertTo<vcl::WindowRect>(vcl::LogicRect(rRect));
 
     SCCOL nX1 = mrViewData.GetPosX(eHWhich);
     SCROW nY1 = mrViewData.GetPosY(eVWhich);
@@ -1238,7 +1238,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
                 if (aNewOutputArea.IsEmpty())
                 {
                     // same zoom level as view used for painting
-                    aNewOutputArea =  rDevice.LogicToWindow(aOrigOutputArea);
+                    aNewOutputArea =  rDevice.convertTo<vcl::WindowRect>(vcl::LogicRect(aOrigOutputArea)).get();
                 }
                 // a small workaround for getting text position matching cursor position horizontally.
                 const tools::Long nCursorGapPx = 2;

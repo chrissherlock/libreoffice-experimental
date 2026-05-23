@@ -173,7 +173,7 @@ SwHeaderFooterDashedLine::SwHeaderFooterDashedLine(SwEditWin* pEditWin, const Sw
 bool SwHeaderFooterDashedLine::IsOnScreen()
 {
     tools::Rectangle aBounds(GetPosPixel(), GetSizePixel());
-    tools::Rectangle aVisArea = GetEditWin()->LogicToWindow(GetEditWin()->GetView().GetVisArea());
+    tools::Rectangle aVisArea = GetEditWin()->convertTo<vcl::WindowRect>(vcl::LogicRect(GetEditWin()->GetView().GetVisArea()));
     return aBounds.Overlaps(aVisArea);
 }
 
@@ -303,7 +303,7 @@ void SwHeaderFooterWin::SetOffset(Point aOffset)
     // Compute the text size and get the box position & size from it
     ::tools::Rectangle aTextRect;
     m_xVirDev->GetTextBoundRect(aTextRect, m_sLabel);
-    ::vcl::WindowRect aTextPxRect = m_xVirDev->LogicToWindow(aTextRect);
+    ::vcl::WindowRect aTextPxRect = m_xVirDev->convertTo<vcl::WindowRect>(vcl::LogicRect(aTextRect));
     FontMetric aFontMetric = m_xVirDev->GetFontMetric(m_xVirDev->GetFont());
     Size aBoxSize (aTextPxRect->GetWidth() + BUTTON_WIDTH + TEXT_PADDING * 2,
                    aFontMetric.GetLineHeight() + TEXT_PADDING  * 2 );

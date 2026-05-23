@@ -550,7 +550,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
         SetMapMode( MapMode( MapUnit::MapPixel ) );
         for( int i= aPageArea.aStart.Col(); i<= aPageArea.aEnd.Col(); i++ )
         {
-            Point aColumnTop = LogicToWindow( Point( 0, -aOffset.Y() ) ,aMMMode );
+            Point aColumnTop = convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( 0, -aOffset.Y() )), aMMMode);
             GetOutDev()->SetLineColor( COL_BLACK );
             GetOutDev()->SetFillColor( COL_BLACK );
             GetOutDev()->DrawRect( tools::Rectangle( Point( mvRight[i] - 2, aColumnTop.Y() ),Point( mvRight[i] + 2 , 4 + aColumnTop.Y()) ));
@@ -587,7 +587,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
         GetOutDev()->SetLineColor( aBorderColor );
         GetOutDev()->SetFillColor();
 
-        tools::Rectangle aPixel( LogicToWindow( tools::Rectangle( -aOffset.X(), -aOffset.Y(), nPageEndX, nPageEndY ) ) );
+        tools::Rectangle aPixel( convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle( -aOffset.X(), -aOffset.Y(), nPageEndX, nPageEndY ))) );
         aPixel.AdjustRight( -1 );
         aPixel.AdjustBottom( -1 );
         GetOutDev()->DrawRect( WindowToLogic( aPixel ) );
@@ -600,13 +600,13 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
 
     tools::Rectangle aPixel;
 
-    aPixel = LogicToWindow( tools::Rectangle( nPageEndX, -aOffset.Y(), nPageEndX, nPageEndY ) );
+    aPixel = convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle( nPageEndX, -aOffset.Y(), nPageEndX, nPageEndY )));
     aPixel.AdjustTop(SC_PREVIEW_SHADOWSIZE );
     aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
     aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );
     GetOutDev()->DrawRect( WindowToLogic( aPixel ) );
 
-    aPixel = LogicToWindow( tools::Rectangle( -aOffset.X(), nPageEndY, nPageEndX, nPageEndY ) );
+    aPixel = convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle( -aOffset.X(), nPageEndY, nPageEndX, nPageEndY )));
     aPixel.AdjustLeft(SC_PREVIEW_SHADOWSIZE );
     aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
     aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );
@@ -800,7 +800,7 @@ sal_uInt16 ScPreview::GetOptimalZoom(bool bWidthOnly)
     //  desired margin is 0.25cm in default MapMode (like Writer),
     //  but some additional margin is introduced by integer scale values
     //  -> add only 0.10cm, so there is some margin in all cases.
-    Size aMarginSize( LogicToWindow(Size(100, 100), MapMode(MapUnit::Map100thMM)) );
+    Size aMarginSize( convertTo<vcl::WindowSize>(vcl::LogicSize(Size(100, 100)), MapMode(MapUnit::Map100thMM)) );
     aWinSize.AdjustWidth( -(2 * aMarginSize.Width()) );
     aWinSize.AdjustHeight( -(2 * aMarginSize.Height()) );
 
@@ -832,7 +832,7 @@ void ScPreview::SetXOffset( tools::Long nX )
 
     if (bValid)
     {
-        tools::Long nDif = LogicToWindow(aOffset).X() - LogicToWindow(Point(nX,0)).X();
+        tools::Long nDif = convertTo<vcl::WindowPoint>(vcl::LogicPoint(aOffset))->X() - convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point(nX,0)))->X();
         aOffset.setX( nX );
         if (nDif && !bInSetZoom)
         {
@@ -859,7 +859,7 @@ void ScPreview::SetYOffset( tools::Long nY )
 
     if (bValid)
     {
-        tools::Long nDif = LogicToWindow(aOffset).Y() - LogicToWindow(Point(0,nY)).Y();
+        tools::Long nDif = convertTo<vcl::WindowPoint>(vcl::LogicPoint(aOffset))->Y() - convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point(0,nY)))->Y();
         aOffset.setY( nY );
         if (nDif && !bInSetZoom)
         {
@@ -1343,21 +1343,21 @@ void ScPreview::MouseMove( const MouseEvent& rMEvt )
     }
 
     Point   aPixPt( rMEvt.GetPosPixel() );
-    Point   aLeftTop = LogicToWindow( Point( nLeftMargin, -aOffset.Y() ) , aMMMode );
-    Point   aLeftBottom = LogicToWindow( Point( nLeftMargin, o3tl::convert(nHeight, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.Y()), aMMMode );
-    Point   aRightTop = LogicToWindow( Point( nRightMargin, -aOffset.Y() ), aMMMode );
-    Point   aTopLeft = LogicToWindow( Point( -aOffset.X(), nTopMargin ), aMMMode );
-    Point   aTopRight = LogicToWindow( Point( o3tl::convert(nWidth, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.X(), nTopMargin ), aMMMode );
-    Point   aBottomLeft = LogicToWindow( Point( -aOffset.X(), nBottomMargin ), aMMMode );
-    Point   aHeaderLeft = LogicToWindow( Point(  -aOffset.X(), nHeaderHeight ), aMMMode );
-    Point   aFooderLeft = LogicToWindow( Point( -aOffset.X(), nFooterHeight ), aMMMode );
+    Point   aLeftTop = convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( nLeftMargin, -aOffset.Y() )), aMMMode);
+    Point   aLeftBottom = convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( nLeftMargin, o3tl::convert(nHeight, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.Y())), aMMMode);
+    Point   aRightTop = convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( nRightMargin, -aOffset.Y() )), aMMMode);
+    Point   aTopLeft = convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( -aOffset.X(), nTopMargin )), aMMMode);
+    Point   aTopRight = convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( o3tl::convert(nWidth, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.X(), nTopMargin )), aMMMode);
+    Point   aBottomLeft = convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( -aOffset.X(), nBottomMargin )), aMMMode);
+    Point   aHeaderLeft = convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point(  -aOffset.X(), nHeaderHeight )), aMMMode);
+    Point   aFooderLeft = convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( -aOffset.X(), nFooterHeight )), aMMMode);
 
     bool bOnColRulerChange = false;
 
     for( SCCOL i=aPageArea.aStart.Col(); i<= aPageArea.aEnd.Col(); i++ )
     {
-        Point   aColumnTop = LogicToWindow( Point( 0, -aOffset.Y() ) ,aMMMode );
-        Point   aColumnBottom = LogicToWindow( Point( 0, o3tl::convert(nHeight, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.Y()), aMMMode );
+        Point   aColumnTop = convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( 0, -aOffset.Y() )), aMMMode);
+        Point   aColumnBottom = convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( 0, o3tl::convert(nHeight, o3tl::Length::twip, o3tl::Length::mm100) - aOffset.Y())), aMMMode);
         tools::Long nRight = i < static_cast<SCCOL>(mvRight.size()) ? mvRight[i] : 0;
         if( aPixPt.X() < ( nRight + 2 ) && ( aPixPt.X() > ( nRight - 2 ) ) && ( aPixPt.X() < aRightTop.X() ) && ( aPixPt.X() > aLeftTop.X() )
             && ( aPixPt.Y() > aColumnTop.Y() ) && ( aPixPt.Y() < aColumnBottom.Y() ) && !bLeftRulerMove && !bRightRulerMove

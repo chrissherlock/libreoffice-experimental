@@ -166,19 +166,19 @@ bool AccessibleDialogWindow::IsChildVisible( const ChildDescriptor& rDesc )
                 if (rView.IsLayerVisible(aLayerName))
                 {
                     // get the bounding box of the shape in logic units
-                    tools::Rectangle aRect = pDlgEdObj->GetSnapRect();
+                    vcl::LogicRect aLogicRect(pDlgEdObj->GetSnapRect());
 
                     // transform coordinates relative to the parent
                     MapMode aMap = m_pDialogWindow->GetMapMode();
                     Point aOrg = aMap.GetOrigin();
-                    aRect.Move( aOrg.X(), aOrg.Y() );
+                    aLogicRect->Move( aOrg.X(), aOrg.Y() );
 
                     // convert logic units to pixel
-                    aRect = m_pDialogWindow->LogicToWindow( aRect, MapMode(MapUnit::Map100thMM) );
+                    auto aRect = m_pDialogWindow->convertTo<vcl::WindowRect>(aLogicRect, MapMode(MapUnit::Map100thMM));
 
                     // check, if the shape's bounding box intersects with the bounding box of its parent
                     tools::Rectangle aParentRect( Point( 0, 0 ), m_pDialogWindow->GetSizePixel() );
-                    if ( aParentRect.Overlaps( aRect ) )
+                    if ( aParentRect.Overlaps( aRect.get() ) )
                         bVisible = true;
                 }
             }

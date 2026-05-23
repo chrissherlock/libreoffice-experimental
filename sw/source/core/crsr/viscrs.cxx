@@ -797,7 +797,7 @@ void SwSelPaintRects::HighlightContentControl()
             SwFrameControlsManager& rMngr = rEditWin.GetFrameControlsManager();
             if (pContentControl && !pContentControl->GetAlias().isEmpty())
             {
-                Point aTopLeftPixel = rEditWin.LogicToWindow(aFirstPortionPaintArea.TopLeft());
+                Point aTopLeftPixel = rEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aFirstPortionPaintArea.TopLeft()));
                 rMngr.SetContentControlAliasButton(pContentControl.get(), aTopLeftPixel);
             }
             else

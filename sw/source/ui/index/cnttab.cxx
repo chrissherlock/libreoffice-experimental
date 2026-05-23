@@ -3897,7 +3897,7 @@ std::vector<tools::Long> SwEntryBrowseBox::GetOptimalColWidths() const
 
 Size SwEntryBrowseBox::GetOptimalSize() const
 {
-    Size aSize = LogicToWindow(Size(276 , 175), MapMode(MapUnit::MapAppFont));
+    Size aSize = convertTo<vcl::WindowSize>(vcl::LogicSize(Size(276 , 175)), MapMode(MapUnit::MapAppFont));
 
     std::vector<tools::Long> aWidths = GetOptimalColWidths();
 

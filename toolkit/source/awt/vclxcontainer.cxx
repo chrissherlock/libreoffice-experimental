@@ -221,31 +221,30 @@ void SAL_CALL VCLXContainer::setProperty(
         {
             sal_Int32 nVal =0;
             Value >>= nVal;
-            Size aSize( nVal, nVal );
             VclPtr<vcl::Window> pWindow = GetWindow();
             MapMode aMode( MapUnit::MapAppFont );
             toolkit::ScrollableDialog* pScrollable = dynamic_cast< toolkit::ScrollableDialog* >( pWindow.get() );
             TabPage* pScrollTabPage = dynamic_cast< TabPage* >( pWindow.get() );
             if ( pWindow && (pScrollable || pScrollTabPage) )
             {
-                aSize = pWindow->LogicToWindow( aSize, aMode );
+                auto aSize = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(nVal, nVal), aMode);
                 switch ( nPropType )
                 {
                     case BASEPROPERTY_SCROLLHEIGHT:
-                        pScrollable ? pScrollable->SetScrollHeight( aSize.Height() ) : (void)0;
-                        pScrollTabPage ? pScrollTabPage->SetScrollHeight( aSize.Height() ) : (void)0;
+                        pScrollable ? pScrollable->SetScrollHeight( aSize->Height() ) : (void)0;
+                        pScrollTabPage ? pScrollTabPage->SetScrollHeight( aSize->Height() ) : (void)0;
                         break;
                     case BASEPROPERTY_SCROLLWIDTH:
-                        pScrollable ? pScrollable->SetScrollWidth( aSize.Width() ) : (void)0;
-                        pScrollTabPage ? pScrollTabPage->SetScrollWidth( aSize.Width() ) : (void)0;
+                        pScrollable ? pScrollable->SetScrollWidth( aSize->Width() ) : (void)0;
+                        pScrollTabPage ? pScrollTabPage->SetScrollWidth( aSize->Width() ) : (void)0;
                         break;
                     case BASEPROPERTY_SCROLLTOP:
-                        pScrollable ? pScrollable->SetScrollTop( aSize.Height() ) : (void)0;
-                        pScrollTabPage ? pScrollTabPage->SetScrollTop( aSize.Height() ) : (void)0;
+                        pScrollable ? pScrollable->SetScrollTop( aSize->Height() ) : (void)0;
+                        pScrollTabPage ? pScrollTabPage->SetScrollTop( aSize->Height() ) : (void)0;
                         break;
                     case BASEPROPERTY_SCROLLLEFT:
-                        pScrollable ? pScrollable->SetScrollLeft( aSize.Width() ) : (void)0;
-                        pScrollTabPage ? pScrollTabPage->SetScrollLeft( aSize.Width() ) : (void)0;
+                        pScrollable ? pScrollable->SetScrollLeft( aSize->Width() ) : (void)0;
+                        pScrollTabPage ? pScrollTabPage->SetScrollLeft( aSize->Width() ) : (void)0;
                         break;
                     default:
                         break;

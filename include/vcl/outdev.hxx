@@ -1684,22 +1684,6 @@ public:
      */
     SAL_WARN_UNUSED_RESULT Size GetPixelOffset() const;
 
-    SAL_WARN_UNUSED_RESULT vcl::WindowPoint LogicToWindow(const Point& rLogicPt) const;
-    SAL_WARN_UNUSED_RESULT vcl::WindowSize LogicToWindow(const Size& rLogicSize) const;
-    SAL_WARN_UNUSED_RESULT vcl::WindowRect LogicToWindow(const tools::Rectangle& rLogicRect) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE vcl::WindowPolygon LogicToWindow(const tools::Polygon& rLogicPoly) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE vcl::WindowPolyPolygon LogicToWindow(const tools::PolyPolygon& rLogicPolyPoly) const;
-    SAL_WARN_UNUSED_RESULT basegfx::B2DPolyPolygon LogicToWindow(const basegfx::B2DPolyPolygon& rLogicPolyPoly) const;
-    SAL_WARN_UNUSED_RESULT vcl::WindowRegion LogicToWindow(const vcl::Region& rLogicRegion) const;
-    SAL_WARN_UNUSED_RESULT vcl::WindowPoint LogicToWindow(const Point& rLogicPt, const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT vcl::WindowSize LogicToWindow(const Size& rLogicSize, const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT vcl::WindowRect LogicToWindow(const tools::Rectangle& rLogicRect,
-                                                         const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE vcl::WindowPolygon LogicToWindow(const tools::Polygon& rLogicPoly,
-                                                                           const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon LogicToWindow(const basegfx::B2DPolyPolygon& rLogicPolyPoly,
-                                                                const MapMode& rMapMode) const;
-
     SAL_WARN_UNUSED_RESULT vcl::LogicPoint WindowToLogic(const Point& rDevicePt) const;
     SAL_WARN_UNUSED_RESULT vcl::LogicSize WindowToLogic(const Size& rDeviceSize) const;
     SAL_WARN_UNUSED_RESULT vcl::LogicRect WindowToLogic(const tools::Rectangle& rDeviceRect) const;

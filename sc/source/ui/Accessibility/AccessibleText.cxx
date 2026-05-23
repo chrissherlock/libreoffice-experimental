@@ -77,7 +77,7 @@ Point ScViewForwarder::LogicToWindow( const Point& rPoint, const MapMode& rMapMo
     {
         vcl::Window* pWindow = mpViewShell->GetWindowByPos(meSplitPos);
         if (pWindow)
-            return pWindow->LogicToWindow( rPoint, rMapMode );
+            return pWindow->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPoint), rMapMode).get();
     }
     else
     {
@@ -146,7 +146,11 @@ Point ScEditObjectViewForwarder::LogicToWindow( const Point& rPoint, const MapMo
             tools::Rectangle aEditViewVisArea( mpEditView->GetVisArea() );
             aPoint += aEditViewVisArea.TopLeft();
         }
-        return mpWindow->LogicToWindow( aPoint, rMapMode );
+
+        return mpWindow->convertTo<vcl::WindowPoint>(
+            vcl::LogicPoint(aPoint),
+            rMapMode
+        ).get();
     }
     else
     {
@@ -214,7 +218,11 @@ Point ScPreviewViewForwarder::LogicToWindow( const Point& rPoint, const MapMode&
         {
             MapMode aMapMode(pWindow->GetMapMode().GetMapUnit());
             Point aPoint2( ::LogicToLogic( rPoint, rMapMode, aMapMode) );
-            return pWindow->LogicToWindow(aPoint2);
+
+            return pWindow->convertTo<vcl::WindowPoint>(
+                vcl::LogicPoint(aPoint2),
+                rMapMode
+            ).get();
         }
     }
     else
@@ -349,11 +357,13 @@ bool ScEditViewForwarder::IsValid() const
 Point ScEditViewForwarder::LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const
 {
     if (mpWindow)
-        return mpWindow->LogicToWindow( rPoint, rMapMode );
-    else
-    {
-        OSL_FAIL("this ViewForwarder is not valid");
-    }
+        return mpWindow->convertTo<vcl::WindowPoint>(
+            vcl::LogicPoint(rPoint),
+            rMapMode
+        ).get();
+
+    OSL_FAIL("this ViewForwarder is not valid");
+
     return Point();
 }
 
@@ -561,13 +571,15 @@ SvxTextForwarder* ScAccessibleCellTextData::GetTextForwarder()
             pEditEngine->SetDefaultItem( SvxAdjustItem( SvxAdjust::Right, EE_PARA_JUST ) );
         }
 
-        Size aTextSize;
+        vcl::WindowSize aTextSize;
         if ( pWin )
-        {
-            aTextSize = pWin->LogicToWindow( Size( pEditEngine->CalcTextWidth(), pEditEngine->GetTextHeight() ), pEditEngine->GetRefMapMode() );
-        }
-        tools::Long nTextWidth = aTextSize.Width();
-        tools::Long nTextHeight = aTextSize.Height();
+            aTextSize = pWin->convertTo<vcl::WindowSize>(
+                vcl::LogicSize(Size(pEditEngine->CalcTextWidth(), pEditEngine->GetTextHeight())),
+                pEditEngine->GetRefMapMode()
+            );
+
+        tools::Long nTextWidth = aTextSize->Width();
+        tools::Long nTextHeight = aTextSize->Height();
 
         tools::Long nOffsetX = nLeftM;
         tools::Long nDiffX = nTextWidth - nWidth;
@@ -1317,8 +1329,13 @@ bool ScCsvViewForwarder::IsValid() const
 
 Point ScCsvViewForwarder::LogicToWindow( const Point& rPoint, const MapMode& rMapMode ) const
 {
-    if( !mpWindow ) return Point();
-    return mpWindow->LogicToWindow( rPoint, rMapMode );
+    if (!mpWindow)
+        return Point();
+
+    return mpWindow->convertTo<vcl::WindowPoint>(
+        vcl::LogicPoint(rPoint),
+        rMapMode
+    ).get();
 }
 
 Point ScCsvViewForwarder::WindowToLogic( const Point& rPoint, const MapMode& rMapMode ) const

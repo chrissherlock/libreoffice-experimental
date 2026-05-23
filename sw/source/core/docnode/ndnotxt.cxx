@@ -134,8 +134,12 @@ const tools::PolyPolygon *SwNoTextNode::HasContour() const
                 for( sal_uInt16 i=0 ; i<nCount; i++ )
                 {
                     if( bPixelGrf )
-                        rPoly[i] = pOutDev->LogicToWindow( rPoly[i],
-                                                          aContourMap );
+                    {
+                        rPoly[i] = pOutDev->convertTo<vcl::WindowPoint>(
+                            vcl::LogicPoint(rPoly[i]),
+                            aContourMap
+                        ).get();
+                    }
                     else if( m_bPixelContour )
                     {
                         rPoly[i] = pOutDev->WindowToLogic( rPoly[i], aGrfMap );

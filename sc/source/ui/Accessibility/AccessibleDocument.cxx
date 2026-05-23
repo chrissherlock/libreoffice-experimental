@@ -1911,25 +1911,30 @@ Point ScAccessibleDocument::LogicToWindow (const Point& rPoint) const
 {
     SolarMutexGuard aGuard;
     ensureAlive();
-    Point aPoint;
+
     ScGridWindow* pWin = static_cast<ScGridWindow*>(mpViewShell->GetWindowByPos(meSplitPos));
-    if (pWin)
-    {
-        aPoint = pWin->LogicToWindow(rPoint, pWin->GetDrawMapMode());
-        aPoint += Point(pWin->GetWindowExtentsAbsolute().TopLeft());
-    }
-    return aPoint;
+
+    if (!pWin)
+        return Point();
+
+    Point aPoint = pWin->convertTo<vcl::WindowPoint>(
+        vcl::LogicPoint(rPoint),
+        pWin->GetDrawMapMode()
+    ).get();
+
+    return aPoint + Point(pWin->GetWindowExtentsAbsolute().TopLeft());
 }
 
 Size ScAccessibleDocument::LogicToWindow (const Size& rSize) const
 {
     SolarMutexGuard aGuard;
     ensureAlive();
-    Size aSize;
     ScGridWindow* pWin = static_cast<ScGridWindow*>(mpViewShell->GetWindowByPos(meSplitPos));
-    if (pWin)
-        aSize = pWin->LogicToWindow(rSize, pWin->GetDrawMapMode());
-    return aSize;
+
+    if (!pWin)
+        return Size();
+
+    return pWin->convertTo<vcl::WindowSize>(vcl::LogicSize(rSize), pWin->GetDrawMapMode()).get();
 }
 
 rtl::Reference<utl::AccessibleRelationSetHelper> ScAccessibleDocument::GetRelationSet(const ScAddress* pAddress) const

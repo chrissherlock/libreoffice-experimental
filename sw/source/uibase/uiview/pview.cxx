@@ -199,7 +199,7 @@ void  SwPagePreviewWin::Paint(vcl::RenderContext& rRenderContext, const tools::R
         if (!maPxWinSize.Height() || !maPxWinSize.Width())
             maPxWinSize = GetOutputSizePixel();
 
-        vcl::WindowRect aRect(rRenderContext.LogicToWindow(rRect));
+        vcl::WindowRect aRect(rRenderContext.convertTo<vcl::WindowRect>(vcl::LogicRect(rRect)));
         mpPgPreviewLayout->Prepare(1, Point(0,0), maPxWinSize,
                                    mnSttPage, maPaintedPreviewDocRect);
         SetSelectedPage(1);
@@ -369,7 +369,7 @@ bool SwPagePreviewWin::MovePage( int eMoveMode )
 void SwPagePreviewWin::SetWinSize( const Size& rNewSize )
 {
     // We always want the size as pixel units.
-    maPxWinSize = LogicToWindow( rNewSize );
+    maPxWinSize = convertTo<vcl::WindowSize>(vcl::LogicSize(rNewSize));
 
     if( USHRT_MAX == mnSttPage )
     {
@@ -1273,7 +1273,7 @@ void SwPagePreview::CreateScrollbar( bool bHori )
 
 bool SwPagePreview::ChgPage( int eMvMode, bool bUpdateScrollbar )
 {
-    tools::Rectangle aPixVisArea( m_pViewWin->LogicToWindow( m_aVisArea ) );
+    tools::Rectangle aPixVisArea( m_pViewWin->convertTo<vcl::WindowRect>(vcl::LogicRect(m_aVisArea)) );
     bool bChg = m_pViewWin->MovePage( eMvMode ) ||
                eMvMode == SwPagePreviewWin::MV_CALC ||
                eMvMode == SwPagePreviewWin::MV_NEWWINSIZE;
@@ -1528,7 +1528,7 @@ void SwPagePreview::EndScrollHdl(const weld::Scrollbar& rScrollbar, bool bHori)
 
 Point SwPagePreview::AlignToPixel(const Point &rPt) const
 {
-    return m_pViewWin->WindowToLogic( m_pViewWin->LogicToWindow( rPt ) );
+    return m_pViewWin->WindowToLogic( m_pViewWin->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPt)) );
 }
 
 void SwPagePreview::DocSzChgd( const Size &rSz )

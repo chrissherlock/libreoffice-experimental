@@ -437,7 +437,7 @@ void Ruler::ImplDrawTicks(vcl::RenderContext& rRenderContext, tools::Long nMin, 
     tools::Long nTickWidth;
     bool bNoTicks = false;
 
-    Size aPixSize = rRenderContext.LogicToWindow(Size(nTick4, nTick4), maMapMode);
+    auto aPixSize = rRenderContext.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nTick4, nTick4)), maMapMode);
 
     if (mnUnitIndex == RULER_UNIT_CHAR)
     {
@@ -462,7 +462,7 @@ void Ruler::ImplDrawTicks(vcl::RenderContext& rRenderContext, tools::Long nMin, 
 
     if (mnWinStyle & WB_HORZ)
     {
-        nTickWidth = aPixSize.Width();
+        nTickWidth = aPixSize->Width();
     }
     else
     {
@@ -472,7 +472,7 @@ void Ruler::ImplDrawTicks(vcl::RenderContext& rRenderContext, tools::Long nMin, 
         else
             aFont.SetOrientation(900_deg10);
         rRenderContext.SetFont(aFont);
-        nTickWidth = aPixSize.Height();
+        nTickWidth = aPixSize->Height();
     }
 
     tools::Long nMaxWidth = rRenderContext.WindowToLogic(Size(mpData->nPageWidth, 0), maMapMode)->Width();
@@ -519,11 +519,11 @@ void Ruler::ImplDrawTicks(vcl::RenderContext& rRenderContext, tools::Long nMin, 
             }
 
             nTick4 = nOrgTick4 * nMulti;
-            aPixSize = rRenderContext.LogicToWindow(Size(nTick4, nTick4), maMapMode);
+            aPixSize = rRenderContext.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nTick4, nTick4)), maMapMode);
             if (mnWinStyle & WB_HORZ)
-                nTickWidth = aPixSize.Width();
+                nTickWidth = aPixSize->Width();
             else
-                nTickWidth = aPixSize.Height();
+                nTickWidth = aPixSize->Height();
         }
         nTickCount = nTick4;
     }
@@ -538,14 +538,12 @@ void Ruler::ImplDrawTicks(vcl::RenderContext& rRenderContext, tools::Long nMin, 
     tools::Long n = 0;
     double nTick = 0.0;
 
-    Size nTickGapSize;
-
-    nTickGapSize = rRenderContext.LogicToWindow(Size(nTickCount, nTickCount), maMapMode);
-    tools::Long nTickGap1 = mnWinStyle & WB_HORZ ? nTickGapSize.Width() : nTickGapSize.Height();
-    nTickGapSize = rRenderContext.LogicToWindow(Size(nTick2, nTick2), maMapMode);
-    tools::Long nTickGap2 = mnWinStyle & WB_HORZ ? nTickGapSize.Width() : nTickGapSize.Height();
-    nTickGapSize = rRenderContext.LogicToWindow(Size(nTick3, nTick3), maMapMode);
-    tools::Long nTickGap3 = mnWinStyle & WB_HORZ ? nTickGapSize.Width() : nTickGapSize.Height();
+    auto nTickGapSize = rRenderContext.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nTickCount, nTickCount)), maMapMode);
+    tools::Long nTickGap1 = mnWinStyle & WB_HORZ ? nTickGapSize->Width() : nTickGapSize->Height();
+    nTickGapSize = rRenderContext.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nTick2, nTick2)), maMapMode);
+    tools::Long nTickGap2 = mnWinStyle & WB_HORZ ? nTickGapSize->Width() : nTickGapSize->Height();
+    nTickGapSize = rRenderContext.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nTick3, nTick3)), maMapMode);
+    tools::Long nTickGap3 = mnWinStyle & WB_HORZ ? nTickGapSize->Width() : nTickGapSize->Height();
 
     while (((nStart - n) >= nMin) || ((nStart + n) <= nMax))
     {
@@ -564,12 +562,12 @@ void Ruler::ImplDrawTicks(vcl::RenderContext& rRenderContext, tools::Long nMin, 
         }
         else
         {
-            aPixSize = rRenderContext.LogicToWindow(Size(nTick, nTick), maMapMode);
+            aPixSize = rRenderContext.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nTick, nTick)), maMapMode);
 
             if (mnWinStyle & WB_HORZ)
-                n = aPixSize.Width();
+                n = aPixSize->Width();
             else
-                n = aPixSize.Height();
+                n = aPixSize->Height();
 
             // Tick4 - Output (Text)
             double aStep = nTick / nTick4;
