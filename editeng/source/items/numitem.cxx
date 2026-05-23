@@ -541,7 +541,7 @@ Size SvxNumberFormat::GetGraphicSizeMM100(const Graphic* pGraphic)
         OutputDevice* pOutDev = Application::GetDefaultDevice();
         MapMode aOldMap( pOutDev->GetMapMode() );
         pOutDev->SetMapMode( aMapMM100 );
-        aRetSize = pOutDev->WindowToLogic( aSize ).get();
+        aRetSize = pOutDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize));
         pOutDev->SetMapMode( aOldMap );
     }
     else

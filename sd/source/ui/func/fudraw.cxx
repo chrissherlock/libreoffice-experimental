@@ -146,7 +146,7 @@ bool FuDraw::MouseButtonDown(const MouseEvent& rMEvt)
 
     bool bReturn = false;
     bDragHelpLine = false;
-    aMDPos = mpWindow->WindowToLogic( rMEvt.GetPosPixel() );
+    aMDPos = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
 
     if ( rMEvt.IsLeft() )
     {
@@ -189,7 +189,7 @@ bool FuDraw::MouseButtonDown(const MouseEvent& rMEvt)
         DoModifiers(rMEvt, bSnapModPressed);
 
         SdrPageView* pPV = nullptr;
-        sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(HITPIX,0)).Width() );
+        sal_uInt16 nHitLog = static_cast<sal_uInt16>(mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(HITPIX, 0)))->Width());
 
         // look only for HelpLines when they are visible (!)
         bool bHelpLine(false);
@@ -215,7 +215,7 @@ bool FuDraw::MouseButtonDown(const MouseEvent& rMEvt)
 bool FuDraw::MouseMove(const MouseEvent& rMEvt)
 {
     FrameView* pFrameView = mrViewShell.GetFrameView();
-    Point aPos = mpWindow->WindowToLogic( rMEvt.GetPosPixel() );
+    Point aPos = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
 
     bool bOrtho = false;
     bool bRestricted = true;
@@ -458,13 +458,13 @@ void FuDraw::ForcePointer(const MouseEvent* pMEvt)
 
     if (pMEvt)
     {
-        aPnt = mpWindow->WindowToLogic(pMEvt->GetPosPixel());
+        aPnt = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(pMEvt->GetPosPixel()));
         nModifier = pMEvt->GetModifier();
         bLeftDown = pMEvt->IsLeft();
     }
     else
     {
-        aPnt = mpWindow->WindowToLogic(mpWindow->GetPointerPosPixel());
+        aPnt = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(mpWindow->GetPointerPosPixel()));
     }
 
     if (mpView->IsDragObj())
@@ -590,7 +590,7 @@ bool FuDraw::SetPointer(const SdrObject* pObj, const Point& rPos)
         return false;
 
     const SdrLayerIDSet* pVisiLayer = &mpView->GetSdrPageView()->GetVisibleLayers();
-    double fHitLog(mpWindow->WindowToLogic(Size(HITPIX, 0)).Width());
+    double fHitLog(mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(HITPIX, 0)))->Width());
     ::tools::Long n2HitLog(fHitLog * 2);
     Point aHitPosR(rPos);
     Point aHitPosL(rPos);
@@ -628,7 +628,7 @@ bool FuDraw::SetPointer(const SdrObject* pObj, const Point& rPos)
  */
 void FuDraw::DoubleClick(const MouseEvent& rMEvt)
 {
-    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(HITPIX,0)).Width() );
+    sal_uInt16 nHitLog = static_cast<sal_uInt16>(mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(HITPIX, 0)))->Width());
 
     const SdrMarkList& rMarkList = mpView->GetMarkedObjectList();
     if ( rMarkList.GetMarkCount() != 0 )
@@ -716,7 +716,7 @@ bool FuDraw::RequestHelp(const HelpEvent& rHEvt)
                 // take a glance into the group
                 SdrPageView* pPV = nullptr;
 
-                Point aPos(mpWindow->WindowToLogic(mpWindow->ScreenToOutputPixel(aPosPixel)));
+                Point aPos(mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(mpWindow->ScreenToOutputPixel(aPosPixel))));
 
                 pObj = mpView->PickObj(aPos, mpView->getHitTolLog(), pPV, SdrSearchOptions::ALSOONMASTER | SdrSearchOptions::DEEP);
                 if (pObj)
@@ -739,7 +739,7 @@ bool FuDraw::RequestHelp(const HelpEvent& rHEvt)
 bool FuDraw::SetHelpText(const SdrObject* pObj, const Point& rPosPixel, const SdrViewEvent& rVEvt)
 {
     OUString aHelpText;
-    Point aPos(mpWindow->WindowToLogic(mpWindow->ScreenToOutputPixel(rPosPixel)));
+    Point aPos(mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(mpWindow->ScreenToOutputPixel(rPosPixel))));
     IMapObject* pIMapObj = SvxIMapInfo::GetHitIMapObject(pObj, aPos);
 
     if (!rVEvt.mpURLField && !pIMapObj)
@@ -765,7 +765,7 @@ bool FuDraw::SetHelpText(const SdrObject* pObj, const Point& rPosPixel, const Sd
     if (aHelpText.isEmpty())
         return false;
 
-    ::tools::Rectangle aLogicPix = mpWindow->LogicToWindow(pObj->GetLogicRect());
+    ::tools::Rectangle aLogicPix = mpWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(pObj->GetLogicRect()));
     ::tools::Rectangle aScreenRect(mpWindow->OutputToScreenPixel(aLogicPix.TopLeft()),
                             mpWindow->OutputToScreenPixel(aLogicPix.BottomRight()));
 

@@ -2770,7 +2770,7 @@ BmpWindow::BmpWindow()
 void BmpWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
-    Size aSize = pDrawingArea->get_ref_device().LogicToWindow(Size(127 , 66), MapMode(MapUnit::MapAppFont));
+    Size aSize = pDrawingArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(127 , 66)), MapMode(MapUnit::MapAppFont));
     set_size_request(aSize.Width(), aSize.Height());
     SetOutputSizePixel(aSize);
 }
@@ -2793,7 +2793,7 @@ void BmpWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
         aGrfSize = ::GetGraphicSizeTwip(m_aGraphic, &rRenderContext);
     //it should show the default bitmap also if no graphic can be found
     if (!aGrfSize.Width() && !aGrfSize.Height())
-        aGrfSize =  rRenderContext.WindowToLogic(m_aBmp.GetSizePixel());
+        aGrfSize =  rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(m_aBmp.GetSizePixel()));
 
     tools::Long nRelGrf = aGrfSize.Width() * 100 / aGrfSize.Height();
     tools::Long nRelWin = aPntSz.Width() * 100 / aPntSz.Height();

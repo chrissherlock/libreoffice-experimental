@@ -99,10 +99,10 @@ void ScGridMerger::AddHorLine(bool bWorksInPixels, tools::Long nX1, tools::Long 
 {
     if ( bWorksInPixels )
     {
-        Point aPoint(pDev->WindowToLogic(Point(nX1, nY)));
+        Point aPoint(pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(nX1, nY))));
         nX1 = aPoint.X();
         nY = aPoint.Y();
-        nX2 = pDev->WindowToLogic(Point(nX2, 0))->X();
+        nX2 = pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(nX2, 0)))->X();
     }
 
     if ( bDashed )
@@ -118,8 +118,8 @@ void ScGridMerger::AddHorLine(bool bWorksInPixels, tools::Long nX1, tools::Long 
         aLineInfo.SetDashCount( PAGEBREAK_LINE_DASH_COUNT );
 
         // Calculating logic values of DashLen and Distance from fixed pixel values
-        Size aDashDistanceLen( pDev->WindowToLogic( Size( PAGEBREAK_LINE_DISTANCE_PIXEL,
-                                                         PAGEBREAK_LINE_DASH_LEN_PIXEL )).get() );
+        Size aDashDistanceLen = pDev->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(Size(PAGEBREAK_LINE_DISTANCE_PIXEL, PAGEBREAK_LINE_DASH_LEN_PIXEL)));
 
         aLineInfo.SetDistance( aDashDistanceLen.Width() );
         aLineInfo.SetDashLen( aDashDistanceLen.Height() );
@@ -143,10 +143,10 @@ void ScGridMerger::AddVerLine(bool bWorksInPixels, tools::Long nX, tools::Long n
 {
     if (bWorksInPixels)
     {
-        Point aPoint(pDev->WindowToLogic(Point(nX, nY1)));
+        Point aPoint(pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(nX, nY1))));
         nX = aPoint.X();
         nY1 = aPoint.Y();
-        nY2 = pDev->WindowToLogic(Point(0, nY2))->Y();
+        nY2 = pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(0, nY2)))->Y();
     }
 
     if ( bDashed )
@@ -162,8 +162,7 @@ void ScGridMerger::AddVerLine(bool bWorksInPixels, tools::Long nX, tools::Long n
         aLineInfo.SetDashCount( PAGEBREAK_LINE_DASH_COUNT );
 
         // Calculating logic values of DashLen and Distance from fixed pixel values
-        Size aDashDistanceLen( pDev->WindowToLogic( Size( PAGEBREAK_LINE_DISTANCE_PIXEL,
-                                                         PAGEBREAK_LINE_DASH_LEN_PIXEL )).get() );
+        Size aDashDistanceLen(pDev->convertTo<vcl::LogicSize>(vcl::WindowSize(PAGEBREAK_LINE_DISTANCE_PIXEL, PAGEBREAK_LINE_DASH_LEN_PIXEL)));
 
         aLineInfo.SetDistance( aDashDistanceLen.Width() );
         aLineInfo.SetDashLen( aDashDistanceLen.Height() );

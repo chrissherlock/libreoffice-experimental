@@ -146,7 +146,8 @@ tools::Long SwView::SetVScrollMax( tools::Long lMax )
 
 Point SwView::AlignToPixel(const Point &rPt) const
 {
-    return GetEditWin().WindowToLogic( GetEditWin().LogicToWindow( rPt ) );
+    return GetEditWin().convertTo<vcl::LogicPoint>(
+        GetEditWin().convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPt)));
 }
 
 // Document size has changed.
@@ -292,13 +293,13 @@ void SwView::SetVisArea( const Point &rPt, bool bUpdateScrollbar )
     // align is not possible (better idea?!?!)
     // (fix: Bild.de, 200%) It does not work completely without alignment
     // Let's see how far we get with half BrushSize.
-    Point aPt = GetEditWin().LogicToWindow( rPt );
+    Point aPt = GetEditWin().convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPt));
 #if HAVE_FEATURE_DESKTOP
     const tools::Long nTmp = 8;
     aPt.AdjustX( -(aPt.X() % nTmp) );
     aPt.AdjustY( -(aPt.Y() % nTmp) );
 #endif
-    aPt = GetEditWin().WindowToLogic( aPt );
+    aPt = GetEditWin().convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPt));
 
     if ( aPt == m_aVisArea.TopLeft() )
         return;
@@ -425,7 +426,8 @@ void SwView::Scroll( const tools::Rectangle &rRect, sal_uInt16 nRangeX, sal_uInt
         {
             AbsoluteScreenPixelPoint aTopLeftAbs(GetEditWin().GetSystemWindow()->OutputToAbsoluteScreenPixel(Point(x, y)));
             Point aTopLeft = GetEditWin().AbsoluteScreenToOutputPixel(aTopLeftAbs);
-            aDlgRect = GetEditWin().WindowToLogic(tools::Rectangle(aTopLeft, Size(width, height)));
+            aDlgRect = GetEditWin().convertTo<vcl::LogicRect>(
+                vcl::WindowRect(tools::Rectangle(aTopLeft, Size(width, height))));
         }
 
         // Only if the dialogue is not the VisArea right or left:
@@ -624,7 +626,8 @@ void SwView::PhyPageUp()
         // If there is a difference, has been truncated --> then add one pixel,
         // so that no residue of the previous page is visible.
         if( aPt.Y() != aAlPt.Y() )
-            aAlPt.AdjustY(3 * GetEditWin().WindowToLogic( Size( 0, 1 ) ).Height() );
+            aAlPt.AdjustY(3 * GetEditWin().convertTo<vcl::LogicSize>(vcl::WindowSize(0, 1))->Height());
+
         SetVisArea( aAlPt );
     }
 }
@@ -642,7 +645,8 @@ void SwView::PhyPageDown()
         // If there is a difference, has been truncated --> then add one pixel,
         // so that no residue of the previous page is visible.
         if( aPt.Y() != aAlPt.Y() )
-            aAlPt.AdjustY(3 * GetEditWin().WindowToLogic( Size( 0, 1 ) ).Height() );
+            aAlPt.AdjustY(3 * GetEditWin().convertTo<vcl::LogicSize>(vcl::WindowSize(0, 1))->Height());
+
         SetVisArea( aAlPt );
     }
 }
@@ -790,7 +794,7 @@ void SwView::CalcVisArea( const Size &rOutPixel )
 {
     Point aTopLeft;
     tools::Rectangle aRect( aTopLeft, rOutPixel );
-    aRect = GetEditWin().WindowToLogic(aRect);
+    aRect = GetEditWin().convertTo<vcl::LogicRect>(vcl::WindowRect(aRect)).get();
 
     // The shifts to the right and/or below can now be incorrect
     // (e.g. change zoom level, change view size).
@@ -964,7 +968,7 @@ void SwView::InnerResizePixel( const Point &rOfst, const Size &rSize, bool )
         Size aSize( rSize );
         aSize.AdjustWidth( -(aBorder.Left() + aBorder.Right()) );
         aSize.AdjustHeight( -(aBorder.Top() + aBorder.Bottom()) );
-        Size aObjSizePixel = GetWindow()->LogicToWindow(aObjSize, MapMode(MapUnit::MapTwip));
+        Size aObjSizePixel = GetWindow()->convertTo<vcl::WindowSize>(vcl::LogicSize(aObjSize), MapMode(MapUnit::MapTwip));
         SfxViewShell::SetZoomFactor( double(aSize.Width()) / aObjSizePixel.Width(),
                         double(aSize.Height()) / aObjSizePixel.Height() );
     }

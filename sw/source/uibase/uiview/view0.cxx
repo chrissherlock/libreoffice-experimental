@@ -667,8 +667,8 @@ void SwView::ExecViewOptions(SfxRequest &rReq)
 
         // tdf#172903 - Web View renders paragraph spotlight markers off canvas
         if (m_bIsSpotlightParaStyles)
-            m_pWrtShell->SetBrowseBorder(Size(GetWindow()->LogicToWindow(Size(375, 0)).Width(),
-                                              m_pWrtShell->GetBrowseBorder().Height()));
+            m_pWrtShell->SetBrowseBorder(Size(GetWindow()->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(375, 0))).get().Width(),
+                                             m_pWrtShell->GetBrowseBorder().Height()));
         else
             m_pWrtShell->SetBrowseBorder(GetMargin());
     }

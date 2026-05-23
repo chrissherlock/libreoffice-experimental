@@ -147,10 +147,10 @@ void OApplicationView::resizeDocumentView(tools::Rectangle& _rPlayground)
 {
     if ( m_pWin && !_rPlayground.IsEmpty() )
     {
-        Size aFLSize = LogicToWindow(Size(3, 3), MapMode(MapUnit::MapAppFont));
-        _rPlayground.Move( aFLSize.Width(),aFLSize.Height() );
+        auto aFLSize = convertTo<vcl::WindowSize>(vcl::LogicSize(Size(3, 3)), MapMode(MapUnit::MapAppFont));
+        _rPlayground.Move(aFLSize->Width(), aFLSize->Height());
         Size aOldSize = _rPlayground.GetSize();
-        _rPlayground.SetSize( Size(aOldSize.Width() - 2*aFLSize.Width(), aOldSize.Height() - 2*aFLSize.Height()) );
+        _rPlayground.SetSize( Size(aOldSize.Width() - 2*aFLSize->Width(), aOldSize.Height() - 2*aFLSize->Height()) );
 
         m_pWin->SetPosSizePixel(_rPlayground.TopLeft() , _rPlayground.GetSize() );
     }

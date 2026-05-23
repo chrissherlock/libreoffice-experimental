@@ -99,18 +99,18 @@ ScHeaderControl::ScHeaderControl( vcl::Window* pParent, SelectionEngine* pSelect
     bBoldSet = true;
     bAutoFilterSet = false;
 
-    Size aSize = LogicToWindow( Size(
-        GetTextWidth(u"8888"_ustr),
-        GetTextHeight() ) );
+    Size aSize = convertTo<vcl::WindowSize>(
+        vcl::LogicSize(Size(GetTextWidth(u"8888"_ustr), GetTextHeight()))
+    ).get();
+
     aSize.AdjustWidth(4 );    // place for highlight border
     aSize.AdjustHeight(3 );
     SetSizePixel( aSize );
 
     nWidth = nSmallWidth = aSize.Width();
-    // tdf#148507 - pre-calculate individual column widths
-    nMedWidth   = LogicToWindow( Size( GetTextWidth(u"88888"_ustr),   0 ) ).Width() + 8;
-    nLargeWidth = LogicToWindow( Size( GetTextWidth(u"888888"_ustr),  0 ) ).Width() + 8;
-    nBigWidth   = LogicToWindow( Size( GetTextWidth(u"8888888"_ustr), 0 ) ).Width() + 8;
+    nMedWidth   = convertTo<vcl::WindowSize>(vcl::LogicSize(Size( GetTextWidth(u"88888"_ustr),   0 )))->Width() + 8;
+    nLargeWidth = convertTo<vcl::WindowSize>(vcl::LogicSize(Size( GetTextWidth(u"888888"_ustr),  0 )))->Width() + 8;
+    nBigWidth   = convertTo<vcl::WindowSize>(vcl::LogicSize(Size( GetTextWidth(u"8888888"_ustr), 0 )))->Width() + 8;
 
     aShowHelpTimer.SetInvokeHandler(LINK(this, ScHeaderControl, ShowDragHelpHdl));
     aShowHelpTimer.SetTimeout(GetSettings().GetMouseSettings().GetDoubleClickTime());

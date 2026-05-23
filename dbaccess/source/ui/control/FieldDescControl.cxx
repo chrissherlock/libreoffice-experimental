@@ -555,7 +555,11 @@ void OFieldDescControl::InitializeControl(weld::Widget* pControl,const OUString&
 
     if (dynamic_cast<weld::Entry*>(pControl))
     {
-        int nWidthRequest = Application::GetDefaultDevice()->LogicToWindow(Size(m_nEditWidth, 0), MapMode(MapUnit::MapAppFont))->Width();
+        int nWidthRequest = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+            vcl::LogicSize(Size(m_nEditWidth, 0)),
+            MapMode(MapUnit::MapAppFont)
+        )->Width();
+
         pControl->set_size_request(nWidthRequest, -1);
     }
 }

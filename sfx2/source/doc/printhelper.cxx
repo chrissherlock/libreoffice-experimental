@@ -404,10 +404,12 @@ void SfxPrintHelper::impl_setPrinter(const uno::Sequence< beans::PropertyValue >
     {
         // Bug 56929 - MapMode of 100mm which recalculated when
         // the device is set. Additionally only set if they were really changed.
-        aSetPaperSize = pPrinter->LogicToWindow(aSetPaperSize, MapMode(MapUnit::Map100thMM));
-        if( aSetPaperSize != pPrinter->GetPaperSizePixel() )
+        const auto aSetPaperWindowSize = pPrinter->convertTo<vcl::WindowSize>(vcl::LogicSize(aSetPaperSize), MapMode(MapUnit::Map100thMM));
+        if (aSetPaperWindowSize.get() != pPrinter->GetPaperSizePixel())
         {
-            pPrinter->SetPaperSizeUser( pPrinter->WindowToLogic( aSetPaperSize ).get() );
+            pPrinter->SetPaperSizeUser(
+                pPrinter->convertTo<vcl::LogicSize>(
+                    vcl::WindowSize(aSetPaperWindowSize)));
             nChangeFlags |= SfxPrinterChangeFlags::CHG_SIZE;
         }
     }

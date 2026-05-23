@@ -102,7 +102,7 @@ void ScTabViewShell::InsertURLButton( const OUString& rName, const OUString& rUR
         aPos = GetInsertPos();
 
     // Size as in 3.1:
-    Size aSize = GetActiveWin()->WindowToLogic(Size(140, 20));
+    Size aSize = GetActiveWin()->convertTo<vcl::LogicSize>(vcl::WindowSize(140, 20), GetActiveWin()->GetMapMode());
 
     if ( rDoc.IsNegativePage(nTab) )
         aPos.AdjustX( -(aSize.Width()) );

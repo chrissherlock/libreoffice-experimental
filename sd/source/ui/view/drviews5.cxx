@@ -345,7 +345,11 @@ void DrawViewShell::WriteFrameViewData()
     mpFrameView->SetDesignMode( mpDrawView->IsDesignMode() );
 
     Size aVisSizePixel = GetActiveWindow()->GetOutputSizePixel();
-    ::tools::Rectangle aVisArea = GetActiveWindow()->WindowToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+
+    ::tools::Rectangle aVisArea = GetActiveWindow()->convertTo<vcl::LogicRect>(
+        vcl::WindowRect(::tools::Rectangle(Point(0, 0), aVisSizePixel)),
+        GetActiveWindow()->GetMapMode());
+
     if (comphelper::LibreOfficeKit::isActive())
     {
         // aVisArea is nonsensical in the LOK case, use the slide size

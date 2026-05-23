@@ -227,7 +227,8 @@ void ScClient::ViewChanged()
     if ( pViewSh )
     {
         vcl::Window* pWin = pViewSh->GetActiveWin();
-        if ( pWin->LogicToWindow( aVisSize ) != pWin->LogicToWindow( aLogicRect.GetSize() ) )
+        if (pWin->convertTo<vcl::WindowSize>(vcl::LogicSize(aVisSize)).get() !=
+            pWin->convertTo<vcl::WindowSize>(vcl::LogicSize(aLogicRect.GetSize())).get())
         {
             aLogicRect.SetSize( aVisSize );
             pDrawObj->SetLogicRect( aLogicRect );

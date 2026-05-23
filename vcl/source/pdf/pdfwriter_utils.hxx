@@ -90,20 +90,57 @@ void computeDocumentIdentifier(std::vector<sal_uInt8>& o_rIdentifier,
                                const PDFWriter::PDFDocInfo& i_rDocInfo, const OString& i_rCString1,
                                const css::util::DateTime& rCreationMetaDate, OString& o_rCString2);
 
-template <class GEOMETRY>
-GEOMETRY convert(const MapMode& _rSource, const MapMode& _rDest, OutputDevice* _pPixelConversion,
-                 const GEOMETRY& _rObject)
+inline Point convert(const MapMode& _rSource, const MapMode& _rDest,
+                     OutputDevice* _pPixelConversion, const Point& _rObject)
 {
-    GEOMETRY aPoint;
     if (MapUnit::MapPixel == _rSource.GetMapUnit())
     {
-        aPoint = _pPixelConversion->WindowToLogic(_rObject, _rDest);
+        return _pPixelConversion->convertTo<vcl::LogicPoint>(vcl::WindowPoint(_rObject), _rDest)
+            .get();
     }
-    else
+
+    return ::LogicToLogic(_rObject, _rSource, _rDest);
+}
+
+inline Size convert(const MapMode& _rSource, const MapMode& _rDest, OutputDevice* _pPixelConversion,
+                    const Size& _rObject)
+{
+    if (MapUnit::MapPixel == _rSource.GetMapUnit())
     {
-        aPoint = ::LogicToLogic(_rObject, _rSource, _rDest);
+        return _pPixelConversion->convertTo<vcl::LogicSize>(vcl::WindowSize(_rObject), _rDest)
+            .get();
     }
-    return aPoint;
+
+    return ::LogicToLogic(_rObject, _rSource, _rDest);
+}
+
+inline tools::Rectangle convert(const MapMode& _rSource, const MapMode& _rDest,
+                                OutputDevice* _pPixelConversion, const tools::Rectangle& _rObject)
+{
+    if (MapUnit::MapPixel == _rSource.GetMapUnit())
+    {
+        return _pPixelConversion->convertTo<vcl::LogicRect>(vcl::WindowRect(_rObject), _rDest)
+            .get();
+    }
+
+    return ::LogicToLogic(_rObject, _rSource, _rDest);
+}
+
+inline basegfx::B2DPolygon convert(const MapMode& _rSource, const MapMode& _rDest,
+                                   OutputDevice* _pPixelConversion,
+                                   const basegfx::B2DPolygon& _rObject)
+{
+    if (MapUnit::MapPixel == _rSource.GetMapUnit())
+    {
+        // Bridge the basegfx geometry to the tools-based VCL wrapper
+        tools::Polygon aToolsPoly(_rObject);
+        return _pPixelConversion
+            ->convertTo<vcl::LogicPolygon>(vcl::WindowPolygon(aToolsPoly), _rDest)
+            .get()
+            .getB2DPolygon();
+    }
+
+    return ::LogicToLogic(_rObject, _rSource, _rDest);
 }
 
 } // end namespace vcl::pdf

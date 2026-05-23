@@ -329,15 +329,14 @@ Bitmap convertPrimitive2DContainerToBitmap(primitive2d::Primitive2DContainer&& r
         aRealRect.Y2 = rTargetRange.getMaxY();
 
         // get system DPI
-        Size aDPI(
-            Application::GetDefaultDevice()->LogicToWindow(Size(1, 1), MapMode(MapUnit::MapInch)));
-        if (rTargetDPI.has_value())
-        {
-            aDPI = *rTargetDPI;
-        }
+        auto aDPI =
+            Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(1, 1)), MapMode(MapUnit::MapInch));
 
-        ::sal_uInt32 DPI_X = aDPI.getWidth();
-        ::sal_uInt32 DPI_Y = aDPI.getHeight();
+        if (rTargetDPI.has_value())
+            aDPI = vcl::WindowSize(*rTargetDPI);
+
+        ::sal_uInt32 DPI_X = aDPI->getWidth();
+        ::sal_uInt32 DPI_Y = aDPI->getHeight();
         const basegfx::B2DRange aRange(aRealRect.X1, aRealRect.Y1, aRealRect.X2, aRealRect.Y2);
         const double fWidth(aRange.getWidth());
         const double fHeight(aRange.getHeight());

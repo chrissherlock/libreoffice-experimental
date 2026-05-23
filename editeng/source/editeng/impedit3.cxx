@@ -3414,8 +3414,8 @@ void ImpEditEngine::DrawText_ToRectangle( OutputDevice& rOutDev, const tools::Re
 
     // get aOutRect and align to the pixel boundary, so that it
     // becomes exactly the same as Paint()
-    const tools::Rectangle aOutRect(rOutDev.WindowToLogic(rOutDev.LogicToWindow(rOutRect).get()).get());
-    const tools::Rectangle aClipRect(0, 0, aOutRect.GetWidth(), aOutRect.GetHeight());
+    auto aOutRect = rOutDev.convertTo<vcl::LogicRect>(rOutDev.convertTo<vcl::WindowRect>(vcl::LogicRect(rOutRect)));
+    const tools::Rectangle aClipRect(0, 0, aOutRect->GetWidth(), aOutRect->GetHeight());
 
     // extract Primitives
     TextHierarchyBreakup aHelper;
@@ -3452,13 +3452,13 @@ void ImpEditEngine::DrawText_ToRectangle( OutputDevice& rOutDev, const tools::Re
     Point aStartPos;
     if ( !IsEffectivelyVertical() )
     {
-        aStartPos.setX( aOutRect.Left() - rStartDocPos.X() );
-        aStartPos.setY( aOutRect.Top() - rStartDocPos.Y() );
+        aStartPos.setX(aOutRect->Left() - rStartDocPos.X());
+        aStartPos.setY(aOutRect->Top() - rStartDocPos.Y());
     }
     else
     {
-        aStartPos.setX( aOutRect.Right() + rStartDocPos.Y() );
-        aStartPos.setY( aOutRect.Top() - rStartDocPos.X() );
+        aStartPos.setX(aOutRect->Right() + rStartDocPos.Y());
+        aStartPos.setY(aOutRect->Top() - rStartDocPos.X());
     }
 
     if (0 != aStartPos.X() || 0 != aStartPos.Y())

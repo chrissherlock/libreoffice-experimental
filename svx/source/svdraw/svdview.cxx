@@ -180,10 +180,15 @@ bool SdrView::KeyInput(const KeyEvent& rKEvt, vcl::Window* pWin)
             }
         } // switch
         if (bRet && pWin!=nullptr) {
-            pWin->SetPointer(GetPreferredPointer(
-                pWin->WindowToLogic(pWin->ScreenToOutputPixel( pWin->GetPointerPosPixel() ) ),
+            auto aPointerStyle = GetPreferredPointer(
+                pWin->convertTo<vcl::LogicPoint>(
+                    vcl::WindowPoint(pWin->ScreenToOutputPixel(pWin->GetPointerPosPixel()))
+                ).get(),
                 pWin->GetOutDev(),
-                rKEvt.GetKeyCode().GetModifier()));
+                rKEvt.GetKeyCode().GetModifier()
+            );
+
+            pWin->SetPointer(aPointerStyle);
         }
     }
     return bRet;
@@ -255,7 +260,8 @@ SdrHitKind SdrView::PickAnything(const MouseEvent& rMEvt, SdrMouseEventKind nEve
         pOut = GetFirstOutputDevice();
     }
     Point aPnt(rMEvt.GetPosPixel());
-    if (pOut!=nullptr) aPnt= pOut->WindowToLogic(aPnt);
+    if (pOut != nullptr)
+        aPnt = pOut->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPnt));
 
     if (mbNegativeX)
     {
@@ -528,10 +534,8 @@ SdrHitKind SdrView::PickAnything(const Point& rLogicPos, SdrViewEvent& rVEvt) co
         sal_Int32 nTolerance(mnHitTolLog);
         bool bBoundRectHit(false);
 
-        if(pOut)
-        {
-            nTolerance = pOut->WindowToLogic(Size(2, 0))->Width();
-        }
+        if (pOut)
+            nTolerance = pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(2, 0))->Width();
 
         if( (aLocalLogicPosition.X() >= aBoundRect.Left() - nTolerance && aLocalLogicPosition.X() <= aBoundRect.Left() + nTolerance)
          || (aLocalLogicPosition.X() >= aBoundRect.Right() - nTolerance && aLocalLogicPosition.X() <= aBoundRect.Right() + nTolerance)
@@ -830,8 +834,13 @@ bool SdrView::DoMouseEvent(const SdrViewEvent& rVEvt)
 
                         if(bRet2)
                         {
-                            MouseEvent aMEvt(mpActualOutDev->LogicToWindow(aLogicPos), 1,
-                                             rVEvt.mnMouseMode,rVEvt.mnMouseCode,rVEvt.mnMouseCode);
+                            MouseEvent aMEvt(
+                                mpActualOutDev->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aLogicPos)).get(),
+                                1,
+                                rVEvt.mnMouseMode,
+                                rVEvt.mnMouseCode,
+                                rVEvt.mnMouseCode
+                            );
 
                             OutlinerView* pOLV=GetTextEditOutlinerView();
                             if (pOLV!=nullptr) {
@@ -927,7 +936,7 @@ bool SdrView::DoMouseEvent(const SdrViewEvent& rVEvt)
 
             if(bRet)
             {
-                MouseEvent aMEvt(mpActualOutDev->LogicToWindow(aLogicPos),
+                MouseEvent aMEvt(mpActualOutDev->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aLogicPos)).get(),
                                  1, rVEvt.mnMouseMode, rVEvt.mnMouseCode, rVEvt.mnMouseCode);
                 OutlinerView* pOLV=GetTextEditOutlinerView();
                 if (pOLV!=nullptr) pOLV->MouseButtonDown(aMEvt); // event for the Outliner, but without double-click
@@ -969,7 +978,7 @@ PointerStyle SdrView::GetPreferredPointer(const Point& rMousePos, const OutputDe
     if (IsDragHelpLine()) return GetDraggedHelpLinePointer();
     if (IsMacroObj()) {
         SdrObjMacroHitRec aHitRec;
-        aHitRec.aPos= pOut->LogicToWindow(rMousePos);
+        aHitRec.aPos= pOut->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rMousePos)).get();
         aHitRec.nTol=m_nMacroTol;
         aHitRec.pVisiLayer=&m_pMacroPV->GetVisibleLayers();
         aHitRec.pPageView=m_pMacroPV;
@@ -987,8 +996,8 @@ PointerStyle SdrView::GetPreferredPointer(const Point& rMousePos, const OutputDe
                 return PointerStyle::Text;
         }
         // Outliner should return something here...
-        Point aPos(pOut->LogicToWindow(rMousePos));
-        PointerStyle aPointer(mpTextEditOutlinerView->GetPointer(aPos));
+        auto aPos = pOut->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rMousePos));
+        PointerStyle aPointer(mpTextEditOutlinerView->GetPointer(aPos.get()));
         if (aPointer==PointerStyle::Arrow)
         {
             if (mpTextEditOutliner->IsVertical())

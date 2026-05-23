@@ -698,7 +698,7 @@ void SwSpellPopup::checkRedline()
 
 void SwSpellPopup::Execute( const tools::Rectangle& rWordPos, vcl::Window* pWin )
 {
-    sal_uInt16 nRet = m_xPopupMenu->Execute(pWin, pWin->LogicToWindow(rWordPos));
+    sal_uInt16 nRet = m_xPopupMenu->Execute(pWin, pWin->convertTo<vcl::WindowRect>(vcl::LogicRect(rWordPos)));
     Execute( nRet );
 }
 

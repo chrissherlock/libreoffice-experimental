@@ -1539,11 +1539,12 @@ void ScGridWindow::LaunchDataSelectMenu(const SCCOL nCol, const SCROW nRow)
 
     if (bLOKActive)
     {
-        // aPos is now view-zoom adjusted and in pixels an more importantly this is pixel aligned to the view-zoom,
-        // but once we use this to set the position of the floating window, it has no information of view-zoom level
-        // so if we don't reverse the zoom now, a simple WindowToLogic(aPos, MapMode(MapUnit::MapTwip)) employed in
-        // FloatingWindow::ImplCalcPos will produce a 'scaled' twips position which will again get zoom scaled in the
-        // client (effective double scaling) causing wrong positioning/size.
+        // aPos is already adjusted for the view-zoom and pixel-aligned to that zoom level.
+        // Because the floating window lacks awareness of this zoom state, calling a
+        // standard coordinate conversion in ImplCalcPos would incorrectly apply the
+        // zoom factor a second time. We must manually reverse the zoom here to ensure
+        // that the subsequent conversion results in a stable, unscaled position in
+        // logical twips.
         double fZoomX(mrViewData.GetZoomX());
         double fZoomY(mrViewData.GetZoomY());
         assert(fZoomX != 0.0 && fZoomY != 0.0 && "cannot be zero");
@@ -2334,7 +2335,7 @@ void ScGridWindow::MouseButtonUp( const MouseEvent& rMEvt )
         SdrView* pSdrView(mrViewData.GetView()->GetScDrawView());
         if (nullptr != pSdrView)
         {
-            const Point aDocPos(WindowToLogic(aCurMousePos));
+            const Point aDocPos(convertTo<vcl::LogicPoint>(vcl::WindowPoint(aCurMousePos)));
             SdrHdl* pHdl(pSdrView->PickHandle(aDocPos));
 
             if (nullptr != pHdl)
@@ -2989,7 +2990,7 @@ void ScGridWindow::MouseMove( const MouseEvent& rMEvt )
             const SvxFieldItem* pFld;
             if ( comphelper::LibreOfficeKit::isActive() )
             {
-                Point aLogicClick = pEditView->GetOutputDevice().WindowToLogic(aPos);
+                Point aLogicClick = pEditView->GetOutputDevice().convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
                 pFld = pEditView->GetField( aLogicClick );
             }
             else
@@ -3276,7 +3277,7 @@ static void lcl_SetTextCursorPos( ScViewData& rViewData, ScSplitPos eWhich, vcl:
     SCROW nRow = rViewData.GetCurY();
     tools::Rectangle aEditArea = rViewData.GetEditArea( eWhich, nCol, nRow, pWin, nullptr, true );
     aEditArea.SetRight( aEditArea.Left() );
-    aEditArea = pWin->WindowToLogic( aEditArea );
+    aEditArea = pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(aEditArea));
     pWin->SetCursorRect( &aEditArea );
 }
 
@@ -3555,7 +3556,7 @@ void ScGridWindow::Command( const CommandEvent& rCEvt )
                 //  the cursor is before the word, but not if behind it)
                 aLogicPos.AdjustX(pCur->GetWidth() );
                 aLogicPos.AdjustY(pCur->GetHeight() / 2 );     // center vertically
-                aMenuPos = LogicToWindow( aLogicPos );
+                aMenuPos = convertTo<vcl::WindowPoint>(vcl::LogicPoint(aLogicPos));
             }
         }
 
@@ -3622,7 +3623,7 @@ void ScGridWindow::Command( const CommandEvent& rCEvt )
             if (pDrawView && pDrawView->GetMarkedObjectList().GetMarkCount() != 0)
             {
                 // #100442#; the context menu should open in the middle of the selected objects
-                tools::Rectangle aSelectRect(LogicToWindow(pDrawView->GetAllMarkedBoundRect()));
+                tools::Rectangle aSelectRect(convertTo<vcl::WindowRect>(vcl::LogicRect(pDrawView->GetAllMarkedBoundRect())));
                 aMenuPos = aSelectRect.Center();
             }
         }
@@ -3663,7 +3664,7 @@ void ScGridWindow::SelectForContextMenu( const Point& rPosPixel, SCCOL nCellX, S
             tools::Rectangle aOutputArea = pEditView->GetOutputArea();
             tools::Rectangle aVisArea = pEditView->GetVisArea();
 
-            Point aTextPos = WindowToLogic( rPosPixel );
+            Point aTextPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPosPixel));
             if (rEditEngine.IsEffectivelyVertical())            // have to manually transform position
             {
                 aTextPos -= aOutputArea.TopRight();
@@ -3698,7 +3699,7 @@ void ScGridWindow::SelectForContextMenu( const Point& rPosPixel, SCCOL nCellX, S
 
     //  check draw text edit mode
 
-    Point aLogicPos = WindowToLogic( rPosPixel );        // after cell edit mode is ended
+    Point aLogicPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPosPixel));          // after cell edit mode is ended
     if ( pDrawView && pDrawView->GetTextEditObject() && pDrawView->GetTextEditOutlinerView() )
     {
         OutlinerView* pOlView = pDrawView->GetTextEditOutlinerView();
@@ -4146,8 +4147,7 @@ sal_Int8 ScGridWindow::AcceptPrivateDrop( const AcceptDropEvent& rEvt, const ScD
         if (pSourceDoc == &rThisDoc)
         {
             OUString aName;
-            if ( rThisDoc.HasChartAtPoint(mrViewData.CurrentTabForData(), WindowToLogic(aPos), aName ))
-            {
+            if ( rThisDoc.HasChartAtPoint(mrViewData.CurrentTabForData(), convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos)), aName )) {
                 if (bDragRect)          // Remove rectangle
                 {
                     bDragRect = false;
@@ -4395,7 +4395,7 @@ sal_Int8 ScGridWindow::AcceptDrop( const AcceptDropEvent& rEvt )
                     nMyAction = DND_ACTION_COPY;
 
             SdrObject* pHitObj = rThisDoc.GetObjectAtPoint(
-                        mrViewData.CurrentTabForData(), WindowToLogic(rEvt.maPosPixel) );
+                        mrViewData.CurrentTabForData(), convertTo<vcl::LogicPoint>(vcl::WindowPoint(rEvt.maPosPixel)));
             if ( pHitObj && nMyAction == DND_ACTION_LINK )
             {
                 if ( IsDropFormatSupported(SotClipboardFormatId::SVXB)
@@ -4626,8 +4626,15 @@ sal_Int8 ScGridWindow::ExecutePrivateDrop( const ExecuteDropEvent& rEvt, const S
     bDragRect = false;
     UpdateDragRectOverlay();
 
-    return DropTransferObj( rData.pCellTransfer, nDragStartX, nDragStartY,
-                                WindowToLogic(rEvt.maPosPixel), rEvt.mnAction );
+    return DropTransferObj(
+        rData.pCellTransfer,
+        nDragStartX,
+        nDragStartY,
+        convertTo<vcl::LogicPoint>(
+            vcl::WindowPoint(rEvt.maPosPixel)
+        ).get(),
+        rEvt.mnAction
+    );
 }
 
 sal_Int8 ScGridWindow::DropTransferObj( ScTransferObj* pTransObj, SCCOL nDestPosX, SCROW nDestPosY,
@@ -5040,7 +5047,7 @@ sal_Int8 ScGridWindow::ExecuteDrop( const ExecuteDropEvent& rEvt )
         return bOk ? rEvt.mnAction : DND_ACTION_NONE;           // don't try anything else
     }
 
-    Point aLogicPos = WindowToLogic(aPos);
+    Point aLogicPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
     bool bIsLink = ( rEvt.mnAction == DND_ACTION_LINK );
 
     if (!bIsLink && rData.pDrawTransfer)
@@ -5080,7 +5087,7 @@ sal_Int8 ScGridWindow::ExecuteDrop( const ExecuteDropEvent& rEvt )
     }
 
     ScDocument& rThisDoc = mrViewData.GetDocument();
-    SdrObject* pHitObj = rThisDoc.GetObjectAtPoint( mrViewData.CurrentTabForData(), WindowToLogic(aPos) );
+    SdrObject* pHitObj = rThisDoc.GetObjectAtPoint( mrViewData.CurrentTabForData(), convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos)));
     if ( pHitObj && bIsLink )
     {
         //  dropped on drawing object
@@ -5108,7 +5115,7 @@ sal_Int8 ScGridWindow::ExecuteDrop( const ExecuteDropEvent& rEvt )
 
 void ScGridWindow::PasteSelection( const Point& rPosPixel )
 {
-    Point aLogicPos = WindowToLogic( rPosPixel );
+    Point aLogicPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPosPixel));
 
     SCCOL  nPosX;
     SCROW  nPosY;
@@ -5195,8 +5202,7 @@ void ScGridWindow::UpdateEditViewPos()
     {
         tools::Rectangle aRect = pView->GetOutputArea();
         tools::Long nHeight = aRect.Bottom() - aRect.Top();
-        aRect.SetTop( WindowToLogic(GetOutputSizePixel(), mrViewData.GetLogicMode()).
-                        Height() * 2 );
+        aRect.SetTop(convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel()))->Height() * 2);
         aRect.SetBottom( aRect.Top() + nHeight );
         pView->SetOutputArea( aRect );
         pView->HideCursor();
@@ -5217,7 +5223,7 @@ void ScGridWindow::UpdateEditViewPos()
             pView->SetLOKSpecialOutputArea(aOutputAreaPTwips);
         }
 
-        Point aScrPos = WindowToLogic( aPixRect.TopLeft(), mrViewData.GetLogicMode() );
+        Point aScrPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPixRect.TopLeft()), mrViewData.GetLogicMode());
 
         tools::Rectangle aRect = pView->GetOutputArea();
         aRect.SetPos( aScrPos );
@@ -5356,7 +5362,7 @@ void ScGridWindow::UpdateFormulaRange(SCCOL nX1, SCROW nY1, SCCOL nX2, SCROW nY2
 
     // #i122149# do not use old GetChangedArea() which used polygon-based Regions, but use
     // the region-band based new version; anyways, only rectangles are added
-    vcl::Region aChangedRegion( aOutputData.GetChangedAreaRegion() );   // logic (WindowToLogic)
+    vcl::Region aChangedRegion( aOutputData.GetChangedAreaRegion() );
     if(!aChangedRegion.IsEmpty())
     {
         Invalidate(aChangedRegion);
@@ -5426,7 +5432,7 @@ void ScGridWindow::UpdateListValPos( bool bVisible, const ScAddress& rPos )
             }
             else
             {
-                Invalidate( WindowToLogic( GetListValButtonRect( aListValPos ) ) );
+                Invalidate(convertTo<vcl::LogicRect>(vcl::WindowRect(GetListValButtonRect(aListValPos))));
             }
         }
     }
@@ -5442,7 +5448,7 @@ void ScGridWindow::UpdateListValPos( bool bVisible, const ScAddress& rPos )
         }
         else
         {
-            Invalidate( WindowToLogic( GetListValButtonRect( aOldPos ) ) );
+            Invalidate(convertTo<vcl::LogicRect>(vcl::WindowRect(GetListValButtonRect(aOldPos))));
         }
     }
 }
@@ -6068,7 +6074,7 @@ bool ScGridWindow::GetEditUrl(const Point& rPos, OUString* pName, OUString* pUrl
     std::shared_ptr<ScFieldEditEngine> pEngine = createEditEngine(pDocSh, *pPattern);
 
     MapMode aEditMode = mrViewData.GetLogicMode(eWhich);            // without draw scaling
-    tools::Rectangle aLogicEdit = WindowToLogic( aEditRect, aEditMode );
+    tools::Rectangle aLogicEdit = convertTo<vcl::LogicRect>(vcl::WindowRect(aEditRect), aEditMode);
     tools::Long nThisColLogic = aLogicEdit.Right() - aLogicEdit.Left() + 1;
     Size aPaperSize( 1000000, 1000000 );
     if (aCell.getType() == CELLTYPE_FORMULA)
@@ -6077,7 +6083,7 @@ bool ScGridWindow::GetEditUrl(const Point& rPos, OUString* pName, OUString* pUrl
         tools::Long nSizeY  = 0;
         mrViewData.GetMergeSizePixel( nPosX, nPosY, nSizeX, nSizeY );
         aPaperSize = Size(nSizeX, nSizeY );
-        aPaperSize = WindowToLogic(aPaperSize);
+        aPaperSize = aPaperSize = convertTo<vcl::LogicSize>(vcl::WindowSize(aPaperSize));
     }
 
     if (bBreak)
@@ -6112,7 +6118,7 @@ bool ScGridWindow::GetEditUrl(const Point& rPos, OUString* pName, OUString* pUrl
     }
     aLogicEdit.SetBottom( aLogicEdit.Top() + nTextHeight );
 
-    Point aLogicClick = WindowToLogic(rPos,aEditMode);
+    Point aLogicClick = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPos), aEditMode);
     if ( aLogicEdit.Contains(aLogicClick) )
     {
         EditView aTempView(*pEngine, this);
@@ -6483,7 +6489,7 @@ void ScGridWindow::UpdateCopySourceOverlay()
 
         Color aHighlight = GetSettings().GetStyleSettings().GetHighlightColor();
 
-        tools::Rectangle aLogic = WindowToLogic(aRect, aDrawMode);
+        tools::Rectangle aLogic = convertTo<vcl::LogicRect>(vcl::WindowRect(aRect));
         ::basegfx::B2DRange aRange = vcl::unotools::b2DRectangleFromRectangle(aLogic);
         std::unique_ptr<ScOverlayDashedBorder> pDashedBorder(new ScOverlayDashedBorder(aRange, aHighlight));
         xOverlayManager->add(*pDashedBorder);
@@ -6663,10 +6669,10 @@ void updateLibreOfficeKitAutoFill(const ScViewData& rViewData, tools::Rectangle 
     if (!rRectangle.IsEmpty())
     {
         // selection start handle
-        tools::Rectangle aLogicRectangle(
+        tools::Rectangle aLogicRect(
                 rRectangle.Left()  / nPPTX, rRectangle.Top() / nPPTY,
                 rRectangle.Right() / nPPTX, rRectangle.Bottom() / nPPTY);
-        sRectangleString = aLogicRectangle.toString();
+        sRectangleString = aLogicRect.toString();
     }
 
     ScTabViewShell* pViewShell = rViewData.GetViewShell();

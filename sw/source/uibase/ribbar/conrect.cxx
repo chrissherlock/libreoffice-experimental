@@ -101,7 +101,7 @@ bool ConstRectangle::MouseButtonUp(const MouseEvent& rMEvt)
                     aItemSet.Put( SdrTextAniDirectionItem( SdrTextAniDirection::Left ) );
                     aItemSet.Put( SdrTextAniCountItem( 0 ) );
                     aItemSet.Put( SdrTextAniAmountItem(
-                            static_cast<sal_Int16>(m_pWin->WindowToLogic(Size(2,1)).Width())) );
+                                static_cast<sal_Int16>(m_pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(2, 1)), m_pWin->GetMapMode())->Width())));
 
                     pObj->SetMergedItemSetAndBroadcast(aItemSet);
                 }

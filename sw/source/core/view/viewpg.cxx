@@ -92,7 +92,7 @@ void SwViewShell::PrintProspect(
     //!! applying view options and formatting the document should now only be done in getRendererCount!
 
     MapMode aMapMode( MapUnit::MapTwip );
-    Size aPrtSize( pPrinter->WindowToLogic( pPrinter->GetPaperSizePixel(), aMapMode ) );
+    Size aPrtSize = pPrinter->convertTo<vcl::LogicSize>(vcl::WindowSize(pPrinter->GetPaperSizePixel()), aMapMode);
 
     SwTwips nMaxRowSz, nMaxColSz;
 
@@ -168,7 +168,7 @@ void SwViewShell::PrintProspect(
         aMapMode.SetScaleX( fScY );
     }
 
-    Size aTmpPrtSize( pPrinter->WindowToLogic( pPrinter->GetPaperSizePixel(), aMapMode ) );
+    Size aTmpPrtSize = pPrinter->convertTo<vcl::LogicSize>(vcl::WindowSize(pPrinter->GetPaperSizePixel()), aMapMode);
 
     // calculate start point for equal border on all sides
     Point aSttPt( (aTmpPrtSize.Width() - nMaxColSz) / 2,

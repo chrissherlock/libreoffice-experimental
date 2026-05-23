@@ -431,7 +431,10 @@ namespace dbaui
 
     Size ORelationControl::GetOptimalSize() const
     {
-        return LogicToWindow(Size(140, 80), MapMode(MapUnit::MapAppFont));
+        return convertTo<vcl::WindowSize>(
+            vcl::LogicSize(Size(140, 80)),
+            MapMode(MapUnit::MapAppFont)
+        ).get();
     }
 
     OTableListBoxControl::OTableListBoxControl(weld::Builder* _pParent,

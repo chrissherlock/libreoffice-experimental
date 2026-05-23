@@ -769,7 +769,7 @@ void SAL_CALL ScStyleFamilyObj::removeByName( const OUString& aName )
             {
                 // like ScViewFunc::RemoveStyleSheetInUse
                 ScopedVclPtrInstance< VirtualDevice > pVDev;
-                Point aLogic = pVDev->LogicToWindow(Point(1000,1000), MapMode(MapUnit::MapTwip));
+                Point aLogic = pVDev->convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point(1000,1000)), MapMode(MapUnit::MapTwip));
                 double nPPTX = aLogic.X() / 1000.0;
                 double nPPTY = aLogic.Y() / 1000.0;
                 double fZoom(1.0);
@@ -1086,7 +1086,7 @@ void SAL_CALL ScStyleObj::setParentStyle( const OUString& rParentStyle )
         // update line height
 
         ScopedVclPtrInstance< VirtualDevice > pVDev;
-        Point aLogic = pVDev->LogicToWindow( Point(1000,1000), MapMode(MapUnit::MapTwip));
+        Point aLogic = pVDev->convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point(1000,1000)), MapMode(MapUnit::MapTwip));
         double nPPTX = aLogic.X() / 1000.0;
         double nPPTY = aLogic.Y() / 1000.0;
         double fZoom(1.0);
@@ -1471,7 +1471,7 @@ void SAL_CALL ScStyleObj::setAllPropertiesToDefault()
         //  row heights
 
         ScopedVclPtrInstance< VirtualDevice > pVDev;
-        Point aLogic = pVDev->LogicToWindow(Point(1000,1000), MapMode(MapUnit::MapTwip));
+        Point aLogic = pVDev->convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point(1000,1000)), MapMode(MapUnit::MapTwip));
         double nPPTX = aLogic.X() / 1000.0;
         double nPPTY = aLogic.Y() / 1000.0;
         double fZoom(1.0);
@@ -1849,7 +1849,7 @@ void ScStyleObj::setPropertyValue_Impl( std::u16string_view rPropertyName, const
         {
             // update line height
             ScopedVclPtrInstance< VirtualDevice > pVDev;
-            Point aLogic = pVDev->LogicToWindow(Point(1000,1000), MapMode(MapUnit::MapTwip));
+            Point aLogic = pVDev->convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point(1000,1000)), MapMode(MapUnit::MapTwip));
             double nPPTX = aLogic.X() / 1000.0;
             double nPPTY = aLogic.Y() / 1000.0;
             double fZoom(1.0);

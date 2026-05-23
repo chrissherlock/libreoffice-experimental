@@ -61,12 +61,12 @@ Point SwGetChartDialogPos( const vcl::Window *pParentWin, const Size& rDialogSiz
     OSL_ENSURE( pParentWin, "Window not found" );
     if (pParentWin)
     {
-        tools::Rectangle aObjPixel = pParentWin->LogicToWindow( rLogicChart, pParentWin->GetMapMode() );
+        tools::Rectangle aObjPixel = pParentWin->convertTo<vcl::WindowRect>(vcl::LogicRect(rLogicChart), pParentWin->GetMapMode());
         AbsoluteScreenPixelRectangle aObjAbs( pParentWin->OutputToAbsoluteScreenPixel( aObjPixel.TopLeft() ),
                            pParentWin->OutputToAbsoluteScreenPixel( aObjPixel.BottomRight() ) );
 
         AbsoluteScreenPixelRectangle aDesktop = pParentWin->GetDesktopRectPixel();
-        Size aSpace = pParentWin->LogicToWindow(Size(8, 12), MapMode(MapUnit::MapAppFont));
+        Size aSpace = pParentWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(8, 12)), MapMode(MapUnit::MapAppFont));
 
         bool bCenterHor = false;
 

@@ -1728,16 +1728,16 @@ void DbCheckBox::PaintCell(OutputDevice& rDev, const tools::Rectangle& rRect)
             TriState eState = static_cast<CheckBoxControl*>(m_pWindow.get())->GetState();
 
             MapMode aResMapMode(MapUnit::Map100thMM);
-            Size aImageSize = rDev.LogicToWindow(Size(300, 300), aResMapMode);
-            Size aBrd1Size = rDev.LogicToWindow(Size(20, 20), aResMapMode);
-            Size aBrd2Size = rDev.LogicToWindow(Size(30, 30), aResMapMode);
-            int nCheckWidth = rDev.LogicToWindow(Size(20, 20), aResMapMode)->Width();
+            auto aImageSize = rDev.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(300, 300)), aResMapMode);
+            auto aBrd1Size = rDev.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(20, 20)), aResMapMode);
+            auto aBrd2Size = rDev.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(30, 30)), aResMapMode);
+            int nCheckWidth = rDev.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(20, 20)), aResMapMode)->Width();
 
             tools::Rectangle aStateRect;
-            aStateRect.SetLeft(rRect.Left() + ((rRect.GetWidth() - aImageSize.Width()) / 2));
-            aStateRect.SetTop(rRect.Top() + ((rRect.GetHeight() - aImageSize.Height()) / 2));
-            aStateRect.SetRight(aStateRect.Left() + aImageSize.Width() - 1);
-            aStateRect.SetBottom(aStateRect.Top() + aImageSize.Height() - 1);
+            aStateRect.SetLeft(rRect.Left() + ((rRect.GetWidth() - aImageSize->Width()) / 2));
+            aStateRect.SetTop(rRect.Top() + ((rRect.GetHeight() - aImageSize->Height()) / 2));
+            aStateRect.SetRight(aStateRect.Left() + aImageSize->Width() - 1);
+            aStateRect.SetBottom(aStateRect.Top() + aImageSize->Height() - 1);
 
             auto popIt = rDev.ScopedPush();
             rDev.SetMapMode();
@@ -1745,10 +1745,10 @@ void DbCheckBox::PaintCell(OutputDevice& rDev, const tools::Rectangle& rRect)
             rDev.SetLineColor();
             rDev.SetFillColor(COL_BLACK);
             rDev.DrawRect(aStateRect);
-            aStateRect.AdjustLeft(aBrd1Size.Width());
-            aStateRect.AdjustTop(aBrd1Size.Height());
-            aStateRect.AdjustRight(-aBrd1Size.Width());
-            aStateRect.AdjustBottom(-aBrd1Size.Height());
+            aStateRect.AdjustLeft(aBrd1Size->Width());
+            aStateRect.AdjustTop(aBrd1Size->Height());
+            aStateRect.AdjustRight(-aBrd1Size->Width());
+            aStateRect.AdjustBottom(-aBrd1Size->Height());
             if (eState == TRISTATE_INDET)
                 rDev.SetFillColor(COL_LIGHTGRAY);
             else
@@ -1757,10 +1757,10 @@ void DbCheckBox::PaintCell(OutputDevice& rDev, const tools::Rectangle& rRect)
 
             if (eState == TRISTATE_TRUE)
             {
-                aStateRect.AdjustLeft(aBrd2Size.Width());
-                aStateRect.AdjustTop(aBrd2Size.Height());
-                aStateRect.AdjustRight(-aBrd2Size.Width());
-                aStateRect.AdjustBottom(-aBrd2Size.Height());
+                aStateRect.AdjustLeft(aBrd2Size->Width());
+                aStateRect.AdjustTop(aBrd2Size->Height());
+                aStateRect.AdjustRight(-aBrd2Size->Width());
+                aStateRect.AdjustBottom(-aBrd2Size->Height());
                 Point aPos11(aStateRect.TopLeft());
                 Point aPos12(aStateRect.BottomRight());
                 Point aPos21(aStateRect.TopRight());

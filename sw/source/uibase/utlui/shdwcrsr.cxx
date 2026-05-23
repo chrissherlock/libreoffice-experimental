@@ -31,8 +31,8 @@ SwShadowCursor::~SwShadowCursor()
 
 void SwShadowCursor::SetPos( const Point& rPt, tools::Long nHeight, sal_uInt16 nMode )
 {
-    Point aPt( m_pWin->LogicToWindow( rPt ));
-    nHeight = m_pWin->LogicToWindow( Size( 0, nHeight )).Height();
+    Point aPt( m_pWin->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPt)));
+    nHeight = m_pWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size( 0, nHeight )))->Height();
     if( m_aOldPt != aPt || m_nOldHeight != nHeight || m_nOldMode != nMode )
     {
         if( USHRT_MAX != m_nOldMode )

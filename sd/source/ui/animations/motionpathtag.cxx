@@ -446,7 +446,7 @@ bool MotionPathTag::MouseButtonDown( const MouseEvent& rMEvt, SmartHdl& rHdl )
         else if( rMEvt.IsLeft() )
         {
             OutputDevice* pOut = mrView.GetViewShell()->GetActiveWindow()->GetOutDev();
-            Point aMDPos( pOut->WindowToLogic( rMEvt.GetPosPixel() ));
+            Point aMDPos(pOut->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
 
             if( !mrView.IsFrameDragSingles() && mrView.IsInsObjPointMode() && (rHdl.GetObjHdlNum() == SMART_TAG_HDL_NUM) )
             {
@@ -517,7 +517,7 @@ bool MotionPathTag::MouseButtonDown( const MouseEvent& rMEvt, SmartHdl& rHdl )
                 if( pHdl && !rMEvt.IsRight() )
                 {
                     mrView.BrkAction();
-                    const sal_uInt16 nDrgLog = static_cast<sal_uInt16>(pOut->WindowToLogic(Size(DRGPIX,0))->Width());
+                    const sal_uInt16 nDrgLog = static_cast<sal_uInt16>(pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(DRGPIX, 0)))->Width());
 
                     rtl::Reference< MotionPathTag > xTag( this );
                     SdrDragMethod* pDragMethod;
@@ -687,7 +687,9 @@ bool MotionPathTag::OnMove( const KeyEvent& rKEvt )
     if(rKEvt.GetKeyCode().IsMod2())
     {
         OutputDevice* pOut = mrView.GetViewShell()->GetActiveWindow()->GetOutDev();
-        Size aLogicSizeOnePixel = pOut ? pOut->WindowToLogic(Size(1,1)) : Size(100, 100);
+        Size aLogicSizeOnePixel = pOut
+            ? pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(1, 1)))
+            : Size(100, 100);
         nX *= aLogicSizeOnePixel.Width();
         nY *= aLogicSizeOnePixel.Height();
     }

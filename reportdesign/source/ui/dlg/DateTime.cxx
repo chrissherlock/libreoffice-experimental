@@ -116,17 +116,25 @@ short ODateTimeDialog::run()
 
             OutputDevice* pDefDev = Application::GetDefaultDevice();
             sal_Int32 nWidth = 0;
-            if ( m_xDate->get_active() )
+
+            if (m_xDate->get_active())
             {
-                OUString sDateFormat = m_xDateListBox->get_active_text();
-                nWidth = ::LogicToLogic(pDefDev->WindowToLogic(Size(pDefDev->GetCtrlTextWidth(sDateFormat),0))->Width(),
-                        pDefDev->GetMapMode().GetMapUnit(),MapUnit::Map100thMM);
+                const OUString sDateFormat = m_xDateListBox->get_active_text();
+                nWidth = pDefDev->convertTo<vcl::LogicSize>(
+                    vcl::WindowSize(pDefDev->GetCtrlTextWidth(sDateFormat), 0),
+                    MapMode(MapUnit::Map100thMM)
+                )->Width();
             }
-            if ( m_xTime->get_active() )
+
+            if (m_xTime->get_active())
             {
-                OUString sDateFormat = m_xTimeListBox->get_active_text();
-                nWidth = ::std::max<sal_Int32>(::LogicToLogic(pDefDev->WindowToLogic(Size(pDefDev->GetCtrlTextWidth(sDateFormat),0))->Width(),
-                        pDefDev->GetMapMode().GetMapUnit(),MapUnit::Map100thMM),nWidth);
+                const OUString sTimeFormat = m_xTimeListBox->get_active_text();
+                const sal_Int32 nTimeWidth = pDefDev->convertTo<vcl::LogicSize>(
+                    vcl::WindowSize(pDefDev->GetCtrlTextWidth(sTimeFormat), 0),
+                    MapMode(MapUnit::Map100thMM)
+                )->Width();
+
+                nWidth = std::max(nTimeWidth, nWidth);
             }
 
             if ( nWidth > 4000 )

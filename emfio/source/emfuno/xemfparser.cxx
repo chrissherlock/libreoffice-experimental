@@ -157,7 +157,7 @@ namespace emfio::emfreader
 
                     if (aMtf.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
                     {
-                        aSize = Application::GetDefaultDevice()->WindowToLogic(aSize, MapMode(MapUnit::Map100thMM));
+                        aSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize), MapMode(MapUnit::Map100thMM));
                     }
                     else
                     {

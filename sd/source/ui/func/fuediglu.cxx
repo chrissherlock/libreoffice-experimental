@@ -89,8 +89,8 @@ bool FuEditGluePoints::MouseButtonDown(const MouseEvent& rMEvt)
     if (rMEvt.IsLeft())
     {
         bReturn = true;
-        sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(HITPIX,0)).Width() );
-        sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+        sal_uInt16 nHitLog = static_cast<sal_uInt16>(mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(HITPIX, 0)))->Width());
+        sal_uInt16 nDrgLog = static_cast<sal_uInt16>(mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(mpView->GetDragThresholdPixels(), 0)))->Width());
         mpWindow->CaptureMouse();
 
         SdrViewEvent aVEvt;
@@ -204,7 +204,7 @@ bool FuEditGluePoints::MouseMove(const MouseEvent& rMEvt)
     if (mpView->IsAction())
     {
         Point aPix(rMEvt.GetPosPixel());
-        Point aPnt( mpWindow->WindowToLogic(aPix) );
+        Point aPnt(mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPix)));
         ForceScroll(aPix);
         mpView->MovAction(aPnt);
     }
@@ -228,8 +228,8 @@ bool FuEditGluePoints::MouseButtonUp(const MouseEvent& rMEvt)
 
     FuDraw::MouseButtonUp(rMEvt);
 
-    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
-    Point aPos = mpWindow->WindowToLogic( rMEvt.GetPosPixel() );
+    sal_uInt16 nDrgLog = static_cast<sal_uInt16>(mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(mpView->GetDragThresholdPixels(), 0)))->Width());
+    Point aPos = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
 
     if (std::abs(aMDPos.X() - aPos.X()) < nDrgLog &&
         std::abs(aMDPos.Y() - aPos.Y()) < nDrgLog &&
@@ -300,7 +300,7 @@ bool FuEditGluePoints::KeyInput(const KeyEvent& rKEvt)
                 }
                 Point centerPoint;
                 ::tools::Rectangle rect = mpView->GetMarkedObjRect();
-                centerPoint = mpWindow->LogicToWindow(rect.Center());
+                centerPoint = mpWindow->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rect.Center()));
                 Point aPoint = bBeginInsertPoint? oldPoint:centerPoint;
                 Point ePoint = aPoint + Point(nX,nY);
                 mpWindow->SetPointerPosPixel(ePoint);

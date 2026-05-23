@@ -1099,7 +1099,7 @@ AddressMultiLineEdit::~AddressMultiLineEdit()
 
 void AddressMultiLineEdit::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
-    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(160, 60), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(160, 60)), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     WeldEditView::SetDrawingArea(pDrawingArea);
 }
@@ -1584,7 +1584,7 @@ css::uno::Reference<css::datatransfer::dnd::XDropTarget> AddressMultiLineEdit::G
 
 bool AddressMultiLineEdit::SetCursorLogicPosition(const Point& rPosition)
 {
-    Point aMousePos = EditViewOutputDevice().WindowToLogic(rPosition);
+    Point aMousePos = EditViewOutputDevice().convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPosition));
     m_xEditView->SetCursorLogicPosition(aMousePos, false, true);
 
     ESelection aSelection = m_xEditView->GetSelection();

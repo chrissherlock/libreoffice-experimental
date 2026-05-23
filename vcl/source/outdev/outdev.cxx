@@ -170,6 +170,11 @@ void OutputDevice::dispose()
     VclReferenceBase::dispose();
 }
 
+Size OutputDevice::GetOutputSize() const
+{
+    return convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())).get();
+}
+
 sal_Int32 OutputDevice::GetDPIX() const
 {
     return mpMapper->GetDPIX();

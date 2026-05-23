@@ -53,7 +53,7 @@ bool FuConstRectangle::MouseButtonDown(const MouseEvent& rMEvt)
 
     if ( rMEvt.IsLeft() && !pView->IsAction() )
     {
-        Point aPos( pWindow->WindowToLogic( rMEvt.GetPosPixel() ) );
+        Point aPos(pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
         pWindow->CaptureMouse();
 
         if ( pView->GetCurrentObjIdentifier() == SdrObjKind::Caption )

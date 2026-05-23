@@ -1167,30 +1167,30 @@ OPreviewWindow::OPreviewWindow()
 bool OPreviewWindow::ImplGetGraphicCenterRect(const vcl::RenderContext& rRenderContext, const Graphic& rGraphic, tools::Rectangle& rResultRect) const
 {
     const Size aWinSize( GetOutputSizePixel() );
-    Size       aNewSize(rRenderContext.LogicToWindow(rGraphic.GetPrefSize(), rGraphic.GetPrefMapMode()));
-    bool       bRet = false;
+    auto aNewSize = rRenderContext.convertTo<vcl::WindowSize>(vcl::LogicSize(rGraphic.GetPrefSize()), rGraphic.GetPrefMapMode());
+    bool bRet = false;
 
-    if( aNewSize.Width() && aNewSize.Height() )
+    if( aNewSize->Width() && aNewSize->Height() )
     {
         // scale to fit window
-        const double fGrfWH = static_cast<double>(aNewSize.Width()) / aNewSize.Height();
+        const double fGrfWH = static_cast<double>(aNewSize->Width()) / aNewSize->Height();
         const double fWinWH = static_cast<double>(aWinSize.Width()) / aWinSize.Height();
 
         if ( fGrfWH < fWinWH )
         {
-            aNewSize.setWidth( static_cast<tools::Long>( aWinSize.Height() * fGrfWH ) );
-            aNewSize.setHeight( aWinSize.Height() );
+            aNewSize->setWidth( static_cast<tools::Long>( aWinSize.Height() * fGrfWH ) );
+            aNewSize->setHeight( aWinSize.Height() );
         }
         else
         {
-            aNewSize.setWidth( aWinSize.Width() );
-            aNewSize.setHeight( static_cast<tools::Long>( aWinSize.Width() / fGrfWH) );
+            aNewSize->setWidth( aWinSize.Width() );
+            aNewSize->setHeight( static_cast<tools::Long>( aWinSize.Width() / fGrfWH) );
         }
 
-        const Point aNewPos( ( aWinSize.Width()  - aNewSize.Width() ) >> 1,
-                             ( aWinSize.Height() - aNewSize.Height() ) >> 1 );
+        const Point aNewPos( ( aWinSize.Width()  - aNewSize->Width() ) >> 1,
+                             ( aWinSize.Height() - aNewSize->Height() ) >> 1 );
 
-        rResultRect = tools::Rectangle( aNewPos, aNewSize );
+        rResultRect = tools::Rectangle( aNewPos, aNewSize.get() );
         bRet = true;
     }
 

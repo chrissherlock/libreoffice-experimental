@@ -156,9 +156,9 @@ void  LineWidthValueSet::UserDraw( const UserDrawEvent& rUDEvt )
 void LineWidthValueSet::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     ValueSet::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(80, 12 * 9), MapMode(MapUnit::MapAppFont)));
-    pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
-    SetOutputSizePixel(aSize);
+    const auto aSize = pDrawingArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(80, 12 * 9)), MapMode(MapUnit::MapAppFont));
+    pDrawingArea->set_size_request(aSize->Width(), aSize->Height());
+    SetOutputSizePixel(aSize.get());
     SetColor(Application::GetSettings().GetStyleSettings().GetListBoxWindowBackgroundColor());
 }
 

@@ -85,7 +85,7 @@ bool FuSelection::MouseButtonDown(const MouseEvent& rMEvt)
     if (aLogicPosition)
         aMDPos = *aLogicPosition;
     else
-        aMDPos = pWindow->WindowToLogic(rMEvt.GetPosPixel());
+        aMDPos = pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
 
     if (comphelper::LibreOfficeKit::isActive())
     {
@@ -313,7 +313,7 @@ bool FuSelection::MouseMove(const MouseEvent& rMEvt)
 
     if (aDragTimer.IsActive() )
     {
-        Point aOldPixel = pWindow->LogicToWindow( aMDPos );
+        Point aOldPixel = pWindow->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aMDPos));
         Point aNewPixel = rMEvt.GetPosPixel();
         if ( std::abs( aOldPixel.X() - aNewPixel.X() ) > SC_MAXDRAGMOVE ||
              std::abs( aOldPixel.Y() - aNewPixel.Y() ) > SC_MAXDRAGMOVE )
@@ -323,7 +323,7 @@ bool FuSelection::MouseMove(const MouseEvent& rMEvt)
     if ( pView->IsAction() )
     {
         Point aPix(rMEvt.GetPosPixel());
-        Point aPnt(pWindow->WindowToLogic(aPix));
+        Point aPnt(pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPix)));
 
         ForceScroll(aPix);
         pView->MovAction(aPnt);
@@ -349,9 +349,22 @@ bool FuSelection::MouseButtonUp(const MouseEvent& rMEvt)
         aDragTimer.Stop();
     }
 
-    sal_uInt16 nDrgLog = sal_uInt16 ( pWindow->WindowToLogic(Size(SC_MINDRAGMOVE,0)).Width() );
+    // Modernizing drag threshold conversion
+    sal_uInt16 nDrgLog = sal_uInt16(
+        pWindow->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(Size(SC_MINDRAGMOVE, 0))
+        )->Width()
+    );
+
+    // Modernizing position logic with potential null-check
     auto aLogicPosition = rMEvt.getLogicPosition();
-    Point aPnt(aLogicPosition ? *aLogicPosition : pWindow->WindowToLogic(rMEvt.GetPosPixel()));
+
+    Point aPnt(aLogicPosition
+        ? *aLogicPosition
+        : pWindow->convertTo<vcl::LogicPoint>(
+            vcl::WindowPoint(rMEvt.GetPosPixel())
+        )
+    );
 
     bool bCopy = false;
     ScViewData& rViewData = rViewShell.GetViewData();

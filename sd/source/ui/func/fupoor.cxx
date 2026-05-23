@@ -635,7 +635,7 @@ bool FuPoor::KeyInput(const KeyEvent& rKEvt)
                     {
                         sal_uInt16 nMarkHdSiz(mpView->GetMarkHdlSizePixel());
                         Size aHalfConSiz(nMarkHdSiz + 1, nMarkHdSiz + 1);
-                        aHalfConSiz = mpWindow->WindowToLogic(aHalfConSiz);
+                        aHalfConSiz = mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(aHalfConSiz));
 
                         if(100 < aHalfConSiz.Width())
                             nX *= aHalfConSiz.Width();
@@ -650,7 +650,7 @@ bool FuPoor::KeyInput(const KeyEvent& rKEvt)
                     else if(rKEvt.GetKeyCode().IsMod2())
                     {
                         // move in 1 pixel distance
-                        Size aLogicSizeOnePixel = mpWindow->WindowToLogic(Size(1,1));
+                        Size aLogicSizeOnePixel = mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(1, 1)));
                         nX *= aLogicSizeOnePixel.Width();
                         nY *= aLogicSizeOnePixel.Height();
                     }
@@ -932,9 +932,8 @@ void FuPoor::DoPasteUnformatted()
         if (aDataHelper.GetTransferable().is())
         {
             sal_Int8 nAction = DND_ACTION_COPY;
-            mpView->InsertData( aDataHelper,
-                                mpWindow->WindowToLogic( ::tools::Rectangle( Point(), mpWindow->GetOutputSizePixel() ).Center() ),
-                                nAction, false, SotClipboardFormatId::STRING);
+            mpView->InsertData(aDataHelper, mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(::tools::Rectangle(Point(), mpWindow->GetOutputSizePixel()).Center())),
+                nAction, false, SotClipboardFormatId::STRING);
         }
     }
 }
@@ -947,7 +946,7 @@ IMPL_LINK_NOARG(FuPoor, DragHdl, Timer *, void)
     if( !mpView )
         return;
 
-    sal_uInt16 nHitLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(HITPIX,0)).Width() );
+    sal_uInt16 nHitLog = static_cast<sal_uInt16>(mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(HITPIX, 0)))->Width());
     SdrHdl* pHdl = mpView->PickHandle(aMDPos);
 
     if ( pHdl==nullptr && mpView->IsMarkedHit(aMDPos, nHitLog)

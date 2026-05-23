@@ -523,7 +523,7 @@ SwXTextView::createTextRangeByPixelPosition(const awt::Point& rPixelPosition)
     if (!m_pView)
         throw RuntimeException();
 
-    Point aLogicPoint = m_pView->GetEditWin().WindowToLogic(aPixelPoint);
+    Point aLogicPoint = m_pView->GetEditWin().convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPixelPoint));
     SwWrtShell& rSh = m_pView->GetWrtShell();
     SwPosition aPosition(*rSh.GetCurrentShellCursor().GetPoint());
     rSh.GetLayout()->GetModelPositionForViewPoint(&aPosition, aLogicPoint);

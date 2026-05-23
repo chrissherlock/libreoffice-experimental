@@ -35,8 +35,10 @@ ConstArc::ConstArc(SwWrtShell* pWrtShell, SwEditWin* pEditWin, SwView& rSwView)
 bool ConstArc::MouseButtonDown(const MouseEvent& rMEvt)
 {
     bool bReturn = SwDrawBase::MouseButtonDown(rMEvt);
+
     if (bReturn && !m_nButtonUpCount)
-        m_aStartPoint = m_pWin->WindowToLogic(rMEvt.GetPosPixel());
+        m_aStartPoint = m_pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
+
     return bReturn;
 }
 
@@ -46,7 +48,7 @@ bool ConstArc::MouseButtonUp(const MouseEvent& rMEvt)
 
     if ((m_pSh->IsDrawCreate() || m_pWin->IsDrawAction()) && rMEvt.IsLeft())
     {
-        Point aPnt(m_pWin->WindowToLogic(rMEvt.GetPosPixel()));
+        Point aPnt(m_pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
         if (!m_nButtonUpCount && aPnt == m_aStartPoint)
         {
             SwDrawBase::MouseButtonUp(rMEvt);

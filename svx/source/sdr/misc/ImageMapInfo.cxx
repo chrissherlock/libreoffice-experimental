@@ -91,8 +91,8 @@ IMapObject* SvxIMapInfo::GetHitIMapObject(const SdrObject* pObj, const Point& rW
                 ShearPoint(aRelPoint, aRect.TopLeft(), -rGeo.mfTanShearAngle);
 
             if (pGrafObj->GetGrafPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
-                aGraphSize = Application::GetDefaultDevice()->WindowToLogic(
-                    pGrafObj->GetGrafPrefSize(), aMap100);
+                aGraphSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+                    vcl::WindowSize(pGrafObj->GetGrafPrefSize()), aMap100);
             else
                 aGraphSize = ::LogicToLogic(pGrafObj->GetGrafPrefSize(),
                                             pGrafObj->GetGrafPrefMapMode(), aMap100);

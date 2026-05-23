@@ -844,8 +844,8 @@ void FrameSelector::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     mxImpl.reset( new FrameSelectorImpl( *this ) );
-    Size aPrefSize = pDrawingArea->get_ref_device().LogicToWindow(Size(61, 65), MapMode(MapUnit::MapAppFont));
-    pDrawingArea->set_size_request(aPrefSize.Width(), aPrefSize.Height());
+    auto aPrefSize = pDrawingArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(61, 65)), MapMode(MapUnit::MapAppFont));
+    pDrawingArea->set_size_request(aPrefSize->Width(), aPrefSize->Height());
     EnableRTL( false ); // #107808# don't mirror the mouse handling
 }
 

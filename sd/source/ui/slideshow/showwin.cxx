@@ -458,7 +458,7 @@ void ShowWindow::RestartShow( sal_Int32 nPageIndexToRestart )
 void ShowWindow::DrawPauseScene( bool bTimeoutOnly )
 {
     const MapMode&  rMap = GetMapMode();
-    const Point     aOutOrg( WindowToLogic( Point() ) );
+    const Point aOutOrg(convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point())));
     const Size      aOutSize( GetOutDev()->GetOutputSize() );
     const Size      aTextSize(::LogicToLogic(Size(0, 14), MapMode(MapUnit::MapPoint), rMap));
     const Size      aOffset(::LogicToLogic(Size(1000, 1000), MapMode(MapUnit::Map100thMM), rMap));
@@ -478,7 +478,7 @@ void ShowWindow::DrawPauseScene( bool bTimeoutOnly )
         Size aGrfSize;
 
         if (maLogo.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
-            aGrfSize = WindowToLogic( maLogo.GetPrefSize() );
+            aGrfSize = convertTo<vcl::LogicSize>(vcl::WindowSize(maLogo.GetPrefSize()));
         else
             aGrfSize = ::LogicToLogic( maLogo.GetPrefSize(), maLogo.GetPrefMapMode(), rMap );
 
@@ -562,7 +562,7 @@ void ShowWindow::DrawEndScene()
     const vcl::Font aOldFont( GetFont() );
     vcl::Font       aFont( GetSettings().GetStyleSettings().GetMenuFont() );
 
-    const Point     aOutOrg( WindowToLogic( Point() ) );
+    const Point aOutOrg(convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point())));
     const Size      aTextSize(::LogicToLogic(Size(0, 14), MapMode(MapUnit::MapPoint), GetMapMode()));
     const OUString  aText( SdResId( STR_PRES_SOFTEND ) );
 

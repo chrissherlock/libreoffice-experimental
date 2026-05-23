@@ -1317,8 +1317,8 @@ bool ImpEditEngine::PostKeyEvent( const KeyEvent& rKeyEvent, EditView* pEditView
                                     SetAutoCompleteText( aComplete, false );
                                     Point aPos = PaMtoEditCursor( aCurSel.Max() ).TopLeft();
                                     aPos = pEditView->getImpl().GetWindowPos( aPos );
-                                    aPos = pEditView->getImpl().GetWindow()->LogicToWindow( aPos );
-                                    aPos = pEditView->GetWindow()->OutputToScreenPixel( aPos );
+                                    const auto aCoordPos = pEditView->getImpl().GetWindow()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aPos));
+                                    aPos = pEditView->GetWindow()->OutputToScreenPixel(aCoordPos.get());
                                     aPos.AdjustY( -3 );
                                     Help::ShowQuickHelp( pEditView->GetWindow(), tools::Rectangle( aPos, Size( 1, 1 ) ), aComplete, QuickHelpFlags::Bottom|QuickHelpFlags::Left );
                                 }

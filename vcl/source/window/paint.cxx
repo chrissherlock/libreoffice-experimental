@@ -136,7 +136,7 @@ PaintBufferGuard::~PaintBufferGuard()
             {
                 const auto aRectanglePixel = m_pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(m_aPaintRect), m_pWindow->GetMapMode());
 
-                aPaintRectSize = m_pWindow->WindowToLogic(aRectanglePixel->GetSize());
+                aPaintRectSize = m_pWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(aRectanglePixel->GetSize()));
             }
 
             m_pWindow->GetOutDev()->DrawOutDev(m_aPaintRect.TopLeft(), aPaintRectSize, m_aPaintRect.TopLeft(), aPaintRectSize, *mpFrameData->mpBuffer);
@@ -989,13 +989,11 @@ vcl::Region Window::GetPaintRegion() const
     {
         vcl::Region aRegion = *mpWindowImpl->mpPaintRegion;
         aRegion.Move( -GetOutDev()->GetDeviceOriginX(), -GetOutDev()->GetDeviceOriginY() );
-        return WindowToLogic( aRegion );
+        return convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
     }
-    else
-    {
-        vcl::Region aPaintRegion(true);
-        return aPaintRegion;
-    }
+
+    vcl::Region aPaintRegion(true);
+    return aPaintRegion;
 }
 
 void Window::Invalidate( InvalidateFlags nFlags )
@@ -1283,7 +1281,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 
         Paint(*pDevice, tools::Rectangle(Point(), GetOutputSizePixel()));
 
-        rTargetOutDev.DrawOutDev(i_rPos, aSize, Point(), pDevice->WindowToLogic(aSize), *pDevice);
+        rTargetOutDev.DrawOutDev(i_rPos, aSize, Point(), pDevice->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize)), *pDevice);
 
         bool bHasMirroredGraphics = pDevice->HasMirroredGraphics();
 
@@ -1425,7 +1423,9 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
             // i_rPos *may* be in logical coordinates if a MapMode is set at
             // i_pTargetOutDev. To not mix values of different coordinate systems
             // it *needs* to be converted (which does nothing if no MapMode)
-            Point aDelta( rTargetOutDev.WindowToLogic( Point( nDeltaX, nDeltaY )));
+            Point aDelta = rTargetOutDev.convertTo<vcl::LogicPoint>(
+                vcl::WindowPoint(nDeltaX, nDeltaY)
+            );
             aPos += aDelta;
             pChild->ImplPaintToDevice(rTargetOutDev, aPos);
         }

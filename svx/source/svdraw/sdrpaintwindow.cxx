@@ -147,9 +147,7 @@ void SdrPreRenderDevice::PreparePreRenderDevice()
 void SdrPreRenderDevice::OutputPreRenderDevice(const vcl::Region& rExpandedRegion)
 {
     // region to pixels
-    const vcl::Region aRegionPixel(mpOutputDevice->LogicToWindow(rExpandedRegion));
-    //RegionHandle aRegionHandle(aRegionPixel.BeginEnumRects());
-    //Rectangle aRegionRectanglePixel;
+    const auto aRegionPixel = mpOutputDevice->convertTo<vcl::WindowRegion>(vcl::LogicRegion(rExpandedRegion));
 
     // MapModes off
     vcl::MappingPolicy bMapModeWasEnabledDest(mpOutputDevice->GetMappingPolicy());
@@ -158,7 +156,7 @@ void SdrPreRenderDevice::OutputPreRenderDevice(const vcl::Region& rExpandedRegio
     mpPreRenderDevice->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     RectangleVector aRectangles;
-    aRegionPixel.GetRegionRectangles(aRectangles);
+    aRegionPixel->GetRegionRectangles(aRectangles);
 
     for(const auto& rRect : aRectangles)
     {
@@ -270,7 +268,8 @@ rtl::Reference< sdr::overlay::OverlayManager > const & SdrPaintWindow::GetOverla
 tools::Rectangle SdrPaintWindow::GetVisibleArea() const
 {
     Size aVisSizePixel(GetOutputDevice().GetOutputSizePixel());
-    return GetOutputDevice().WindowToLogic(tools::Rectangle(Point(0,0), aVisSizePixel));
+    return GetOutputDevice().convertTo<vcl::LogicRect>(
+        vcl::WindowRect(tools::Rectangle(Point(0, 0), aVisSizePixel)));
 }
 
 bool SdrPaintWindow::OutputToRecordingMetaFile() const

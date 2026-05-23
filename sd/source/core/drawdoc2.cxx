@@ -679,7 +679,8 @@ void SdDrawDocument::CreateFirstPages( SdDrawDocument const * pRefDocument /* = 
             {
                 Size aOutSize(pPrinter->GetOutputSize());
                 Point aPageOffset(pPrinter->GetPageOffset());
-                aPageOffset -=  pPrinter->WindowToLogic( Point() );
+                aPageOffset -= pPrinter->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(0, 0)));
+
                 ::tools::Long nOffset = !aPageOffset.X() && !aPageOffset.Y() ? 0 : PRINT_OFFSET;
 
                 tools::Long nTop    = aPageOffset.Y();

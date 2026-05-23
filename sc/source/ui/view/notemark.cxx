@@ -133,7 +133,7 @@ tools::Rectangle ScNoteOverlay::calculateVisibleRectangle()
         mapmode to include size of top-left window. */
     Size aSizePixel(pLeft->GetOutputSizePixel());
     MapMode aMapMode(mrScGridWindow.GetDrawMapMode(true));
-    const Size aLeftSize(pLeft->WindowToLogic(aSizePixel, aMapMode));
+    const Size aLeftSize(pLeft->convertTo<vcl::LogicSize>(vcl::WindowSize(aSizePixel), aMapMode));
     Point aOrigin(aMapMode.GetOrigin());
 
     if ((&mrScGridWindow == pRight) || (&mrScGridWindow == pDiagonal))
@@ -150,7 +150,7 @@ tools::Rectangle ScNoteOverlay::calculateVisibleRectangle()
     if (nullptr != pBottom)
         aSizePixel.AdjustHeight(pBottom->GetOutputSizePixel().Height());
 
-    return mrScGridWindow.WindowToLogic(tools::Rectangle(Point(0, 0), aSizePixel), aMapMode);
+    return mrScGridWindow.convertTo<vcl::LogicRect>(vcl::WindowRect(Point(0, 0), aSizePixel), aMapMode);
 }
 
 void ScNoteOverlay::createOverlaySubContent(

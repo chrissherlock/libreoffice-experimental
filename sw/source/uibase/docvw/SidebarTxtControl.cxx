@@ -88,7 +88,7 @@ void SidebarTextControl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     OutputDevice& rDevice = pDrawingArea->get_ref_device();
     rDevice.SetMapMode(MapMode(MapUnit::MapTwip));
     rDevice.SetBackground(aBgColor);
-    Size aOutputSize(rDevice.WindowToLogic(aSize));
+    Size aOutputSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(aSize)));
     EditView* pEditView = GetEditView();
     pEditView->setEditViewCallbacks(this);
     EditEngine& rEditEngine = pEditView->getEditEngine();
@@ -106,11 +106,16 @@ void SidebarTextControl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     InitAccessible();
 #endif
 }
+
 void SidebarTextControl::SetCursorLogicPosition(const Point& rPosition, bool bPoint, bool bClearMark)
 {
-    Point aMousePos = EditViewOutputDevice().WindowToLogic(rPosition);
+    // Atomically convert the device-space pixel point to logical document space
+    const Point aMousePos = EditViewOutputDevice().convertTo<vcl::LogicPoint>(
+        vcl::WindowPoint(rPosition));
+
     m_xEditView->SetCursorLogicPosition(aMousePos, bPoint, bClearMark);
 }
+
 void SidebarTextControl::GetFocus()
 {
     WeldEditView::GetFocus();
@@ -118,6 +123,7 @@ void SidebarTextControl::GetFocus()
         Invalidate();
     mrSidebarWin.SetActiveSidebarWin();
 }
+
 void SidebarTextControl::LoseFocus()
 {
     // write the visible text back into the SwField
@@ -136,7 +142,7 @@ OUString SidebarTextControl::RequestHelp(tools::Rectangle& rHelpRect)
     {
         Point aPos = rHelpRect.TopLeft();
         const OutputDevice& rOutDev = pEditView->GetOutputDevice();
-        vcl::LogicPoint aLogicClick = rOutDev.WindowToLogic(aPos);
+        vcl::LogicPoint aLogicClick = rOutDev.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
         const SvxFieldItem* pItem = pEditView->GetField(aLogicClick);
         if (pItem)
         {
@@ -190,7 +196,7 @@ void SidebarTextControl::DrawForPage(OutputDevice* pDev, const Point& rPt)
 {
     //Take the control's height, but overwrite the scrollbar area if there was one
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    Size aSize(rDevice.WindowToLogic(GetOutputSizePixel()));
+    Size aSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
     if (OutlinerView* pOutlinerView = mrSidebarWin.GetOutlinerView())
     {
         pOutlinerView->GetOutliner().SetPaperSize(aSize);
@@ -217,12 +223,12 @@ void SidebarTextControl::Paint(vcl::RenderContext& rRenderContext, const tools::
     {
         if (mrSidebarWin.IsMouseOverSidebarWin() || HasFocus())
         {
-            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.WindowToLogic(aSize)),
+            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(aSize))),
                                         Gradient(css::awt::GradientStyle_LINEAR, mrSidebarWin.ColorDark(), mrSidebarWin.ColorDark()));
         }
         else
         {
-            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.WindowToLogic(aSize)),
+            rRenderContext.DrawGradient(tools::Rectangle(aPos, rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(aSize))),
                            Gradient(css::awt::GradientStyle_LINEAR, mrSidebarWin.ColorLight(), mrSidebarWin.ColorDark()));
         }
     }
@@ -250,8 +256,16 @@ void SidebarTextControl::Paint(vcl::RenderContext& rRenderContext, const tools::
     if ( bIsAntiAliasing )
         rRenderContext.SetAntialiasing(AntialiasingFlags::Enable);
     rRenderContext.SetLineColor(mrSidebarWin.GetChangeColor());
-    rRenderContext.DrawLine(rRenderContext.WindowToLogic(aPos), rRenderContext.WindowToLogic(aPos + Point(0, aSize.Height() * 0.95)));
-    rRenderContext.DrawLine(rRenderContext.WindowToLogic(aPos + Point(aSize.Width(), 0)), rRenderContext.WindowToLogic(aPos + Point(aSize.Width(), aSize.Height() * 0.95)));
+
+    rRenderContext.DrawLine(
+        rRenderContext.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos)).get(),
+        rRenderContext.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos.X(), aPos.Y() + static_cast<tools::Long>(aSize.Height() * 0.95))).get()
+    );
+
+    rRenderContext.DrawLine(
+        rRenderContext.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos.X() + aSize.Width(), aPos.Y())).get(),
+        rRenderContext.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos.X() + aSize.Width(), aPos.Y() + static_cast<tools::Long>(aSize.Height() * 0.95))).get()
+    );
 }
 void SidebarTextControl::MakeVisible()
 {
@@ -329,7 +343,7 @@ bool SidebarTextControl::MouseButtonDown(const MouseEvent& rMEvt)
         if ( !bExecuteMod || (rMEvt.GetModifier() == KEY_MOD1))
         {
             const OutputDevice& rOutDev = pEditView->GetOutputDevice();
-            vcl::LogicPoint aLogicClick = rOutDev.WindowToLogic(rMEvt.GetPosPixel());
+            vcl::LogicPoint aLogicClick = rOutDev.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
             if (const SvxFieldItem* pItem = pEditView->GetField(aLogicClick))
             {
                 const SvxFieldData* pField = pItem->GetField();

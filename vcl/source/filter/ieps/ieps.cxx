@@ -135,12 +135,20 @@ static void MakeAsMeta(Graphic &rGraphic)
     GDIMetaFile     aMtf;
     Size            aSize = rGraphic.GetPrefSize();
 
-    if( !aSize.Width() || !aSize.Height() )
-        aSize = Application::GetDefaultDevice()->WindowToLogic(
-            rGraphic.GetSizePixel(), MapMode(MapUnit::Map100thMM));
+    if (!aSize.Width() || !aSize.Height())
+    {
+        aSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(rGraphic.GetSizePixel()),
+            MapMode(MapUnit::Map100thMM));
+    }
     else
-        aSize = ::LogicToLogic( aSize,
-            rGraphic.GetPrefMapMode(), MapMode(MapUnit::Map100thMM));
+    {
+        aSize = ::LogicToLogic(
+            aSize,
+            rGraphic.GetPrefMapMode(),
+            MapMode(MapUnit::Map100thMM)
+        );
+    }
 
     pVDev->EnableOutput( false );
     aMtf.Record( pVDev );

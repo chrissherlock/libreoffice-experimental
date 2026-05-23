@@ -2013,7 +2013,9 @@ void SwRootFrame::ImplCalcBrowseWidth()
 
     mbBrowseWidthValid = true;
     SwViewShell *pSh = getRootFrame()->GetCurrShell();
-    mnBrowseWidth = (!comphelper::LibreOfficeKit::isActive() && pSh)? MINLAY + 2 * pSh->GetOut()-> WindowToLogic( pSh->GetBrowseBorder() )->Width(): MIN_BROWSE_WIDTH;
+    mnBrowseWidth = (!comphelper::LibreOfficeKit::isActive() && pSh) ?
+        MINLAY + 2 * pSh->GetOut()->convertTo<vcl::LogicSize>(vcl::WindowSize(pSh->GetBrowseBorder()), pSh->GetOut()->GetMapMode()).get().Width() :
+        MIN_BROWSE_WIDTH;
 
     do
     {

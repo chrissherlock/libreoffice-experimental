@@ -152,7 +152,9 @@ IMapRectangleObject::IMapRectangleObject( const tools::Rectangle& rRect,
 void IMapRectangleObject::ImpConstruct( const tools::Rectangle& rRect, bool bPixel )
 {
     if ( bPixel )
-        aRect = Application::GetDefaultDevice()->WindowToLogic( rRect, MapMode( MapUnit::Map100thMM ) );
+        aRect = Application::GetDefaultDevice()->convertTo<vcl::LogicRect>(
+            vcl::WindowRect(rRect),
+            MapMode(MapUnit::Map100thMM));
     else
         aRect = rRect;
 }
@@ -263,9 +265,10 @@ void IMapCircleObject::ImpConstruct( const Point& rCenter, sal_Int32 nRad, bool 
     if ( bPixel )
     {
         MapMode aMap100( MapUnit::Map100thMM );
+        auto* pDev = Application::GetDefaultDevice();
 
-        aCenter = Application::GetDefaultDevice()->WindowToLogic( rCenter, aMap100 );
-        nRadius = Application::GetDefaultDevice()->WindowToLogic( Size( nRad, 0 ), aMap100 )->Width();
+        aCenter = pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rCenter), aMap100);
+        nRadius = pDev->convertTo<vcl::LogicSize>(vcl::WindowSize(nRad, 0), aMap100)->Width();
     }
     else
     {
@@ -273,7 +276,6 @@ void IMapCircleObject::ImpConstruct( const Point& rCenter, sal_Int32 nRad, bool 
         nRadius = nRad;
     }
 }
-
 
 /******************************************************************************
 |*
@@ -410,11 +412,12 @@ IMapPolygonObject::IMapPolygonObject( const tools::Polygon& rPoly,
 void IMapPolygonObject::ImpConstruct( const tools::Polygon& rPoly, bool bPixel )
 {
     if ( bPixel )
-        aPoly = Application::GetDefaultDevice()->WindowToLogic( rPoly, MapMode( MapUnit::Map100thMM ) );
+        aPoly = Application::GetDefaultDevice()->convertTo<vcl::LogicPolygon>(
+            vcl::WindowPolygon(rPoly),
+            MapMode(MapUnit::Map100thMM));
     else
         aPoly = rPoly;
 }
-
 
 /******************************************************************************
 |*

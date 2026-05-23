@@ -318,8 +318,12 @@ SwGlossaryDlg::SwGlossaryDlg(const SfxViewFrame& rViewFrame,
     Link<SwOneExampleFrame&,void> aLink(LINK(this, SwGlossaryDlg, PreviewLoadedHdl));
     m_xExampleFrame.reset(new SwOneExampleFrame(EX_SHOW_ONLINE_LAYOUT, &aLink));
     m_xExampleFrameWin.reset(new weld::CustomWeld(*m_xBuilder, u"example"_ustr, *m_xExampleFrame));
-    Size aSize = m_xExampleFrame->GetDrawingArea()->get_ref_device().LogicToWindow(
-            Size(82, 124), MapMode(MapUnit::MapAppFont));
+
+    Size aSize = m_xExampleFrame->GetDrawingArea()->get_ref_device().convertTo<vcl::WindowSize>(
+        vcl::LogicSize(Size(82, 124)),
+        MapMode(MapUnit::MapAppFont)
+    ).get();
+
     m_xExampleFrame->set_size_request(aSize.Width(), aSize.Height());
 
     m_xShortNameEdit->connect_insert_text(LINK(this, SwGlossaryDlg, TextFilterHdl));

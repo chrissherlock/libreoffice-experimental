@@ -604,9 +604,13 @@ bool ScDocument::IdleCalcTextWidth()            // true = try next again
                     aScope.setOldMapMode(pDev->GetMapMode());
                     pDev->SetMapMode(MapMode(MapUnit::MapPixel)); // Important for GetNeededSize
 
-                    Point aPix1000 = pDev->LogicToWindow(Point(1000,1000), MapMode(MapUnit::MapTwip));
-                    nPPTX = aPix1000.X() / 1000.0;
-                    nPPTY = aPix1000.Y() / 1000.0;
+                    auto aPix1000 = pDev->convertTo<vcl::WindowPoint>(
+                        vcl::LogicPoint(Point(1000, 1000)),
+                        MapMode(MapUnit::MapTwip)
+                    );
+
+                    nPPTX = aPix1000->X() / 1000.0;
+                    nPPTY = aPix1000->Y() / 1000.0;
                 }
 
                 if (!aScope.hasProgressBar() && pCol->IsFormulaDirty(nRow))

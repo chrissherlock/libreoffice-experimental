@@ -326,9 +326,9 @@ void SwModule::InsertEnv( SfxRequest& rReq )
 
         Printer *pPrt = pSh->getIDocumentDeviceAccess().getPrinter( true );
 
-    // Borders (are put together by Shift-Offset and alignment)
-        Size aPaperSize = pPrt->WindowToLogic( pPrt->GetPaperSizePixel(),
-                                              MapMode(MapUnit::MapTwip));
+        // Borders (are put together by Shift-Offset and alignment)
+        Size aPaperSize = pPrt->convertTo<vcl::LogicSize>(vcl::WindowSize(pPrt->GetPaperSizePixel()), MapMode(MapUnit::MapTwip));
+
         if ( !aPaperSize.Width() && !aPaperSize.Height() )
                     aPaperSize = SvxPaperInfo::GetPaperSize(PAPER_A4);
         if ( aPaperSize.Width() > aPaperSize.Height() )

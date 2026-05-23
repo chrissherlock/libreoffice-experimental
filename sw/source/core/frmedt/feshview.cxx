@@ -302,7 +302,7 @@ bool SwFEShell::SelectObj( const Point& rPt, sal_uInt8 nFlag, SdrObject *pObj )
         if (comphelper::LibreOfficeKit::isActive())
             nMinMove = static_cast<short>(::LogicToLogic(Size(nHdlSizePixel/2,0), MapMode(MapUnit::MapPixel), GetOut()->GetMapMode()).Width());
         else
-            nMinMove = static_cast<short>(GetOut()->WindowToLogic(Size(nHdlSizePixel/2, 0))->Width());
+            nMinMove = static_cast<short>(GetOut()->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(nHdlSizePixel / 2, 0)), GetOut()->GetMapMode())->Width());
 
         pDView->MarkObj( rPt, nMinMove, bAddSelect, bEnterGroup );
     }
@@ -3258,7 +3258,7 @@ void SwFEShell::CreateDefaultShape( SdrObjKind eSdrObjectKind, const tools::Rect
                 aSet.Put( SdrTextAniKindItem( SdrTextAniKind::Slide ) );
                 aSet.Put( SdrTextAniDirectionItem( SdrTextAniDirection::Left ) );
                 aSet.Put( SdrTextAniCountItem( 1 ) );
-                aSet.Put( SdrTextAniAmountItem( static_cast<sal_Int16>(GetWin()->WindowToLogic(Size(2,1)).Width())) );
+                aSet.Put(SdrTextAniAmountItem(static_cast<sal_Int16>(GetWin()->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(2, 1)), GetWin()->GetMapMode())->Width())));
                 pObj->SetMergedItemSetAndBroadcast(aSet);
             }
         }

@@ -1305,9 +1305,15 @@ bool ImpPathForDragAndCreate::MovCreate(SdrDragStat& rStat)
         if (rStat.IsMouseDown() && nCurrentPoint>0) {
             // don't allow two consecutive points to occupy too similar positions
             tools::Long nMinDist=1;
-            if (pView!=nullptr) nMinDist=pView->GetFreeHandMinDistPix();
-            if (pOut!=nullptr) nMinDist=pOut->WindowToLogic(Size(nMinDist,0))->Width();
-            if (nMinDist<1) nMinDist=1;
+
+            if (pView != nullptr)
+                nMinDist = pView->GetFreeHandMinDistPix();
+
+            if (pOut != nullptr)
+                nMinDist = pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(nMinDist, 0))->Width();
+
+            if (nMinDist < 1)
+                nMinDist = 1;
 
             Point aPt0(rXPoly[nCurrentPoint-1]);
             Point aPt1(rStat.GetNow());
@@ -2192,7 +2198,7 @@ bool SdrPathObj::EndCreate(SdrDragStat& rStat, SdrCreateCmd eCmd)
                         if(aCandidate.count() > 2)
                         {
                             // check distance of first and last point
-                            const sal_Int32 nCloseDist(pOut->WindowToLogic(Size(pView->GetAutoCloseDistPix(), 0))->Width());
+                            const sal_Int32 nCloseDist(pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(pView->GetAutoCloseDistPix(), 0))->Width());
                             const basegfx::B2DVector aDistVector(aCandidate.getB2DPoint(aCandidate.count() - 1) - aCandidate.getB2DPoint(0));
 
                             if(aDistVector.getLength() <= static_cast<double>(nCloseDist))

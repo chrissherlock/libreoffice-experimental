@@ -2290,8 +2290,8 @@ void SAL_CALL VCLXDialog::draw( sal_Int32 nX, sal_Int32 nY )
         if ( !pDev )
             pDev = pWindow->GetParent()->GetOutDev();
 
-        Point aPos = pDev->WindowToLogic( Point( nX, nY ) ).get();
-        pWindow->Draw(*pDev, aPos, SystemTextColorFlags::NoControls);
+        auto aPos = pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(nX, nY));
+        pWindow->Draw( *pDev, aPos, SystemTextColorFlags::NoControls );
     }
 }
 
@@ -2404,8 +2404,8 @@ void SAL_CALL VCLXMultiPage::draw( sal_Int32 nX, sal_Int32 nY )
         if ( !pDev )
             pDev = pWindow->GetParent()->GetOutDev();
 
-        Point aPos = pDev->WindowToLogic( Point( nX, nY ) ).get();
-        pWindow->Draw(*pDev, aPos, SystemTextColorFlags::NoControls);
+        Point aPos = pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(nX, nY));
+        pWindow->Draw( *pDev, aPos, SystemTextColorFlags::NoControls );
     }
 }
 
@@ -2647,8 +2647,8 @@ void SAL_CALL VCLXTabPage::draw( sal_Int32 nX, sal_Int32 nY )
         if ( !pDev )
             pDev = pWindow->GetParent()->GetOutDev();
 
-        Point aPos = pDev->WindowToLogic( Point( nX, nY ) ).get();
-        pWindow->Draw(*pDev, aPos, SystemTextColorFlags::NoControls);
+        Point aPos = pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(nX, nY));
+        pWindow->Draw( *pDev, aPos, SystemTextColorFlags::NoControls );
     }
 }
 
@@ -5905,8 +5905,8 @@ void SAL_CALL VCLXFrame::draw( sal_Int32 nX, sal_Int32 nY )
         if ( !pDev )
             pDev = pWindow->GetParent()->GetOutDev();
 
-        Point aPos = pDev->WindowToLogic( Point( nX, nY ) ).get();
-        pWindow->Draw(*pDev, aPos, SystemTextColorFlags::NoControls);
+        Point aPos = pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(nX, nY));
+        pWindow->Draw( *pDev, aPos, SystemTextColorFlags::NoControls );
     }
 }
 

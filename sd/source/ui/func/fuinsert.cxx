@@ -266,9 +266,9 @@ void FuInsertClipboard::DoExecute( SfxRequest&  )
     sal_Int8 nAction = DND_ACTION_COPY;
     DrawViewShell* pDrViewSh = nullptr;
 
-    if (!mpView->InsertData( aDataHelper,
-                            mpWindow->WindowToLogic( ::tools::Rectangle( Point(), mpWindow->GetOutputSizePixel() ).Center() ),
-                            nAction, false, nFormatId ))
+    if (!mpView->InsertData(aDataHelper,
+                            mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(::tools::Rectangle(Point(), mpWindow->GetOutputSizePixel()).Center())),
+                            nAction, false, nFormatId))
     {
         pDrViewSh = dynamic_cast<DrawViewShell*>(&mrViewShell);
     }
@@ -667,7 +667,7 @@ void FuInsertOLE::DoExecute( SfxRequest& rReq )
                         }
 
                         Size aVisSizePixel = mpWindow->GetOutputSizePixel();
-                        ::tools::Rectangle aVisAreaWin = mpWindow->WindowToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+                        ::tools::Rectangle aVisAreaWin = mpWindow->convertTo<vcl::LogicRect>(vcl::WindowRect(::tools::Rectangle(Point(0, 0), aVisSizePixel)));
                         mrViewShell.VisAreaChanged(aVisAreaWin);
                         mpDocSh->SetVisArea(aVisAreaWin);
                     }
@@ -782,16 +782,16 @@ void FuInsertAVMedia::InsertMediaURL(const OUString& rURL, const Size& rPrefSize
     if (rPrefSize.Width() && rPrefSize.Height())
     {
         if( mpWindow )
-            aSize = mpWindow->WindowToLogic(rPrefSize, MapMode(MapUnit::Map100thMM));
+            aSize = mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(rPrefSize), MapMode(MapUnit::Map100thMM));
         else
-            aSize = Application::GetDefaultDevice()->WindowToLogic(rPrefSize, MapMode(MapUnit::Map100thMM));
+            aSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(vcl::WindowSize(rPrefSize), MapMode(MapUnit::Map100thMM));
     }
     else
         aSize = Size( 5000, 5000 );
 
     if( mpWindow )
     {
-        aPos = mpWindow->WindowToLogic( ::tools::Rectangle( aPos, mpWindow->GetOutputSizePixel() ).Center() );
+        aPos = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(::tools::Rectangle(aPos, mpWindow->GetOutputSizePixel()).Center()));
         aPos.AdjustX( -(aSize.Width() >> 1) );
         aPos.AdjustY( -(aSize.Height() >> 1) );
     }

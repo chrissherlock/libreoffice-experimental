@@ -498,7 +498,7 @@ void Control::LogicInvalidate(const tools::Rectangle* pRectangle)
     if (!pRectangle)
     {
         // we have to invalidate the whole control area not the whole document
-        aResultRectangle = WindowToLogic(tools::Rectangle(GetPosPixel(), GetSizePixel()), MapMode(MapUnit::MapTwip));
+        aResultRectangle = convertTo<vcl::LogicRect>(vcl::WindowRect(tools::Rectangle(GetPosPixel(), GetSizePixel())), MapMode(MapUnit::MapTwip));
     }
     else
     {

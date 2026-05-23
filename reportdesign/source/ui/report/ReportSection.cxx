@@ -714,7 +714,7 @@ sal_Int8 OReportSection::AcceptDrop( const AcceptDropEvent& _rEvt )
 
 sal_Int8 OReportSection::ExecuteDrop( const ExecuteDropEvent& _rEvt )
 {
-    ::Point aDropPos(WindowToLogic(_rEvt.maPosPixel));
+    ::Point aDropPos(convertTo<vcl::LogicPoint>(vcl::WindowPoint(_rEvt.maPosPixel)).get());
     const MouseEvent aMouseEvt(aDropPos);
     if ( m_pFunc->isOverlapping(aMouseEvt) )
         return DND_ACTION_NONE;

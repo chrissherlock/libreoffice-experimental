@@ -476,11 +476,12 @@ void UnoDialogControl::setMenuBar( const Reference< XMenuBar >& rxMenuBar )
             xTW->setMenuBar( mxMenuBar );
     }
 }
+
 static ::Size ImplMapPixelToAppFont( OutputDevice const * pOutDev, const ::Size& aSize )
 {
-    ::Size aTmp = pOutDev->WindowToLogic(aSize, MapMode(MapUnit::MapAppFont));
-    return aTmp;
+    return pOutDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize), MapMode(MapUnit::MapAppFont)).get();
 }
+
 // css::awt::XWindowListener
 void SAL_CALL UnoDialogControl::windowResized( const css::awt::WindowEvent& e )
 {

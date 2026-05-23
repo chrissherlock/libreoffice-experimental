@@ -256,7 +256,7 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                 // URL for IMapObject below Pointer is help text
                 if (SvxIMapInfo::GetIMapInfo(aVEvt.mpObj))
                 {
-                    Point aLogicPos = WindowToLogic( aPosPixel );
+                    Point aLogicPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPosPixel));
                     IMapObject* pIMapObj = SvxIMapInfo::GetHitIMapObject(
                                                     aVEvt.mpObj, aLogicPos, GetOutDev() );
 
@@ -266,7 +266,7 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                         aHelpText = pIMapObj->GetAltText();
                         if (aHelpText.isEmpty())
                             aHelpText = SfxHelp::GetURLHelpText(pIMapObj->GetURL());
-                        aPixRect = LogicToWindow(aVEvt.mpObj->GetLogicRect());
+                        aPixRect = convertTo<vcl::WindowRect>(vcl::LogicRect(aVEvt.mpObj->GetLogicRect())).get();
                     }
                 }
                 // URL in shape text or at shape itself (URL in text overrides object URL)
@@ -277,13 +277,13 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                         if (aVEvt.mpURLField && !aVEvt.mpURLField->GetURL().startsWith("#"))
                         {
                             aHelpText = SfxHelp::GetURLHelpText(aVEvt.mpURLField->GetURL());
-                            aPixRect = LogicToWindow(aVEvt.mpObj->GetLogicRect());
+                            aPixRect = convertTo<vcl::WindowRect>(vcl::LogicRect(aVEvt.mpObj->GetLogicRect())).get();
                         }
                     }
                     else
                     {
                         SdrPageView* pPV = nullptr;
-                        Point aMDPos = WindowToLogic( aPosPixel );
+                        Point aMDPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPosPixel));
                         SdrObject* pObj = pDrView->PickObj(aMDPos, pDrView->getHitTolLog(), pPV, SdrSearchOptions::ALSOONMASTER);
                         if (pObj)
                         {
@@ -297,7 +297,7 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                             // describing the ctrl-click functionality.
                             if ( !pObj->getHyperlink().isEmpty() && !pObj->getHyperlink().startsWith("#") )
                             {
-                                aPixRect = LogicToWindow(aVEvt.mpObj->GetLogicRect());
+                                aPixRect = convertTo<vcl::WindowRect>(vcl::LogicRect(aVEvt.mpObj->GetLogicRect())).get();
                                 aHelpText = SfxHelp::GetURLHelpText(pObj->getHyperlink());
                             }
                         }

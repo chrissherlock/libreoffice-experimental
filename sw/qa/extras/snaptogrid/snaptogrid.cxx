@@ -114,8 +114,8 @@ void SwSnapToGridTest::moveShape(const SdrObject* pObject, const tools::Long nMo
     const Point aToTwips(aFromTwips.X() + nMoveXTwips, aFromTwips.Y() + nMoveYTwips);
 
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    const Point aFromPixels = rEditWin.LogicToWindow(aFromTwips);
-    const Point aToPixels = rEditWin.LogicToWindow(aToTwips);
+    const Point aFromPixels = rEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aFromTwips));
+    const Point aToPixels = rEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aToTwips));
 
     const MouseEvent aClickEvent(aFromPixels, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);
@@ -168,8 +168,8 @@ void SwSnapToGridTest::resizeShape(const SdrObject* pObject, const DragPoint eDr
     const Point aToTwips(aDragPoint.X() + nMoveXTwips, aDragPoint.Y() + nMoveYTwips);
 
     vcl::Window& rEditWin = getSwDocShell()->GetView()->GetEditWin();
-    const Point aFromPixels = rEditWin.LogicToWindow(aFromTwips);
-    const Point aToPixels = rEditWin.LogicToWindow(aToTwips);
+    const Point aFromPixels = rEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aFromTwips));
+    const Point aToPixels = rEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aToTwips));
 
     const MouseEvent aClickEvent(aFromPixels, 1, MouseEventModifiers::SIMPLECLICK, MOUSE_LEFT);
     rEditWin.MouseButtonDown(aClickEvent);

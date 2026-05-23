@@ -642,9 +642,9 @@ ExportDialog::ExportDialog(FltCallDialogParameter& rPara,
 
     mnFormat = GetFilterFormat( maExt );
 
-    Size aResolution( Application::GetDefaultDevice()->LogicToWindow(Size(100, 100), MapMode(MapUnit::MapCM)) );
-    maResolution.Width = aResolution.Width();
-    maResolution.Height= aResolution.Height();
+    auto aResolution = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(100, 100)), MapMode(MapUnit::MapCM));
+    maResolution.Width = aResolution->Width();
+    maResolution.Height= aResolution->Height();
 
     if ( mxGraphic.is() )
     {

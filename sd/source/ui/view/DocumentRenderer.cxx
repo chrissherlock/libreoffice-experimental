@@ -1927,7 +1927,10 @@ private:
         ::tools::Rectangle aOutRect(aPageOfs, rInfo.mpPrinter->GetOutputSize());
         if( aOutRect.GetWidth() > aOutRect.GetHeight() )
         {
-            Size aPaperSize( rInfo.mpPrinter->WindowToLogic( rInfo.mpPrinter->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) ) );
+            Size aPaperSize = rInfo.mpPrinter->convertTo<vcl::LogicSize>(
+                vcl::WindowSize(rInfo.mpPrinter->GetPaperSizePixel()),
+                MapMode(MapUnit::Map100thMM));
+
             maPrintSize.Width  = aPaperSize.Height();
             maPrintSize.Height = aPaperSize.Width();
             const auto nRotatedWidth = aOutRect.GetHeight();

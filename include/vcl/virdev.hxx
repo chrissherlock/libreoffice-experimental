@@ -122,8 +122,12 @@ public:
                                                                    const Point& rNewOffset,
                                                                    sal_uInt8* pBuffer);
 
-    bool                SetOutputSize( const Size& rNewSize )
-                            { return SetOutputSizePixel( LogicToWindow( rNewSize ).get() ); }
+    bool SetOutputSize(const Size& rNewSize)
+    {
+        return SetOutputSizePixel(
+            convertTo<vcl::WindowSize>(vcl::LogicSize(rNewSize)).get()
+        );
+    }
 
     void                SetReferenceDevice( RefDevMode );
 

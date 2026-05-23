@@ -35,8 +35,7 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
 
 vcl::Region OutputDevice::GetClipRegion() const
 {
-
-    return WindowToLogic( maRegion );
+    return convertTo<vcl::LogicRegion>(vcl::WindowRegion(maRegion));
 }
 
 void OutputDevice::SetClipRegion()

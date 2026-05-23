@@ -3934,7 +3934,7 @@ void SVGActionWriter::ImplWriteActions( const GDIMetaFile& rMtf,
                     const MetaBmpAction* pA = static_cast<const MetaBmpAction*>(pAction);
 
                     ImplWriteBmp( pA->GetBitmap(),
-                                  pA->GetPoint(), mpVDev->WindowToLogic( pA->GetBitmap().GetSizePixel() ).get(),
+                                  pA->GetPoint(), mpVDev->convertTo<vcl::LogicSize>(vcl::WindowSize(pA->GetBitmap().GetSizePixel())),
                                   Point(), pA->GetBitmap().GetSizePixel(), pxShape );
                 }
             }
@@ -3981,7 +3981,7 @@ void SVGActionWriter::ImplWriteActions( const GDIMetaFile& rMtf,
                     const MetaBmpExAction*  pA = static_cast<const MetaBmpExAction*>(pAction);
 
                     ImplWriteBmp( pA->GetBitmap(),
-                                  pA->GetPoint(), mpVDev->WindowToLogic( pA->GetBitmap().GetSizePixel() ).get(),
+                                  pA->GetPoint(), mpVDev->convertTo<vcl::LogicSize>(vcl::WindowSize(pA->GetBitmap().GetSizePixel())),
                                   Point(), pA->GetBitmap().GetSizePixel(), pxShape );
                 }
             }

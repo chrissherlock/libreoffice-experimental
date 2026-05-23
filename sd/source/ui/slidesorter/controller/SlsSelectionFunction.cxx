@@ -714,7 +714,7 @@ SelectionFunction::EventDescriptor::EventDescriptor (
       meDragMode(InsertionIndicatorHandler::MoveMode),
       mbIsLeaving(false)
 {
-    maMouseModelPosition = rSlideSorter.GetContentWindow()->WindowToLogic(maMousePosition);
+    maMouseModelPosition = rSlideSorter.GetContentWindow()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(maMousePosition));
     mpHitDescriptor = rSlideSorter.GetController().GetPageAt(maMousePosition);
     if (mpHitDescriptor)
     {
@@ -743,7 +743,7 @@ SelectionFunction::EventDescriptor::EventDescriptor (
       meDragMode(InsertionIndicatorHandler::GetModeFromDndAction(nDragAction)),
       mbIsLeaving(false)
 {
-    maMouseModelPosition = rSlideSorter.GetContentWindow()->WindowToLogic(maMousePosition);
+    maMouseModelPosition = rSlideSorter.GetContentWindow()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(maMousePosition));
     mpHitDescriptor = rSlideSorter.GetController().GetPageAt(maMousePosition);
     if (mpHitDescriptor)
     {
@@ -1272,7 +1272,7 @@ void MultiSelectionModeHandler::UpdatePosition (
     // window coordinates for auto-scrolling because that remains
     // constant while scrolling.)
     sd::Window *pWindow (mrSlideSorter.GetContentWindow().get());
-    const Point aMouseModelPosition (pWindow->WindowToLogic(rMousePosition));
+    const Point aMouseModelPosition(pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMousePosition)));
 
     bool bDoAutoScroll = bAllowAutoScroll && mrSlideSorter.GetController().GetScrollBarManager().AutoScroll(
         rMousePosition,

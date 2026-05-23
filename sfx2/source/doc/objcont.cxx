@@ -165,31 +165,29 @@ bool SfxObjectShell::CreatePreview_Impl( bool bFullContent, bool bOutputForScree
     {
         // Use pixel size, that's also what DoDraw() requires in this case,
         // despite the metafile case (needlessly?) setting mapmode.
-        Size aSizePix = pDevice->LogicToWindow( aTmpSize, aMode );
+        auto aSizePix = pDevice->convertTo<vcl::WindowSize>(vcl::LogicSize(aTmpSize), aMode);
         // Code based on GDIMetaFile::CreateThumbnail().
         sal_uInt32      nMaximumExtent = 512;
         // determine size that has the same aspect ratio as image size and
         // fits into the rectangle determined by nMaximumExtent
-        if ( aSizePix.Width() && aSizePix.Height()
-          && ( sal::static_int_cast< tools::ULong >(aSizePix.Width()) >
-                   nMaximumExtent ||
-               sal::static_int_cast< tools::ULong >(aSizePix.Height()) >
-                   nMaximumExtent ) )
+        if ( aSizePix->Width() && aSizePix->Height()
+          && ( sal::static_int_cast< tools::ULong >(aSizePix->Width()) > nMaximumExtent ||
+               sal::static_int_cast< tools::ULong >(aSizePix->Height()) > nMaximumExtent ) )
         {
-            double      fWH = static_cast< double >( aSizePix.Width() ) / aSizePix.Height();
+            double      fWH = static_cast< double >( aSizePix->Width() ) / aSizePix->Height();
             if ( fWH <= 1.0 )
             {
-                aSizePix.setWidth(basegfx::fround<tools::Long>(nMaximumExtent * fWH));
-                aSizePix.setHeight( nMaximumExtent );
+                aSizePix->setWidth(basegfx::fround<tools::Long>(nMaximumExtent * fWH));
+                aSizePix->setHeight( nMaximumExtent );
             }
             else
             {
-                aSizePix.setWidth( nMaximumExtent );
-                aSizePix.setHeight(basegfx::fround<tools::Long>(nMaximumExtent / fWH));
+                aSizePix->setWidth( nMaximumExtent );
+                aSizePix->setHeight(basegfx::fround<tools::Long>(nMaximumExtent / fWH));
             }
         }
         // do it 4x larger to be able to scale it down & get beautiful antialias
-        aTmpSize = Size( aSizePix.Width() * 4, aSizePix.Height() * 4 );
+        aTmpSize = Size( aSizePix->Width() * 4, aSizePix->Height() * 4 );
         pDevice->SetOutputSizePixel( aTmpSize );
     }
 
