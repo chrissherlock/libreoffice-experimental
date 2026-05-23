@@ -1700,7 +1700,7 @@ bool WMFWriter::WriteWMF( const GDIMetaFile& rMTF, SvStream& rTargetStream,
     {
         aTargetMapMode = MapMode( MapUnit::MapInch );
 
-        const tools::Long      nUnit = pVirDev->LogicToWindow( Size( 1, 1 ), aTargetMapMode )->Width();
+        const tools::Long nUnit = pVirDev->convertTo<vcl::WindowSize>(vcl::LogicSize(Size( 1, 1 )), aTargetMapMode)->Width();
         const double  fFrac = 1.0 / nUnit;
 
         aTargetMapMode.SetScaleX( fFrac );
