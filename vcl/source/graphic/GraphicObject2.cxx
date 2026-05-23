@@ -311,8 +311,15 @@ bool GraphicObject::ImplDrawTiled(OutputDevice& rOut, const tools::Rectangle& rA
     }
     else
     {
-        const Size      aOutOffset( rOut.LogicToWindow( rOffset, aOutMapMode ) );
-        const tools::Rectangle aOutArea( rOut.LogicToWindow( rArea, aOutMapMode ) );
+        const Size aOutOffset = rOut.convertTo<vcl::WindowSize>(
+            vcl::LogicSize(rOffset),
+            aOutMapMode
+        ).get();
+
+        const tools::Rectangle aOutArea = rOut.convertTo<vcl::WindowRect>(
+            vcl::LogicRect(rArea),
+            aOutMapMode
+        ).get();
 
         // number of invisible (because out-of-area) tiles
         int nInvisibleTilesX;
@@ -331,8 +338,12 @@ bool GraphicObject::ImplDrawTiled(OutputDevice& rOut, const tools::Rectangle& rA
             nInvisibleTilesY = aOutOffset.Height() / rSizePixel.Height();
 
         // origin from where to 'virtually' start drawing in pixel
-        const Point aOutOrigin( rOut.LogicToWindow( Point( rArea.Left() - rOffset.Width(),
-                                                           rArea.Top() - rOffset.Height() ) ) .get() );
+        const Point aOutOrigin = rOut.convertTo<vcl::WindowPoint>(
+            vcl::LogicPoint(Point(rArea.Left() - rOffset.Width(),
+                                  rArea.Top() - rOffset.Height())),
+            aOutMapMode
+        ).get();
+
         // position in pixel from where to really start output
         const Point aOutStart( aOutOrigin.X() + nInvisibleTilesX*rSizePixel.Width(),
                                aOutOrigin.Y() + nInvisibleTilesY*rSizePixel.Height() );
