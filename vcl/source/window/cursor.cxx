@@ -277,15 +277,17 @@ tools::Rectangle calcualteCursorRect(Point const& rPosition, Size const rSize, v
     const tools::Long nX = pWindow->GetDeviceOriginX() + aPositionPixel->X() - pParent->GetDeviceOriginX();
     const tools::Long nY = pWindow->GetDeviceOriginY() + aPositionPixel->Y() - pParent->GetDeviceOriginY();
 
-    Size aSizePixel = pWindow->LogicToWindow(rSize);
-    if (!aSizePixel.Width())
-        aSizePixel.setWidth( pWindow->GetSettings().GetStyleSettings().GetCursorSize() );
+    auto aSizePixel = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(rSize), pWindow->GetMapMode());
+    if (!aSizePixel->Width())
+        aSizePixel->setWidth(pWindow->GetSettings().GetStyleSettings().GetCursorSize());
 
     Point aPosition(nX, nY);
 
     if (pWindow->IsRTLEnabled() && pWindow->GetOutDev() && pParent->GetOutDev()
         && !pWindow->GetOutDev()->ImplIsAntiparallel())
+    {
         pParent->GetOutDev()->ReMirror(aPosition);
+    }
 
     if (!pWindow->IsRTLEnabled() && pWindow->GetOutDev() && pParent->GetOutDev()
         && pWindow->GetOutDev()->ImplIsAntiparallel())
@@ -294,7 +296,7 @@ tools::Rectangle calcualteCursorRect(Point const& rPosition, Size const rSize, v
         pParent->GetOutDev()->ReMirror(aPosition);
     }
 
-    return tools::Rectangle(aPosition, aSizePixel);
+    return tools::Rectangle(aPosition, aSizePixel.get());
 }
 
 } // end anonymous namespace
