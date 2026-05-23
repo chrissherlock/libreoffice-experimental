@@ -211,10 +211,17 @@ tools::Rectangle IMapRectangleObject::GetRectangle( bool bPixelCoords ) const
 {
     tools::Rectangle   aNewRect;
 
-    if ( bPixelCoords )
-        aNewRect = Application::GetDefaultDevice()->LogicToWindow( aRect, MapMode( MapUnit::Map100thMM ) );
+    if (bPixelCoords)
+    {
+        aNewRect = Application::GetDefaultDevice()->convertTo<vcl::WindowRect>(
+            vcl::LogicRect(aRect),
+            MapMode(MapUnit::Map100thMM)
+        ).get();
+    }
     else
+    {
         aNewRect = aRect;
+    }
 
     return aNewRect;
 }
@@ -330,10 +337,17 @@ Point IMapCircleObject::GetCenter( bool bPixelCoords ) const
 {
     Point aNewPoint;
 
-    if ( bPixelCoords )
-        aNewPoint = Application::GetDefaultDevice()->LogicToWindow( aCenter, MapMode( MapUnit::Map100thMM ) );
+    if (bPixelCoords)
+    {
+        aNewPoint = Application::GetDefaultDevice()->convertTo<vcl::WindowPoint>(
+            vcl::LogicPoint(aCenter),
+            MapMode(MapUnit::Map100thMM)
+        ).get();
+    }
     else
+    {
         aNewPoint = aCenter;
+    }
 
     return aNewPoint;
 }
@@ -342,10 +356,17 @@ sal_Int32 IMapCircleObject::GetRadius( bool bPixelCoords ) const
 {
     sal_Int32 nNewRadius;
 
-    if ( bPixelCoords )
-        nNewRadius = Application::GetDefaultDevice()->LogicToWindow( Size( nRadius, 0 ), MapMode( MapUnit::Map100thMM ) )->Width();
+    if (bPixelCoords)
+    {
+        nNewRadius = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+            vcl::LogicSize(nRadius, 0),
+            MapMode(MapUnit::Map100thMM)
+        )->Width();
+    }
     else
+    {
         nNewRadius = nRadius;
+    }
 
     return nNewRadius;
 }
@@ -458,10 +479,17 @@ tools::Polygon IMapPolygonObject::GetPolygon( bool bPixelCoords ) const
 {
     tools::Polygon aNewPoly;
 
-    if ( bPixelCoords )
-        aNewPoly = Application::GetDefaultDevice()->LogicToWindow( aPoly, MapMode( MapUnit::Map100thMM ) );
+    if (bPixelCoords)
+    {
+        aNewPoly = Application::GetDefaultDevice()->convertTo<vcl::WindowPolygon>(
+            vcl::LogicPolygon(aPoly),
+            MapMode(MapUnit::Map100thMM)
+        ).get();
+    }
     else
+    {
         aNewPoly = aPoly;
+    }
 
     return aNewPoly;
 }
