@@ -531,17 +531,28 @@ void GraphicObject::DrawTiled(OutputDevice& rOut, const tools::Rectangle& rArea,
     if (rSize.IsEmpty())
         return;
 
-    const MapMode   aOutMapMode(rOut.GetMapMode());
-    // #106258# Clamp size to 1 for zero values. This is okay, since
-    // logical size of zero is handled above already
-    const Size      aOutTileSize( ::std::max( tools::Long(1), rOut.LogicToWindow( rSize, aOutMapMode )->Width() ),
-                                  ::std::max( tools::Long(1), rOut.LogicToWindow( rSize, aOutMapMode )->Height() ) );
+    const MapMode aOutMapMode(rOut.GetMapMode());
 
-    //#i69780 clip final tile size to a sane max size
-    while ((static_cast<sal_Int64>(rSize.Width()) * nTileCacheSize1D) > SAL_MAX_UINT16)
-        nTileCacheSize1D /= 2;
-    while ((static_cast<sal_Int64>(rSize.Height()) * nTileCacheSize1D) > SAL_MAX_UINT16)
-        nTileCacheSize1D /= 2;
+    // Convert logical size to window (pixel) size using the current device map mode
+    const Size aConvertedSize = rOut.convertTo<vcl::WindowSize>(
+        vcl::LogicSize(rSize),
+        aOutMapMode
+    ).get();
+
+    // #106258# Clamp size to 1 for zero values to avoid division issues.
+    const Size aOutTileSize(
+        ::std::max<tools::Long>(1, aConvertedSize.Width()),
+        ::std::max<tools::Long>(1, aConvertedSize.Height())
+    );
+
+    // #i69780# Clip final tile size to a sane max size to prevent overflow
+    auto clampCacheSize = [](tools::Long nSize, int& nCache) {
+        while ((static_cast<sal_Int64>(nSize) * nCache) > SAL_MAX_UINT16)
+            nCache /= 2;
+    };
+
+    clampCacheSize(rSize.Width(), nTileCacheSize1D);
+    clampCacheSize(rSize.Height(), nTileCacheSize1D);
 
     ImplDrawTiled(rOut, rArea, aOutTileSize, rOffset, nullptr, nTileCacheSize1D);
 }
@@ -634,13 +645,14 @@ Graphic GraphicObject::GetTransformedGraphic( const Size& rDestSize, const MapMo
 
         if (aMapGraph.GetMapUnit() == MapUnit::MapPixel)
         {
-            // crops are in 1/100th mm -> to aMapGraph -> to MapUnit::MapPixel
-            aCropLeftTop = Application::GetDefaultDevice()->LogicToWindow(
-                Size(rAttr.GetLeftCrop(), rAttr.GetTopCrop()),
-                aMap100);
-            aCropRightBottom = Application::GetDefaultDevice()->LogicToWindow(
-                Size(rAttr.GetRightCrop(), rAttr.GetBottomCrop()),
-                aMap100);
+            // Convert Logic (100th mm) -> Window (Pixel)
+            aCropLeftTop = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+                vcl::LogicSize(Size(rAttr.GetLeftCrop(), rAttr.GetTopCrop())),
+                aMap100).get();
+
+            aCropRightBottom = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+                vcl::LogicSize(Size(rAttr.GetRightCrop(), rAttr.GetBottomCrop())),
+                aMap100).get();
         }
         else
         {
@@ -707,30 +719,32 @@ Graphic GraphicObject::GetTransformedGraphic( const Size& rDestSize, const MapMo
         {
             if (aMapGraph.GetMapUnit() == MapUnit::MapPixel)
             {
-                // crops are in 1/100th mm -> to MapUnit::MapPixel
-                aCropLeftTop = Application::GetDefaultDevice()->LogicToWindow(
-                    Size(rAttr.GetLeftCrop(), rAttr.GetTopCrop()),
-                    aMap100);
-                aCropRightBottom = Application::GetDefaultDevice()->LogicToWindow(
-                    Size(rAttr.GetRightCrop(), rAttr.GetBottomCrop()),
-                    aMap100);
+                // Convert Logic (100th mm) -> Window (Pixel)
+                aCropLeftTop = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+                    vcl::LogicSize(Size(rAttr.GetLeftCrop(), rAttr.GetTopCrop())),
+                    aMap100).get();
+
+                aCropRightBottom = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+                    vcl::LogicSize(Size(rAttr.GetRightCrop(), rAttr.GetBottomCrop())),
+                    aMap100).get();
             }
             else
             {
                 // crops are in GraphicObject units -> to MapUnit::MapPixel
-                aCropLeftTop = Application::GetDefaultDevice()->LogicToWindow(
-                    Size(rAttr.GetLeftCrop(), rAttr.GetTopCrop()),
-                    aMapGraph);
-                aCropRightBottom = Application::GetDefaultDevice()->LogicToWindow(
-                    Size(rAttr.GetRightCrop(), rAttr.GetBottomCrop()),
-                    aMapGraph);
+                aCropLeftTop = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+                    vcl::LogicSize(Size(rAttr.GetLeftCrop(), rAttr.GetTopCrop())),
+                    aMapGraph).get();
+
+                aCropRightBottom = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+                    vcl::LogicSize(Size(rAttr.GetRightCrop(), rAttr.GetBottomCrop())),
+                    aMapGraph).get();
             }
 
             // convert from prefmapmode to pixel
-            Size aSrcSizePixel(
-                Application::GetDefaultDevice()->LogicToWindow(
-                    aSrcSize,
-                    aMapGraph));
+            Size aSrcSizePixel = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+                vcl::LogicSize(aSrcSize),
+                aMapGraph
+            ).get();
 
             if(rAttr.IsCropped()
                 && (aSrcSizePixel.Width() != aBitmap.GetSizePixel().Width() || aSrcSizePixel.Height() != aBitmap.GetSizePixel().Height())
