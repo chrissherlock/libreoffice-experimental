@@ -216,7 +216,7 @@ void EMFWriter::ImplWritePlusColor( const Color& rColor, sal_uInt32 nTrans )
 void EMFWriter::ImplWritePlusPoint( const Point& rPoint )
 {
     // Convert to pixels
-    const Point aPoint(maVDev->LogicToWindow( rPoint, maDestMapMode ));
+    const Point aPoint(maVDev->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPoint), maDestMapMode ));
     m_rStm.WriteInt16(aPoint.X()).WriteInt16(aPoint.Y());
 }
 
@@ -250,7 +250,7 @@ bool EMFWriter::WriteEMF(const GDIMetaFile& rMtf)
     mnLineHandle = mnFillHandle = mnTextHandle = HANDLE_INVALID;
     mnHorTextAlign = 0;
 
-    const Size aMtfSizePix( maVDev->LogicToWindow( rMtf.GetPrefSize(), rMtf.GetPrefMapMode() ) );
+    const Size aMtfSizePix( maVDev->convertTo<vcl::WindowSize>(vcl::LogicSize(rMtf.GetPrefSize()), rMtf.GetPrefMapMode() ));
     const Size aMtfSizeLog( ::LogicToLogic(rMtf.GetPrefSize(), rMtf.GetPrefMapMode(), MapMode(MapUnit::Map100thMM)) );
 
     // seek over header
