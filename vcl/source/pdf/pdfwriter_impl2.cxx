@@ -122,7 +122,15 @@ void PDFWriterImpl::implWriteBitmapEx( const Point& i_rPoint, const Size& i_rSiz
         && aBmpSize.getHeight() > 50)
     {
         // do downsampling if necessary
-        const Size      aDstSizeTwip( i_pDummyVDev->WindowToLogic(i_pDummyVDev->LogicToWindow(aSize), MapMode(MapUnit::MapTwip)) );
+        const auto aDstSize =
+            i_pDummyVDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aSize), i_pDummyVDev->GetMapMode());
+
+        const Size aDstSizeTwip =
+            i_pDummyVDev->convertTo<vcl::LogicSize>(
+                vcl::WindowSize(aDstSize),
+                MapMode(MapUnit::MapTwip)
+            ).get();
+
         const double    fBmpPixelX = aBmpSize.Width();
         const double    fBmpPixelY = aBmpSize.Height();
         const double fMaxPixelX
@@ -454,7 +462,8 @@ void PDFWriterImpl::playMetafile( const GDIMetaFile& i_rMtf, vcl::PDFExtOutDevDa
                     }
                     else
                     {
-                        const Size aDstSizeTwip( pDummyVDev->WindowToLogic(pDummyVDev->LogicToWindow(rSize), MapMode(MapUnit::MapTwip)) );
+                        const auto aTmpDstSize = pDummyVDev->convertTo<vcl::WindowSize>(vcl::LogicSize(rSize), pDummyVDev->GetMapMode());
+                        const Size aDstSizeTwip = pDummyVDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aTmpDstSize), MapMode(MapUnit::MapTwip)).get();
 
                         // i#115962# Always use at least 300 DPI for bitmap conversion of transparence gradients,
                         // else the quality is not acceptable (see bugdoc as example)
