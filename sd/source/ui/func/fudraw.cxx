@@ -765,7 +765,7 @@ bool FuDraw::SetHelpText(const SdrObject* pObj, const Point& rPosPixel, const Sd
     if (aHelpText.isEmpty())
         return false;
 
-    ::tools::Rectangle aLogicPix = mpWindow->LogicToWindow(pObj->GetLogicRect());
+    ::tools::Rectangle aLogicPix = mpWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(pObj->GetLogicRect()));
     ::tools::Rectangle aScreenRect(mpWindow->OutputToScreenPixel(aLogicPix.TopLeft()),
                             mpWindow->OutputToScreenPixel(aLogicPix.BottomRight()));
 

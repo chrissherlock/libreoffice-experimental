@@ -141,36 +141,6 @@ bool Window::IsRTLEnabled() const { return GetOutDev()->IsRTLEnabled(); }
 TextAlign Window::GetTextAlign() const { return GetOutDev()->GetTextAlign(); }
 const AllSettings& Window::GetSettings() const { return GetOutDev()->GetSettings(); }
 
-Point Window::LogicToWindow(const Point& rLogicPt) const
-{
-    return GetOutDev()->LogicToWindow(rLogicPt);
-}
-Size Window::LogicToWindow(const Size& rLogicSize) const
-{
-    return GetOutDev()->LogicToWindow(rLogicSize);
-}
-tools::Rectangle Window::LogicToWindow(const tools::Rectangle& rLogicRect) const
-{
-    return GetOutDev()->LogicToWindow(rLogicRect);
-}
-vcl::Region Window::LogicToWindow(const vcl::Region& rLogicRegion) const
-{
-    return GetOutDev()->LogicToWindow(rLogicRegion);
-}
-Point Window::LogicToWindow(const Point& rLogicPt, const MapMode& rMapMode) const
-{
-    return GetOutDev()->LogicToWindow(rLogicPt, rMapMode);
-}
-Size Window::LogicToWindow(const Size& rLogicSize, const MapMode& rMapMode) const
-{
-    return GetOutDev()->LogicToWindow(rLogicSize, rMapMode);
-}
-tools::Rectangle Window::LogicToWindow(const tools::Rectangle& rLogicRect,
-                                       const MapMode& rMapMode) const
-{
-    return GetOutDev()->LogicToWindow(rLogicRect, rMapMode);
-}
-
 Point Window::WindowToLogic(const Point& rDevicePt) const
 {
     return GetOutDev()->WindowToLogic(rDevicePt);

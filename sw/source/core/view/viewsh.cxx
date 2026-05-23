@@ -178,7 +178,7 @@ lcl_PaintTransparentFormControls(SwViewShell const & rShell, SwRect const& rRect
     if (rShell.GetWin())
     {
         vcl::Window& rWindow = *(rShell.GetWin());
-        const tools::Rectangle aRectanglePixel(rShell.GetOut()->LogicToWindow(rRect.SVRect()));
+        const tools::Rectangle aRectanglePixel(rShell.GetOut()->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect.SVRect())));
         PaintTransparentChildren(rWindow, aRectanglePixel);
     }
 }
@@ -1555,8 +1555,8 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
             aRect.SetPosY(lYDiff < 0 ? aOldVis.Bottom() - aPixSz.Height()
                                          : aRect.Top() - aSize.Height() + aPixSz.Height() );
             aRect.SetPosX(std::max(tools::Long(0), aRect.Left() - aPixSz.Width()));
-            aRect.Pos(GetWin()->WindowToLogic(GetWin()->LogicToWindow(aRect.Pos())));
-            aRect.SSize( GetWin()->WindowToLogic( GetWin()->LogicToWindow( aRect.SSize())) );
+            aRect.Pos(GetWin()->WindowToLogic(GetWin()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aRect.Pos()))));
+            aRect.SSize( GetWin()->WindowToLogic( GetWin()->convertTo<vcl::WindowRect>(vcl::LogicRect(aRect.SSize()))) );
             maVisArea = aRect;
             const Point aPt( -aRect.Left(), -aRect.Top() );
             aMapMode.SetOrigin( aPt );
@@ -1633,7 +1633,7 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
 
                 const SwRect aTmpOldVis = VisArea();
                 maVisArea.SetPosY(maVisArea.Pos().Y() - lScroll);
-                maVisArea.Pos(GetWin()->WindowToLogic(GetWin()->LogicToWindow(VisArea().Pos())));
+                maVisArea.Pos(GetWin()->WindowToLogic(GetWin()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(VisArea().Pos()))));
                 lScroll = aTmpOldVis.Top() - VisArea().Top();
                 if ( pRect )
                 {
@@ -1680,10 +1680,10 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
 
                             // get target rectangle in discrete pixels
                             OutputDevice& rTargetDevice = mpTargetPaintWindow->GetTargetOutputDevice();
-                            const tools::Rectangle aTargetPixel(rTargetDevice.LogicToWindow(aTargetLogic));
+                            const tools::Rectangle aTargetPixel(rTargetDevice.convertTo<vcl::WindowRect>(vcl::LogicRect(aTargetLogic)));
 
                             // get source top-left in discrete pixels
-                            const Point aSourceTopLeft(pVout->LogicToWindow(aTargetLogic.TopLeft()));
+                            const Point aSourceTopLeft(pVout->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aTargetLogic.TopLeft())));
 
                             // switch off MapModes
                             const vcl::MappingPolicy bMapModeWasEnabledDest(rTargetDevice.GetMappingPolicy());

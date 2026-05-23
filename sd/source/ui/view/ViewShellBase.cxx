@@ -476,7 +476,7 @@ void ViewShellBase::InnerResizePixel (const Point& rOrigin, const Size &rSize, b
         Size aSize( rSize );
         aSize.AdjustWidth( -(aBorder.Left() + aBorder.Right()) );
         aSize.AdjustHeight( -(aBorder.Top() + aBorder.Bottom()) );
-        Size aObjSizePixel = mpImpl->mpViewWindow->LogicToWindow(aObjSize, MapMode(MapUnit::Map100thMM));
+        Size aObjSizePixel = mpImpl->mpViewWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(aObjSize), MapMode(MapUnit::Map100thMM));
         SfxViewShell::SetZoomFactor(
             double(aSize.Width()) / std::max( aObjSizePixel.Width(), static_cast<::tools::Long>(1) ),
             double(aSize.Height()) / std::max( aObjSizePixel.Height(), static_cast<::tools::Long>(1) ) );

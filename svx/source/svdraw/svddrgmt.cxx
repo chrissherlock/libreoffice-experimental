@@ -2823,9 +2823,9 @@ static basegfx::B2DPolyPolygon impCreateDragRaster(SdrPageView const & rPageView
     if(rPageView.PageWindowCount())
     {
         OutputDevice& rOut = rPageView.GetPageWindow(0)->GetPaintWindow().GetOutputDevice();
-        tools::Rectangle aPixelSize =  rOut.LogicToWindow(rMarkRect);
-        sal_uInt32 nHorDiv(aPixelSize.GetWidth() / DRAG_CROOK_RASTER_DISTANCE);
-        sal_uInt32 nVerDiv(aPixelSize.GetHeight() / DRAG_CROOK_RASTER_DISTANCE);
+        auto aPixelSize = rOut.convertTo<vcl::WindowRect>(vcl::LogicRect(rMarkRect));
+        sal_uInt32 nHorDiv(aPixelSize->GetWidth() / DRAG_CROOK_RASTER_DISTANCE);
+        sal_uInt32 nVerDiv(aPixelSize->GetHeight() / DRAG_CROOK_RASTER_DISTANCE);
 
         if(nHorDiv > DRAG_CROOK_RASTER_MAXIMUM)
             nHorDiv = DRAG_CROOK_RASTER_MAXIMUM;

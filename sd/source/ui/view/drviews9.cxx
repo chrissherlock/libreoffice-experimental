@@ -85,7 +85,7 @@ void DrawViewShell::ExecGallery(SfxRequest const & rReq)
         // reduce size if necessary
         ScopedVclPtrInstance< Window > aWindow(GetActiveWindow());
         aWindow->SetMapMode(aGraphic.GetPrefMapMode());
-        Size aSizePix = aWindow->LogicToWindow(aGraphic.GetPrefSize());
+        Size aSizePix = aWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(aGraphic.GetPrefSize()));
         aWindow->SetMapMode( MapMode(MapUnit::Map100thMM) );
         Size aSize = aWindow->WindowToLogic(aSizePix);
 

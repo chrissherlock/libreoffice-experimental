@@ -94,7 +94,8 @@ sal_Int32 OStartMarker::getMinHeight() const
 {
     double fExtraWidth(tools::Long(2 * REPORT_EXTRA_SPACE));
     fExtraWidth *= GetMapMode().GetScaleX();
-    return LogicToWindow(Size(0, GetTextHeight())).Height() + tools::Long(fExtraWidth);
+
+    return convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, GetTextHeight())))->Height() + tools::Long(fExtraWidth);
 }
 
 void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& /*rRect*/)
@@ -232,11 +233,20 @@ void OStartMarker::Resize()
     tools::Long nExtraWidth = tools::Long(REPORT_EXTRA_SPACE * rMapMode.GetScaleX());
 
     Point aPos(aImageSize.Width() + (nExtraWidth * 2), nExtraWidth);
-    const tools::Long nHeight = ::std::max<sal_Int32>(nOutputHeight - 2*aPos.Y(),LogicToWindow(Size(0, GetTextHeight())).Height());
-    m_aTextRect = tools::Rectangle(aPos, Size(aRulerPos.X() - aPos.X(),nHeight));
 
-    aPos.setX( nExtraWidth );
-    aPos.AdjustY(static_cast<sal_Int32>((LogicToWindow(Size(0, GetTextHeight())).Height() - aImageSize.Height()) * 0.5) ) ;
+    const tools::Long nHeight = ::std::max<sal_Int32>(
+        nOutputHeight - 2 * aPos.Y(),
+        convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, GetTextHeight())))->Height()
+    );
+
+    m_aTextRect = tools::Rectangle(aPos, Size(aRulerPos.X() - aPos.X(), nHeight));
+
+    aPos.setX(nExtraWidth);
+
+    aPos.AdjustY(static_cast<sal_Int32>(
+        (convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, GetTextHeight())))->Height() - aImageSize.Height()) * 0.5
+    ));
+
     m_aImageRect = tools::Rectangle(aPos, aImageSize);
 
     OColorListener::Resize();

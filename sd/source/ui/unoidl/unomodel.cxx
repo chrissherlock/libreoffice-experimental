@@ -4291,7 +4291,7 @@ void SdXImpressDocument::initializeForTiledRendering(const css::uno::Sequence<cs
         {
             // get the full page size in pixels
             pWindow->SetMappingPolicy();
-            Size aSize(pWindow->LogicToWindow(pDrawView->GetSdrPageView()->GetPage()->GetSize()));
+            Size aSize(pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(pDrawView->GetSdrPageView()->GetPage()->GetSize())));
             // Disable map mode, so that it's possible to send mouse event
             // coordinates in logic units
             pWindow->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);

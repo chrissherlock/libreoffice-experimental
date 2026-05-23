@@ -157,7 +157,10 @@ bool FuZoom::MouseButtonUp(const MouseEvent& rMEvt)
     if(SID_ZOOM_PANNING != nSlotId && !rMEvt.IsShift())
     {
         // Zoom
-        Size aZoomSizePixel = mpWindow->LogicToWindow(aZoomRect).GetSize();
+        Size aZoomSizePixel = mpWindow->convertTo<vcl::WindowRect>(
+            vcl::LogicRect(aZoomRect)
+        )->GetSize();
+
         tools::Long nTol = 2 * mpView->GetDragThresholdPixels();
 
         if ( ( aZoomSizePixel.Width() < nTol && aZoomSizePixel.Height() < nTol ) || rMEvt.IsMod1() )

@@ -67,7 +67,7 @@ Point SvxDrawOutlinerViewForwarder::LogicToWindow( const Point& rPoint, const Ma
         Point aPoint2( ::LogicToLogic( aPoint1, rMapMode,
                                                MapMode(aMapMode.GetMapUnit())));
         aMapMode.SetOrigin(Point());
-        return pOutDev->LogicToWindow( aPoint2, aMapMode );
+        return pOutDev->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aPoint2), aMapMode).get();
     }
 
     return Point();

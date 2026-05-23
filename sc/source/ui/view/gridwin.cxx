@@ -3554,7 +3554,7 @@ void ScGridWindow::Command( const CommandEvent& rCEvt )
                 //  the cursor is before the word, but not if behind it)
                 aLogicPos.AdjustX(pCur->GetWidth() );
                 aLogicPos.AdjustY(pCur->GetHeight() / 2 );     // center vertically
-                aMenuPos = LogicToWindow( aLogicPos );
+                aMenuPos = convertTo<vcl::WindowPoint>(vcl::LogicPoint(aLogicPos));
             }
         }
 
@@ -3621,7 +3621,7 @@ void ScGridWindow::Command( const CommandEvent& rCEvt )
             if (pDrawView && pDrawView->GetMarkedObjectList().GetMarkCount() != 0)
             {
                 // #100442#; the context menu should open in the middle of the selected objects
-                tools::Rectangle aSelectRect(LogicToWindow(pDrawView->GetAllMarkedBoundRect()));
+                tools::Rectangle aSelectRect(convertTo<vcl::WindowRect>(vcl::LogicRect(pDrawView->GetAllMarkedBoundRect())));
                 aMenuPos = aSelectRect.Center();
             }
         }

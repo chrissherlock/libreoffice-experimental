@@ -183,7 +183,7 @@ void SfxObjectShell::DoDraw_Impl( OutputDevice* pDev,
     if( pDev->IsClipRegion() && pDev->GetOutDevType() != OUTDEV_PRINTER )
     {
         aRegion = pDev->GetClipRegion();
-        aRegion = pDev->LogicToWindow( aRegion );
+        aRegion = pDev->convertTo<vcl::WindowRegion>(vcl::LogicRegion(aRegion)).get();
     }
     pDev->SetRelativeMapMode( aMapMode );
 

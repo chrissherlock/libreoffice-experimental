@@ -451,7 +451,7 @@ void SwColumnOnlyExample::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     weld::CustomWidgetController::SetDrawingArea(pDrawingArea);
     OutputDevice& rRefDevice = pDrawingArea->get_ref_device();
-    Size aPrefSize(rRefDevice.LogicToWindow(Size(75, 46), MapMode(MapUnit::MapAppFont)));
+    Size aPrefSize(rRefDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(75, 46)), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aPrefSize.Width(), aPrefSize.Height());
 }
 

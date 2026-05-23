@@ -1177,7 +1177,7 @@ Point ScTextWndGroup::GetCursorScreenPixelPos(bool bBelow)
     Point aLogicPos = pCur->GetPos();
     if (bBelow)
         aLogicPos.AdjustY(pCur->GetHeight());
-    aPos = GetEditViewDevice().LogicToWindow(aLogicPos);
+    aPos = GetEditViewDevice().convertTo<vcl::WindowPoint>(vcl::LogicPoint(aLogicPos));
     bool bRTL = mrParent.IsRTLEnabled();
     if (bRTL)
         aPos.setX(mxTextWnd->GetOutputSizePixel().Width() - aPos.X() + gnBorderWidth);
@@ -1348,7 +1348,7 @@ const OutputDevice& ScTextWnd::GetEditViewDevice() const
 int ScTextWnd::GetPixelHeightForLines(tools::Long nLines)
 {
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    return rDevice.LogicToWindow(Size(0, nLines * rDevice.GetTextHeight()))->Height() + 1;
+    return rDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, nLines * rDevice.GetTextHeight())))->Height() + 1;
 }
 
 tools::Long ScTextWnd::GetNumLines() const
@@ -2269,7 +2269,7 @@ ScPosWnd::ScPosWnd(vcl::Window* pParent)
     // formatting toolbar is placed above formulabar when using multiple toolbars typically
 
     m_xWidget->set_entry_width_chars(1);
-    Size aSize(LogicToWindow(Size(POSITION_COMBOBOX_WIDTH * 4, 0), MapMode(MapUnit::MapAppFont)));
+    Size aSize(convertTo<vcl::WindowSize>(vcl::LogicSize(Size(POSITION_COMBOBOX_WIDTH * 4, 0)), MapMode(MapUnit::MapAppFont)));
     m_xWidget->set_size_request(aSize.Width(), -1);
     SetSizePixel(m_xContainer->get_preferred_size());
 
@@ -2562,7 +2562,7 @@ IMPL_LINK_NOARG(ScPosWnd, ModifyHdl, weld::ComboBox&, void)
     Point aPos;
     vcl::Cursor* pCur = GetCursor();
     if (pCur)
-        aPos = LogicToWindow( pCur->GetPos() );
+        aPos = convertTo<vcl::WindowPoint>(vcl::LogicPoint(pCur->GetPos()));
     aPos = OutputToScreenPixel( aPos );
     tools::Rectangle aRect( aPos, aPos );
 

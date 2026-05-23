@@ -92,9 +92,9 @@ IMapWindow::~IMapWindow()
 void IMapWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     weld::CustomWidgetController::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(270, 170), MapMode(MapUnit::MapAppFont)));
-    pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
-    SetOutputSizePixel(aSize);
+    const auto aSize = pDrawingArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(270, 170)), MapMode(MapUnit::MapAppFont));
+    pDrawingArea->set_size_request(aSize->Width(), aSize->Height());
+    SetOutputSizePixel(aSize.get());
 
     SetSdrMode(true);
 
@@ -602,7 +602,10 @@ OUString IMapWindow::RequestHelp(tools::Rectangle& rHelpArea)
             OUString aStr = pIMapObj->GetURL();
             if ( !aStr.isEmpty() )
             {
-                rHelpArea =  rDevice.LogicToWindow(tools::Rectangle( Point(), GetGraphicSize()));
+                rHelpArea = rDevice.convertTo<vcl::WindowRect>(
+                    vcl::LogicRect(tools::Rectangle(Point(), GetGraphicSize()))
+                ).get();
+
                 return aStr;
             }
         }

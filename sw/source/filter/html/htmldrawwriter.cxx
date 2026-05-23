@@ -214,9 +214,11 @@ SwHTMLWriter& OutHTML_DrawFrameFormatAsMarquee( SwHTMLWriter& rWrt,
     if( (aTwipSz.Width() || aTwipSz.Height()) &&
         Application::GetDefaultDevice() )
     {
-        Size aPixelSz =
-            Application::GetDefaultDevice()->LogicToWindow( aTwipSz,
-                                                MapMode(MapUnit::MapTwip) );
+        Size aPixelSz = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+            vcl::LogicSize(aTwipSz),
+            MapMode(MapUnit::MapTwip)
+        ).get();
+
         if( !aPixelSz.Width() && aTwipSz.Width() )
             aPixelSz.setWidth( 1 );
         if( !aPixelSz.Height() && aTwipSz.Height() )

@@ -53,7 +53,7 @@ namespace sd
         m_aContentWindow->Show();
 
         SetTitle(rsTitle);
-        SetSizePixel(LogicToWindow(Size(80,200), MapMode(MapUnit::MapAppFont)));
+        SetSizePixel(convertTo<vcl::WindowSize>(vcl::LogicSize(Size(80,200)), MapMode(MapUnit::MapAppFont)));
     }
 
     TitledDockingWindow::~TitledDockingWindow()

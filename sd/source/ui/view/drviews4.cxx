@@ -417,7 +417,7 @@ void DrawViewShell::MouseMove(const MouseEvent& rMEvt, ::sd::Window* pWin)
     if ( mpDrawView->IsAction() )
     {
         mpDrawView->TakeActionRect(aRect);
-        aRect = GetActiveWindow()->LogicToWindow(aRect);
+        aRect = GetActiveWindow()->convertTo<vcl::WindowRect>(vcl::LogicRect(aRect));
     }
     else
     {
@@ -670,7 +670,7 @@ void DrawViewShell::Command(const CommandEvent& rCEvt, ::sd::Window* pWin)
 
                                 if( !rCEvt.IsMouseEvent() )
                                 {
-                                    aPos = GetActiveWindow()->LogicToWindow( pOutlinerView->GetEditView().GetCursor()->GetPos() );
+                                    aPos = GetActiveWindow()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(pOutlinerView->GetEditView().GetCursor()->GetPos()));
                                 }
                                 // While showing the spell context menu
                                 // we lock the input so that another
@@ -824,7 +824,7 @@ void DrawViewShell::Command(const CommandEvent& rCEvt, ::sd::Window* pWin)
                 {
                     ::tools::Rectangle aMarkRect;
                     rMarkList.TakeBoundRect(nullptr,aMarkRect);
-                    aMenuPos = GetActiveWindow()->LogicToWindow( aMarkRect.Center() );
+                    aMenuPos = GetActiveWindow()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aMarkRect.Center()));
 
                     //move the point into the visible window area
                     if( aMenuPos.X() < 0 )

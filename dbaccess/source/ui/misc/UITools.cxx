@@ -963,7 +963,7 @@ void adjustBrowseBoxColumnWidth( ::svt::EditBrowseBox* _pBox, sal_uInt16 _nColId
     else
     {
         Size aSizeMM( nValue / 10, 0 );
-        nValue = _pBox->LogicToWindow( aSizeMM, MapMode( MapUnit::MapMM ) ).Width();
+        nValue = _pBox->convertTo<vcl::WindowSize>(vcl::LogicSize(aSizeMM), MapMode(MapUnit::MapMM))->Width();
     }
     _pBox->SetColumnWidth( _nColId, nValue );
 }

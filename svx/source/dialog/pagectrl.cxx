@@ -384,7 +384,12 @@ void SvxPageWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     // Count in Twips by default
     auto popIt = rRefDevice.ScopedPush(vcl::PushFlags::MAPMODE);
     rRefDevice.SetMapMode(MapMode(MapUnit::MapTwip));
-    m_aWinSize = rRefDevice.LogicToWindow(Size(75, 46), MapMode(MapUnit::MapAppFont));
+
+    m_aWinSize = rRefDevice.convertTo<vcl::WindowSize>(
+        vcl::LogicSize(Size(75, 46)),
+        MapMode(MapUnit::MapAppFont)
+    ).get();
+
     pDrawingArea->set_size_request(m_aWinSize.Width(), m_aWinSize.Height());
 
     m_aWinSize.AdjustHeight( -4 );

@@ -199,11 +199,13 @@ Svx3DWin::Svx3DWin(SfxBindings* pInBindings, SfxChildWindow *pCW, vcl::Window* p
     SetText(SvxResId(RID_SVXDLG_FLOAT3D_STR_TITLE));
 
     weld::DrawingArea* pDrawingArea = m_xCtlPreview->GetDrawingArea();
-    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(83, 76), MapMode(MapUnit::MapAppFont)));
-    pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
-    m_xCtlPreview->SetOutputSizePixel(aSize);
 
-    m_xLightPreviewGrid->set_size_request(aSize.Width(), aSize.Height());
+    auto aSize = pDrawingArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(83, 76)), MapMode(MapUnit::MapAppFont));
+
+    pDrawingArea->set_size_request(aSize->Width(), aSize->Height());
+    m_xCtlPreview->SetOutputSizePixel(aSize.get());
+
+    m_xLightPreviewGrid->set_size_request(aSize->Width(), aSize->Height());
     pDrawingArea = m_xLightPreview->GetDrawingArea();
     pDrawingArea->set_size_request(42, 42); // small to fit to m_xLightPreviewGrid
 
@@ -305,8 +307,8 @@ Svx3DWin::Svx3DWin(SfxBindings* pInBindings, SfxChildWindow *pCW, vcl::Window* p
     // Preview callback
     m_xCtlLightPreview->SetUserSelectionChangeCallback(LINK( this, Svx3DWin, ChangeSelectionCallbackHdl ));
 
-    aSize = GetOutputSizePixel();
-    SetMinOutputSizePixel( aSize );
+    Size aOutSize = GetOutputSizePixel();
+    SetMinOutputSizePixel(aOutSize);
 
     Construct();
 
@@ -322,9 +324,9 @@ Svx3DWin::Svx3DWin(SfxBindings* pInBindings, SfxChildWindow *pCW, vcl::Window* p
     Reset();
 
     //lock down the size of the initial largest default mode as the permanent size
-    aSize = get_preferred_size();
-    set_width_request(aSize.Width());
-    set_height_request(aSize.Height());
+    aOutSize = get_preferred_size();
+    set_width_request(aOutSize.Width());
+    set_height_request(aOutSize.Height());
 }
 
 Svx3DWin::~Svx3DWin()

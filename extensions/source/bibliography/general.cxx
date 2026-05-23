@@ -351,8 +351,8 @@ BibGeneralPage::BibGeneralPage(vcl::Window* pParent, BibDataManager* pMan)
 
     SetText(BibResId(ST_TYPE_TITLE));
 
-    Size aSize(LogicToWindow(Size(0, 209), MapMode(MapUnit::MapAppFont)));
-    set_height_request(aSize.Height());
+    auto aSize = convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, 209)), MapMode(MapUnit::MapAppFont));
+    set_height_request(aSize->Height());
 }
 
 IMPL_LINK_NOARG(BibGeneralPage, BrowseHdl, weld::Button&, void)

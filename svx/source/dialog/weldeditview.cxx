@@ -896,7 +896,7 @@ Point WeldViewForwarder::LogicToWindow(const Point& rPoint, const MapMode& rMapM
     MapMode aMapMode(rOutDev.GetMapMode());
     Point aPoint(::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
     aMapMode.SetOrigin(Point());
-    return rOutDev.LogicToWindow(aPoint, aMapMode);
+    return rOutDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aPoint), aMapMode).get();
 }
 
 Point WeldViewForwarder::WindowToLogic(const Point& rPoint, const MapMode& rMapMode) const
@@ -1490,7 +1490,7 @@ Point WeldEditViewForwarder::LogicToWindow(const Point& rPoint, const MapMode& r
     MapMode aMapMode(rOutDev.GetMapMode());
     Point aPoint(::LogicToLogic(rPoint, rMapMode, MapMode(aMapMode.GetMapUnit())));
     aMapMode.SetOrigin(Point());
-    return rOutDev.LogicToWindow(aPoint, aMapMode);
+    return rOutDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aPoint), aMapMode).get();
 }
 
 Point WeldEditViewForwarder::WindowToLogic(const Point& rPoint, const MapMode& rMapMode) const

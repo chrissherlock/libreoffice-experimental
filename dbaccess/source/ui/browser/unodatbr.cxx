@@ -293,7 +293,10 @@ bool SbaTableQueryBrowser::Construct(vcl::Window* pParent)
         return true;
 
     // create controls and set sizes
-    const tools::Long  nFrameWidth = getBrowserView()->LogicToWindow(::Size(3, 0), MapMode(MapUnit::MapAppFont)).Width();
+    const tools::Long nFrameWidth = getBrowserView()->convertTo<vcl::WindowSize>(
+        vcl::LogicSize(3, 0),
+        MapMode(MapUnit::MapAppFont)
+    )->Width();
 
     m_pSplitter = VclPtr<Splitter>::Create(getBrowserView(),WB_HSCROLL);
     m_pSplitter->SetPosSizePixel( ::Point(0,0), ::Size(nFrameWidth,0) );
@@ -311,7 +314,12 @@ bool SbaTableQueryBrowser::Construct(vcl::Window* pParent)
     m_pTreeView->SetHelpId(HID_CTL_TREEVIEW);
 
     // a default pos for the splitter, so that the listbox is about 80 (logical) pixels wide
-    m_pSplitter->SetSplitPosPixel(getBrowserView()->LogicToWindow(::Size(80, 0), MapMode(MapUnit::MapAppFont)).Width());
+    m_pSplitter->SetSplitPosPixel(
+        getBrowserView()->convertTo<vcl::WindowSize>(
+            vcl::LogicSize(80, 0),
+            MapMode(MapUnit::MapAppFont)
+        )->Width()
+    );
 
     getBrowserView()->setSplitter(m_pSplitter);
     getBrowserView()->setTreeView(m_pTreeView);

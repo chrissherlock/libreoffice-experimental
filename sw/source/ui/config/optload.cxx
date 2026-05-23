@@ -892,7 +892,7 @@ void SwCaptionPreview::SetPreviewText(const OUString& rText)
 void SwCaptionPreview::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(106 , 20), MapMode(MapUnit::MapAppFont)));
+    Size aSize(pDrawingArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(106 , 20)), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
 }
 

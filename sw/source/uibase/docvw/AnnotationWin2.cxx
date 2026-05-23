@@ -791,7 +791,7 @@ void SwAnnotationWin::DoResize()
     aHeight -= GetMetaHeight();
 
     mpOutliner->SetPaperSize( WindowToLogic( Size(aWidth, aHeight) ) ) ;
-    tools::Long aTextHeight = LogicToWindow( mpOutliner->CalcTextSize()).Height();
+    tools::Long aTextHeight = convertTo<vcl::WindowSize>(vcl::LogicSize(mpOutliner->CalcTextSize()))->Height();
 
     mxMetadataAuthor->show();
     if(IsResolved()) { mxMetadataResolved->show(); }
@@ -1194,7 +1194,7 @@ SwEditWin&  SwAnnotationWin::EditWin()
 
 tools::Long SwAnnotationWin::GetPostItTextHeight()
 {
-    return mpOutliner ? LogicToWindow(mpOutliner->CalcTextSize()).Height() : 0;
+    return mpOutliner ? convertTo<vcl::WindowSize>(vcl::LogicSize(mpOutliner->CalcTextSize()))->Height() : 0;
 }
 
 // Provides an estimation for the text height given a specific width of the annotation window.
@@ -1208,7 +1208,7 @@ tools::Long SwAnnotationWin::GuessTextHeightForWidth(tools::Long nWidth) const
     comphelper::ScopeGuard resetPaperSize([this, curSize = mpOutliner->GetPaperSize()]()
                                           { mpOutliner->SetPaperSize(curSize); });
     mpOutliner->SetPaperSize(WindowToLogic(Size(nWidth, SAL_MAX_INT32)));
-    return LogicToWindow(mpOutliner->CalcTextSize()).Height();
+    return convertTo<vcl::WindowSize>(vcl::LogicSize(mpOutliner->CalcTextSize()))->Height();
 }
 
 void SwAnnotationWin::SwitchToPostIt(sal_uInt16 aDirection)

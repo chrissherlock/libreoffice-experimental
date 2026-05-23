@@ -146,7 +146,7 @@ tools::Long SwView::SetVScrollMax( tools::Long lMax )
 
 Point SwView::AlignToPixel(const Point &rPt) const
 {
-    return GetEditWin().WindowToLogic( GetEditWin().LogicToWindow( rPt ) );
+    return GetEditWin().WindowToLogic( GetEditWin().convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPt)) );
 }
 
 // Document size has changed.
@@ -292,7 +292,7 @@ void SwView::SetVisArea( const Point &rPt, bool bUpdateScrollbar )
     // align is not possible (better idea?!?!)
     // (fix: Bild.de, 200%) It does not work completely without alignment
     // Let's see how far we get with half BrushSize.
-    Point aPt = GetEditWin().LogicToWindow( rPt );
+    Point aPt = GetEditWin().convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPt));
 #if HAVE_FEATURE_DESKTOP
     const tools::Long nTmp = 8;
     aPt.AdjustX( -(aPt.X() % nTmp) );
@@ -964,7 +964,7 @@ void SwView::InnerResizePixel( const Point &rOfst, const Size &rSize, bool )
         Size aSize( rSize );
         aSize.AdjustWidth( -(aBorder.Left() + aBorder.Right()) );
         aSize.AdjustHeight( -(aBorder.Top() + aBorder.Bottom()) );
-        Size aObjSizePixel = GetWindow()->LogicToWindow(aObjSize, MapMode(MapUnit::MapTwip));
+        Size aObjSizePixel = GetWindow()->convertTo<vcl::WindowSize>(vcl::LogicSize(aObjSize), MapMode(MapUnit::MapTwip));
         SfxViewShell::SetZoomFactor( double(aSize.Width()) / aObjSizePixel.Width(),
                         double(aSize.Height()) / aObjSizePixel.Height() );
     }

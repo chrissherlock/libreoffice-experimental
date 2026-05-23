@@ -142,7 +142,7 @@ bool FmFormPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
 
     // display the help
     tools::Rectangle aItemRect = pObj->GetCurrentBoundRect();
-    aItemRect = pWindow->LogicToWindow( aItemRect );
+    aItemRect = pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(aItemRect)).get();
     Point aPt = pWindow->OutputToScreenPixel( aItemRect.TopLeft() );
     aItemRect.SetLeft( aPt.X() );
     aItemRect.SetTop( aPt.Y() );

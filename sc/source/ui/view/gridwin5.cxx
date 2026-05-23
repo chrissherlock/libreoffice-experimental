@@ -266,7 +266,7 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                         aHelpText = pIMapObj->GetAltText();
                         if (aHelpText.isEmpty())
                             aHelpText = SfxHelp::GetURLHelpText(pIMapObj->GetURL());
-                        aPixRect = LogicToWindow(aVEvt.mpObj->GetLogicRect());
+                        aPixRect = convertTo<vcl::WindowRect>(vcl::LogicRect(aVEvt.mpObj->GetLogicRect())).get();
                     }
                 }
                 // URL in shape text or at shape itself (URL in text overrides object URL)
@@ -277,7 +277,7 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                         if (aVEvt.mpURLField && !aVEvt.mpURLField->GetURL().startsWith("#"))
                         {
                             aHelpText = SfxHelp::GetURLHelpText(aVEvt.mpURLField->GetURL());
-                            aPixRect = LogicToWindow(aVEvt.mpObj->GetLogicRect());
+                            aPixRect = convertTo<vcl::WindowRect>(vcl::LogicRect(aVEvt.mpObj->GetLogicRect())).get();
                         }
                     }
                     else
@@ -297,7 +297,7 @@ void ScGridWindow::RequestHelp(const HelpEvent& rHEvt)
                             // describing the ctrl-click functionality.
                             if ( !pObj->getHyperlink().isEmpty() && !pObj->getHyperlink().startsWith("#") )
                             {
-                                aPixRect = LogicToWindow(aVEvt.mpObj->GetLogicRect());
+                                aPixRect = convertTo<vcl::WindowRect>(vcl::LogicRect(aVEvt.mpObj->GetLogicRect())).get();
                                 aHelpText = SfxHelp::GetURLHelpText(pObj->getHyperlink());
                             }
                         }

@@ -969,7 +969,10 @@ void drawIconSets(vcl::RenderContext& rRenderContext, const ScIconSetInfo* pOldI
     {
         if (comphelper::LibreOfficeKit::isActive())
         {
-            aHeight = rRenderContext.LogicToWindow(Size(0, pOldIconSetInfo->mnHeight), MapMode(MapUnit::MapTwip))->Height();
+            aHeight = rRenderContext.convertTo<vcl::WindowSize>(
+                vcl::LogicSize(0, pOldIconSetInfo->mnHeight), MapMode(MapUnit::MapTwip)
+            )->Height();
+
             aHeight *= comphelper::LibreOfficeKit::getDPIScale();
         }
         else
@@ -1437,12 +1440,12 @@ void ScOutputData::DrawClear()
 
 static tools::Long lclGetSnappedX( const OutputDevice& rDev, tools::Long nPosX, bool mbSnapPixel )
 {
-    return (mbSnapPixel && nPosX) ? rDev.WindowToLogic( rDev.LogicToWindow( Size( nPosX, 0 ) ))->Width() : nPosX;
+    return (mbSnapPixel && nPosX) ? rDev.WindowToLogic( rDev.convertTo<vcl::WindowSize>(vcl::LogicSize(Size( nPosX, 0 ))))->Width() : nPosX;
 }
 
 static tools::Long lclGetSnappedY( const OutputDevice& rDev, tools::Long nPosY, bool mbSnapPixel )
 {
-    return (mbSnapPixel && nPosY) ? rDev.WindowToLogic( rDev.LogicToWindow( Size( 0, nPosY ) ))->Height() : nPosY;
+    return (mbSnapPixel && nPosY) ? rDev.WindowToLogic( rDev.convertTo<vcl::WindowSize>(vcl::LogicSize(Size( 0, nPosY ))))->Height() : nPosY;
 }
 
 void ScOutputData::DrawFrame(vcl::RenderContext& rRenderContext)

@@ -300,12 +300,12 @@ void DlgEditor::DoScroll()
     MapMode aMap = rWindow.GetMapMode();
     Point aOrg = aMap.GetOrigin();
 
-    Size  aScrollPos( pHScroll->GetThumbPos(), pVScroll->GetThumbPos() );
-    aScrollPos = rWindow.LogicToWindow( aScrollPos );
-    aScrollPos = rWindow.WindowToLogic( aScrollPos );
+    vcl::LogicSize aScrollPos(pHScroll->GetThumbPos(), pVScroll->GetThumbPos());
+    auto aScrollWindowPos = rWindow.convertTo<vcl::WindowSize>(aScrollPos);
+    auto aScrollLogicPos = rWindow.convertTo<vcl::LogicSize>(aScrollWindowPos);
 
-    tools::Long  nX   = aScrollPos.Width() + aOrg.X();
-    tools::Long  nY   = aScrollPos.Height() + aOrg.Y();
+    tools::Long nX = aScrollLogicPos->Width() + aOrg.X();
+    tools::Long nY = aScrollLogicPos->Height() + aOrg.Y();
 
     if( !nX && !nY )
         return;
@@ -321,7 +321,7 @@ void DlgEditor::DoScroll()
 
     // #i74769# children should be scrolled
     rWindow.Scroll( -nX, -nY, ScrollFlags::Children);
-    aMap.SetOrigin( Point( -aScrollPos.Width(), -aScrollPos.Height() ) );
+    aMap.SetOrigin(Point(-aScrollPos->Width(), -aScrollPos->Height()));
     rWindow.SetMapMode( aMap );
     rWindow.PaintImmediately();
 

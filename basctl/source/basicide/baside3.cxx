@@ -208,10 +208,10 @@ void DialogWindow::Command( const CommandEvent& rCEvt )
             SdrView& rView = GetView();
             if( !rCEvt.IsMouseEvent() && rView.GetMarkedObjectList().GetMarkCount() != 0 )
             {
-                tools::Rectangle aMarkedRect( rView.GetMarkedRect() );
-                Point MarkedCenter( aMarkedRect.Center() );
-                Point PosPixel( LogicToWindow( MarkedCenter ) );
-                SfxDispatcher::ExecutePopup( this, &PosPixel );
+                tools::Rectangle aMarkedRect(rView.GetMarkedRect());
+                vcl::LogicPoint MarkedCenter(aMarkedRect.Center());
+                auto PosPixel = convertTo<vcl::WindowPoint>(MarkedCenter);
+                SfxDispatcher::ExecutePopup(this, &PosPixel.get());
             }
             else
             {

@@ -488,9 +488,9 @@ IMPL_LINK_NOARG(ColumnsWidget, ActivateHdl, weld::Entry&, bool)
 void ColumnsWidget::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     OutputDevice& rDevice = pDrawingArea->get_ref_device();
-    Size aLogicSize = rDevice.LogicToWindow( Size( 95, 155 ), MapMode( MapUnit::Map10thMM ) );
-    nMX = aLogicSize.Width();
-    Size aSize(nMX*WIDTH-1, aLogicSize.Height());
+    auto aLogicSize = rDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(95, 155)), MapMode(MapUnit::Map10thMM));
+    nMX = aLogicSize->Width();
+    Size aSize(nMX*WIDTH-1, aLogicSize->Height());
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     SetOutputSizePixel(aSize);

@@ -532,35 +532,35 @@ Reference< XAccessible > SAL_CALL AccessibleBase::getAccessibleAtPoint( const aw
 css::awt::Rectangle AccessibleBase::implGetBounds()
 {
     rtl::Reference<ChartView> pChartView = m_aAccInfo.m_xView.get();
-    if( pChartView )
-    {
-        VclPtr<vcl::Window> pWindow = m_aAccInfo.m_pWindow;
-        awt::Rectangle aLogicRect( pChartView->getRectangleOfObject( m_aAccInfo.m_aOID.getObjectCID() ));
-        if( pWindow )
-        {
-            tools::Rectangle aRect( aLogicRect.X, aLogicRect.Y,
-                             aLogicRect.X + aLogicRect.Width,
-                             aLogicRect.Y + aLogicRect.Height );
-            SolarMutexGuard aSolarGuard;
-            aRect = pWindow->LogicToWindow( aRect );
+    if (!pChartView)
+        return awt::Rectangle();
 
-            // aLogicRect is relative to the page, but we need a value relative
-            // to the parent object
-            awt::Point aParentLocOnScreen;
-            uno::Reference< XAccessibleComponent > xParent( getAccessibleParent(), uno::UNO_QUERY );
-            if( xParent.is() )
-                aParentLocOnScreen = xParent->getLocationOnScreen();
+    VclPtr<vcl::Window> pWindow = m_aAccInfo.m_pWindow;
+    awt::Rectangle aRect( pChartView->getRectangleOfObject( m_aAccInfo.m_aOID.getObjectCID() ));
 
-            awt::Point aULOnScreen = GetUpperLeftOnScreen();
-            awt::Point aOffset( aParentLocOnScreen.X - aULOnScreen.X,
-                                aParentLocOnScreen.Y - aULOnScreen.Y );
+    if (!pWindow)
+        return awt::Rectangle();
 
-            return awt::Rectangle( aRect.Left() - aOffset.X, aRect.Top() - aOffset.Y,
-                                   aRect.getOpenWidth(), aRect.getOpenHeight());
-        }
-    }
+    vcl::LogicRect aLogicRect(aRect.X, aRect.Y,
+                              aRect.X + aRect.Width,
+                              aRect.Y + aRect.Height);
 
-    return awt::Rectangle();
+    SolarMutexGuard aSolarGuard;
+    auto aWindowRect = pWindow->convertTo<vcl::WindowRect>(aLogicRect);
+
+    // aLogicRect is relative to the page, but we need a value relative
+    // to the parent object
+    awt::Point aParentLocOnScreen;
+    uno::Reference< XAccessibleComponent > xParent( getAccessibleParent(), uno::UNO_QUERY );
+    if( xParent.is() )
+        aParentLocOnScreen = xParent->getLocationOnScreen();
+
+    awt::Point aULOnScreen = GetUpperLeftOnScreen();
+    awt::Point aOffset( aParentLocOnScreen.X - aULOnScreen.X,
+                        aParentLocOnScreen.Y - aULOnScreen.Y );
+
+    return awt::Rectangle(aWindowRect->Left() - aOffset.X, aWindowRect->Top() - aOffset.Y,
+                          aWindowRect->getOpenWidth(), aWindowRect->getOpenHeight());
 }
 
 void SAL_CALL AccessibleBase::grabFocus()

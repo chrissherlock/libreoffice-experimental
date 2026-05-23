@@ -539,7 +539,7 @@ tools::Long ScColumn::GetNeededSize(
 
             Size aTextSize = bInPrintTwips ?
                     o3tl::toTwips(aSize, o3tl::Length::mm100) :
-                    pDev->LogicToWindow(aSize, aHMMMode);
+                    pDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aSize), aHMMMode).get();
 
             if ( bEdWidth )
                 nValue = aTextSize.Width();
@@ -565,7 +565,7 @@ tools::Long ScColumn::GetNeededSize(
                 sal_uInt32 aTextSize(pEngine->CalcTextWidth());
                 nValue = bInPrintTwips ?
                         o3tl::toTwips(aTextSize, o3tl::Length::mm100) :
-                        pDev->LogicToWindow(Size(aTextSize, 0), aHMMMode)->Width();
+                        pDev->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(aTextSize, 0)), aHMMMode)->Width();
             }
         }
         else            // height
@@ -573,7 +573,7 @@ tools::Long ScColumn::GetNeededSize(
             sal_uInt32 aTextSize(pEngine->GetTextHeight());
             nValue = bInPrintTwips ?
                     o3tl::toTwips(aTextSize, o3tl::Length::mm100) :
-                    pDev->LogicToWindow(Size(0, aTextSize), aHMMMode)->Height();
+                    pDev->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, aTextSize)), aHMMMode)->Height();
         }
 
         if ( nValue && bAddMargin )

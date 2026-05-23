@@ -104,9 +104,12 @@ GraphicHelper::GraphicHelper( const Reference< XComponentContext >& rxContext, c
     maDeviceInfo = mxDefaultOutputDevice->GetDeviceInfo();
     // 100 000 is 1 meter in MM100.
     // various unit tests rely on these values being exactly this and not the "true" values
-    Size aDefault = mxDefaultOutputDevice->LogicToWindow(Size(100000, 100000), MapMode(MapUnit::Map100thMM));
-    maDeviceInfo.PixelPerMeterX = aDefault.Width();
-    maDeviceInfo.PixelPerMeterY = aDefault.Height();
+    auto aDefault = mxDefaultOutputDevice->convertTo<vcl::WindowSize>(
+        vcl::LogicSize(Size(100000, 100000)),
+        MapMode(MapUnit::Map100thMM)
+    );
+    maDeviceInfo.PixelPerMeterX = aDefault->Width();
+    maDeviceInfo.PixelPerMeterY = aDefault->Height();
     mfPixelPerHmmX = maDeviceInfo.PixelPerMeterX / 100000.0;
     mfPixelPerHmmY = maDeviceInfo.PixelPerMeterY / 100000.0;
 }
