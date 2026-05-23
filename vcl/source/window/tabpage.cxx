@@ -164,7 +164,7 @@ void TabPage::Paint( vcl::RenderContext& rRenderContext, const tools::Rectangle&
 
 void TabPage::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
 {
-    Point aPos =  rDev.LogicToWindow( rPos );
+    const auto aPos = rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos), rDev.GetMapMode());
     Size aSize = GetSizePixel();
 
     Wallpaper aWallpaper = GetBackground();
@@ -176,14 +176,15 @@ void TabPage::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags)
     rDev.SetLineColor();
 
     if ( aWallpaper.IsBitmap() )
-        rDev.DrawBitmap(aPos, aSize, aWallpaper.GetBitmap());
+        rDev.DrawBitmap(aPos.get(), aSize, aWallpaper.GetBitmap());
     else
     {
         if( aWallpaper.GetColor() == COL_AUTO )
             rDev.SetFillColor(GetSettings().GetStyleSettings().GetDialogColor());
         else
-            rDev.SetFillColor(aWallpaper.GetColor());
-        rDev.DrawRect(tools::Rectangle(aPos, aSize));
+            rDev.SetFillColor( aWallpaper.GetColor() );
+
+        rDev.DrawRect(tools::Rectangle(aPos.get(), aSize));
     }
 }
 
