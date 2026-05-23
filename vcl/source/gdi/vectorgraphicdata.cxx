@@ -78,7 +78,7 @@ Bitmap convertPrimitive2DSequenceToBitmap(
             aRealRect.Y2 = rTargetRange.getMaxY();
 
             // get system DPI
-            Size aDPI(Application::GetDefaultDevice()->LogicToWindow(Size(1, 1), MapMode(MapUnit::MapInch)));
+            Size aDPI(Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(1, 1)), MapMode(MapUnit::MapInch)).get());
             if (rTargetDPI.has_value())
             {
                 aDPI = *rTargetDPI;
