@@ -501,15 +501,15 @@ void FuInsertFile::InsTextOrRTFinDrMode(SfxMedium* pMedium)
             Size aMaxSize = mrDoc.GetMaxObjSize();
             aSize.setHeight( std::min(aSize.Height(), aMaxSize.Height()) );
             aSize.setWidth( std::min(aSize.Width(), aMaxSize.Width()) );
-            aSize = mpWindow->LogicToWindow(aSize);
+            aSize = mpWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(aSize));
 
             // put it at the center of the window
             Size aTemp(mpWindow->GetOutputSizePixel());
             Point aPos(aTemp.Width() / 2, aTemp.Height() / 2);
             aPos.AdjustX( -(aSize.Width() / 2) );
             aPos.AdjustY( -(aSize.Height() / 2) );
-            aSize = mpWindow->WindowToLogic(aSize);
-            aPos = mpWindow->WindowToLogic(aPos);
+            aSize = mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize));
+            aPos = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
             pTO->SetLogicRect(::tools::Rectangle(aPos, aSize));
 
             if (pDlg->IsLink())

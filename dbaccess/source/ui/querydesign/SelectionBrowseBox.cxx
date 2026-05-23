@@ -2362,7 +2362,7 @@ sal_uInt32 OSelectionBrowseBox::GetTotalCellWidth(sal_Int32 nRowId, sal_uInt16 n
 
     sal_Int32 nRow = GetRealRow(nRowId);
     OUString strText(GetCellText(nRow, nColId));
-    return GetDataWindow().LogicToWindow(Size(GetDataWindow().GetTextWidth(strText),0)).Width();
+    return GetDataWindow().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(GetDataWindow().GetTextWidth(strText), 0)))->Width();
 }
 
 bool OSelectionBrowseBox::isCutAllowed() const

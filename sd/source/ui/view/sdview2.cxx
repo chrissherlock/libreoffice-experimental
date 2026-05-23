@@ -468,7 +468,7 @@ sal_Int8 View::AcceptDrop( const AcceptDropEvent& rEvt, DropTargetHelper& rTarge
                 aRect.Union( pObj->GetLogicRect() );
             }
 
-            if( aRect.Contains( pOLV->GetWindow()->WindowToLogic( rEvt.maPosPixel ) ) )
+            if (aRect.Contains(pOLV->GetWindow()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rEvt.maPosPixel))))
             {
                 bIsInsideOutlinerView = true;
             }
@@ -540,7 +540,7 @@ sal_Int8 View::AcceptDrop( const AcceptDropEvent& rEvt, DropTargetHelper& rTarge
                 {
                     SdrPageView*    pPageView = nullptr;
                     ::sd::Window* pWindow = mpViewSh->GetActiveWindow();
-                    Point           aPos( pWindow->WindowToLogic( rEvt.maPosPixel ) );
+                    Point aPos(pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rEvt.maPosPixel)));
                     SdrObject* pPickObj = PickObj(aPos, getHitTolLog(), pPageView);
                     bool            bIsPresTarget = false;
 
@@ -650,7 +650,7 @@ sal_Int8 View::ExecuteDrop( const ExecuteDropEvent& rEvt,
                 aRect.Union( pObj->GetLogicRect() );
             }
 
-            Point aPos( pOLV->GetWindow()->WindowToLogic( rEvt.maPosPixel ) );
+            Point aPos(pOLV->GetWindow()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rEvt.maPosPixel)));
 
             if( aRect.Contains( aPos ) )
             {
@@ -664,7 +664,7 @@ sal_Int8 View::ExecuteDrop( const ExecuteDropEvent& rEvt,
             TransferableDataHelper  aDataHelper( rEvt.maDropEvent.Transferable );
 
             if( pTargetWindow )
-                aPos = pTargetWindow->WindowToLogic( rEvt.maPosPixel );
+                aPos = pTargetWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rEvt.maPosPixel));
 
             // handle insert?
             if ((SdrDragMode::Gradient == GetDragMode())
@@ -822,7 +822,8 @@ IMPL_LINK( View, ExecuteNavigatorDrop, void*, p, void )
         sal_uInt16  nPgPos = 0xFFFF;
 
         if( pSdNavigatorDropEvent->mpTargetWindow )
-            aPos = pSdNavigatorDropEvent->mpTargetWindow->WindowToLogic( pSdNavigatorDropEvent->maPosPixel );
+            aPos = pSdNavigatorDropEvent->mpTargetWindow->convertTo<vcl::LogicPoint>(
+                vcl::WindowPoint(pSdNavigatorDropEvent->maPosPixel));
 
         const OUString& aURL( aINetBookmark.GetURL() );
         sal_Int32 nIndex = aURL.indexOf( '#' );

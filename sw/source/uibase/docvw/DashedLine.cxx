@@ -43,7 +43,7 @@ void SwDashedLine::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
         drawinglayer::processor2d::createProcessor2DFromOutputDevice(rRenderContext, aNewViewInfos));
 
     // Compute the start and end points
-    const tools::Rectangle aRect(tools::Rectangle(Point(0, 0), rRenderContext.WindowToLogic(GetSizePixel())));
+    const tools::Rectangle aRect(tools::Rectangle(Point(0, 0), rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(GetSizePixel()))));
     double nHalfWidth = double(aRect.Top() + aRect.Bottom()) / 2.0;
 
     basegfx::B2DPoint aStart(double(aRect.Left()), nHalfWidth);

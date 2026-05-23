@@ -515,7 +515,8 @@ CPPUNIT_TEST_FIXTURE(HtmlExportTest, testReqIfOleImg)
         OutputDevice* pDevice = Application::GetDefaultDevice();
         Size aPixel(64, 64);
         // Expected to be 1693.
-        Size aLogic(pDevice->WindowToLogic(aPixel, MapMode(MapUnit::Map100thMM)));
+        Size aLogic(pDevice->convertTo<vcl::LogicSize>(vcl::WindowSize(aPixel),
+                                                       MapMode(MapUnit::Map100thMM)));
         awt::Size aSize = xShape->getSize();
         // This was only 1247, size was not set explicitly.
         CPPUNIT_ASSERT_EQUAL(static_cast<sal_Int32>(aLogic.getWidth()), aSize.Width);

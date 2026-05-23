@@ -43,8 +43,10 @@ SvxXConnectionPreview::SvxXConnectionPreview()
 void SvxXConnectionPreview::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     weld::CustomWidgetController::SetDrawingArea(pDrawingArea);
-    Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(118 , 121), MapMode(MapUnit::MapAppFont)));
-    pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
+
+    auto aSize = pDrawingArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(118, 121)), MapMode(MapUnit::MapAppFont));
+
+    pDrawingArea->set_size_request(aSize->Width(), aSize->Height());
     SetOutputSizePixel(aSize);
 }
 
@@ -77,7 +79,9 @@ void SvxXConnectionPreview::AdaptSize()
     MapMode         aDisplayMap( aMapMode );
     Point           aNewPos;
     Size            aNewSize;
-    const Size      aWinSize = GetDrawingArea()->get_ref_device().WindowToLogic(GetOutputSizePixel(), aDisplayMap);
+    const Size aWinSize = GetDrawingArea()->get_ref_device().convertTo<vcl::LogicSize>(
+        vcl::WindowSize(GetOutputSizePixel()),
+        aDisplayMap);
     const tools::Long      nWidth = aWinSize.Width();
     const tools::Long      nHeight = aWinSize.Height();
     if (aRect.GetHeight() == 0)
@@ -285,7 +289,7 @@ bool SvxXConnectionPreview::MouseButtonDown( const MouseEvent& rMEvt )
             SetMapMode( aMapMode );
 
             Size aOutSize(GetOutputSizePixel());
-            aOutSize = GetDrawingArea()->get_ref_device().WindowToLogic(aOutSize);
+            aOutSize = GetDrawingArea()->get_ref_device().convertTo<vcl::LogicSize>(vcl::WindowSize(aOutSize));
 
             Point aPt( aMapMode.GetOrigin() );
             tools::Long nX = static_cast<tools::Long>( ( static_cast<double>(aOutSize.Width()) - ( static_cast<double>(aOutSize.Width()) * fMultFrac ) ) / 2.0 + 0.5 );

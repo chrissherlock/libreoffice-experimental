@@ -196,7 +196,7 @@ sal_Int32 SlideSorterView::GetPageIndexAtPoint (const Point& rWindowPosition) co
     sd::Window *pWindow (mrSlideSorter.GetContentWindow().get());
     if (pWindow)
     {
-        nIndex = mpLayouter->GetIndexAtPoint(pWindow->WindowToLogic(rWindowPosition));
+        nIndex = mpLayouter->GetIndexAtPoint(pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rWindowPosition)));
 
         // Clip the page index against the page count.
         if (nIndex >= mrModel.GetPageCount())
@@ -440,7 +440,9 @@ void SlideSorterView::DeterminePageObjectVisibilities()
     // visibility calculation can correctly invalidate it again.
     mbPageObjectVisibilitiesValid = true;
 
-    ::tools::Rectangle aViewArea (pWindow->WindowToLogic(::tools::Rectangle(Point(0,0),pWindow->GetSizePixel())));
+    ::tools::Rectangle aViewArea(
+        pWindow->convertTo<vcl::LogicRect>(
+            vcl::WindowRect(Point(0, 0), pWindow->GetSizePixel())));
     const Range aRange (mpLayouter->GetRangeOfVisiblePageObjects(aViewArea));
     const Range aUnion(
         ::std::min(maVisiblePageRange.Min(), aRange.Min()),
@@ -527,9 +529,9 @@ void SlideSorterView::RequestRepaint()
     if (pWindow)
     {
         mpLayeredDevice->InvalidateAllLayers(
-            ::tools::Rectangle(
-                pWindow->WindowToLogic(Point(0,0)),
-                pWindow->WindowToLogic(pWindow->GetSizePixel())));
+            pWindow->convertTo<vcl::LogicRect>(
+                vcl::WindowRect(::tools::Rectangle(Point(0, 0), pWindow->GetSizePixel()))));
+
         pWindow->Invalidate();
     }
 }

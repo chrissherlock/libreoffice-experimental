@@ -2494,7 +2494,12 @@ Reference < XShape > Shape::renderDiagramToGraphic( XmlFilterBase const & rFilte
 
         // Size of the rendering
         awt::Size aActualSize = mxShape->getSize();
-        Size aResolution(Application::GetDefaultDevice()->LogicToWindow(Size(100, 100), MapMode(MapUnit::MapCM)));
+
+        Size aResolution(Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+            vcl::LogicSize(100, 100),
+            MapMode(MapUnit::MapCM)
+        ).get());
+
         double fPixelsPer100thmm = static_cast < double > ( aResolution.Width() ) / 100000.0;
         awt::Size aSize( static_cast < sal_Int32 > ( ( fPixelsPer100thmm * aActualSize.Width ) + 0.5 ),
                          static_cast < sal_Int32 > ( ( fPixelsPer100thmm * aActualSize.Height ) + 0.5 ) );

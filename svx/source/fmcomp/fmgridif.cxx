@@ -1367,7 +1367,11 @@ void FmXGridPeer::propertyChange(const PropertyChangeEvent& evt)
                 sal_Int32 nTest = 0;
                 if (evt.NewValue >>= nTest)
                 {
-                    nWidth = pGrid->LogicToWindow(Point(nTest, 0), MapMode(MapUnit::Map10thMM)).X();
+                    nWidth = pGrid->convertTo<vcl::WindowPoint>(
+                        vcl::LogicPoint(Point(nTest, 0)),
+                        MapMode(MapUnit::Map10thMM)
+                    )->X();
+
                     // take the zoom factor into account
                     nWidth = pGrid->CalcZoom(nWidth);
                 }
@@ -1685,7 +1689,12 @@ void FmXGridPeer::elementInserted(const ContainerEvent& evt)
     Any aWidth = xNewColumn->getPropertyValue(FM_PROP_WIDTH);
     sal_Int32 nWidth = 0;
     if (aWidth >>= nWidth)
-        nWidth = pGrid->LogicToWindow(Point(nWidth, 0), MapMode(MapUnit::Map10thMM)).X();
+    {
+        nWidth = pGrid->convertTo<vcl::WindowPoint>(
+            vcl::LogicPoint(Point(nWidth, 0)),
+            MapMode(MapUnit::Map10thMM)
+        )->X();
+    }
 
     pGrid->AppendColumn(aName, static_cast<sal_uInt16>(nWidth), static_cast<sal_Int16>(::comphelper::getINT32(evt.Accessor)));
 
@@ -1728,7 +1737,13 @@ void FmXGridPeer::elementReplaced(const ContainerEvent& evt)
     Any aWidth = xNewColumn->getPropertyValue(FM_PROP_WIDTH);
     sal_Int32 nWidth = 0;
     if (aWidth >>= nWidth)
-        nWidth = pGrid->LogicToWindow(Point(nWidth, 0), MapMode(MapUnit::Map10thMM)).X();
+    {
+        nWidth = pGrid->convertTo<vcl::WindowPoint>(
+            vcl::LogicPoint(Point(nWidth, 0)),
+            MapMode(MapUnit::Map10thMM)
+        )->X();
+    }
+
     sal_uInt16 nNewId = pGrid->AppendColumn(aName, static_cast<sal_uInt16>(nWidth), static_cast<sal_Int16>(::comphelper::getINT32(evt.Accessor)));
     sal_uInt16 nNewPos = pGrid->GetModelColumnPos(nNewId);
 
@@ -1919,7 +1934,11 @@ void FmXGridPeer::setProperty( const OUString& PropertyName, const Any& Value)
         sal_Int32 nLogHeight(0);
         if (Value >>= nLogHeight)
         {
-            sal_Int32 nHeight = pGrid->LogicToWindow(Point(0, nLogHeight), MapMode(MapUnit::Map10thMM)).Y();
+            sal_Int32 nHeight = pGrid->convertTo<vcl::WindowPoint>(
+                vcl::LogicPoint(Point(0, nLogHeight)),
+                MapMode(MapUnit::Map10thMM)
+            )->Y();
+
             // take the zoom factor into account
             nHeight = pGrid->CalcZoom(nHeight);
             pGrid->SetDataRowHeight(nHeight);
@@ -1981,7 +2000,11 @@ Any FmXGridPeer::getProperty( const OUString& _rPropertyName )
             sal_Int32 nPixelHeight = pGrid->GetDataRowHeight();
             // take the zoom factor into account
             nPixelHeight = pGrid->CalcReverseZoom(nPixelHeight);
-            aProp <<= static_cast<sal_Int32>(pGrid->WindowToLogic(Point(0, nPixelHeight), MapMode(MapUnit::Map10thMM)).Y());
+
+            aProp <<= static_cast<sal_Int32>(pGrid->convertTo<vcl::LogicPoint>(
+                vcl::WindowPoint(0, nPixelHeight),
+                MapMode(MapUnit::Map10thMM)
+            )->Y());
         }
         else if ( _rPropertyName == FM_PROP_HASNAVIGATION )
         {

@@ -194,11 +194,19 @@ static Graphic ImpGetScaledGraphic( const Graphic& rGraphic, FilterConfigItem& r
     Size aOriginalSize;
     MapMode aPrefMapMode( rGraphic.GetPrefMapMode() );
     if (aPrefMapMode.GetMapUnit() == MapUnit::MapPixel)
-        aOriginalSize = Application::GetDefaultDevice()->WindowToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
+    {
+        aOriginalSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(aPrefSize),
+            MapMode(MapUnit::Map100thMM));
+    }
     else
+    {
         aOriginalSize = ::LogicToLogic(aPrefSize, aPrefMapMode, MapMode(MapUnit::Map100thMM));
+    }
+
     if ( !nLogicalWidth )
         nLogicalWidth = aOriginalSize.Width();
+
     if ( !nLogicalHeight )
         nLogicalHeight = aOriginalSize.Height();
 

@@ -1295,14 +1295,21 @@ void ControlContainerBase::ImplSetPosSize( Reference< XControl >& rxCtrl )
     OutputDevice*pOutDev = Application::GetDefaultDevice();
     if ( pOutDev )
     {
-        ::Size aTmp( nX, nY );
-        aTmp = pOutDev->LogicToWindow( aTmp, aMode );
-        nX = aTmp.Width();
-        nY = aTmp.Height();
-        aTmp = ::Size( nWidth, nHeight );
-        aTmp = pOutDev->LogicToWindow( aTmp, aMode );
-        nWidth = aTmp.Width();
-        nHeight = aTmp.Height();
+        auto originSize = pOutDev->convertTo<vcl::WindowSize>(
+            vcl::LogicSize(nX, nY),
+            aMode
+        );
+
+        nX = originSize->Width();
+        nY = originSize->Height();
+
+        auto originOffset = pOutDev->convertTo<vcl::WindowSize>(
+            vcl::LogicSize(nWidth, nHeight),
+            aMode
+        );
+
+        nWidth = originOffset->Width();
+        nHeight = originOffset->Height();
     }
     else
     {

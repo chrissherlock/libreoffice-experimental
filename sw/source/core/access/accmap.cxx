@@ -2736,7 +2736,7 @@ Point SwAccessibleMap::LogicToWindow( const Point& rPoint ) const
     if (const vcl::Window* pWin = GetShell().GetWin())
     {
         const MapMode aMapMode = GetMapMode(aPoint);
-        aPoint = pWin->LogicToWindow( aPoint, aMapMode );
+        aPoint = pWin->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aPoint), aMapMode);
         aPoint = Point(pWin->OutputToAbsoluteScreenPixel( aPoint ));
     }
 
@@ -2749,7 +2749,7 @@ Size SwAccessibleMap::LogicToWindow( const Size& rSize ) const
     if (const OutputDevice* pWin = GetShell().GetWin()->GetOutDev())
     {
         const MapMode aMapMode = GetMapMode(Point(0, 0));
-        aSize = pWin->LogicToWindow( aSize, aMapMode );
+        aSize = pWin->convertTo<vcl::WindowSize>(vcl::LogicSize(aSize), aMapMode);
     }
 
     return aSize;
@@ -2851,13 +2851,12 @@ XAccessible*
 
 Point SwAccessibleMap::PixelToCore( const Point& rPoint ) const
 {
-    Point aPoint;
-    if (const OutputDevice* pWin = GetShell().GetWin()->GetOutDev())
-    {
-        const MapMode aMapMode = GetMapMode(rPoint);
-        aPoint = pWin->WindowToLogic( rPoint, aMapMode );
-    }
-    return aPoint;
+    const OutputDevice* pWin = GetShell().GetWin()->GetOutDev();
+    if (!pWin)
+        return Point();
+
+    const MapMode aMapMode = GetMapMode(rPoint);
+    return pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPoint), aMapMode);
 }
 
 static tools::Long lcl_CorrectCoarseValue(tools::Long aCoarseValue, tools::Long aFineValue,
@@ -2895,15 +2894,15 @@ static void lcl_CorrectRectangle(tools::Rectangle & rRect,
 
 tools::Rectangle SwAccessibleMap::CoreToPixel( const SwRect& rRect ) const
 {
-    tools::Rectangle aRect;
-    if (const OutputDevice* pWin = GetShell().GetWin()->GetOutDev())
-    {
-        const MapMode aMapMode = GetMapMode(rRect.TopLeft());
-        aRect = pWin->LogicToWindow( rRect.SVRect(), aMapMode );
+    const OutputDevice* pWin = GetShell().GetWin()->GetOutDev();
+    if (!pWin)
+        return tools::Rectangle();
 
-        tools::Rectangle aTmpRect = pWin->WindowToLogic( aRect, aMapMode );
-        lcl_CorrectRectangle(aRect, rRect.SVRect(), aTmpRect);
-    }
+    const MapMode aMapMode = GetMapMode(rRect.TopLeft());
+    tools::Rectangle aRect = pWin->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect.SVRect()), aMapMode);
+
+    tools::Rectangle aTmpRect = pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(aRect), aMapMode);
+    lcl_CorrectRectangle(aRect, rRect.SVRect(), aTmpRect);
 
     return aRect;
 }

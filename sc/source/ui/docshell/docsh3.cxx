@@ -405,7 +405,7 @@ void ScDocShell::CalcOutputFactor()
     pRefDev->SetMapMode(MapMode(MapUnit::MapPixel));
     rPattern.fillFontOnly(aDefFont, pRefDev); // font color doesn't matter here
     pRefDev->SetFont(aDefFont);
-    nPrinterWidth = pRefDev->WindowToLogic(Size(pRefDev->GetTextWidth(aTestString), 0), MapMode(MapUnit::Map100thMM))->Width();
+    nPrinterWidth = pRefDev->convertTo<vcl::LogicSize>(vcl::WindowSize(pRefDev->GetTextWidth(aTestString), 0), MapMode(MapUnit::Map100thMM))->Width();
     pRefDev->SetFont(aOldFont);
     pRefDev->SetMapMode(aOldMode);
 

@@ -85,9 +85,9 @@ void DrawViewShell::ExecGallery(SfxRequest const & rReq)
         // reduce size if necessary
         ScopedVclPtrInstance< Window > aWindow(GetActiveWindow());
         aWindow->SetMapMode(aGraphic.GetPrefMapMode());
-        Size aSizePix = aWindow->LogicToWindow(aGraphic.GetPrefSize());
+        Size aSizePix = aWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(aGraphic.GetPrefSize()));
         aWindow->SetMapMode( MapMode(MapUnit::Map100thMM) );
-        Size aSize = aWindow->WindowToLogic(aSizePix);
+        Size aSize = aWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(aSizePix), aWindow->GetMapMode());
 
         // constrain size to page size if necessary
         SdrPage* pPage = mpDrawView->GetSdrPageView()->GetPage();

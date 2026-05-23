@@ -417,7 +417,7 @@ CPPUNIT_TEST_FIXTURE(HtmlImportTest, testImageSize)
     awt::Size aSize = getShape(1)->getSize();
     OutputDevice* pDevice = Application::GetDefaultDevice();
     Size aPixelSize(200, 400);
-    Size aExpected = pDevice->WindowToLogic(aPixelSize, MapMode(MapUnit::Map100thMM));
+    Size aExpected = pDevice->convertTo<vcl::LogicSize>(vcl::WindowSize(aPixelSize), MapMode(MapUnit::Map100thMM));
 
     // This was 1997, i.e. a hardcoded default, we did not look at the image
     // header when the HTML markup declared no size.
@@ -494,7 +494,7 @@ CPPUNIT_TEST_FIXTURE(HtmlImportTest, testTdf142781)
     createSwWebDoc("tdf142781.html");
     OutputDevice* pDevice = Application::GetDefaultDevice();
     Size aPixelSize(672, 480);
-    Size aExpected = pDevice->WindowToLogic(aPixelSize, MapMode(MapUnit::Map100thMM));
+    Size aExpected = pDevice->convertTo<vcl::LogicSize>(vcl::WindowSize(aPixelSize), MapMode(MapUnit::Map100thMM));
     awt::Size aSize = getShape(1)->getSize();
     // Without the fix in place, this test would have failed with
     // - Expected: 12700

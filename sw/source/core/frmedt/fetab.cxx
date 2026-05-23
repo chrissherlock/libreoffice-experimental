@@ -1840,7 +1840,7 @@ const SwFrame* SwFEShell::GetBox( const Point &rPt, bool* pbRow, bool* pbCol ) c
         // #i32329# Enhanced table selection
         SwTwips nSize = pbCol ? ENHANCED_TABLE_SELECTION_FUZZY : RULER_MOUSE_MARGINWIDTH;
         Size aTmp( nSize, nSize );
-        aTmp = pOutWin->WindowToLogic( aTmp );
+        aTmp = pOutWin->convertTo<vcl::LogicSize>(vcl::WindowSize(aTmp), pOutWin->GetMapMode());
         nFuzzy = aTmp.Width();
     }
 

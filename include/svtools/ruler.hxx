@@ -91,7 +91,7 @@ The values are computed as described below:
 
 - PagePos
 
-    Point aPagePos = aEditWin.LogicToWindow( aEditWin.GetPagePos() );
+    Point aPagePos = aEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aEditWin.GetPagePos()) );
     aHRuler.SetPagePos( aPagePos().X() );
 
 - All other values

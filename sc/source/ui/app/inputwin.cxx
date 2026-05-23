@@ -1175,7 +1175,7 @@ Point ScTextWndGroup::GetCursorScreenPixelPos(bool bBelow)
     Point aLogicPos = pCur->GetPos();
     if (bBelow)
         aLogicPos.AdjustY(pCur->GetHeight());
-    aPos = GetEditViewDevice().LogicToWindow(aLogicPos);
+    aPos = GetEditViewDevice().convertTo<vcl::WindowPoint>(vcl::LogicPoint(aLogicPos));
     bool bRTL = mrParent.IsRTLEnabled();
     if (bRTL)
         aPos.setX(mxTextWnd->GetOutputSizePixel().Width() - aPos.X() + gnBorderWidth);
@@ -1346,7 +1346,7 @@ const OutputDevice& ScTextWnd::GetEditViewDevice() const
 int ScTextWnd::GetPixelHeightForLines(tools::Long nLines)
 {
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-    return rDevice.LogicToWindow(Size(0, nLines * rDevice.GetTextHeight()))->Height() + 1;
+    return rDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, nLines * rDevice.GetTextHeight())))->Height() + 1;
 }
 
 tools::Long ScTextWnd::GetNumLines() const
@@ -1373,7 +1373,7 @@ void ScTextWnd::Resize()
     {
         Size aOutputSize = GetOutputSizePixel();
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        tools::Rectangle aOutputArea =  rDevice.WindowToLogic( tools::Rectangle( Point(), aOutputSize ));
+        tools::Rectangle aOutputArea =  rDevice.convertTo<vcl::LogicRect>(vcl::WindowRect(Point(), aOutputSize));
         m_xEditView->SetOutputArea( aOutputArea );
 
         // Don't leave an empty area at the bottom if we can move the text down.
@@ -1383,7 +1383,7 @@ void ScTextWnd::Resize()
             m_xEditView->Scroll(0, m_xEditView->GetVisArea().Top() - nMaxVisAreaTop);
         }
 
-        m_xEditEngine->SetPaperSize( rDevice.WindowToLogic( Size( aOutputSize.Width(), 10000 ) ));
+        m_xEditEngine->SetPaperSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(aOutputSize.Width(), 10000)));
     }
 
     // skip WeldEditView's Resize();
@@ -1538,7 +1538,7 @@ void ScTextWnd::InitEditEngine()
 
     Size barSize = GetOutputSizePixel();
     m_xEditEngine->SetUpdateLayout( false );
-    m_xEditEngine->SetPaperSize( GetDrawingArea()->get_ref_device().WindowToLogic(Size(barSize.Width(),10000)));
+    m_xEditEngine->SetPaperSize(GetDrawingArea()->get_ref_device().convertTo<vcl::LogicSize>(vcl::WindowSize(Size(barSize.Width(), 10000))));
     m_xEditEngine->SetWordDelimiters(
                     ScEditUtil::ModifyDelimiters( m_xEditEngine->GetWordDelimiters() ) );
     m_xEditEngine->SetReplaceLeadingSingleQuotationMark( false );
@@ -2057,7 +2057,7 @@ void ScTextWnd::SetTextString( const OUString& rNewString, bool bKitUpdate )
                 else
                     nTextSize = GetOutputSizePixel().Width(); // Overflow
 
-                Point aLogicStart = GetDrawingArea()->get_ref_device().WindowToLogic(Point(0,0));
+                Point aLogicStart = GetDrawingArea()->get_ref_device().convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(0, 0)));
                 tools::Long nStartPos = aLogicStart.X();
                 tools::Long nInvPos = nStartPos;
                 if (nDifPos)
@@ -2197,7 +2197,7 @@ void ScTextWnd::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 
     aTextFont = rDevice.GetFont();
     Size aFontSize = aTextFont.GetFontSize();
-    aTextFont.SetFontSize(rDevice.WindowToLogic(aFontSize, MapMode(MapUnit::MapTwip)));
+    aTextFont.SetFontSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(aFontSize), MapMode(MapUnit::MapTwip)));
 
     const StyleSettings& rStyleSettings = Application::GetSettings().GetStyleSettings();
 
@@ -2267,7 +2267,7 @@ ScPosWnd::ScPosWnd(vcl::Window* pParent)
     // formatting toolbar is placed above formulabar when using multiple toolbars typically
 
     m_xWidget->set_entry_width_chars(1);
-    Size aSize(LogicToWindow(Size(POSITION_COMBOBOX_WIDTH * 4, 0), MapMode(MapUnit::MapAppFont)));
+    Size aSize(convertTo<vcl::WindowSize>(vcl::LogicSize(Size(POSITION_COMBOBOX_WIDTH * 4, 0)), MapMode(MapUnit::MapAppFont)));
     m_xWidget->set_size_request(aSize.Width(), -1);
     SetSizePixel(m_xContainer->get_preferred_size());
 
@@ -2560,7 +2560,7 @@ IMPL_LINK_NOARG(ScPosWnd, ModifyHdl, weld::ComboBox&, void)
     Point aPos;
     vcl::Cursor* pCur = GetCursor();
     if (pCur)
-        aPos = LogicToWindow( pCur->GetPos() );
+        aPos = convertTo<vcl::WindowPoint>(vcl::LogicPoint(pCur->GetPos()));
     aPos = OutputToScreenPixel( aPos );
     tools::Rectangle aRect( aPos, aPos );
 

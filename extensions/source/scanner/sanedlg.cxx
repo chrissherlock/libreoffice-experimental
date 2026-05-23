@@ -213,12 +213,16 @@ public:
     }
     virtual void SetDrawingArea(weld::DrawingArea* pDrawingArea) override
     {
-        Size aSize(pDrawingArea->get_ref_device().LogicToWindow(Size(PREVIEW_WIDTH, PREVIEW_HEIGHT), MapMode(MapUnit::MapAppFont)));
-        aSize.setWidth(aSize.getWidth()+1);
-        aSize.setHeight(aSize.getHeight()+1);
-        pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
+        auto aSize = pDrawingArea->get_ref_device().convertTo<vcl::WindowSize>(
+            vcl::LogicSize(Size(PREVIEW_WIDTH, PREVIEW_HEIGHT)),
+            MapMode(MapUnit::MapAppFont)
+        );
+
+        aSize->setWidth(aSize->getWidth()+1);
+        aSize->setHeight(aSize->getHeight()+1);
+        pDrawingArea->set_size_request(aSize->Width(), aSize->Height());
         CustomWidgetController::SetDrawingArea(pDrawingArea);
-        SetOutputSizePixel(aSize);
+        SetOutputSizePixel(aSize.get());
     }
 };
 
@@ -1216,22 +1220,25 @@ void ScanPreview::DrawDrag(vcl::RenderContext& rRenderContext)
     rRenderContext.SetMapMode(MapMode(MapUnit::MapAppFont));
 }
 
-Point ScanPreview::GetPixelPos( const Point& rIn) const
+Point ScanPreview::GetPixelPos(const Point& rIn) const
 {
     Point aConvert(
-        ( ( rIn.X() * PREVIEW_WIDTH ) /
-          ( maMaxBottomRight.X() - maMinTopLeft.X() ) )
-        ,
-        ( ( rIn.Y() * PREVIEW_HEIGHT )
-          / ( maMaxBottomRight.Y() - maMinTopLeft.Y() ) )
-        );
+        (rIn.X() * PREVIEW_WIDTH) / (maMaxBottomRight.X() - maMinTopLeft.X()),
+        (rIn.Y() * PREVIEW_HEIGHT) / (maMaxBottomRight.Y() - maMinTopLeft.Y())
+    );
 
-    return GetDrawingArea()->get_ref_device().LogicToWindow(aConvert, MapMode(MapUnit::MapAppFont));
+    return GetDrawingArea()->get_ref_device().convertTo<vcl::WindowPoint>(
+        vcl::LogicPoint(aConvert),
+        MapMode(MapUnit::MapAppFont)
+    ).get();
 }
 
 Point ScanPreview::GetLogicPos(const Point& rIn) const
 {
-    Point aConvert = GetDrawingArea()->get_ref_device().WindowToLogic(rIn, MapMode(MapUnit::MapAppFont));
+    Point aConvert = GetDrawingArea()->get_ref_device().convertTo<vcl::LogicPoint>(
+        vcl::WindowPoint(rIn),
+        MapMode(MapUnit::MapAppFont));
+
     if( aConvert.X() < 0 )
         aConvert.setX( 0 );
     if( aConvert.X() >= PREVIEW_WIDTH )

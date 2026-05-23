@@ -102,7 +102,7 @@ void SwFrameControlsManager::SetHeaderFooterControl( const SwPageFrame* pPageFra
         pControl.swap( pNewControl );
     }
 
-    tools::Rectangle aPageRect = m_pEditWin->LogicToWindow( pPageFrame->getFrameArea().SVRect() );
+    tools::Rectangle aPageRect = m_pEditWin->convertTo<vcl::WindowRect>(vcl::LogicRect(pPageFrame->getFrameArea().SVRect()));
 
     SwHeaderFooterDashedLine* pWin = dynamic_cast<SwHeaderFooterDashedLine*>(pControl->GetWindow());
     assert( pWin != nullptr) ;

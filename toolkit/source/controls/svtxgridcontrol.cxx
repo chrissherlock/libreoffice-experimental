@@ -211,7 +211,10 @@ void SVTXGridControl::setProperty( const OUString& PropertyName, const Any& aVal
             sal_Int32 columnHeaderHeight = 0;
             if ( !aValue.hasValue() )
             {
-                columnHeaderHeight = pTable->WindowToLogic(Size(0, pTable->GetTextHeight() + 3), MapMode(MapUnit::MapAppFont)).Height();
+                columnHeaderHeight = pTable->convertTo<vcl::LogicSize>(
+                    vcl::WindowSize(0, pTable->GetTextHeight() + 3),
+                    MapMode(MapUnit::MapAppFont)
+                )->Height();
             }
             else
             {
@@ -251,7 +254,10 @@ void SVTXGridControl::setProperty( const OUString& PropertyName, const Any& aVal
             sal_Int32 rowHeight = 0;
             if ( !aValue.hasValue() )
             {
-                rowHeight = pTable->WindowToLogic(Size(0, pTable->GetTextHeight() + 3), MapMode(MapUnit::MapAppFont)).Height();
+                rowHeight = pTable->convertTo<vcl::LogicSize>(
+                    vcl::WindowSize(0, pTable->GetTextHeight() + 3),
+                    MapMode(MapUnit::MapAppFont)
+                )->Height();
             }
             else
             {

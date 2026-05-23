@@ -533,7 +533,7 @@ tools::Rectangle ScIAccessibleViewForwarder::GetVisibleArea() const
         aVisRect.SetSize(pWin->GetOutputSizePixel());
         aVisRect.SetPos(Point(0, 0));
 
-        aVisRect = pWin->WindowToLogic(aVisRect, maMapMode);
+        aVisRect = pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(aVisRect), maMapMode);
     }
 
     return aVisRect;
@@ -542,25 +542,31 @@ tools::Rectangle ScIAccessibleViewForwarder::GetVisibleArea() const
 Point ScIAccessibleViewForwarder::LogicToWindow (const Point& rPoint) const
 {
     SolarMutexGuard aGuard;
-    Point aPoint;
     vcl::Window* pWin = mpViewShell->GetWindow();
-    if (pWin && mpAccDoc)
-    {
-        tools::Rectangle aRect(mpAccDoc->GetBoundingBoxOnScreen());
-        aPoint = pWin->LogicToWindow(rPoint, maMapMode) + aRect.TopLeft();
-    }
 
-    return aPoint;
+    if (!pWin || !mpAccDoc)
+        return Point();
+
+    tools::Rectangle aRect(mpAccDoc->GetBoundingBoxOnScreen());
+
+    return pWin->convertTo<vcl::WindowPoint>(
+        vcl::LogicPoint(rPoint),
+        maMapMode
+    ).get() + aRect.TopLeft();
 }
 
 Size ScIAccessibleViewForwarder::LogicToWindow (const Size& rSize) const
 {
     SolarMutexGuard aGuard;
-    Size aSize;
     vcl::Window* pWin = mpViewShell->GetWindow();
-    if (pWin)
-        aSize = pWin->LogicToWindow(rSize, maMapMode);
-    return aSize;
+
+    if (!pWin)
+        return Size();
+
+    return pWin->convertTo<vcl::WindowSize>(
+        vcl::LogicSize(rSize),
+        maMapMode
+    ).get();
 }
 
 namespace {
@@ -994,10 +1000,15 @@ void ScShapeChildren::FillShapes(const tools::Rectangle& aPixelPaintRect, const 
         uno::Reference< drawing::XShape > xShape(pObj->getUnoShape(), uno::UNO_QUERY);
         if (xShape.is())
         {
-            tools::Rectangle aRect(pWin->LogicToWindow(
-                tools::Rectangle(vcl::unohelper::ConvertToVCLPoint(xShape->getPosition()),
-                                 vcl::unohelper::ConvertToVCLSize(xShape->getSize())), aMapMode));
-            if(!aClippedPixelPaintRect.GetIntersection(aRect).IsEmpty())
+            auto aRect = pWin->convertTo<vcl::WindowRect>(
+                vcl::LogicRect(tools::Rectangle(
+                    vcl::unohelper::ConvertToVCLPoint(xShape->getPosition()),
+                    vcl::unohelper::ConvertToVCLSize(xShape->getSize())
+                )),
+                aMapMode
+            );
+
+            if (!aClippedPixelPaintRect.GetIntersection(aRect.get()).IsEmpty())
             {
                 ScShapeChild aShape;
                 aShape.mxShape = std::move(xShape);

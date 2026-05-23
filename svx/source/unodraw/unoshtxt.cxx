@@ -855,7 +855,7 @@ Point SvxTextEditSourceImpl::LogicToWindow( const Point& rPoint, const MapMode& 
                                                    MapMode(mpModel->GetScaleUnit()) ) );
         MapMode aMapMode(mpWindow->GetMapMode());
         aMapMode.SetOrigin(Point());
-        return mpWindow->LogicToWindow( aPoint2, aMapMode );
+        return mpWindow->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aPoint2), aMapMode).get();
     }
 
     return Point();
@@ -880,7 +880,7 @@ Point SvxTextEditSourceImpl::WindowToLogic( const Point& rPoint, const MapMode& 
     {
         MapMode aMapMode(mpWindow->GetMapMode());
         aMapMode.SetOrigin(Point());
-        Point aPoint1( mpWindow->WindowToLogic( rPoint, aMapMode ) );
+        Point aPoint1(mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPoint), aMapMode));
         Point aPoint2( ::LogicToLogic( aPoint1,
                                                    MapMode(mpModel->GetScaleUnit()),
                                                    rMapMode ) );

@@ -327,7 +327,7 @@ void SwColumnOnlyExample::Paint(vcl::RenderContext& rRenderContext, const tools:
     const Color& rFieldTextColor = SwViewOption::GetCurrentViewOptions().GetFontColor();
     const Color& rDocColor = SwViewOption::GetCurrentViewOptions().GetDocColor();
 
-    Size aLogSize(rRenderContext.WindowToLogic(GetOutputSizePixel()));
+    Size aLogSize(rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
     tools::Rectangle aCompleteRect(Point(0,0), aLogSize);
     rRenderContext.SetLineColor(rDlgColor);
     rRenderContext.SetFillColor(rDlgColor);
@@ -451,7 +451,7 @@ void SwColumnOnlyExample::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     weld::CustomWidgetController::SetDrawingArea(pDrawingArea);
     OutputDevice& rRefDevice = pDrawingArea->get_ref_device();
-    Size aPrefSize(rRefDevice.LogicToWindow(Size(75, 46), MapMode(MapUnit::MapAppFont)));
+    Size aPrefSize(rRefDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(75, 46)), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aPrefSize.Width(), aPrefSize.Height());
 }
 
@@ -463,7 +463,7 @@ void SwColumnOnlyExample::Resize()
     m_aWinSize = GetOutputSizePixel();
     m_aWinSize.AdjustHeight( -4 );
     m_aWinSize.AdjustWidth( -4 );
-    m_aWinSize =  rRefDevice.WindowToLogic(m_aWinSize);
+    m_aWinSize =  rRefDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(m_aWinSize));
     rRefDevice.Pop();
     Invalidate();
 }

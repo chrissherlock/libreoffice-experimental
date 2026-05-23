@@ -356,7 +356,7 @@ void ScTabView::DoResize( const Point& rOffset, const Size& rSize, bool bInner )
 
     Size aFontSize = rStyleSettings.GetTabFont().GetFontSize();
     MapMode aPtMapMode(MapUnit::MapPoint);
-    aFontSize = pFrameWin->LogicToWindow(aFontSize, aPtMapMode);
+    aFontSize = pFrameWin->convertTo<vcl::WindowSize>(vcl::LogicSize(aFontSize), aPtMapMode).get();
     sal_Int32 nTabHeight = aFontSize.Height() + TAB_HEIGHT_MARGIN;
 
     if ( aViewData.GetHSplitMode() != SC_SPLIT_NONE )
@@ -1912,10 +1912,11 @@ Point ScTabView::GetChartInsertPos( const Size& rSize, const ScRange& rCellRange
         //  get the visible rectangle in logic units
         bool bLOKActive = comphelper::LibreOfficeKit::isActive();
         MapMode aDrawMode = pWin->GetDrawMapMode();
+
         tools::Rectangle aVisible(
             bLOKActive ?
-            ::LogicToLogic( aViewData.getLOKVisibleArea(), MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM) )
-            : pWin->WindowToLogic( tools::Rectangle( Point(0,0), pWin->GetOutputSizePixel() ), aDrawMode ) );
+            ::LogicToLogic(aViewData.getLOKVisibleArea(), MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM))
+            : pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(tools::Rectangle(Point(0, 0), pWin->GetOutputSizePixel())), aDrawMode));
 
         ScDocument& rDoc = aViewData.GetDocument();
         SCTAB nTab = aViewData.CurrentTabForData();
@@ -2035,12 +2036,12 @@ Point ScTabView::GetChartDialogPos( const Size& rDialogSize, const tools::Rectan
     if (pWin)
     {
         MapMode aDrawMode = pWin->GetDrawMapMode();
-        tools::Rectangle aObjPixel = pWin->LogicToWindow( rLogicChart, aDrawMode );
+        tools::Rectangle aObjPixel = pWin->convertTo<vcl::WindowRect>(vcl::LogicRect(rLogicChart), aDrawMode);
         AbsoluteScreenPixelRectangle aObjAbs( pWin->OutputToAbsoluteScreenPixel( aObjPixel.TopLeft() ),
                            pWin->OutputToAbsoluteScreenPixel( aObjPixel.BottomRight() ) );
 
         AbsoluteScreenPixelRectangle aDesktop = pWin->GetDesktopRectPixel();
-        Size aSpace = pWin->LogicToWindow( Size(8, 12), MapMode(MapUnit::MapAppFont));
+        Size aSpace = pWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(8, 12)), MapMode(MapUnit::MapAppFont));
 
         ScDocument& rDoc = aViewData.GetDocument();
         SCTAB nTab = aViewData.CurrentTabForData();

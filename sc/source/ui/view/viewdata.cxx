@@ -1662,7 +1662,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
     if (bLOKActive && pEditView[eWhich]->HasLOKSpecialPositioning())
         pEditView[eWhich]->SetLOKSpecialFlags(bLOKLayoutRTL ? LOKSpecialFlags::LayoutRTL : LOKSpecialFlags::NONE);
 
-    tools::Rectangle aOutputArea = pWin->WindowToLogic( aPixRect, GetLogicMode() );
+    tools::Rectangle aOutputArea = pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(aPixRect), GetLogicMode());
     pEditView[eWhich]->SetOutputArea( aOutputArea );
 
     if (bLOKPrintTwips)
@@ -1717,7 +1717,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
             Size aGridSize(nGridWidthPx, nGridHeightPx);
             const MapMode& rWinMapMode = GetLogicMode();
             aGridSize = ::LogicToLogic(
-                pWin->WindowToLogic(aGridSize, rWinMapMode),
+                pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(aGridSize), rWinMapMode),
                 rWinMapMode, MapMode(MapUnit::MapTwip));
             nGridWidthTwips = aGridSize.Width();
             nGridHeightTwips = aGridSize.Height();
@@ -1784,7 +1784,7 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
                 nSizeYPTwips = aPTwipsRect.GetHeight();
         }
 
-        Size aPaperSize = pView->GetActiveWin()->WindowToLogic( Size( nSizeXPix, nSizeYPix ), GetLogicMode() );
+        Size aPaperSize = pView->GetActiveWin()->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(nSizeXPix, nSizeYPix)), GetLogicMode());
         Size aPaperSizePTwips(nSizeXPTwips, nSizeYPTwips);
         // In the LOK case the following code can make the cell background and visible area larger
         // than needed which makes selecting the adjacent right cell impossible in some cases.
@@ -1841,12 +1841,12 @@ void ScViewData::SetEditEngine( ScSplitPos eWhich,
         aVis.SetLeft( aVis.Right() - nDiff );
         if (bLOKPrintTwips)
             aVisPTwips.SetLeft(aVisPTwips.Right() - nDiffPTwips);
-        // #i49561# Important note:
-        // The set offset of the visible area of the EditView for centered and
-        // right alignment in horizontal layout is consider by instances of
-        // class <ScEditObjectViewForwarder> in its methods <LogicToWindow(..)>
-        // and <WindowToLogic(..)>. This is needed for the correct visibility
-        // of paragraphs in edit mode at the accessibility API.
+        // #i49561#
+        // The EditView's horizontal offset (for centered or right alignment) must be
+        // accounted for during coordinate transformations. ScEditObjectViewForwarder
+        // handles this by applying the offset within its convertTo<vcl::LogicSize>
+        // and convertTo<vcl::WindowSize> overrides. This ensures the accessibility API
+        // correctly calculates the visible bounds of paragraphs while in edit mode.
         pEditView[eWhich]->SetVisArea(aVis);
         if (bLOKPrintTwips)
             pEditView[eWhich]->SetLOKSpecialVisArea(aVisPTwips);
@@ -2014,7 +2014,7 @@ void ScViewData::EditGrowX()
                            GetScrPos(nEditCol, nEditRow, eWhich), pWin->GetOutDev(), nPPTX, nPPTY,
                            GetZoomX(), GetZoomY())
                     .GetEditArea(pPattern, true);
-        aTempArea = pWin->WindowToLogic(aTempArea, GetLogicMode());
+        aTempArea = pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(aTempArea), GetLogicMode());
         aArea.SetLeft(aTempArea.Left());
         aArea.SetRight(aTempArea.Right());
 
@@ -2028,7 +2028,7 @@ void ScViewData::EditGrowX()
         {
             tools::Long nGridWidthPx = pView->GetGridWidth(eHWhich);
             Size aGridSize{ nGridWidthPx, 1 };
-            aGridSize = pWin->WindowToLogic(aGridSize, GetLogicMode());
+            aGridSize = pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(aGridSize), GetLogicMode());
 
             Size aPaperSize = pEngine->GetPaperSize();
             aPaperSize.setWidth(aGridSize.Width() - aArea.Left());
@@ -2055,8 +2055,8 @@ void ScViewData::EditGrowX()
                 tools::Long nGridWidthPx = pView->GetGridWidth(eHWhich);
                 Size aGridSize{ nGridWidthPx, 1 };
                 aGridSize
-                    = ::LogicToLogic(pWin->WindowToLogic(aGridSize, GetLogicMode()),
-                                                 GetLogicMode(), MapMode{ MapUnit::MapTwip });
+                    = ::LogicToLogic(pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(aGridSize), GetLogicMode()),
+                                                                     GetLogicMode(), MapMode{ MapUnit::MapTwip });
 
                 Size aPaperSize = pEngine->GetLOKSpecialPaperSize();
                 aPaperSize.setWidth(aGridSize.Width() - aAreaPTwips.Left());
@@ -2077,7 +2077,7 @@ void ScViewData::EditGrowX()
                 --nEditStartCol;
                 tools::Long nColWidth = rLocalDoc.GetColWidth(nEditStartCol, nCurrentTab);
                 tools::Long nLeftPix = ToPixel( nColWidth, nPPTX );
-                nLogicLeft = pWin->WindowToLogic(Size(nLeftPix,0)).Width();
+                nLogicLeft = pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(nLeftPix, 0)))->Width();
                 if (bLOKPrintTwips)
                     nLogicLeftPTwips = nColWidth;
             }
@@ -2088,7 +2088,7 @@ void ScViewData::EditGrowX()
                 ++nEditEndCol;
                 tools::Long nColWidth = rLocalDoc.GetColWidth(nEditEndCol, nCurrentTab);
                 tools::Long nRightPix = ToPixel( nColWidth, nPPTX );
-                nLogicRight = pWin->WindowToLogic(Size(nRightPix,0)).Width();
+                nLogicRight = pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(nRightPix, 0)))->Width();
                 if (bLOKPrintTwips)
                     nLogicRightPTwips = nColWidth;
             }
@@ -2129,7 +2129,7 @@ void ScViewData::EditGrowX()
             --nEditStartCol;
             tools::Long nColWidth = rLocalDoc.GetColWidth(nEditStartCol, nCurrentTab);
             tools::Long nPix = ToPixel( nColWidth, nPPTX );
-            tools::Long nLogicWidth = pWin->WindowToLogic(Size(nPix,0)).Width();
+            tools::Long nLogicWidth = pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(nPix, 0)))->Width();
             tools::Long& nLogicWidthPTwips = nColWidth;
 
             if ( !bLayoutRTL || bLOKActive )
@@ -2171,7 +2171,7 @@ void ScViewData::EditGrowX()
             ++nEditEndCol;
             tools::Long nColWidth = rLocalDoc.GetColWidth(nEditEndCol, nCurrentTab);
             tools::Long nPix = ToPixel( nColWidth, nPPTX );
-            tools::Long nLogicWidth = pWin->WindowToLogic(Size(nPix,0)).Width();
+            tools::Long nLogicWidth = pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(nPix, 0)))->Width();
             tools::Long& nLogicWidthPTwips = nColWidth;
             if ( bLayoutRTL && !bLOKActive )
             {
@@ -2310,8 +2310,8 @@ void ScViewData::EditGrowX()
     //  the whole text will move, and may not even obscure all of the original display.
     if ( bUnevenGrow )
     {
-        aArea.SetLeft( pWin->WindowToLogic( Point(0,0) ).X() );
-        aArea.SetRight( pWin->WindowToLogic( aScrSize ).Width() );
+        aArea.SetLeft(pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(0, 0)))->X());
+        aArea.SetRight(pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(aScrSize))->Width());
     }
     else if ( !bAsianVertical && !bGrowToLeft && !bGrowCentered )
         aArea.SetLeft( nOldRight );
@@ -2393,7 +2393,7 @@ void ScViewData::EditGrowY( bool bInitial )
         ScDocument& rLocalDoc = GetDocument();
         tools::Long nRowHeight = rLocalDoc.GetRowHeight(nEditEndRow, CurrentTabForData());
         tools::Long nPix = ToPixel( nRowHeight, nPPTY );
-        aArea.AdjustBottom(pWin->WindowToLogic(Size(0,nPix)).Height() );
+        aArea.AdjustBottom(pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(0, nPix)))->Height());
         if (bLOKPrintTwips)
             aAreaPTwips.AdjustBottom(nRowHeight);
 
@@ -3701,7 +3701,7 @@ void ScViewData::WriteExtOptions( ScExtDocOptions& rDocOpt ) const
             {
                 Point& rSplitPos = rTabSett.maSplitPos;
                 rSplitPos = Point( bHSplit ? nExHSplitPos : 0, bVSplit ? nExVSplitPos : 0 );
-                rSplitPos = Application::GetDefaultDevice()->WindowToLogic( rSplitPos, MapMode( MapUnit::MapTwip ) );
+                rSplitPos = Application::GetDefaultDevice()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rSplitPos), MapMode(MapUnit::MapTwip));
                 if ( pDocShell )
                     rSplitPos.setX( static_cast<tools::Long>(static_cast<double>(rSplitPos.X()) / pDocShell->GetOutputFactor()) );
             }
@@ -3828,8 +3828,11 @@ void ScViewData::ReadExtOptions( const ScExtDocOptions& rDocOpt )
             }
             else
             {
-                Point aPixel = Application::GetDefaultDevice()->LogicToWindow(
-                                rTabSett.maSplitPos, MapMode( MapUnit::MapTwip ) );  //! Zoom?
+                Point aPixel = Application::GetDefaultDevice()->convertTo<vcl::WindowPoint>(
+                    vcl::LogicPoint(rTabSett.maSplitPos),
+                    MapMode(MapUnit::MapTwip)
+                ).get();
+
                 // the test for use of printer metrics for text formatting here
                 // effectively results in the nFactor = 1.0 regardless of the Option setting.
                 if (pDocShell && ScModule::get()->GetInputOptions().GetTextWysiwyg())

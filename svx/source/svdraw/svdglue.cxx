@@ -258,12 +258,12 @@ void SdrGluePoint::Invalidate(vcl::Window& rWin, const SdrObject* pObj) const
         return;
     vcl::MappingPolicy bMapMode = rWin.GetMappingPolicy();
     Point aPt(pObj!=nullptr ? GetAbsolutePos(*pObj) : GetPos());
-    aPt=rWin.LogicToWindow(aPt);
+    const auto aConvertedPt = rWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aPt));
     rWin.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
     Size aSiz( aGlueHalfSize );
-    tools::Rectangle aRect(aPt.X()-aSiz.Width(),aPt.Y()-aSiz.Height(),
-                    aPt.X()+aSiz.Width(),aPt.Y()+aSiz.Height());
+    tools::Rectangle aRect(aConvertedPt->X() - aSiz.Width(), aConvertedPt->Y() - aSiz.Height(),
+                           aConvertedPt->X() + aSiz.Width(), aConvertedPt->Y() + aSiz.Height());
 
     // do not erase background, that causes flicker (!)
     rWin.Invalidate(aRect, InvalidateFlags::NoErase);
@@ -274,7 +274,7 @@ void SdrGluePoint::Invalidate(vcl::Window& rWin, const SdrObject* pObj) const
 bool SdrGluePoint::IsHit(const Point& rPnt, const OutputDevice& rOut, const SdrObject* pObj) const
 {
     Point aPt(pObj!=nullptr ? GetAbsolutePos(*pObj) : GetPos());
-    Size aSiz= rOut.WindowToLogic(aGlueHalfSize);
+    Size aSiz= rOut.convertTo<vcl::LogicSize>(vcl::WindowSize(aGlueHalfSize));
     tools::Rectangle aRect(aPt.X()-aSiz.Width(),aPt.Y()-aSiz.Height(),aPt.X()+aSiz.Width(),aPt.Y()+aSiz.Height());
     return aRect.Contains(rPnt);
 }

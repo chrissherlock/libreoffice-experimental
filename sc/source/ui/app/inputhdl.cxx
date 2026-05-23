@@ -1357,7 +1357,13 @@ void ScInputHandler::ShowTip( const OUString& rText )
     {
         pTipVisibleParent = pActiveView->GetWindow();
         if (vcl::Cursor* pCur = pActiveView->GetCursor())
-            aPos = pTipVisibleParent->LogicToWindow( pCur->GetPos() );
+        {
+            aPos = pTipVisibleParent->convertTo<vcl::WindowPoint>(
+                vcl::LogicPoint(pCur->GetPos()),
+                pTipVisibleParent->GetMapMode()
+            ).get();
+        }
+
         aPos = pTipVisibleParent->OutputToScreenPixel( aPos );
     }
 
@@ -1388,8 +1394,12 @@ void ScInputHandler::ShowTipBelow( const OUString& rText )
         {
             Point aLogicPos = pCur->GetPos();
             aLogicPos.AdjustY(pCur->GetHeight() );
-            aPos = pTipVisibleSecParent->LogicToWindow( aLogicPos );
+            aPos = pTipVisibleSecParent->convertTo<vcl::WindowPoint>(
+                vcl::LogicPoint(aLogicPos),
+                pTipVisibleSecParent->GetMapMode()
+            ).get();
         }
+
         aPos = pTipVisibleSecParent->OutputToScreenPixel( aPos );
     }
 

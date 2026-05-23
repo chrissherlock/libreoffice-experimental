@@ -809,24 +809,31 @@ void EmbeddedObjectRef::DrawShading( const tools::Rectangle &rRect, OutputDevice
     auto popIt = pOut->ScopedPush();
     pOut->SetLineColor( COL_BLACK );
 
-    Size aPixSize =  pOut->LogicToWindow( rRect.GetSize() );
-    aPixSize.AdjustWidth( -1 );
-    aPixSize.AdjustHeight( -1 );
-    Point aPixViewPos =  pOut->LogicToWindow( rRect.TopLeft() );
-    sal_Int32 nMax = aPixSize.Width() + aPixSize.Height();
-    for( sal_Int32 i = 5; i < nMax; i += 5 )
-    {
-        Point a1( aPixViewPos ), a2( aPixViewPos );
-        if( i > aPixSize.Width() )
-            a1 += Point( aPixSize.Width(), i - aPixSize.Width() );
-        else
-            a1 += Point( i, 0 );
-        if( i > aPixSize.Height() )
-            a2 += Point( i - aPixSize.Height(), aPixSize.Height() );
-        else
-            a2 += Point( 0, i );
+    auto aPixSize = pOut->convertTo<vcl::WindowSize>(vcl::LogicSize(rRect.GetSize()));
+    aPixSize->AdjustWidth(-1);
+    aPixSize->AdjustHeight(-1);
 
-        pOut->DrawLine( pOut->WindowToLogic( a1 ), pOut->WindowToLogic( a2 ) );
+    const auto aPixViewPos = pOut->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rRect.TopLeft()));
+    const sal_Int32 nMax = aPixSize->Width() + aPixSize->Height();
+
+    for(sal_Int32 i = 5; i < nMax; i += 5)
+    {
+        Point a1(aPixViewPos.get()), a2(aPixViewPos.get());
+
+        if (i > aPixSize->Width())
+            a1 += Point(aPixSize->Width(), i - aPixSize->Width());
+        else
+            a1 += Point(i, 0);
+
+        if (i > aPixSize->Height())
+            a2 += Point(i - aPixSize->Height(), aPixSize->Height());
+        else
+            a2 += Point(0, i);
+
+        pOut->DrawLine(
+            pOut->convertTo<vcl::LogicPoint>(vcl::WindowPoint(a1)),
+            pOut->convertTo<vcl::LogicPoint>(vcl::WindowPoint(a2))
+        );
     }
 }
 

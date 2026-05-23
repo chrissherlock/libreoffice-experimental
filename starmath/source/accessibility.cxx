@@ -308,8 +308,8 @@ awt::Rectangle SAL_CALL SmGraphicAccessible::getCharacterBounds( sal_Int32 nInde
             aTLPos.AdjustX(nNodeIndex > 0 ? aXAry[nNodeIndex - 1] : 0 );
             aSize.setWidth( nNodeIndex > 0 ? aXAry[nNodeIndex] - aXAry[nNodeIndex - 1] : aXAry[nNodeIndex] );
 
-            aTLPos = rDevice.LogicToWindow( aTLPos ).get();
-            aSize  = rDevice.LogicToWindow( aSize ).get();
+            aTLPos = rDevice.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aTLPos)).get();
+            aSize  = rDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(aSize)).get();
             aRes.X = aTLPos.X();
             aRes.Y = aTLPos.Y();
             aRes.Width  = aSize.Width();
@@ -348,7 +348,7 @@ sal_Int32 SAL_CALL SmGraphicAccessible::getIndexAtPoint( const awt::Point& aPoin
 
         // get position relative to formula draw position
         Point  aPos( aPoint.X, aPoint.Y );
-        aPos = rDevice.WindowToLogic( aPos ).get();
+        aPos = rDevice.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos)).get();
         aPos -= pWin->GetFormulaDrawPos();
 
         // if it was inside the formula then get the appropriate node

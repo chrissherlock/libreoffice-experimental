@@ -2505,8 +2505,7 @@ void SwRootFrame::CalcFrameRects(SwShellCursor const& rCursor, SwRects & rRects,
                 OutputDevice* pOut = pSh->GetOut();
                 tools::Long nCursorWidth = pOut->GetSettings().GetStyleSettings().
                     GetCursorSize();
-                aRectFnSet.SetWidth( aTmp, pOut->WindowToLogic(
-                    Size( nCursorWidth, 0 ) )->Width() );
+                aRectFnSet.SetWidth(aTmp, pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(nCursorWidth, 0)), pOut->GetMapMode())->Width());
             }
             aTmp.Intersection( aStFrame );
             Sub( aRegion, aTmp );

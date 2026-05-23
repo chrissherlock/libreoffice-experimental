@@ -330,7 +330,9 @@ tools::Rectangle SwCommentRuler::GetCommentControlRegion()
     if (GetSidebarPosition() == sw::sidebarwindows::SidebarPosition::LEFT)
         nLeft += GetBorderOffset() - nSidebarWidth;
     else
-        nLeft += GetWinOffset() + mpSwWin->LogicToWindow(Size(GetPageWidth(), 0)).Width();
+        nLeft += GetWinOffset()
+                 + mpSwWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(GetPageWidth(), 0)))
+                       ->Width();
 
     // Ruler::ImplDraw uses RULER_OFF (value: 3px) as offset, and Ruler::ImplFormat adds one extra pixel
     tools::Long nTop = 4;

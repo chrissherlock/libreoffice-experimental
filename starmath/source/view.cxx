@@ -278,7 +278,7 @@ void SmGraphicWindow::SetGraphicMapMode(const MapMode& rNewMapMode)
 {
     OutputDevice& rDevice = mxGraphic->GetOutputDevice();
     MapMode aMap( rNewMapMode );
-    aMap.SetOrigin( aMap.GetOrigin() + rDevice.WindowToLogic( aPixOffset, aMap ) );
+    aMap.SetOrigin(aMap.GetOrigin() + rDevice.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPixOffset), aMap).get());
     rDevice.SetMapMode( aMap );
     mxGraphic->Invalidate();
 }
@@ -287,19 +287,19 @@ MapMode SmGraphicWindow::GetGraphicMapMode() const
 {
     OutputDevice& rDevice = mxGraphic->GetOutputDevice();
     MapMode aMap(rDevice.GetMapMode());
-    aMap.SetOrigin( aMap.GetOrigin() - rDevice.WindowToLogic( aPixOffset ).get() );
+    aMap.SetOrigin(aMap.GetOrigin() - rDevice.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPixOffset)).get());
     return aMap;
 }
 
 void SmGraphicWindow::SetTotalSize( const Size& rNewSize )
 {
-    aTotPixSz = mxGraphic->GetOutputDevice().LogicToWindow(rNewSize).get();
+    aTotPixSz = mxGraphic->GetOutputDevice().convertTo<vcl::WindowSize>(vcl::LogicSize(rNewSize));
     Resize();
 }
 
 Size SmGraphicWindow::GetTotalSize() const
 {
-    return mxGraphic->GetOutputDevice().WindowToLogic(aTotPixSz).get();
+    return mxGraphic->GetOutputDevice().convertTo<vcl::LogicSize>(vcl::WindowSize(aTotPixSz));
 }
 
 void SmGraphicWindow::ShowContextMenu(const CommandEvent& rCEvt)
@@ -380,7 +380,7 @@ bool SmGraphicWidget::MouseButtonDown(const MouseEvent& rMEvt)
 
     OutputDevice& rDevice = GetOutputDevice();
     // get click position relative to formula
-    Point aPos(rDevice.WindowToLogic(rMEvt.GetPosPixel()).get() - GetFormulaDrawPos());
+    Point aPos(rDevice.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())).get() - GetFormulaDrawPos());
 
     const SmNode *pTree = GetDoc()->GetFormulaTree();
     if (!pTree)
@@ -423,7 +423,7 @@ bool SmGraphicWidget::MouseMove(const MouseEvent &rMEvt)
     if (rMEvt.IsLeft() && SmViewShell::IsInlineEditEnabled())
     {
         OutputDevice& rDevice = GetOutputDevice();
-        Point aPos(rDevice.WindowToLogic(rMEvt.GetPosPixel()).get() - GetFormulaDrawPos());
+        Point aPos(rDevice.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())).get() - GetFormulaDrawPos());
         GetCursor().MoveTo(&rDevice, aPos, false);
 
         CaretBlinkStop();
@@ -626,8 +626,7 @@ void SmGraphicWidget::Paint(vcl::RenderContext& rRenderContext, const tools::Rec
 void SmGraphicWidget::SetTotalSize()
 {
     assert(GetDoc());
-    OutputDevice& rDevice = GetOutputDevice();
-    const Size aTmp(rDevice.WindowToLogic(rDevice.LogicToWindow(GetDoc()->GetSize()).get()).get());
+    const Size aTmp = GetDoc()->GetSize();
     if (aTmp != mrGraphicWindow.GetTotalSize())
         mrGraphicWindow.SetTotalSize(aTmp);
 }
@@ -900,7 +899,7 @@ void SmGraphicWindow::ZoomToFitInWindow()
     SetGraphicMapMode(MapMode(SmMapUnit()));
 
     assert(mxGraphic->GetDoc());
-    Size aSize(mxGraphic->GetOutputDevice().LogicToWindow(mxGraphic->GetDoc()->GetSize()).get());
+    Size aSize(mxGraphic->GetOutputDevice().convertTo<vcl::WindowSize>(vcl::LogicSize(mxGraphic->GetDoc()->GetSize())).get());
     Size aWindowSize(GetSizePixel());
 
     if (!aSize.IsEmpty())
@@ -967,7 +966,7 @@ SmCmdBoxWindow::SmCmdBoxWindow(SfxBindings& rBindings_, SfxChildWindow* pChildWi
     set_id(u"math_edit"_ustr);
 
     SetHelpId( HID_SMA_COMMAND_WIN );
-    SetSizePixel(LogicToWindow(Size(292 , 94), MapMode(MapUnit::MapAppFont)));
+    SetSizePixel(convertTo<vcl::WindowSize>(vcl::LogicSize(Size(292 , 94)), MapMode(MapUnit::MapAppFont)));
     SetText(SmResId(STR_CMDBOXWINDOW));
 
     Hide();
@@ -1185,7 +1184,7 @@ void SmViewShell::InnerResizePixel(const Point &rOfs, const Size &rSize, bool)
     Size aObjSize = GetObjectShell()->GetVisArea().GetSize();
     if ( !aObjSize.IsEmpty() )
     {
-        Size aProvidedSize = GetWindow()->WindowToLogic(rSize, MapMode(SmMapUnit()));
+        Size aProvidedSize = GetWindow()->convertTo<vcl::LogicSize>(vcl::WindowSize(rSize), MapMode(SmMapUnit())).get();
         double fZoomX = double(aProvidedSize.Width()) / aObjSize.Width();
         double fZoomY = double(aProvidedSize.Height()) / aObjSize.Height();
         MapMode aMap(mxGraphicWindow->GetGraphicMapMode());
@@ -2234,9 +2233,17 @@ void SmViewShell::ZoomByItemSet(const SfxItemSet *pSet)
             const MapMode aMap( SmMapUnit() );
             SfxPrinter *pPrinter = GetPrinter( true );
             tools::Rectangle  OutputRect(Point(), pPrinter->GetOutputSize());
-            Size       OutputSize(pPrinter->LogicToWindow(Size(OutputRect.GetWidth(),
-                                                              OutputRect.GetHeight()), aMap));
-            Size       GraphicSize(pPrinter->LogicToWindow(GetDoc()->GetSize(), aMap));
+
+            Size OutputSize(pPrinter->convertTo<vcl::WindowSize>(
+                vcl::LogicSize(Size(OutputRect.GetWidth(), OutputRect.GetHeight())),
+                aMap
+            ).get());
+
+            Size GraphicSize(pPrinter->convertTo<vcl::WindowSize>(
+                vcl::LogicSize(GetDoc()->GetSize()),
+                aMap
+            ).get());
+
             if (GraphicSize.Width() <= 0 || GraphicSize.Height() <= 0)
                 break;
             sal_uInt16 nZ = std::min(o3tl::convert(OutputSize.Width(), 100, GraphicSize.Width()),

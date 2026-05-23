@@ -139,7 +139,7 @@ Reference< XAccessible > SAL_CALL SvxGraphCtrlAccessibleContext::getAccessibleAt
     }
 
     Point aPnt( rPoint.X, rPoint.Y );
-    aPnt = mpControl->GetDrawingArea()->get_ref_device().WindowToLogic(aPnt);
+    aPnt = mpControl->GetDrawingArea()->get_ref_device().convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPnt));
 
     SdrObject* pObj = nullptr;
 
@@ -550,7 +550,9 @@ Point SvxGraphCtrlAccessibleContext::LogicToWindow(const Point& rPoint) const
 {
     if( mpControl )
     {
-        return mpControl->GetDrawingArea()->get_ref_device().LogicToWindow(rPoint) + mpControl->GetPositionInDialog();
+        return mpControl->GetDrawingArea()->get_ref_device().convertTo<vcl::WindowPoint>(
+            vcl::LogicPoint(rPoint)
+        ).get() + mpControl->GetPositionInDialog();
     }
     else
     {
@@ -561,9 +563,15 @@ Point SvxGraphCtrlAccessibleContext::LogicToWindow(const Point& rPoint) const
 Size SvxGraphCtrlAccessibleContext::LogicToWindow(const Size& rSize) const
 {
     if( mpControl )
-        return mpControl->GetDrawingArea()->get_ref_device().LogicToWindow(rSize);
+    {
+        return mpControl->GetDrawingArea()->get_ref_device().convertTo<vcl::WindowSize>(
+            vcl::LogicSize(rSize)
+        ).get();
+    }
     else
+    {
         return rSize;
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

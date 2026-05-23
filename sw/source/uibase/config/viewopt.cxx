@@ -212,7 +212,7 @@ void SwViewOption::PaintPostIts( OutputDevice *pOut, const SwRect &rRect, bool b
     Color aOldLineColor( pOut->GetLineColor() );
     pOut->SetLineColor( COL_GRAY );
     // to make it look nice, we subtract two pixels everywhere
-    SwTwips nPix = o3tl::narrowing<sal_uInt16>(pOut->WindowToLogic( Size(1,1) )->Height()) * 2;
+    SwTwips nPix = o3tl::narrowing<sal_uInt16>(pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(1, 1)), pOut->GetMapMode())->Height()) * 2;
     if( rRect.Width() <= 2 * nPix || rRect.Height() <= 2 * nPix )
         nPix = 0;
     const Point aTopLeft(  rRect.Left()  + nPix, rRect.Top()    + nPix );

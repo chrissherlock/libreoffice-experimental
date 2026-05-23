@@ -452,9 +452,9 @@ tools::Long ScColumn::GetNeededSize(
             double fWidthFactor = bInPrintTwips ? 1.0 : nPPTX;
             if ( bTextWysiwyg )
             {
-                //  if text is formatted for printer, don't use WindowToLogic,
-                //  to ensure the exact same paper width (and same line breaks) as in
-                //  ScEditUtil::GetEditArea, used for output.
+                // When formatting for the printer, we omit coordinate transformation to ensure
+                // pixel-perfect parity with ScEditUtil::GetEditArea. This avoids rounding
+                // discrepancies, maintaining identical line breaks and paper widths for output.
 
                 fWidthFactor = o3tl::convert(1.0, o3tl::Length::twip, o3tl::Length::mm100);
             }
@@ -480,11 +480,11 @@ tools::Long ScColumn::GetNeededSize(
 
             aPaper.setWidth( nDocWidth );
 
-            if ( !bTextWysiwyg )
+            if (!bTextWysiwyg)
             {
                 aPaper = bInPrintTwips ?
-                        o3tl::convert(aPaper, o3tl::Length::twip, o3tl::Length::mm100) :
-                        pDev->WindowToLogic(aPaper, aHMMMode);
+                    o3tl::convert(aPaper, o3tl::Length::twip, o3tl::Length::mm100) :
+                    pDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aPaper), aHMMMode).get();
             }
         }
         pEngine->SetPaperSize(aPaper);
@@ -539,7 +539,7 @@ tools::Long ScColumn::GetNeededSize(
 
             Size aTextSize = bInPrintTwips ?
                     o3tl::toTwips(aSize, o3tl::Length::mm100) :
-                    pDev->LogicToWindow(aSize, aHMMMode);
+                    pDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aSize), aHMMMode).get();
 
             if ( bEdWidth )
                 nValue = aTextSize.Width();
@@ -565,7 +565,7 @@ tools::Long ScColumn::GetNeededSize(
                 sal_uInt32 aTextSize(pEngine->CalcTextWidth());
                 nValue = bInPrintTwips ?
                         o3tl::toTwips(aTextSize, o3tl::Length::mm100) :
-                        pDev->LogicToWindow(Size(aTextSize, 0), aHMMMode)->Width();
+                        pDev->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(aTextSize, 0)), aHMMMode)->Width();
             }
         }
         else            // height
@@ -573,7 +573,7 @@ tools::Long ScColumn::GetNeededSize(
             sal_uInt32 aTextSize(pEngine->GetTextHeight());
             nValue = bInPrintTwips ?
                     o3tl::toTwips(aTextSize, o3tl::Length::mm100) :
-                    pDev->LogicToWindow(Size(0, aTextSize), aHMMMode)->Height();
+                    pDev->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, aTextSize)), aHMMMode)->Height();
         }
 
         if ( nValue && bAddMargin )

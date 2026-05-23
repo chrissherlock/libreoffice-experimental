@@ -273,7 +273,8 @@ SvxPageDescPage::SvxPageDescPage(weld::Container* pPage, weld::DialogController*
      * looks like nonsense; but it makes sense when the
      * coordinate system's origin has been moved.
      */
-    Point aPrintOffset = mpDefPrinter->GetPageOffset() - mpDefPrinter->WindowToLogic( Point() );
+    Point aPrintOffset = mpDefPrinter->GetPageOffset() -
+        mpDefPrinter->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point()));
     mpDefPrinter->SetMapMode( aOldMode );
 
     nFirstLeftMargin = m_xLeftMarginEdit->convert_value_from(m_xLeftMarginEdit->normalize(aPrintOffset.X()), FieldUnit::TWIP);
@@ -1080,7 +1081,8 @@ void SvxPageDescPage::SwapFirstValues_Impl( bool bSet )
      * looks like nonsense; but it makes sense if the
      * coordinate system's origin has been moved.
      */
-    Point aPrintOffset = mpDefPrinter->GetPageOffset() - mpDefPrinter->WindowToLogic( Point() );
+    Point aPrintOffset = mpDefPrinter->GetPageOffset() -
+        mpDefPrinter->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point()));
     mpDefPrinter->SetMapMode( aOldMode );
     mpDefPrinter->SetOrientation( eOldOri );
 

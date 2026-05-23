@@ -114,7 +114,7 @@ void SwOneExampleFrame::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     m_xVirDev = VclPtr<VirtualDevice>::Create();
-    Size aSize(m_xVirDev->LogicToWindow(Size(150, 188), MapMode(MapUnit::MapAppFont)));
+    Size aSize(m_xVirDev->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(150, 188)), MapMode(MapUnit::MapAppFont)));
     pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
     SetOutputSizePixel(aSize);
     CreateControl();
@@ -161,7 +161,7 @@ void SwOneExampleFrame::Paint(vcl::RenderContext& rRenderContext, const tools::R
         m_xVirDev->SetMapMode(MapMode(MapUnit::MapTwip));
         SwDoc *pDoc = m_xCursor->GetDoc();
         SwDocShell* pShell = pDoc->GetDocShell();
-        tools::Rectangle aRect(Point(), m_xVirDev->WindowToLogic(aSize));
+        tools::Rectangle aRect(Point(), m_xVirDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize)));
         pShell->SetVisArea(tools::Rectangle(Point(), Size(aRect.GetWidth() * fZoom,
                                                           aRect.GetHeight() * fZoom)));
         pShell->DoDraw(m_xVirDev.get(), aRect.TopLeft(), aRect.GetSize(), JobSetup(), ASPECT_CONTENT, true);

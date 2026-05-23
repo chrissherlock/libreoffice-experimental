@@ -149,7 +149,7 @@ public:
     sal_uInt16 GetSnapMagneticPixel() const { return mnMagnSizPix; }
 
     // RecalcLogicSnapMagnetic has to be called for every change of OutputDevices and every change of the MapMode!
-    void RecalcLogicSnapMagnetic(const OutputDevice& rOut) { SetSnapMagnetic(rOut.WindowToLogic(Size(mnMagnSizPix,mnMagnSizPix)).get()); }
+    void RecalcLogicSnapMagnetic(const OutputDevice& rOut) { SetSnapMagnetic(rOut.convertTo<vcl::LogicSize>(vcl::WindowSize(mnMagnSizPix, mnMagnSizPix)).get()); }
     void SetActualWin(const OutputDevice* pWin) { SdrPaintView::SetActualWin(pWin); if (pWin!=nullptr) RecalcLogicSnapMagnetic(*pWin); }
 
     // Coordinates referred to the view!

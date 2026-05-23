@@ -3766,8 +3766,8 @@ static Size lcl_GetPrefSize(const Graphic& rGraf, const MapMode& aWanted)
     Size aRetSize;
     if (aPrefMapMode.GetMapUnit() == MapUnit::MapPixel)
     {
-        aRetSize = Application::GetDefaultDevice()->WindowToLogic(
-            rGraf.GetPrefSize(), aWanted);
+        aRetSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(rGraf.GetPrefSize()), aWanted);
     }
     else
     {

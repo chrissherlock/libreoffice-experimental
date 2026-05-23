@@ -247,6 +247,18 @@ template <typename Target, typename Source> struct CoordinateCastTraits
 };
 
 // Points
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::DevicePoint, vcl::LogicPoint>
+{
+    static vcl::DevicePoint cast(const OutputDevice& rDev, const vcl::LogicPoint& rSrc,
+                                 const MapMode* pMapOverride = nullptr);
+};
+
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPoint, vcl::DevicePoint>
+{
+    static vcl::LogicPoint cast(const OutputDevice& rDev, const vcl::DevicePoint& rSrc,
+                                const MapMode* pMapOverride = nullptr);
+};
+
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowPoint, vcl::LogicPoint>
 {
     static vcl::WindowPoint cast(const OutputDevice& rDev, const vcl::LogicPoint& rSrc,

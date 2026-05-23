@@ -154,7 +154,7 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
     {
         Point aPos( rEvt.GetMousePosPixel() );
         aPos = pWindow->ScreenToOutputPixel( aPos );
-        aPos = pWindow->WindowToLogic( aPos );
+        aPos = pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
 
         SdrPageView* pPV;
         SdrObject* pObj = pView->PickObj(aPos, 0, pPV, SdrSearchOptions::PICKMACRO);
@@ -166,7 +166,7 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
         {
             SwFlyFrame *pFly = pDrawObj->GetFlyFrame();
 
-            aPixRect = pWindow->LogicToWindow(pFly->getFrameArea().SVRect());
+            aPixRect = pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(pFly->getFrameArea().SVRect())).get();
 
             const SwFormatURL &rURL = pFly->GetFormat()->GetURL();
             if (!pFly->GetFormat()->GetObjTooltip().isEmpty())
@@ -200,8 +200,11 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
                     aPt -= pFly->getFrameArea().Pos();
                     // without MapMode-Offset !!!!!
                     // without MapMode-Offset, without Offset, w ... !!!!!
-                    aPt = pWindow->LogicToWindow(
-                            aPt, MapMode( MapUnit::MapTwip ) );
+                    aPt = pWindow->convertTo<vcl::WindowPoint>(
+                        vcl::LogicPoint(aPt),
+                        MapMode(MapUnit::MapTwip)
+                    ).get();
+
                     sText += "?" + OUString::number( aPt.getX() )
                           + "," + OUString::number( aPt.getY() );
                 }
@@ -216,7 +219,7 @@ bool SwDPage::RequestHelp( vcl::Window* pWindow, SdrView const * pView,
             if (aVEvt.meEvent == SdrEventKind::ExecuteUrl && aVEvt.mpURLField)
             {
                 sText = aVEvt.mpURLField->GetURL();
-                aPixRect = pWindow->LogicToWindow(aVEvt.mpObj->GetLogicRect());
+                aPixRect = pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(aVEvt.mpObj->GetLogicRect())).get();
             }
         }
 

@@ -388,7 +388,7 @@ ErrCode ScHTMLLayoutParser::Read( SvStream& rStream, const OUString& rBaseURL )
     for ( sal_uInt16 j = 1; j < nCount; j++ )
     {
         aSize.setWidth( maColOffset[j] - nOff );
-        aSize = pDefaultDev->WindowToLogic( aSize, MapMode( MapUnit::MapTwip ) );
+        aSize = pDefaultDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize), MapMode(MapUnit::MapTwip));
         maColWidths[ j-1 ] = aSize.Width();
         nOff = maColOffset[j];
     }
@@ -1533,8 +1533,11 @@ void ScHTMLLayoutParser::Image( HtmlImportInfo* pInfo )
     if ( !(pImage->aSize.Width() && pImage->aSize.Height()) )
     {
         OutputDevice* pDefaultDev = Application::GetDefaultDevice();
-        pImage->aSize = pDefaultDev->LogicToWindow( pImage->oGraphic->GetPrefSize(),
-            pImage->oGraphic->GetPrefMapMode() );
+
+        pImage->aSize = pDefaultDev->convertTo<vcl::WindowSize>(
+            vcl::LogicSize(pImage->oGraphic->GetPrefSize()),
+            pImage->oGraphic->GetPrefMapMode()
+        ).get();
     }
     if (mxActEntry->maImageList.empty())
         return;

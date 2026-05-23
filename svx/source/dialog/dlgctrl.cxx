@@ -65,7 +65,7 @@ Bitmap& SvxRectCtl::GetRectBitmap()
 
 SvxRectCtl::SvxRectCtl(SvxTabPage* pPage)
     : m_pPage(pPage)
-    , m_nBorderWidth(Application::GetDefaultDevice()->LogicToWindow(Size(200, 0), MapMode(MapUnit::Map100thMM))->Width())
+    , m_nBorderWidth(Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(200, 0)), MapMode(MapUnit::Map100thMM))->Width())
     , m_eRP(RectPoint::MM)
     , m_eDefRP(RectPoint::MM)
     , m_nState(CTL_STATE::NONE)
@@ -84,7 +84,7 @@ void SvxRectCtl::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 
 void SvxRectCtl::SetControlSettings(RectPoint eRpt, sal_uInt16 nBorder)
 {
-    m_nBorderWidth = Application::GetDefaultDevice()->LogicToWindow(Size(nBorder, 0), MapMode(MapUnit::Map100thMM))->Width();
+    m_nBorderWidth = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nBorder, 0)), MapMode(MapUnit::Map100thMM))->Width();
     m_eDefRP = eRpt;
     Resize();
 }
@@ -1376,8 +1376,7 @@ SvxXRectPreview::SvxXRectPreview()
 
 tools::Rectangle SvxPreviewBase::GetPreviewSize() const
 {
-    tools::Rectangle aObjectSize(Point(), getBufferDevice().WindowToLogic(GetOutputSizePixel()));
-    return aObjectSize;
+    return tools::Rectangle(Point(), getBufferDevice().convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
 }
 
 void SvxXRectPreview::SetDrawingArea(weld::DrawingArea* pDrawingArea)

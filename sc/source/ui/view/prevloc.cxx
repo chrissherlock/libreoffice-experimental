@@ -178,7 +178,7 @@ void ScPreviewLocationData::Clear()
 void ScPreviewLocationData::AddCellRange( const tools::Rectangle& rRect, const ScRange& rRange, bool bRepCol, bool bRepRow,
                                             const MapMode& rDrawMap )
 {
-    tools::Rectangle aPixelRect( pWindow->LogicToWindow( rRect ));
+    tools::Rectangle aPixelRect( pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect)));
     m_Entries.push_front( std::make_unique<ScPreviewLocationEntry>(SC_PLOC_CELLRANGE, aPixelRect, rRange, bRepCol, bRepRow) );
 
     OSL_ENSURE( nDrawRanges < SC_PREVIEW_MAXRANGES, "too many ranges" );
@@ -211,7 +211,7 @@ void ScPreviewLocationData::AddColHeaders( const tools::Rectangle& rRect, SCCOL 
 {
     SCTAB nTab = 0; //! ?
     ScRange aRange( nStartCol, 0, nTab, nEndCol, 0, nTab );
-    tools::Rectangle aPixelRect( pWindow->LogicToWindow( rRect ));
+    tools::Rectangle aPixelRect( pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect)));
 
     m_Entries.push_front( std::make_unique<ScPreviewLocationEntry>(SC_PLOC_COLHEADER, aPixelRect, aRange, bRepCol, false) );
 }
@@ -220,7 +220,7 @@ void ScPreviewLocationData::AddRowHeaders( const tools::Rectangle& rRect, SCROW 
 {
     SCTAB nTab = 0; //! ?
     ScRange aRange( 0, nStartRow, nTab, 0, nEndRow, nTab );
-    tools::Rectangle aPixelRect( pWindow->LogicToWindow( rRect ));
+    tools::Rectangle aPixelRect( pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect)));
 
     m_Entries.push_front( std::make_unique<ScPreviewLocationEntry>(SC_PLOC_ROWHEADER, aPixelRect, aRange, false, bRepRow) );
 }
@@ -228,7 +228,7 @@ void ScPreviewLocationData::AddRowHeaders( const tools::Rectangle& rRect, SCROW 
 void ScPreviewLocationData::AddHeaderFooter( const tools::Rectangle& rRect, bool bHeader, bool bLeft )
 {
     ScRange aRange;     //! ?
-    tools::Rectangle aPixelRect( pWindow->LogicToWindow( rRect ));
+    tools::Rectangle aPixelRect( pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect)));
 
     ScPreviewLocationType eType = bHeader ?
                 ( bLeft ? SC_PLOC_LEFTHEADER : SC_PLOC_RIGHTHEADER ) :
@@ -240,7 +240,7 @@ void ScPreviewLocationData::AddHeaderFooter( const tools::Rectangle& rRect, bool
 void ScPreviewLocationData::AddNoteMark( const tools::Rectangle& rRect, const ScAddress& rPos )
 {
     ScRange aRange( rPos );
-    tools::Rectangle aPixelRect( pWindow->LogicToWindow( rRect ));
+    tools::Rectangle aPixelRect( pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect)));
 
     m_Entries.push_front( std::make_unique<ScPreviewLocationEntry>(SC_PLOC_NOTEMARK, aPixelRect, aRange, false, false) );
 }
@@ -248,7 +248,7 @@ void ScPreviewLocationData::AddNoteMark( const tools::Rectangle& rRect, const Sc
 void ScPreviewLocationData::AddNoteText( const tools::Rectangle& rRect, const ScAddress& rPos )
 {
     ScRange aRange( rPos );
-    tools::Rectangle aPixelRect( pWindow->LogicToWindow( rRect ));
+    tools::Rectangle aPixelRect( pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect)));
 
     m_Entries.push_front( std::make_unique<ScPreviewLocationEntry>(SC_PLOC_NOTETEXT, aPixelRect, aRange, false, false) );
 }
@@ -300,8 +300,8 @@ tools::Rectangle ScPreviewLocationData::GetOffsetPixel( const ScAddress& rCellPo
 
     Size aOffsetLogic( nPosX, nPosY );
     Size aSizeLogic( nSizeX, nSizeY );
-    Size aOffsetPixel = pWindow->LogicToWindow( aOffsetLogic, aCellMapMode );
-    Size aSizePixel = pWindow->LogicToWindow( aSizeLogic, aCellMapMode );
+    Size aOffsetPixel = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(aOffsetLogic), aCellMapMode);
+    Size aSizePixel = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(aSizeLogic), aCellMapMode);
 
     return tools::Rectangle( Point( aOffsetPixel.Width(), aOffsetPixel.Height() ), aSizePixel );
 }
@@ -552,8 +552,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                     tools::Long nNextX
                         = nPosX + o3tl::convert(nDocW, o3tl::Length::twip, o3tl::Length::mm100);
 
-                    tools::Long nPixelStart = pWindow->LogicToWindow( Size( nPosX, 0 ), aCellMapMode )->Width();
-                    tools::Long nPixelEnd = pWindow->LogicToWindow( Size( nNextX, 0 ), aCellMapMode )->Width() - 1;
+                    tools::Long nPixelStart = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(Size( nPosX, 0 )), aCellMapMode)->Width();
+                    tools::Long nPixelEnd = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(Size( nNextX, 0 )), aCellMapMode)->Width() - 1;
                     pColInfo[nColPos].Set( false, nCol,
                                                 aRepeatRect.Left() + nPixelStart,
                                                 aRepeatRect.Left() + nPixelEnd );
@@ -572,8 +572,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                     tools::Long nNextX
                         = nPosX + o3tl::convert(nDocW, o3tl::Length::twip, o3tl::Length::mm100);
 
-                    tools::Long nPixelStart = pWindow->LogicToWindow( Size( nPosX, 0 ), aCellMapMode )->Width();
-                    tools::Long nPixelEnd = pWindow->LogicToWindow( Size( nNextX, 0 ), aCellMapMode )->Width() - 1;
+                    tools::Long nPixelStart = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(Size( nPosX, 0 )), aCellMapMode)->Width();
+                    tools::Long nPixelEnd = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(Size( nNextX, 0 )), aCellMapMode)->Width() - 1;
                     pColInfo[nColPos].Set( false, nCol,
                                                 aMainRect.Left() + nPixelStart,
                                                 aMainRect.Left() + nPixelEnd );
@@ -619,8 +619,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                 tools::Long nNextY
                     = nPosY + o3tl::convert(nDocH, o3tl::Length::twip, o3tl::Length::mm100);
 
-                tools::Long nPixelStart = pWindow->LogicToWindow( Size( 0, nPosY ), aCellMapMode )->Height();
-                tools::Long nPixelEnd = pWindow->LogicToWindow( Size( 0, nNextY ), aCellMapMode )->Height() - 1;
+                tools::Long nPixelStart = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(Size( 0, nPosY )), aCellMapMode)->Height();
+                tools::Long nPixelEnd = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(Size( 0, nNextY )), aCellMapMode)->Height() - 1;
                 pRowInfo[nRowPos].Set( false, nRow,
                         aRepeatRect.Top() + nPixelStart,
                         aRepeatRect.Top() + nPixelEnd );
@@ -641,8 +641,8 @@ void ScPreviewLocationData::GetTableInfo( const tools::Rectangle& rVisiblePixel,
                 tools::Long nNextY
                     = nPosY + o3tl::convert(nDocH, o3tl::Length::twip, o3tl::Length::mm100);
 
-                tools::Long nPixelStart = pWindow->LogicToWindow( Size( 0, nPosY ), aCellMapMode )->Height();
-                tools::Long nPixelEnd = pWindow->LogicToWindow( Size( 0, nNextY ), aCellMapMode )->Height() - 1;
+                tools::Long nPixelStart = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(Size( 0, nPosY )), aCellMapMode)->Height();
+                tools::Long nPixelEnd = pWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(Size( 0, nNextY )), aCellMapMode)->Height() - 1;
                 pRowInfo[nRowPos].Set( false, nRow,
                         aMainRect.Top() + nPixelStart,
                         aMainRect.Top() + nPixelEnd );
