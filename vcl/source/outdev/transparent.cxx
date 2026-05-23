@@ -279,7 +279,11 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
     GDIMetaFile* pOldMetaFile = mpMetaFile;
     mpMetaFile = nullptr;
 
-    tools::PolyPolygon aPolyPoly( LogicToWindow( rPolyPoly ) );
+    tools::PolyPolygon aPolyPoly = convertTo<vcl::WindowPolyPolygon>(
+        vcl::LogicPolyPolygon(rPolyPoly),
+        GetMapMode()
+    ).get();
+
     tools::Rectangle aPolyRect( aPolyPoly.GetBoundRect() );
     tools::Rectangle aDstRect( Point(), GetOutputSizePixel() );
 
@@ -503,7 +507,12 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
     else
     {
         GDIMetaFile* pOldMetaFile = mpMetaFile;
-        vcl::DeviceRect aOutRect( LogicToWindow( tools::Rectangle(rPos, rSize) ) );
+        vcl::DeviceRect aOutRect(
+                convertTo<vcl::WindowRect>(
+                    vcl::LogicRect(tools::Rectangle(rPos, rSize)),
+                    GetMapMode()
+                ).get());
+
         Point aPoint;
         tools::Rectangle aDstRect( aPoint, GetOutputSizePixel() );
 
@@ -695,8 +704,9 @@ bool doesRectCoverWithUniformColor(
 {
     // shape needs to fully cover previous content, and have uniform
     // color
-    return (rMapModeVDev.LogicToWindow(rCurrRect)->Contains(rPrevRect) &&
-        rMapModeVDev.IsFillColor());
+    auto currRect = rMapModeVDev.convertTo<vcl::WindowRect>(vcl::LogicRect(rCurrRect), rMapModeVDev.GetMapMode());
+
+    return (currRect->Contains(rPrevRect) && rMapModeVDev.IsFillColor());
 }
 
 /** Check whether rCurrRect rectangle fully covers io_rPrevRect - if
@@ -1188,13 +1198,19 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
     {
         // fdo#40421 limit current action's output to clipped area
         if( rOut.IsClipRegion() )
-            return rOut.LogicToWindow(
-                rOut.GetClipRegion().GetBoundRect().Intersection( aActionBounds ) ).get();
+        {
+            const auto clippedRect = vcl::LogicRect(rOut.GetClipRegion().GetBoundRect().Intersection(aActionBounds));
+            return rOut.convertTo<vcl::WindowRect>(clippedRect, rOut.GetMapMode()).get();
+        }
         else
-            return rOut.LogicToWindow( aActionBounds );
+        {
+            return rOut.convertTo<vcl::WindowRect>(vcl::LogicRect(aActionBounds), rOut.GetMapMode()).get();
+        }
     }
     else
+    {
         return tools::Rectangle();
+    }
 }
 
 } // end anon namespace
@@ -1642,7 +1658,11 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
         if( meOutDevType == OUTDEV_PDF )
         {
             auto pPdfWriter = static_cast<vcl::PDFWriterImpl*>(this);
-            aTmpSize = LogicToWindow(pPdfWriter->getCurPageSize(), MapMode(MapUnit::MapPoint));
+
+            aTmpSize = convertTo<vcl::WindowSize>(
+                vcl::LogicSize(pPdfWriter->getCurPageSize()),
+                MapMode(MapUnit::MapPoint)
+            ).get();
 
             // also add error code to PDFWriter
             pPdfWriter->insertError(vcl::PDFWriter::Warning_Transparency_Converted);
@@ -1777,9 +1797,14 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
 
                                     // scale down bitmap, if requested
                                     if( bDownsampleBitmaps )
-                                        aBandBmp = vcl::bitmap::GetDownsampledBitmap(WindowToLogic(LogicToWindow(aDstSzPix), MapMode(MapUnit::MapTwip)),
+                                    {
+                                        const auto dstSize = convertTo<vcl::WindowSize>(vcl::LogicSize(aDstSzPix), GetMapMode());
+                                        const auto dstSizeTwips = convertTo<vcl::LogicSize>(vcl::WindowSize(dstSize), MapMode(MapUnit::MapTwip));
+
+                                        aBandBmp = vcl::bitmap::GetDownsampledBitmap(dstSizeTwips,
                                                                          Point(), aBandBmp.GetSizePixel(),
                                                                          aBandBmp, nMaxBmpDPIX, nMaxBmpDPIY);
+                                    }
 
                                     rOutMtf.AddAction( new MetaCommentAction( "PRNSPOOL_TRANSPARENTBITMAP_BEGIN"_ostr ) );
                                     rOutMtf.AddAction( new MetaBmpScaleAction( aDstPtPix, aDstSzPix, aBandBmp ) );
