@@ -640,8 +640,14 @@ void ImplApplyFilterData( ::Graphic& rGraphic, const uno::Sequence< beans::Prope
                             aPos = pScaleAction->GetPoint();
                             aSize = pScaleAction->GetSize();
                         }
+
                         ::Graphic aGraphic( aBmp );
-                        const Size aSize100thmm( aDummyVDev->LogicToWindow( aSize ));
+
+                        const Size aSize100thmm = aDummyVDev->convertTo<vcl::WindowSize>(
+                            vcl::LogicSize(aSize),
+                            aDummyVDev->GetMapMode()
+                        ).get();
+
                         Size aSize100thmm2( aDummyVDev->WindowToLogic(aSize100thmm, MapMode(MapUnit::Map100thMM)) );
 
                         ImplApplyBitmapResolution( aGraphic, nImageResolution,
