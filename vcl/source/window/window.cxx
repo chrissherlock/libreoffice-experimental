@@ -1390,20 +1390,19 @@ void Window::ImplPointToLogic(vcl::RenderContext const & rRenderContext, vcl::Fo
 
 void Window::ImplLogicToPoint(vcl::RenderContext const & rRenderContext, vcl::Font& rFont) const
 {
-    Size aSize = rFont.GetFontSize();
-    aSize =  rRenderContext.LogicToWindow(aSize);
+    auto aSize = rRenderContext.convertTo<vcl::WindowSize>(vcl::LogicSize(rFont.GetFontSize()), rRenderContext.GetMapMode());
 
-    if (aSize.Width())
+    if (aSize->Width())
     {
-        aSize.setWidth( aSize.Width() * 72 );
-        aSize.AdjustWidth(mpWindowImpl->mpFrameData->mnDPIX / 2 );
-        aSize.setWidth( aSize.Width() / ( mpWindowImpl->mpFrameData->mnDPIX) );
+        aSize->setWidth(aSize->Width() * 72);
+        aSize->AdjustWidth(mpWindowImpl->mpFrameData->mnDPIX / 2);
+        aSize->setWidth(aSize->Width() / mpWindowImpl->mpFrameData->mnDPIX);
     }
-    aSize.setHeight( aSize.Height() * 72 );
-    aSize.AdjustHeight(mpWindowImpl->mpFrameData->mnDPIY / 2 );
-    aSize.setHeight( aSize.Height() / ( mpWindowImpl->mpFrameData->mnDPIY) );
+    aSize->setHeight(aSize->Height() * 72);
+    aSize->AdjustHeight(mpWindowImpl->mpFrameData->mnDPIY / 2);
+    aSize->setHeight(aSize->Height() / mpWindowImpl->mpFrameData->mnDPIY);
 
-    rFont.SetFontSize(aSize);
+    rFont.SetFontSize(aSize.get());
 }
 
 bool Window::ImplUpdatePos()
