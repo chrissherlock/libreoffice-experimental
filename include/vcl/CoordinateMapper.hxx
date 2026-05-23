@@ -369,12 +369,6 @@ public:
     tools::Long ViewSubPixelToLogicDistanceX(double n, double fScale) const;
     tools::Long ViewSubPixelToLogicDistanceY(double n, double fScale) const;
 
-private:
-    TransformKey ResolveKey(const TransformRequest& rReq) const;
-
-    void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX, double& rTransY,
-                               vcl::MappingPolicy ePolicy) const;
-
     template <typename Geom>
     vcl::TypedGeom<vcl::SpaceWindow, Geom>
     MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogicGeom,
@@ -384,6 +378,10 @@ private:
     vcl::TypedGeom<vcl::SpaceDevice, Geom>
     MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogicGeom,
                 const MapMode& rCustomMapMode) const;
+
+private:
+    void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX, double& rTransY,
+                               vcl::MappingPolicy ePolicy) const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

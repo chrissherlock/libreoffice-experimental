@@ -273,6 +273,12 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicSize, vcl::Windo
 };
 
 // Rectangles
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::DeviceRect, vcl::LogicRect>
+{
+    static vcl::DeviceRect cast(const OutputDevice& rDev, const vcl::LogicRect& rSrc,
+                                const MapMode* pMapOverride = nullptr);
+};
+
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRect, vcl::LogicRect>
 {
     static vcl::WindowRect cast(const OutputDevice& rDev, const vcl::LogicRect& rSrc,
@@ -312,6 +318,12 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPolyPolygon, vcl
 };
 
 // Regions
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::DeviceRegion, vcl::LogicRegion>
+{
+    static vcl::DeviceRegion cast(const OutputDevice& rDev, const vcl::LogicRegion& rSrc,
+                                  const MapMode* pMapOverride = nullptr);
+};
+
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>
 {
     static vcl::WindowRegion cast(const OutputDevice& rDev, const vcl::LogicRegion& rSrc,
