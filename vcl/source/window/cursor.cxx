@@ -165,8 +165,9 @@ bool vcl::Cursor::ImplPrepForDraw(const OutputDevice* pDevice, ImplCursorData& r
 {
     if (pDevice && !rData.mbCurVisible)
     {
-        rData.maPixPos        =  pDevice->LogicToWindow( maPos );
-        rData.maPixSize       =  pDevice->LogicToWindow( maSize );
+        rData.maPixPos = pDevice->convertTo<vcl::WindowPoint>(vcl::LogicPoint(maPos), pDevice->GetMapMode()).get();
+        rData.maPixSize = pDevice->convertTo<vcl::WindowSize>(vcl::LogicSize(maSize), pDevice->GetMapMode()).get();
+
         rData.mnOrientation   = mnOrientation;
         rData.mnDirection     = mnDirection;
 
@@ -272,9 +273,9 @@ namespace
 
 tools::Rectangle calcualteCursorRect(Point const& rPosition, Size const rSize, vcl::Window* pWindow, vcl::Window* pParent)
 {
-    Point aPositionPixel = pWindow->LogicToWindow(rPosition);
-    const tools::Long nX = pWindow->GetDeviceOriginX() + aPositionPixel.X() - pParent->GetDeviceOriginX();
-    const tools::Long nY = pWindow->GetDeviceOriginY() + aPositionPixel.Y() - pParent->GetDeviceOriginY();
+    const auto aPositionPixel = pWindow->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPosition), pWindow->GetMapMode());
+    const tools::Long nX = pWindow->GetDeviceOriginX() + aPositionPixel->X() - pParent->GetDeviceOriginX();
+    const tools::Long nY = pWindow->GetDeviceOriginY() + aPositionPixel->Y() - pParent->GetDeviceOriginY();
 
     Size aSizePixel = pWindow->LogicToWindow(rSize);
     if (!aSizePixel.Width())
