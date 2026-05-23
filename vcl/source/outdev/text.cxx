@@ -1605,7 +1605,11 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
                         const double fScaleX = aTransform.get(0, 0);
                         const double fScaleY = aTransform.get(1, 1);
 
-                        Point aTempPos =  rTargetDevice.LogicToWindow( aPos );
+                        Point aTempPos = rTargetDevice.convertTo<vcl::WindowPoint>(
+                            vcl::LogicPoint(aPos),
+                            rTargetDevice.GetMapMode()
+                        ).get();
+
                         nMnemonicX = std::round(rTargetDevice.GetDeviceOriginX() + aTempPos.X() + (std::min(lc_x1, lc_x2) * fScaleX));
                         nMnemonicY = std::round(rTargetDevice.GetDeviceOriginY() + aTempPos.Y() + (rTargetDevice.GetFontMetric().GetAscent() * fScaleY));
                         rTargetDevice.ImplDrawMnemonicLine( nMnemonicX, nMnemonicY, nMnemonicWidth );
@@ -1678,7 +1682,11 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
             const double fScaleX = aTransform.get(0, 0);
             const double fScaleY = aTransform.get(1, 1);
 
-            Point aTempPos =  rTargetDevice.LogicToWindow( aPos );
+            Point aTempPos = rTargetDevice.convertTo<vcl::WindowPoint>(
+                vcl::LogicPoint(aPos),
+                rTargetDevice.GetMapMode()
+            ).get();
+
             nMnemonicX = std::round(rTargetDevice.GetDeviceOriginX() + aTempPos.X() + (std::min(lc_x1, lc_x2) * fScaleX));
             nMnemonicY = std::round(rTargetDevice.GetDeviceOriginY() + aTempPos.Y() + (rTargetDevice.GetFontMetric().GetAscent() * fScaleY));
         }
