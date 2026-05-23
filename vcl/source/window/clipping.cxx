@@ -670,40 +670,37 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
 
 void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize, const Size&) const
 {
-    MapMode aTempMap(GetMapMode());
-    aTempMap.SetOrigin(Point());
-    rSaveDevice.SetMapMode(aTempMap);
-
-    if ( mxOwnerWindow->mpWindowImpl->mpPaintRegion )
+    if (mxOwnerWindow && mxOwnerWindow->mpWindowImpl && mxOwnerWindow->mpWindowImpl->mpPaintRegion)
     {
-        vcl::Region      aClip( *mxOwnerWindow->mpWindowImpl->mpPaintRegion );
-        aClip.Move( -GetDeviceOriginX(), -GetDeviceOriginY() );
+        vcl::Region aClip(*mxOwnerWindow->mpWindowImpl->mpPaintRegion);
+        aClip.Move(-GetDeviceOriginX(), -GetDeviceOriginY());
 
-        const WindowPoint aPixPos(rPos);
+        // Modernized coordinate transformations
+        const auto aPixPos = convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos), GetMapMode());
         const auto boundRect = convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle(rPos, rSize)), GetMapMode());
 
         aClip.Intersect(boundRect.get());
 
-        if ( !aClip.IsEmpty() )
+        if (!aClip.IsEmpty())
         {
-            const vcl::Region    aOldClip( rSaveDevice.GetClipRegion() );
+            const vcl::Region aOldClip(rSaveDevice.GetClipRegion());
             const auto aPixOffset = rSaveDevice.convertTo<vcl::WindowPoint>(vcl::LogicPoint(0, 0), rSaveDevice.GetMapMode());
             const vcl::MappingPolicy eOldPolicy = rSaveDevice.GetMappingPolicy();
 
-            // move clip region to have the same distance to DestOffset
+            // Move clip region to have the same distance to DestOffset
             aClip.Move(aPixOffset->X() - aPixPos->X(), aPixOffset->Y() - aPixPos->Y());
 
-            // set pixel clip region
-            rSaveDevice.SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
-            rSaveDevice.SetClipRegion( aClip );
-            rSaveDevice.SetMappingPolicy( eOldPolicy );
-            rSaveDevice.DrawOutDev( Point(), rSize, rPos, rSize, *this );
-            rSaveDevice.SetClipRegion( aOldClip );
+            // Set pixel clip region
+            rSaveDevice.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
+            rSaveDevice.SetClipRegion(aClip);
+            rSaveDevice.DrawOutDev(Point(), rSize, rPos, rSize, *this);
+            rSaveDevice.SetMappingPolicy(eOldPolicy);
+            rSaveDevice.SetClipRegion(aOldClip);
         }
     }
     else
     {
-        rSaveDevice.DrawOutDev( Point(), rSize, rPos, rSize, *this );
+        rSaveDevice.DrawOutDev(Point(), rSize, rPos, rSize, *this);
     }
 
     rSaveDevice.SetMapMode(MapMode());
