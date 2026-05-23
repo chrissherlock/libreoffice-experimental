@@ -698,8 +698,15 @@ namespace vcl
         if (i_pDeviceSize)
         {
             //if i_pDeviceSize is passed in here, it was the original pre logic-to-pixel size of _rRect
-            SAL_WARN_IF(std::abs(_rRect.GetSize().Width() - m_rTargetDevice.LogicToWindow(*i_pDeviceSize)->Width()) > 1, "vcl", "DeviceSize width was expected to match Pixel width");
-            SAL_WARN_IF(std::abs(_rRect.GetSize().Height() - m_rTargetDevice.LogicToWindow(*i_pDeviceSize)->Height()) > 1, "vcl", "DeviceSize height was expected to match Pixel height");
+            auto const aWindowSize = m_rTargetDevice.convertTo<vcl::WindowSize>(
+                vcl::LogicSize(*i_pDeviceSize),
+                m_rTargetDevice.GetMapMode());
+
+            SAL_WARN_IF(std::abs(_rRect.GetSize().Width() - aWindowSize->Width()) > 1, "vcl",
+                "DeviceSize width was expected to match Pixel width");
+            SAL_WARN_IF(std::abs(_rRect.GetSize().Height() - aWindowSize->Height()) > 1, "vcl",
+                "DeviceSize height was expected to match Pixel height");
+
             aRect.SetSize(*i_pDeviceSize);
         }
 
@@ -720,14 +727,20 @@ namespace vcl
 
         // similar to above, the text rect now contains TWIPs (or whatever unit the ref device has), but the caller
         // expects pixel coordinates
-        aTextRect =  m_rTargetDevice.LogicToWindow( aTextRect );
+        aTextRect = m_rTargetDevice.convertTo<vcl::WindowRect>(
+            vcl::LogicRect(aTextRect),
+            m_rTargetDevice.GetMapMode()
+        ).get();
 
         // convert the metric vector
         if ( _pVector )
         {
             for ( auto& rCharRect : *_pVector )
             {
-                rCharRect =  m_rTargetDevice.LogicToWindow( rCharRect );
+                rCharRect = m_rTargetDevice.convertTo<vcl::WindowRect>(
+                    vcl::LogicRect(rCharRect),
+                    m_rTargetDevice.GetMapMode()
+                ).get();
             }
         }
 
@@ -760,7 +773,7 @@ namespace vcl
 
         // similar to above, the text rect now contains TWIPs (or whatever unit the ref device has), but the caller
         // expects pixel coordinates
-        aTextRect =  m_rTargetDevice.LogicToWindow( aTextRect );
+        aTextRect = m_rTargetDevice.convertTo<vcl::WindowRect>(vcl::LogicRect(aTextRect), m_rTargetDevice.GetMapMode()).get();
 
         return aTextRect;
     }
