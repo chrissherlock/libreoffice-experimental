@@ -158,7 +158,7 @@ static void ImplCursorInvert(vcl::Window* pWindow, ImplCursorData const * pData)
 
     tools::Rectangle aPaintRect = ImplCursorInvert(pRenderContext, pData);
     if (bDoubleBuffering)
-        pGuard->SetPaintRect(pRenderContext->WindowToLogic(aPaintRect));
+        pGuard->SetPaintRect(pRenderContext->convertTo<vcl::LogicRect>(vcl::WindowRect(aPaintRect)));
 }
 
 bool vcl::Cursor::ImplPrepForDraw(const OutputDevice* pDevice, ImplCursorData& rData) const
@@ -324,7 +324,7 @@ void vcl::Cursor::LOKNotify(vcl::Window* pWindow, const OUString& rAction)
                 aRect = calculateCursorRect(GetPos(), GetSize(), pWindow, pWindow->GetParent()->GetParent());
 
             OutputDevice* pDevice = mpData->mpWindow->GetOutDev();
-            const tools::Rectangle aRectTwip = pDevice->WindowToLogic(aRect, MapMode(MapUnit::MapTwip));
+            const tools::Rectangle aRectTwip = pDevice->convertTo<vcl::LogicRect>(vcl::WindowRect(aRect), MapMode(MapUnit::MapTwip));
 
             if (pWindow->IsFormControl())
                 pNotifier->notifyCursorInvalidation(&aRectTwip, true, pWindow->GetLOKWindowId());

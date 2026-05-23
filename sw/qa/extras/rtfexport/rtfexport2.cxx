@@ -83,7 +83,8 @@ CPPUNIT_TEST_FIXTURE(Test, testN192129)
         // We expect that the result will be 16x16px.
         Size aExpectedSize(16, 16);
         MapMode aMap(MapUnit::Map100thMM);
-        aExpectedSize = Application::GetDefaultDevice()->WindowToLogic(aExpectedSize, aMap);
+        aExpectedSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(aExpectedSize), aMap);
 
         uno::Reference<text::XTextGraphicObjectsSupplier> xTextGraphicObjectsSupplier(
             mxComponent, uno::UNO_QUERY);

@@ -15,6 +15,46 @@
 namespace vcl::detail
 {
 // POINTS
+vcl::DevicePoint CoordinateCastTraits<vcl::DevicePoint, vcl::LogicPoint>::cast(
+    const OutputDevice& rDev, const vcl::LogicPoint& rSrc, const MapMode* pMapOverride)
+{
+    // If an override is provided, we must temporarily apply it to the device
+    if (pMapOverride)
+    {
+        OutputDevice* pMutableDev = const_cast<OutputDevice*>(&rDev);
+        MapMode aOldMap = pMutableDev->GetMapMode();
+        pMutableDev->SetMapMode(*pMapOverride);
+
+        vcl::DevicePoint aResult(
+            rDev.GetMapper().LogicToDevicePixel(rSrc.get(), rDev.GetMappingPolicy()));
+
+        pMutableDev->SetMapMode(aOldMap); // Restore original state
+        return aResult;
+    }
+
+    return vcl::DevicePoint(
+        rDev.GetMapper().LogicToDevicePixel(rSrc.get(), rDev.GetMappingPolicy()));
+}
+
+vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::DevicePoint>::cast(
+    const OutputDevice& rDev, const vcl::DevicePoint& rSrc, const MapMode* pMapOverride)
+{
+    if (pMapOverride)
+    {
+        OutputDevice* pMutableDev = const_cast<OutputDevice*>(&rDev);
+        MapMode aOldMap = pMutableDev->GetMapMode();
+        pMutableDev->SetMapMode(*pMapOverride);
+
+        vcl::LogicPoint aResult(
+            rDev.GetMapper().DevicePixelToLogic(rSrc.get(), rDev.GetMappingPolicy()));
+
+        pMutableDev->SetMapMode(aOldMap);
+        return aResult;
+    }
+
+    return vcl::LogicPoint(
+        rDev.GetMapper().DevicePixelToLogic(rSrc.get(), rDev.GetMappingPolicy()));
+}
 
 vcl::WindowPoint CoordinateCastTraits<vcl::WindowPoint, vcl::LogicPoint>::cast(
     const OutputDevice& rDev, const vcl::LogicPoint& rSrc, const MapMode* pMapOverride)
@@ -79,6 +119,13 @@ vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::WindowSize>::cast(
 }
 
 // RECTANGLES
+vcl::DeviceRect CoordinateCastTraits<vcl::DeviceRect, vcl::LogicRect>::cast(
+    const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pMapOverride)
+{
+    const MapMode& rMapMode = pMapOverride ? *pMapOverride : rDev.GetMapMode();
+
+    return rDev.GetMapper().MapToDevice(rSrc, rMapMode);
+}
 
 vcl::WindowRect CoordinateCastTraits<vcl::WindowRect, vcl::LogicRect>::cast(
     const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pMapOverride)
@@ -175,6 +222,13 @@ vcl::LogicPolyPolygon CoordinateCastTraits<vcl::LogicPolyPolygon, vcl::WindowPol
 }
 
 // REGIONS
+vcl::DeviceRegion CoordinateCastTraits<vcl::DeviceRegion, vcl::LogicRegion>::cast(
+    const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)
+{
+    const MapMode& rMapMode = pMapOverride ? *pMapOverride : rDev.GetMapMode();
+
+    return rDev.GetMapper().MapToDevice(rSrc, rMapMode);
+}
 
 vcl::WindowRegion CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>::cast(
     const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)

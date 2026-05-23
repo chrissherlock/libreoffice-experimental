@@ -74,7 +74,7 @@ void UnfloatTableButton::SetOffset(Point aTopRightPixel)
     // Compute the text size and get the box position & size from it
     tools::Rectangle aTextRect;
     m_xVirDev->GetTextBoundRect(aTextRect, m_sLabel);
-    vcl::WindowRect aTextPxRect = m_xVirDev->LogicToWindow(aTextRect);
+    vcl::WindowRect aTextPxRect = m_xVirDev->convertTo<vcl::WindowRect>(vcl::LogicRect(aTextRect));
     FontMetric aFontMetric = m_xVirDev->GetFontMetric(m_xVirDev->GetFont());
     Size aBoxSize(aTextPxRect->GetWidth() + BUTTON_WIDTH + TEXT_PADDING * 2,
                   aFontMetric.GetLineHeight() + TEXT_PADDING * 2);
@@ -194,8 +194,10 @@ void UnfloatTableButton::PaintButton()
 
     m_xVirDev->SetMapMode(MapMode(MapUnit::MapPixel));
     drawinglayer::primitive2d::Primitive2DContainer aSeq;
-    const ::tools::Rectangle aRect(
-        ::tools::Rectangle(Point(0, 0), m_xVirDev->WindowToLogic(GetSizePixel())));
+
+    const ::tools::Rectangle aRect(::tools::Rectangle(
+        Point(0, 0), m_xVirDev->convertTo<vcl::LogicSize>(vcl::WindowSize(GetSizePixel()),
+                                                          m_xVirDev->GetMapMode())));
 
     // Create button
     SwFrameButtonPainter::PaintButton(aSeq, aRect, true);

@@ -315,8 +315,10 @@ bool LayeredDevice::HandleMapModeChange()
     if (maSavedMapMode == rMapMode)
         return false;
 
-    const ::tools::Rectangle aLogicWindowBox (
-        mpTargetWindow->WindowToLogic(::tools::Rectangle(Point(0,0), mpTargetWindow->GetSizePixel())));
+    const ::tools::Rectangle aLogicWindowBox = mpTargetWindow->convertTo<vcl::LogicRect>(
+        vcl::WindowRect(::tools::Rectangle(Point(0, 0), mpTargetWindow->GetSizePixel())),
+        mpTargetWindow->GetMapMode());
+
     if (maSavedMapMode.GetScaleX() != rMapMode.GetScaleX()
         || maSavedMapMode.GetScaleY() != rMapMode.GetScaleY()
         || maSavedMapMode.GetMapUnit() != rMapMode.GetMapUnit())
@@ -326,40 +328,43 @@ bool LayeredDevice::HandleMapModeChange()
     }
     else if (maSavedMapMode.GetOrigin() != rMapMode.GetOrigin())
     {
-        // Window has been scrolled.  Adapt contents of backbuffers and
+        // Window has been scrolled. Adapt contents of backbuffers and
         // layer devices.
-        const Point aDelta (rMapMode.GetOrigin() - maSavedMapMode.GetOrigin());
+        const Point aDelta(rMapMode.GetOrigin() - maSavedMapMode.GetOrigin());
+
         mpBackBuffer->CopyArea(
             aLogicWindowBox.TopLeft(),
-            mpTargetWindow->WindowToLogic(Point(0,0), maSavedMapMode),
+            mpTargetWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(0, 0), maSavedMapMode).get(),
             aLogicWindowBox.GetSize());
 
         // Invalidate the area(s) that have been exposed.
-        const ::tools::Rectangle aWindowBox (Point(0,0), mpTargetWindow->GetSizePixel());
+        const ::tools::Rectangle aWindowBox(Point(0, 0), mpTargetWindow->GetSizePixel());
+
         if (aDelta.Y() < 0)
-            InvalidateAllLayers(mpTargetWindow->WindowToLogic(::tools::Rectangle(
-                aWindowBox.Left(),
-                aWindowBox.Bottom()+aDelta.Y(),
-                aWindowBox.Right(),
-                aWindowBox.Bottom())));
+        {
+            InvalidateAllLayers(mpTargetWindow->convertTo<vcl::LogicRect>(
+                vcl::WindowRect(::tools::Rectangle(aWindowBox.Left(), aWindowBox.Bottom() + aDelta.Y(), aWindowBox.Right(), aWindowBox.Bottom())),
+                rMapMode));
+        }
         else if (aDelta.Y() > 0)
-            InvalidateAllLayers(mpTargetWindow->WindowToLogic(::tools::Rectangle(
-                aWindowBox.Left(),
-                aWindowBox.Top(),
-                aWindowBox.Right(),
-                aWindowBox.Top()+aDelta.Y())));
+        {
+            InvalidateAllLayers(mpTargetWindow->convertTo<vcl::LogicRect>(
+                vcl::WindowRect(::tools::Rectangle(aWindowBox.Left(), aWindowBox.Top(), aWindowBox.Right(), aWindowBox.Top() + aDelta.Y())),
+                rMapMode));
+        }
+
         if (aDelta.X() < 0)
-            InvalidateAllLayers(mpTargetWindow->WindowToLogic(::tools::Rectangle(
-                aWindowBox.Right()+aDelta.X(),
-                aWindowBox.Top(),
-                aWindowBox.Right(),
-                aWindowBox.Bottom())));
+        {
+            InvalidateAllLayers(mpTargetWindow->convertTo<vcl::LogicRect>(
+                vcl::WindowRect(::tools::Rectangle(aWindowBox.Right() + aDelta.X(), aWindowBox.Top(), aWindowBox.Right(), aWindowBox.Bottom())),
+                rMapMode));
+        }
         else if (aDelta.X() > 0)
-            InvalidateAllLayers(mpTargetWindow->WindowToLogic(::tools::Rectangle(
-                aWindowBox.Left(),
-                aWindowBox.Top(),
-                aWindowBox.Left()+aDelta.X(),
-                aWindowBox.Bottom())));
+        {
+            InvalidateAllLayers(mpTargetWindow->convertTo<vcl::LogicRect>(
+                vcl::WindowRect(::tools::Rectangle(aWindowBox.Left(), aWindowBox.Top(), aWindowBox.Left() + aDelta.X(), aWindowBox.Bottom())),
+                rMapMode));
+        }
     }
     else
     {

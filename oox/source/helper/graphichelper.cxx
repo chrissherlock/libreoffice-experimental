@@ -104,9 +104,12 @@ GraphicHelper::GraphicHelper( const Reference< XComponentContext >& rxContext, c
     maDeviceInfo = mxDefaultOutputDevice->GetDeviceInfo();
     // 100 000 is 1 meter in MM100.
     // various unit tests rely on these values being exactly this and not the "true" values
-    Size aDefault = mxDefaultOutputDevice->LogicToWindow(Size(100000, 100000), MapMode(MapUnit::Map100thMM));
-    maDeviceInfo.PixelPerMeterX = aDefault.Width();
-    maDeviceInfo.PixelPerMeterY = aDefault.Height();
+    auto aDefault = mxDefaultOutputDevice->convertTo<vcl::WindowSize>(
+        vcl::LogicSize(Size(100000, 100000)),
+        MapMode(MapUnit::Map100thMM)
+    );
+    maDeviceInfo.PixelPerMeterX = aDefault->Width();
+    maDeviceInfo.PixelPerMeterY = aDefault->Height();
     mfPixelPerHmmX = maDeviceInfo.PixelPerMeterX / 100000.0;
     mfPixelPerHmmY = maDeviceInfo.PixelPerMeterY / 100000.0;
 }
@@ -200,7 +203,8 @@ awt::Point GraphicHelper::convertHmmToAppFont( const awt::Point& rHmm ) const
         awt::Point aPixel = convertHmmToScreenPixel( rHmm );
         MapMode aMode(MapUnit::MapAppFont);
         ::Point aVCLPoint(aPixel.X, aPixel.Y);
-        ::Point aDevPoint = mxDefaultOutputDevice->WindowToLogic(aVCLPoint, aMode );
+        ::Point aDevPoint = mxDefaultOutputDevice->convertTo<vcl::LogicPoint>(
+            vcl::WindowPoint(aVCLPoint), aMode);
         return awt::Point(aDevPoint.X(), aDevPoint.Y());
     }
     catch( Exception& )
@@ -217,7 +221,8 @@ awt::Size GraphicHelper::convertHmmToAppFont( const awt::Size& rHmm ) const
         awt::Size aPixel = convertHmmToScreenPixel( rHmm );
         MapMode aMode(MapUnit::MapAppFont);
         ::Size aVCLSize(aPixel.Width, aPixel.Height);
-        ::Size aDevSz = mxDefaultOutputDevice->WindowToLogic(aVCLSize, aMode );
+        ::Size aDevSz = mxDefaultOutputDevice->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(aVCLSize), aMode);
         return awt::Size(aDevSz.Width(), aDevSz.Height());
     }
     catch( Exception& )

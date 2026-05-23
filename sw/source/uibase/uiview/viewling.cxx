@@ -682,7 +682,7 @@ bool SwView::ExecSpellPopup(const Point& rPt, bool bIsMouseEvent)
                     new SwSpellPopup(m_pWrtShell.get(), aGrammarCheckRes, nErrorInResult, aSuggestions, aParaText) :
                     new SwSpellPopup(m_pWrtShell.get(), xAlt, aParaText));
                 ui::ContextMenuExecuteEvent aEvent;
-                const Point aPixPos = GetEditWin().LogicToWindow( rPt );
+                const Point aPixPos = GetEditWin().convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPt));
 
                 aEvent.SourceWindow = VCLUnoHelper::GetInterface( m_pEditWin );
                 aEvent.ExecutePosition.X = aPixPos.X();
@@ -799,9 +799,12 @@ void SwView::ExecSmartTagPopup( const Point& rPt )
         m_pWrtShell->GetSmartTagRect( rPt, aToFill );
         m_pWrtShell->SttSelect();
 
-        if ( aToFill.HasArea() )
-            xPopupMenu->execute( m_pEditWin->GetComponentInterface(),
-                                 vcl::unohelper::ConvertToAWTRect( m_pEditWin->LogicToWindow( aToFill.SVRect() ) ), css::awt::PopupMenuDirection::EXECUTE_DOWN );
+        if (aToFill.HasArea())
+            xPopupMenu->execute(m_pEditWin->GetComponentInterface(),
+                                vcl::unohelper::ConvertToAWTRect(m_pEditWin->convertTo<vcl::WindowRect>(
+                                    vcl::LogicRect(aToFill.SVRect())
+                                ).get()),
+                                css::awt::PopupMenuDirection::EXECUTE_DOWN);
 
         css::uno::Reference< css::lang::XComponent > xComponent( xPopupController, css::uno::UNO_QUERY );
         if ( xComponent.is() )

@@ -2796,9 +2796,11 @@ void SwEnhancedPDFExportHelper::EnhancedPDFExport(
                             const SwRect& aAnnotRect = pWin->GetAnchorRect();
                             if (aAnnotRect.Contains(rNoteRect))
                             {
-                                Point aPt(pDoc->GetEditShell()->GetWin()->WindowToLogic(pWin->GetPosPixel()));
-                                Size aSize(pDoc->GetEditShell()->GetWin()->WindowToLogic(pWin->GetSizePixel()));
-                                aPopupRect = tools::Rectangle(aPt, aSize);
+                                vcl::Window* pTargetWin = pDoc->GetEditShell()->GetWin();
+
+                                aPopupRect = pTargetWin->convertTo<vcl::LogicRect>(
+                                    vcl::WindowRect(::tools::Rectangle(pWin->GetPosPixel(), pWin->GetSizePixel()))
+                                );
                             }
                         }
                     }

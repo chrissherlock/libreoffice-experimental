@@ -222,8 +222,6 @@ void TableControl::dispose()
     m_pDataWindow.disposeAndClear();
     m_pTableFunctionSet.reset();
     m_pSelEngine.reset();
-
-    Control::dispose();
 }
 
 void TableControl::GetFocus()
@@ -603,20 +601,28 @@ tools::Rectangle TableControl::impl_getAllVisibleDataCellArea() const
 
 void TableControl::impl_ni_updateCachedTableMetrics()
 {
-    m_nRowHeightPixel
-        = LogicToWindow(Size(0, m_pModel->getRowHeight()), MapMode(MapUnit::MapAppFont)).Height();
+    m_nRowHeightPixel = convertTo<vcl::WindowSize>(vcl::LogicSize(0, m_pModel->getRowHeight()),
+                                                   MapMode(MapUnit::MapAppFont))
+                            ->Height();
 
     m_nColHeaderHeightPixel = 0;
+
     if (m_pModel->hasColumnHeaders())
-        m_nColHeaderHeightPixel = LogicToWindow(Size(0, m_pModel->getColumnHeaderHeight()),
-                                                MapMode(MapUnit::MapAppFont))
-                                      .Height();
+    {
+        m_nColHeaderHeightPixel
+            = convertTo<vcl::WindowSize>(vcl::LogicSize(0, m_pModel->getColumnHeaderHeight()),
+                                         MapMode(MapUnit::MapAppFont))
+                  ->Height();
+    }
 
     m_nRowHeaderWidthPixel = 0;
     if (m_pModel->hasRowHeaders())
+    {
         m_nRowHeaderWidthPixel
-            = LogicToWindow(Size(m_pModel->getRowHeaderWidth(), 0), MapMode(MapUnit::MapAppFont))
-                  .Width();
+            = convertTo<vcl::WindowSize>(vcl::LogicSize(m_pModel->getRowHeaderWidth(), 0),
+                                         MapMode(MapUnit::MapAppFont))
+                  ->Width();
+    }
 }
 
 void TableControl::impl_ni_updateCachedModelValues()
@@ -1813,13 +1819,17 @@ void TableControl::invalidate(TableArea const i_what)
 
 tools::Long TableControl::pixelWidthToAppFont(tools::Long const i_pixels) const
 {
-    return m_pDataWindow->WindowToLogic(Size(i_pixels, 0), MapMode(MapUnit::MapAppFont)).Width();
+    return m_pDataWindow
+        ->convertTo<vcl::LogicSize>(vcl::WindowSize(i_pixels, 0), MapMode(MapUnit::MapAppFont))
+        ->Width();
 }
 
 tools::Long TableControl::appFontWidthToPixel(tools::Long const i_appFontUnits) const
 {
-    return m_pDataWindow->LogicToWindow(Size(i_appFontUnits, 0), MapMode(MapUnit::MapAppFont))
-        .Width();
+    return m_pDataWindow
+        ->convertTo<vcl::WindowSize>(vcl::LogicSize(i_appFontUnits, 0),
+                                     MapMode(MapUnit::MapAppFont))
+        ->Width();
 }
 
 void TableControl::hideTracking() { m_pDataWindow->HideTracking(); }

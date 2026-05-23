@@ -121,9 +121,10 @@ Image PreviewRenderer::RenderPage (
                 PaintFrame();
 
                 Size aSize (mpPreviewDevice->GetOutputSizePixel());
-                aPreview = Image(mpPreviewDevice->GetBitmap(
-                    mpPreviewDevice->WindowToLogic(Point(0,0)),
-                    mpPreviewDevice->WindowToLogic(aSize)));
+
+                  aPreview = Image(mpPreviewDevice->GetBitmap(
+                       mpPreviewDevice->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(0, 0))),
+                       mpPreviewDevice->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize))));
 
                 mpView->HideSdrPage();
             }
@@ -163,8 +164,11 @@ Image PreviewRenderer::RenderSubstitution (
         aMapMode.SetScaleX(fFinalScale);
         aMapMode.SetScaleY(fFinalScale);
         const sal_Int32 nFrameWidth (mbHasFrame ? snFrameWidth : 0);
-        aMapMode.SetOrigin(mpPreviewDevice->WindowToLogic(
-            Point(nFrameWidth,nFrameWidth),aMapMode));
+        aMapMode.SetOrigin(
+            mpPreviewDevice->convertTo<vcl::LogicPoint>(
+                vcl::WindowPoint(Point(nFrameWidth, nFrameWidth))
+            ));
+
         mpPreviewDevice->SetMapMode (aMapMode);
 
         // Clear the background.
@@ -184,8 +188,8 @@ Image PreviewRenderer::RenderSubstitution (
 
         const Size aSize (mpPreviewDevice->GetOutputSizePixel());
         aPreview = Image(mpPreviewDevice->GetBitmap(
-            mpPreviewDevice->WindowToLogic(Point(0,0)),
-            mpPreviewDevice->WindowToLogic(aSize)));
+            mpPreviewDevice->convertTo<vcl::LogicPoint>(vcl::WindowPoint(0, 0)),
+            mpPreviewDevice->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize))));
     }
     catch (const css::uno::Exception&)
     {
@@ -312,15 +316,17 @@ void PreviewRenderer::PaintSubstitutionText (const OUString& rSubstitutionText)
     // Set the font size.
     const vcl::Font& rOriginalFont (mpPreviewDevice->GetFont());
     vcl::Font aFont (mpPreviewDevice->GetSettings().GetStyleSettings().GetAppFont());
-    sal_Int32 nHeight (mpPreviewDevice->WindowToLogic(Size(0,snSubstitutionTextSize))->Height());
+    sal_Int32 nHeight = static_cast<sal_Int32>(mpPreviewDevice->convertTo<vcl::LogicSize>(vcl::WindowSize(0, snSubstitutionTextSize), mpPreviewDevice->GetMapMode())->Height());
     aFont.SetFontHeight(nHeight);
     mpPreviewDevice->SetFont (aFont);
 
     // Paint the substitution text.
-    ::tools::Rectangle aTextBox (
-        Point(0,0),
-        mpPreviewDevice->WindowToLogic(
-            mpPreviewDevice->GetOutputSizePixel()).get());
+    ::tools::Rectangle aTextBox(
+        Point(0, 0),
+        mpPreviewDevice->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(mpPreviewDevice->GetOutputSizePixel()),
+            mpPreviewDevice->GetMapMode()));
+
     DrawTextFlags const nTextStyle =
         DrawTextFlags::Center
         | DrawTextFlags::VCenter
@@ -361,12 +367,16 @@ void PreviewRenderer::SetupOutputSize (
     const Size aPageModelSize (rPage.GetSize());
     if (!aPageModelSize.IsEmpty())
     {
-        const sal_Int32 nFrameWidth (mbHasFrame ? snFrameWidth : 0);
+        const sal_Int32 nFrameWidth(mbHasFrame ? snFrameWidth : 0);
+
         aMapMode.SetScaleX(
-            double(rFramePixelSize.Width()-2*nFrameWidth-1) / aPageModelSize.Width());
+            double(rFramePixelSize.Width() - 2 * nFrameWidth - 1) / aPageModelSize.Width());
+
         aMapMode.SetScaleY(
-            double(rFramePixelSize.Height()-2*nFrameWidth-1) / aPageModelSize.Height());
-        aMapMode.SetOrigin(mpPreviewDevice->WindowToLogic(Point(nFrameWidth,nFrameWidth),aMapMode));
+            double(rFramePixelSize.Height() - 2 * nFrameWidth - 1) / aPageModelSize.Height());
+
+        aMapMode.SetOrigin(mpPreviewDevice->convertTo<vcl::LogicPoint>(
+            vcl::WindowPoint(nFrameWidth, nFrameWidth), aMapMode));
     }
     else
     {

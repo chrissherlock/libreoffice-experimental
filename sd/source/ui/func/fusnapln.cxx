@@ -82,8 +82,8 @@ void FuSnapLine::DoExecute( SfxRequest& rReq )
 
             if ( aLinePos.X() >= 0 )
             {
-                aLinePos = mpWindow->WindowToLogic(aLinePos);
-                sal_uInt16 nHitLog = static_cast<sal_uInt16>(mpWindow->WindowToLogic(Size(HITPIX,0)).Width());
+                aLinePos = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aLinePos));
+                sal_uInt16 nHitLog = static_cast<sal_uInt16>(mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(HITPIX, 0)))->Width());
                 bLineExist = mpView->PickHelpLine(aLinePos, nHitLog, *mpWindow->GetOutDev(), nHelpLine, pPV);
                 if ( bLineExist )
                     aLinePos = (pPV->GetHelpLines())[nHelpLine].GetPos();

@@ -129,7 +129,9 @@ void Image::Draw(OutputDevice* pOutDev, const Point& rPos, DrawImageFlags nStyle
     if (!mpImplData || (!pOutDev->IsDeviceOutputNecessary() && pOutDev->GetConnectMetaFile() == nullptr))
         return;
 
-    Size aOutSize = pSize ? *pSize : pOutDev->WindowToLogic(mpImplData->getSizePixel());
+    Size aOutSize = pSize
+        ? *pSize
+        : pOutDev->convertTo<vcl::LogicSize>(vcl::WindowSize(mpImplData->getSizePixel()));
 
     Bitmap aRenderBmp = mpImplData->getBitmapForHiDPI(bool(nStyle & DrawImageFlags::Disable), pOutDev->GetGraphics());
 

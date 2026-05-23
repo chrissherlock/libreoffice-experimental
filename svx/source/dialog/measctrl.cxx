@@ -55,7 +55,7 @@ void SvxXMeasurePreview::ResizeImpl(const Size& rSize)
 
     rRefDevice.SetMapMode(m_aMapMode);
 
-    Size aSize = rRefDevice.WindowToLogic(rSize);
+    Size aSize = rRefDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(rSize));
     Point aPt1(aSize.Width() / 5, static_cast<tools::Long>(aSize.Height() / 2));
     m_pMeasureObj->SetPoint(aPt1, 0);
     Point aPt2(aSize.Width() * 4 / 5, static_cast<tools::Long>(aSize.Height() / 2));
@@ -129,7 +129,8 @@ bool SvxXMeasurePreview::MouseButtonDown(const MouseEvent& rMEvt)
             OutputDevice& rRefDevice = GetDrawingArea()->get_ref_device();
             rRefDevice.Push(vcl::PushFlags::MAPMODE);
             rRefDevice.SetMapMode(m_aMapMode);
-            Size aOutSize(rRefDevice.WindowToLogic(GetOutputSizePixel()));
+            Size aOutSize(
+                rRefDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
             rRefDevice.Pop();
 
             Point aPt(m_aMapMode.GetOrigin());

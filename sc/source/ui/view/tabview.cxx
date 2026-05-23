@@ -358,7 +358,7 @@ void ScTabView::DoResize( const Point& rOffset, const Size& rSize, bool bInner )
     Size aFontSize = rStyleSettings.GetTabFont().GetFontSize();
 #ifndef MACOSX // already in pixels on macOS: a point conversion would inflate the tab bar
     MapMode aPtMapMode(MapUnit::MapPoint);
-    aFontSize = pFrameWin->LogicToWindow(aFontSize, aPtMapMode);
+    aFontSize = pFrameWin->convertTo<vcl::WindowSize>(vcl::LogicSize(aFontSize), aPtMapMode).get();
 #endif
     sal_Int32 nTabHeight = aFontSize.Height() + TAB_HEIGHT_MARGIN;
 
@@ -1915,10 +1915,11 @@ Point ScTabView::GetChartInsertPos( const Size& rSize, const ScRange& rCellRange
         //  get the visible rectangle in logic units
         bool bLOKActive = comphelper::LibreOfficeKit::isActive();
         MapMode aDrawMode = pWin->GetDrawMapMode();
+
         tools::Rectangle aVisible(
             bLOKActive ?
-            ::LogicToLogic( aViewData.getLOKVisibleArea(), MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM) )
-            : pWin->WindowToLogic( tools::Rectangle( Point(0,0), pWin->GetOutputSizePixel() ), aDrawMode ) );
+            ::LogicToLogic(aViewData.getLOKVisibleArea(), MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM))
+            : pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(tools::Rectangle(Point(0, 0), pWin->GetOutputSizePixel())), aDrawMode));
 
         ScDocument& rDoc = aViewData.GetDocument();
         SCTAB nTab = aViewData.CurrentTabForData();
@@ -2038,12 +2039,12 @@ Point ScTabView::GetChartDialogPos( const Size& rDialogSize, const tools::Rectan
     if (pWin)
     {
         MapMode aDrawMode = pWin->GetDrawMapMode();
-        tools::Rectangle aObjPixel = pWin->LogicToWindow( rLogicChart, aDrawMode );
+        tools::Rectangle aObjPixel = pWin->convertTo<vcl::WindowRect>(vcl::LogicRect(rLogicChart), aDrawMode);
         AbsoluteScreenPixelRectangle aObjAbs( pWin->OutputToAbsoluteScreenPixel( aObjPixel.TopLeft() ),
                            pWin->OutputToAbsoluteScreenPixel( aObjPixel.BottomRight() ) );
 
         AbsoluteScreenPixelRectangle aDesktop = pWin->GetDesktopRectPixel();
-        Size aSpace = pWin->LogicToWindow( Size(8, 12), MapMode(MapUnit::MapAppFont));
+        Size aSpace = pWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(8, 12)), MapMode(MapUnit::MapAppFont));
 
         ScDocument& rDoc = aViewData.GetDocument();
         SCTAB nTab = aViewData.CurrentTabForData();
@@ -3278,64 +3279,5 @@ void ScTabView::extendTiledAreaIfNeeded()
         << "] MaxTiledCol = " << aViewData.GetMaxTiledCol()
         << " MaxTiledRow = " << aViewData.GetMaxTiledRow());
 }
-
-tools::Long ScTabView::GetCurrentPage() const
-{
-    std::unique_ptr<ScPageBreakData> pTempPageData;
-    const ScPageBreakData* pPageData = pPageBreakData.get();
-
-    if (!pPageData)
-    {
-        ScDocShell* pDocSh = aViewData.GetDocShell();
-        if (!pDocSh)
-            return 1;
-
-        ScDocument& rDoc = pDocSh->GetDocument();
-        SCTAB nTab = aViewData.CurrentTabForData();
-
-        sal_uInt16 nCount = rDoc.GetPrintRangeCount(nTab);
-        if (!nCount)
-            nCount = 1;
-
-        pTempPageData = std::make_unique<ScPageBreakData>(nCount);
-
-        ScPrintFunc aPrintFunc(
-            *pDocSh,
-            pDocSh->GetPrinter(),
-            nTab,
-            0, 0,
-            nullptr,
-            nullptr,
-            pTempPageData.get());
-
-        // ScPrintFunc fills the PageBreakData in ctor.
-        if (nCount > 1)
-        {
-            aPrintFunc.ResetBreaks(nTab);
-            pTempPageData->AddPages();
-        }
-
-        pPageData = pTempPageData.get();
-    }
-
-    const SCCOL nCurCol = aViewData.GetCurX();
-    const SCROW nCurRow = aViewData.GetCurY();
-
-    for (size_t nPos = 0; nPos < pPageData->GetCount(); ++nPos)
-    {
-        const ScPrintRangeData& rData = pPageData->GetData(nPos);
-        const ScRange& rRange = rData.GetPrintRange();
-
-        if (nCurCol < rRange.aStart.Col() || nCurCol > rRange.aEnd.Col()
-            || nCurRow < rRange.aStart.Row() || nCurRow > rRange.aEnd.Row())
-            continue;
-
-        return rData.GetPageNumber(nCurCol, nCurRow);
-    }
-
-    return 1;
-}
-
-
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

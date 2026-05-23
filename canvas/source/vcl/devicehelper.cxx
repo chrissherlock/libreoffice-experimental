@@ -51,10 +51,10 @@ namespace vclcanvas
         OutputDevice& rOutDev = mpOutDev->getOutDev();
         const MapMode aOldMapMode( rOutDev.GetMapMode() );
         rOutDev.SetMapMode( MapMode(MapUnit::MapMM) );
-        const Size aPixelSize( rOutDev.LogicToWindow(Size(1,1)).get() );
+        const auto aPixelSize = rOutDev.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(1, 1)));
         rOutDev.SetMapMode( aOldMapMode );
 
-        return vcl::unotools::size2DFromSize( aPixelSize );
+        return vcl::unotools::size2DFromSize(aPixelSize.get());
     }
 
     geometry::RealSize2D DeviceHelper::getPhysicalSize()
@@ -66,7 +66,7 @@ namespace vclcanvas
         OutputDevice& rOutDev = mpOutDev->getOutDev();
         const MapMode aOldMapMode( rOutDev.GetMapMode() );
         rOutDev.SetMapMode( MapMode(MapUnit::MapMM) );
-        const Size aLogSize( rOutDev.WindowToLogic(rOutDev.GetOutputSizePixel()).get() );
+        const Size aLogSize( rOutDev.convertTo<vcl::LogicSize>(vcl::WindowSize(rOutDev.GetOutputSizePixel())).get() );
         rOutDev.SetMapMode( aOldMapMode );
 
         return vcl::unotools::size2DFromSize( aLogSize );

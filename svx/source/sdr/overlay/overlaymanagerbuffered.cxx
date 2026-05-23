@@ -56,8 +56,12 @@ namespace sdr::overlay
                     {
                         // get pixel bounds (tdf#149322 do subtraction in logic units before converting result back to pixel)
                         const Point aLogicOriginDiff(rOriginNew - rOriginOld);
-                        const Size aPixelOriginDiff(mpBufferDevice->LogicToWindow(Size(aLogicOriginDiff.X(), aLogicOriginDiff.Y())));
-                        const Point aDestinationOffsetPixel(aPixelOriginDiff.Width(), aPixelOriginDiff.Height());
+
+                        const auto aPixelOriginDiff = mpBufferDevice->convertTo<vcl::WindowSize>(
+                            vcl::LogicSize(aLogicOriginDiff.X(), aLogicOriginDiff.Y())
+                        );
+
+                        const Point aDestinationOffsetPixel(aPixelOriginDiff->Width(), aPixelOriginDiff->Height());
                         const Size aOutputSizePixel(mpBufferDevice->GetOutputSizePixel());
 
                         // remember and switch off MapMode
@@ -141,15 +145,15 @@ namespace sdr::overlay
             ImpPrepareBufferDevice();
 
             // build region which needs to be copied
-            vcl::Region aRegion(rSource.LogicToWindow(rRegion));
+            auto aRegion = rSource.convertTo<vcl::WindowRegion>(vcl::LogicRegion(rRegion));
 
             // limit to PaintRegion if it's a window. This will be evtl. the expanded one,
             // but always the exact redraw area
             if(OUTDEV_WINDOW == rSource.GetOutDevType())
             {
                 vcl::Window& rWindow = *rSource.GetOwnerWindow();
-                vcl::Region aPaintRegionPixel = rWindow.LogicToWindow(rWindow.GetPaintRegion());
-                aRegion.Intersect(aPaintRegionPixel);
+                auto aPaintRegionPixel = rWindow.convertTo<vcl::WindowRegion>(vcl::LogicRegion(rWindow.GetPaintRegion()));
+                aRegion->Intersect(aPaintRegionPixel.get());
 
                 // #i72754# Make sure content is completely rendered, the window
                 // will be used as source of a DrawOutDev soon
@@ -158,7 +162,7 @@ namespace sdr::overlay
 
             // also limit to buffer size
             const tools::Rectangle aBufferDeviceRectanglePixel(Point(), mpBufferDevice->GetOutputSizePixel());
-            aRegion.Intersect(aBufferDeviceRectanglePixel);
+            aRegion->Intersect(aBufferDeviceRectanglePixel);
 
             // MapModes off
             const vcl::MappingPolicy eOldPolicyDest(rSource.GetMappingPolicy());
@@ -168,7 +172,7 @@ namespace sdr::overlay
 
             // prepare to iterate over the rectangles from the region in pixels
             RectangleVector aRectangles;
-            aRegion.GetRegionRectangles(aRectangles);
+            aRegion->GetRegionRectangles(aRectangles);
 
             for(const auto& rRect : aRectangles)
             {

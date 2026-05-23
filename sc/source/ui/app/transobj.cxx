@@ -423,12 +423,12 @@ bool ScTransferObj::GetData( const datatransfer::DataFlavor& rFlavor, const OUSt
             // platforms other than macOS.
             static constexpr tools::Long nCopyToImageMaxPixels = 8192 * 8192;
             double fScale(1.0);
-            Size aPixelSize = pVirtDev->LogicToWindow(aMMRect.GetSize(), MapMode(MapUnit::Map100thMM));
+            Size aPixelSize = pVirtDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aMMRect.GetSize()), MapMode(MapUnit::Map100thMM));
             tools::Long nPixels(aPixelSize.Width() * aPixelSize.Height());
             if (nPixels < 0 || nPixels > nCopyToImageMaxPixels)
             {
                 fScale = double(nCopyToImageMaxPixels) / nPixels;
-                aPixelSize = pVirtDev->LogicToWindow(aMMRect.GetSize(), MapMode(MapUnit::Map100thMM, Point(), fScale, fScale));
+                aPixelSize = pVirtDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aMMRect.GetSize()), MapMode(MapUnit::Map100thMM, Point(), fScale, fScale)).get();
                 nPixels = aPixelSize.Width() * aPixelSize.Height();
             }
 

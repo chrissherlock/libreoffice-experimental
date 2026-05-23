@@ -148,8 +148,10 @@ void SmEditEngine::setSmItemPool(SfxItemPool* mpItemPool, const SvtLinguOptions&
 
     // Set font heights
     SvxFontHeightItem aFontHeight(
-        aDefaultDevice->LogicToWindow(Size(0, 11), MapMode(MapUnit::MapPoint))->Height(), 100,
-        EE_CHAR_FONTHEIGHT);
+        aDefaultDevice
+            ->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, 11)), MapMode(MapUnit::MapPoint))
+            ->Height(),
+        100, EE_CHAR_FONTHEIGHT);
     mpItemPool->SetUserDefaultItem(aFontHeight);
     aFontHeight.SetWhich(EE_CHAR_FONTHEIGHT_CJK);
     mpItemPool->SetUserDefaultItem(aFontHeight);

@@ -100,7 +100,7 @@ void expandSelection(std::vector<::tools::Rectangle>& rVector, const ::OutputDev
     if (rVector.empty())
         return;
 
-    const Size aLogicPixel(rTarget.WindowToLogic(Size(1, 1)));
+    const Size aLogicPixel(rTarget.convertTo<vcl::LogicSize>(vcl::WindowSize(1, 1)));
 
     for (auto& aRect : rVector)
     {
@@ -922,7 +922,7 @@ IMPL_LINK_NOARG(OutlineView, StatusEventHdl, EditStatus&, void)
                                    Size(mnPaperWidth,
                                    mrOutliner.GetTextHeight()));
     ::tools::Rectangle aWin(Point(0,0), pWin->GetOutputSizePixel());
-    aWin = pWin->WindowToLogic(aWin);
+    aWin = pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(aWin), pWin->GetMapMode());
 
     if (!aVis.IsEmpty())        // not when opening
     {
@@ -1677,7 +1677,7 @@ IMPL_LINK(OutlineView, PaintingFirstLineHdl, PaintFirstLineInfo*, pInfo, void)
     sal_Int32 nPara = pInfo->mnPara;
     EditEngine& rEditEngine = mrOutliner.GetEditEngine();
 
-    Size aImageSize( pInfo->mpOutDev->WindowToLogic( maSlideImage.GetSizePixel()  ));
+    Size aImageSize = pInfo->mpOutDev->convertTo<vcl::LogicSize>(vcl::WindowSize(maSlideImage.GetSizePixel()), pInfo->mpOutDev->GetMapMode());
     Size aOffset( 100, 100 );
 
     // paint slide number

@@ -269,7 +269,7 @@ void SwWebView::SelectShell()
         rDispatcher.Flush();
 
         Point aPnt = GetEditWin().GetPointerPosPixel();
-        aPnt = GetEditWin().WindowToLogic(aPnt);
+        aPnt = GetEditWin().convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPnt));
         GetEditWin().UpdatePointer(aPnt);
 
         if ( bInitFormShell && GetWrtShell().GetDrawView() )

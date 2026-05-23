@@ -172,11 +172,14 @@ void Client::ViewChanged()
                                         static_cast< ::tools::Long >( GetScaleHeight() * aVisArea.GetHeight() ) );
 
     // react to the change if the difference is bigger than one pixel
-    Size aPixelDiff =
-        Application::GetDefaultDevice()->LogicToWindow(
-            Size( aLogicRect.GetWidth() - aScaledSize.Width(),
-                  aLogicRect.GetHeight() - aScaledSize.Height() ),
-            aMap100 );
+    Size aPixelDiff = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+        vcl::LogicSize(Size(
+            aLogicRect.GetWidth() - aScaledSize.Width(),
+            aLogicRect.GetHeight() - aScaledSize.Height()
+        )),
+        aMap100
+    ).get();
+
     if( aPixelDiff.Width() || aPixelDiff.Height() )
     {
         pSdrOle2Obj->SetLogicRect( ::tools::Rectangle( aLogicRect.TopLeft(), aScaledSize ) );

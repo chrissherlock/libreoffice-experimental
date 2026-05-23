@@ -52,11 +52,11 @@ namespace
 {
     short lcl_getHitTolerance( OutputDevice const * pOutDev )
     {
-        const short HITPIX=2; //hit-tolerance in pixel
-        short nHitTolerance = 50;
-        if(pOutDev)
-            nHitTolerance = static_cast<short>(pOutDev->WindowToLogic(Size(HITPIX,0))->Width());
-        return nHitTolerance;
+        if(!pOutDev)
+            return 50;
+
+        const short HITPIX=2; // hit-tolerance in pixel
+        return static_cast<short>(pOutDev->convertTo<vcl::LogicSize>(vcl::WindowSize(HITPIX, 0))->Width());
     }
 
 // this code is copied from sfx2/source/doc/objembed.cxx. It is a workaround to

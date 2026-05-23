@@ -761,7 +761,7 @@ bool SwView::ExecDrwTextSpellPopup(const Point& rPt)
     bool bRet = false;
     SdrView *pSdrView = m_pWrtShell->GetDrawView();
     OutlinerView* pOLV = pSdrView->GetTextEditOutlinerView();
-    Point aPos( GetEditWin().LogicToWindow( rPt ) );
+    Point aPos( GetEditWin().convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPt)) );
 
     if (pOLV->IsWrongSpelledWordAtPos( aPos ))
     {

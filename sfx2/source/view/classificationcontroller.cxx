@@ -289,8 +289,9 @@ ClassificationControl::ClassificationControl(vcl::Window* pParent)
 
     // Same as SvxColorDockingWindow.
     const Size aLogicalAttrSize(150, 0);
-    Size aSize(LogicToWindow(aLogicalAttrSize, MapMode(MapUnit::MapAppFont)));
-    m_xCategory->set_size_request(aSize.Width() - m_xLabel->get_preferred_size().Width(), -1);
+    auto nWidth = convertTo<vcl::WindowSize>(vcl::LogicSize(aLogicalAttrSize), MapMode(MapUnit::MapAppFont))->Width();
+
+    m_xCategory->set_size_request(nWidth - m_xLabel->get_preferred_size().Width(), -1);
 
     SetOptimalSize();
 }

@@ -782,7 +782,10 @@ IMPL_LINK_NOARG( OFieldExpressionControl, DelayedDelete, void*, void )
 
 Size OFieldExpressionControl::GetOptimalSize() const
 {
-    return LogicToWindow(Size(106, 75), MapMode(MapUnit::MapAppFont));
+    return convertTo<vcl::WindowSize>(
+        vcl::LogicSize(Size(106, 75)),
+        MapMode(MapUnit::MapAppFont)
+    ).get();
 }
 
 OGroupsSortingDialog::OGroupsSortingDialog(weld::Window* pParent, bool bReadOnly,

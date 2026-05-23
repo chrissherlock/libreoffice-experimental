@@ -53,18 +53,19 @@ bool FuSelection::TestDetective( const SdrPageView* pPV, const Point& rPos )
     {
         if (ScDetectiveFunc::IsNonAlienArrow( pObject ))
         {
-            double fHitLog = pWindow->WindowToLogic(Size(pView->GetHitTolerancePixel(),0)).Width();
+            double fHitLog = pWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(pView->GetHitTolerancePixel(), 0))->Width();
+
             if (SdrObjectPrimitiveHit(*pObject, rPos, {fHitLog, fHitLog}, *pPV, nullptr, false))
             {
                 ScViewData& rViewData = rViewShell.GetViewData();
                 ScSplitPos ePos = rViewShell.FindWindow( pWindow );
                 Point aLineStart = pObject->GetPoint(0);
                 Point aLineEnd   = pObject->GetPoint(1);
-                Point aPixel = pWindow->LogicToWindow( aLineStart );
+                Point aPixel = pWindow->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aLineStart));
                 SCCOL nStartCol;
                 SCROW nStartRow;
                 rViewData.GetPosFromPixel( aPixel.X(), aPixel.Y(), ePos, nStartCol, nStartRow );
-                aPixel = pWindow->LogicToWindow( aLineEnd );
+                aPixel = pWindow->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aLineEnd)).get();
                 SCCOL nEndCol;
                 SCROW nEndRow;
                 rViewData.GetPosFromPixel( aPixel.X(), aPixel.Y(), ePos, nEndCol, nEndRow );

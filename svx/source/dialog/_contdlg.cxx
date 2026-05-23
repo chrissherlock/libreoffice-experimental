@@ -139,29 +139,29 @@ tools::PolyPolygon SvxContourDlg::CreateAutoContour( const Graphic& rGraphic,
     {
         const Graphic   aTmpGrf( rGraphic.GetGDIMetaFile().GetMonochromeMtf( COL_BLACK ) );
         ScopedVclPtrInstance< VirtualDevice > pVDev;
-        Size            aSizePix( pVDev->LogicToWindow( aTmpGrf.GetPrefSize(), aTmpGrf.GetPrefMapMode() ) );
+        auto aSizePix = pVDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aTmpGrf.GetPrefSize()), aTmpGrf.GetPrefMapMode());
 
-        if( aSizePix.Width() && aSizePix.Height() && ( aSizePix.Width() > 512 || aSizePix.Height() > 512 ) )
+        if( aSizePix->Width() && aSizePix->Height() && ( aSizePix->Width() > 512 || aSizePix->Height() > 512 ) )
         {
-            double fWH = static_cast<double>(aSizePix.Width()) / aSizePix.Height();
+            double fWH = static_cast<double>(aSizePix->Width()) / aSizePix->Height();
 
             if( fWH <= 1.0 )
             {
-                aSizePix.setHeight(512);
-                aSizePix.setWidth(basegfx::fround<tools::Long>(aSizePix.Height() * fWH));
+                aSizePix->setHeight(512);
+                aSizePix->setWidth(basegfx::fround<tools::Long>(aSizePix->Height() * fWH));
             }
             else
             {
-                aSizePix.setWidth(512);
-                aSizePix.setHeight(basegfx::fround<tools::Long>(aSizePix.Width() / fWH));
+                aSizePix->setWidth(512);
+                aSizePix->setHeight(basegfx::fround<tools::Long>(aSizePix->Width() / fWH));
             }
         }
 
-        if( pVDev->SetOutputSizePixel( aSizePix ) )
+        if( pVDev->SetOutputSizePixel( aSizePix.get() ) )
         {
             const Point aPt;
-            aTmpGrf.Draw(*pVDev, aPt, aSizePix);
-            aBmp = pVDev->GetBitmap( aPt, aSizePix );
+            aTmpGrf.Draw(*pVDev, aPt, aSizePix.get());
+            aBmp = pVDev->GetBitmap( aPt, aSizePix.get() );
         }
 
         bContourEdgeDetect = true;
@@ -309,9 +309,9 @@ void SvxSuperContourDlg::SetPolyPolygon( const tools::PolyPolygon& rPolyPoly )
             Point& rPt = rPoly[ i ];
 
             if ( !bPixelMap )
-                rPt = pOutDev->LogicToWindow( rPt, aGrfMap );
+                rPt = pOutDev->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPt), aGrfMap).get();
 
-            rPt = pOutDev->WindowToLogic( rPt, aMap100 );
+            rPt = pOutDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPt), aMap100).get();
         }
     }
 
@@ -336,10 +336,10 @@ tools::PolyPolygon SvxSuperContourDlg::GetPolyPolygon()
         {
             Point& rPt = rPoly[ i ];
 
-            rPt = pOutDev->LogicToWindow( rPt, aMap100  );
+            rPt = pOutDev->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPt), aMap100).get();
 
-            if ( !bPixelMap )
-                rPt = pOutDev->WindowToLogic( rPt, aGrfMap  );
+            if (!bPixelMap)
+                rPt = pOutDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPt), aGrfMap).get();
         }
     }
 
@@ -542,14 +542,16 @@ IMPL_LINK_NOARG(SvxSuperContourDlg, CreateHdl, Timer *, void)
 {
     aCreateIdle.Stop();
 
-    const tools::Rectangle aWorkRect = m_xContourWnd->GetDrawingArea()->get_ref_device().LogicToWindow(
-        m_xContourWnd->GetWorkRect(), MapMode( MapUnit::Map100thMM));
+    const auto aWorkRect = m_xContourWnd->GetDrawingArea()->get_ref_device().convertTo<vcl::WindowRect>(
+        vcl::LogicRect(m_xContourWnd->GetWorkRect()),
+        MapMode(MapUnit::Map100thMM)
+    );
 
     const Graphic&  rGraphic = m_xContourWnd->GetGraphic();
-    const bool      bValid = aWorkRect.Left() != aWorkRect.Right() && aWorkRect.Top() != aWorkRect.Bottom();
+    const bool bValid = aWorkRect->Left() != aWorkRect->Right() && aWorkRect->Top() != aWorkRect->Bottom();
 
     weld::WaitObject aWaitObj(&m_rDialog);
-    SetPolyPolygon( SvxContourDlg::CreateAutoContour( rGraphic, bValid ? &aWorkRect : nullptr ) );
+    SetPolyPolygon( SvxContourDlg::CreateAutoContour( rGraphic, bValid ? &aWorkRect.get() : nullptr ) );
 }
 
 IMPL_LINK( SvxSuperContourDlg, StateHdl, GraphCtrl*, pWnd, void )

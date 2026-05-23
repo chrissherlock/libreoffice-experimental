@@ -548,7 +548,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
 
                     // create MapMode for buffer (offset needed) and set
                     MapMode aMap(GetMapMode());
-                    const vcl::LogicPoint aOutPos( WindowToLogic( aDstRect.TopLeft() ) );
+                    const auto aOutPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(aDstRect.TopLeft()));
                     aMap.SetOrigin(Point(-aOutPos->X(), -aOutPos->Y()));
                     xVDev->SetMapMode(aMap);
 
@@ -604,7 +604,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
                 else
                 {
                     MapMode aMap( GetMapMode() );
-                    vcl::LogicPoint aOutPos( WindowToLogic( aDstRect.TopLeft() ) );
+                    const auto aOutPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(aDstRect.TopLeft()));
                     const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
                     aMap.SetOrigin( Point( -aOutPos->X(), -aOutPos->Y() ) );
@@ -1028,8 +1028,8 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
             break;
 
         case MetaActionType::BMP:
-            aActionBounds = tools::Rectangle( static_cast<const MetaBmpAction&>(rAct).GetPoint(),
-                                       rOut.WindowToLogic( static_cast<const MetaBmpAction&>(rAct).GetBitmap().GetSizePixel() ));
+            aActionBounds = tools::Rectangle(static_cast<const MetaBmpAction&>(rAct).GetPoint(),
+                                 rOut.convertTo<vcl::LogicSize>(vcl::WindowSize(static_cast<const MetaBmpAction&>(rAct).GetBitmap().GetSizePixel())).get());
             break;
 
         case MetaActionType::BMPSCALE:
@@ -1043,8 +1043,8 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
             break;
 
         case MetaActionType::BMPEX:
-            aActionBounds = tools::Rectangle( static_cast<const MetaBmpExAction&>(rAct).GetPoint(),
-                                       rOut.WindowToLogic( static_cast<const MetaBmpExAction&>(rAct).GetBitmap().GetSizePixel() ));
+            aActionBounds = tools::Rectangle(static_cast<const MetaBmpExAction&>(rAct).GetPoint(),
+                                 rOut.convertTo<vcl::LogicSize>(vcl::WindowSize(static_cast<const MetaBmpExAction&>(rAct).GetBitmap().GetSizePixel())).get());
             break;
 
         case MetaActionType::BMPEXSCALE:
@@ -1059,7 +1059,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
 
         case MetaActionType::MASK:
             aActionBounds = tools::Rectangle( static_cast<const MetaMaskAction&>(rAct).GetPoint(),
-                                       rOut.WindowToLogic( static_cast<const MetaMaskAction&>(rAct).GetBitmap().GetSizePixel() ));
+                                       rOut.convertTo<vcl::LogicSize>(vcl::WindowSize(static_cast<const MetaMaskAction&>(rAct).GetBitmap().GetSizePixel())));
             break;
 
         case MetaActionType::MASKSCALE:
@@ -1151,7 +1151,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
                 if( pSalLayout )
                 {
                     tools::Rectangle aBoundRect( rOut.ImplGetTextBoundRect( *pSalLayout ) );
-                    aActionBounds =  rOut.WindowToLogic( aBoundRect );
+                    aActionBounds =  rOut.convertTo<vcl::LogicRect>(vcl::WindowRect(aBoundRect));
                 }
             }
         }
@@ -1180,7 +1180,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
                 if( pSalLayout )
                 {
                     tools::Rectangle aBoundRect( rOut.ImplGetTextBoundRect( *pSalLayout ) );
-                    aActionBounds =  rOut.WindowToLogic( aBoundRect );
+                    aActionBounds =  rOut.convertTo<vcl::LogicRect>(vcl::WindowRect(aBoundRect));
                 }
             }
         }
@@ -1762,7 +1762,7 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
                                             pCurrAct->Execute( aMapVDev.get() );
 
                                             MapMode     aMtfMap( aMapVDev->GetMapMode() );
-                                            const Point aNewOrg( aMapVDev->WindowToLogic( aDstPtPix ));
+                                            const Point aNewOrg = aMapVDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aDstPtPix));
 
                                             aMtfMap.SetOrigin( Point( -aNewOrg.X(), -aNewOrg.Y() ) );
                                             aPaintVDev->SetMapMode( aMtfMap );
@@ -1885,7 +1885,9 @@ bool OutputDevice::RemoveTransparenciesFromMetaFile( const GDIMetaFile& rInMtf, 
             else
                 rOutMtf.AddAction( new MetaLineColorAction( COL_BLUE, true) );
 
-            rOutMtf.AddAction( new MetaRectAction( aMapModeVDev->WindowToLogic( aCurr.aBounds ) ) );
+            rOutMtf.AddAction(new MetaRectAction(
+                aMapModeVDev->convertTo<vcl::LogicRect>(vcl::WindowRect(aCurr.aBounds))
+            ));
         }
 #endif
     }

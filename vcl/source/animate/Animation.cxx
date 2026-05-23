@@ -230,7 +230,7 @@ void Animation::Stop(const OutputDevice* pOut, tools::Long nRendererId)
 
 void Animation::Draw(OutputDevice& rOut, const Point& rDestPt) const
 {
-    Draw(rOut, rDestPt, rOut.WindowToLogic(maGlobalSize));
+    Draw(rOut, rDestPt, rOut.convertTo<vcl::LogicSize>(vcl::WindowSize(maGlobalSize)));
 }
 
 void Animation::Draw(OutputDevice& rOut, const Point& rDestPt, const Size& rDestSz) const

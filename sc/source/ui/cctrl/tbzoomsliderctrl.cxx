@@ -191,7 +191,7 @@ ScZoomSliderWnd::ScZoomSliderWnd( vcl::Window* pParent,
                 mxWeld(new weld::CustomWeld(*m_xBuilder, u"zoom"_ustr, *mxWidget))
 {
     Size aLogicalSize( 115, 40 );
-    Size aSliderSize = LogicToWindow(aLogicalSize, MapMode(MapUnit::Map10thMM));
+    Size aSliderSize = convertTo<vcl::WindowSize>(vcl::LogicSize(aLogicalSize), MapMode(MapUnit::Map10thMM));
     Size aPreferredSize(aSliderSize.Width() * nSliderWidth-1, aSliderSize.Height() + nSliderHeight);
     mxWidget->GetDrawingArea()->set_size_request(aPreferredSize.Width(), aPreferredSize.Height());
     mxWidget->SetOutputSizePixel(aPreferredSize);

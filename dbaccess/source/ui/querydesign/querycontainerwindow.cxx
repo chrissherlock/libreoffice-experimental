@@ -201,7 +201,11 @@ namespace dbaui
         Size aSize = GetOutputSizePixel();
         Size aBeamer(aSize.Width(),sal_Int32(aSize.Height()*0.33));
 
-        const tools::Long  nFrameHeight = LogicToWindow(Size(0, 3), MapMode(MapUnit::MapAppFont)).Height();
+        const tools::Long nFrameHeight = convertTo<vcl::WindowSize>(
+            vcl::LogicSize(Size(0, 3)),
+            MapMode(MapUnit::MapAppFont)
+        )->Height();
+
         Point aPos(0,aBeamer.Height()+nFrameHeight);
 
         m_pBeamer->SetPosSizePixel(Point(0,0),aBeamer);

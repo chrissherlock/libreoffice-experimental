@@ -679,7 +679,7 @@ tools::Long ListBox::GetIndexForPoint( const Point& rPoint, sal_Int32& rPos ) co
         Point aConvPoint = GetOutDev()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPoint)).get();
         AbsoluteScreenPixelPoint aConvPointAbs = OutputToAbsoluteScreenPixel( aConvPoint );
         aConvPoint = rMain->AbsoluteScreenToOutputPixel( aConvPointAbs );
-        aConvPoint = rMain->WindowToLogic( aConvPoint );
+        aConvPoint = rMain->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aConvPoint));
 
         // Try to find entry
         sal_Int32 nEntry = rMain->GetEntryPosForPoint( aConvPoint );

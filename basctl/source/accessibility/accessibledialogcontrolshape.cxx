@@ -129,22 +129,21 @@ awt::Rectangle AccessibleDialogControlShape::GetBounds() const
     if ( m_pDlgEdObj )
     {
         // get the bounding box of the shape in logic units
-        tools::Rectangle aRect = m_pDlgEdObj->GetSnapRect();
+        vcl::LogicRect aLogicRect = vcl::LogicRect(m_pDlgEdObj->GetSnapRect());
 
         if ( m_pDialogWindow )
         {
             // transform coordinates relative to the parent
             MapMode aMap = m_pDialogWindow->GetMapMode();
             Point aOrg = aMap.GetOrigin();
-            aRect.Move( aOrg.X(), aOrg.Y() );
+            aLogicRect->Move(aOrg.X(), aOrg.Y());
 
             // convert logic units to pixel
-            aRect = m_pDialogWindow->LogicToWindow( aRect, MapMode(MapUnit::Map100thMM) );
+            auto aRect = m_pDialogWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(aLogicRect), MapMode(MapUnit::Map100thMM));
 
             // clip the shape's bounding box with the bounding box of its parent
             tools::Rectangle aParentRect( Point( 0, 0 ), m_pDialogWindow->GetSizePixel() );
-            aRect = aRect.GetIntersection( aParentRect );
-            aBounds = vcl::unohelper::ConvertToAWTRect(aRect);
+            aBounds = vcl::unohelper::ConvertToAWTRect(aRect->GetIntersection(aParentRect));
         }
     }
 

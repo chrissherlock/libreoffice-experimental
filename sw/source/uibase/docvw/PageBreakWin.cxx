@@ -175,7 +175,7 @@ void SwPageBreakWin::PaintButton()
     if (!m_xVirDev)
         return;
 
-    const ::tools::Rectangle aRect(::tools::Rectangle(Point(0, 0), m_xVirDev->WindowToLogic(GetSizePixel())));
+    const ::tools::Rectangle aRect(::tools::Rectangle(Point(0, 0), m_xVirDev->convertTo<vcl::LogicSize>(vcl::WindowSize(GetSizePixel()), m_xVirDev->GetMapMode())));
 
     // Properly paint the control
     BColor aColor = SwViewOption::GetCurrentViewOptions().GetPageBreakColor().getBColor();
@@ -390,13 +390,13 @@ void SwBreakDashedLine::UpdatePosition(const std::optional<Point>& xEvtPt)
     while ( pPrevPage && ( ( pPrevPage->getFrameArea().Top( ) == pPageFrame->getFrameArea().Top( ) )
                 || static_cast< const SwPageFrame* >( pPrevPage )->IsEmptyPage( ) ) );
 
-    ::tools::Rectangle aBoundRect = GetEditWin()->LogicToWindow( pPageFrame->GetBoundRect(GetEditWin()->GetOutDev()).SVRect() );
-    ::tools::Rectangle aFrameRect = GetEditWin()->LogicToWindow( pPageFrame->getFrameArea().SVRect() );
+    ::tools::Rectangle aBoundRect = GetEditWin()->convertTo<vcl::WindowRect>(vcl::LogicRect(pPageFrame->GetBoundRect(GetEditWin()->GetOutDev()).SVRect()));
+    ::tools::Rectangle aFrameRect = GetEditWin()->convertTo<vcl::WindowRect>(vcl::LogicRect(pPageFrame->getFrameArea().SVRect()));
 
     tools::Long nYLineOffset = ( aBoundRect.Top() + aFrameRect.Top() ) / 2;
     if ( pPrevPage )
     {
-        ::tools::Rectangle aPrevFrameRect = GetEditWin()->LogicToWindow( pPrevPage->getFrameArea().SVRect() );
+        ::tools::Rectangle aPrevFrameRect = GetEditWin()->convertTo<vcl::WindowRect>(vcl::LogicRect(pPrevPage->getFrameArea().SVRect()));
         nYLineOffset = ( aPrevFrameRect.Bottom() + aFrameRect.Top() ) / 2;
     }
 
@@ -417,7 +417,7 @@ void SwBreakDashedLine::UpdatePosition(const std::optional<Point>& xEvtPt)
     Size aBtnSize( BUTTON_WIDTH + ARROW_WIDTH, BUTTON_HEIGHT );
 
     // Place the button on the left or right?
-    ::tools::Rectangle aVisArea = GetEditWin()->LogicToWindow( GetEditWin()->GetView().GetVisArea() );
+    ::tools::Rectangle aVisArea = GetEditWin()->convertTo<vcl::WindowRect>(vcl::LogicRect(GetEditWin()->GetView().GetVisArea()));
 
     tools::Long nLineLeft = std::max( nPgLeft, aVisArea.Left() );
     tools::Long nLineRight = std::min( nPgRight, aVisArea.Right() );

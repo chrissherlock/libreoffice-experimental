@@ -118,7 +118,7 @@ bool SwTextShell::InsertMediaDlg( SfxRequest const & rReq )
             aPos.setY( aDocSz.Height() / 2 + rVisArea.Top() );
 
         if( aPrefSize.Width() && aPrefSize.Height() )
-            aSize = rWindow.WindowToLogic(aPrefSize, MapMode(MapUnit::MapTwip));
+            aSize = rWindow.convertTo<vcl::LogicSize>(vcl::WindowSize(aPrefSize), MapMode(MapUnit::MapTwip));
         else
             aSize = Size( 2835, 2835 );
 

@@ -1407,7 +1407,7 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
                 SfxItemSet              aSet( mrDoc.GetPool() );
                 bool                    bClosed = pPickObj->IsClosedObj();
                 ::sd::Window* pWin = mpViewSh->GetActiveWindow();
-                double fHitLog = pWin->WindowToLogic(Size(FuPoor::HITPIX, 0 ) ).Width();
+                double fHitLog = pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(FuPoor::HITPIX, 0)))->Width();
                 const ::tools::Long              n2HitLog = fHitLog * 2;
                 Point                   aHitPosR( rPos );
                 Point                   aHitPosL( rPos );
@@ -1472,7 +1472,7 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
                 if (pOLV)
                 {
                     ::tools::Rectangle aRect(pOLV->GetOutputArea());
-                    Point aPos(pOLV->GetWindow()->WindowToLogic(maDropPos));
+                    Point aPos(pOLV->GetWindow()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(maDropPos)));
 
                     if (aRect.Contains(aPos) || (!bDrag && IsTextEdit())
                         || dynamic_cast<sd::NotesPanelViewShell*>(mpViewSh))
@@ -1500,7 +1500,7 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
             if( pOLV )
             {
                 ::tools::Rectangle   aRect( pOLV->GetOutputArea() );
-                Point       aPos( pOLV->GetWindow()->WindowToLogic( maDropPos ) );
+                Point aPos(pOLV->GetWindow()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(maDropPos)));
 
                 if (aRect.Contains(aPos) || (!bDrag && IsTextEdit())
                     || dynamic_cast<sd::NotesPanelViewShell*>(mpViewSh))
@@ -1532,7 +1532,7 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
                 if (pOLV)
                 {
                     ::tools::Rectangle   aRect(pOLV->GetOutputArea());
-                    Point aPos(pOLV->GetWindow()->WindowToLogic(maDropPos));
+                    Point aPos(pOLV->GetWindow()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(maDropPos)));
 
                     if (aRect.Contains(aPos) || (!bDrag && IsTextEdit())
                         || dynamic_cast<sd::NotesPanelViewShell*>(mpViewSh))
@@ -1569,7 +1569,7 @@ bool View::InsertData( const TransferableDataHelper& rDataHelper,
                     if( pOLV )
                     {
                         ::tools::Rectangle   aRect( pOLV->GetOutputArea() );
-                        Point       aPos( pOLV->GetWindow()->WindowToLogic( maDropPos ) );
+                        Point aPos(pOLV->GetWindow()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(maDropPos)));
 
                         if (aRect.Contains(aPos) || (!bDrag && IsTextEdit())
                             || dynamic_cast<sd::NotesPanelViewShell*>(mpViewSh))

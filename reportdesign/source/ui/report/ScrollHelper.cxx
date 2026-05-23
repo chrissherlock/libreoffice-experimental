@@ -149,13 +149,18 @@ Size OScrollWindowHelper::ResizeScrollBars()
     m_aVScroll->Show( bVVisible );
     m_aHScroll->Show( bHVisible );
 
-    const Point aOffset = LogicToWindow(Point(SECTION_OFFSET, SECTION_OFFSET), MapMode(MapUnit::MapAppFont));
+    const auto aOffset = convertTo<vcl::WindowPoint>(
+        vcl::LogicPoint(Point(SECTION_OFFSET, SECTION_OFFSET)),
+        MapMode(MapUnit::MapAppFont)
+    );
+
     // resize scrollbars and set their ranges
     {
-        double fStartWidth = (REPORT_STARTMARKER_WIDTH*m_pParent->getController().getZoomValue()) / 100.0;
-        const sal_Int32 nNewWidth = aOutPixSz.Width() - aOffset.X() - static_cast<tools::Long>(fStartWidth);
-        lcl_setScrollBar(nNewWidth,Point( static_cast<tools::Long>(fStartWidth) + aOffset.X(), aOutPixSz.Height() ), Size( nNewWidth, nScrSize ), *m_aHScroll);
+        double fStartWidth = (REPORT_STARTMARKER_WIDTH * m_pParent->getController().getZoomValue()) / 100.0;
+        const sal_Int32 nNewWidth = aOutPixSz.Width() - aOffset->X() - static_cast<tools::Long>(fStartWidth);
+        lcl_setScrollBar(nNewWidth, Point(static_cast<tools::Long>(fStartWidth) + aOffset->X(), aOutPixSz.Height()), Size(nNewWidth, nScrSize), *m_aHScroll);
     }
+
     {
         const sal_Int32 nNewHeight = aOutPixSz.Height() - m_aReportWindow->getRulerHeight();
         lcl_setScrollBar(nNewHeight,Point( aOutPixSz.Width(), m_aReportWindow->getRulerHeight() ), Size( nScrSize,nNewHeight), *m_aVScroll);

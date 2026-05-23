@@ -945,11 +945,11 @@ void adjustBrowseBoxColumnWidth( ::svt::EditBrowseBox* _pBox, sal_uInt16 _nColId
     ::tools::Long nDefaultWidth = _pBox->GetDefaultColumnWidth( _pBox->GetColumnTitle( _nColId ) );
     if ( nDefaultWidth != _pBox->GetColumnWidth( _nColId ) )
     {
-        Size aSizeMM = _pBox->WindowToLogic( Size( _pBox->GetColumnWidth( _nColId ), 0 ), MapMode( MapUnit::MapMM ) );
+        Size aSizeMM = _pBox->convertTo<vcl::LogicSize>(vcl::WindowSize(_pBox->GetColumnWidth(_nColId), 0), MapMode(MapUnit::MapMM));
         nColSize = aSizeMM.Width() * 10;
     }
 
-    Size aDefaultMM = _pBox->WindowToLogic( Size( nDefaultWidth, 0 ), MapMode( MapUnit::MapMM ) );
+    Size aDefaultMM = _pBox->convertTo<vcl::LogicSize>(vcl::WindowSize(nDefaultWidth, 0), MapMode(MapUnit::MapMM));
 
     DlgSize aColumnSizeDlg(_pBox->GetFrameWeld(), nColSize, false, aDefaultMM.Width() * 10);
     if (aColumnSizeDlg.run() != RET_OK)
@@ -963,7 +963,7 @@ void adjustBrowseBoxColumnWidth( ::svt::EditBrowseBox* _pBox, sal_uInt16 _nColId
     else
     {
         Size aSizeMM( nValue / 10, 0 );
-        nValue = _pBox->LogicToWindow( aSizeMM, MapMode( MapUnit::MapMM ) ).Width();
+        nValue = _pBox->convertTo<vcl::WindowSize>(vcl::LogicSize(aSizeMM), MapMode(MapUnit::MapMM))->Width();
     }
     _pBox->SetColumnWidth( _nColId, nValue );
 }

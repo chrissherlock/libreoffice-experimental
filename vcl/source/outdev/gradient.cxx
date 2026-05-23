@@ -80,7 +80,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
         return;
 
     // Clip and then draw the gradient
-    if (tools::Rectangle(WindowToLogic(Point()), GetOutputSize()).IsEmpty())
+    if (convertTo<vcl::LogicRect>(vcl::WindowRect(tools::Rectangle(Point(), GetOutputSize())))->IsEmpty())
         return;
 
     const tools::Rectangle aBoundRect( rPolyPoly.GetBoundRect() );

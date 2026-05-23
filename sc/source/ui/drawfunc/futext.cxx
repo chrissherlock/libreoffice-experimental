@@ -144,7 +144,7 @@ bool FuText::MouseButtonDown(const MouseEvent& rMEvt)
         pView->SetCreateMode();
     }
 
-    aMDPos = pWindow->WindowToLogic( rMEvt.GetPosPixel() );
+    aMDPos = pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
 
     if ( rMEvt.IsLeft() )
     {
@@ -324,8 +324,11 @@ bool FuText::MouseButtonDown(const MouseEvent& rMEvt)
         lcl_InvalidateAttribs( rViewShell.GetViewFrame().GetBindings() );
     }
 
-    rViewShell.SetActivePointer(pView->GetPreferredPointer(
-                    pWindow->WindowToLogic(rMEvt.GetPosPixel()), pWindow->GetOutDev() ));
+    rViewShell.SetActivePointer(
+        pView->GetPreferredPointer(
+            pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())),
+            pWindow->GetOutDev()));
+
     if (!bStraightEnter)
     {
             pView->UnmarkAll();
@@ -338,12 +341,14 @@ bool FuText::MouseButtonDown(const MouseEvent& rMEvt)
 
 bool FuText::MouseMove(const MouseEvent& rMEvt)
 {
-    rViewShell.SetActivePointer(pView->GetPreferredPointer(
-                    pWindow->WindowToLogic(rMEvt.GetPosPixel()), pWindow->GetOutDev() ));
+    rViewShell.SetActivePointer(
+        pView->GetPreferredPointer(
+            pWindow->convertTo<vcl::LogicPoint>( vcl::WindowPoint(rMEvt.GetPosPixel())),
+            pWindow->GetOutDev()));
 
     if (aDragTimer.IsActive() )
     {
-        Point aOldPixel = pWindow->LogicToWindow( aMDPos );
+        Point aOldPixel = pWindow->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aMDPos));
         Point aNewPixel = rMEvt.GetPosPixel();
         if ( std::abs( aOldPixel.X() - aNewPixel.X() ) > SC_MAXDRAGMOVE ||
              std::abs( aOldPixel.Y() - aNewPixel.Y() ) > SC_MAXDRAGMOVE )
@@ -351,7 +356,7 @@ bool FuText::MouseMove(const MouseEvent& rMEvt)
     }
 
     Point aPix(rMEvt.GetPosPixel());
-    Point aPnt(pWindow->WindowToLogic(aPix));
+    Point aPnt(pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPix)));
 
     if ( pView->MouseMove(rMEvt, pWindow->GetOutDev()) )
         return true; // event handled from SdrView
@@ -377,7 +382,7 @@ bool FuText::MouseButtonUp(const MouseEvent& rMEvt)
 
     lcl_InvalidateAttribs( rViewShell.GetViewFrame().GetBindings() );
 
-    Point aPnt( pWindow->WindowToLogic( rMEvt.GetPosPixel() ) );
+    Point aPnt(pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
 
     if ( pView->MouseButtonUp(rMEvt, pWindow->GetOutDev()) )
         return true; // Event evaluated by SdrView
@@ -408,8 +413,9 @@ bool FuText::MouseButtonUp(const MouseEvent& rMEvt)
                     aItemSet.Put( SdrTextAniKindItem( SdrTextAniKind::Slide ) );
                     aItemSet.Put( SdrTextAniDirectionItem( SdrTextAniDirection::Left ) );
                     aItemSet.Put( SdrTextAniCountItem( 1 ) );
-                    aItemSet.Put( SdrTextAniAmountItem(
-                                    static_cast<sal_Int16>(pWindow->WindowToLogic(Size(2,1)).Width())) );
+                    aItemSet.Put(SdrTextAniAmountItem(
+                        static_cast<sal_Int16>(pWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(2, 1))->Width())
+                    ));
                     pObj->SetMergedItemSetAndBroadcast(aItemSet);
                 }
             }
@@ -673,7 +679,9 @@ rtl::Reference<SdrObject> FuText::CreateDefaultObject(const sal_uInt16 nID, cons
                 aSet.Put( SdrTextAniKindItem( SdrTextAniKind::Slide ) );
                 aSet.Put( SdrTextAniDirectionItem( SdrTextAniDirection::Left ) );
                 aSet.Put( SdrTextAniCountItem( 1 ) );
-                aSet.Put( SdrTextAniAmountItem( static_cast<sal_Int16>(pWindow->WindowToLogic(Size(2,1)).Width())) );
+                aSet.Put(SdrTextAniAmountItem(
+                    static_cast<sal_Int16>(pWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(2, 1))->Width())
+                ));
 
                 pObj->SetMergedItemSetAndBroadcast(aSet);
             }

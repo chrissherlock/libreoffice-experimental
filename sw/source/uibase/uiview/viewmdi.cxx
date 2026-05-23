@@ -79,8 +79,8 @@ void SwView::SetZoom( SvxZoomType eZoomType, short nFactor, bool bViewOnly )
 
     // tdf#172903 - Web View renders paragraph spotlight markers off canvas
     if (IsSpotlightParaStyles())
-        m_pWrtShell->SetBrowseBorder(Size(GetWindow()->LogicToWindow(Size(375, 0)).Width(),
-                                          m_pWrtShell->GetBrowseBorder().Height()));
+        m_pWrtShell->SetBrowseBorder(Size(GetWindow()->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(375, 0))).get().Width(),
+                                         m_pWrtShell->GetBrowseBorder().Height()));
 
     // tdf#43959 - resync rulers when no outer action is open after SetZoom_() re-centred pages
     if (!m_pWrtShell->ActionPend())
@@ -128,7 +128,7 @@ void SwView::SetZoom_( const Size &rEditSize, SvxZoomType eZoomType,
             aPageSize.AdjustWidth(pPostItMgr->GetSidebarWidth() + pPostItMgr->GetSidebarBorderWidth() );
 
         const MapMode aTmpMap( MapUnit::MapTwip );
-        const Size aWindowSize( GetEditWin().WindowToLogic( rEditSize, aTmpMap ) );
+        const Size aWindowSize(GetEditWin().convertTo<vcl::LogicSize>(vcl::WindowSize(rEditSize), aTmpMap));
 
         if( SvxZoomType::OPTIMAL == eZoomType )
         {
@@ -365,8 +365,9 @@ void SwView::MoveNavigation(bool bNext)
             Point aAlPt(AlignToPixel(aPt));
             // If there is a difference, has been truncated --> then add one pixel,
             // so that no residue of the previous page is visible.
-            if(aPt.Y() != aAlPt.Y())
-                aAlPt.AdjustY(3 * GetEditWin().WindowToLogic(Size(0, 1)).Height());
+            if (aPt.Y() != aAlPt.Y())
+                aAlPt.AdjustY(3 * GetEditWin().convertTo<vcl::LogicSize>(vcl::WindowSize(0, 1))->Height());
+
             SetVisArea(aAlPt);
         }
         break;

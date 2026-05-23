@@ -1261,7 +1261,12 @@ void EMFWriter::ImplWrite( const GDIMetaFile& rMtf )
             case MetaActionType::BMP:
             {
                 const MetaBmpAction* pA = static_cast<const MetaBmpAction *>(pAction);
-                ImplWriteBmpRecord( pA->GetBitmap(), pA->GetPoint(), maVDev->WindowToLogic( pA->GetBitmap().GetSizePixel() ), WIN_SRCCOPY );
+                ImplWriteBmpRecord(
+                    pA->GetBitmap(),
+                    pA->GetPoint(),
+                    maVDev->convertTo<vcl::LogicSize>(vcl::WindowSize(pA->GetBitmap().GetSizePixel())),
+                    WIN_SRCCOPY
+                );
             }
             break;
 
@@ -1285,33 +1290,47 @@ void EMFWriter::ImplWrite( const GDIMetaFile& rMtf )
             case MetaActionType::BMPEX:
             {
                 const MetaBmpExAction*  pA = static_cast<const MetaBmpExAction *>(pAction);
-                const Bitmap& rBmpEx(pA->GetBitmap());
+                Bitmap                  aBmp( pA->GetBitmap().CreateColorBitmap() );
+                AlphaMask               aMsk( pA->GetBitmap().CreateAlphaMask() );
 
-                if (rBmpEx.HasAlpha())
+                if( !aMsk.IsEmpty() )
                 {
-                    auto [ aBmp, aMsk ] = rBmpEx.SplitIntoColorAndAlpha();
                     aBmp.Replace( aMsk, COL_WHITE );
-                    ImplWriteBmpRecord( aMsk.GetBitmap(), pA->GetPoint(), maVDev->WindowToLogic( aMsk.GetSizePixel() ), WIN_SRCPAINT );
-                    ImplWriteBmpRecord( aBmp, pA->GetPoint(), maVDev->WindowToLogic( aBmp.GetSizePixel() ), WIN_SRCAND );
+                    ImplWriteBmpRecord(
+                        aMsk.GetBitmap(),
+                        pA->GetPoint(),
+                        maVDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aMsk.GetSizePixel())),
+                        WIN_SRCPAINT
+                    );
+
+                    ImplWriteBmpRecord(
+                        aBmp,
+                        pA->GetPoint(),
+                        maVDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aBmp.GetSizePixel())),
+                        WIN_SRCAND
+                    );
                 }
                 else
-                    ImplWriteBmpRecord(rBmpEx, pA->GetPoint(), rBmpEx.GetSizePixel(), WIN_SRCCOPY);
+                {
+                    ImplWriteBmpRecord( aBmp, pA->GetPoint(), aBmp.GetSizePixel(), WIN_SRCCOPY );
+                }
             }
             break;
 
             case MetaActionType::BMPEXSCALE:
             {
                 const MetaBmpExScaleAction* pA = static_cast<const MetaBmpExScaleAction*>(pAction);
+                Bitmap                      aBmp( pA->GetBitmap().CreateColorBitmap() );
 
                 if( pA->GetBitmap().HasAlpha() )
                 {
-                    auto [ aBmp, aMsk ] = pA->GetBitmap().SplitIntoColorAndAlpha();
+                    AlphaMask                   aMsk( pA->GetBitmap().CreateAlphaMask() );
                     aBmp.Replace( aMsk, COL_WHITE );
                     ImplWriteBmpRecord( aMsk.GetBitmap(), pA->GetPoint(), pA->GetSize(), WIN_SRCPAINT );
                     ImplWriteBmpRecord( aBmp, pA->GetPoint(), pA->GetSize(), WIN_SRCAND );
                 }
                 else
-                    ImplWriteBmpRecord(pA->GetBitmap(), pA->GetPoint(), pA->GetSize(), WIN_SRCCOPY);
+                    ImplWriteBmpRecord( aBmp, pA->GetPoint(), pA->GetSize(), WIN_SRCCOPY );
             }
             break;
 
@@ -1320,16 +1339,17 @@ void EMFWriter::ImplWrite( const GDIMetaFile& rMtf )
                 const MetaBmpExScalePartAction* pA = static_cast<const MetaBmpExScalePartAction*>(pAction);
                 Bitmap                          aBmpEx( pA->GetBitmap() );
                 aBmpEx.Crop( tools::Rectangle( pA->GetSrcPoint(), pA->GetSrcSize() ) );
+                Bitmap                          aBmp( aBmpEx.CreateColorBitmap() );
 
                 if( aBmpEx.HasAlpha() )
                 {
-                    auto [ aBmp, aMsk ] = aBmpEx.SplitIntoColorAndAlpha();
+                    AlphaMask aMsk( aBmpEx.CreateAlphaMask() );
                     aBmp.Replace( aMsk, COL_WHITE );
                     ImplWriteBmpRecord( aMsk.GetBitmap(), pA->GetDestPoint(), pA->GetDestSize(), WIN_SRCPAINT );
                     ImplWriteBmpRecord( aBmp, pA->GetDestPoint(), pA->GetDestSize(), WIN_SRCAND );
                 }
                 else
-                    ImplWriteBmpRecord(aBmpEx, pA->GetDestPoint(), pA->GetDestSize(), WIN_SRCCOPY);
+                    ImplWriteBmpRecord( aBmp, pA->GetDestPoint(), pA->GetDestSize(), WIN_SRCCOPY );
             }
             break;
 

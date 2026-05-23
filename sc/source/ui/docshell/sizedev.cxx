@@ -45,7 +45,7 @@ ScSizeDeviceProvider::ScSizeDeviceProvider( ScDocShell& rDocSh )
         bOwner = true;
     }
 
-    Point aLogic = pDevice->LogicToWindow(Point(1000,1000), MapMode(MapUnit::MapTwip));
+    Point aLogic = pDevice->convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point(1000,1000)), MapMode(MapUnit::MapTwip));
     nPPTX = aLogic.X() / 1000.0;
     nPPTY = aLogic.Y() / 1000.0;
 

@@ -671,3 +671,11 @@ CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, tools::Polyg
 template vcl::TypedGeom<vcl::SpaceDevice, tools::PolyPolygon>
 CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, tools::PolyPolygon>&,
                               const MapMode&) const;
+
+template vcl::TypedGeom<vcl::SpaceWindow, vcl::Region>
+CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, vcl::Region>&,
+                              const MapMode&) const;
+
+template vcl::TypedGeom<vcl::SpaceDevice, vcl::Region>
+CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, vcl::Region>&,
+                              const MapMode&) const;

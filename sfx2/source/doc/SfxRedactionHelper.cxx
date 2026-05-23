@@ -150,12 +150,14 @@ tools::Rectangle ImplCalcActionBounds(const MetaAction& rAct, const OutputDevice
                 if (pSalLayout2)
                 {
                     tools::Rectangle aBoundRect2(rOut.ImplGetTextBoundRect(*pSalLayout2));
-                    aActionBounds = rOut.WindowToLogic(aBoundRect2).get();
+                    aActionBounds
+                        = rOut.convertTo<vcl::LogicRect>(vcl::WindowRect(aBoundRect2)).get();
                 }
                 if (pSalLayout1 && nStrStartPos > 0)
                 {
                     tools::Rectangle aBoundRect1(rOut.ImplGetTextBoundRect(*pSalLayout1));
-                    aActionBounds.SetLeft(rOut.WindowToLogic(aBoundRect1)->Right());
+                    aActionBounds.SetLeft(
+                        rOut.convertTo<vcl::LogicRect>(vcl::WindowRect(aBoundRect1))->Right());
                 }
             }
         }

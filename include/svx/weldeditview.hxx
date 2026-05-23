@@ -106,8 +106,10 @@ protected:
     virtual void EditViewCursorRect(const tools::Rectangle& rRect, int nExtTextInputWidth) override
     {
         OutputDevice& rRefDevice = EditViewOutputDevice();
-        SetCursorRect(rRefDevice.LogicToWindow(rRect).get(),
-                      rRefDevice.LogicToWindow(Size(nExtTextInputWidth, 0))->Width());
+        SetCursorRect(
+            rRefDevice.convertTo<vcl::WindowRect>(vcl::LogicRect(rRect)).get(),
+            rRefDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nExtTextInputWidth, 0)))
+                ->Width());
     }
 
     virtual weld::Widget* EditViewPopupParent() const override { return GetDrawingArea(); }

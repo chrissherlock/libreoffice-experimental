@@ -57,7 +57,7 @@ using namespace ::com::sun::star;
 
 IMPL_LINK_NOARG( DlgEdFunc, ScrollTimeout, Timer *, void )
 {
-    ForceScroll( m_pParent->WindowToLogic( m_pParent->GetPointerPosPixel() ) );
+    ForceScroll(m_pParent->convertTo<vcl::LogicPoint>(vcl::WindowPoint(m_pParent->GetPointerPosPixel())));
 }
 
 
@@ -79,10 +79,10 @@ void DlgEdFunc::ForceScroll( const Point& rPos )
     aPos.setX( aPos.X() * 0.5 );
     aPos.setY( aPos.Y() * 0.5 );
     tools::Rectangle aOutRect( aPos, aOut );
-    aOutRect = m_pParent->WindowToLogic( aOutRect );
+    aOutRect = m_pParent->convertTo<vcl::LogicRect>(vcl::WindowRect(aOutRect));
     tools::Rectangle aWorkArea(Point(), pScrollWindow->getTotalSize());
     aWorkArea.AdjustRight( -static_cast<tools::Long>(fStartWidth) );
-    aWorkArea = pScrollWindow->WindowToLogic( aWorkArea );
+    aWorkArea = pScrollWindow->convertTo<vcl::LogicRect>(vcl::WindowRect( aWorkArea )).get();
     if( !aOutRect.Contains( rPos ) && aWorkArea.Contains( rPos ) )
     {
         ScrollAdaptor& rHScroll = pScrollWindow->GetHScroll();
@@ -170,7 +170,7 @@ DlgEdFunc::~DlgEdFunc()
 
 bool DlgEdFunc::MouseButtonDown( const MouseEvent& rMEvt )
 {
-    m_aMDPos = m_pParent->WindowToLogic( rMEvt.GetPosPixel() );
+    m_aMDPos = m_pParent->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
     m_pParent->GrabFocus();
     bool bHandled = false;
     if ( rMEvt.IsLeft() )
@@ -511,7 +511,7 @@ void DlgEdFunc::checkMovementAllowed(const MouseEvent& rMEvt)
             m_pParent->getSectionWindow()->getViewsWindow()->BrkAction();
         }
         // object was dragged
-        Point aPnt( m_pParent->WindowToLogic( rMEvt.GetPosPixel() ) );
+        Point aPnt(m_pParent->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
         if (m_bSelectionMode)
         {
             m_pParent->getSectionWindow()->getViewsWindow()->EndAction();
@@ -685,8 +685,8 @@ bool DlgEdFuncInsert::MouseButtonUp( const MouseEvent& rMEvt )
     if ( DlgEdFunc::MouseButtonUp( rMEvt ) )
         return true;
 
-    const Point aPos( m_pParent->WindowToLogic( rMEvt.GetPosPixel() ) );
-    const sal_uInt16 nHitLog = sal_uInt16 ( m_pParent->WindowToLogic(Size(3,0)).Width() );
+    const Point aPos(m_pParent->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
+    const sal_uInt16 nHitLog = static_cast<sal_uInt16>(m_pParent->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(3, 0)))->Width());
 
     bool bReturn = true;
     // object creation active?
@@ -746,7 +746,7 @@ bool DlgEdFuncInsert::MouseMove( const MouseEvent& rMEvt )
 {
     if ( DlgEdFunc::MouseMove(rMEvt ) )
         return true;
-    Point   aPos( m_pParent->WindowToLogic( rMEvt.GetPosPixel() ) );
+    Point aPos(m_pParent->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
 
     if ( m_rView.IsCreateObj() )
     {
@@ -839,7 +839,7 @@ bool DlgEdFuncSelect::MouseButtonUp( const MouseEvent& rMEvt )
         return true;
 
     // get view from parent
-    const Point aPnt( m_pParent->WindowToLogic( rMEvt.GetPosPixel() ) );
+    const Point aPnt(m_pParent->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
 
     if ( rMEvt.IsLeft() )                     // left mousebutton pressed
         checkMovementAllowed(rMEvt);
@@ -861,7 +861,7 @@ bool DlgEdFuncSelect::MouseMove( const MouseEvent& rMEvt )
     if ( DlgEdFunc::MouseMove(rMEvt ) )
         return true;
 
-    Point aPnt( m_pParent->WindowToLogic( rMEvt.GetPosPixel() ) );
+    Point aPnt(m_pParent->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
     bool bIsSetPoint = false;
 
     if ( m_rView.IsAction() ) // Drag Mode

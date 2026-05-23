@@ -83,7 +83,7 @@ CPPUNIT_TEST_FIXTURE(SwUibaseUnoTest, testCreateTextRangeByPixelPosition)
     Point aLogic = pWrtShell->GetCharRect().Center();
     SwView* pView = pDocShell->GetView();
     SwEditWin& rEditWin = pView->GetEditWin();
-    Point aPixel = rEditWin.LogicToWindow(aLogic);
+    Point aPixel = rEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aLogic));
 
     // When converting that pixel position to a document model position (text range):
     uno::Reference<frame::XModel2> xModel(mxComponent, uno::UNO_QUERY);
@@ -135,7 +135,7 @@ CPPUNIT_TEST_FIXTURE(SwUibaseUnoTest, testCreateTextRangeByPixelPositionGraphic)
     Point aLogic = pAnchored->GetObjRect().Center();
     SwView* pView = pDocShell->GetView();
     SwEditWin& rEditWin = pView->GetEditWin();
-    Point aPixel = rEditWin.LogicToWindow(aLogic);
+    Point aPixel = rEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aLogic));
 
     // When converting that pixel position to a document model position (text range):
     uno::Reference<frame::XModel2> xModel(mxComponent, uno::UNO_QUERY);
@@ -184,7 +184,7 @@ CPPUNIT_TEST_FIXTURE(SwUibaseUnoTest, testCreateTextRangeByPixelPositionAtPageGr
     Point aLogic = pAnchored->GetObjRect().Center();
     SwView* pView = pDocShell->GetView();
     SwEditWin& rEditWin = pView->GetEditWin();
-    Point aPixel = rEditWin.LogicToWindow(aLogic);
+    Point aPixel = rEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aLogic));
 
     // When asking for the doc model pos of the image's anchor by pixel position:
     uno::Reference<frame::XModel2> xModel(mxComponent, uno::UNO_QUERY);

@@ -185,7 +185,10 @@ void AnimationRenderer::draw( sal_uLong nIndex, VirtualDevice* pVDev )
         pRenderContext = pGuard->GetRenderContext();
     }
 
-    tools::Rectangle aOutRect( pRenderContext->WindowToLogic( Point() ), pRenderContext->GetOutputSize() );
+    tools::Rectangle aOutRect(
+        pRenderContext->convertTo<vcl::LogicPoint>(vcl::WindowPoint(0, 0)).get(),
+        pRenderContext->GetOutputSize()
+    );
 
     // check, if output lies out of display
     if( aOutRect.Intersection( tools::Rectangle( maDispPt, maDispSz ) ).IsEmpty() )

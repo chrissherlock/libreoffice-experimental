@@ -325,7 +325,7 @@ namespace frm
         ::Point aPos( _nX, _nY );
         // the XView::draw API talks about pixels, always ...
         if ( eTargetUnit != MapUnit::MapPixel )
-            aPos = pTargetDevice->WindowToLogic( aPos ).get();
+            aPos = pTargetDevice->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
 
         pControl->Draw(*pTargetDevice, aPos, SystemTextColorFlags::NoControls);
     }

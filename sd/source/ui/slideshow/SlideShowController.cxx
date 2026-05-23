@@ -782,7 +782,7 @@ void SlideShowController::disposing(std::unique_lock<std::mutex>&)
             if (pActWin)
             {
                 Size aVisSizePixel = pActWin->GetOutputSizePixel();
-                ::tools::Rectangle aVisAreaWin = pActWin->WindowToLogic( ::tools::Rectangle( Point(0,0), aVisSizePixel) );
+                ::tools::Rectangle aVisAreaWin = pActWin->convertTo<vcl::LogicRect>(vcl::WindowRect(::tools::Rectangle(Point(0, 0), aVisSizePixel)), pActWin->GetMapMode());
                 mpViewShell->VisAreaChanged(aVisAreaWin);
                 if (mpView)
                     mpView->VisAreaChanged(pActWin->GetOutDev());

@@ -298,7 +298,7 @@ void SdrMarkView::modelHasChangedLOKit()
                     if (pViewShellWindow && pViewShellWindow->IsAncestorOf(*pWin))
                     {
                         Point aOffsetPx = pWin->GetOffsetPixelFrom(*pViewShellWindow);
-                        Point aLogicOffset = pWin->WindowToLogic(aOffsetPx);
+                        Point aLogicOffset = pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aOffsetPx)).get();
                         aSelection.Move(aLogicOffset.getX(), aLogicOffset.getY());
                     }
                 }
@@ -919,7 +919,7 @@ void SdrMarkView::SetMarkHandlesForLOKit(tools::Rectangle const & rRect, const S
                         aOffsetPx.setX(pViewShellWindow->GetDeviceOriginX() + pViewShellWindow->GetSizePixel().Width()
                             - pWin->GetDeviceOriginX() - pWin->GetSizePixel().Width());
                     }
-                    Point aLogicOffset = pWin->WindowToLogic(aOffsetPx);
+                    Point aLogicOffset = pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aOffsetPx)).get();
                     addLogicOffset = aLogicOffset;
                     aSelection.Move(aLogicOffset.getX(), aLogicOffset.getY());
                 }
@@ -1110,7 +1110,7 @@ void SdrMarkView::SetMarkHandlesForLOKit(tools::Rectangle const & rRect, const S
                                                 // are for making them understandable by the JSON parser
 
                                                 Point aOffsetPx = pWin->GetOffsetPixelFrom(*pViewShellWindow);
-                                                Point aLogicOffset = pWin->WindowToLogic(aOffsetPx);
+                                                Point aLogicOffset = pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aOffsetPx));
                                                 OStringBuffer sPolygonElem("<polygon points=\\\"");
                                                 for (sal_uInt32 nIndex = 0; nIndex < nPolySize; ++nIndex)
                                                 {
@@ -1861,7 +1861,7 @@ bool SdrMarkView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
         SdrHdl* pMouseOverHdl = nullptr;
         if( !rMEvt.IsLeaveWindow() && pWin )
         {
-            Point aMDPos( pWin->WindowToLogic( rMEvt.GetPosPixel() ));
+            Point aMDPos(pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
             pMouseOverHdl = PickHandle(aMDPos);
         }
 
@@ -1932,29 +1932,29 @@ void SdrMarkView::ForceRefToMarked()
             tools::Long nObjDst=0;
             tools::Long nOutHgt=0;
             OutputDevice* pOut=GetFirstOutputDevice();
-            if (pOut!=nullptr) {
+            if (pOut != nullptr) {
                 // minimum length: 50 pixels
-                nMinLen=pOut->WindowToLogic(Size(0,50))->Height();
+                nMinLen = pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(0, 50))->Height();
                 // 20 pixels distance to the Obj for the reference point
-                nObjDst=pOut->WindowToLogic(Size(0,20))->Height();
+                nObjDst = pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(0, 20))->Height();
                 // MinY/MaxY
                 // margin = minimum length = 10 pixels
-                tools::Long nDst=pOut->WindowToLogic(Size(0,10))->Height();
-                nOutMin=-pOut->GetMapMode().GetOrigin().Y();
-                nOutMax=pOut->GetOutputSize().Height()-1+nOutMin;
-                nOutMin+=nDst;
-                nOutMax-=nDst;
+                tools::Long nDst = pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(0, 10))->Height();
+                nOutMin = -pOut->GetMapMode().GetOrigin().Y();
+                nOutMax = pOut->GetOutputSize().Height() - 1 + nOutMin;
+                nOutMin += nDst;
+                nOutMax -= nDst;
                 // absolute minimum length, however, is 10 pixels
-                if (nOutMax-nOutMin<nDst) {
-                    nOutMin+=nOutMax+1;
-                    nOutMin/=2;
-                    nOutMin-=(nDst+1)/2;
-                    nOutMax=nOutMin+nDst;
+                if (nOutMax - nOutMin < nDst) {
+                    nOutMin += nOutMax + 1;
+                    nOutMin /= 2;
+                    nOutMin -= (nDst + 1) / 2;
+                    nOutMax = nOutMin + nDst;
                 }
-                nOutHgt=nOutMax-nOutMin;
+                nOutHgt = nOutMax - nOutMin;
                 // otherwise minimum length = 1/4 OutHgt
-                tools::Long nTemp=nOutHgt/4;
-                if (nTemp>nMinLen) nMinLen=nTemp;
+                tools::Long nTemp = nOutHgt / 4;
+                if (nTemp > nMinLen) nMinLen = nTemp;
             }
 
             tools::Rectangle aR(GetMarkedObjBoundRect());

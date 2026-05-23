@@ -68,9 +68,13 @@ Size SvxPaperInfo::GetPaperSize( const Printer* pPrinter )
         const MapMode& aMap1 = pPrinter->GetMapMode();
         MapMode aMap2;
 
-        if ( aMap1 == aMap2 )
-            aPaperSize =
-                pPrinter->WindowToLogic( aPaperSize, MapMode( MapUnit::MapTwip ) );
+        if (aMap1 == aMap2)
+        {
+            aPaperSize = pPrinter->convertTo<vcl::LogicSize>(
+                vcl::WindowSize(aPaperSize),
+                MapMode(MapUnit::MapTwip));
+        }
+
         return aPaperSize;
     }
 

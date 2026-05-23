@@ -592,10 +592,9 @@ Size Window::CalcOutputSize( const Size& rWinSz ) const
 vcl::Font Window::GetDrawPixelFont(OutputDevice const * pDev) const
 {
     vcl::Font aFont = GetPointFont(*GetOutDev());
-    Size aFontSize = aFont.GetFontSize();
     MapMode aPtMapMode(MapUnit::MapPoint);
-    aFontSize = pDev->LogicToWindow( aFontSize, aPtMapMode );
-    aFont.SetFontSize( aFontSize );
+    const auto aFontSize = pDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aFont.GetFontSize()), aPtMapMode);
+    aFont.SetFontSize(aFontSize.get());
     return aFont;
 }
 
@@ -605,10 +604,8 @@ tools::Long Window::GetDrawPixel( OutputDevice const * pDev, tools::Long nPixels
     if ( pDev->GetOutDevType() != OUTDEV_WINDOW )
     {
         MapMode aMap( MapUnit::Map100thMM );
-        Size aSz( nP, 0 );
-        aSz = WindowToLogic( aSz, aMap );
-        aSz = pDev->LogicToWindow( aSz, aMap );
-        nP = aSz.Width();
+        auto aSz = convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nP, 0)), aMap);
+        nP = aSz->Width();
     }
     return nP;
 }

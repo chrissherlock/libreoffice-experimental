@@ -407,7 +407,7 @@ void ScDrawShell::GetDrawAttrState( SfxItemSet& rSet )
     Point       aMousePos   = rViewData.GetMousePosPixel();
     vcl::Window*     pWindow     = rViewData.GetActiveWin();
     ScDrawView* pDrView     = rViewData.GetScDrawView();
-    Point       aPos        = pWindow->WindowToLogic(aMousePos);
+    Point aPos = pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aMousePos));
     const SdrMarkList& rMarkList = pDrView->GetMarkedObjectList();
     bool        bHasMarked  = rMarkList.GetMarkCount() != 0;
 

@@ -1062,7 +1062,7 @@ void FillControl::SetOptimalSize()
 {
     Size aSize(mxLbFillType->get_preferred_size());
     Size aFirstSize(mxToolBoxColor->get_preferred_size());
-    auto nWidth = std::max(aFirstSize.Width(), LogicToWindow(Size(55, 0), MapMode(MapUnit::MapAppFont)).Width());
+    auto nWidth = std::max(aFirstSize.Width(), convertTo<vcl::WindowSize>(vcl::LogicSize(Size(55, 0)), MapMode(MapUnit::MapAppFont))->Width());
     auto nHeight = std::max(aSize.Height(), aFirstSize.Height());
     mxToolBoxColor->set_size_request(nWidth, -1);
     mxLbFillAttr->set_size_request(42, -1); //something narrow so the toolbar sets the overall size of this column

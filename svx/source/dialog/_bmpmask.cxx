@@ -81,10 +81,10 @@ public:
 
     virtual void SetDrawingArea(weld::DrawingArea* pArea) override
     {
-        Size aSize(pArea->get_ref_device().LogicToWindow(Size(43, 14), MapMode(MapUnit::MapAppFont)));
+        auto aSize = pArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(43, 14)), MapMode(MapUnit::MapAppFont));
         CustomWidgetController::SetDrawingArea(pArea);
-        pArea->set_size_request(aSize.Width(), aSize.Height());
-        SetOutputSizePixel(aSize);
+        pArea->set_size_request(aSize->Width(), aSize->Height());
+        SetOutputSizePixel(aSize.get());
     }
 };
 
@@ -99,10 +99,10 @@ public:
     virtual void GetFocus() override;
     virtual void SetDrawingArea(weld::DrawingArea* pArea) override
     {
-        Size aSize(pArea->get_ref_device().LogicToWindow(Size(24, 12), MapMode(MapUnit::MapAppFont)));
+        auto aSize = pArea->get_ref_device().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(24, 12)), MapMode(MapUnit::MapAppFont));
         ValueSet::SetDrawingArea(pArea);
-        pArea->set_size_request(aSize.Width(), aSize.Height());
-        SetOutputSizePixel(aSize);
+        pArea->set_size_request(aSize->Width(), aSize->Height());
+        SetOutputSizePixel(aSize.get());
         SetHelpId(HID_BMPMASK_CTL_QCOL_1);
     }
     void onEditColor();

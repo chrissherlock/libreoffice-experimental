@@ -620,7 +620,7 @@ void ImplListBoxWindow::ImplUpdateEntryMetrics( ImplEntryType& rEntry )
         if( rEntry.mnFlags & ListBoxEntryFlags::MultiLine )
         {
             // multiline case
-            Size aCurSize( WindowToLogic( GetSizePixel() ) );
+            Size aCurSize(convertTo<vcl::LogicSize>(vcl::WindowSize(GetSizePixel())));
             // set the current size to a large number
             // GetTextRect should shrink it to the actual size
             aCurSize.setHeight( 0x7fffff );
@@ -801,18 +801,16 @@ sal_Int32 ImplListBoxWindow::GetEntryPosForPoint( const Point& rPoint ) const
 
 bool ImplListBoxWindow::IsVisible( sal_Int32 i_nEntry ) const
 {
-    bool bRet = false;
+    if (i_nEntry < mnTop)
+        return false;
 
-    if( i_nEntry >= mnTop )
+    if (maEntryList.GetAddedHeight(i_nEntry, mnTop) <
+        convertTo<vcl::LogicSize>(vcl::WindowSize(GetSizePixel()))->Height())
     {
-        if( maEntryList.GetAddedHeight( i_nEntry, mnTop ) <
-            WindowToLogic( GetSizePixel() ).Height() )
-        {
-            bRet = true;
-        }
+        return true;
     }
 
-    return bRet;
+    return false;
 }
 
 tools::Long ImplListBoxWindow::GetEntryHeightWithMargin() const
@@ -1862,7 +1860,7 @@ void ImplListBoxWindow::SetTopEntry( sal_Int32 nTop )
     if( maEntryList.GetEntryCount() == 0 )
         return;
 
-    tools::Long nWHeight = WindowToLogic( GetSizePixel() ).Height();
+    tools::Long nWHeight = convertTo<vcl::LogicSize>(vcl::WindowSize(GetSizePixel()))->Height();
 
     sal_Int32 nLastEntry = maEntryList.GetEntryCount()-1;
     if( nTop > nLastEntry )
@@ -1889,11 +1887,14 @@ void ImplListBoxWindow::SetTopEntry( sal_Int32 nTop )
 void ImplListBoxWindow::ShowProminentEntry( sal_Int32 nEntryPos )
 {
     sal_Int32 nPos = nEntryPos;
-    auto nWHeight = WindowToLogic( GetSizePixel() ).Height();
-    while( nEntryPos > 0 && maEntryList.GetAddedHeight( nPos+1, nEntryPos ) < nWHeight/2 )
-        nEntryPos--;
+    auto nWHeight = convertTo<vcl::LogicSize>(vcl::WindowSize(GetSizePixel()))->Height();
 
-    SetTopEntry( nEntryPos );
+    while (nEntryPos > 0 && maEntryList.GetAddedHeight(nPos + 1, nEntryPos) < nWHeight / 2)
+    {
+        nEntryPos--;
+    }
+
+    SetTopEntry(nEntryPos);
 }
 
 void ImplListBoxWindow::SetLeftIndent( tools::Long n )

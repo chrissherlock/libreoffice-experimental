@@ -84,8 +84,9 @@ XPdfDecomposer::getDecomposition(const uno::Reference<util::XBinaryDataContainer
     // short form for scale and translate transformation
     const Size aBitmapSize(aReplacement.GetSizePixel());
     // ImpGraphic::getPrefMapMode() requires mm100 for bitmaps rendered from vector graphic data.
-    const Size aMM100(
-        Application::GetDefaultDevice()->WindowToLogic(aBitmapSize, MapMode(MapUnit::Map100thMM)));
+    const Size aMM100(Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+        vcl::WindowSize(aBitmapSize), MapMode(MapUnit::Map100thMM)));
+
     const basegfx::B2DHomMatrix aBitmapTransform(basegfx::utils::createScaleTranslateB2DHomMatrix(
         aMM100.getWidth(), aMM100.getHeight(), 0, 0));
 

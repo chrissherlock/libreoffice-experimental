@@ -317,7 +317,7 @@ public:
 
     Size GetOutputSize() const
     {
-        return mpBufferDevice->WindowToLogic(GetOutputSizePixel()).get();
+        return mpBufferDevice->convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel()));
     }
 
     // dada read access

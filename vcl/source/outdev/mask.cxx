@@ -34,7 +34,7 @@ void OutputDevice::DrawMask( const Point& rDestPt,
     assert(!is_double_buffered_window());
 
     const Size aSizePix( rBitmap.GetSizePixel() );
-    DrawMask( rDestPt, WindowToLogic( aSizePix ), Point(), aSizePix, rBitmap, rMaskColor, MetaActionType::MASK );
+    DrawMask(rDestPt, convertTo<vcl::LogicSize>(vcl::WindowSize(aSizePix)), Point(), aSizePix, rBitmap, rMaskColor, MetaActionType::MASK);
 }
 
 void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,

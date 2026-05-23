@@ -15,22 +15,30 @@
 
 Size getParagraphPreviewOptimalSize(const OutputDevice& rReference)
 {
-    return rReference.LogicToWindow(Size(68, 112), MapMode(MapUnit::MapAppFont));
+    return rReference
+        .convertTo<vcl::WindowSize>(vcl::LogicSize(Size(68, 112)), MapMode(MapUnit::MapAppFont))
+        .get();
 }
 
 Size getDrawPreviewOptimalSize(const OutputDevice& rReference)
 {
-    return rReference.LogicToWindow(Size(88, 42), MapMode(MapUnit::MapAppFont));
+    return rReference
+        .convertTo<vcl::WindowSize>(vcl::LogicSize(Size(88, 42)), MapMode(MapUnit::MapAppFont))
+        .get();
 }
 
 Size getPreviewStripSize(const OutputDevice& rReference)
 {
-    return rReference.LogicToWindow(Size(70, 40), MapMode(MapUnit::MapAppFont));
+    return rReference
+        .convertTo<vcl::WindowSize>(vcl::LogicSize(Size(70, 40)), MapMode(MapUnit::MapAppFont))
+        .get();
 }
 
 Size getPreviewOptionsSize(const OutputDevice& rReference)
 {
-    return rReference.LogicToWindow(Size(70, 27), MapMode(MapUnit::MapAppFont));
+    return rReference
+        .convertTo<vcl::WindowSize>(vcl::LogicSize(Size(70, 27)), MapMode(MapUnit::MapAppFont))
+        .get();
 }
 
 OUString getWidestDateTime(const LocaleDataWrapper& rWrapper, bool bWithSec)

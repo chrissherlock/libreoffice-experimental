@@ -728,10 +728,9 @@ Size SvxGrfCropPage::GetGrfOrigSize(const Graphic& rGrf)
         const MapMode aMapTwip( MapUnit::MapTwip );
         aSize = rGrf.GetPrefSize();
         if( MapUnit::MapPixel == rGrf.GetPrefMapMode().GetMapUnit() )
-            aSize = Application::GetDefaultDevice()->WindowToLogic(aSize, aMapTwip);
+            aSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize), aMapTwip);
         else
-            aSize = ::LogicToLogic( aSize,
-                                            rGrf.GetPrefMapMode(), aMapTwip );
+           aSize = ::LogicToLogic(aSize, rGrf.GetPrefMapMode(), aMapTwip);
     }
     return aSize;
 }
@@ -748,8 +747,10 @@ void SvxCropExample::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 {
     CustomWidgetController::SetDrawingArea(pDrawingArea);
     OutputDevice& rDevice = pDrawingArea->get_ref_device();
-    Size aSize(rDevice.LogicToWindow(Size(78, 78), MapMode(MapUnit::MapAppFont)));
-    pDrawingArea->set_size_request(aSize.Width(), aSize.Height());
+
+    auto aSize = rDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(Size(78, 78)), MapMode(MapUnit::MapAppFont));
+
+    pDrawingArea->set_size_request(aSize->Width(), aSize->Height());
 
     m_aMapMode = rDevice.GetMapMode();
     m_aFrameSize = ::LogicToLogic(
@@ -763,7 +764,7 @@ void SvxCropExample::Paint(vcl::RenderContext& rRenderContext, const ::tools::Re
     rRenderContext.SetMapMode(m_aMapMode);
 
     // Win BG
-    const vcl::LogicSize aWinSize(rRenderContext.WindowToLogic(GetOutputSizePixel()));
+    const vcl::LogicSize aWinSize(rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
     rRenderContext.SetLineColor();
     rRenderContext.SetFillColor(rRenderContext.GetSettings().GetStyleSettings().GetWindowColor());
     rRenderContext.DrawRect(::tools::Rectangle(Point(), aWinSize.get()));

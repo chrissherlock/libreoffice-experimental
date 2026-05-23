@@ -1076,9 +1076,14 @@ void SvxStyleBox_Impl::SetOptimalSize()
 {
     // set width in chars low so the size request will not be overridden
     m_xWidget->set_entry_width_chars(1);
+
     // tdf#132338 purely using this calculation to keep things their traditional width
-    Size aSize(LogicToWindow(Size((COMBO_WIDTH_IN_CHARS + 3) * 4, 0), MapMode(MapUnit::MapAppFont)));
-    m_xWidget->set_size_request(aSize.Width(), -1);
+    auto aSize = convertTo<vcl::WindowSize>(
+        vcl::LogicSize((COMBO_WIDTH_IN_CHARS + 3) * 4, 0),
+        MapMode(MapUnit::MapAppFont)
+    );
+
+    m_xWidget->set_size_request(aSize->Width(), -1);
 
     SetSizePixel(get_preferred_size());
 }
@@ -1276,8 +1281,8 @@ static bool SetFontSize(const vcl::RenderContext& rRenderContext, const SfxItemS
         if (SfxObjectShell *pShell = SfxObjectShell::Current())
         {
             Size aFontSize(0, rFontHeightItem.GetHeight());
-            Size aPixelSize(rRenderContext.LogicToWindow(aFontSize, MapMode(pShell->GetMapUnit())));
-            rFont.SetFontSize(aPixelSize);
+            auto aPixelSize = rRenderContext.convertTo<vcl::WindowSize>(vcl::LogicSize(aFontSize), MapMode(pShell->GetMapUnit()));
+            rFont.SetFontSize(aPixelSize.get());
             return true;
         }
     }
@@ -1835,9 +1840,14 @@ void SvxFontNameBox_Impl::SetOptimalSize()
 {
     // set width in chars low so the size request will not be overridden
     m_xWidget->set_entry_width_chars(1);
+
     // tdf#132338 purely using this calculation to keep things their traditional width
-    Size aSize(LogicToWindow(Size((COMBO_WIDTH_IN_CHARS +5) * 4, 0), MapMode(MapUnit::MapAppFont)));
-    m_xWidget->set_size_request(aSize.Width(), -1);
+    auto aSize = convertTo<vcl::WindowSize>(
+        vcl::LogicSize((COMBO_WIDTH_IN_CHARS + 5) * 4, 0),
+        MapMode(MapUnit::MapAppFont)
+    );
+
+    m_xWidget->set_size_request(aSize->Width(), -1);
 
     SetSizePixel(get_preferred_size());
 }
@@ -2416,7 +2426,7 @@ namespace o3tl {
     template<> struct typed_flags<FrmValidFlags> : is_typed_flags<FrmValidFlags, 0x3f> {};
 }
 
-static void DispatchBorderItem(svt::PopupWindowController& rControl, sal_uInt16 nSel, bool bIsCalc, bool bShiftModifier)
+static void DispatchBorderItem(svt::PopupWindowController& rControl, sal_uInt16 nSel, bool bIsCalc, sal_uInt16 nModifier)
 {
     auto dispatchDiagonalDownBorder = [&](const SvxLineItem& dDownLineItem)
     {

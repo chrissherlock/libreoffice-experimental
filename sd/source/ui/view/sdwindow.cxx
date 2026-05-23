@@ -150,7 +150,7 @@ void Window::CalcMinZoom()
     // and calculate the scaling factors that would lead to the view
     // area (also called application area) to completely fill the
     // window.
-    Size aWinSize = WindowToLogic(GetOutputSizePixel());
+    Size aWinSize = convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel()));
     tools::Long nX = static_cast<tools::Long>(static_cast<double>(aWinSize.Width())
         * double(ZOOM_MULTIPLICATOR) / static_cast<double>(maViewSize.Width()));
     tools::Long nY = static_cast<tools::Long>(static_cast<double>(aWinSize.Height())
@@ -372,7 +372,7 @@ void Window::SetZoomIntegral(::tools::Long nZoom)
         nZoom = mnMinZoom;
 
     // Calculate the window's new origin.
-    Size aSize = WindowToLogic(GetOutputSizePixel());
+    Size aSize = convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel()));
     ::tools::Long nW = aSize.Width()  * GetZoom() / nZoom;
     ::tools::Long nH = aSize.Height() * GetZoom() / nZoom;
     maWinPos.AdjustX((aSize.Width()  - nW) / 2 );
@@ -398,7 +398,7 @@ void Window::SetZoomIntegral(::tools::Long nZoom)
         tools::Long nX(0);
         tools::Long nY(0);
 
-        const Size aWinSize( WindowToLogic(GetOutputSizePixel()) );
+        const Size aWinSize(convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
         if(rZoomRect.GetHeight())
         {
             nX = static_cast<tools::Long>(static_cast<double>(aWinSize.Height())
@@ -459,7 +459,7 @@ void Window::SetZoomIntegral(::tools::Long nZoom)
         Point aPos = rZoomRect.TopLeft();
         // Transform the output area from pixel coordinates into logical
         // coordinates.
-        Size aWinSize = WindowToLogic(GetOutputSizePixel());
+        Size aWinSize = convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel()), GetMapMode());
         // Paranoia!  The degenerate case of zero width or height has been
         // taken care of above.
         DBG_ASSERT(rZoomRect.GetWidth(), "ZoomRect-Width = 0!");
@@ -536,7 +536,7 @@ void Window::SetMinZoomAutoCalc (bool bAuto)
 void Window::UpdateMapOrigin(bool bInvalidate)
 {
     bool       bChanged = false;
-    const Size aWinSize = WindowToLogic(GetOutputSizePixel());
+    const Size aWinSize = convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel()), GetMapMode());
 
     if ( mbCenterAllowed )
     {
@@ -584,7 +584,7 @@ void Window::UpdateMapMode()
 {
     maWinPos -= maViewOrigin;
     Size aPix(maWinPos.X(), maWinPos.Y());
-    aPix = LogicToWindow(aPix);
+    aPix = convertTo<vcl::WindowSize>(vcl::LogicSize(aPix));
     // Size has to be a multiple of BRUSH_SIZE due to the correct depiction of
     // pattern
     // #i2237#
@@ -610,7 +610,7 @@ void Window::UpdateMapMode()
         }
     }
 
-    aPix = WindowToLogic(aPix);
+    aPix = convertTo<vcl::LogicSize>(vcl::WindowSize(aPix), GetMapMode());
     maWinPos.setX( aPix.Width() );
     maWinPos.setY( aPix.Height() );
     Point aNewOrigin (-maWinPos.X(), -maWinPos.Y());
@@ -666,7 +666,7 @@ void Window::SetVisibleXY(double fX, double fY)
  */
 double Window::GetVisibleWidth() const
 {
-    Size aWinSize = WindowToLogic(GetOutputSizePixel());
+    Size aWinSize = convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel()), GetMapMode());
     return
         maViewSize.Width() == 0 ? 0 : (static_cast<double>(aWinSize.Width()) / maViewSize.Width());
 }
@@ -677,7 +677,7 @@ double Window::GetVisibleWidth() const
  */
 double Window::GetVisibleHeight() const
 {
-    Size aWinSize = WindowToLogic(GetOutputSizePixel());
+    Size aWinSize = convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel()), GetMapMode());
     return maViewSize.Height() == 0
         ? 0 : (static_cast<double>(aWinSize.Height()) / maViewSize.Height());
 }
@@ -689,7 +689,7 @@ Point Window::GetVisibleCenter()
     // For LOK
     vcl::MappingPolicy eOldPolicy(GetMappingPolicy());
     SetMappingPolicy(/*true*/);
-    aPos = WindowToLogic(aPos);
+    aPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
     SetMappingPolicy(eOldPolicy);
 
     return aPos;

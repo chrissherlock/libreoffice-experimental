@@ -246,7 +246,7 @@ public:
     Point GetPosForHitTest( const OutputDevice& rOut )
     {
         Point aHitTestPos( m_pHdl->GetPos() );
-        aHitTestPos =  rOut.LogicToWindow( aHitTestPos );
+        aHitTestPos =  rOut.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aHitTestPos));
         if ( m_bTopRightHandle )
         {
             aHitTestPos += Point( -1, 1 );
@@ -255,7 +255,7 @@ public:
         {
             aHitTestPos += Point( 1, 1 );
         }
-        aHitTestPos =  rOut.WindowToLogic( aHitTestPos );
+        aHitTestPos =  rOut.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aHitTestPos));
 
         return aHitTestPos;
     }
@@ -1091,9 +1091,9 @@ void SwEditWin::ChangeFly( Move::Direction eDir, Move::Size eDirSize, bool bWeb 
     RndStdIds eAnchorId = aSet.Get(RES_ANCHOR).GetAnchorId();
     Size aSnap;
 
-    if(eDirSize == Move::Size::Small)
+    if (eDirSize == Move::Size::Small)
     {
-        aSnap = WindowToLogic(Size(1,1));
+        aSnap = convertTo<vcl::LogicSize>(vcl::WindowSize(1, 1));
     }
     else
     {
@@ -1296,9 +1296,9 @@ void SwEditWin::ChangeDrawing(Move::Direction eDir, Move::Size eDirSize)
         if ( nDiv > 0 )
             aSnap.setHeight( std::max( sal_uLong(1), static_cast<sal_uLong>(aSnap.Height()) / nDiv ) );
 
-        if(eDirSize == Move::Size::Small)
+        if (eDirSize == Move::Size::Small)
         {
-            aSnap = WindowToLogic(Size(1,1));
+            aSnap = convertTo<vcl::LogicSize>(vcl::WindowSize(1, 1));
         }
         else if(eDirSize == Move::Size::Huge)
         {
@@ -3057,7 +3057,7 @@ void SwEditWin::MouseButtonDown(const MouseEvent& _rMEvt)
     m_bWasShdwCursor = nullptr != m_pShadCursor;
     m_pShadCursor.reset();
 
-    const Point aDocPos(WindowToLogic(aMEvt.GetPosPixel()));
+    const Point aDocPos(convertTo<vcl::LogicPoint>(vcl::WindowPoint(aMEvt.GetPosPixel())));
 
     FrameControlType eControl;
     bool bOverFly = false;
@@ -4225,7 +4225,10 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
         const SwNodes& rNds = rSh.GetDoc()->GetNodes();
         SwOutlineNodes::size_type nPos;
         SwContentAtPos aSwContentAtPos(IsAttrAtPos::Outline);
-        if (rSh.GetContentAtPos(WindowToLogic(rMEvt.GetPosPixel()), aSwContentAtPos))
+
+        const Point aLogicPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
+
+        if (rSh.GetContentAtPos(aLogicPos, aSwContentAtPos))
         {
             // mouse pointer is on an outline paragraph node
             if(aSwContentAtPos.aFnd.pNode && aSwContentAtPos.aFnd.pNode->IsTextNode())
@@ -4293,7 +4296,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
     //aPixPt == Point in Pixel, relative to ChildWin
     //aDocPt == Point in Twips, document coordinates
     const Point aPixPt( rMEvt.GetPosPixel() );
-    const Point aDocPt( WindowToLogic( aPixPt ) );
+    const Point aDocPt(convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPixPt)));
 
     if ( IsChainMode() )
     {
@@ -4354,7 +4357,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
     // a MB-Move is called immediately.
     if( g_bDDTimerStarted )
     {
-        Point aDD = LogicToWindow(s_aDDStartPos);
+        Point aDD = convertTo<vcl::WindowPoint>(vcl::LogicPoint(s_aDDStartPos));
         tools::Rectangle aRect( aDD.X()-3, aDD.Y()-3, aDD.X()+3, aDD.Y()+3 );
         if ( !aRect.Contains( aPixPt ) )
             StopDDTimer( &rSh, aDocPt );
@@ -4482,7 +4485,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
                     // event processing for resizing
                     if (pSdrView && pSdrView->GetMarkedObjectList().GetMarkCount() != 0)
                     {
-                        const Point aSttPt( WindowToLogic( m_aStartPos ) );
+                        const Point aSttPt(convertTo<vcl::LogicPoint>(vcl::WindowPoint(m_aStartPos)));
 
                         // can we start?
                         if( SdrHdlKind::User == g_eSdrMoveHdl )
@@ -4550,7 +4553,7 @@ void SwEditWin::MouseMove(const MouseEvent& _rMEvt)
                     if (pSdrView)
                     {
                         // Resize proportionally when media is selected and the user drags on a corner
-                        const Point aSttPt(WindowToLogic(m_aStartPos));
+                        const Point aSttPt(convertTo<vcl::LogicPoint>(vcl::WindowPoint(m_aStartPos)));
                         SdrHdl* pHdl = pSdrView->PickHandle(aSttPt);
                         if (pHdl)
                             bResizeKeepRatio = bResizeKeepRatio && pHdl->IsCornerHdl();
@@ -4797,7 +4800,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
             return; // SdrView's event evaluated
         }
 
-        const Point aDocPos(WindowToLogic(rMEvt.GetPosPixel()));
+        const Point aDocPos(convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
         SdrHdl* pHdl(pSdrView->PickHandle(aDocPos));
 
         if (nullptr != pHdl)
@@ -4837,7 +4840,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
         return;
     }
 
-    Point aDocPt( WindowToLogic( rMEvt.GetPosPixel() ) );
+    Point aDocPt(convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
 
     if ( g_bDDTimerStarted )
     {
@@ -4849,8 +4852,12 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
             g_bFrameDrag = false;
         }
         g_bNoInterrupt = false;
-        const Point aDocPos( WindowToLogic( rMEvt.GetPosPixel() ) );
-        if ((WindowToLogic(m_aStartPos).Y() == (aDocPos.Y())) && (WindowToLogic(m_aStartPos).X() == (aDocPos.X())))//To make sure it was not moved
+
+        const Point aDocPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
+        const Point aLogicStartPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(m_aStartPos));
+
+        // To make sure it was not moved
+        if (aLogicStartPos == aDocPos)
         {
             SdrPageView* pPV = nullptr;
             SdrObject* pObj = pSdrView ? pSdrView->PickObj(aDocPos, pSdrView->getHitTolLog(), pPV, SdrSearchOptions::ALSOONMASTER) : nullptr;
@@ -4928,7 +4935,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
             }
             else
             {
-                const Point aDocPos( WindowToLogic( m_aStartPos ) );
+                const Point aDocPos(convertTo<vcl::LogicPoint>(vcl::WindowPoint(m_aStartPos)));
                 g_bValidCursorPos = !(CRSR_POSCHG & rSh.CallSetCursor(&aDocPos, false));
                 rSh.Edit();
             }
@@ -5011,7 +5018,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
                             pMacro = pFlyFormat->GetMacro().GetMacroTable().Get(nEvent);
                         if (nullptr != pMacro)
                         {
-                            const Point aSttPt( WindowToLogic( m_aStartPos ) );
+                            const Point aSttPt(convertTo<vcl::LogicPoint>(vcl::WindowPoint(m_aStartPos)));
                             m_aRszMvHdlPt = aDocPt;
                             sal_uInt32 nPos = 0;
                             SbxArrayRef xArgs = new SbxArray;
@@ -5105,7 +5112,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
                     {   // create only temporary move context because otherwise
                         // the query to the content form doesn't work!!!
                         SwMvContext aMvContext( &rSh );
-                        const Point aDocPos( WindowToLogic( m_aStartPos ) );
+                        const Point aDocPos(convertTo<vcl::LogicPoint>(vcl::WindowPoint(m_aStartPos)));
                         g_bValidCursorPos = !(CRSR_POSCHG & rSh.CallSetCursor(&aDocPos, false));
                     }
                     g_bNoInterrupt = bTmpNoInterrupt;
@@ -5174,7 +5181,7 @@ void SwEditWin::MouseButtonUp(const MouseEvent& rMEvt)
                                         // create only temporary move context because otherwise
                                         // the query to the content form doesn't work!!!
                                         SwMvContext aMvContext( &rSh );
-                                        const Point aDocPos( WindowToLogic( m_aStartPos ) );
+                                        const Point aDocPos(convertTo<vcl::WindowPoint>(vcl::LogicPoint(m_aStartPos)));
                                         g_bValidCursorPos = !(CRSR_POSCHG & rSh.CallSetCursor(&aDocPos, false));
                                     }
                                     else
@@ -5824,7 +5831,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
             if (m_rView.GetPostItMgr()->IsHit(rCEvt.GetMousePosPixel()))
                 return;
 
-            Point aDocPos( WindowToLogic( rCEvt.GetMousePosPixel() ) );
+            Point aDocPos(convertTo<vcl::LogicPoint>(vcl::WindowPoint(rCEvt.GetMousePosPixel())));
             if ( !rCEvt.IsMouseEvent() )
                 aDocPos = rSh.GetCharRect().Center();
 
@@ -5858,7 +5865,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
                         SelectMenuPosition(rSh, rCEvt.GetMousePosPixel());
                         m_rView.StopShellTimer();
                     }
-                    const Point aPixPos = LogicToWindow( aDocPos );
+                    const Point aPixPos = convertTo<vcl::WindowPoint>(vcl::LogicPoint(aDocPos));
 
                     if ( m_rView.GetDocShell()->IsReadOnly() )
                     {
@@ -6081,7 +6088,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
                                 &nActionFlags );
             if( EXCHG_INOUT_ACTION_NONE != nDropAction )
             {
-                const Point aDocPt( WindowToLogic( rCEvt.GetMousePosPixel() ) );
+                const Point aDocPt(convertTo<vcl::LogicPoint>(vcl::WindowPoint(rCEvt.GetMousePosPixel())));
                 SwTransferable::PasteData( aDataHelper, rSh, nDropAction, nActionFlags,
                                     nDropFormat, nDropDestination, false,
                                     false, &aDocPt, EXCHG_IN_ACTION_COPY,
@@ -6223,7 +6230,7 @@ void SwEditWin::Command( const CommandEvent& rCEvt )
     position of the context menu request */
 void SwEditWin::SelectMenuPosition(SwWrtShell& rSh, const Point& rMousePos )
 {
-    const Point aDocPos( WindowToLogic( rMousePos ) );
+    const Point aDocPos(convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMousePos)));
     const bool bIsInsideSelectedObj( rSh.IsInsideSelectedObj( aDocPos ) );
     //create a synthetic mouse event out of the coordinates
     MouseEvent aMEvt(rMousePos);
@@ -6432,7 +6439,7 @@ void SwEditWin::SelectMenuPosition(SwWrtShell& rSh, const Point& rMousePos )
 
 void SwEditWin::DrawCommentGuideLine(Point aPointPixel)
 {
-    const Point aPointLogic = WindowToLogic(aPointPixel);
+    const Point aPointLogic = convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPointPixel));
 
     sw::sidebarwindows::SidebarPosition eSidebarPosition
         = m_rView.GetPostItMgr()->GetSidebarPos(aPointLogic);
@@ -6444,14 +6451,14 @@ void SwEditWin::DrawCommentGuideLine(Point aPointPixel)
     if (eSidebarPosition == sw::sidebarwindows::SidebarPosition::RIGHT)
     {
         tools::Long nSidebarRectLeft
-            = LogicToWindow(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopLeft()).X();
+            = convertTo<vcl::WindowPoint>(vcl::LogicPoint(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopLeft()))->X();
         tools::Long nPxWidth = aPointPixel.X() - nSidebarRectLeft;
         nPosX = nSidebarRectLeft + std::clamp<tools::Long>(nPxWidth, 1 * nZoom, 8 * nZoom);
     }
     else
     {
         tools::Long nSidebarRectRight
-            = LogicToWindow(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopRight()).X();
+            = convertTo<vcl::WindowPoint>(vcl::LogicPoint(m_rView.GetPostItMgr()->GetSidebarRect(aPointLogic).TopRight()))->X();
         tools::Long nPxWidth = nSidebarRectRight - aPointPixel.X();
         nPosX = nSidebarRectRight - std::clamp<tools::Long>(nPxWidth, 1 * nZoom, 8 * nZoom);
     }
@@ -6460,8 +6467,10 @@ void SwEditWin::DrawCommentGuideLine(Point aPointPixel)
     // We need two InvertTracking calls here to "erase" the previous and draw the new position at each mouse move
     InvertTracking(aLastCommentSidebarPos, ShowTrackFlags::Clip | ShowTrackFlags::Split);
     const tools::Long nHeight = GetOutDev()->GetOutputSizePixel().Height();
-    aLastCommentSidebarPos
-        = tools::Rectangle(WindowToLogic(Point(nPosX, 0)), WindowToLogic(Point(nPosX, nHeight)));
+
+    const ::tools::Rectangle aSidebarRectPx(Point(nPosX, 0), Point(nPosX, nHeight));
+    aLastCommentSidebarPos = convertTo<vcl::LogicRect>(vcl::WindowRect(aSidebarRectPx));
+
     InvertTracking(aLastCommentSidebarPos, ShowTrackFlags::Clip | ShowTrackFlags::Split);
 }
 
@@ -6477,8 +6486,8 @@ void SwEditWin::SetSidebarWidth(const Point& rPointPixel)
     if (aLastCommentSidebarPos.IsEmpty())
         return;
     // aLastCommentSidebarPos right and left positions are the same so either can be used here
-    m_rView.GetPostItMgr()->SetSidebarWidth(
-        Point(aLastCommentSidebarPos.Right(), WindowToLogic(rPointPixel).Y()));
+    const tools::Long nLogicY = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPointPixel))->Y();
+    m_rView.GetPostItMgr()->SetSidebarWidth(Point(aLastCommentSidebarPos.Right(), nLogicY));
 }
 
 static SfxShell* lcl_GetTextShellFromDispatcher( SwView const & rView )
@@ -6583,8 +6592,12 @@ void QuickHelpData::Start(SwWrtShell& rSh, const bool bRestart)
     vcl::Window& rWin = rSh.GetView().GetEditWin();
     if( m_bIsTip )
     {
-        Point aPt( rWin.OutputToScreenPixel( rWin.LogicToWindow(
-                    rSh.GetCharRect().Pos() )));
+        Point aPt(rWin.OutputToScreenPixel(
+            rWin.convertTo<vcl::WindowPoint>(
+                vcl::LogicPoint(rSh.GetCharRect().Pos())
+            ).get()
+        ));
+
         aPt.AdjustY( -3 );
         nTipId = Help::ShowPopover(&rWin, tools::Rectangle( aPt, Size( 1, 1 )),
                         CurStr(),
@@ -6876,7 +6889,7 @@ bool SwEditWin::IsInHeaderFooter( const Point &rDocPt, FrameControlType &rContro
     if ( rSh.IsShowHeaderFooterSeparator( FrameControlType::Header ) || rSh.IsShowHeaderFooterSeparator( FrameControlType::Footer ) )
     {
         SwFrameControlsManager &rMgr = rSh.GetView().GetEditWin().GetFrameControlsManager();
-        Point aPoint( LogicToWindow( rDocPt ) );
+        Point aPoint( convertTo<vcl::WindowPoint>(vcl::LogicPoint(rDocPt)) );
 
         if ( rSh.IsShowHeaderFooterSeparator( FrameControlType::Header ) )
         {

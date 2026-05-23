@@ -89,8 +89,8 @@ CPPUNIT_TEST_FIXTURE(SwHtmlDomExportTest, testReqifEmbedShapeAsPNG)
     assertXPath(pXmlDoc, "//reqif-xhtml:p/reqif-xhtml:object", "type", u"image/png");
 
     // Then check the pixel size of the shape:
-    Size aPixelSize(Application::GetDefaultDevice()->LogicToWindow(Size(10000, 10000),
-                                                                   MapMode(MapUnit::Map100thMM)));
+    Size aPixelSize(Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+        vcl::LogicSize(10000, 10000), MapMode(MapUnit::Map100thMM)));
     // Without the accompanying fix in place, this test would have failed with:
     // - no attribute 'width' exist
     // i.e. shapes had no width.
@@ -179,8 +179,8 @@ CPPUNIT_TEST_FIXTURE(SwHtmlDomExportTest, testReqifEmbedShapeAsPNGCustomDPI)
     assertXPath(pXmlDoc, "//reqif-xhtml:p/reqif-xhtml:object", "type", u"image/png");
 
     // Then check the pixel size of the shape:
-    Size aPixelSize(Application::GetDefaultDevice()->LogicToWindow(Size(5080, 2540),
-                                                                   MapMode(MapUnit::Map100thMM)));
+    Size aPixelSize(Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+        vcl::LogicSize(5080, 2540), MapMode(MapUnit::Map100thMM)));
     tools::Long nPNGWidth = 1200;
     OUString aPngUrl = GetPngPath();
     SvFileStream aFileStream(aPngUrl, StreamMode::READ);

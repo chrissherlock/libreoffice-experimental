@@ -1730,8 +1730,11 @@ const SwFrameFormat* SwFEShell::IsURLGrfAtPos( const Point& rPt, OUString* pURL,
                         Point aPt( rPt );
                         aPt -= pFly->getFrameArea().Pos();
                         // without MapMode-Offset, without Offset, o ... !!!!!
-                        aPt = GetOut()->LogicToWindow(
-                                aPt, MapMode( MapUnit::MapTwip ) );
+                        aPt = GetOut()->convertTo<vcl::WindowPoint>(
+                            vcl::LogicPoint(aPt),
+                            MapMode(MapUnit::MapTwip)
+                        ).get();
+
                         *pURL = *pURL + "?" + OUString::number( aPt.getX() )
                                 + "," + OUString::number(aPt.getY() );
                     }

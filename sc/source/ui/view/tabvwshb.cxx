@@ -476,7 +476,7 @@ void ScTabViewShell::ExecDrawIns(SfxRequest& rReq)
                 if ( pClient && pClient->IsObjectInPlaceActive() )
                 {
                     const SfxRectangleItem& rRect = rReq.GetArgs()->Get(SID_OBJECTRESIZE);
-                    tools::Rectangle aRect( pWin->WindowToLogic( rRect.GetValue() ) );
+                    tools::Rectangle aRect(pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(rRect.GetValue()), pWin->GetMapMode()));
 
                     const SdrMarkList& rMarkList = pView->GetMarkedObjectList();
                     if ( rMarkList.GetMarkCount() != 0 )
@@ -546,7 +546,9 @@ void ScTabViewShell::ExecDrawIns(SfxRequest& rReq)
 
                         if(pNewDBField)
                         {
-                            tools::Rectangle aVisArea = pWin->WindowToLogic(tools::Rectangle(Point(0,0), pWin->GetOutputSizePixel()));
+                            tools::Rectangle aVisArea = pWin->convertTo<vcl::LogicRect>(
+                                vcl::WindowRect(tools::Rectangle(Point(0, 0), pWin->GetOutputSizePixel())), pWin->GetMapMode());
+
                             Point aObjPos(aVisArea.Center());
                             Size aObjSize(pNewDBField->GetLogicRect().GetSize());
                             aObjPos.AdjustX( -(aObjSize.Width() / 2) );

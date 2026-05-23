@@ -161,52 +161,56 @@ bool DlgEdObj::TransformSdrToControlCoordinates(
     sal_Int32& nXOut, sal_Int32& nYOut, sal_Int32& nWidthOut, sal_Int32& nHeightOut )
 {
     // input position and size
-    Size aPos( nXIn, nYIn );
-    Size aSize( nWidthIn, nHeightIn );
+    vcl::LogicSize aLogicPos(nXIn, nYIn);
+    vcl::LogicSize aLogicSize(nWidthIn, nHeightIn);
 
     // form position
     DlgEdForm* pForm = nullptr;
     if ( !lcl_getDlgEdForm( this, pForm ) )
         return false;
     tools::Rectangle aFormRect = pForm->GetSnapRect();
-    Size aFormPos( aFormRect.Left(), aFormRect.Top() );
+    vcl::LogicSize aLogicFormPos(aFormRect.Left(), aFormRect.Top());
 
     // convert 100th_mm to pixel
     OutputDevice* pDevice = Application::GetDefaultDevice();
     DBG_ASSERT( pDevice, "DlgEdObj::TransformSdrToControlCoordinates: missing default device!" );
+
     if ( !pDevice )
         return false;
-    aPos = pDevice->LogicToWindow( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->LogicToWindow( aSize, MapMode( MapUnit::Map100thMM ) );
-    aFormPos = pDevice->LogicToWindow( aFormPos, MapMode( MapUnit::Map100thMM ) );
+
+    auto aPos = pDevice->convertTo<vcl::WindowSize>(aLogicPos, MapMode(MapUnit::Map100thMM));
+    auto aSize = pDevice->convertTo<vcl::WindowSize>(aLogicSize, MapMode(MapUnit::Map100thMM));
+    auto aFormPos = pDevice->convertTo<vcl::WindowSize>(aLogicFormPos, MapMode(MapUnit::Map100thMM));
 
     // subtract form position
-    aPos.AdjustWidth( -(aFormPos.Width()) );
-    aPos.AdjustHeight( -(aFormPos.Height()) );
+    aPos->AdjustWidth(-(aFormPos->Width()));
+    aPos->AdjustHeight(-(aFormPos->Height()));
 
     // take window borders into account
     Reference< beans::XPropertySet > xPSetForm( pForm->GetUnoControlModel(), UNO_QUERY );
     DBG_ASSERT( xPSetForm.is(), "DlgEdObj::TransformFormToSdrCoordinates: no form property set!" );
     if ( !xPSetForm.is() )
         return false;
+
     bool bDecoration = true;
     xPSetForm->getPropertyValue( DLGED_PROP_DECORATION ) >>= bDecoration;
+
     if( bDecoration )
     {
         awt::DeviceInfo aDeviceInfo = pForm->getDeviceInfo();
-        aPos.AdjustWidth( -(aDeviceInfo.LeftInset) );
-        aPos.AdjustHeight( -(aDeviceInfo.TopInset) );
+        aPos->AdjustWidth(-(aDeviceInfo.LeftInset));
+        aPos->AdjustHeight(-(aDeviceInfo.TopInset));
     }
 
     // convert pixel to logic units
-    aPos = pDevice->WindowToLogic(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->WindowToLogic(aSize, MapMode(MapUnit::MapAppFont));
+    auto aConvertedPos = pDevice->convertTo<vcl::LogicSize>(aPos, MapMode(MapUnit::MapAppFont));
+    auto aConvertedSize = pDevice->convertTo<vcl::LogicSize>(aSize, MapMode(MapUnit::MapAppFont));
 
     // set out parameters
-    nXOut = aPos.Width();
-    nYOut = aPos.Height();
-    nWidthOut = aSize.Width();
-    nHeightOut = aSize.Height();
+    nXOut = aConvertedPos->Width();
+    nYOut = aConvertedPos->Height();
+    nWidthOut = aConvertedSize->Width();
+    nHeightOut = aConvertedSize->Height();
 
     return true;
 }
@@ -216,16 +220,17 @@ bool DlgEdObj::TransformSdrToFormCoordinates(
     sal_Int32& nXOut, sal_Int32& nYOut, sal_Int32& nWidthOut, sal_Int32& nHeightOut )
 {
     // input position and size
-    Size aPos( nXIn, nYIn );
-    Size aSize( nWidthIn, nHeightIn );
+    vcl::LogicSize aLogicPos(nXIn, nYIn);
+    vcl::LogicSize aLogicSize(nWidthIn, nHeightIn);
 
     // convert 100th_mm to pixel
     OutputDevice* pDevice = Application::GetDefaultDevice();
     DBG_ASSERT( pDevice, "DlgEdObj::TransformSdrToFormCoordinates: missing default device!" );
     if ( !pDevice )
         return false;
-    aPos = pDevice->LogicToWindow( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->LogicToWindow( aSize, MapMode( MapUnit::Map100thMM ) );
+
+    auto aWindowPos = pDevice->convertTo<vcl::WindowSize>(aLogicPos, MapMode(MapUnit::Map100thMM));
+    auto aWindowSize = pDevice->convertTo<vcl::WindowSize>(aLogicSize, MapMode(MapUnit::Map100thMM));
 
     // take window borders into account
     DlgEdForm* pForm = nullptr;
@@ -235,25 +240,29 @@ bool DlgEdObj::TransformSdrToFormCoordinates(
     // take window borders into account
     Reference< beans::XPropertySet > xPSetForm( pForm->GetUnoControlModel(), UNO_QUERY );
     DBG_ASSERT( xPSetForm.is(), "DlgEdObj::TransformFormToSdrCoordinates: no form property set!" );
+
     if ( !xPSetForm.is() )
         return false;
+
     bool bDecoration = true;
     xPSetForm->getPropertyValue( DLGED_PROP_DECORATION ) >>= bDecoration;
+
     if( bDecoration )
     {
         awt::DeviceInfo aDeviceInfo = pForm->getDeviceInfo();
-        aSize.AdjustWidth( -(aDeviceInfo.LeftInset + aDeviceInfo.RightInset) );
-        aSize.AdjustHeight( -(aDeviceInfo.TopInset + aDeviceInfo.BottomInset) );
+        aWindowSize->AdjustWidth(-(aDeviceInfo.LeftInset + aDeviceInfo.RightInset));
+        aWindowSize->AdjustHeight(-(aDeviceInfo.TopInset + aDeviceInfo.BottomInset));
     }
+
     // convert pixel to logic units
-    aPos = pDevice->WindowToLogic(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->WindowToLogic(aSize, MapMode(MapUnit::MapAppFont));
+    auto aPos = pDevice->convertTo<vcl::LogicSize>(aWindowPos, MapMode(MapUnit::MapAppFont));
+    auto aSize = pDevice->convertTo<vcl::LogicSize>(aWindowSize, MapMode(MapUnit::MapAppFont));
 
     // set out parameters
-    nXOut = aPos.Width();
-    nYOut = aPos.Height();
-    nWidthOut = aSize.Width();
-    nHeightOut = aSize.Height();
+    nXOut = aPos->Width();
+    nYOut = aPos->Height();
+    nWidthOut = aSize->Width();
+    nHeightOut = aSize->Height();
 
     return true;
 }
@@ -263,8 +272,8 @@ bool DlgEdObj::TransformControlToSdrCoordinates(
     sal_Int32& nXOut, sal_Int32& nYOut, sal_Int32& nWidthOut, sal_Int32& nHeightOut )
 {
     // input position and size
-    Size aPos( nXIn, nYIn );
-    Size aSize( nWidthIn, nHeightIn );
+    vcl::LogicSize aLogicPos(nXIn, nYIn);
+    vcl::LogicSize aLogicSize(nWidthIn, nHeightIn);
 
     // form position
     DlgEdForm* pForm = nullptr;
@@ -273,45 +282,50 @@ bool DlgEdObj::TransformControlToSdrCoordinates(
 
     Reference< beans::XPropertySet > xPSetForm( pForm->GetUnoControlModel(), UNO_QUERY );
     DBG_ASSERT( xPSetForm.is(), "DlgEdObj::TransformControlToSdrCoordinates: no form property set!" );
+
     if ( !xPSetForm.is() )
         return false;
+
     sal_Int32 nFormX = 0, nFormY = 0;
     xPSetForm->getPropertyValue( DLGED_PROP_POSITIONX ) >>= nFormX;
     xPSetForm->getPropertyValue( DLGED_PROP_POSITIONY ) >>= nFormY;
-    Size aFormPos( nFormX, nFormY );
+    vcl::LogicSize aLogicFormPos(nFormX, nFormY);
 
     // convert logic units to pixel
     OutputDevice* pDevice = Application::GetDefaultDevice();
     DBG_ASSERT( pDevice, "DlgEdObj::TransformControlToSdrCoordinates: missing default device!" );
+
     if ( !pDevice )
         return false;
-    aPos = pDevice->LogicToWindow(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->LogicToWindow(aSize, MapMode(MapUnit::MapAppFont));
-    aFormPos = pDevice->LogicToWindow(aFormPos, MapMode(MapUnit::MapAppFont));
+
+    auto aWindowPos = pDevice->convertTo<vcl::WindowSize>(aLogicPos, MapMode(MapUnit::MapAppFont));
+    auto aWindowSize = pDevice->convertTo<vcl::WindowSize>(aLogicSize, MapMode(MapUnit::MapAppFont));
+    auto aWindowFormPos = pDevice->convertTo<vcl::WindowSize>(aLogicFormPos, MapMode(MapUnit::MapAppFont));
 
     // add form position
-    aPos.AdjustWidth(aFormPos.Width() );
-    aPos.AdjustHeight(aFormPos.Height() );
+    aWindowPos->AdjustWidth(aWindowFormPos->Width());
+    aWindowPos->AdjustHeight(aWindowFormPos->Height());
 
     // take window borders into account
     bool bDecoration = true;
     xPSetForm->getPropertyValue( DLGED_PROP_DECORATION ) >>= bDecoration;
+
     if( bDecoration )
     {
         awt::DeviceInfo aDeviceInfo = pForm->getDeviceInfo();
-        aPos.AdjustWidth(aDeviceInfo.LeftInset );
-        aPos.AdjustHeight(aDeviceInfo.TopInset );
+        aWindowPos->AdjustWidth(aDeviceInfo.LeftInset);
+        aWindowPos->AdjustHeight(aDeviceInfo.TopInset);
     }
 
     // convert pixel to 100th_mm
-    aPos = pDevice->WindowToLogic( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->WindowToLogic( aSize, MapMode( MapUnit::Map100thMM ) );
+    auto aPos = pDevice->convertTo<vcl::LogicSize>(aWindowPos, MapMode(MapUnit::Map100thMM));
+    auto aSize = pDevice->convertTo<vcl::LogicSize>(aWindowSize, MapMode(MapUnit::Map100thMM));
 
     // set out parameters
-    nXOut = aPos.Width();
-    nYOut = aPos.Height();
-    nWidthOut = aSize.Width();
-    nHeightOut = aSize.Height();
+    nXOut = aPos->Width();
+    nYOut = aPos->Height();
+    nWidthOut = aSize->Width();
+    nHeightOut = aSize->Height();
 
     return true;
 }
@@ -321,8 +335,8 @@ bool DlgEdObj::TransformFormToSdrCoordinates(
     sal_Int32& nXOut, sal_Int32& nYOut, sal_Int32& nWidthOut, sal_Int32& nHeightOut )
 {
     // input position and size
-    Size aPos( nXIn, nYIn );
-    Size aSize( nWidthIn, nHeightIn );
+    vcl::LogicSize aLogicPos(nXIn, nYIn);
+    vcl::LogicSize aLogicSize(nWidthIn, nHeightIn);
 
     // convert logic units to pixel
     OutputDevice* pDevice = Application::GetDefaultDevice();
@@ -335,32 +349,35 @@ bool DlgEdObj::TransformFormToSdrCoordinates(
     if ( !lcl_getDlgEdForm( this, pForm ) )
         return false;
 
-    aPos = pDevice->LogicToWindow(aPos, MapMode(MapUnit::MapAppFont));
-    aSize = pDevice->LogicToWindow(aSize, MapMode(MapUnit::MapAppFont));
+    auto aWindowPos = pDevice->convertTo<vcl::WindowSize>(aLogicPos, MapMode(MapUnit::MapAppFont));
+    auto aWindowSize = pDevice->convertTo<vcl::WindowSize>(aLogicSize, MapMode(MapUnit::MapAppFont));
 
     // take window borders into account
     Reference< beans::XPropertySet > xPSetForm( pForm->GetUnoControlModel(), UNO_QUERY );
     DBG_ASSERT( xPSetForm.is(), "DlgEdObj::TransformFormToSdrCoordinates: no form property set!" );
+
     if ( !xPSetForm.is() )
         return false;
+
     bool bDecoration = true;
     xPSetForm->getPropertyValue( DLGED_PROP_DECORATION ) >>= bDecoration;
+
     if( bDecoration )
     {
         awt::DeviceInfo aDeviceInfo = pForm->getDeviceInfo();
-        aSize.AdjustWidth(aDeviceInfo.LeftInset + aDeviceInfo.RightInset );
-        aSize.AdjustHeight(aDeviceInfo.TopInset + aDeviceInfo.BottomInset );
+        aWindowSize->AdjustWidth(aDeviceInfo.LeftInset + aDeviceInfo.RightInset);
+        aWindowSize->AdjustHeight(aDeviceInfo.TopInset + aDeviceInfo.BottomInset);
     }
 
     // convert pixel to 100th_mm
-    aPos = pDevice->WindowToLogic( aPos, MapMode( MapUnit::Map100thMM ) );
-    aSize = pDevice->WindowToLogic( aSize, MapMode( MapUnit::Map100thMM ) );
+    auto aPos = pDevice->convertTo<vcl::LogicSize>(aWindowPos, MapMode(MapUnit::Map100thMM));
+    auto aSize = pDevice->convertTo<vcl::LogicSize>(aWindowSize, MapMode(MapUnit::Map100thMM));
 
     // set out parameters
-    nXOut = aPos.Width();
-    nYOut = aPos.Height();
-    nWidthOut = aSize.Width();
-    nHeightOut = aSize.Height();
+    nXOut = aPos->Width();
+    nYOut = aPos->Height();
+    nWidthOut = aSize->Width();
+    nHeightOut = aSize->Height();
 
     return true;
 }

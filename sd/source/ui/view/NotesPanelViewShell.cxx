@@ -711,8 +711,11 @@ void NotesPanelViewShell::FuTemporary(SfxRequest& rReq)
         {
             SetZoom(std::min<::tools::Long>(GetActiveWindow()->GetZoom() * 2,
                                             GetActiveWindow()->GetMaxZoom()));
-            ::tools::Rectangle aVisAreaWin = GetActiveWindow()->WindowToLogic(
-                ::tools::Rectangle(Point(0, 0), GetActiveWindow()->GetOutputSizePixel()));
+            ::tools::Rectangle aVisAreaWin
+                = GetActiveWindow()
+                      ->convertTo<vcl::LogicRect>(vcl::WindowRect(
+                          ::tools::Rectangle(Point(0, 0), GetActiveWindow()->GetOutputSizePixel())))
+                      .get();
             mpZoomList->InsertZoomRect(aVisAreaWin);
             Invalidate(SID_ATTR_ZOOM);
             Invalidate(SID_ZOOM_IN);
@@ -726,8 +729,11 @@ void NotesPanelViewShell::FuTemporary(SfxRequest& rReq)
         case SID_SIZE_REAL:
         {
             SetZoom(100);
-            ::tools::Rectangle aVisAreaWin = GetActiveWindow()->WindowToLogic(
-                ::tools::Rectangle(Point(0, 0), GetActiveWindow()->GetOutputSizePixel()));
+            ::tools::Rectangle aVisAreaWin
+                = GetActiveWindow()
+                      ->convertTo<vcl::LogicRect>(vcl::WindowRect(
+                          ::tools::Rectangle(Point(0, 0), GetActiveWindow()->GetOutputSizePixel())))
+                      .get();
             mpZoomList->InsertZoomRect(aVisAreaWin);
             Invalidate(SID_ATTR_ZOOM);
             Invalidate(SID_ATTR_ZOOMSLIDER);
@@ -740,8 +746,11 @@ void NotesPanelViewShell::FuTemporary(SfxRequest& rReq)
         {
             SetZoom(std::max<::tools::Long>(GetActiveWindow()->GetZoom() / 2,
                                             GetActiveWindow()->GetMinZoom()));
-            ::tools::Rectangle aVisAreaWin = GetActiveWindow()->WindowToLogic(
-                ::tools::Rectangle(Point(0, 0), GetActiveWindow()->GetOutputSizePixel()));
+            ::tools::Rectangle aVisAreaWin
+                = GetActiveWindow()
+                      ->convertTo<vcl::LogicRect>(vcl::WindowRect(
+                          ::tools::Rectangle(Point(0, 0), GetActiveWindow()->GetOutputSizePixel())))
+                      .get();
             mpZoomList->InsertZoomRect(aVisAreaWin);
             Invalidate(SID_ATTR_ZOOM);
             Invalidate(SID_ZOOM_OUT);
@@ -1220,9 +1229,11 @@ void NotesPanelViewShell::FuSupport(SfxRequest& rReq)
                     sal_Int8 nAction = DND_ACTION_COPY;
                     mpNotesPanelView->InsertData(
                         aDataHelper,
-                        GetActiveWindow()->WindowToLogic(
-                            ::tools::Rectangle(Point(), GetActiveWindow()->GetOutputSizePixel())
-                                .Center()),
+                        GetActiveWindow()
+                            ->convertTo<vcl::LogicPoint>(vcl::WindowPoint(
+                                ::tools::Rectangle(Point(), GetActiveWindow()->GetOutputSizePixel())
+                                    .Center()))
+                            .get(),
                         nAction, false, SotClipboardFormatId::STRING);
                 }
             }
@@ -1230,6 +1241,7 @@ void NotesPanelViewShell::FuSupport(SfxRequest& rReq)
             rReq.Ignore();
         }
         break;
+
         case SID_DELETE:
         {
             if (mpNotesPanelView)

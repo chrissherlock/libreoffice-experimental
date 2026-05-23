@@ -60,10 +60,10 @@ void DrawViewShell::ScannerEvent()
                     if( !aBmpSize.Width() || !aBmpSize.Height() )
                         aBmpSize = aScanBmp.GetSizePixel();
 
-                    if( aScanBmp.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
-                        aBmpSize = GetActiveWindow()->WindowToLogic( aBmpSize, aMap100 );
+                    if (aScanBmp.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
+                        aBmpSize = GetActiveWindow()->convertTo<vcl::LogicSize>(vcl::WindowSize(aBmpSize), aMap100);
                     else
-                        aBmpSize = ::LogicToLogic( aBmpSize, aScanBmp.GetPrefMapMode(), aMap100 );
+                        aBmpSize = ::LogicToLogic(aBmpSize, aScanBmp.GetPrefMapMode(), aMap100);
 
                     aPageSize.AdjustWidth( -(pPage->GetLeftBorder() + pPage->GetRightBorder()) );
                     aPageSize.AdjustHeight( -(pPage->GetUpperBorder() + pPage->GetLowerBorder()) );

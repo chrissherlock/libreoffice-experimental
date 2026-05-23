@@ -91,7 +91,7 @@ bool SwDrawBase::MouseButtonDown(const MouseEvent& rMEvt)
             g_bNoInterrupt = true;
             m_pWin->CaptureMouse();
 
-            m_aStartPos = m_pWin->WindowToLogic(rMEvt.GetPosPixel());
+            m_aStartPos = m_pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
 
             bReturn = m_pSh->BeginCreate(m_pWin->GetSdrDrawMode(), m_aStartPos);
 
@@ -104,7 +104,7 @@ bool SwDrawBase::MouseButtonDown(const MouseEvent& rMEvt)
         {
             // BEZIER-EDITOR
             m_pWin->CaptureMouse();
-            m_aStartPos = m_pWin->WindowToLogic(rMEvt.GetPosPixel());
+            m_aStartPos = m_pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
             sal_uInt16 nEditMode = m_pWin->GetBezierMode();
 
             if (eHit == SdrHitKind::Handle && aVEvt.mpHdl->GetKind() == SdrHdlKind::BezierWeight)
@@ -215,7 +215,7 @@ bool SwDrawBase::MouseButtonDown(const MouseEvent& rMEvt)
 bool SwDrawBase::MouseMove(const MouseEvent& rMEvt)
 {
     SdrView *pSdrView = m_pSh->GetDrawView();
-    Point aPnt(m_pWin->WindowToLogic(rMEvt.GetPosPixel()));
+    Point aPnt(m_pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
     bool bRet = false;
 
     if (IsCreateObj() && !m_pWin->IsDrawSelMode() && pSdrView->IsCreateObj())
@@ -242,7 +242,7 @@ bool SwDrawBase::MouseButtonUp(const MouseEvent& rMEvt)
     bool bCheckShell = false;
     bool bAutoCap = false;
 
-    Point aPnt(m_pWin->WindowToLogic(rMEvt.GetPosPixel()));
+    Point aPnt(m_pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
 
     if (IsCreateObj() && m_pSh->IsDrawCreate() && !m_pWin->IsDrawSelMode())
     {
@@ -479,7 +479,7 @@ void SwDrawBase::SetDrawPointer()
 {
     SdrView *pSdrView = m_pSh->GetDrawView();
     Point aPnt(m_pWin->OutputToScreenPixel(m_pWin->GetPointerPosPixel()));
-    aPnt = m_pWin->WindowToLogic(m_pWin->ScreenToOutputPixel(aPnt));
+    aPnt = m_pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(m_pWin->ScreenToOutputPixel(aPnt)));
     PointerStyle aPointTyp = pSdrView->GetPreferredPointer(aPnt, m_pSh->GetOut());
     m_pWin->SetPointer(aPointTyp);
 }
@@ -493,7 +493,7 @@ void SwDrawBase::EnterSelectMode(const MouseEvent& rMEvt)
     if (m_pSh->GetSelectedObjCount() || m_pWin->IsDrawAction())
         return;
 
-    Point aPnt(m_pWin->WindowToLogic(rMEvt.GetPosPixel()));
+    Point aPnt(m_pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
 
     if (m_pSh->IsObjSelectable(aPnt))
     {
