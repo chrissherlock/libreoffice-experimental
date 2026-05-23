@@ -271,7 +271,7 @@ void vcl::Cursor::ImplDoShow( bool bDrawDirect, bool bRestore )
 namespace
 {
 
-tools::Rectangle calcualteCursorRect(Point const& rPosition, Size const rSize, vcl::Window* pWindow, vcl::Window* pParent)
+tools::Rectangle calculateCursorRect(Point const& rPosition, Size const rSize, vcl::Window* pWindow, vcl::Window* pParent)
 {
     const auto aPositionPixel = pWindow->convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPosition), pWindow->GetMapMode());
     const tools::Long nX = pWindow->GetDeviceOriginX() + aPositionPixel->X() - pParent->GetDeviceOriginX();
@@ -319,9 +319,9 @@ void vcl::Cursor::LOKNotify(vcl::Window* pWindow, const OUString& rAction)
         {
             tools::Rectangle aRect;
             if (pWindow->IsFormControl())
-                aRect = calcualteCursorRect(GetPos(), GetSize(), pWindow, pWindow->GetParent());
+                aRect = calculateCursorRect(GetPos(), GetSize(), pWindow, pWindow->GetParent());
             else
-                aRect = calcualteCursorRect(GetPos(), GetSize(), pWindow, pWindow->GetParent()->GetParent());
+                aRect = calculateCursorRect(GetPos(), GetSize(), pWindow, pWindow->GetParent()->GetParent());
 
             OutputDevice* pDevice = mpData->mpWindow->GetOutDev();
             const tools::Rectangle aRectTwip = pDevice->WindowToLogic(aRect, MapMode(MapUnit::MapTwip));
@@ -344,7 +344,7 @@ void vcl::Cursor::LOKNotify(vcl::Window* pWindow, const OUString& rAction)
         }
         else if (rAction == "cursor_invalidate")
         {
-            const tools::Rectangle aRect = calcualteCursorRect(GetPos(), GetSize(), pWindow, pParent);
+            const tools::Rectangle aRect = calculateCursorRect(GetPos(), GetSize(), pWindow, pParent);
             aItems.emplace_back("rectangle", aRect.toString());
         }
         pNotifier->notifyWindow(pParent->GetLOKWindowId(), rAction, aItems);
