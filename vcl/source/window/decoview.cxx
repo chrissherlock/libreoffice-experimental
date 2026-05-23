@@ -760,7 +760,7 @@ void DecorationView::DrawSymbol( const tools::Rectangle& rRect, SymbolType eType
                                  const Color& rColor, DrawSymbolFlags nStyle )
 {
     const StyleSettings&    rStyleSettings  = mpOutDev->GetSettings().GetStyleSettings();
-    const tools::Rectangle         aRect           =  mpOutDev->LogicToWindow( rRect );
+    const auto aRect = mpOutDev->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect), mpOutDev->GetMapMode());
     auto popIt = mpOutDev->ScopedPush(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR | vcl::PushFlags::MAPMODE);
     Color                   nColor(rColor);
     mpOutDev->SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
@@ -781,7 +781,7 @@ void DecorationView::DrawSymbol( const tools::Rectangle& rRect, SymbolType eType
             // Draw shifted and brighter symbol for embossed look
             mpOutDev->SetLineColor( rStyleSettings.GetLightColor() );
             mpOutDev->SetFillColor( rStyleSettings.GetLightColor() );
-            ImplDrawSymbol( mpOutDev, aRect + Point(1, 1) , eType );
+            ImplDrawSymbol( mpOutDev, aRect.get() + Point(1, 1) , eType );
             nColor = rStyleSettings.GetShadowColor();
         }
     }
@@ -789,18 +789,18 @@ void DecorationView::DrawSymbol( const tools::Rectangle& rRect, SymbolType eType
     // Set selected color and draw the symbol
     mpOutDev->SetLineColor( nColor );
     mpOutDev->SetFillColor( nColor );
-    ImplDrawSymbol( mpOutDev, aRect, eType );
+    ImplDrawSymbol( mpOutDev, aRect.get(), eType );
 }
 
 void DecorationView::DrawFrame( const tools::Rectangle& rRect,
                                 const Color& rLeftTopColor,
                                 const Color& rRightBottomColor )
 {
-    tools::Rectangle   aRect         =  mpOutDev->LogicToWindow( rRect );
+    auto aRect = mpOutDev->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect), mpOutDev->GetMapMode());
     const Color aOldLineColor = mpOutDev->GetLineColor();
     const vcl::MappingPolicy eOldPolicy = mpOutDev->GetMappingPolicy();
     mpOutDev->SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
-    ImplDraw2ColorFrame( mpOutDev, aRect, rLeftTopColor, rRightBottomColor );
+    ImplDraw2ColorFrame( mpOutDev, aRect.get(), rLeftTopColor, rRightBottomColor );
     mpOutDev->SetLineColor( aOldLineColor );
     mpOutDev->SetMappingPolicy( eOldPolicy );
 }
@@ -847,7 +847,7 @@ void DecorationView::DrawHighlightFrame( const tools::Rectangle& rRect )
 
 tools::Rectangle DecorationView::DrawFrame( const tools::Rectangle& rRect, DrawFrameStyle nStyle, DrawFrameFlags nFlags )
 {
-    tools::Rectangle aRect =  mpOutDev->LogicToWindow( rRect );
+    auto aRect = mpOutDev->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect), mpOutDev->GetMapMode());
     vcl::MappingPolicy eOldPolicy = mpOutDev->GetMappingPolicy();
     mpOutDev->SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
@@ -863,9 +863,7 @@ tools::Rectangle DecorationView::DrawFrame( const tools::Rectangle& rRect, DrawF
     }
 
     mpOutDev->SetMappingPolicy( eOldPolicy );
-    aRect =  mpOutDev->WindowToLogic( aRect );
-
-    return aRect;
+    return mpOutDev->convertTo<vcl::LogicRect>(vcl::WindowRect(aRect), mpOutDev->GetMapMode()).get();
 }
 
 tools::Rectangle DecorationView::DrawButton( const tools::Rectangle& rRect, DrawButtonFlags nStyle )
@@ -875,66 +873,65 @@ tools::Rectangle DecorationView::DrawButton( const tools::Rectangle& rRect, Draw
         return rRect;
     }
 
-    tools::Rectangle aRect =  mpOutDev->LogicToWindow( rRect );
+    auto aRect = mpOutDev->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect), mpOutDev->GetMapMode());
     const vcl::MappingPolicy eOldPolicy = mpOutDev->GetMappingPolicy();
     mpOutDev->SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
 
     mpOutDev->Push(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR);
-    ImplDrawButton( mpOutDev, aRect, nStyle );
+    ImplDrawButton( mpOutDev, aRect.get(), nStyle );
     mpOutDev->Pop();
 
     // keep border free, although it is used at default representation
-    aRect.AdjustLeft( 1 );
-    aRect.AdjustTop( 1 );
-    aRect.AdjustRight( -1 );
-    aRect.AdjustBottom( -1 );
+    aRect->AdjustLeft( 1 );
+    aRect->AdjustTop( 1 );
+    aRect->AdjustRight( -1 );
+    aRect->AdjustBottom( -1 );
 
     if ( nStyle & DrawButtonFlags::NoLightBorder )
     {
-        aRect.AdjustLeft( 1 );
-        aRect.AdjustTop( 1 );
+        aRect->AdjustLeft( 1 );
+        aRect->AdjustTop( 1 );
     }
     else if ( nStyle & DrawButtonFlags::NoLeftLightBorder )
     {
-        aRect.AdjustLeft( 1 );
+        aRect->AdjustLeft( 1 );
     }
 
     if ( nStyle & DrawButtonFlags::Pressed )
     {
-        if ( (aRect.GetHeight() > 10) && (aRect.GetWidth() > 10) )
+        if ( (aRect->GetHeight() > 10) && (aRect->GetWidth() > 10) )
         {
-            aRect.AdjustLeft(4 );
-            aRect.AdjustTop(4 );
-            aRect.AdjustRight( -1 );
-            aRect.AdjustBottom( -1 );
+            aRect->AdjustLeft(4 );
+            aRect->AdjustTop(4 );
+            aRect->AdjustRight( -1 );
+            aRect->AdjustBottom( -1 );
         }
         else
         {
-            aRect.AdjustLeft(3 );
-            aRect.AdjustTop(3 );
-            aRect.AdjustRight( -2 );
-            aRect.AdjustBottom( -2 );
+            aRect->AdjustLeft(3 );
+            aRect->AdjustTop(3 );
+            aRect->AdjustRight( -2 );
+            aRect->AdjustBottom( -2 );
         }
     }
     else if ( nStyle & DrawButtonFlags::Checked )
     {
-        aRect.AdjustLeft(3 );
-        aRect.AdjustTop(3 );
-        aRect.AdjustRight( -2 );
-        aRect.AdjustBottom( -2 );
+        aRect->AdjustLeft(3 );
+        aRect->AdjustTop(3 );
+        aRect->AdjustRight( -2 );
+        aRect->AdjustBottom( -2 );
     }
     else
     {
-        aRect.AdjustLeft(2 );
-        aRect.AdjustTop(2 );
-        aRect.AdjustRight( -3 );
-        aRect.AdjustBottom( -3 );
+        aRect->AdjustLeft(2 );
+        aRect->AdjustTop(2 );
+        aRect->AdjustRight( -3 );
+        aRect->AdjustBottom( -3 );
     }
 
     mpOutDev->SetMappingPolicy( eOldPolicy );
-    aRect =  mpOutDev->WindowToLogic( aRect );
 
-    return aRect;
+    return mpOutDev->convertTo<vcl::LogicRect>(vcl::WindowRect(aRect), mpOutDev->GetMapMode()).get();
 }
 
 void DecorationView::DrawSeparator( const Point& rStart, const Point& rStop, bool bVertical )
