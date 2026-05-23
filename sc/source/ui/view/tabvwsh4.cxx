@@ -463,7 +463,7 @@ void ScTabViewShell::QueryObjAreaPixel( tools::Rectangle& rRect ) const
 
     rViewData.GetDocShell()->SnapVisArea( aLogicRect );
 
-    rRect.SetSize( pWin->LogicToWindow( aLogicRect.GetSize() ) );
+    rRect.SetSize( pWin->convertTo<vcl::WindowSize>(vcl::LogicSize(aLogicRect.GetSize())).get() );
 }
 
 void ScTabViewShell::Move()

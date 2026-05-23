@@ -1022,7 +1022,10 @@ void SwPostItMgr::LayoutPostIts()
                             if (pPage->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT )
                             {
                                 // x value for notes positioning
-                                mlPageBorder = mpEditWin->LogicToWindow(Point(pPage->mPageRect.Left(), 0)).X() - nSidebarWidth;// - GetSidebarBorderWidth(true);
+                                mlPageBorder = mpEditWin->convertTo<vcl::WindowPoint>(
+                                    vcl::LogicPoint(Point(pPage->mPageRect.Left(), 0))
+                                ).get().X() - nSidebarWidth; // - GetSidebarBorderWidth(true);
+
                                 //bending point
                                 mlPageEnd =
                                     mpWrtShell->getIDocumentSettingAccess().get(DocumentSettingId::BROWSE_MODE)
@@ -1032,7 +1035,10 @@ void SwPostItMgr::LayoutPostIts()
                             else if (pPage->eSidebarPosition == sw::sidebarwindows::SidebarPosition::RIGHT )
                             {
                                 // x value for notes positioning
-                                mlPageBorder = mpEditWin->LogicToWindow( Point(pPage->mPageRect.Right(), 0)).X() + GetSidebarBorderWidth(true);
+                                mlPageBorder = mpEditWin->convertTo<vcl::WindowPoint>(
+                                    vcl::LogicPoint(Point(pPage->mPageRect.Right(), 0))
+                                ).get().X() + GetSidebarBorderWidth(true);
+
                                 //bending point
                                 mlPageEnd =
                                     mpWrtShell->getIDocumentSettingAccess().get(DocumentSettingId::BROWSE_MODE)
@@ -1040,7 +1046,9 @@ void SwPostItMgr::LayoutPostIts()
                                     pPage->mPageRect.Right() - 350;
                             }
 
-                            tools::Long Y = mpEditWin->LogicToWindow( Point(0,pItem->maLayoutInfo.mPosition.Bottom())).Y();
+                            tools::Long Y = mpEditWin->convertTo<vcl::WindowPoint>(
+                                vcl::LogicPoint(Point(0, pItem->maLayoutInfo.mPosition.Bottom()))
+                            ).get().Y();
 
                             // Without taking new width into account, the text height will be wrong.
                             // GuessTextHeightForWidth is expensive, only use it when necessary.
@@ -1052,8 +1060,11 @@ void SwPostItMgr::LayoutPostIts()
 
                             tools::Long postItPixelTextHeight
                                 = (comphelper::LibreOfficeKit::isActive()
-                                       ? mpEditWin->LogicToWindow(Point(0, nTextHeight)).Y()
-                                       : nTextHeight);
+                                        ? mpEditWin->convertTo<vcl::WindowPoint>(
+                                              vcl::LogicPoint(Point(0, nTextHeight))
+                                          ).get().Y()
+                                        : nTextHeight);
+
                             aPostItHeight
                                 = (postItPixelTextHeight < pPostIt->GetMinimumSizeWithoutMeta()
                                        ? pPostIt->GetMinimumSizeWithoutMeta()
@@ -1103,8 +1114,12 @@ void SwPostItMgr::LayoutPostIts()
                     else if (sal_Int32 nScrollSize = GetScrollSize())
                     {
                         //when we changed our zoom level, the offset value can be too big, so let's check for the largest possible zoom value
-                        tools::Long aAvailableHeight = mpEditWin->LogicToWindow(Size(0,pPage->mPageRect.Height())).Height() - 2 * GetSidebarScrollerHeight();
+                        tools::Long aAvailableHeight = mpEditWin->convertTo<vcl::WindowSize>(
+                            vcl::LogicSize(Size(0, pPage->mPageRect.Height()))
+                        ).get().Height() - 2 * GetSidebarScrollerHeight();
+
                         tools::Long lOffset = -1 * nScrollSize * (aVisiblePostItList.size() - aAvailableHeight / nScrollSize);
+
                         if (pPage->lOffset < lOffset)
                             pPage->lOffset = lOffset;
                     }
@@ -1376,8 +1391,14 @@ void SwPostItMgr::AutoScroll(const SwAnnotationWin* pPostIt,const tools::ULong a
     const bool bTop = mpEditWin->WindowToLogic(Point(0,pPostIt->GetPosPixel().Y())).Y() >= (mPages[aPage-1]->mPageRect.Top()+aSidebarheight);
     if ( !(bBottom && bTop))
     {
-        const tools::Long aDiff = bBottom ? mpEditWin->LogicToWindow(Point(0,mPages[aPage-1]->mPageRect.Top() + aSidebarheight)).Y() - pPostIt->GetPosPixel().Y() :
-                                        mpEditWin->LogicToWindow(Point(0,mPages[aPage-1]->mPageRect.Bottom() - aSidebarheight)).Y() - (pPostIt->GetPosPixel().Y()+pPostIt->GetSizePixel().Height());
+        const tools::Long aDiff = bBottom
+            ? mpEditWin->convertTo<vcl::WindowPoint>(
+                  vcl::LogicPoint(Point(0, mPages[aPage - 1]->mPageRect.Top() + aSidebarheight))
+              ).get().Y() - pPostIt->GetPosPixel().Y()
+            : mpEditWin->convertTo<vcl::WindowPoint>(
+                  vcl::LogicPoint(Point(0, mPages[aPage - 1]->mPageRect.Bottom() - aSidebarheight))
+              ).get().Y() - (pPostIt->GetPosPixel().Y() + pPostIt->GetSizePixel().Height());
+
         // this just adds the missing value to get the next a* GetScrollSize() after aDiff
         // e.g aDiff= 61 POSTIT_SCROLL=50 --> lScroll = 100
         const auto nScrollSize = GetScrollSize();
@@ -1451,7 +1472,7 @@ bool SwPostItMgr::LayoutByPage(std::vector<SwAnnotationWin*> &aVisiblePostItList
     //  - then the real layout starts
 
     //rBorder is the page rect
-    const tools::Rectangle aBorder         = mpEditWin->LogicToWindow(rBorder);
+    const tools::Rectangle aBorder = mpEditWin->convertTo<vcl::WindowRect>(vcl::LogicRect(rBorder)).get();
     tools::Long            lTopBorder      = aBorder.Top() + 5;
     tools::Long            lBottomBorder   = aBorder.Bottom() - 5;
     const tools::Long      lVisibleHeight  = lBottomBorder - lTopBorder; //aBorder.GetHeight() ;
@@ -2121,9 +2142,15 @@ tools::Long SwPostItMgr::GetNextBorder()
                 {
                     //if this is the last item, return the bottom border otherwise the next item
                     if (aNext == pPage->mvSidebarItems.end())
-                        return mpEditWin->LogicToWindow(Point(0,pPage->mPageRect.Bottom())).Y() - GetSpaceBetween();
+                    {
+                        return mpEditWin->convertTo<vcl::WindowPoint>(
+                                   vcl::LogicPoint(Point(0, pPage->mPageRect.Bottom()))
+                               )->Y() - GetSpaceBetween();
+                    }
                     else
+                    {
                         return (*aNext)->mpPostIt->GetPosPixel().Y() - GetSpaceBetween();
+                    }
                 }
             }
         }
@@ -2375,12 +2402,18 @@ void SwPostItMgr::CorrectPositions()
     // yeah, I know,    if this is a left page it could be wrong, but finding the page and the note is probably not even faster than just doing it
     // check, if anchor overlay object exists.
     const tools::Long aAnchorX = pFirstPostIt->Anchor()
-                          ? mpEditWin->LogicToWindow( Point(static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getX()),0)).X()
-                          : 0;
+        ? mpEditWin->convertTo<vcl::WindowPoint>(
+              vcl::LogicPoint(Point(static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getX()), 0))
+          ).get().X()
+        : 0;
+
     const tools::Long aAnchorY = pFirstPostIt->Anchor()
-                          ? mpEditWin->LogicToWindow( Point(0,static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getY()))).Y() + 1
-                          : 0;
-    if (Point(aAnchorX,aAnchorY) == pFirstPostIt->GetPosPixel())
+        ? mpEditWin->convertTo<vcl::WindowPoint>(
+              vcl::LogicPoint(Point(0, static_cast<tools::Long>(pFirstPostIt->Anchor()->GetSixthPosition().getY())))
+          ).get().Y() + 1
+        : 0;
+
+    if (Point(aAnchorX, aAnchorY) == pFirstPostIt->GetPosPixel())
         return;
 
     tools::Long aAnchorPosX = 0;
@@ -2393,10 +2426,18 @@ void SwPostItMgr::CorrectPositions()
             if ( item->mbShow && item->mpPostIt && item->mpPostIt->Anchor() )
             {
                 aAnchorPosX = pPage->eSidebarPosition == sw::sidebarwindows::SidebarPosition::LEFT
-                    ? mpEditWin->LogicToWindow( Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSeventhPosition().getX()),0)).X()
-                    : mpEditWin->LogicToWindow( Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getX()),0)).X();
-                aAnchorPosY = mpEditWin->LogicToWindow( Point(0,static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getY()))).Y() + 1;
-                item->mpPostIt->SetPosPixel(Point(aAnchorPosX,aAnchorPosY));
+                    ? mpEditWin->convertTo<vcl::WindowPoint>(
+                          vcl::LogicPoint(Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSeventhPosition().getX()), 0))
+                      ).get().X()
+                    : mpEditWin->convertTo<vcl::WindowPoint>(
+                          vcl::LogicPoint(Point(static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getX()), 0))
+                      ).get().X();
+
+                aAnchorPosY = mpEditWin->convertTo<vcl::WindowPoint>(
+                      vcl::LogicPoint(Point(0, static_cast<tools::Long>(item->mpPostIt->Anchor()->GetSixthPosition().getY())))
+                  ).get().Y() + 1;
+
+                item->mpPostIt->SetPosPixel(Point(aAnchorPosX, aAnchorPosY));
             }
         }
     }
@@ -2432,8 +2473,12 @@ void SwPostItMgr::SetSidebarWidth(const Point& rPointLogic)
 
     // The zoom level is conveniently used as reference to define the minimum width
     const sal_uInt16 nZoom = mpWrtShell->GetViewOptions()->GetZoom();
-    double nFactor = static_cast<double>(mpEditWin->LogicToWindow(Point(nLogicWidth, 0)).X())
-                     / static_cast<double>(nZoom);
+
+    double nFactor = static_cast<double>(mpEditWin->convertTo<vcl::WindowPoint>(
+                     vcl::LogicPoint(Point(nLogicWidth, 0))
+                 ).get().X())
+                 / static_cast<double>(nZoom);
+
     // The width may vary from 1x to 8x the zoom factor
     nFactor = std::clamp(nFactor, 1.0, 8.0);
     std::shared_ptr<comphelper::ConfigurationChanges> xChanges(

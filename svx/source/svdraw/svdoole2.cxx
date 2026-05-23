@@ -268,12 +268,13 @@ void SAL_CALL SdrLightEmbeddedClient_Impl::notifyEvent( const document::EventObj
         tools::Rectangle aLogicRect( mpObj->GetLogicRect() );
 
         // react to the change if the difference is bigger than one pixel
-        Size aPixelDiff =
-            Application::GetDefaultDevice()->LogicToWindow(
-                Size( aLogicRect.GetWidth() - aScaledSize.Width(),
-                      aLogicRect.GetHeight() - aScaledSize.Height() ),
-                MapMode(aContainerMapUnit));
-        if( aPixelDiff.Width() || aPixelDiff.Height() )
+        auto aPixelDiff = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+            vcl::LogicSize(Size(aLogicRect.GetWidth() - aScaledSize.Width(),
+                                aLogicRect.GetHeight() - aScaledSize.Height())),
+            MapMode(aContainerMapUnit)
+        );
+
+        if( aPixelDiff->Width() || aPixelDiff->Height() )
         {
             mpObj->SetLogicRect( tools::Rectangle( aLogicRect.TopLeft(), aScaledSize ) );
             mpObj->BroadcastObjectChange();
@@ -454,8 +455,8 @@ awt::Rectangle SAL_CALL SdrLightEmbeddedClient_Impl::getPlacement()
     if ( xParentVis.is() )
         aContainerMapUnit = VCLUnoHelper::UnoEmbed2VCLMapUnit( xParentVis->getMapUnit( mpObj->GetAspect() ) );
 
-    aLogicRect = Application::GetDefaultDevice()->LogicToWindow(aLogicRect, MapMode(aContainerMapUnit));
-    return vcl::unohelper::ConvertToAWTRect(aLogicRect);
+    const auto aRect = Application::GetDefaultDevice()->convertTo<vcl::WindowRect>(vcl::LogicRect(aLogicRect), MapMode(aContainerMapUnit));
+    return vcl::unohelper::ConvertToAWTRect(aRect.get());
 }
 
 awt::Rectangle SAL_CALL SdrLightEmbeddedClient_Impl::getClipRectangle()
@@ -510,12 +511,13 @@ void SAL_CALL SdrLightEmbeddedClient_Impl::changedPlacement( const awt::Rectangl
     // now remove scaling from new placement and keep this at the new object area
     aNewLogicRect.SetSize( aNewObjSize );
     // react to the change if the difference is bigger than one pixel
-    Size aPixelDiff =
-        Application::GetDefaultDevice()->LogicToWindow(
-            Size( aLogicRect.GetWidth() - aNewObjSize.Width(),
-                  aLogicRect.GetHeight() - aNewObjSize.Height() ),
-            MapMode(aContainerMapUnit));
-    if( aPixelDiff.Width() || aPixelDiff.Height() )
+    auto aPixelDiff = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+        vcl::LogicSize(aLogicRect.GetWidth() - aNewObjSize.Width(),
+                       aLogicRect.GetHeight() - aNewObjSize.Height()),
+        MapMode(aContainerMapUnit)
+    );
+
+    if( aPixelDiff->Width() || aPixelDiff->Height() )
     {
         mpObj->SetLogicRect( tools::Rectangle( aLogicRect.TopLeft(), aNewObjSize ) );
         mpObj->BroadcastObjectChange();

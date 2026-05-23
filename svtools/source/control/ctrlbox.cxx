@@ -1524,9 +1524,10 @@ Image SvtLineListBox::GetLineImage(const ImpLineListData& rLineListData)
     if ( aSize.Width() <= 0 )
         return {};
 
-    Size aVirSize =  aVirDev->LogicToWindow( aSize );
-    if ( aVirDev->GetOutputSizePixel() != aVirSize )
-        aVirDev->SetOutputSizePixel( aVirSize );
+    const auto aVirSize = aVirDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aSize));
+    if (aVirDev->GetOutputSizePixel() != aVirSize.get())
+        aVirDev->SetOutputSizePixel(aVirSize.get());
+
     aVirDev->SetFillColor( aColorDist );
     aVirDev->DrawRect( tools::Rectangle( Point(), aSize ) );
 

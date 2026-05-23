@@ -237,10 +237,10 @@ bool PSCSDFPropsQuickHelp(const HelpEvent &rEvt, SwWrtShell& rSh)
         tools::Rectangle aRect(rSh.GetWin()->WindowToLogic(
                                    rSh.GetWin()->ScreenToOutputPixel(rEvt.GetMousePosPixel())),
                                Size(1, 1));
-        Point aPt(rSh.GetWin()->OutputToScreenPixel(rSh.GetWin()->LogicToWindow(aRect.TopLeft())));
+        Point aPt(rSh.GetWin()->OutputToScreenPixel(rSh.GetWin()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aRect.TopLeft()))));
         aRect.SetLeft(aPt.X());
         aRect.SetTop(aPt.Y());
-        aPt = rSh.GetWin()->OutputToScreenPixel(rSh.GetWin()->LogicToWindow(aRect.BottomRight()));
+        aPt = rSh.GetWin()->OutputToScreenPixel(rSh.GetWin()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aRect.BottomRight())));
         aRect.SetRight(aPt.X());
         aRect.SetBottom(aPt.Y());
 
@@ -729,10 +729,10 @@ void SwEditWin::RequestHelp(const HelpEvent &rEvt)
                 else
                 {
                     tools::Rectangle aRect(aFieldRect.SVRect());
-                    Point aRectPt(OutputToScreenPixel(LogicToWindow(aRect.TopLeft())));
+                    Point aRectPt(OutputToScreenPixel(convertTo<vcl::WindowPoint>(vcl::LogicPoint(aRect.TopLeft()))));
                     aRect.SetLeft(aRectPt.X());
                     aRect.SetTop(aRectPt.Y());
-                    aRectPt = OutputToScreenPixel(LogicToWindow(aRect.BottomRight()));
+                    aRectPt = OutputToScreenPixel(convertTo<vcl::WindowPoint>(vcl::LogicPoint(aRect.BottomRight())));
                     aRect.SetRight(aRectPt.X());
                     aRect.SetBottom(aRectPt.Y());
 

@@ -294,8 +294,11 @@ ErrCode XOutBitmap::WriteGraphic( const Graphic& rGraphic, OUString& rFileName,
             const Size* pSize = nullptr;
             if (pMtfSize_100TH_MM)
             {
-                aSize = Application::GetDefaultDevice()->LogicToWindow(*pMtfSize_100TH_MM,
-                                                                      MapMode(MapUnit::Map100thMM));
+                aSize = Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(
+                    vcl::LogicSize(*pMtfSize_100TH_MM),
+                    MapMode(MapUnit::Map100thMM)
+                ).get();
+
                 pSize = &aSize;
             }
             aGraphic = GetBitmapFromMetaFile(rGraphic.GetGDIMetaFile(), pSize);
@@ -305,12 +308,12 @@ ErrCode XOutBitmap::WriteGraphic( const Graphic& rGraphic, OUString& rFileName,
             if (bWriteTransGrf)
             {
                 ScopedVclPtrInstance< VirtualDevice > pVDev(DeviceFormat::WITH_ALPHA);
-                const Size aSize(pVDev->LogicToWindow(*pMtfSize_100TH_MM, MapMode(MapUnit::Map100thMM)));
+                const auto aSize = pVDev->convertTo<vcl::WindowSize>(vcl::LogicSize(*pMtfSize_100TH_MM), MapMode(MapUnit::Map100thMM));
 
-                if( pVDev->SetOutputSizePixel( aSize ) )
+                if( pVDev->SetOutputSizePixel( aSize.get() ) )
                 {
-                    rGraphic.Draw(*pVDev, Point(), aSize);
-                    aGraphic = pVDev->GetBitmap( Point(), aSize );
+                    rGraphic.Draw(*pVDev, Point(), aSize.get());
+                    aGraphic = pVDev->GetBitmap( Point(), aSize.get() );
                 }
                 else
                     aGraphic = rGraphic.GetBitmap();
@@ -318,12 +321,12 @@ ErrCode XOutBitmap::WriteGraphic( const Graphic& rGraphic, OUString& rFileName,
             else
             {
                 ScopedVclPtrInstance< VirtualDevice > pVDev;
-                const Size aSize(pVDev->LogicToWindow(*pMtfSize_100TH_MM, MapMode(MapUnit::Map100thMM)));
+                const auto aSize = pVDev->convertTo<vcl::WindowSize>(vcl::LogicSize(*pMtfSize_100TH_MM), MapMode(MapUnit::Map100thMM));
 
-                if( pVDev->SetOutputSizePixel( aSize ) )
+                if( pVDev->SetOutputSizePixel( aSize.get() ) )
                 {
-                    rGraphic.Draw(*pVDev, Point(), aSize);
-                    aGraphic = pVDev->GetBitmap(Point(), aSize);
+                    rGraphic.Draw(*pVDev, Point(), aSize.get());
+                    aGraphic = pVDev->GetBitmap(Point(), aSize.get());
                 }
                 else
                     aGraphic = rGraphic.GetBitmap();

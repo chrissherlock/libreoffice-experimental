@@ -1731,7 +1731,7 @@ WatchWindow::WatchWindow(Layout* pParent)
 
     m_xEdit->set_accessible_name(IDEResId(RID_STR_WATCHNAME));
     m_xEdit->set_help_id(HID_BASICIDE_WATCHWINDOW_EDIT);
-    m_xEdit->set_size_request(LogicToWindow(Size(80, 0), MapMode(MapUnit::MapAppFont)).Width(), -1);
+    m_xEdit->set_size_request(convertTo<vcl::WindowSize>(vcl::LogicSize(Size(80, 0)), MapMode(MapUnit::MapAppFont))->Width(), -1);
     m_xEdit->connect_activate(LINK( this, WatchWindow, ActivateHdl));
     m_xEdit->connect_key_press(LINK( this, WatchWindow, KeyInputHdl));
     m_xTreeListBox->set_accessible_name(IDEResId(RID_STR_WATCHNAME));

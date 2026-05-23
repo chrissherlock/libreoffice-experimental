@@ -1117,7 +1117,7 @@ void SwAlignRect( SwRect &rRect, const SwViewShell *pSh, const vcl::RenderContex
                         gProp.pSFlyMetafileOut.get() : pRenderContext;
 
     // Hold original rectangle in pixel
-    const vcl::WindowRect aOrgPxRect = pOut->LogicToWindow( rRect.SVRect() );
+    const vcl::WindowRect aOrgPxRect = pOut->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect.SVRect()));
     // Determine pixel-center rectangle in twip
     const SwRect aPxCenterRect( pOut->WindowToLogic( aOrgPxRect ));
 
@@ -1208,7 +1208,7 @@ void SwAlignRect( SwRect &rRect, const SwViewShell *pSh, const vcl::RenderContex
 */
 void SwAlignGrfRect( SwRect *pGrfRect, const vcl::RenderContext &rOut )
 {
-    tools::Rectangle aPxRect =  rOut.LogicToWindow( pGrfRect->SVRect() );
+    tools::Rectangle aPxRect =  rOut.convertTo<vcl::WindowRect>(vcl::LogicRect(pGrfRect->SVRect()));
     pGrfRect->Pos( rOut.WindowToLogic( aPxRect.TopLeft() ));
     pGrfRect->SSize( rOut.WindowToLogic( aPxRect.GetSize() ));
 }
@@ -2161,12 +2161,13 @@ static void lcl_AdjustRectToPixelSize( SwRect& io_aSwRect, const vcl::RenderCont
 
     // local object of class <Rectangle> in Twip coordinates
     // calculated from given rectangle aligned to pixel centers.
-    const tools::Rectangle aPxCenterRect = aOut.WindowToLogic(
-            aOut.LogicToWindow( io_aSwRect.SVRect() ));
+    const tools::Rectangle aPxCenterRect = aOut.convertTo<vcl::LogicRect>(
+        aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(io_aSwRect.SVRect()))
+    ).get();
 
     // local constant object of class <Rectangle> representing given rectangle
     // in pixel.
-    const vcl::WindowRect aOrgPxRect = aOut.LogicToWindow( io_aSwRect.SVRect() );
+    const vcl::WindowRect aOrgPxRect = aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(io_aSwRect.SVRect()));
 
     // calculate adjusted rectangle from pixel centered rectangle.
     // Due to rounding differences <aPxCenterRect> doesn't exactly represents
@@ -2179,22 +2180,22 @@ static void lcl_AdjustRectToPixelSize( SwRect& io_aSwRect, const vcl::RenderCont
     aSizedRect.AdjustBottom(aTwipToPxSize.Height()/2 + 1);
 
     // adjust left()
-    while ( aOut.LogicToWindow(aSizedRect)->Left() < aOrgPxRect->Left() )
+    while ( aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(aSizedRect))->Left() < aOrgPxRect->Left() )
     {
         aSizedRect.AdjustLeft( 1 );
     }
     // adjust right()
-    while ( aOut.LogicToWindow(aSizedRect)->Right() > aOrgPxRect->Right() )
+    while ( aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(aSizedRect))->Right() > aOrgPxRect->Right() )
     {
         aSizedRect.AdjustRight( -1 );
     }
     // adjust top()
-    while ( aOut.LogicToWindow(aSizedRect)->Top() < aOrgPxRect->Top() )
+    while ( aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(aSizedRect))->Top() < aOrgPxRect->Top() )
     {
         aSizedRect.AdjustTop( 1 );
     }
     // adjust bottom()
-    while ( aOut.LogicToWindow(aSizedRect)->Bottom() > aOrgPxRect->Bottom() )
+    while ( aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(aSizedRect))->Bottom() > aOrgPxRect->Bottom() )
     {
         aSizedRect.AdjustBottom( -1 );
     }
@@ -2202,31 +2203,31 @@ static void lcl_AdjustRectToPixelSize( SwRect& io_aSwRect, const vcl::RenderCont
     io_aSwRect = SwRect( aSizedRect );
 
 #if OSL_DEBUG_LEVEL > 0
-    vcl::WindowRect aTestOrgPxRect = aOut.LogicToWindow( io_aSwRect.SVRect() );
-    vcl::WindowRect aTestNewPxRect = aOut.LogicToWindow( aSizedRect );
+    vcl::WindowRect aTestOrgPxRect = aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(io_aSwRect.SVRect()));
+    vcl::WindowRect aTestNewPxRect = aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(aSizedRect));
     OSL_ENSURE( aTestOrgPxRect == aTestNewPxRect,
             "Error in lcl_AlignRectToPixelSize(..): Adjusted rectangle has incorrect position or size");
     // check Left()
     aSizedRect.AdjustLeft( -1 );
-    aTestNewPxRect = vcl::WindowRect(aOut.LogicToWindow( aSizedRect ));
+    aTestNewPxRect = vcl::WindowRect(aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(aSizedRect)));
     OSL_ENSURE( aTestOrgPxRect->Left() >= (aTestNewPxRect->Left()+1),
             "Error in lcl_AlignRectToPixelSize(..): Left() not correct adjusted");
     aSizedRect.AdjustLeft( 1 );
     // check Right()
     aSizedRect.AdjustRight( 1 );
-    aTestNewPxRect = vcl::WindowRect(aOut.LogicToWindow( aSizedRect ));
+    aTestNewPxRect = vcl::WindowRect(aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(aSizedRect)));
     OSL_ENSURE( aTestOrgPxRect->Right() <= (aTestNewPxRect->Right()-1),
             "Error in lcl_AlignRectToPixelSize(..): Right() not correct adjusted");
     aSizedRect.AdjustRight( -1 );
     // check Top()
     aSizedRect.AdjustTop( -1 );
-    aTestNewPxRect = vcl::WindowRect(aOut.LogicToWindow( aSizedRect ));
+    aTestNewPxRect = vcl::WindowRect(aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(aSizedRect)));
     OSL_ENSURE( aTestOrgPxRect->Top() >= (aTestNewPxRect->Top()+1),
             "Error in lcl_AlignRectToPixelSize(..): Top() not correct adjusted");
     aSizedRect.AdjustTop( 1 );
     // check Bottom()
     aSizedRect.AdjustBottom( 1 );
-    aTestNewPxRect = vcl::WindowRect(aOut.LogicToWindow( aSizedRect ));
+    aTestNewPxRect = vcl::WindowRect(aOut.convertTo<vcl::WindowRect>(vcl::LogicRect(aSizedRect)));
     OSL_ENSURE( aTestOrgPxRect->Bottom() <= (aTestNewPxRect->Bottom()-1),
             "Error in lcl_AlignRectToPixelSize(..): Bottom() not correct adjusted");
     aSizedRect.AdjustBottom( -1 );
@@ -2586,8 +2587,8 @@ void SwTabFramePainter::PaintLines(OutputDevice& rDev, const SwRect& rRect) cons
             // By making the line sizes a multiple of one pixel size, we can
             // assure that all lines having the same twip size have the same
             // pixel size, independent of their position on the screen.
-            vcl::LogicPoint aPaintStart = rDev.WindowToLogic( rDev.LogicToWindow(aStart));
-            vcl::LogicPoint aPaintEnd = rDev.WindowToLogic( rDev.LogicToWindow(aEnd));
+            vcl::LogicPoint aPaintStart = rDev.WindowToLogic( rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aStart)));
+            vcl::LogicPoint aPaintEnd = rDev.WindowToLogic( rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aEnd)));
 
             if (gProp.pSGlobalShell->GetWin())
             {
@@ -4042,7 +4043,7 @@ void SwPageFrame::PaintDecorators( ) const
             pHeaderFrame = nullptr;
 
         tools::Long nHeaderYOff = aBodyRect.Top();
-        Point nOutputOff = rEditWin.LogicToWindow( Point( nXOff, nHeaderYOff ) );
+        Point nOutputOff = rEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( nXOff, nHeaderYOff )));
         rEditWin.GetFrameControlsManager().SetHeaderFooterControl( this, FrameControlType::Header, nOutputOff );
     }
 
@@ -4059,7 +4060,7 @@ void SwPageFrame::PaintDecorators( ) const
     }
 
     tools::Long nFooterYOff = aBodyRect.Bottom();
-    Point nOutputOff = rEditWin.LogicToWindow( Point( nXOff, nFooterYOff ) );
+    Point nOutputOff = rEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(Point( nXOff, nFooterYOff )));
     rEditWin.GetFrameControlsManager().SetHeaderFooterControl( this, FrameControlType::Footer, nOutputOff );
 }
 
@@ -6407,7 +6408,7 @@ bool SwPageFrame::IsLeftShadowNeeded() const
     const SwPostItMgr *pMgr = _pViewShell->GetPostItMgr();
     SwRect aAlignedPageRect( _rPageRect );
     ::SwAlignRect( aAlignedPageRect, _pViewShell, pRenderContext );
-    SwRect aPagePxRect(pRenderContext->LogicToWindow( aAlignedPageRect.SVRect() ));
+    SwRect aPagePxRect(pRenderContext->convertTo<vcl::WindowRect>(vcl::LogicRect(aAlignedPageRect.SVRect())));
 
     tools::Long lShadowAdjustment = snShadowPxWidth - 1; // TODO: extract this
 
@@ -6525,7 +6526,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
 
     SwRect aAlignedPageRect( _rPageRect );
     ::SwAlignRect( aAlignedPageRect, _pViewShell, _pViewShell->GetOut() );
-    SwRect aPagePxRect(_pViewShell->GetOut()->LogicToWindow( aAlignedPageRect.SVRect() ));
+    SwRect aPagePxRect(_pViewShell->GetOut()->convertTo<vcl::WindowRect>(vcl::LogicRect(aAlignedPageRect.SVRect())));
 
     if (aShadowColor != _pViewShell->GetViewOptions()->GetShadowColor())
     {
@@ -6774,7 +6775,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
 {
     SwRect aAlignedPageRect( _rPageRect );
     ::SwAlignRect( aAlignedPageRect, _pViewShell, pRenderContext );
-    SwRect aPagePxRect(pRenderContext->LogicToWindow( aAlignedPageRect.SVRect() ));
+    SwRect aPagePxRect(pRenderContext->convertTo<vcl::WindowRect>(vcl::LogicRect(aAlignedPageRect.SVRect())));
     aPagePxRect.AddBottom( snShadowPxWidth + 1 );
     aPagePxRect.AddTop( - snShadowPxWidth - 1 );
 

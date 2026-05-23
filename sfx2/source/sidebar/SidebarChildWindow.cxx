@@ -80,16 +80,19 @@ SidebarChildWindow::SidebarChildWindow(vcl::Window* pParentWindow, sal_uInt16 nI
 
 sal_Int32 SidebarChildWindow::GetDefaultWidth(vcl::Window const* pWindow)
 {
-    if (pWindow != nullptr)
-    {
-        // Width of the paragraph panel.
-        const static sal_Int32 nMaxPropertyPageWidth(146);
-
-        return pWindow->LogicToWindow(Point(nMaxPropertyPageWidth,1), MapMode(MapUnit::MapAppFont)).X()
-            + TabBar::GetDefaultWidth();
-    }
-    else
+    if (!pWindow)
         return 0;
+
+    // Width of the paragraph panel (logical units).
+    const static sal_Int32 nMaxPropertyPageWidth(146);
+
+    auto aConvertedPos = pWindow->convertTo<vcl::WindowPoint>(
+        vcl::LogicPoint(Point(nMaxPropertyPageWidth, 1)),
+        MapMode(MapUnit::MapAppFont)
+    );
+
+    // Add the tab bar width (pixels) to the pixel X-coordinate.
+    return aConvertedPos->X() + TabBar::GetDefaultWidth();
 }
 
 } // end of namespace sfx2::sidebar

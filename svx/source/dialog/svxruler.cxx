@@ -322,7 +322,7 @@ tools::Long SvxRuler::MakePositionSticky(tools::Long aPosition, tools::Long aPoi
     if (mbCoarseSnapping)
         aTick = GetCurrentRulerUnit().nTick2;
 
-    tools::Long aTickPixel = m_pEditWin->LogicToWindow(Size(aTick, 0), GetCurrentMapMode()).Width();
+    tools::Long aTickPixel = m_pEditWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(aTick, 0)), GetCurrentMapMode())->Width();
 
     double aHalfTick = aTick / 2.0;
     double aHalfTickPixel = aTickPixel / 2.0;
@@ -346,29 +346,29 @@ tools::Long SvxRuler::MakePositionSticky(tools::Long aPosition, tools::Long aPoi
     // Normalize -- snap to nearest tick
     aPositionLogic = rtl::math::round((aPositionLogic + aHalfTick) / aTick) * aTick;
     // Convert back to pixels
-    aPosition = m_pEditWin->LogicToWindow(Size(aPositionLogic, 0), GetCurrentMapMode()).Width();
+    aPosition = m_pEditWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(aPositionLogic, 0)), GetCurrentMapMode())->Width();
     // Move "coordinate system" back to original position
     return aPosition + aPointOfReferencePixel;
 }
 
 tools::Long SvxRuler::ConvertHPosPixel(tools::Long nVal) const
 {
-    return m_pEditWin->LogicToWindow(Size(nVal, 0)).Width();
+    return m_pEditWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nVal, 0)))->Width();
 }
 
 tools::Long SvxRuler::ConvertVPosPixel(tools::Long nVal) const
 {
-    return m_pEditWin->LogicToWindow(Size(0, nVal)).Height();
+    return m_pEditWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, nVal)))->Height();
 }
 
 tools::Long SvxRuler::ConvertHSizePixel(tools::Long nVal) const
 {
-    return m_pEditWin->LogicToWindow(Size(nVal, 0)).Width();
+    return m_pEditWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nVal, 0)))->Width();
 }
 
 tools::Long SvxRuler::ConvertVSizePixel(tools::Long nVal) const
 {
-    return m_pEditWin->LogicToWindow(Size(0, nVal)).Height();
+    return m_pEditWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, nVal)))->Height();
 }
 
 tools::Long SvxRuler::ConvertPosPixel(tools::Long nVal) const
@@ -924,20 +924,21 @@ void SvxRuler::UpdatePage()
     if (mxPagePosItem)
     {
         // all objects are automatically adjusted
-        if(m_bHorz)
+        if (m_bHorz)
         {
             SetPagePos(
-                m_pEditWin->LogicToWindow(mxPagePosItem->GetPos()).X(),
-                m_pEditWin->LogicToWindow(Size(mxPagePosItem->GetWidth(), 0)).
-                Width());
+                m_pEditWin->convertTo<vcl::WindowPoint>(vcl::LogicPoint(mxPagePosItem->GetPos()))->X(),
+                m_pEditWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(mxPagePosItem->GetWidth(), 0)))->Width()
+            );
         }
         else
         {
             SetPagePos(
-                m_pEditWin->LogicToWindow(mxPagePosItem->GetPos()).Y(),
-                m_pEditWin->LogicToWindow(Size(0, mxPagePosItem->GetHeight())).
-                Height());
+                m_pEditWin->convertTo<vcl::WindowPoint>(vcl::LogicPoint(mxPagePosItem->GetPos()))->Y(),
+                m_pEditWin->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, mxPagePosItem->GetHeight())))->Height()
+            );
         }
+
         if(m_bAppSetNullOffset)
             SetNullOffset(ConvertSizePixel(-m_lAppNullOffset + m_lLogicNullOffset));
     }

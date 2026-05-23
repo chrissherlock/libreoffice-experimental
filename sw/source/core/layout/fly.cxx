@@ -2299,7 +2299,7 @@ void SwFlyFrame::UpdateUnfloatButton(SwWrtShell* pWrtSh, bool bShow) const
 
     SwEditWin& rEditWin = pWrtSh->GetView().GetEditWin();
     SwFrameControlsManager& rMngr = rEditWin.GetFrameControlsManager();
-    Point aTopRightPixel = rEditWin.LogicToWindow( getFrameArea().TopRight() );
+    Point aTopRightPixel = rEditWin.convertTo<vcl::WindowPoint>(vcl::LogicPoint(getFrameArea().TopRight()));
     rMngr.SetUnfloatTableButton(this, bShow,  aTopRightPixel);
 }
 

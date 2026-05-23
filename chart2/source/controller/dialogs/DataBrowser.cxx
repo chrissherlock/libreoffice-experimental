@@ -51,7 +51,6 @@
 #include <algorithm>
 #include <limits>
 
-
 using namespace ::com::sun::star;
 using ::com::sun::star::uno::Reference;
 
@@ -289,18 +288,18 @@ void SeriesHeader::SetColor( const Color & rCol )
 void SeriesHeader::SetPos()
 {
     // chart type symbol
-    Size aSize( nSymbolHeight, nSymbolHeight );
-    aSize = m_xDevice->LogicToWindow(aSize, MapMode(MapUnit::MapAppFont));
-    m_spSymbol->set_size_request(aSize.Width(), aSize.Height());
+    vcl::LogicSize aLogicSize(static_cast<sal_Int32>(nSymbolHeight), static_cast<sal_Int32>(nSymbolHeight));
+    auto aSize = m_xDevice->convertTo<vcl::WindowSize>(vcl::LogicSize(aLogicSize), MapMode(MapUnit::MapAppFont));
+    m_spSymbol->set_size_request(aSize->Width(), aSize->Height());
 
     // series name edit field
     m_spSeriesName->set_margin_start(2);
 
-    sal_Int32 nHeightPx = m_xDevice->LogicToWindow(Size(0, 12), MapMode(MapUnit::MapAppFont))->Height();
-    m_spSeriesName->set_size_request(m_nWidth - aSize.Width() - 2, nHeightPx);
+    sal_Int32 nHeightPx = m_xDevice->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, 12)), MapMode(MapUnit::MapAppFont))->Height();
+    m_spSeriesName->set_size_request(m_nWidth - aSize->Width() - 2, nHeightPx);
 
     // color bar
-    nHeightPx = m_xDevice->LogicToWindow(Size(0, 3), MapMode(MapUnit::MapAppFont))->Height();
+    nHeightPx = m_xDevice->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(0, 3)), MapMode(MapUnit::MapAppFont))->Height();
     m_spColorBar->set_size_request(m_nWidth, nHeightPx);
 
     ScopedVclPtr<VirtualDevice> xVirDev(m_spColorBar->create_virtual_device());
@@ -616,14 +615,21 @@ void DataBrowser::RenewTable()
     RowRemoved( 1, GetRowCount() );
 
     // for row numbers
-    InsertHandleColumn( static_cast< sal_uInt16 >(
-                            GetDataWindow().LogicToWindow( Size( 42, 0 )).getWidth() ));
+    InsertHandleColumn(static_cast<sal_uInt16>(
+        GetDataWindow().convertTo<vcl::WindowSize>(vcl::LogicSize(Size(42, 0)))->Width()
+    ));
 
     OUString aDefaultSeriesName(SchResId(STR_COLUMN_LABEL));
     replaceParamterInString( aDefaultSeriesName, u"%COLUMNNUMBER", OUString::number( 24 ) );
-    sal_Int32 nColumnWidth = GetDataWindow().GetTextWidth( aDefaultSeriesName )
-        + GetDataWindow().LogicToWindow(Point(8 + impl::SeriesHeader::GetRelativeAppFontXPosForNameField(), 0), MapMode(MapUnit::MapAppFont)).X();
+
+    sal_Int32 nColumnWidth = GetDataWindow().GetTextWidth(aDefaultSeriesName)
+        + GetDataWindow().convertTo<vcl::WindowPoint>(
+            vcl::LogicPoint(Point(8 + impl::SeriesHeader::GetRelativeAppFontXPosForNameField(), 0)),
+            MapMode(MapUnit::MapAppFont)
+        )->X();
+
     sal_Int32 nColumnCount = m_apDataBrowserModel->getColumnCount();
+
     // nRowCount is a member of a base class
     sal_Int32 nRowCountLocal = m_apDataBrowserModel->getMaxRowCount();
     for( sal_Int32 nColIdx=1; nColIdx<=nColumnCount; ++nColIdx )

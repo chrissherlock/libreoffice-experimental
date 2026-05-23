@@ -154,10 +154,10 @@ namespace oglcanvas
         SystemChildWindow* pChildWindow = mxContext->getChildWindow();
         const MapMode aOldMapMode( pChildWindow->GetMapMode() );
         pChildWindow->SetMapMode( MapMode(MapUnit::MapMM) );
-        const Size aPixelSize( pChildWindow->LogicToWindow(Size(1,1)) );
+        const auto aPixelSize = pChildWindow->convertTo<vcl::WindowSize>(vcl::LogicSize(Size(1, 1)));
         pChildWindow->SetMapMode( aOldMapMode );
 
-        return vcl::unotools::size2DFromSize( aPixelSize );
+        return vcl::unotools::size2DFromSize(aPixelSize.get());
     }
 
     geometry::RealSize2D SpriteDeviceHelper::getPhysicalSize()

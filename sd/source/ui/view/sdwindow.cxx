@@ -584,7 +584,7 @@ void Window::UpdateMapMode()
 {
     maWinPos -= maViewOrigin;
     Size aPix(maWinPos.X(), maWinPos.Y());
-    aPix = LogicToWindow(aPix);
+    aPix = convertTo<vcl::WindowSize>(vcl::LogicSize(aPix));
     // Size has to be a multiple of BRUSH_SIZE due to the correct depiction of
     // pattern
     // #i2237#

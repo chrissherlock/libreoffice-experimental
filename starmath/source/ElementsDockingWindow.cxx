@@ -665,7 +665,7 @@ void SmElementsControl::addElement(const OUString& aElementVisual, const OUStrin
 
     AutoColorVisitor(pNode.get(), GetTextColor());
 
-    Size aSize = pDevice->LogicToWindow(Size(pNode->GetWidth(), pNode->GetHeight())).get();
+    Size aSize = pDevice->convertTo<vcl::WindowSize>(vcl::LogicSize(pNode->GetWidth(), pNode->GetHeight())).get();
     aSize.extendBy(10, 0); // Add 5 pixels from both sides to accommodate extending parts of italics
     pDevice->SetOutputSizePixel(aSize);
     SmDrawingVisitor(*pDevice, pDevice->WindowToLogic(Point(5, 0)).get(), pNode.get(), maFormat);

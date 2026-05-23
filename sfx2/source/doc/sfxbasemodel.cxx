@@ -3784,9 +3784,9 @@ void SAL_CALL SfxBaseModel::setVisualAreaSize( sal_Int64 nAspect, const awt::Siz
         Size aWinSize = pWindow->GetSizePixel();
         awt::Size aCurrent = getVisualAreaSize( nAspect );
         Size aDiff( aSize.Width-aCurrent.Width, aSize.Height-aCurrent.Height );
-        aDiff = pViewFrm->GetViewShell()->GetWindow()->LogicToWindow( aDiff );
-        aWinSize.AdjustWidth(aDiff.Width() );
-        aWinSize.AdjustHeight(aDiff.Height() );
+        const auto aConvertedSize = pViewFrm->GetViewShell()->GetWindow()->convertTo<vcl::WindowSize>(vcl::LogicSize(aDiff));
+        aWinSize.AdjustWidth(aConvertedSize->Width());
+        aWinSize.AdjustHeight(aConvertedSize->Height());
         pWindow->SetSizePixel( aWinSize );
     }
     else

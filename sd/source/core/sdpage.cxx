@@ -347,7 +347,7 @@ SdrObject* SdPage::CreatePresObj(PresObjKind eObjKind, bool bVertical, const ::t
             auto popIt = aOutDev.ScopedPush();
 
             aOutDev.SetMapMode( aGraphic.GetPrefMapMode() );
-            Size aSizePix =  aOutDev.LogicToWindow( aGraphic.GetPrefSize() );
+            Size aSizePix =  aOutDev.convertTo<vcl::WindowSize>(vcl::LogicSize(aGraphic.GetPrefSize()));
             aOutDev.SetMapMode(MapMode(MapUnit::Map100thMM));
 
             Size aSize =  aOutDev.WindowToLogic(aSizePix);

@@ -193,20 +193,20 @@ void OViewsWindow::impl_resizeSectionWindow(OSectionWindow& _rSectionWindow,Poin
 {
     const uno::Reference< report::XSection> xSection = _rSectionWindow.getReportSection().getSection();
 
-    Size aSectionSize = _rSectionWindow.LogicToWindow( Size( 0,xSection->getHeight() ) );
-    aSectionSize.setWidth( getView()->GetTotalWidth() );
+    auto aSectionSize = _rSectionWindow.convertTo<vcl::WindowSize>(vcl::LogicSize(0, xSection->getHeight()));
+    aSectionSize->setWidth( getView()->GetTotalWidth() );
 
     const sal_Int32 nMinHeight = _rSectionWindow.getStartMarker().getMinHeight();
-    if ( _rSectionWindow.getStartMarker().isCollapsed() || nMinHeight > aSectionSize.Height() )
-    {
-        aSectionSize.setHeight( nMinHeight );
-    }
-    aSectionSize.AdjustHeight(static_cast<tools::Long>(StyleSettings::GetSplitSize() * _rSectionWindow.GetMapMode().GetScaleY()) );
+
+    if (_rSectionWindow.getStartMarker().isCollapsed() || nMinHeight > aSectionSize->Height())
+        aSectionSize->setHeight(nMinHeight);
+
+    aSectionSize->AdjustHeight(static_cast<tools::Long>(StyleSettings::GetSplitSize() * _rSectionWindow.GetMapMode().GetScaleY()) );
 
     if ( _bSet )
-        _rSectionWindow.SetPosSizePixel(_rStartPoint,aSectionSize);
+        _rSectionWindow.SetPosSizePixel(_rStartPoint, aSectionSize.get());
 
-    _rStartPoint.AdjustY(aSectionSize.Height() );
+    _rStartPoint.AdjustY(aSectionSize->Height());
 }
 
 

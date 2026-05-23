@@ -74,7 +74,7 @@ void UnfloatTableButton::SetOffset(Point aTopRightPixel)
     // Compute the text size and get the box position & size from it
     tools::Rectangle aTextRect;
     m_xVirDev->GetTextBoundRect(aTextRect, m_sLabel);
-    vcl::WindowRect aTextPxRect = m_xVirDev->LogicToWindow(aTextRect);
+    vcl::WindowRect aTextPxRect = m_xVirDev->convertTo<vcl::WindowRect>(vcl::LogicRect(aTextRect));
     FontMetric aFontMetric = m_xVirDev->GetFontMetric(m_xVirDev->GetFont());
     Size aBoxSize(aTextPxRect->GetWidth() + BUTTON_WIDTH + TEXT_PADDING * 2,
                   aFontMetric.GetLineHeight() + TEXT_PADDING * 2);

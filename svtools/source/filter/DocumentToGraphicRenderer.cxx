@@ -109,7 +109,7 @@ DocumentToGraphicRenderer::~DocumentToGraphicRenderer()
 Size DocumentToGraphicRenderer::getDocumentSizeInPixels(sal_Int32 nCurrentPage)
 {
     Size aSize100mm = getDocumentSizeIn100mm(nCurrentPage);
-    return Application::GetDefaultDevice()->LogicToWindow(aSize100mm, MapMode(MapUnit::Map100thMM));
+    return Application::GetDefaultDevice()->convertTo<vcl::WindowSize>(vcl::LogicSize(aSize100mm), MapMode(MapUnit::Map100thMM)).get();
 }
 
 bool DocumentToGraphicRenderer::hasSelection() const

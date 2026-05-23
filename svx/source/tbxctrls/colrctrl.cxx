@@ -187,7 +187,7 @@ SvxColorDockingWindow::SvxColorDockingWindow(SfxBindings* _pBindings, SfxChildWi
 {
     SetText(SvxResId(STR_COLORTABLE));
     SetQuickHelpText(SvxResId(RID_SVXSTR_COLORBAR));
-    SetSizePixel(LogicToWindow(Size(150, 22), MapMode(MapUnit::MapAppFont)));
+    SetSizePixel(convertTo<vcl::WindowSize>(vcl::LogicSize(Size(150, 22)), MapMode(MapUnit::MapAppFont)).get());
     SetHelpId(HID_CTRL_COLOR);
 
     m_pColorSet->SetSelectHdl(LINK(this, SvxColorDockingWindow, SelectHdl));

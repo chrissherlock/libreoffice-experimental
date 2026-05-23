@@ -453,13 +453,15 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getPlacement()
         vcl::MappingPolicy eOldPolicy = pEditWin->GetMappingPolicy();
         if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode)
             pEditWin->SetMappingPolicy();
-        aRealObjArea = pEditWin->LogicToWindow(aRealObjArea);
+
+        aRealObjArea = pEditWin->convertTo<vcl::WindowRect>(vcl::LogicRect(aRealObjArea)).get();
+
         if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode  && pEditWin->GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode)
             pEditWin->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     }
     else
     {
-        aRealObjArea = pEditWin->LogicToWindow(aRealObjArea);
+        aRealObjArea = pEditWin->convertTo<vcl::WindowRect>(vcl::LogicRect(aRealObjArea)).get();
     }
 
     return vcl::unohelper::ConvertToAWTRect(aRealObjArea);
@@ -483,13 +485,15 @@ awt::Rectangle SAL_CALL SfxInPlaceClient_Impl::getClipRectangle()
         vcl::MappingPolicy eOldPolicy = pEditWin->GetMappingPolicy();
         if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode)
             pEditWin->SetMappingPolicy();
-        aRealObjArea = pEditWin->LogicToWindow(aRealObjArea);
+
+        aRealObjArea = pEditWin->convertTo<vcl::WindowRect>(vcl::LogicRect(aRealObjArea)).get();
+
         if (eOldPolicy == vcl::MappingPolicy::IgnoreMapMode  && pEditWin->GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode)
             pEditWin->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
     }
     else
     {
-        aRealObjArea = pEditWin->LogicToWindow(aRealObjArea);
+        aRealObjArea = pEditWin->convertTo<vcl::WindowRect>(vcl::LogicRect(aRealObjArea)).get();
     }
 
     return vcl::unohelper::ConvertToAWTRect(aRealObjArea);

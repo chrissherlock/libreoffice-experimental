@@ -141,8 +141,13 @@ void SwOutlineContentVisibilityWin::Set()
     SwRect aCharRect;
     pTextFrame->GetCharRect(aCharRect, SwPosition(*(pTextFrame->GetTextNodeForParaProps())),
                             &aMoveState);
-    Point aPxPt(GetEditWin()->GetOutDev()->LogicToWindow(
-        Point(aCharRect.Left(), aFrameAreaRect.Center().getY())));
+
+    Point aPxPt(GetEditWin()
+                    ->GetOutDev()
+                    ->convertTo<vcl::WindowPoint>(
+                        vcl::LogicPoint(Point(aCharRect.Left(), aFrameAreaRect.Center().getY())))
+                    .get());
+
     if (pTextFrame->IsRightToLeft())
         aPxPt.AdjustX(2);
     else
@@ -182,8 +187,8 @@ IMPL_LINK(SwOutlineContentVisibilityWin, MouseMoveHdl, const MouseEvent&, rMEvt,
             // MouseMove event may not be seen by the edit window for example when move is to
             // a show button or when move is outside of the edit window.
             // Only hide when mouse leave results in leaving the frame.
-            tools::Rectangle aFrameAreaPxRect
-                = GetEditWin()->LogicToWindow(GetFrame()->getFrameArea().SVRect());
+            tools::Rectangle aFrameAreaPxRect = GetEditWin()->convertTo<vcl::WindowRect>(
+                vcl::LogicRect(GetFrame()->getFrameArea().SVRect()));
             auto nY = GetPosPixel().getY() + rMEvt.GetPosPixel().getY();
             if (nY <= 0 || nY <= aFrameAreaPxRect.Top() || nY >= aFrameAreaPxRect.Bottom()
                 || nY >= GetEditWin()->GetSizePixel().Height())

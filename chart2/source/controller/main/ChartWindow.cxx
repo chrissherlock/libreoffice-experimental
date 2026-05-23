@@ -219,9 +219,10 @@ void ChartWindow::RequestHelp( const HelpEvent& rHEvt )
 
         if( bHelpHandled )
         {
-            tools::Rectangle aPixelRect(LogicToWindow(lcl_AWTRectToVCLRect(aHelpRect)));
-            tools::Rectangle aScreenRect(OutputToScreenPixel(aPixelRect.TopLeft()),
-                                         OutputToScreenPixel(aPixelRect.BottomRight()));
+            auto aPixelRect = convertTo<vcl::WindowRect>(vcl::LogicRect(lcl_AWTRectToVCLRect(aHelpRect)));
+
+            tools::Rectangle aScreenRect(OutputToScreenPixel(aPixelRect->TopLeft()),
+                                         OutputToScreenPixel(aPixelRect->BottomRight()));
 
             if( bIsBalloonHelp )
                 Help::ShowBalloon(this, rHEvt.GetMousePosPixel(), aScreenRect, aQuickHelpText);

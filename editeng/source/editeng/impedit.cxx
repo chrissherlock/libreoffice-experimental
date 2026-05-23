@@ -56,14 +56,15 @@ using namespace css;
 
 static void lcl_AlignToPixel(Point& rPoint, const OutputDevice& rOutDev, short nDiffX, short nDiffY)
 {
-    rPoint = rOutDev.LogicToWindow( rPoint ).get();
+    auto aPoint = rOutDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPoint));
 
-    if ( nDiffX )
-        rPoint.AdjustX(nDiffX );
-    if ( nDiffY )
-        rPoint.AdjustY(nDiffY );
+    if (nDiffX)
+        aPoint->AdjustX(nDiffX);
 
-    rPoint = rOutDev.WindowToLogic( rPoint ).get();
+    if (nDiffY)
+        aPoint->AdjustY(nDiffY);
+
+    rPoint = rOutDev.convertTo<vcl::LogicPoint>(aPoint).get();
 }
 
 LOKSpecialPositioning::LOKSpecialPositioning(const ImpEditView& rImpEditView, MapUnit eUnit,
@@ -340,7 +341,7 @@ void ImpEditView::lokSelectionCallback(const std::optional<tools::PolyPolygon> &
         std::vector<OString> v;
         for (tools::Rectangle & rRectangle : aRectangles)
         {
-            rRectangle = mpOutputWindow->LogicToWindow(rRectangle);
+            rRectangle = mpOutputWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(rRectangle)).get();
             rRectangle.Move(nX, nY);
             v.emplace_back(rRectangle.toString().getStr());
         }
@@ -1548,9 +1549,11 @@ Pair ImpEditView::Scroll( tools::Long ndX, tools::Long ndY, ScrollRangeCheck nRa
 
 #ifdef DBG_UTIL
     tools::Rectangle aR(maOutputArea);
-    aR = rOutDev.LogicToWindow( aR );
-    aR = rOutDev.WindowToLogic( aR );
-    SAL_WARN_IF(aR != maOutputArea, "editeng", "OutArea before Scroll not aligned");
+    // Round-trip: Logic -> Window -> Logic
+    auto aWindowRect = rOutDev.convertTo<vcl::WindowRect>(vcl::LogicRect(aR));
+    auto aLogicRect = rOutDev.convertTo<vcl::LogicRect>(aWindowRect);
+
+    SAL_WARN_IF(aLogicRect.get() != maOutputArea, "editeng", "OutArea before Scroll not aligned");
 #endif
 
     tools::Rectangle aNewVisArea( GetVisDocArea() );
@@ -1614,13 +1617,14 @@ Pair ImpEditView::Scroll( tools::Long ndX, tools::Long ndY, ScrollRangeCheck nRa
     tools::Long nDiffX = !IsVertical() ? ( GetVisDocLeft() - aNewVisArea.Left() ) : (IsTopToBottom() ? -( GetVisDocTop() - aNewVisArea.Top() ) : (GetVisDocTop() - aNewVisArea.Top()));
     tools::Long nDiffY = !IsVertical() ? ( GetVisDocTop() - aNewVisArea.Top() ) : (IsTopToBottom() ? (GetVisDocLeft() - aNewVisArea.Left()) : -(GetVisDocTop() - aNewVisArea.Top()));
 
-    Size aDiffs( nDiffX, nDiffY );
-    aDiffs = rOutDev.LogicToWindow( aDiffs ).get();
-    aDiffs = rOutDev.WindowToLogic( aDiffs ).get();
+    Size aDiffs(nDiffX, nDiffY);
 
-    tools::Long nRealDiffX = aDiffs.Width();
-    tools::Long nRealDiffY = aDiffs.Height();
+    // Perform the round-trip conversion
+    auto aWindowSize = rOutDev.convertTo<vcl::WindowSize>(vcl::LogicSize(aDiffs));
+    auto aLogicSize = rOutDev.convertTo<vcl::LogicSize>(aWindowSize);
 
+    tools::Long nRealDiffX = aLogicSize->Width();
+    tools::Long nRealDiffY = aLogicSize->Height();
 
     if ( nRealDiffX || nRealDiffY )
     {
@@ -1640,8 +1644,12 @@ Pair ImpEditView::Scroll( tools::Long ndX, tools::Long ndY, ScrollRangeCheck nRa
         }
         // Move by aligned value does not necessarily result in aligned
         // rectangle ...
-        maVisDocStartPos = rOutDev.LogicToWindow(maVisDocStartPos).get();
-        maVisDocStartPos = rOutDev.WindowToLogic(maVisDocStartPos).get();
+        maVisDocStartPos = rOutDev.convertTo<vcl::LogicPoint>(
+            rOutDev.convertTo<vcl::WindowPoint>(
+                vcl::LogicPoint(maVisDocStartPos)
+            )
+        ).get();
+
         tools::Rectangle aRect(maOutputArea);
 
         if (mpOutputWindow)
@@ -2245,10 +2253,11 @@ void ImpEditView::ShowDDCursor( const tools::Rectangle& rRect )
     rOutDev.SetFillColor( Color(4210752) );    // GRAY BRUSH_50, OLDSV, change to DDCursor!
 
     // Save background ...
-    tools::Rectangle aSaveRect( rOutDev.LogicToWindow( rRect ).get() );
+    auto aSaveRect = rOutDev.convertTo<vcl::WindowRect>(vcl::LogicRect(rRect));
+
     // prefer to save some more ...
-    aSaveRect.AdjustRight(1 );
-    aSaveRect.AdjustBottom(1 );
+    aSaveRect->AdjustRight(1);
+    aSaveRect->AdjustBottom(1);
 
     if (!mpDragAndDropInfo->pBackground)
     {
@@ -2259,7 +2268,7 @@ void ImpEditView::ShowDDCursor( const tools::Rectangle& rRect )
 
     }
 
-    Size aNewSzPx( aSaveRect.GetSize() );
+    Size aNewSzPx(aSaveRect->GetSize());
     Size aCurSzPx(mpDragAndDropInfo->pBackground->GetOutputSizePixel());
     if ( ( aCurSzPx.Width() < aNewSzPx.Width() ) ||( aCurSzPx.Height() < aNewSzPx.Height() ) )
     {
@@ -2267,11 +2276,11 @@ void ImpEditView::ShowDDCursor( const tools::Rectangle& rRect )
         DBG_ASSERT( bDone, "Virtual Device broken?" );
     }
 
-    aSaveRect = rOutDev.WindowToLogic( aSaveRect ).get();
+    const auto aSaveLogicRect = rOutDev.convertTo<vcl::LogicRect>(aSaveRect);
 
-    mpDragAndDropInfo->pBackground->DrawOutDev( Point(0,0), aSaveRect.GetSize(),
-                                aSaveRect.TopLeft(), aSaveRect.GetSize(), rOutDev );
-    mpDragAndDropInfo->aCurSavedCursor = aSaveRect;
+    mpDragAndDropInfo->pBackground->DrawOutDev(Point(0,0), aSaveLogicRect->GetSize(),
+                                aSaveLogicRect->TopLeft(), aSaveLogicRect->GetSize(), rOutDev);
+    mpDragAndDropInfo->aCurSavedCursor = aSaveLogicRect.get();
 
     // Draw Cursor...
     rOutDev.DrawRect( rRect );
@@ -2642,7 +2651,7 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
             }
             if ( bAccept )
             {
-                tools::Rectangle aEditCursor;
+                vcl::LogicRect aEditCursor;
                 if (mpDragAndDropInfo->bOutlinerMode)
                 {
                     tools::Long nDDYPos(0);
@@ -2660,38 +2669,42 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
                     aStartPos = GetWindowPos( aStartPos );
                     Point aEndPos( GetOutputArea().GetWidth(), nDDYPos );
                     aEndPos = GetWindowPos( aEndPos );
-                    aEditCursor = rOutDev.LogicToWindow( tools::Rectangle( aStartPos, aEndPos ) ).get();
+
+                    auto aEditWindowCursor = rOutDev.convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle(aStartPos, aEndPos)));
+
                     if (!getEditEngine().IsEffectivelyVertical())
                     {
-                        aEditCursor.AdjustTop( -1 );
-                        aEditCursor.AdjustBottom( 1 );
+                        aEditWindowCursor->AdjustTop( -1 );
+                        aEditWindowCursor->AdjustBottom( 1 );
                     }
                     else
                     {
                         if( IsTopToBottom() )
                         {
-                            aEditCursor.AdjustLeft( -1 );
-                            aEditCursor.AdjustRight( 1 );
+                            aEditWindowCursor->AdjustLeft( -1 );
+                            aEditWindowCursor->AdjustRight( 1 );
                         }
                         else
                         {
-                            aEditCursor.AdjustLeft( 1 );
-                            aEditCursor.AdjustRight( -1 );
+                            aEditWindowCursor->AdjustLeft( 1 );
+                            aEditWindowCursor->AdjustRight( -1 );
                         }
                     }
-                    aEditCursor = rOutDev.WindowToLogic( aEditCursor ).get();
+
+                    aEditCursor = rOutDev.convertTo<vcl::LogicRect>(aEditWindowCursor);
                 }
                 else
                 {
-                    aEditCursor = getImpEditEngine().PaMtoEditCursor( aPaM );
-                    Point aTopLeft( GetWindowPos( aEditCursor.TopLeft() ) );
-                    aEditCursor.SetPos( aTopLeft );
-                    aEditCursor.SetRight(aEditCursor.Left() + mpDragAndDropInfo->nCursorWidth);
-                    aEditCursor = rOutDev.LogicToWindow( aEditCursor ).get();
-                    aEditCursor = rOutDev.WindowToLogic( aEditCursor ).get();
+                    aEditCursor = vcl::LogicRect(getImpEditEngine().PaMtoEditCursor(aPaM));
+                    Point aTopLeft(GetWindowPos(aEditCursor->TopLeft()));
+                    aEditCursor->SetPos(aTopLeft);
+                    aEditCursor->SetRight(aEditCursor->Left() + mpDragAndDropInfo->nCursorWidth);
+
+                    // round trip
+                    aEditCursor = rOutDev.convertTo<vcl::LogicRect>(rOutDev.convertTo<vcl::WindowRect>(aEditCursor));
                 }
 
-                bool bCursorChanged = !mpDragAndDropInfo->bVisCursor || (mpDragAndDropInfo->aCurCursor != aEditCursor);
+                bool bCursorChanged = !mpDragAndDropInfo->bVisCursor || (mpDragAndDropInfo->aCurCursor != aEditCursor.get());
                 if ( bCursorChanged )
                 {
                     HideDDCursor();
