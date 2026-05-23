@@ -134,8 +134,9 @@ PaintBufferGuard::~PaintBufferGuard()
             }
             else
             {
-                tools::Rectangle aRectanglePixel = m_pWindow->LogicToWindow(m_aPaintRect);
-                aPaintRectSize = m_pWindow->WindowToLogic(aRectanglePixel.GetSize());
+                const auto aRectanglePixel = m_pWindow->convertTo<vcl::WindowRect>(vcl::LogicRect(m_aPaintRect), m_pWindow->GetMapMode());
+
+                aPaintRectSize = m_pWindow->WindowToLogic(aRectanglePixel->GetSize());
             }
 
             m_pWindow->GetOutDev()->DrawOutDev(m_aPaintRect.TopLeft(), aPaintRectSize, m_aPaintRect.TopLeft(), aPaintRectSize, *mpFrameData->mpBuffer);
@@ -1040,10 +1041,11 @@ void Window::Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags )
     }
     else
     {
-        vcl::Region aRegion = GetOutDev()->GetMapper().ViewToDevice( LogicToWindow( rRegion ) );
-        if ( !aRegion.IsEmpty() )
+        auto aRegion = convertTo<vcl::DeviceRegion>(vcl::LogicRegion(rRegion), GetMapMode());
+
+        if (!aRegion->IsEmpty())
         {
-            ImplInvalidate( &aRegion, nFlags );
+            ImplInvalidate(&aRegion.get(), nFlags);
             tools::Rectangle aLogicRectangle = rRegion.GetBoundRect();
             LogicInvalidate(&aLogicRectangle);
         }
@@ -1054,8 +1056,8 @@ void Window::LogicInvalidate(const tools::Rectangle* pRectangle)
 {
     if(pRectangle)
     {
-        tools::Rectangle aRect = GetOutDev()->GetMapper().LogicToDevicePixel(*pRectangle, GetOutDev()->GetMappingPolicy());
-        PixelInvalidate(&aRect);
+        const auto aRect = convertTo<vcl::DeviceRect>(vcl::LogicRect(*pRectangle), GetOutDev()->GetMapMode());
+        PixelInvalidate(&aRect.get());
     }
     else
         PixelInvalidate(nullptr);

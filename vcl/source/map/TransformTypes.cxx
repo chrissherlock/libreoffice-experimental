@@ -79,6 +79,13 @@ vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::WindowSize>::cast(
 }
 
 // RECTANGLES
+vcl::DeviceRect CoordinateCastTraits<vcl::DeviceRect, vcl::LogicRect>::cast(
+    const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pMapOverride)
+{
+    const MapMode& rMapMode = pMapOverride ? *pMapOverride : rDev.GetMapMode();
+
+    return rDev.GetMapper().MapToDevice(rSrc, rMapMode);
+}
 
 vcl::WindowRect CoordinateCastTraits<vcl::WindowRect, vcl::LogicRect>::cast(
     const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pMapOverride)
@@ -175,6 +182,13 @@ vcl::LogicPolyPolygon CoordinateCastTraits<vcl::LogicPolyPolygon, vcl::WindowPol
 }
 
 // REGIONS
+vcl::DeviceRegion CoordinateCastTraits<vcl::DeviceRegion, vcl::LogicRegion>::cast(
+    const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)
+{
+    const MapMode& rMapMode = pMapOverride ? *pMapOverride : rDev.GetMapMode();
+
+    return rDev.GetMapper().MapToDevice(rSrc, rMapMode);
+}
 
 vcl::WindowRegion CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>::cast(
     const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)
