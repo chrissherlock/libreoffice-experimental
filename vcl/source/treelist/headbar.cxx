@@ -887,7 +887,11 @@ void HeaderBar::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
 
 void HeaderBar::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFlags)
 {
-    Point       aPos  =  rDev.LogicToWindow( rPos );
+    Point aPos = rDev.convertTo<vcl::WindowPoint>(
+        vcl::LogicPoint(rPos),
+        rDev.GetMapMode()
+    ).get();
+
     Size        aSize = GetSizePixel();
     tools::Rectangle   aRect( aPos, aSize );
     vcl::Font aFont = GetDrawPixelFont(&rDev);
