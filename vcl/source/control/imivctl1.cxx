@@ -466,7 +466,7 @@ bool SvxIconChoiceCtrl_Impl::MouseMove( const MouseEvent& rMEvt )
     SvxIconChoiceCtrlEntry* pEntry = nullptr;
     if (!rMEvt.IsLeaveWindow())
     {
-        const Point aDocPos(pView->WindowToLogic(rMEvt.GetPosPixel()));
+        const Point aDocPos = pView->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
         pEntry = GetEntry(aDocPos);
     }
     SetEntryHighlightFrame(pEntry);

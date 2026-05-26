@@ -2101,9 +2101,8 @@ void DrawViewShell::FuTemporary(SfxRequest& rReq)
         case SID_DELETE_SNAPITEM:
         {
             SdrPageView* pPV;
-            Point   aMPos = GetActiveWindow()->WindowToLogic( maMousePos );
-            sal_uInt16  nHitLog = static_cast<sal_uInt16>(GetActiveWindow()->WindowToLogic( Size(
-                FuPoor::HITPIX, 0 ) ).Width());
+            Point aMPos = GetActiveWindow()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(maMousePos));
+            sal_uInt16 nHitLog = static_cast<sal_uInt16>(GetActiveWindow()->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(FuPoor::HITPIX, 0)))->Width());
             sal_uInt16  nHelpLine;
 
             if( mpDrawView->PickHelpLine( aMPos, nHitLog, *GetActiveWindow()->GetOutDev(), nHelpLine, pPV) )
@@ -3317,7 +3316,7 @@ void DrawViewShell::FuTemporary(SfxRequest& rReq)
                 Point aPos;
                 ::tools::Rectangle aRect( aPos, GetActiveWindow()->GetOutputSizePixel() );
                 aPos = aRect.Center();
-                aPos = GetActiveWindow()->WindowToLogic(aPos);
+                aPos = GetActiveWindow()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
                 aPos.AdjustX( -(aSize.Width() / 2) );
                 aPos.AdjustY( -(aSize.Height() / 2) );
 

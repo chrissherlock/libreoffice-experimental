@@ -100,6 +100,16 @@ void ImplUpdateJobSetupPaper( JobSetup& rJobSetup )
 }
 }
 
+Size Printer::GetPaperSize() const
+{
+    return convertTo<vcl::LogicSize>(vcl::WindowSize(maPaperSize)).get();
+}
+
+Point Printer::GetPageOffset() const
+{
+    return convertTo<vcl::LogicPoint>(vcl::WindowPoint(maPageOffset)).get();
+}
+
 void Printer::ImplPrintTransparent( const Bitmap& rBmp,
                                          const Point& rDestPt, const Size& rDestSize,
                                          const Point& rSrcPtPixel, const Size& rSrcSizePixel )
@@ -1298,7 +1308,10 @@ bool Printer::SetPaperSizeUser( const Size& rSize )
         return false;
 
     const Size aPixSize = convertTo<vcl::WindowSize>(vcl::LogicSize(rSize)).get();
-    const Size aPageSize = WindowToLogic(aPixSize, MapMode(MapUnit::Map100thMM));
+    const Size aPageSize = convertTo<vcl::LogicSize>(
+        vcl::WindowSize(aPixSize),
+        MapMode(MapUnit::Map100thMM)
+    );
     bool bNeedToChange(maJobSetup.ImplGetConstData().GetPaperWidth() != aPageSize.Width() ||
         maJobSetup.ImplGetConstData().GetPaperHeight() != aPageSize.Height());
 

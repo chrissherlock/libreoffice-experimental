@@ -1894,7 +1894,7 @@ tools::Rectangle ScAccessibleDocument::GetVisibleArea_Impl()
 
         ScGridWindow* pWin = static_cast<ScGridWindow*>(mpViewShell->GetWindowByPos(meSplitPos));
         if (pWin)
-            aVisRect = pWin->WindowToLogic(aVisRect, pWin->GetDrawMapMode());
+            aVisRect = pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(aVisRect), pWin->GetDrawMapMode());
     }
 
     return aVisRect;

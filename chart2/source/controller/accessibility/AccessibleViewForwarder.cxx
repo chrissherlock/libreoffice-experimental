@@ -43,14 +43,12 @@ AccessibleViewForwarder::~AccessibleViewForwarder()
 
 tools::Rectangle AccessibleViewForwarder::GetVisibleArea() const
 {
-    tools::Rectangle aVisibleArea;
-    if ( m_pWindow )
-    {
-        aVisibleArea = m_pWindow->WindowToLogic(
-            tools::Rectangle( Point( 0, 0 ), m_pWindow->GetOutputSizePixel() ),
-            m_aMapMode );
-    }
-    return aVisibleArea;
+    if (!m_pWindow)
+        return tools::Rectangle();
+
+    return m_pWindow->convertTo<vcl::LogicRect>(
+        vcl::WindowRect(tools::Rectangle(Point(0, 0), m_pWindow->GetOutputSizePixel())),
+        m_aMapMode);
 }
 
 Point AccessibleViewForwarder::LogicToWindow( const Point& rPoint ) const

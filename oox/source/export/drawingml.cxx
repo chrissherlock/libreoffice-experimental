@@ -2001,7 +2001,7 @@ void DrawingML::WriteGraphicCropProperties(uno::Reference<beans::XPropertySet> c
 
         // GraphicCrop is in mm100, so in case the original size is in pixels, convert it over.
         if (rMapMode.GetMapUnit() == MapUnit::MapPixel)
-            aOriginalSize = Application::GetDefaultDevice()->WindowToLogic(aOriginalSize, MapMode(MapUnit::Map100thMM));
+            aOriginalSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(vcl::WindowSize(aOriginalSize), MapMode(MapUnit::Map100thMM));
 
         if (aOriginalSize.Width() != 0 && aOriginalSize.Height() != 0)
             if ( (0 != aGraphicCropStruct.Left) || (0 != aGraphicCropStruct.Top) || (0 != aGraphicCropStruct.Right) || (0 != aGraphicCropStruct.Bottom) )
@@ -2113,8 +2113,11 @@ void DrawingML::WriteXGraphicTile(uno::Reference<beans::XPropertySet> const& rXP
     const MapMode aMapMode = aGraphic.GetPrefMapMode();
     // if the original size is in pixel, convert it to mm100
     if (aMapMode.GetMapUnit() == MapUnit::MapPixel)
-        aOriginalSize = Application::GetDefaultDevice()->WindowToLogic(aOriginalSize,
-                                                                      MapMode(MapUnit::Map100thMM));
+    {
+        aOriginalSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(aOriginalSize), MapMode(MapUnit::Map100thMM));
+    }
+
     sal_Int32 nSizeX = 0;
     sal_Int32 nOffsetX = 0;
     if (GetProperty(rXPropSet, u"FillBitmapSizeX"_ustr))
@@ -2192,8 +2195,11 @@ void DrawingML::WriteXGraphicCustomPosition(uno::Reference<beans::XPropertySet> 
     const MapMode aMapMode = aGraphic.GetPrefMapMode();
     // if the original size is in pixel, convert it to mm100
     if (aMapMode.GetMapUnit() == MapUnit::MapPixel)
-        aOriginalSize = Application::GetDefaultDevice()->WindowToLogic(aOriginalSize,
-                                                                      MapMode(MapUnit::Map100thMM));
+    {
+        aOriginalSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(aOriginalSize), MapMode(MapUnit::Map100thMM));
+    }
+
     double nSizeX = 0;
     if (GetProperty(rXPropSet, u"FillBitmapSizeX"_ustr))
     {

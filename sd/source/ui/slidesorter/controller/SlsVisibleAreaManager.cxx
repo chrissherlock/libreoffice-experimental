@@ -103,7 +103,8 @@ void VisibleAreaManager::MakeVisible()
     sd::Window *pWindow (mrSlideSorter.GetContentWindow().get());
     if ( ! pWindow)
         return;
-    const Point aCurrentTopLeft (pWindow->WindowToLogic(Point(0,0)));
+
+    const Point aCurrentTopLeft(pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(0, 0))));
 
     const ::std::optional<Point> aNewVisibleTopLeft (GetRequestedTopLeft());
     maVisibleRequests.clear();
@@ -126,10 +127,10 @@ void VisibleAreaManager::MakeVisible()
         return ::std::optional<Point>();
 
     // Get the currently visible area and the model area.
-    const ::tools::Rectangle aVisibleArea (pWindow->WindowToLogic(
-        ::tools::Rectangle(
-            Point(0,0),
-            pWindow->GetOutputSizePixel())));
+    const ::tools::Rectangle aVisibleArea(
+        pWindow->convertTo<vcl::LogicRect>(
+            vcl::WindowRect(::tools::Rectangle(Point(0, 0), pWindow->GetOutputSizePixel()))));
+
     const ::tools::Rectangle aModelArea (mrSlideSorter.GetView().GetModelArea());
 
     sal_Int32 nVisibleTop (aVisibleArea.Top());

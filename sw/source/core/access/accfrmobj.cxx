@@ -255,9 +255,9 @@ SwRect SwAccessibleChild::GetBox( const SwAccessibleMap& rAccMap ) const
         vcl::Window* pWin = rAccMap.GetShell().GetWin();
         if (pWin)
         {
-            aBox = SwRect( pWin->WindowToLogic(
-                                            tools::Rectangle( mpWindow->GetPosPixel(),
-                                                       mpWindow->GetSizePixel() ) ) );
+            aBox = SwRect(
+                pWin->convertTo<vcl::LogicRect>(
+                    vcl::WindowRect(tools::Rectangle(mpWindow->GetPosPixel(), mpWindow->GetSizePixel()))));
         }
     }
 

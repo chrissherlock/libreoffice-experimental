@@ -66,8 +66,8 @@ void SAL_CALL VCLXTabPageContainer::draw( sal_Int32 nX, sal_Int32 nY )
         if (pTabPage && pDev)
         {
             ::Point aPos( nX, nY );
-            aPos  = pDev->WindowToLogic( aPos ).get();
-            pTabPage->Draw(*pDev, aPos, SystemTextColorFlags::NONE);
+            aPos = pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
+            pTabPage->Draw( *pDev, aPos, SystemTextColorFlags::NONE );
         }
     }
 

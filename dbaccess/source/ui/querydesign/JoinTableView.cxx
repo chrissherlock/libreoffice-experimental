@@ -111,9 +111,9 @@ void OScrollWindowHelper::setTableView(OJoinTableView* _pTableView)
 
 void OScrollWindowHelper::resetRange(const Point& _aSize)
 {
-    Point aPos = WindowToLogic(_aSize);
-    GetHScrollBar().SetRange( Range(0, aPos.X() + TABWIN_SPACING_X) );
-    GetVScrollBar().SetRange( Range(0, aPos.Y() + TABWIN_SPACING_Y) );
+    auto aPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(_aSize));
+    GetHScrollBar().SetRange( Range(0, aPos->X() + TABWIN_SPACING_X) );
+    GetVScrollBar().SetRange( Range(0, aPos->Y() + TABWIN_SPACING_Y) );
 }
 
 void OScrollWindowHelper::Resize()

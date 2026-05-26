@@ -264,7 +264,7 @@ void LayerTabBar::MouseButtonDown(const MouseEvent& rMEvt)
     if (rMEvt.IsLeft())
     {
         Point aPosPixel = rMEvt.GetPosPixel();
-        sal_uInt16 aTabId = GetPageId( WindowToLogic(aPosPixel) );
+        sal_uInt16 aTabId = GetPageId(convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPosPixel)));
         if (aTabId == 0)
         {
             if (SfxViewFrame* pFrame = pDrViewSh->GetViewFrame())
@@ -395,7 +395,7 @@ sal_Int8 LayerTabBar::AcceptDrop( const AcceptDropEvent& rEvt )
 
     if( !pDrViewSh->GetDocSh()->IsReadOnly() )
     {
-        Point         aPos( WindowToLogic( rEvt.maPosPixel ) );
+        Point aPos(convertTo<vcl::LogicPoint>(vcl::WindowPoint(rEvt.maPosPixel)));
         OUString      sLayerName( GetLayerName(GetPageId(aPos)) );
         SdrLayerID    nLayerId = pDrViewSh->GetView()->GetDoc().GetLayerAdmin().GetLayerID(sLayerName);
 
@@ -412,7 +412,7 @@ sal_Int8 LayerTabBar::AcceptDrop( const AcceptDropEvent& rEvt )
  */
 sal_Int8 LayerTabBar::ExecuteDrop( const ExecuteDropEvent& rEvt )
 {
-    Point         aPos( WindowToLogic(rEvt.maPosPixel) );
+    Point aPos(convertTo<vcl::LogicPoint>(vcl::WindowPoint(rEvt.maPosPixel)));
     OUString      sLayerName( GetLayerName(GetPageId(aPos)) );
     SdrLayerID    nLayerId = pDrViewSh->GetView()->GetDoc().GetLayerAdmin().GetLayerID(sLayerName);
 

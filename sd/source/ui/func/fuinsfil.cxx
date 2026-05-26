@@ -508,8 +508,8 @@ void FuInsertFile::InsTextOrRTFinDrMode(SfxMedium* pMedium)
             Point aPos(aTemp.Width() / 2, aTemp.Height() / 2);
             aPos.AdjustX( -(aSize.Width() / 2) );
             aPos.AdjustY( -(aSize.Height() / 2) );
-            aSize = mpWindow->WindowToLogic(aSize);
-            aPos = mpWindow->WindowToLogic(aPos);
+            aSize = mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize));
+            aPos = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
             pTO->SetLogicRect(::tools::Rectangle(aPos, aSize));
 
             if (pDlg->IsLink())

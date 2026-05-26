@@ -82,7 +82,7 @@ void AnnotationTextWindow::Paint(vcl::RenderContext& rRenderContext, const ::too
     const bool bHighContrast = Application::GetSettings().GetStyleSettings().GetHighContrastMode();
     if (!bHighContrast)
     {
-        rRenderContext.DrawGradient(::tools::Rectangle(Point(0,0), rRenderContext.WindowToLogic(aSize)),
+        rRenderContext.DrawGradient(::tools::Rectangle(Point(0,0), rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(aSize))),
                                     Gradient(css::awt::GradientStyle_LINEAR, mrContents.maColorLight, mrContents.maColor));
     }
 
@@ -197,7 +197,7 @@ void AnnotationTextWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     rDevice.SetMapMode(MapMode(MapUnit::Map100thMM));
     rDevice.SetBackground(aBgColor);
 
-    Size aOutputSize(rDevice.WindowToLogic(aSize));
+    Size aOutputSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(aSize)));
 
     EditView* pEditView = GetEditView();
     pEditView->setEditViewCallbacks(this);
@@ -282,7 +282,7 @@ void AnnotationWindow::InitControls()
     mxVScrollbar->connect_vadjustment_value_changed(LINK(this, AnnotationWindow, ScrollHdl));
 
     mpOutlinerView->SetBackgroundColor(COL_TRANSPARENT);
-    mpOutlinerView->SetOutputArea(rDevice.WindowToLogic(::tools::Rectangle(0, 0, 1, 1)));
+    mpOutlinerView->SetOutputArea(rDevice.convertTo<vcl::LogicRect>(vcl::WindowRect(0, 0, 1, 1)));
 
     mxMenuButton = mxBuilder->weld_menu_button(u"menubutton"_ustr);
     if (mbReadonly)
@@ -396,7 +396,7 @@ void AnnotationWindow::DoResize()
 
     aHeight -= POSTIT_META_HEIGHT;
 
-    mpOutliner->SetPaperSize( rDevice.WindowToLogic( Size(aWidth, aHeight) )) ;
+    mpOutliner->SetPaperSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(aWidth, aHeight)));
     ::tools::Long aTextHeight = rDevice.convertTo<vcl::WindowSize>(vcl::LogicSize(mpOutliner->CalcTextSize()))->Height();
 
     if( aTextHeight > aHeight )
@@ -406,7 +406,7 @@ void AnnotationWindow::DoResize()
         {
             // we need vertical scrollbars and have to reduce the width
             aWidth -= nThickness;
-            mpOutliner->SetPaperSize(rDevice.WindowToLogic(Size(aWidth, aHeight)));
+            mpOutliner->SetPaperSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(aWidth, aHeight)));
         }
         mxVScrollbar->set_vpolicy(VclPolicyType::ALWAYS);
     }
@@ -415,7 +415,7 @@ void AnnotationWindow::DoResize()
         mxVScrollbar->set_vpolicy(VclPolicyType::NEVER);
     }
 
-    ::tools::Rectangle aOutputArea =  rDevice.WindowToLogic(::tools::Rectangle(0, 0, aWidth, aHeight));
+    ::tools::Rectangle aOutputArea =  rDevice.convertTo<vcl::LogicRect>(vcl::WindowRect(0, 0, aWidth, aHeight));
     if (mxVScrollbar->get_vpolicy() == VclPolicyType::NEVER)
     {
         // if we do not have a scrollbar anymore, we want to see the complete text
@@ -427,8 +427,8 @@ void AnnotationWindow::DoResize()
     int nUpper = mpOutliner->GetTextHeight();
     int nCurrentDocPos = mpOutlinerView->GetVisArea().Top();
     int nStepIncrement = mpOutliner->GetTextHeight() / 10;
-    int nPageIncrement = rDevice.WindowToLogic(Size(0,aHeight))->Height() * 8 / 10;
-    int nPageSize = rDevice.WindowToLogic(Size(0,aHeight))->Height();
+    int nPageIncrement = rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(0, aHeight))->Height() * 8 / 10;
+    int nPageSize = rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(0, aHeight))->Height();
 
     /* limit the page size to below nUpper because gtk's gtk_scrolled_window_start_deceleration has
        effectively...

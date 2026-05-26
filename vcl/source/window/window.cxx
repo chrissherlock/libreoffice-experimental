@@ -1386,7 +1386,7 @@ void Window::ImplPointToLogic(vcl::RenderContext const & rRenderContext, vcl::Fo
     aSize.AdjustHeight(72/2 );
     aSize.setHeight( aSize.Height() / 72 );
 
-    aSize =  rRenderContext.WindowToLogic(aSize);
+    aSize =  rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(aSize));
 
     rFont.SetFontSize(aSize);
 }

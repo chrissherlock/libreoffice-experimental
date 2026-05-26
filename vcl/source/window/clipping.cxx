@@ -147,7 +147,7 @@ vcl::Region WindowOutputDevice::GetActiveClipRegion() const
     if ( mbClipRegion )
         aRegion.Intersect( maRegion );
 
-    return WindowToLogic( aRegion );
+    return convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
 }
 
 void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)

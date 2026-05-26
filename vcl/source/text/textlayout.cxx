@@ -683,7 +683,7 @@ namespace vcl
         // our caller gives us the left border of the draw position, regardless of script type, text layout,
         // and the like in our ctor, we set the map mode of the target device from pixel to twip, but our caller doesn't know this,
         // but passed pixel coordinates. So, adjust the rect.
-        tools::Rectangle aRect( m_rTargetDevice.WindowToLogic( _rRect ));
+        tools::Rectangle aRect( m_rTargetDevice.convertTo<vcl::LogicRect>(vcl::WindowRect(_rRect)));
         if (i_pDeviceSize)
         {
             //if i_pDeviceSize is passed in here, it was the original pre logic-to-pixel size of _rRect
@@ -750,7 +750,7 @@ namespace vcl
         // our caller gives us the left border of the draw position, regardless of script type, text layout,
         // and the like in our ctor, we set the map mode of the target device from pixel to twip, but our caller doesn't know this,
         // but passed pixel coordinates. So, adjust the rect.
-        tools::Rectangle aRect( m_rTargetDevice.WindowToLogic( _rRect ));
+        tools::Rectangle aRect( m_rTargetDevice.convertTo<vcl::LogicRect>(vcl::WindowRect(_rRect)));
 
         tools::Rectangle aTextRect = m_rTargetDevice.GetTextRect( aRect, _rText, _nStyle, nullptr, this );
 

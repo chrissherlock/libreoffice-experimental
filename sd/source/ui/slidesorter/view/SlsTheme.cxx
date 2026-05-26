@@ -151,7 +151,7 @@ std::shared_ptr<vcl::Font> Theme::GetFont (
         ).get();
 
         // Transform the font size to the logical coordinates of the device.
-        pFont->SetFontSize(rDevice.WindowToLogic(aFontSize));
+        pFont->SetFontSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(aFontSize)));
     }
 
     return pFont;

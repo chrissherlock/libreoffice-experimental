@@ -531,7 +531,7 @@ void SAL_CALL SfxInPlaceClient_Impl::changedPlacement( const awt::Rectangle& aPo
         return;
 
     // new scaled object area
-    tools::Rectangle aNewLogicRect = m_pClient->GetEditWin()->WindowToLogic( aNewPixelRect );
+    tools::Rectangle aNewLogicRect = m_pClient->GetEditWin()->convertTo<vcl::LogicRect>(vcl::WindowRect(aNewPixelRect));
 
     // all the size changes in this method should happen without scaling
     // SfxBooleanFlagGuard aGuard( m_bResizeNoScale, sal_True );

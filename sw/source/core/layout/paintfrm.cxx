@@ -362,7 +362,7 @@ void SwCalcPixStatics( vcl::RenderContext const *pOut )
     bool bSmallTwipToPxRelW = false;
     bool bSmallTwipToPxRelH = false;
     {
-        Size aCheckTwipToPxRelSz( pOut->WindowToLogic( Size( 100, 100 )));
+        Size aCheckTwipToPxRelSz(pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(100, 100)));
         if ( (aCheckTwipToPxRelSz.Width()/100.0) < 2.0 )
         {
             bSmallTwipToPxRelW = true;
@@ -373,7 +373,7 @@ void SwCalcPixStatics( vcl::RenderContext const *pOut )
         }
     }
 
-    Size aSz( pOut->WindowToLogic( Size( 1,1 )));
+    Size aSz(pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(1, 1)));
 
     gProp.nSPixelSzW = aSz.Width();
     if( !gProp.nSPixelSzW )
@@ -1119,7 +1119,7 @@ void SwAlignRect( SwRect &rRect, const SwViewShell *pSh, const vcl::RenderContex
     // Hold original rectangle in pixel
     const vcl::WindowRect aOrgPxRect = pOut->convertTo<vcl::WindowRect>(vcl::LogicRect(rRect.SVRect()));
     // Determine pixel-center rectangle in twip
-    const SwRect aPxCenterRect( pOut->WindowToLogic( aOrgPxRect ));
+    const SwRect aPxCenterRect(pOut->convertTo<vcl::LogicRect>(vcl::WindowRect(aOrgPxRect)));
 
     // Perform adjustments on pixel level.
     SwRect aAlignedPxRect( aOrgPxRect );
@@ -1177,7 +1177,7 @@ void SwAlignRect( SwRect &rRect, const SwViewShell *pSh, const vcl::RenderContex
         bZeroHeight = true;
     }
 
-    rRect = SwRect(pOut->WindowToLogic( aAlignedPxRect.SVRect() ));
+    rRect = SwRect(pOut->convertTo<vcl::LogicRect>(vcl::WindowRect(aAlignedPxRect.SVRect())));
 
     // Consider zero width/height and adjust calculated aligned twip rectangle.
     // Reset width/height to zero; previous negative width/height haven't to be considered.
@@ -1209,8 +1209,8 @@ void SwAlignRect( SwRect &rRect, const SwViewShell *pSh, const vcl::RenderContex
 void SwAlignGrfRect( SwRect *pGrfRect, const vcl::RenderContext &rOut )
 {
     tools::Rectangle aPxRect =  rOut.convertTo<vcl::WindowRect>(vcl::LogicRect(pGrfRect->SVRect()));
-    pGrfRect->Pos( rOut.WindowToLogic( aPxRect.TopLeft() ));
-    pGrfRect->SSize( rOut.WindowToLogic( aPxRect.GetSize() ));
+    pGrfRect->Pos(rOut.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPxRect.TopLeft())));
+    pGrfRect->SSize(rOut.convertTo<vcl::LogicSize>(vcl::WindowSize(aPxRect.GetSize())));
 }
 
 static tools::Long lcl_AlignWidth( const tools::Long nWidth, SwPaintProperties const & properties )
@@ -1350,7 +1350,7 @@ static void lcl_ExtendLeftAndRight( SwRect&                _rRect,
 static basegfx::B2DRange lcl_ShrinkFly(const SwRect& rRect)
 {
     static MapMode aMapMode(MapUnit::MapTwip);
-    static const Size aSingleUnit = Application::GetDefaultDevice()->WindowToLogic(Size(1, 1), aMapMode);
+    static const Size aSingleUnit = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(vcl::WindowSize(1, 1), aMapMode);
 
     double x1 = rRect.Left() + aSingleUnit.getWidth();
     double y1 = rRect.Top() + aSingleUnit.getHeight();
@@ -2157,7 +2157,7 @@ static void lcl_AdjustRectToPixelSize( SwRect& io_aSwRect, const vcl::RenderCont
 {
     // local constant object of class <Size> to determine number of Twips
     // representing a pixel.
-    const Size aTwipToPxSize( aOut.WindowToLogic( Size( 1,1 ) ));
+    const Size aTwipToPxSize(aOut.convertTo<vcl::LogicSize>(vcl::WindowSize(1, 1)));
 
     // local object of class <Rectangle> in Twip coordinates
     // calculated from given rectangle aligned to pixel centers.
@@ -2587,8 +2587,8 @@ void SwTabFramePainter::PaintLines(OutputDevice& rDev, const SwRect& rRect) cons
             // By making the line sizes a multiple of one pixel size, we can
             // assure that all lines having the same twip size have the same
             // pixel size, independent of their position on the screen.
-            vcl::LogicPoint aPaintStart = rDev.WindowToLogic( rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aStart)));
-            vcl::LogicPoint aPaintEnd = rDev.WindowToLogic( rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aEnd)));
+            vcl::LogicPoint aPaintStart = rDev.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aStart))));
+            vcl::LogicPoint aPaintEnd = rDev.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rDev.convertTo<vcl::WindowPoint>(vcl::LogicPoint(aEnd))));
 
             if (gProp.pSGlobalShell->GetWin())
             {
@@ -6459,7 +6459,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
 
         pOut->SetFillColor(SwViewOption::GetCurrentViewOptions().GetAppBackgroundColor());
         pOut->SetLineColor();
-        pOut->DrawRect(pOut->WindowToLogic(aRect));
+        pOut->DrawRect(pOut->convertTo<vcl::LogicRect>(vcl::WindowRect(aRect)));
     }
 
     // Tiled render if necessary
@@ -6474,8 +6474,9 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
         tools::Rectangle aRender = aComplete.GetIntersection(aTile);
         if (aRender.IsEmpty())
             break;
-        pOut->DrawBitmap(static_cast<const Point&>(pOut->WindowToLogic(aRender.TopLeft())),
-                         static_cast<const Size&>(pOut->WindowToLogic(aRender.GetSize())),
+
+        pOut->DrawBitmap(static_cast<const Point&>(pOut->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aRender.TopLeft()))),
+                         static_cast<const Size&>(pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(aRender.GetSize()))),
                          Point(0, 0), aRender.GetSize(),
                          rBitmap);
     }
@@ -6581,8 +6582,17 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
     // Right shadow & corners
     if ( bPaintRightShadow )
     {
-        pOut->DrawBitmap(pOut->WindowToLogic( Point( aPaintRect.Right(), aPagePxRect.Bottom() + 1 - (aPageBottomRightShadow.GetSizePixel().Height() - snShadowPxWidth) ) ), aPageBottomRightShadow);
-        pOut->DrawBitmap(pOut->WindowToLogic( Point( aPaintRect.Right(), aPagePxRect.Top() - snShadowPxWidth ) ), aPageTopRightShadow);
+        pOut->DrawBitmap(
+            pOut->convertTo<vcl::LogicPoint>(
+                vcl::WindowPoint(Point(aPaintRect.Right(), aPagePxRect.Bottom() + 1 - (aPageBottomRightShadow.GetSizePixel().Height() - snShadowPxWidth)))),
+            aPageBottomRightShadow
+        );
+
+        pOut->DrawBitmap(
+            pOut->convertTo<vcl::LogicPoint>(
+                vcl::WindowPoint(Point(aPaintRect.Right(), aPagePxRect.Top() - snShadowPxWidth))),
+            aPageTopRightShadow
+        );
 
         if (aPagePxRect.Height() > 2 * snShadowPxWidth)
         {
@@ -6602,10 +6612,17 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
     if(bPaintLeftShadow)
     {
         const tools::Long lLeft = aPaintRect.Left() - aPageBottomLeftShadow.GetSizePixel().Width();
-        pOut->DrawBitmap( pOut->WindowToLogic( Point( lLeft,
-            aPagePxRect.Bottom() + 1 + snShadowPxWidth - aPageBottomLeftShadow.GetSizePixel().Height() ) ), aPageBottomLeftShadow );
-        pOut->DrawBitmap(pOut->WindowToLogic( Point( lLeft, aPagePxRect.Top() - snShadowPxWidth ) ), aPageTopLeftShadow);
-        if (aPagePxRect.Height() > 2 * snShadowPxWidth)
+
+        pOut->DrawBitmap(
+    pOut->convertTo<vcl::LogicPoint>(
+        vcl::WindowPoint(Point(lLeft, aPagePxRect.Bottom() + 1 + snShadowPxWidth - aPageBottomLeftShadow.GetSizePixel().Height()))),
+            aPageBottomLeftShadow);
+
+        pOut->DrawBitmap(
+            pOut->convertTo<vcl::LogicPoint>(
+                vcl::WindowPoint(Point(lLeft, aPagePxRect.Top() - snShadowPxWidth))),
+            aPageTopLeftShadow);
+
         {
             const tools::Long nWidth = aPageLeftShadow.GetSizePixel().Width();
             const tools::Long nHeight = aPagePxRect.Height() - 2 * (snShadowPxWidth - 1);
@@ -6686,38 +6703,72 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
     if (!pMgr->ShowScrollbar(nPageNum))
         return;
 
+    OutputDevice* pOut = _pViewShell->GetOut();
+
+    // Cache logical conversions to avoid repeated and verbose inline calculations
+    const ::tools::Long nLogic2X = pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(2, 0))->Width();
+    const ::tools::Long nLogic2Y = pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(0, 2))->Height();
+    const ::tools::Long nLogic4X = pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(4, 0))->Width();
+    const ::tools::Long nLogicScrollOffsetY = pOut->convertTo<vcl::LogicSize>(
+        vcl::WindowSize(0, 2 + pMgr->GetSidebarScrollerHeight()))->Height();
+    const ::tools::Long nLogicScrollerHeightY = pOut->convertTo<vcl::LogicSize>(
+        vcl::WindowSize(0, nScrollerHeight))->Height();
+
     // draw scrollbar area and arrows
     Point aPointBottom;
     Point aPointTop;
-    aPointBottom = !bRight ? Point(aPageRect.Left() - pMgr->GetSidebarWidth() - pMgr->GetSidebarBorderWidth() + _pViewShell->GetOut()->WindowToLogic(Size(2,0))->Width(),aPageRect.Bottom()- _pViewShell->GetOut()->WindowToLogic(Size(0,2+pMgr->GetSidebarScrollerHeight()))->Height()) :
-                            Point(aPageRect.Right() + pMgr->GetSidebarBorderWidth() + _pViewShell->GetOut()->WindowToLogic(Size(2,0))->Width(),aPageRect.Bottom()- _pViewShell->GetOut()->WindowToLogic(Size(0,2+pMgr->GetSidebarScrollerHeight()))->Height());
-    aPointTop = !bRight ?    Point(aPageRect.Left() - pMgr->GetSidebarWidth() + _pViewShell->GetOut()->WindowToLogic(Size(2,0))->Width(),aPageRect.Top() + _pViewShell->GetOut()->WindowToLogic(Size(0,2))->Height()) :
-                        Point(aPageRect.Right() + pMgr->GetSidebarBorderWidth() + _pViewShell->GetOut()->WindowToLogic(Size(2,0))->Width(),aPageRect.Top() + _pViewShell->GetOut()->WindowToLogic(Size(0,2))->Height());
-    Size aSize(pMgr->GetSidebarWidth() - _pViewShell->GetOut()->WindowToLogic(Size(4,0))->Width(), _pViewShell->GetOut()->WindowToLogic(Size(0,nScrollerHeight))->Height()) ;
-    tools::Rectangle aRectBottom(aPointBottom,aSize);
-    tools::Rectangle aRectTop(aPointTop,aSize);
+
+    if (!bRight)
+    {
+        aPointBottom = Point(aPageRect.Left() - pMgr->GetSidebarWidth() - pMgr->GetSidebarBorderWidth() + nLogic2X,
+                             aPageRect.Bottom() - nLogicScrollOffsetY);
+        aPointTop    = Point(aPageRect.Left() - pMgr->GetSidebarWidth() + nLogic2X,
+                             aPageRect.Top() + nLogic2Y);
+    }
+    else
+    {
+        aPointBottom = Point(aPageRect.Right() + pMgr->GetSidebarBorderWidth() + nLogic2X,
+                             aPageRect.Bottom() - nLogicScrollOffsetY);
+        aPointTop    = Point(aPageRect.Right() + pMgr->GetSidebarBorderWidth() + nLogic2X,
+                             aPageRect.Top() + nLogic2Y);
+    }
+
+    Size aSize(pMgr->GetSidebarWidth() - nLogic4X, nLogicScrollerHeightY);
+    tools::Rectangle aRectBottom(aPointBottom, aSize);
+    tools::Rectangle aRectTop(aPointTop, aSize);
 
     if (aRectBottom.Overlaps(aVisRect))
     {
-
-        if (Application::GetSettings().GetStyleSettings().GetHighContrastMode() )
+        if (Application::GetSettings().GetStyleSettings().GetHighContrastMode())
         {
-            _pViewShell->GetOut()->SetLineColor(COL_WHITE);
-            _pViewShell->GetOut()->SetFillColor(COL_BLACK);
+            pOut->SetLineColor(COL_WHITE);
+            pOut->SetFillColor(COL_BLACK);
         }
         else
         {
-            _pViewShell->GetOut()->SetLineColor(COL_BLACK);
-            _pViewShell->GetOut()->SetFillColor(COL_LIGHTGRAY);
+            pOut->SetLineColor(COL_BLACK);
+            pOut->SetFillColor(COL_LIGHTGRAY);
         }
-        _pViewShell->GetOut()->DrawRect(aRectBottom);
-        _pViewShell->GetOut()->DrawLine(aPointBottom + Point(pMgr->GetSidebarWidth()/3,0), aPointBottom + Point(pMgr->GetSidebarWidth()/3 , _pViewShell->GetOut()->WindowToLogic(Size(0,nScrollerHeight))->Height()));
 
-        _pViewShell->GetOut()->SetLineColor();
-        Point aMiddleFirst(aPointBottom + Point(pMgr->GetSidebarWidth()/6,_pViewShell->GetOut()->WindowToLogic(Size(0,nScrollerHeight))->Height()/2));
-        Point aMiddleSecond(aPointBottom + Point(pMgr->GetSidebarWidth()/3*2,_pViewShell->GetOut()->WindowToLogic(Size(0,nScrollerHeight))->Height()/2));
-        PaintNotesSidebarArrows(aMiddleFirst,aMiddleSecond,_pViewShell,pMgr->GetArrowColor(KEY_PAGEUP,nPageNum), pMgr->GetArrowColor(KEY_PAGEDOWN,nPageNum));
+        pOut->DrawRect(aRectBottom);
+
+        // Draw Scroller Line
+        pOut->DrawLine(
+            aPointBottom + Point(pMgr->GetSidebarWidth() / 3, 0),
+            aPointBottom + Point(pMgr->GetSidebarWidth() / 3, nLogicScrollerHeightY)
+        );
+
+        pOut->SetLineColor();
+
+        // Calculate Arrow Middle Points
+        Point aMiddleFirst(aPointBottom + Point(pMgr->GetSidebarWidth() / 6, nLogicScrollerHeightY / 2));
+        Point aMiddleSecond(aPointBottom + Point(pMgr->GetSidebarWidth() / 3 * 2, nLogicScrollerHeightY / 2));
+
+        PaintNotesSidebarArrows(aMiddleFirst, aMiddleSecond, _pViewShell,
+                                pMgr->GetArrowColor(KEY_PAGEUP, nPageNum),
+                                pMgr->GetArrowColor(KEY_PAGEDOWN, nPageNum));
     }
+
     if (!aRectTop.Overlaps(aVisRect))
         return;
 
@@ -6731,32 +6782,54 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
         _pViewShell->GetOut()->SetLineColor(COL_BLACK);
         _pViewShell->GetOut()->SetFillColor(COL_LIGHTGRAY);
     }
-    _pViewShell->GetOut()->DrawRect(aRectTop);
-    _pViewShell->GetOut()->DrawLine(aPointTop + Point(pMgr->GetSidebarWidth()/3*2,0), aPointTop + Point(pMgr->GetSidebarWidth()/3*2 , _pViewShell->GetOut()->WindowToLogic(Size(0,nScrollerHeight))->Height()));
 
-    _pViewShell->GetOut()->SetLineColor();
-    Point aMiddleFirst(aPointTop + Point(pMgr->GetSidebarWidth()/3,_pViewShell->GetOut()->WindowToLogic(Size(0,nScrollerHeight))->Height()/2));
-    Point aMiddleSecond(aPointTop + Point(pMgr->GetSidebarWidth()/6*5,_pViewShell->GetOut()->WindowToLogic(Size(0,nScrollerHeight))->Height()/2));
-    PaintNotesSidebarArrows(aMiddleFirst,aMiddleSecond,_pViewShell, pMgr->GetArrowColor(KEY_PAGEUP,nPageNum), pMgr->GetArrowColor(KEY_PAGEDOWN,nPageNum));
+    pOut->DrawRect(aRectTop);
+
+    // Draw Scroller Line
+    pOut->DrawLine(
+        aPointTop + Point(pMgr->GetSidebarWidth() / 3 * 2, 0),
+        aPointTop + Point(pMgr->GetSidebarWidth() / 3 * 2, nLogicScrollerHeightY)
+    );
+
+    pOut->SetLineColor();
+
+    // Calculate Arrow Middle Points
+    Point aMiddleFirst(aPointTop + Point(pMgr->GetSidebarWidth() / 3, nLogicScrollerHeightY / 2));
+    Point aMiddleSecond(aPointTop + Point(pMgr->GetSidebarWidth() / 6 * 5, nLogicScrollerHeightY / 2));
+
+    PaintNotesSidebarArrows(aMiddleFirst, aMiddleSecond, _pViewShell,
+                            pMgr->GetArrowColor(KEY_PAGEUP, nPageNum),
+                            pMgr->GetArrowColor(KEY_PAGEDOWN, nPageNum));
 }
 
 /*static*/ void SwPageFrame::PaintNotesSidebarArrows(const Point &aMiddleFirst, const Point &aMiddleSecond, SwViewShell const * _pViewShell, const Color& rColorUp, const Color& rColorDown)
 {
+    OutputDevice* pOut = _pViewShell->GetOut();
+
+    // Cache the logical conversions for the 3-pixel arrow offsets
+    const ::tools::Long nLogic3X = pOut->convertTo<vcl::LogicSize>(
+        vcl::WindowSize(3, 0)
+    ).get().Width();
+
+    const ::tools::Long nLogic3Y = pOut->convertTo<vcl::LogicSize>(
+        vcl::WindowSize(0, 3)
+    ).get().Height();
+
     tools::Polygon aTriangleUp(3);
+    aTriangleUp.SetPoint(aMiddleFirst + Point(0, -nLogic3Y), 0);
+    aTriangleUp.SetPoint(aMiddleFirst + Point(-nLogic3X, nLogic3Y), 1);
+    aTriangleUp.SetPoint(aMiddleFirst + Point(nLogic3X, nLogic3Y), 2);
+
     tools::Polygon aTriangleDown(3);
+    aTriangleDown.SetPoint(aMiddleSecond + Point(-nLogic3X, -nLogic3Y), 0);
+    aTriangleDown.SetPoint(aMiddleSecond + Point(nLogic3X, -nLogic3Y), 1);
+    aTriangleDown.SetPoint(aMiddleSecond + Point(0, nLogic3Y), 2);
 
-    aTriangleUp.SetPoint(aMiddleFirst + Point(0,_pViewShell->GetOut()->WindowToLogic(Size(0,-3))->Height()),0);
-    aTriangleUp.SetPoint(aMiddleFirst + Point(_pViewShell->GetOut()->WindowToLogic(Size(-3,0))->Width(),_pViewShell->GetOut()->WindowToLogic(Size(0,3))->Height()),1);
-    aTriangleUp.SetPoint(aMiddleFirst + Point(_pViewShell->GetOut()->WindowToLogic(Size(3,0))->Width(),_pViewShell->GetOut()->WindowToLogic(Size(0,3))->Height()),2);
+    pOut->SetFillColor(rColorUp);
+    pOut->DrawPolygon(aTriangleUp);
 
-    aTriangleDown.SetPoint(aMiddleSecond + Point(_pViewShell->GetOut()->WindowToLogic(Size(-3,0))->Width(),_pViewShell->GetOut()->WindowToLogic(Size(0,-3))->Height()),0);
-    aTriangleDown.SetPoint(aMiddleSecond + Point(_pViewShell->GetOut()->WindowToLogic(Size(+3,0))->Width(),_pViewShell->GetOut()->WindowToLogic(Size(0,-3))->Height()),1);
-    aTriangleDown.SetPoint(aMiddleSecond + Point(0,_pViewShell->GetOut()->WindowToLogic(Size(0,3))->Height()),2);
-
-    _pViewShell->GetOut()->SetFillColor(rColorUp);
-    _pViewShell->GetOut()->DrawPolygon(aTriangleUp);
-    _pViewShell->GetOut()->SetFillColor(rColorDown);
-    _pViewShell->GetOut()->DrawPolygon(aTriangleDown);
+    pOut->SetFillColor(rColorDown);
+    pOut->DrawPolygon(aTriangleDown);
 }
 
 /**
@@ -6788,7 +6861,7 @@ static void lcl_paintBitmapExToRect(vcl::RenderContext *pOut, const Point& aPoin
     if(bLeftShadow) aPagePxRect.Left( aTmpRect.Left() - snShadowPxWidth - 1);
     if(bRightShadow) aPagePxRect.Right( aTmpRect.Right() + snShadowPxWidth + 1);
 
-    _orBorderAndShadowBoundRect = SwRect(pRenderContext->WindowToLogic( aPagePxRect.SVRect() ));
+    _orBorderAndShadowBoundRect = SwRect(pRenderContext->convertTo<vcl::LogicRect>(vcl::WindowRect(aPagePxRect.SVRect())));
 }
 
 SwRect SwPageFrame::GetBoundRect(OutputDevice const * pOutputDevice) const

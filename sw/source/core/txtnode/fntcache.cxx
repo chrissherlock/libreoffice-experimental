@@ -1041,7 +1041,7 @@ void SwFntObj::DrawText( SwDrawTextInfo &rInf )
             *s_pPixMap = rInf.GetOut().GetMapMode();
             (*s_pFntObjPixOut.get()) = rInf.GetpOut();
             Size aTmp( 1, 1 );
-            s_nPixWidth = rInf.GetOut().WindowToLogic( aTmp )->Width();
+            s_nPixWidth = rInf.GetOut().convertTo<vcl::LogicSize>(vcl::WindowSize(aTmp), rInf.GetOut().GetMapMode())->Width();
         }
 
         aTextOriginPos.AdjustX(rInf.GetFrame()->IsRightToLeft() ? 0 : s_nPixWidth );

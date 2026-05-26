@@ -752,8 +752,8 @@ namespace drawinglayer::primitive2d
 
                 if(MapUnit::MapPixel == aGraphic.GetPrefMapMode().GetMapUnit())
                 {
-                    aNewSize = Application::GetDefaultDevice()->WindowToLogic(
-                        aGraphic.GetPrefSize(),
+                    aNewSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+                        vcl::WindowSize(aGraphic.GetPrefSize()),
                         MapMode(aDestinationMapUnit));
                 }
                 else

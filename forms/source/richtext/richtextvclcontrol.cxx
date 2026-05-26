@@ -292,7 +292,7 @@ namespace frm
     void RichTextControl::Draw(OutputDevice& rDev, const Point& _rPos,
                                SystemTextColorFlags /*_nFlags*/)
     {
-        m_pImpl->Draw(rDev, _rPos, rDev.WindowToLogic(GetSizePixel()).get() );
+        m_pImpl->Draw( &rDev, _rPos, rDev.convertTo<vcl::LogicSize>(vcl::WindowSize(GetSizePixel())).get());
     }
 
     EditView& RichTextControl::getView()

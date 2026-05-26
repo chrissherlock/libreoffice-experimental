@@ -159,7 +159,7 @@ void ScrollBarManager::UpdateScrollBars(bool bUseScrolling)
 {
     ::tools::Rectangle aModelArea (mrSlideSorter.GetView().GetModelArea());
     sd::Window *pWindow (mrSlideSorter.GetContentWindow().get());
-    Size aWindowModelSize (pWindow->WindowToLogic(pWindow->GetSizePixel()));
+    Size aWindowModelSize = pWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(pWindow->GetSizePixel()), pWindow->GetMapMode());
 
     // The horizontal scroll bar is only shown when the window is
     // horizontally smaller than the view.
@@ -174,8 +174,9 @@ void ScrollBarManager::UpdateScrollBars(bool bUseScrolling)
 
         mpHorizontalScrollBar->SetVisibleSize (aWindowModelSize.Width());
 
-        const ::tools::Long nWidth (mpContentWindow->WindowToLogic(
-            mpContentWindow->GetSizePixel()).Width());
+        const ::tools::Long nWidth = mpContentWindow->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(mpContentWindow->GetSizePixel()),
+            mpContentWindow->GetMapMode())->Width();
         // Make the line size about 10% of the visible width.
         mpHorizontalScrollBar->SetLineSize (nWidth / 10);
         // Make the page size about 90% of the visible width.
@@ -197,8 +198,9 @@ void ScrollBarManager::UpdateScrollBars(bool bUseScrolling)
 
         mpVerticalScrollBar->SetVisibleSize (aWindowModelSize.Height());
 
-        const ::tools::Long nHeight (mpContentWindow->WindowToLogic(
-            mpContentWindow->GetSizePixel()).Height());
+        const ::tools::Long nHeight = mpContentWindow->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(mpContentWindow->GetSizePixel()),
+            mpContentWindow->GetMapMode())->Height();
         // Make the line size about 10% of the visible height.
         mpVerticalScrollBar->SetLineSize (nHeight / 10);
         // Make the page size about 90% of the visible height.
@@ -346,7 +348,7 @@ bool ScrollBarManager::TestScrollBarVisibilities (
     if (bRearrangeSuccess)
     {
         Size aPageSize = mrSlideSorter.GetView().GetLayouter().GetTotalBoundingBox().GetSize();
-        Size aWindowModelSize = mpContentWindow->WindowToLogic(aBrowserSize);
+        Size aWindowModelSize = mpContentWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(aBrowserSize), mpContentWindow->GetMapMode());
 
         // The content may be clipped, i.e. not fully visible, in one
         // direction only when the scroll bar is visible in that direction.

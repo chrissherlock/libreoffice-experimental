@@ -74,7 +74,7 @@ bool ScGridWindow::DrawMouseButtonDown(const MouseEvent& rMEvt)
             SetMapMode( aDrawMode );
 
         pDraw->SetWindow( this );
-        Point aLogicPos = WindowToLogic(rMEvt.GetPosPixel());
+        Point aLogicPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
         SdrMarkList aPreMarkList = pDrView->GetMarkedObjectList();
         if(!aPreMarkList.GetMarkCount())
             aDrawSelectionPos = Point(0,0);
@@ -346,7 +346,8 @@ MapMode ScGridWindow::GetDrawMapMode( bool bForce )
         //  RTL uses negative positions for drawing objects
         aStartPos.setX( -aStartPos.X() + GetOutputSizePixel().Width() - 1 );
     }
-    aDrawMode.SetOrigin( WindowToLogic( aStartPos, aDrawMode ) );
+
+    aDrawMode.SetOrigin(convertTo<vcl::LogicPoint>(vcl::WindowPoint(aStartPos)));
 
     return aDrawMode;
 }
@@ -374,7 +375,7 @@ void ScGridWindow::CreateAnchorHandle(SdrHdlList& rHdl, const ScAddress& rAddres
         {
             bool bNegativePage = mrViewData.GetDocument().IsNegativePage( mrViewData.CurrentTabForData() );
             Point aPos = mrViewData.GetScrPos( rAddress.Col(), rAddress.Row(), eWhich, true );
-            aPos = WindowToLogic(aPos);
+            aPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
             rHdl.AddHdl(std::make_unique<SdrHdl>(aPos, bNegativePage ? SdrHdlKind::Anchor_TR : SdrHdlKind::Anchor));
         }
     }
@@ -424,7 +425,7 @@ void ScGridWindow::UpdateStatusPosSize()
         }
         else // mouse position
         {
-            Point aPos = WindowToLogic(aCurMousePos);
+            Point aPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(aCurMousePos));
             pPV->LogicToPagePos(aPos);
             aSet.Put( SfxPointItem( SID_ATTR_POSITION, aPos ) );
             aSet.Put( SvxSizeItem( SID_ATTR_SIZE, Size( 0, 0 ) ) );

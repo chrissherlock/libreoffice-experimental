@@ -447,7 +447,12 @@ bool FuText::MouseButtonDown(const MouseEvent& rMEvt)
                             eHit = mpView->PickAnything(rMEvt, SdrMouseEventKind::BUTTONDOWN, aVEvt);
                             if( (eHit == SdrHitKind::Handle) || (eHit == SdrHitKind::MarkedObject) )
                             {
-                                sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+                                sal_uInt16 nDrgLog = static_cast<sal_uInt16>(
+                                    mpWindow->convertTo<vcl::LogicSize>(
+                                        vcl::WindowSize(Size(mpView->GetDragThresholdPixels(), 0))
+                                    )->Width()
+                                );
+
                                 mpView->BegDragObj(aMDPos, nullptr, aVEvt.mpHdl, nDrgLog);
                             }
                         }
@@ -460,7 +465,13 @@ bool FuText::MouseButtonDown(const MouseEvent& rMEvt)
                     // create object
                     mpView->SetCurrentObj(SdrObjKind::Text);
                     mpView->SetEditMode(SdrViewEditMode::Create);
-                    sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+
+                    sal_uInt16 nDrgLog = static_cast<sal_uInt16>(
+                        mpWindow->convertTo<vcl::LogicSize>(
+                            vcl::WindowSize(Size(mpView->GetDragThresholdPixels(), 0))
+                        )->Width()
+                    );
+
                     mpView->BegCreateObj(aMDPos, nullptr, nDrgLog);
                 }
                 else
@@ -504,7 +515,7 @@ bool FuText::MouseMove(const MouseEvent& rMEvt)
     if (!bReturn && mpView->IsAction() && !mpDocSh->IsReadOnly())
     {
         Point aPix(rMEvt.GetPosPixel());
-        Point aPnt(mpWindow->WindowToLogic(aPix));
+        Point aPnt(mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPix)));
 
         ForceScroll(aPix);
         mpView->MovAction(aPnt);
@@ -577,7 +588,7 @@ bool FuText::MouseButtonUp(const MouseEvent& rMEvt)
 
     mrViewShell.GetViewFrame()->GetBindings().Invalidate( SidArray );
 
-    Point aPnt( mpWindow->WindowToLogic( rMEvt.GetPosPixel() ) );
+    Point aPnt(mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
 
     if( (mpView && mpView->MouseButtonUp(rMEvt, mpWindow->GetOutDev())) || rMEvt.GetClicks() == 2 )
         return true; // handle event from SdrView
@@ -628,7 +639,7 @@ bool FuText::MouseButtonUp(const MouseEvent& rMEvt)
         mpView->ForceMarkedToAnotherPage();
         mpView->SetCurrentObj(SdrObjKind::Text);
 
-        sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+        sal_uInt16 nDrgLog = static_cast<sal_uInt16>(mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(mpView->GetDragThresholdPixels(), 0)))->Width());
 
         if (bJustEndedEdit)
         {
@@ -731,7 +742,12 @@ bool FuText::MouseButtonUp(const MouseEvent& rMEvt)
         const SdrMarkList& rMarkList = mpView->GetMarkedObjectList();
         if ( rMarkList.GetMarkCount() == 0 )
         {
-            sal_uInt16 nDrgLog1 = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+            sal_uInt16 nDrgLog1 = static_cast<sal_uInt16>(
+                mpWindow->convertTo<vcl::LogicSize>(
+                    vcl::WindowSize(Size(mpView->GetDragThresholdPixels(), 0))
+                )->Width()
+            );
+
             if ( std::abs(aMDPos.X() - aPnt.X()) < nDrgLog1 &&
                  std::abs(aMDPos.Y() - aPnt.Y()) < nDrgLog1 &&
                  !rMEvt.IsShift() && !rMEvt.IsMod2() )
@@ -754,7 +770,11 @@ bool FuText::MouseButtonUp(const MouseEvent& rMEvt)
             // text body (left-justified AutoGrow)
             mpView->SetCurrentObj(SdrObjKind::Text);
             mpView->SetEditMode(SdrViewEditMode::Create);
-            sal_uInt16 nDrgLog = sal_uInt16 ( mpWindow->WindowToLogic(Size(mpView->GetDragThresholdPixels(),0)).Width() );
+            sal_uInt16 nDrgLog = static_cast<sal_uInt16>(
+                mpWindow->convertTo<vcl::LogicSize>(
+                    vcl::WindowSize(Size(mpView->GetDragThresholdPixels(), 0))
+                )->Width()
+            );
             mpView->BegCreateObj(aMDPos, nullptr, nDrgLog);
 
             bool bSnapEnabled = mpView->IsSnapEnabled();
@@ -1056,7 +1076,7 @@ void FuText::SetInEditMode(const MouseEvent& rMEvt, bool bQuickDrag)
                     if( pTextObj->getTextCount() > 1 )
                     {
                         Point aPix(rMEvt.GetPosPixel());
-                        Point aPnt(mpWindow->WindowToLogic(aPix));
+                        Point aPnt(mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPix)));
                         pTextObj->setActiveText( pTextObj->CheckTextHit(aPnt ) );
                     }
 

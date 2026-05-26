@@ -588,7 +588,7 @@ void SbRtl_TwipsPerPixelX(StarBASIC *, SbxArray & rPar, bool)
     OutputDevice* pDevice = Application::GetDefaultDevice();
     if( pDevice )
     {
-        aSize = pDevice->WindowToLogic( aSize, aMap );
+        aSize = pDevice->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize), aMap);
         nResult = aSize.Width() / 100;
     }
     rPar.Get(0)->PutLong(nResult);
@@ -602,7 +602,7 @@ void SbRtl_TwipsPerPixelY(StarBASIC *, SbxArray & rPar, bool)
     OutputDevice* pDevice = Application::GetDefaultDevice();
     if( pDevice )
     {
-        aSize = pDevice->WindowToLogic( aSize, aMap );
+        aSize = pDevice->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize), aMap);
         nResult = aSize.Height() / 100;
     }
     rPar.Get(0)->PutLong(nResult);

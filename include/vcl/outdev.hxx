@@ -311,8 +311,7 @@ public:
     tools::Rectangle            GetOutputRectPixel() const
                                     { return tools::Rectangle(GetOutputOffPixel(), GetOutputSizePixel() ); }
 
-    Size                        GetOutputSize() const
-                                    { return WindowToLogic( GetOutputSizePixel() ).get(); }
+    Size                        GetOutputSize() const;
 
     css::uno::Reference< css::awt::XGraphics >
                                 CreateUnoGraphics();
@@ -1683,25 +1682,6 @@ public:
         @return the current offset in pixel
      */
     SAL_WARN_UNUSED_RESULT Size GetPixelOffset() const;
-
-    SAL_WARN_UNUSED_RESULT vcl::LogicPoint WindowToLogic(const Point& rDevicePt) const;
-    SAL_WARN_UNUSED_RESULT vcl::LogicSize WindowToLogic(const Size& rDeviceSize) const;
-    SAL_WARN_UNUSED_RESULT vcl::LogicRect WindowToLogic(const tools::Rectangle& rDeviceRect) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE vcl::LogicPolygon WindowToLogic(const tools::Polygon& rDevicePoly) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE vcl::LogicPolyPolygon WindowToLogic(const tools::PolyPolygon& rDevicePolyPoly) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon WindowToLogic(const basegfx::B2DPolyPolygon& rDevicePolyPoly) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DRectangle WindowToLogic(const basegfx::B2DRectangle& rDeviceRect) const;
-    SAL_WARN_UNUSED_RESULT vcl::LogicRegion WindowToLogic(const vcl::Region& rDeviceRegion) const;
-    SAL_WARN_UNUSED_RESULT vcl::LogicPoint WindowToLogic(const Point& rDevicePt, const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT vcl::LogicSize WindowToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT vcl::LogicRect WindowToLogic(const tools::Rectangle& rDeviceRect,
-                                                         const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE vcl::LogicPolygon WindowToLogic(const tools::Polygon& rDevicePoly,
-                                                                           const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolygon WindowToLogic(const basegfx::B2DPolygon& rDevicePoly,
-                                                            const MapMode& rMapMode) const;
-    SAL_WARN_UNUSED_RESULT SAL_DLLPRIVATE basegfx::B2DPolyPolygon WindowToLogic(const basegfx::B2DPolyPolygon& rDevicePolyPoly,
-                                                                const MapMode& rMapMode) const;
 
     SAL_WARN_UNUSED_RESULT Point LogicToLogic(const Point& rPtSource,
                                               const MapMode* pMapModeSource,

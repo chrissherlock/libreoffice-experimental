@@ -146,7 +146,7 @@ void Svx3DPreviewControl::Resize()
 {
     // size of page
     Size aSize(GetOutputSizePixel());
-    aSize = GetDrawingArea()->get_ref_device().WindowToLogic(aSize);
+    aSize = GetDrawingArea()->get_ref_device().convertTo<vcl::LogicSize>(vcl::WindowSize(aSize));
     mxFmPage->SetSize(aSize);
 
     // set size
@@ -456,7 +456,11 @@ void Svx3DLightControl::TrySelection(Point aPosPixel)
     if(!mpScene)
         return;
 
-    const Point aPosLogic(GetDrawingArea()->get_ref_device().WindowToLogic(aPosPixel));
+    const Point aPosLogic(
+        GetDrawingArea()->get_ref_device().convertTo<vcl::LogicPoint>(
+            vcl::WindowPoint(aPosPixel)
+        )
+    );
     const basegfx::B2DPoint aPoint(aPosLogic.X(), aPosLogic.Y());
     std::vector< const E3dCompoundObject* > aResult;
     getAllHit3DObjectsSortedFrontToBack(aPoint, *mpScene, aResult);
@@ -676,7 +680,7 @@ bool Svx3DLightControl::MouseButtonUp(const MouseEvent& rMEvt)
 void Svx3DLightControl::Resize()
 {
     // set size of page
-    const Size aSize(GetDrawingArea()->get_ref_device().WindowToLogic(GetOutputSizePixel()));
+    const Size aSize(GetDrawingArea()->get_ref_device().convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
     mxFmPage->SetSize(aSize);
 
     // set position and size of scene

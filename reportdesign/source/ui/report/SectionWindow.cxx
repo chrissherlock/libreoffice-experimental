@@ -336,7 +336,7 @@ IMPL_LINK( OSectionWindow, SplitHdl, Splitter*, _pSplitter, void )
     sal_Int32 nSplitPos = _pSplitter->GetSplitPosPixel();
 
     const uno::Reference< report::XSection> xSection = m_aReportSection->getSection();
-    nSplitPos = m_aSplitter->WindowToLogic(Size(0,nSplitPos)).Height();
+    nSplitPos = m_aSplitter->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(0, nSplitPos)))->Height();
 
     const sal_Int32 nCount = xSection->getCount();
     for (sal_Int32 i = 0; i < nCount; ++i)
@@ -383,7 +383,7 @@ void OSectionWindow::scrollChildren(tools::Long _nX)
         lcl_scroll(*m_aReportSection, aDiff);
     }
 
-    lcl_scroll(*m_aEndMarker, m_aEndMarker->WindowToLogic(Point(_nX,0)));
+    lcl_scroll(*m_aEndMarker, m_aEndMarker->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(_nX, 0))));
 
     lcl_setOrigin(*m_aSplitter,_nX, 0);
     lcl_scroll(*m_aSplitter,aDiff);

@@ -441,7 +441,7 @@ void SdrObjEditView::ModelHasChanged()
                 { // invalidate old OutlinerView area
                     tools::Rectangle aTmpRect(aOldArea);
                     sal_uInt16 nPixSiz = pOLV->GetInvalidateMore() + 1;
-                    Size aMore(pWin->WindowToLogic(Size(nPixSiz, nPixSiz)));
+                    Size aMore(pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(nPixSiz, nPixSiz)));
                     aTmpRect.AdjustLeft(-(aMore.Width()));
                     aTmpRect.AdjustRight(aMore.Width());
                     aTmpRect.AdjustTop(-(aMore.Height()));
@@ -819,7 +819,8 @@ void TextEditOverlayObject::checkSelectionChange()
 
     std::vector<tools::Rectangle> aLogicRects;
     std::vector<basegfx::B2DRange> aLogicRanges;
-    const Size aLogicPixel(getOverlayManager()->getOutputDevice().WindowToLogic(Size(1, 1)));
+    const Size aLogicPixel(
+        getOverlayManager()->getOutputDevice().convertTo<vcl::LogicSize>(vcl::WindowSize(1, 1)));
 
     // get logic selection
     getOutlinerView().GetSelectionRectangles(aLogicRects);
@@ -2001,7 +2002,7 @@ bool SdrObjEditView::IsTextEditFrameHit(const Point& rHit) const
                 aEditArea.Union(pOLV->GetOutputArea());
                 if (!aEditArea.Contains(rHit))
                 {
-                    Size aSiz(pWin->WindowToLogic(Size(nPixSiz, nPixSiz)));
+                    Size aSiz(pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(nPixSiz, nPixSiz)));
                     aEditArea.AdjustLeft(-(aSiz.Width()));
                     aEditArea.AdjustTop(-(aSiz.Height()));
                     aEditArea.AdjustRight(aSiz.Width());
@@ -2082,9 +2083,9 @@ bool SdrObjEditView::MouseButtonDown(const MouseEvent& rMEvt, OutputDevice* pWin
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin != nullptr)
-                aPt = pWin->WindowToLogic(aPt);
+                aPt = pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPt)).get();
             else if (mpTextEditWin != nullptr)
-                aPt = mpTextEditWin->WindowToLogic(aPt);
+                aPt = mpTextEditWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPt)).get();
             bPostIt = IsTextEditHit(aPt);
         }
         if (bPostIt)
@@ -2133,9 +2134,9 @@ bool SdrObjEditView::MouseButtonUp(const MouseEvent& rMEvt, OutputDevice* pWin)
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin != nullptr)
-                aPt = pWin->WindowToLogic(aPt);
+                aPt = pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPt)).get();
             else if (mpTextEditWin != nullptr)
-                aPt = mpTextEditWin->WindowToLogic(aPt);
+                aPt = mpTextEditWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPt)).get();
             bPostIt = IsTextEditHit(aPt);
         }
         if (bPostIt && pWin)
@@ -2179,9 +2180,9 @@ bool SdrObjEditView::MouseMove(const MouseEvent& rMEvt, OutputDevice* pWin)
         {
             Point aPt(rMEvt.GetPosPixel());
             if (pWin)
-                aPt = pWin->WindowToLogic(aPt);
+                aPt = pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPt)).get();
             else if (mpTextEditWin)
-                aPt = mpTextEditWin->WindowToLogic(aPt);
+                aPt = mpTextEditWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPt)).get();
             bPostIt = IsTextEditHit(aPt);
         }
         if (bPostIt)
@@ -2231,9 +2232,9 @@ bool SdrObjEditView::Command(const CommandEvent& rCEvt, vcl::Window* pWin)
             {
                 Point aPt(rCEvt.GetMousePosPixel());
                 if (pWin != nullptr)
-                    aPt = pWin->WindowToLogic(aPt);
+                    aPt = pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPt)).get();
                 else if (mpTextEditWin != nullptr)
-                    aPt = mpTextEditWin->WindowToLogic(aPt);
+                    aPt = mpTextEditWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPt)).get();
                 bPostIt = IsTextEditHit(aPt);
             }
             if (bPostIt)

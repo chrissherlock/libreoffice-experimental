@@ -203,7 +203,7 @@ void SwPagePreviewLayout::Init( const sal_uInt16 _nCols,
 
     // calculate scaling
     MapMode aMapMode( MapUnit::MapTwip );
-    Size aWinSize = mrParentViewShell.GetOut()->WindowToLogic( _rPxWinSize, aMapMode );
+    Size aWinSize = mrParentViewShell.GetOut()->convertTo<vcl::LogicSize>(vcl::WindowSize(_rPxWinSize), aMapMode);
     double fXScale = double(aWinSize.Width()) / mnPreviewLayoutWidth;
     double fYScale = double(aWinSize.Height()) / mnPreviewLayoutHeight;
     if( fXScale < fYScale )
@@ -221,7 +221,7 @@ void SwPagePreviewLayout::Init( const sal_uInt16 _nCols,
     }
 
     // set window size in twips
-    maWinSize = mrParentViewShell.GetOut()->WindowToLogic( _rPxWinSize );
+    maWinSize = mrParentViewShell.GetOut()->convertTo<vcl::LogicSize>(vcl::WindowSize(_rPxWinSize), mrParentViewShell.GetOut()->GetMapMode());
     // validate layout sizes
     mbLayoutSizesValid = true;
 }
@@ -312,7 +312,7 @@ bool SwPagePreviewLayout::Prepare( const sal_uInt16 _nProposedStartPageNum,
     // environment and parameter ok
 
     // update window size at preview setting data
-    maWinSize = mrParentViewShell.GetOut()->WindowToLogic( _rPxWinSize );
+    maWinSize = mrParentViewShell.GetOut()->convertTo<vcl::LogicSize>(vcl::WindowSize(_rPxWinSize), mrParentViewShell.GetOut()->GetMapMode());
 
     mbNoPageVisible = false;
     if ( nProposedStartPageNum > 0 )
@@ -1097,7 +1097,7 @@ bool SwPagePreviewLayout::Paint(vcl::RenderContext& rRenderContext, const tools:
 
                 mrParentViewShell.maVisArea = SwRect(aPageRect);
                 aPxPaintRect.Intersection( aPxOutRect );
-                vcl::LogicRect aPaintRect = pOutputDev->WindowToLogic( aPxPaintRect );
+                vcl::LogicRect aPaintRect = pOutputDev->convertTo<vcl::LogicRect>(vcl::WindowRect(aPxPaintRect), pOutputDev->GetMapMode());
                 mrParentViewShell.Paint(rRenderContext, aPaintRect);
 
                 // --> OD 2007-08-15 #i80691#
@@ -1234,14 +1234,14 @@ void SwPagePreviewLayout::PaintSelectMarkAtPage(vcl::RenderContext& rRenderConte
     // OD 19.02.2003 #107369# - adjust position of select mark rectangle
     tools::Rectangle aRect( aPxPageRect.Left(), aPxPageRect.Top(),
                        aPxPageRect.Right(), aPxPageRect.Bottom() );
-    aRect =  pOutputDev->WindowToLogic( aRect );
+    aRect = pOutputDev->convertTo<vcl::LogicRect>(vcl::WindowRect(aRect), pOutputDev->GetMapMode());
     pOutputDev->SetFillColor(); // OD 20.02.2003 #107369# - no fill color
     pOutputDev->SetLineColor( aSelPgLineColor );
     pOutputDev->DrawRect( aRect );
     // OD 19.02.2003 #107369# - adjust position of select mark rectangle
     aRect = tools::Rectangle( aPxPageRect.Left()+1, aPxPageRect.Top()+1,
                        aPxPageRect.Right()-1, aPxPageRect.Bottom()-1 );
-    aRect =  pOutputDev->WindowToLogic( aRect );
+    aRect = pOutputDev->convertTo<vcl::LogicRect>(vcl::WindowRect(aRect), pOutputDev->GetMapMode());
     pOutputDev->DrawRect( aRect );
 }
 
@@ -1271,19 +1271,19 @@ void SwPagePreviewLayout::MarkNewSelectedPage( const sal_uInt16 _nSelectedPage )
         // invalidate top mark line
         tools::Rectangle aInvalPxRect( aPxPageRect.Left(), aPxPageRect.Top(),
                                 aPxPageRect.Right(), aPxPageRect.Top()+1 );
-        mrParentViewShell.GetWin()->Invalidate( pOutputDev->WindowToLogic( aInvalPxRect ));
+        mrParentViewShell.GetWin()->Invalidate(pOutputDev->convertTo<vcl::LogicRect>(vcl::WindowRect(aInvalPxRect), pOutputDev->GetMapMode()));
         // invalidate right mark line
         aInvalPxRect = tools::Rectangle( aPxPageRect.Right()-1, aPxPageRect.Top(),
                                   aPxPageRect.Right(), aPxPageRect.Bottom() );
-        mrParentViewShell.GetWin()->Invalidate( pOutputDev->WindowToLogic( aInvalPxRect ));
+        mrParentViewShell.GetWin()->Invalidate(pOutputDev->convertTo<vcl::LogicRect>(vcl::WindowRect(aInvalPxRect), pOutputDev->GetMapMode()));
         // invalidate bottom mark line
         aInvalPxRect = tools::Rectangle( aPxPageRect.Left(), aPxPageRect.Bottom()-1,
                                   aPxPageRect.Right(), aPxPageRect.Bottom() );
-        mrParentViewShell.GetWin()->Invalidate( pOutputDev->WindowToLogic( aInvalPxRect ));
+        mrParentViewShell.GetWin()->Invalidate(pOutputDev->convertTo<vcl::LogicRect>(vcl::WindowRect(aInvalPxRect), pOutputDev->GetMapMode()));
         // invalidate left mark line
         aInvalPxRect = tools::Rectangle( aPxPageRect.Left(), aPxPageRect.Top(),
                                   aPxPageRect.Left()+1, aPxPageRect.Bottom() );
-        mrParentViewShell.GetWin()->Invalidate( pOutputDev->WindowToLogic( aInvalPxRect ));
+        mrParentViewShell.GetWin()->Invalidate(pOutputDev->convertTo<vcl::LogicRect>(vcl::WindowRect(aInvalPxRect), pOutputDev->GetMapMode()));
     }
 
     // re-paint for new selected page in order to mark it.

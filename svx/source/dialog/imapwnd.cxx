@@ -455,7 +455,7 @@ SdrObject* IMapWindow::GetHitSdrObj( const Point& rPosPixel ) const
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
 
     SdrObject*  pObj = nullptr;
-    Point       aPt =  rDevice.WindowToLogic( rPosPixel );
+    Point       aPt =  rDevice.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPosPixel));
 
     if ( tools::Rectangle( Point(), GetGraphicSize() ).Contains( aPt ) )
     {
@@ -590,7 +590,7 @@ OUString IMapWindow::RequestHelp(tools::Rectangle& rHelpArea)
 {
     OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
 
-    Point aPos =  rDevice.WindowToLogic(rHelpArea.TopLeft());
+    Point aPos =  rDevice.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rHelpArea.TopLeft()));
 
     SdrPageView* pPageView = nullptr;
     SdrObject* pSdrObj = mpView->PickObj(aPos, mpView->getHitTolLog(), pPageView);

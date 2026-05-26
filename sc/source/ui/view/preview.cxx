@@ -590,7 +590,7 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
         tools::Rectangle aPixel( convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle( -aOffset.X(), -aOffset.Y(), nPageEndX, nPageEndY ))) );
         aPixel.AdjustRight( -1 );
         aPixel.AdjustBottom( -1 );
-        GetOutDev()->DrawRect( WindowToLogic( aPixel ) );
+        GetOutDev()->DrawRect(GetOutDev()->convertTo<vcl::LogicRect>(vcl::WindowRect(aPixel), GetOutDev()->GetMapMode()));
     }
 
     //  draw shadow
@@ -604,13 +604,13 @@ void ScPreview::DoPrint( ScPreviewLocationData* pFillLocation )
     aPixel.AdjustTop(SC_PREVIEW_SHADOWSIZE );
     aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
     aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );
-    GetOutDev()->DrawRect( WindowToLogic( aPixel ) );
+    GetOutDev()->DrawRect(GetOutDev()->convertTo<vcl::LogicRect>(vcl::WindowRect(aPixel), GetOutDev()->GetMapMode()));
 
     aPixel = convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle( -aOffset.X(), nPageEndY, nPageEndX, nPageEndY )));
     aPixel.AdjustLeft(SC_PREVIEW_SHADOWSIZE );
     aPixel.AdjustRight(SC_PREVIEW_SHADOWSIZE - 1 );
     aPixel.AdjustBottom(SC_PREVIEW_SHADOWSIZE - 1 );
-    GetOutDev()->DrawRect( WindowToLogic( aPixel ) );
+    GetOutDev()->DrawRect(GetOutDev()->convertTo<vcl::LogicRect>(vcl::WindowRect(aPixel), GetOutDev()->GetMapMode()));
 }
 
 void ScPreview::Paint( vcl::RenderContext& /*rRenderContext*/, const tools::Rectangle& /* rRect */ )
@@ -956,8 +956,8 @@ void ScPreview::MouseButtonDown( const MouseEvent& rMEvt )
     double    fHorPrevZoom = 100.0 * nZoom / pDocShell->GetOutputFactor() / 10000;
     MapMode   aMMMode( MapUnit::Map100thMM, Point(), fHorPrevZoom, fPreviewZoom );
 
-    aButtonDownChangePoint = WindowToLogic( rMEvt.GetPosPixel(),aMMMode );
-    aButtonDownPt = WindowToLogic( rMEvt.GetPosPixel(),aMMMode );
+    aButtonDownChangePoint = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()), aMMMode);
+    aButtonDownPt = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()), aMMMode);
 
     CaptureMouse();
 
@@ -1024,10 +1024,11 @@ void ScPreview::MouseButtonDown( const MouseEvent& rMEvt )
         return;
 
     SetMapMode( aMMMode );
+
     if( nColNumberButtonDown == aPageArea.aStart.Col() )
-        DrawInvert( WindowToLogic( Point( nLeftPosition, 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+        DrawInvert( convertTo<vcl::LogicPoint>(vcl::WindowPoint(nLeftPosition, 0), aMMMode)->X(), PointerStyle::HSplit );
     else
-        DrawInvert( WindowToLogic( Point( mvRight[ nColNumberButtonDown-1 ], 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+        DrawInvert( convertTo<vcl::LogicPoint>(vcl::WindowPoint(mvRight[nColNumberButtonDown - 1], 0), aMMMode)->X(), PointerStyle::HSplit );
 
     DrawInvert( aButtonDownChangePoint.X(), PointerStyle::HSplit );
     bColRulerMove = true;
@@ -1039,7 +1040,7 @@ void ScPreview::MouseButtonUp( const MouseEvent& rMEvt )
         double    fHorPrevZoom = 100.0 * nZoom / pDocShell->GetOutputFactor() / 10000;
         MapMode   aMMMode( MapUnit::Map100thMM, Point(), fHorPrevZoom, fPreviewZoom );
 
-        aButtonUpPt = WindowToLogic( rMEvt.GetPosPixel(),aMMMode );
+        aButtonUpPt = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()), aMMMode);
 
         tools::Long  nWidth = lcl_GetDocPageSize(&pDocShell->GetDocument(), nTab).Width();
         tools::Long  nHeight = lcl_GetDocPageSize(&pDocShell->GetDocument(), nTab).Height();
@@ -1253,10 +1254,12 @@ void ScPreview::MouseButtonUp( const MouseEvent& rMEvt )
             if( aButtonDownPt.X() == aButtonUpPt.X() )
             {
                 bMoveRulerAction = false;
+
                 if( nColNumberButtonDown == aPageArea.aStart.Col() )
-                    DrawInvert( WindowToLogic( Point( nLeftPosition, 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+                    DrawInvert( convertTo<vcl::LogicPoint>(vcl::WindowPoint(nLeftPosition, 0), aMMMode)->X(), PointerStyle::HSplit );
                 else
-                    DrawInvert( WindowToLogic( Point( mvRight[ nColNumberButtonDown-1 ], 0 ),aMMMode ).X() ,PointerStyle::HSplit );
+                    DrawInvert( convertTo<vcl::LogicPoint>(vcl::WindowPoint(mvRight[nColNumberButtonDown - 1], 0), aMMMode)->X(), PointerStyle::HSplit );
+
                 DrawInvert( aButtonUpPt.X(), PointerStyle::HSplit );
             }
             if( bMoveRulerAction )
@@ -1266,16 +1269,16 @@ void ScPreview::MouseButtonUp( const MouseEvent& rMEvt )
 
                 constexpr auto md = o3tl::getConversionMulDiv(o3tl::Length::mm100, o3tl::Length::twip);
                 const auto m = md.first * 100, d = md.second * mnScale;
-                if( !bLayoutRTL )
+
+                if (!bLayoutRTL)
                 {
-                    nNewColWidth = o3tl::convert(WindowToLogic( Point( rMEvt.GetPosPixel().X() - mvRight[ nColNumberButtonDown ], 0), aMMMode ).X(), m, d);
-                    nNewColWidth += pDocShell->GetDocument().GetColWidth( nColNumberButtonDown, nTab );
+                    nNewColWidth = o3tl::convert(convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel().X() - mvRight[nColNumberButtonDown], 0), aMMMode)->X(), m, d);
+                    nNewColWidth += pDocShell->GetDocument().GetColWidth(nColNumberButtonDown, nTab);
                 }
                 else
                 {
-
-                    nNewColWidth = o3tl::convert(WindowToLogic( Point( mvRight[ nColNumberButtonDown ] - rMEvt.GetPosPixel().X(), 0), aMMMode ).X(), m, d);
-                    nNewColWidth += pDocShell->GetDocument().GetColWidth( nColNumberButtonDown, nTab );
+                    nNewColWidth = o3tl::convert(convertTo<vcl::LogicPoint>(vcl::WindowPoint(mvRight[nColNumberButtonDown] - rMEvt.GetPosPixel().X(), 0), aMMMode)->X(), m, d);
+                    nNewColWidth += pDocShell->GetDocument().GetColWidth(nColNumberButtonDown, nTab);
                 }
 
                 if( nNewColWidth >= 0 )
@@ -1302,7 +1305,7 @@ void ScPreview::MouseMove( const MouseEvent& rMEvt )
     double   fPreviewZoom = double(nZoom) / 100;
     double   fHorPrevZoom = 100.0 * nZoom / pDocShell->GetOutputFactor() / 10000;
     MapMode  aMMMode( MapUnit::Map100thMM, Point(), fHorPrevZoom, fPreviewZoom );
-    Point    aMouseMovePoint = WindowToLogic( rMEvt.GetPosPixel(), aMMMode );
+    Point aMouseMovePoint = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()), aMMMode);
 
     tools::Long    nLeftMargin = 0;
     tools::Long    nRightMargin = 0;

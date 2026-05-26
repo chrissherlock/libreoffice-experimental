@@ -495,7 +495,14 @@ void GDIMetaFile::Play(OutputDevice& rOut, const Point& rPos,
     const Size aOldOffset(rOut.GetPixelOffset());
     const Size aEmptySize;
     rOut.SetPixelOffset(aEmptySize);
-    aDrawMap.SetOrigin(rOut.WindowToLogic(rOut.convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos)).get(), aDrawMap));
+    aDrawMap.SetOrigin(rOut.convertTo<vcl::LogicPoint>(
+        vcl::WindowPoint(
+            rOut.convertTo<vcl::WindowPoint>(
+                vcl::LogicPoint(rPos)
+            )
+        ), aDrawMap)
+    );
+
     rOut.SetPixelOffset(aOldOffset);
 
     auto popIt = rOut.ScopedPush();
@@ -1315,20 +1322,20 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
         case MetaActionType::PIXEL:
         {
             MetaPixelAction* pAct = static_cast<MetaPixelAction*>(pAction);
-            ImplActionBounds( aBound,
-                              tools::Rectangle( ::LogicToLogic( pAct->GetPoint(), aMapVDev->GetMapMode(), GetPrefMapMode() ),
-                                       aMapVDev->WindowToLogic( Size( 1, 1 ), GetPrefMapMode() ) ),
-                             aClipStack );
+            ImplActionBounds(aBound,
+                             tools::Rectangle(::LogicToLogic(pAct->GetPoint(), aMapVDev->GetMapMode(), GetPrefMapMode()),
+                                              aMapVDev->convertTo<vcl::LogicSize>(vcl::WindowSize(1, 1), GetPrefMapMode())),
+                             aClipStack);
         }
         break;
 
         case MetaActionType::POINT:
         {
             MetaPointAction* pAct = static_cast<MetaPointAction*>(pAction);
-            ImplActionBounds( aBound,
-                              tools::Rectangle( ::LogicToLogic( pAct->GetPoint(), aMapVDev->GetMapMode(), GetPrefMapMode() ),
-                                       aMapVDev->WindowToLogic( Size( 1, 1 ), GetPrefMapMode() ) ),
-                             aClipStack );
+            ImplActionBounds(aBound,
+                             tools::Rectangle(::LogicToLogic(pAct->GetPoint(), aMapVDev->GetMapMode(), GetPrefMapMode()),
+                                              aMapVDev->convertTo<vcl::LogicSize>(vcl::WindowSize(1, 1), GetPrefMapMode())),
+                             aClipStack);
         }
         break;
 
@@ -1593,24 +1600,27 @@ tools::Rectangle GDIMetaFile::GetBoundRect( OutputDevice& i_rReference ) const
         case MetaActionType::BMP:
         {
             MetaBmpAction* pAct = static_cast<MetaBmpAction*>(pAction);
-            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->WindowToLogic( pAct->GetBitmap().GetSizePixel() ));
-            ImplActionBounds( aBound, ::LogicToLogic( aRect, aMapVDev->GetMapMode(), GetPrefMapMode() ), aClipStack );
+            tools::Rectangle aRect(pAct->GetPoint(),
+                                   aMapVDev->convertTo<vcl::LogicSize>(vcl::WindowSize(pAct->GetBitmap().GetSizePixel())).get());
+            ImplActionBounds(aBound, ::LogicToLogic(aRect, aMapVDev->GetMapMode(), GetPrefMapMode()), aClipStack);
         }
         break;
 
         case MetaActionType::BMPEX:
         {
             MetaBmpExAction* pAct = static_cast<MetaBmpExAction*>(pAction);
-            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->WindowToLogic( pAct->GetBitmap().GetSizePixel() ));
-            ImplActionBounds( aBound, ::LogicToLogic( aRect, aMapVDev->GetMapMode(), GetPrefMapMode() ), aClipStack );
+            tools::Rectangle aRect(pAct->GetPoint(),
+                                   aMapVDev->convertTo<vcl::LogicSize>(vcl::WindowSize(pAct->GetBitmap().GetSizePixel())).get());
+            ImplActionBounds(aBound, ::LogicToLogic(aRect, aMapVDev->GetMapMode(), GetPrefMapMode()), aClipStack);
         }
         break;
 
         case MetaActionType::MASK:
         {
             MetaMaskAction* pAct = static_cast<MetaMaskAction*>(pAction);
-            tools::Rectangle aRect( pAct->GetPoint(), aMapVDev->WindowToLogic( pAct->GetBitmap().GetSizePixel() ));
-            ImplActionBounds( aBound, ::LogicToLogic( aRect, aMapVDev->GetMapMode(), GetPrefMapMode() ), aClipStack );
+            tools::Rectangle aRect(pAct->GetPoint(),
+                                   aMapVDev->convertTo<vcl::LogicSize>(vcl::WindowSize(pAct->GetBitmap().GetSizePixel())).get());
+            ImplActionBounds(aBound, ::LogicToLogic(aRect, aMapVDev->GetMapMode(), GetPrefMapMode()), aClipStack);
         }
         break;
 
