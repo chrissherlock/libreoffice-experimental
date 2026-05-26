@@ -180,10 +180,15 @@ bool SdrView::KeyInput(const KeyEvent& rKEvt, vcl::Window* pWin)
             }
         } // switch
         if (bRet && pWin!=nullptr) {
-            pWin->SetPointer(GetPreferredPointer(
-                pWin->WindowToLogic(pWin->ScreenToOutputPixel( pWin->GetPointerPosPixel() ) ),
+            auto aPointerStyle = GetPreferredPointer(
+                pWin->convertTo<vcl::LogicPoint>(
+                    vcl::WindowPoint(pWin->ScreenToOutputPixel(pWin->GetPointerPosPixel()))
+                ).get(),
                 pWin->GetOutDev(),
-                rKEvt.GetKeyCode().GetModifier()));
+                rKEvt.GetKeyCode().GetModifier()
+            );
+
+            pWin->SetPointer(aPointerStyle);
         }
     }
     return bRet;
@@ -255,7 +260,8 @@ SdrHitKind SdrView::PickAnything(const MouseEvent& rMEvt, SdrMouseEventKind nEve
         pOut = GetFirstOutputDevice();
     }
     Point aPnt(rMEvt.GetPosPixel());
-    if (pOut!=nullptr) aPnt= pOut->WindowToLogic(aPnt);
+    if (pOut != nullptr)
+        aPnt = pOut->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPnt));
 
     if (mbNegativeX)
     {
@@ -528,10 +534,8 @@ SdrHitKind SdrView::PickAnything(const Point& rLogicPos, SdrViewEvent& rVEvt) co
         sal_Int32 nTolerance(mnHitTolLog);
         bool bBoundRectHit(false);
 
-        if(pOut)
-        {
-            nTolerance = pOut->WindowToLogic(Size(2, 0))->Width();
-        }
+        if (pOut)
+            nTolerance = pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(2, 0))->Width();
 
         if( (aLocalLogicPosition.X() >= aBoundRect.Left() - nTolerance && aLocalLogicPosition.X() <= aBoundRect.Left() + nTolerance)
          || (aLocalLogicPosition.X() >= aBoundRect.Right() - nTolerance && aLocalLogicPosition.X() <= aBoundRect.Right() + nTolerance)

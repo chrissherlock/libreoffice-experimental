@@ -317,30 +317,30 @@ bool SdrPaintView::IsTextEdit() const
 
 sal_uInt16 SdrPaintView::ImpGetMinMovLogic(short nMinMov, const OutputDevice* pOut) const
 {
-    if (nMinMov>=0) return sal_uInt16(nMinMov);
-    if (pOut==nullptr)
-    {
+    if (nMinMov >= 0)
+        return sal_uInt16(nMinMov);
+
+    if (pOut == nullptr)
         pOut = GetFirstOutputDevice();
-    }
-    if (pOut!=nullptr) {
-        return short(-pOut->WindowToLogic(Size(nMinMov,0))->Width());
-    } else {
-        return 0;
-    }
+
+    if (pOut != nullptr)
+        return short(-pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(nMinMov, 0))->Width());
+
+    return 0;
 }
 
 sal_uInt16 SdrPaintView::ImpGetHitTolLogic(short nHitTol, const OutputDevice* pOut) const
 {
-    if (nHitTol>=0) return sal_uInt16(nHitTol);
-    if (pOut==nullptr)
-    {
+    if (nHitTol >= 0)
+        return sal_uInt16(nHitTol);
+
+    if (pOut == nullptr)
         pOut = GetFirstOutputDevice();
-    }
-    if (pOut!=nullptr) {
-        return short(-pOut->WindowToLogic(Size(nHitTol,0))->Width());
-    } else {
-        return 0;
-    }
+
+    if (pOut != nullptr)
+        return short(-pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(nHitTol, 0))->Width());
+
+    return 0;
 }
 
 void SdrPaintView::TheresNewMapMode()
@@ -353,8 +353,8 @@ void SdrPaintView::TheresNewMapMode()
         }
         else
         {
-            mnHitTolLog=static_cast<sal_uInt16>(mpActualOutDev->WindowToLogic(Size(mnHitTolPix,0))->Width());
-            mnMinMovLog=static_cast<sal_uInt16>(mpActualOutDev->WindowToLogic(Size(mnMinMovPix,0))->Width());
+            mnHitTolLog = static_cast<sal_uInt16>(mpActualOutDev->convertTo<vcl::LogicSize>(vcl::WindowSize(mnHitTolPix, 0))->Width());
+            mnMinMovLog = static_cast<sal_uInt16>(mpActualOutDev->convertTo<vcl::LogicSize>(vcl::WindowSize(mnMinMovPix, 0))->Width());
         }
     }
 }

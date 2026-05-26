@@ -164,7 +164,8 @@ void NotesPanelView::onResize()
     if (!pOutlinerView)
         return;
 
-    Size aOutputSize = pWin->WindowToLogic(pWin->GetOutputSizePixel());
+    Size aOutputSize = pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(pWin->GetOutputSizePixel()),
+                                                       pWin->GetMapMode());
 
     pOutlinerView->SetOutputArea({ Point(0, 0), aOutputSize });
     maOutliner.SetPaperSize(aOutputSize);

@@ -110,8 +110,9 @@ bool PSCSDFPropsQuickHelp(const HelpEvent &rEvt, SwWrtShell& rSh)
             || rView.IsSpotlightCharStyles())
     {
         SwPosition aPos(rSh.GetDoc()->GetNodes());
-        Point aPt(rSh.GetWin()->WindowToLogic(
-                      rSh.GetWin()->ScreenToOutputPixel(rEvt.GetMousePosPixel())));
+        vcl::Window* pWin = rSh.GetWin();
+
+        Point aPt(pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(pWin->ScreenToOutputPixel(rEvt.GetMousePosPixel()))));
 
         rSh.GetLayout()->GetModelPositionForViewPoint(&aPos, aPt);
 
@@ -234,9 +235,10 @@ bool PSCSDFPropsQuickHelp(const HelpEvent &rEvt, SwWrtShell& rSh)
 
     if (!sText.isEmpty())
     {
-        tools::Rectangle aRect(rSh.GetWin()->WindowToLogic(
-                                   rSh.GetWin()->ScreenToOutputPixel(rEvt.GetMousePosPixel())),
-                               Size(1, 1));
+        vcl::Window* pWin = rSh.GetWin();
+
+        const Point aLogicPos = pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(pWin->ScreenToOutputPixel(rEvt.GetMousePosPixel())));
+        tools::Rectangle aRect(aLogicPos, Size(1, 1));
         Point aPt(rSh.GetWin()->OutputToScreenPixel(rSh.GetWin()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aRect.TopLeft()))));
         aRect.SetLeft(aPt.X());
         aRect.SetTop(aPt.Y());
@@ -309,7 +311,7 @@ OUString SwEditWin::ClipLongToolTip(const OUString& rText)
     OUString sDisplayText(rText);
     tools::Long nTextWidth = GetTextWidth(sDisplayText);
     tools::Long nMaxWidth = GetDesktopRectPixel().GetWidth() * 2 / 3;
-    nMaxWidth = WindowToLogic(Size(nMaxWidth, 0)).Width();
+    nMaxWidth = convertTo<vcl::LogicSize>(vcl::WindowSize(nMaxWidth, 0))->Width();
     if (nTextWidth > nMaxWidth)
         sDisplayText = GetOutDev()->GetEllipsisString(sDisplayText, nMaxWidth, DrawTextFlags::CenterEllipsis);
     return sDisplayText;
@@ -400,7 +402,7 @@ void SwEditWin::RequestHelp(const HelpEvent &rEvt)
     bool bScreenTip = false;
     CurrShell aCurr(&rSh);
     OUString sText;
-    Point aPt( WindowToLogic( ScreenToOutputPixel( rEvt.GetMousePosPixel() ) ));
+    Point aPt(convertTo<vcl::LogicPoint>(vcl::WindowPoint(ScreenToOutputPixel(rEvt.GetMousePosPixel()))));
     bool bBalloon = bool(rEvt.GetMode() & HelpEventMode::BALLOON);
 
     SdrView *pSdrView = rSh.GetDrawView();

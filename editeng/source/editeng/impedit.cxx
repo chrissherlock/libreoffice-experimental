@@ -303,7 +303,7 @@ static void lcl_translateTwips(const OutputDevice& rParent, OutputDevice& rChild
         rChild.SetMapMode(aMapMode);
         rChild.SetMappingPolicy(vcl::MappingPolicy::ApplyMapMode);
     }
-    aOffset = rChild.WindowToLogic(aOffset).get();
+    aOffset = rChild.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aOffset)).get();
     MapMode aMapMode(rChild.GetMapMode());
     aMapMode.SetOrigin(aOffset);
     aMapMode.SetMapUnit(rParent.GetMapMode().GetMapUnit());
@@ -398,7 +398,7 @@ void ImpEditView::lokSelectionCallback(const std::optional<tools::PolyPolygon> &
                 if (pViewShellWindow && pViewShellWindow->IsAncestorOf(*mpOutputWindow))
                 {
                     Point aOffsetPx = mpOutputWindow->GetOffsetPixelFrom(*pViewShellWindow);
-                    Point aLogicOffset = mpOutputWindow->WindowToLogic(aOffsetPx);
+                    Point aLogicOffset = mpOutputWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aOffsetPx));
                     for (tools::Rectangle& rRect : aRectangles)
                         rRect.Move(aLogicOffset.getX(), aLogicOffset.getY());
                 }
@@ -918,7 +918,7 @@ void ImpEditView::ResetOutputArea( const tools::Rectangle& rRect )
         return;
 
     // #i119885# use grown area if needed; do when getting bigger OR smaller
-    const sal_Int32 nMore(DoInvalidateMore() ? GetOutputDevice().WindowToLogic(Size(mnInvalidateMore, 0))->Width() : 0);
+    const sal_Int32 nMore(DoInvalidateMore() ? GetOutputDevice().convertTo<vcl::LogicSize>(vcl::WindowSize(mnInvalidateMore, 0))->Width() : 0);
 
     if (aOldArea.Left() > maOutputArea.Left())
     {
@@ -1279,7 +1279,7 @@ ImpEditView::ImplGetCursorRectAndMaybeScroll(EditPaM const& rPos,
 
     const OutputDevice& rOutDev = GetOutputDevice();
 
-    tools::Long nOnePixel = rOutDev.WindowToLogic( Size( 1, 0 ) )->Width();
+    tools::Long nOnePixel = rOutDev.convertTo<vcl::LogicSize>(vcl::WindowSize( 1, 0))->Width();
 
     if ( ( aEditCursor.Top() + nOnePixel >= GetVisDocTop() ) &&
          ( aEditCursor.Bottom() - nOnePixel <= GetVisDocBottom() ) &&
@@ -1294,7 +1294,7 @@ ImpEditView::ImplGetCursorRectAndMaybeScroll(EditPaM const& rPos,
         if ( !aCursorSz.Width() || !aCursorSz.Height() )
         {
             tools::Long nCursorSz = rOutDev.GetSettings().GetStyleSettings().GetCursorSize();
-            nCursorSz = rOutDev.WindowToLogic( Size( nCursorSz, 0 ) )->Width();
+            nCursorSz = rOutDev.convertTo<vcl::LogicSize>(vcl::WindowSize(nCursorSz, 0))->Width();
             if ( !aCursorSz.Width() )
                 aCursorSz.setWidth( nCursorSz );
             if ( !aCursorSz.Height() )
@@ -1414,7 +1414,7 @@ void ImpEditView::ShowCursor( bool bGotoCursor, bool bForceVisCursor )
                 if (pViewShellWindow && pViewShellWindow->IsAncestorOf(*mpOutputWindow))
                 {
                     Point aOffsetPx = mpOutputWindow->GetOffsetPixelFrom(*pViewShellWindow);
-                    Point aLogicOffset = mpOutputWindow->WindowToLogic(aOffsetPx);
+                    Point aLogicOffset = mpOutputWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aOffsetPx));
                     aPos.Move(aLogicOffset.getX(), aLogicOffset.getY());
                 }
             }
@@ -2160,7 +2160,7 @@ bool ImpEditView::IsSelectionAtPoint( const Point& rPosPixel )
 
     // Logical units ...
     const OutputDevice& rOutDev = GetOutputDevice();
-    Point aMousePos = rOutDev.WindowToLogic(rPosPixel).get();
+    Point aMousePos = rOutDev.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPosPixel)).get();
 
     if ( ( !GetOutputArea().Contains( aMousePos ) ) && !getImpEditEngine().IsInSelectionMode() )
     {
@@ -2180,7 +2180,7 @@ bool ImpEditView::SetCursorAtPoint( const Point& rPointPixel )
 
     // Logical units ...
     const OutputDevice& rOutDev = GetOutputDevice();
-    aMousePos = rOutDev.WindowToLogic( aMousePos ).get();
+    aMousePos = rOutDev.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aMousePos)).get();
 
     if ( ( !GetOutputArea().Contains( aMousePos ) ) && !getImpEditEngine().IsInSelectionMode() )
     {
@@ -2313,7 +2313,7 @@ void ImpEditView::dragGestureRecognized(const css::datatransfer::dnd::DragGestur
         // Field?!
         sal_Int32 nPara;
         sal_Int32 nPos;
-        Point aMousePos = GetOutputDevice().WindowToLogic( aMousePosPixel ).get();
+        Point aMousePos = GetOutputDevice().convertTo<vcl::LogicPoint>(vcl::WindowPoint(aMousePosPixel));
         const SvxFieldItem* pField = GetField( aMousePos, &nPara, &nPos );
         if ( pField )
         {
@@ -2358,7 +2358,7 @@ void ImpEditView::dragGestureRecognized(const css::datatransfer::dnd::DragGestur
 
     // Sensitive area to be scrolled.
     Size aSz( 5, 0 );
-    aSz = GetOutputDevice().WindowToLogic( aSz ).get();
+    aSz = GetOutputDevice().convertTo<vcl::LogicSize>(vcl::WindowSize(aSz));
     mpDragAndDropInfo->nSensibleRange = static_cast<sal_uInt16>(aSz.Width());
     mpDragAndDropInfo->nCursorWidth = static_cast<sal_uInt16>(aSz.Width()) / 2;
     mpDragAndDropInfo->aBeginDragSel = getEditEngine().CreateESelection( aCopySel );
@@ -2577,7 +2577,7 @@ void ImpEditView::dragOver(const css::datatransfer::dnd::DropTargetDragEvent& rD
     const OutputDevice& rOutDev = GetOutputDevice();
 
     Point aMousePos( rDTDE.LocationX, rDTDE.LocationY );
-    aMousePos = rOutDev.WindowToLogic( aMousePos ).get();
+    aMousePos = rOutDev.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aMousePos)).get();
 
     bool bAccept = false;
 

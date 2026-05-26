@@ -141,9 +141,7 @@ void DrawDocShell::Draw(OutputDevice* pOut, const JobSetup&, sal_uInt16 nAspect,
         vcl::Window* pWin = mpViewShell->GetActiveWindow();
 
         if (pWin)
-        {
-            aVisArea = pWin->WindowToLogic(::tools::Rectangle(Point(0,0), pWin->GetOutputSizePixel()));
-        }
+            aVisArea = pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(::tools::Rectangle(Point(0, 0), pWin->GetOutputSizePixel())), pWin->GetMapMode());
     }
 
     return aVisArea;

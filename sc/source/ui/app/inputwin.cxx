@@ -1375,7 +1375,7 @@ void ScTextWnd::Resize()
     {
         Size aOutputSize = GetOutputSizePixel();
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        tools::Rectangle aOutputArea =  rDevice.WindowToLogic( tools::Rectangle( Point(), aOutputSize ));
+        tools::Rectangle aOutputArea =  rDevice.convertTo<vcl::LogicRect>(vcl::WindowRect(Point(), aOutputSize));
         m_xEditView->SetOutputArea( aOutputArea );
 
         // Don't leave an empty area at the bottom if we can move the text down.
@@ -1385,7 +1385,7 @@ void ScTextWnd::Resize()
             m_xEditView->Scroll(0, m_xEditView->GetVisArea().Top() - nMaxVisAreaTop);
         }
 
-        m_xEditEngine->SetPaperSize( rDevice.WindowToLogic( Size( aOutputSize.Width(), 10000 ) ));
+        m_xEditEngine->SetPaperSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(aOutputSize.Width(), 10000)));
     }
 
     // skip WeldEditView's Resize();
@@ -1540,7 +1540,7 @@ void ScTextWnd::InitEditEngine()
 
     Size barSize = GetOutputSizePixel();
     m_xEditEngine->SetUpdateLayout( false );
-    m_xEditEngine->SetPaperSize( GetDrawingArea()->get_ref_device().WindowToLogic(Size(barSize.Width(),10000)));
+    m_xEditEngine->SetPaperSize(GetDrawingArea()->get_ref_device().convertTo<vcl::LogicSize>(vcl::WindowSize(Size(barSize.Width(), 10000))));
     m_xEditEngine->SetWordDelimiters(
                     ScEditUtil::ModifyDelimiters( m_xEditEngine->GetWordDelimiters() ) );
     m_xEditEngine->SetReplaceLeadingSingleQuotationMark( false );
@@ -2059,7 +2059,7 @@ void ScTextWnd::SetTextString( const OUString& rNewString, bool bKitUpdate )
                 else
                     nTextSize = GetOutputSizePixel().Width(); // Overflow
 
-                Point aLogicStart = GetDrawingArea()->get_ref_device().WindowToLogic(Point(0,0));
+                Point aLogicStart = GetDrawingArea()->get_ref_device().convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(0, 0)));
                 tools::Long nStartPos = aLogicStart.X();
                 tools::Long nInvPos = nStartPos;
                 if (nDifPos)
@@ -2199,7 +2199,7 @@ void ScTextWnd::SetDrawingArea(weld::DrawingArea* pDrawingArea)
 
     aTextFont = rDevice.GetFont();
     Size aFontSize = aTextFont.GetFontSize();
-    aTextFont.SetFontSize(rDevice.WindowToLogic(aFontSize, MapMode(MapUnit::MapTwip)));
+    aTextFont.SetFontSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(aFontSize), MapMode(MapUnit::MapTwip)));
 
     const StyleSettings& rStyleSettings = Application::GetSettings().GetStyleSettings();
 

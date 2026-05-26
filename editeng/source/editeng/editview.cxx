@@ -190,17 +190,19 @@ tools::Rectangle EditView::GetInvalidateRect() const
 {
     if (!getImpl().DoInvalidateMore())
         return getImpl().maOutputArea;
-    else
-    {
-        tools::Rectangle aRect(getImpl().maOutputArea);
-        tools::Long nMore = getImpl().GetOutputDevice().WindowToLogic( Size( getImpl().GetInvalidateMore(), 0 ) )->Width();
-        aRect.AdjustLeft( -nMore );
-        aRect.AdjustRight(nMore );
-        aRect.AdjustTop( -nMore );
-        aRect.AdjustBottom(nMore );
-        return aRect;
-    }
+
+    tools::Rectangle aRect(getImpl().maOutputArea);
+    tools::Long nMore = getImpl().GetOutputDevice().convertTo<vcl::LogicSize>(
+        vcl::WindowSize(getImpl().GetInvalidateMore(), 0)
+    )->Width();
+    aRect.AdjustLeft( -nMore );
+    aRect.AdjustRight(nMore );
+    aRect.AdjustTop( -nMore );
+    aRect.AdjustBottom(nMore );
+
+    return aRect;
 }
+
 
 namespace {
 
@@ -988,7 +990,7 @@ bool EditView::IsCursorAtWrongSpelledWord()
 
 bool EditView::IsWrongSpelledWordAtPos( const Point& rPosPixel, bool bMarkIfWrong )
 {
-    Point aPos(getImpl().GetOutputDevice().WindowToLogic(rPosPixel).get());
+    Point aPos = getImpl().GetOutputDevice().convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPosPixel));
     aPos = getImpl().GetDocPos( aPos );
     EditPaM aPaM = getEditEngine().GetPaM(aPos, false);
     return getImpl().IsWrongSpelledWord( aPaM , bMarkIfWrong );
@@ -1073,7 +1075,7 @@ bool EditView::ExecuteSpellPopup(const Point& rPosPixel, const Link<SpellCallbac
         return false;
 
     OutputDevice& rDevice = getImpl().GetOutputDevice();
-    Point aPos(rDevice.WindowToLogic(rPosPixel).get());
+    Point aPos(rDevice.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPosPixel)).get());
     aPos = getImpl().GetDocPos( aPos );
     EditPaM aPaM = getEditEngine().GetPaM(aPos, false);
     Reference< linguistic2::XSpellChecker1 >  xSpeller(getImpEditEngine().GetSpeller());
@@ -1418,7 +1420,7 @@ const SvxFieldItem* EditView::GetFieldUnderMousePointer( sal_Int32& nPara, sal_I
     else
         aPos = getImpl().GetWindow()->GetPointerPosPixel();
     OutputDevice& rDevice = getImpl().GetOutputDevice();
-    aPos = rDevice.WindowToLogic(aPos).get();
+    aPos = rDevice.convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos)).get();
     return GetField( aPos, &nPara, &nPos );
 }
 

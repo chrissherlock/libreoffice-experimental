@@ -1584,7 +1584,7 @@ css::uno::Reference<css::datatransfer::dnd::XDropTarget> AddressMultiLineEdit::G
 
 bool AddressMultiLineEdit::SetCursorLogicPosition(const Point& rPosition)
 {
-    Point aMousePos = EditViewOutputDevice().WindowToLogic(rPosition);
+    Point aMousePos = EditViewOutputDevice().convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPosition));
     m_xEditView->SetCursorLogicPosition(aMousePos, false, true);
 
     ESelection aSelection = m_xEditView->GetSelection();

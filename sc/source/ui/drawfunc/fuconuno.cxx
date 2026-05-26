@@ -51,7 +51,7 @@ bool FuConstUnoControl::MouseButtonDown(const MouseEvent& rMEvt)
 
     if ( rMEvt.IsLeft() && !pView->IsAction() )
     {
-        Point aPnt( pWindow->WindowToLogic( rMEvt.GetPosPixel() ) );
+        Point aPnt(pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel())));
         pWindow->CaptureMouse();
         pView->BegCreateObj(aPnt);
         bReturn = true;

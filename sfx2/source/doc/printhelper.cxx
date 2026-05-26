@@ -407,7 +407,9 @@ void SfxPrintHelper::impl_setPrinter(const uno::Sequence< beans::PropertyValue >
         const auto aSetPaperWindowSize = pPrinter->convertTo<vcl::WindowSize>(vcl::LogicSize(aSetPaperSize), MapMode(MapUnit::Map100thMM));
         if (aSetPaperWindowSize.get() != pPrinter->GetPaperSizePixel())
         {
-            pPrinter->SetPaperSizeUser(pPrinter->WindowToLogic(aSetPaperWindowSize).get());
+            pPrinter->SetPaperSizeUser(
+                pPrinter->convertTo<vcl::LogicSize>(
+                    vcl::WindowSize(aSetPaperWindowSize)));
             nChangeFlags |= SfxPrinterChangeFlags::CHG_SIZE;
         }
     }

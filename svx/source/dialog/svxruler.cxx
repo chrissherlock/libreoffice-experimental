@@ -342,7 +342,7 @@ tools::Long SvxRuler::MakePositionSticky(tools::Long aPosition, tools::Long aPoi
     // Move "coordinate system" to frame position so ticks are calculated correctly
     tools::Long aTranslatedPosition = aPosition - aPointOfReferencePixel;
     // Convert position to current selected map mode
-    tools::Long aPositionLogic = m_pEditWin->WindowToLogic(Size(aTranslatedPosition, 0), GetCurrentMapMode()).Width();
+    tools::Long aPositionLogic = m_pEditWin->convertTo<vcl::LogicSize>(vcl::WindowSize(aTranslatedPosition, 0), GetCurrentMapMode())->Width();
     // Normalize -- snap to nearest tick
     aPositionLogic = rtl::math::round((aPositionLogic + aHalfTick) / aTick) * aTick;
     // Convert back to pixels
@@ -383,22 +383,22 @@ tools::Long SvxRuler::ConvertSizePixel(tools::Long nVal) const
 
 inline tools::Long SvxRuler::ConvertHPosLogic(tools::Long nVal) const
 {
-    return m_pEditWin->WindowToLogic(Size(nVal, 0)).Width();
+    return m_pEditWin->convertTo<vcl::LogicSize>(vcl::WindowSize(nVal, 0))->Width();
 }
 
 inline tools::Long SvxRuler::ConvertVPosLogic(tools::Long nVal) const
 {
-    return m_pEditWin->WindowToLogic(Size(0, nVal)).Height();
+    return m_pEditWin->convertTo<vcl::LogicSize>(vcl::WindowSize(0, nVal))->Height();
 }
 
 inline tools::Long SvxRuler::ConvertHSizeLogic(tools::Long nVal) const
 {
-    return m_pEditWin->WindowToLogic(Size(nVal, 0)).Width();
+    return m_pEditWin->convertTo<vcl::LogicSize>(vcl::WindowSize(nVal, 0))->Width();
 }
 
 inline tools::Long SvxRuler::ConvertVSizeLogic(tools::Long nVal) const
 {
-    return m_pEditWin->WindowToLogic(Size(0, nVal)).Height();
+    return m_pEditWin->convertTo<vcl::LogicSize>(vcl::WindowSize(0, nVal))->Height();
 }
 
 inline tools::Long SvxRuler::ConvertPosLogic(tools::Long nVal) const

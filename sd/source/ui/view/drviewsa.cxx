@@ -634,7 +634,7 @@ void DrawViewShell::GetStatusBarState(SfxItemSet& rSet)
     SdrPageView* pPageView = mpDrawView->GetSdrPageView();
     if (pPageView)
     {
-        Point aPos = GetActiveWindow()->WindowToLogic(maMousePos);
+        Point aPos = GetActiveWindow()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(maMousePos));
         pPageView->LogicToPagePos(aPos);
         double fUIScale(GetDoc()->GetUIScale());
         aPos.setX( ::tools::Long(aPos.X() / fUIScale) );

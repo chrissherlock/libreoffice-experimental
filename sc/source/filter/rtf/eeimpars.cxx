@@ -507,7 +507,7 @@ bool ScEEImport::GraphicSize( SCCOL nCol, SCROW nRow, ScEEParseEntry* pE )
         Size aSizePix = pI->aSize;
         aSizePix.AdjustWidth(2 * pI->aSpace.X() );
         aSizePix.AdjustHeight(2 * pI->aSpace.Y() );
-        Size aLogicSize = pDefaultDev->WindowToLogic( aSizePix, MapMode( MapUnit::MapTwip ) );
+        Size aLogicSize = pDefaultDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aSizePix), MapMode(MapUnit::MapTwip));
         if ( nDir & nHorizontal )
             nWidth += aLogicSize.Width();
         else if ( nWidth < aLogicSize.Width() )
@@ -597,11 +597,11 @@ void ScEEImport::InsertGraphic( SCCOL nCol, SCROW nRow, SCTAB nTab,
             aInsertPos.AdjustY(aSpace.Y() );
         }
         // Add offset of Spacing
-        aSpace = pDefaultDev->WindowToLogic( pI->aSpace, MapMode( MapUnit::Map100thMM ) );
+        aSpace = pDefaultDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(pI->aSpace), MapMode(MapUnit::Map100thMM));
         aInsertPos += aSpace;
 
         Size aSizePix = pI->aSize;
-        aLogicSize = pDefaultDev->WindowToLogic( aSizePix, MapMode( MapUnit::Map100thMM ) );
+        aLogicSize = pDefaultDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aSizePix), MapMode(MapUnit::Map100thMM));
 
         // Limit size
         ::ScLimitSizeOnDrawPage( aLogicSize, aInsertPos, pPage->GetSize() );

@@ -868,7 +868,7 @@ void SwPageFrame::MakeAll(vcl::RenderContext* pRenderContext)
                            !pSh->GetViewOptions()->getDraftView())
                 {
                     // In BrowseView, we use fixed settings
-                    const Size aBorder =  pRenderContext->WindowToLogic( pSh->GetBrowseBorder() );
+                    const Size aBorder = pRenderContext->convertTo<vcl::LogicSize>(vcl::WindowSize(pSh->GetBrowseBorder()), pRenderContext->GetMapMode());
                     const tools::Long nTop    = pAttrs->CalcTopLine()   + aBorder.Height();
                     const tools::Long nBottom = pAttrs->CalcBottomLine()+ aBorder.Height();
 
@@ -1235,7 +1235,7 @@ void SwContentFrame::MakePrtArea( const SwBorderAttrs &rAttrs )
                 }
             }
 
-            const Size aBorder = pSh->GetOut()->WindowToLogic( pSh->GetBrowseBorder() );
+            const Size aBorder = pSh->GetOut()->convertTo<vcl::LogicSize>(vcl::WindowSize(pSh->GetBrowseBorder()), pSh->GetOut()->GetMapMode());
             tools::Long nWidth = nWidthArea - 2 * ( IsVertical() ? aBorder.Height() : aBorder.Width() );
             nWidth -= aRectFnSet.GetLeft(getFramePrintArea());
             nWidth -= rAttrs.CalcRightLine();

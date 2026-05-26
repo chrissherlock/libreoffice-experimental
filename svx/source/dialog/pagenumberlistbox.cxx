@@ -84,7 +84,7 @@ static tools::Long lcl_DrawGraphic(VirtualDevice& rVDev, const SvxNumberFormat& 
             nRet = aGSize.Width();
             aGSize.setHeight(aGSize.Height() / nDivision);
             pGrf->Draw(rVDev, Point(nXStart, nYMiddle - (aGSize.Height() / 2)),
-                       rVDev.WindowToLogic(aGSize));
+                       rVDev.convertTo<vcl::LogicSize>(vcl::WindowSize(aGSize)));
         }
     }
     return nRet;
@@ -129,7 +129,7 @@ static tools::Long lcl_DrawBullet(VirtualDevice* pVDev, const SvxNumberFormat& r
 void SvxNumberingPreview::Paint(vcl::RenderContext& rRenderContext,
                                 const ::tools::Rectangle& /*rRect*/)
 {
-    Size aSize(rRenderContext.WindowToLogic(GetOutputSizePixel()));
+    Size aSize(rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
 
     // Use default document and font colors to create preview
     const Color aBackColor = svtools::ColorConfig().GetColorValue(svtools::DOCCOLOR).nColor;

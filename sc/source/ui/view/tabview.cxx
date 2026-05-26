@@ -1910,10 +1910,11 @@ Point ScTabView::GetChartInsertPos( const Size& rSize, const ScRange& rCellRange
         //  get the visible rectangle in logic units
         bool bLOKActive = comphelper::LibreOfficeKit::isActive();
         MapMode aDrawMode = pWin->GetDrawMapMode();
+
         tools::Rectangle aVisible(
             bLOKActive ?
-            ::LogicToLogic( aViewData.getLOKVisibleArea(), MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM) )
-            : pWin->WindowToLogic( tools::Rectangle( Point(0,0), pWin->GetOutputSizePixel() ), aDrawMode ) );
+            ::LogicToLogic(aViewData.getLOKVisibleArea(), MapMode(MapUnit::MapTwip), MapMode(MapUnit::Map100thMM))
+            : pWin->convertTo<vcl::LogicRect>(vcl::WindowRect(tools::Rectangle(Point(0, 0), pWin->GetOutputSizePixel())), aDrawMode));
 
         ScDocument& rDoc = aViewData.GetDocument();
         SCTAB nTab = aViewData.CurrentTabForData();

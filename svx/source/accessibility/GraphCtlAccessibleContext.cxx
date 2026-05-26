@@ -139,7 +139,7 @@ Reference< XAccessible > SAL_CALL SvxGraphCtrlAccessibleContext::getAccessibleAt
     }
 
     Point aPnt( rPoint.X, rPoint.Y );
-    aPnt = mpControl->GetDrawingArea()->get_ref_device().WindowToLogic(aPnt);
+    aPnt = mpControl->GetDrawingArea()->get_ref_device().convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPnt));
 
     SdrObject* pObj = nullptr;
 

@@ -348,7 +348,11 @@ void PrintDialog::PrintPreviewWindow::preparePreviewBitmap()
     pPrerenderVDev->SetReferenceDevice( mnDPIX, mnDPIY );
 
     // calculate needed Scale for Metafile (using Size and DPI from VDev)
-    Size aLogicSize( pPrerenderVDev->WindowToLogic( pPrerenderVDev->GetOutputSizePixel(), MapMode( MapUnit::Map100thMM ) ) );
+    Size aLogicSize = pPrerenderVDev->convertTo<vcl::LogicSize>(
+        vcl::WindowSize(pPrerenderVDev->GetOutputSizePixel()),
+        MapMode(MapUnit::Map100thMM)
+    );
+
     Size aOrigSize( maOrigSize );
     if( aOrigSize.Width() < 1 )
         aOrigSize.setWidth( aLogicSize.Width() );
@@ -406,7 +410,11 @@ void PrintDialog::PrintPreviewWindow::preparePreviewBitmap()
 
         const Size aScaledSize2(basegfx::fround<tools::Long>(fWidth), basegfx::fround<tools::Long>(fHeight));
         pPrerenderVDev->SetOutputSizePixel(aScaledSize2, false);
-        aLogicSize = pPrerenderVDev->WindowToLogic( aScaledSize2, MapMode( MapUnit::Map100thMM ) );
+
+        aLogicSize = pPrerenderVDev->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(aScaledSize2),
+            MapMode(MapUnit::Map100thMM)
+        );
     }
 
     pPrerenderVDev->EnableOutput();
@@ -635,8 +643,11 @@ PrintDialog::PrintDialog(weld::Window* i_pWindow, std::shared_ptr<PrinterControl
     mxPrinters->grab_focus();
 
     // setup sizes for N-Up
-    Size aNupSize( maPController->getPrinter()->WindowToLogic(
-                         maPController->getPrinter()->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) ) );
+    Size aNupSize = maPController->getPrinter()->convertTo<vcl::LogicSize>(
+        vcl::WindowSize(maPController->getPrinter()->GetPaperSizePixel()),
+        MapMode(MapUnit::Map100thMM)
+    );
+
     if( maPController->getPrinter()->GetOrientation() == Orientation::Landscape )
     {
         maNupLandscapeSize = aNupSize;
@@ -860,8 +871,8 @@ void PrintDialog::setPaperSizes()
             aInfo.doSloppyFit(true);
             Paper ePaper = aInfo.getPaper();
 
-            // Use PaperInfo directly (1/100th mm); GetPaperSize() uses
-            // WindowToLogic which can return wrong values.
+            // Prefer direct use of PaperInfo (in 1/100th mm) to avoid potential
+            // inaccuracies from device-to-logic conversions during MapMode transitions.
             Size aSize(aInfo.getWidth(), aInfo.getHeight());
             Size aLogicPaperSize( o3tl::convert(aSize, o3tl::Length::mm100, eUnit) );
 
@@ -1024,11 +1035,13 @@ IMPL_LINK_NOARG(PrintDialog, updatePreviewIdle, Timer*, void)
 void PrintDialog::preparePreview( bool i_bMayUseCache )
 {
     VclPtr<Printer> aPrt( maPController->getPrinter() );
-    // Prefer maSelectedPaperSize (stable 1/100th mm) over WindowToLogic
+
+    // Prefer maSelectedPaperSize (stable 1/100th mm) over convertTo
     // which can return wrong values during MapMode transitions.
     Size aCurPageSize = !maSelectedPaperSize.IsEmpty()
         ? maSelectedPaperSize
-        : aPrt->WindowToLogic( aPrt->GetPaperSizePixel(), MapMode( MapUnit::Map100thMM ) );
+        : aPrt->convertTo<vcl::LogicSize>(vcl::WindowSize(aPrt->GetPaperSizePixel()), MapMode(MapUnit::Map100thMM));
+
     // maSelectedPaperSize is always portrait-order; swap to landscape
     // based on the orientation dropdown (not GetOrientation() which
     // can be clobbered by SetPaper/SetPaperSizeUser).
@@ -1111,7 +1124,7 @@ void PrintDialog::preparePreview( bool i_bMayUseCache )
         {
             aCurPageSize = !maSelectedPaperSize.IsEmpty()
                 ? maSelectedPaperSize
-                : aPrt->WindowToLogic(aPrt->GetPaperSizePixel(), MapMode(MapUnit::Map100thMM));
+                : aPrt->convertTo<vcl::LogicSize>(vcl::WindowSize(aPrt->GetPaperSizePixel()), MapMode(MapUnit::Map100thMM));
             // Swap to landscape if document requires it.
             if (!maSelectedPaperSize.IsEmpty())
             {
@@ -1126,7 +1139,10 @@ void PrintDialog::preparePreview( bool i_bMayUseCache )
         if( ! aPageSize.bFullPaper )
         {
             const MapMode aMapMode( MapUnit::Map100thMM );
-            Point aOff( aPrt->WindowToLogic( aPrt->GetPageOffsetPixel(), aMapMode ) );
+            Point aOff = aPrt->convertTo<vcl::LogicPoint>(
+                vcl::WindowPoint(aPrt->GetPageOffsetPixel()),
+                aMapMode
+            );
             aMtf.Move( aOff.X(), aOff.Y() );
         }
         // tdf#150561: page size may have changed so sync mePaper with it

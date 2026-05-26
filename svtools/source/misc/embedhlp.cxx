@@ -830,7 +830,10 @@ void EmbeddedObjectRef::DrawShading( const tools::Rectangle &rRect, OutputDevice
         else
             a2 += Point(0, i);
 
-        pOut->DrawLine(pOut->WindowToLogic(a1), pOut->WindowToLogic(a2));
+        pOut->DrawLine(
+            pOut->convertTo<vcl::LogicPoint>(vcl::WindowPoint(a1)),
+            pOut->convertTo<vcl::LogicPoint>(vcl::WindowPoint(a2))
+        );
     }
 }
 

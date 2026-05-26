@@ -81,7 +81,7 @@ void DrawViewShell::MakeVisible(const ::tools::Rectangle& rRect, vcl::Window& rW
         rWin.GetOutDev()->Push(vcl::PushFlags::MAPMODE);
         rWin.SetMappingPolicy();
     }
-    ::tools::Rectangle aVisArea(rWin.WindowToLogic(::tools::Rectangle(Point(0,0), aVisSizePixel)));
+    ::tools::Rectangle aVisArea(rWin.convertTo<vcl::LogicRect>(vcl::WindowRect(Point(0, 0), aVisSizePixel)));
     if (bTiledRendering)
         rWin.GetOutDev()->Pop();
     Size aVisAreaSize(aVisArea.GetSize());

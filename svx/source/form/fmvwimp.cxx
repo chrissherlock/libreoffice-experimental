@@ -250,7 +250,7 @@ void SAL_CALL FormViewPageWindowAdapter::makeVisible( const Reference< XControl 
     {
         awt::Rectangle aRect = xWindow->getPosSize();
         ::tools::Rectangle aNewRect( aRect.X, aRect.Y, aRect.X + aRect.Width, aRect.Y + aRect.Height );
-        aNewRect = m_pWindow->WindowToLogic( aNewRect );
+        aNewRect = m_pWindow->convertTo<vcl::LogicRect>(vcl::WindowRect(aNewRect));
         m_pViewImpl->getView()->MakeVisible( aNewRect, *m_pWindow );
     }
 }
@@ -953,7 +953,7 @@ IMPL_LINK_NOARG(FmXFormView, OnAutoFocus, void*, void)
         {
             awt::Rectangle aRect = xControlWindow->getPosSize();
             ::tools::Rectangle aNonUnoRect( aRect.X, aRect.Y, aRect.X + aRect.Width, aRect.Y + aRect.Height );
-            m_pView->MakeVisible( pCurrentWindow->WindowToLogic( aNonUnoRect ), *const_cast< vcl::Window* >( pCurrentWindow ) );
+            m_pView->MakeVisible(pCurrentWindow->convertTo<vcl::LogicRect>(vcl::WindowRect(aNonUnoRect)).get(), *const_cast<vcl::Window*>(pCurrentWindow));
         }
     }
     catch (const Exception&)

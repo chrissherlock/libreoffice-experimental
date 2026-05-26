@@ -311,7 +311,7 @@ bool SlideSorterController::Command (
                     bool bOnSectionHeader = false;
                     if (rEvent.IsMouseEvent())
                     {
-                        Point aModelPos = pWindow->WindowToLogic(rEvent.GetMousePosPixel());
+                        Point aModelPos = pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rEvent.GetMousePosPixel()));
                         sal_Int32 nSectionIdx
                             = mrView.GetLayouter().GetSectionIndexAtPoint(aModelPos);
                         if (nSectionIdx >= 0)
@@ -359,7 +359,7 @@ bool SlideSorterController::Command (
                 mpInsertionIndicatorHandler->Start(false);
                 mpInsertionIndicatorHandler->UpdateIndicatorIcon(SdModule::get()->pTransferClip);
                 mpInsertionIndicatorHandler->UpdatePosition(
-                    pWindow->WindowToLogic(rEvent.GetMousePosPixel()),
+                    pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rEvent.GetMousePosPixel())),
                     InsertionIndicatorHandler::MoveMode);
                 xContext.reset(new InsertionIndicatorHandler::ForceShowContext(
                     mpInsertionIndicatorHandler));

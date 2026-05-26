@@ -194,8 +194,10 @@ void UnfloatTableButton::PaintButton()
 
     m_xVirDev->SetMapMode(MapMode(MapUnit::MapPixel));
     drawinglayer::primitive2d::Primitive2DContainer aSeq;
-    const ::tools::Rectangle aRect(
-        ::tools::Rectangle(Point(0, 0), m_xVirDev->WindowToLogic(GetSizePixel())));
+
+    const ::tools::Rectangle aRect(::tools::Rectangle(
+        Point(0, 0), m_xVirDev->convertTo<vcl::LogicSize>(vcl::WindowSize(GetSizePixel()),
+                                                          m_xVirDev->GetMapMode())));
 
     // Create button
     SwFrameButtonPainter::PaintButton(aSeq, aRect, true);

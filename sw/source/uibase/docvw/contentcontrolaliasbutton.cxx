@@ -98,7 +98,9 @@ void SwContentControlAliasButton::PaintButton()
 
     m_xVirDev->SetMapMode(MapMode(MapUnit::MapPixel));
     drawinglayer::primitive2d::Primitive2DContainer aSeq;
-    tools::Rectangle aRect(Point(0, 0), m_xVirDev->WindowToLogic(GetSizePixel()));
+    tools::Rectangle aRect(Point(0, 0),
+                           m_xVirDev->convertTo<vcl::LogicSize>(vcl::WindowSize(GetSizePixel()),
+                                                                m_xVirDev->GetMapMode()));
 
     // Create button
     SwFrameButtonPainter::PaintButton(aSeq, aRect, /*bOnTop=*/false);

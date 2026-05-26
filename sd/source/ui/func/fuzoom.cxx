@@ -80,7 +80,7 @@ bool FuZoom::MouseButtonDown(const MouseEvent& rMEvt)
     bStartDrag = true;
 
     aBeginPosPix = rMEvt.GetPosPixel();
-    aBeginPos = mpWindow->WindowToLogic(aBeginPosPix);
+    aBeginPos = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aBeginPosPix));
     aZoomRect.SetSize( Size( 0, 0 ) );
     aZoomRect.SetPos( aBeginPos );
 
@@ -104,8 +104,8 @@ bool FuZoom::MouseMove(const MouseEvent& rMEvt)
         Point aPosPix = rMEvt.GetPosPixel();
         ForceScroll(aPosPix);
 
-        aEndPos = mpWindow->WindowToLogic(aPosPix);
-        aBeginPos = mpWindow->WindowToLogic(aBeginPosPix);
+        aEndPos = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPosPix));
+        aBeginPos = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aBeginPosPix));
 
         if (nSlotId == SID_ZOOM_PANNING || (rMEvt.IsShift() && !bVisible) )
         {
@@ -166,8 +166,8 @@ bool FuZoom::MouseButtonUp(const MouseEvent& rMEvt)
         if ( ( aZoomSizePixel.Width() < nTol && aZoomSizePixel.Height() < nTol ) || rMEvt.IsMod1() )
         {
             // click at place: double zoom factor
-            Point aPos = mpWindow->WindowToLogic(aPosPix);
-            Size aSize = mpWindow->WindowToLogic(mpWindow->GetOutputSizePixel());
+            Point aPos = mpWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPosPix));
+            Size aSize = mpWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(mpWindow->GetOutputSizePixel()));
             if ( rMEvt.IsMod1() )
             {
                 aSize.setWidth( aSize.Width() * 2 );
@@ -188,8 +188,7 @@ bool FuZoom::MouseButtonUp(const MouseEvent& rMEvt)
         mrViewShell.GetViewFrame()->GetBindings().Invalidate( SidArrayZoom );
     }
 
-    ::tools::Rectangle aVisAreaWin = mpWindow->WindowToLogic(::tools::Rectangle(Point(0,0),
-                                           mpWindow->GetOutputSizePixel()));
+    ::tools::Rectangle aVisAreaWin = mpWindow->convertTo<vcl::LogicRect>(vcl::WindowRect(Point(0, 0), mpWindow->GetOutputSizePixel()));
     mrViewShell.GetZoomList()->InsertZoomRect(aVisAreaWin);
 
     bStartDrag = false;

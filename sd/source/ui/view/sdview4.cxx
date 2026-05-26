@@ -194,8 +194,8 @@ SdrGrafObj* View::InsertGraphic( const Graphic& rGraphic, sal_Int8& rAction,
             if( !pOutDev )
                 pOutDev = Application::GetDefaultDevice();
 
-            if( pOutDev )
-                aSize = pOutDev->WindowToLogic(rGraphic.GetPrefSize(), MapMode(MapUnit::Map100thMM));
+            if (pOutDev)
+                aSize = pOutDev->convertTo<vcl::LogicSize>(vcl::WindowSize(rGraphic.GetPrefSize()), MapMode(MapUnit::Map100thMM));
         }
         else
         {
@@ -536,9 +536,9 @@ IMPL_LINK_NOARG(View, DropInsertFileHdl, Timer *, void)
                             ::sd::Window* pWin = mpViewSh->GetActiveWindow();
 
                             if( pWin )
-                                aPrefSize = pWin->WindowToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
+                                aPrefSize = pWin->convertTo<vcl::LogicSize>(vcl::WindowSize(aPrefSize), MapMode(MapUnit::Map100thMM));
                             else
-                                aPrefSize = Application::GetDefaultDevice()->WindowToLogic(aPrefSize, MapMode(MapUnit::Map100thMM));
+                                aPrefSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(vcl::WindowSize(aPrefSize), MapMode(MapUnit::Map100thMM));
                         }
                         else
                             aPrefSize  = Size( 5000, 5000 );

@@ -2293,7 +2293,7 @@ static void lcl_PDFExportHelper(const OutputDevice* pDev, const OUString& rTabNa
         if (pPDF->GetIsExportBookmarks())
         {
             // the sheet starts at the top of the page
-            tools::Rectangle aArea(pDev->WindowToLogic(tools::Rectangle(0, 0, 0, 0)));
+            tools::Rectangle aArea(pDev->convertTo<vcl::LogicRect>(vcl::WindowRect(0, 0, 0, 0)));
             sal_Int32 nDestID = pPDF->CreateDest(aArea);
             // top-level
             pPDF->CreateOutlineItem(-1/*nParent*/, rTabName, nDestID);
@@ -2301,7 +2301,7 @@ static void lcl_PDFExportHelper(const OutputDevice* pDev, const OUString& rTabNa
         // #i56629# add the named destination stuff
         if (pPDF->GetIsExportNamedDestinations())
         {
-            tools::Rectangle aArea(pDev->WindowToLogic(tools::Rectangle(0, 0, 0, 0)));
+            tools::Rectangle aArea(pDev->convertTo<vcl::LogicRect>(vcl::WindowRect(0, 0, 0, 0)));
             //need the PDF page number here
             pPDF->CreateNamedDest(rTabName, aArea);
         }
@@ -2359,7 +2359,7 @@ static void lcl_PDFExportBookmarkHelper(OutputDevice* pDev, ScDocument& rDoc,
                     //  Get first page for sheet (if nothing from that sheet is printed,
                     //  this page can show a different sheet)
                     nPage = pPrintFuncCache->GetTabStart(aTargetRange.aStart.Tab());
-                    aArea =  pDev->WindowToLogic(tools::Rectangle(0, 0, 0, 0));
+                    aArea = pDev->convertTo<vcl::LogicRect>(vcl::WindowRect(0, 0, 0, 0));
                 }
                 else
                 {
@@ -2414,10 +2414,11 @@ static void lcl_PDFExportBookmarkHelper(OutputDevice* pDev, ScDocument& rDoc,
                         if (nY2 > aLocationPixel.Bottom())
                             nY2 = aLocationPixel.Bottom();
 
-                        // The link target area is interpreted using the device's MapMode at
-                        // the time of the CreateDest call, so WindowToLogic can be used here,
-                        // regardless of the MapMode that is actually selected.
-                        aArea =  pDev->WindowToLogic(tools::Rectangle(nX1, nY1, nX2, nY2));
+                        // The target area for the link is interpreted using the device's MapMode
+                        // active during the CreateDest call. We leverage the type-safe conversion
+                        // to project these coordinates into logical space, ensuring consistency
+                        // regardless of the currently selected MapMode.
+                        aArea = pDev->convertTo<vcl::LogicRect>(vcl::WindowRect(nX1, nY1, nX2, nY2));
                     }
                 }
 

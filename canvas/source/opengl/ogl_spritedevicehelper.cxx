@@ -169,7 +169,7 @@ namespace oglcanvas
         SystemChildWindow* pChildWindow = mxContext->getChildWindow();
         const MapMode aOldMapMode( pChildWindow->GetMapMode() );
         pChildWindow->SetMapMode( MapMode(MapUnit::MapMM) );
-        const Size aLogSize( pChildWindow->WindowToLogic(pChildWindow->GetOutputSizePixel()) );
+        const Size aLogSize(pChildWindow->convertTo<vcl::LogicSize>(vcl::WindowSize(pChildWindow->GetOutputSizePixel())));
         pChildWindow->SetMapMode( aOldMapMode );
 
         return vcl::unotools::size2DFromSize( aLogSize );

@@ -1409,8 +1409,10 @@ void SwViewShell::VisPortChgd( const SwRect &rRect)
                     //selected and have handles attached.
                     if ( pPage->GetSortedObjs() )
                     {
-                        const tools::Long nOfst = GetOut()->WindowToLogic(
-                            Size(Imp()->GetDrawView()->GetMarkHdlSizePixel()/2,0))->Width();
+                        const tools::Long nOfst = GetOut()->convertTo<vcl::LogicSize>(
+                            vcl::WindowSize(Size(Imp()->GetDrawView()->GetMarkHdlSizePixel() / 2, 0)),
+                            GetOut()->GetMapMode())->Width();
+
                         for (SwAnchoredObject* pObj : *pPage->GetSortedObjs())
                         {
                             // ignore objects that are not actually placed on the page
@@ -1529,7 +1531,7 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
         const SwRect aOldVis( VisArea() );
 
         //create virtual device and set.
-        const Size aPixSz = GetWin()->WindowToLogic(Size(1,1));
+        const Size aPixSz = GetWin()->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(1, 1)), GetWin()->GetMapMode());
         ScopedVclPtrInstance<VirtualDevice> pVout(*GetWin()->GetOutDev());
         pVout->SetLineColor( GetWin()->GetOutDev()->GetLineColor() );
         pVout->SetFillColor( GetWin()->GetOutDev()->GetFillColor() );
@@ -1555,8 +1557,15 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
             aRect.SetPosY(lYDiff < 0 ? aOldVis.Bottom() - aPixSz.Height()
                                          : aRect.Top() - aSize.Height() + aPixSz.Height() );
             aRect.SetPosX(std::max(tools::Long(0), aRect.Left() - aPixSz.Width()));
-            aRect.Pos(GetWin()->WindowToLogic(GetWin()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(aRect.Pos()))));
-            aRect.SSize( GetWin()->WindowToLogic( GetWin()->convertTo<vcl::WindowRect>(vcl::LogicRect(aRect.SSize()))) );
+
+            aRect.Pos(GetWin()->convertTo<vcl::LogicPoint>(vcl::WindowPoint(
+                GetWin()->convertTo<vcl::WindowPoint>(
+                    vcl::LogicPoint(aRect.Pos()))), GetWin()->GetMapMode()));
+
+            aRect.SSize(GetWin()->convertTo<vcl::LogicSize>(vcl::WindowSize(
+                GetWin()->convertTo<vcl::WindowSize>(
+                    vcl::LogicSize(aRect.SSize()), GetWin()->GetMapMode())), GetWin()->GetMapMode()));
+
             maVisArea = aRect;
             const Point aPt( -aRect.Left(), -aRect.Top() );
             aMapMode.SetOrigin( aPt );
@@ -1633,7 +1642,11 @@ bool SwViewShell::SmoothScroll( tools::Long lXDiff, tools::Long lYDiff, const to
 
                 const SwRect aTmpOldVis = VisArea();
                 maVisArea.SetPosY(maVisArea.Pos().Y() - lScroll);
-                maVisArea.Pos(GetWin()->WindowToLogic(GetWin()->convertTo<vcl::WindowPoint>(vcl::LogicPoint(VisArea().Pos()))));
+
+                maVisArea.Pos(GetWin()->convertTo<vcl::LogicPoint>(
+                    vcl::WindowPoint(GetWin()->convertTo<vcl::WindowPoint>(
+                        vcl::LogicPoint(VisArea().Pos()), GetWin()->GetMapMode())), GetWin()->GetMapMode()));
+
                 lScroll = aTmpOldVis.Top() - VisArea().Top();
                 if ( pRect )
                 {
@@ -2197,7 +2210,7 @@ void SwViewShell::PaintTile(VirtualDevice &rDevice, int contextWidth, int contex
     }
 
     tools::Rectangle aOutRect(Point(tilePosX, tilePosY),
-                              rDevice.WindowToLogic(Size(contextWidth, contextHeight)));
+                              rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(contextWidth, contextHeight)));
 
     // Make the requested area visible -- we can't use MakeVisible as that will
     // only scroll the contents, but won't zoom/resize if needed.
@@ -2273,12 +2286,13 @@ sal_Int32 SwViewShell::GetBrowseWidth() const
     if ( pPostItMgr && pPostItMgr->HasNotes() && pPostItMgr->ShowNotes() )
     {
         Size aBorder( maBrowseBorder );
-        aBorder.AdjustWidth(maBrowseBorder.Width() );
-        aBorder.AdjustWidth(pPostItMgr->GetSidebarWidth(true) + pPostItMgr->GetSidebarBorderWidth(true) );
-        return maVisArea.Width() - GetOut()->WindowToLogic(aBorder)->Width();
+        aBorder.AdjustWidth( maBrowseBorder.Width() );
+        aBorder.AdjustWidth( pPostItMgr->GetSidebarWidth(true) + pPostItMgr->GetSidebarBorderWidth(true) );
+
+        return maVisArea.Width() - GetOut()->convertTo<vcl::LogicSize>(vcl::WindowSize(aBorder), GetOut()->GetMapMode())->Width();
     }
-    else
-        return maVisArea.Width() - 2 * GetOut()->WindowToLogic(maBrowseBorder)->Width();
+
+    return maVisArea.Width() - 2 * GetOut()->convertTo<vcl::LogicSize>(vcl::WindowSize(maBrowseBorder), GetOut()->GetMapMode())->Width();
 }
 
 void SwViewShell::InvalidateLayout( bool bSizeChanged )

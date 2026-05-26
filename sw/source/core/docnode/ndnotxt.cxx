@@ -142,7 +142,7 @@ const tools::PolyPolygon *SwNoTextNode::HasContour() const
                     }
                     else if( m_bPixelContour )
                     {
-                        rPoly[i] = pOutDev->WindowToLogic( rPoly[i], aGrfMap );
+                        rPoly[i] = pOutDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPoly[i]), aGrfMap);
 
                         if ( nGrfDPIx != 0 && nGrfDPIy != 0 )
                         {

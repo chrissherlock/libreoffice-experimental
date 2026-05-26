@@ -647,8 +647,8 @@ private:
         }
 
         // Paint the lines
-        aSize =  aVirDev->WindowToLogic( aSize );
-        tools::Long nPix = aVirDev->WindowToLogic( Size( 0, 1 ) )->Height();
+        aSize = aVirDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize));
+        tools::Long nPix = aVirDev->convertTo<vcl::LogicSize>(vcl::WindowSize(0, 1))->Height();
         sal_uInt32 n1 = nLine1;
         sal_uInt32 n2 = nLine2;
         tools::Long nDist  = nDistance;
