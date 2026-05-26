@@ -728,10 +728,9 @@ Size SvxGrfCropPage::GetGrfOrigSize(const Graphic& rGrf)
         const MapMode aMapTwip( MapUnit::MapTwip );
         aSize = rGrf.GetPrefSize();
         if( MapUnit::MapPixel == rGrf.GetPrefMapMode().GetMapUnit() )
-            aSize = Application::GetDefaultDevice()->WindowToLogic(aSize, aMapTwip);
+            aSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize), aMapTwip);
         else
-            aSize = ::LogicToLogic( aSize,
-                                            rGrf.GetPrefMapMode(), aMapTwip );
+           aSize = ::LogicToLogic(aSize, rGrf.GetPrefMapMode(), aMapTwip);
     }
     return aSize;
 }
@@ -765,7 +764,7 @@ void SvxCropExample::Paint(vcl::RenderContext& rRenderContext, const ::tools::Re
     rRenderContext.SetMapMode(m_aMapMode);
 
     // Win BG
-    const vcl::LogicSize aWinSize(rRenderContext.WindowToLogic(GetOutputSizePixel()));
+    const vcl::LogicSize aWinSize(rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
     rRenderContext.SetLineColor();
     rRenderContext.SetFillColor(rRenderContext.GetSettings().GetStyleSettings().GetWindowColor());
     rRenderContext.DrawRect(::tools::Rectangle(Point(), aWinSize.get()));

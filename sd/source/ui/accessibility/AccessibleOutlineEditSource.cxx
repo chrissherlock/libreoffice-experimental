@@ -141,7 +141,7 @@ namespace accessibility
         {
             MapMode aMapMode(mrWindow.GetMapMode());
             aMapMode.SetOrigin(Point());
-            Point aPoint( mrWindow.WindowToLogic( rPoint, aMapMode ) );
+            Point aPoint( mrWindow.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPoint), aMapMode ) );
             return ::LogicToLogic( aPoint,
                                                MapMode(mrView.GetModel().GetScaleUnit()),
                                                rMapMode );

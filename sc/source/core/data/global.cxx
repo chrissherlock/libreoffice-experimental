@@ -543,7 +543,11 @@ void ScGlobal::InitTextHeight(SfxItemPool& rPool)
     rDefaultCellAttribute.fillFontOnly(aDefFont, pVirtWindow); // Font color doesn't matter here
     pVirtWindow->SetFont(aDefFont);
     sal_uInt16 nTest = static_cast<sal_uInt16>(
-        pVirtWindow->WindowToLogic(Size(0, pVirtWindow->GetTextHeight()), MapMode(MapUnit::MapTwip))->Height());
+        pVirtWindow->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(0, pVirtWindow->GetTextHeight()),
+            MapMode(MapUnit::MapTwip)
+        )->Height()
+    );
 
     if (nTest > nDefFontHeight)
         nDefFontHeight = nTest;

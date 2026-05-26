@@ -896,8 +896,8 @@ bool GraphicExporter::GetGraphic( ExportSettings const & rSettings, Graphic& aGr
 
             MapMode aOutMap( aMap );
             const Size aOnePixelInMtf(
-                Application::GetDefaultDevice()->WindowToLogic(
-                    Size(1, 1),
+                Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+                    vcl::WindowSize(1, 1),
                     aMap));
             const Size aHalfPixelInMtf(
                 (aOnePixelInMtf.getWidth() + 1) / 2,
@@ -1286,7 +1286,7 @@ Bitmap GetBitmapFromMetaFile(const GDIMetaFile& rMtf, const Size* pSize)
         // use 100th mm for primitive bitmap converter tool, input is pixel
         // use a real OutDev to get the correct DPI, the static LogicToLogic assumes 72dpi which is wrong (!)
         const Size aSize100th(
-            Application::GetDefaultDevice()->WindowToLogic(*pSize, MapMode(MapUnit::Map100thMM)));
+                Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(vcl::WindowSize(*pSize), MapMode(MapUnit::Map100thMM)));
 
         aRange.expand(basegfx::B2DPoint(aSize100th.Width(), aSize100th.Height()));
 

@@ -260,6 +260,27 @@ namespace
                 static_cast< const sal_uInt8* >(aMemStm.GetData()),
                 aMemStm.TellEnd()));
     }
+
+    template <typename ActionT>
+    bool processBitmapAction(const ActionT* pAction,
+                             const std::vector<basegfx::B2DPolyPolygon>& rClips,
+                             const std::vector<MapMode>& rMapModes,
+                             GDIMetaFile& rTarget)
+    {
+        const Bitmap& rBitmap = pAction->GetBitmap();
+
+        Size aLogicalSize = (MapUnit::MapPixel == rBitmap.GetPrefMapMode().GetMapUnit())
+            ? Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+                vcl::WindowSize(rBitmap.GetPrefSize()), rMapModes.back()).get()
+            : ::LogicToLogic(rBitmap.GetPrefSize(), rBitmap.GetPrefMapMode(), rMapModes.back());
+
+        return handleBitmapContent(
+            rClips.back(),
+            pAction->GetPoint(),
+            aLogicalSize,
+            rBitmap,
+            rTarget);
+    }
 } // end of anonymous namespace
 
 // #i121267# Tooling to internally clip geometry against internal clip regions
@@ -706,59 +727,13 @@ void clipMetafileContentAgainstOwnRegions(GDIMetaFile& rSource)
                 // bitmap actions, create Bitmap with alpha channel derived
                 // from clipping
 
-                case MetaActionType::BMPEX :
-                {
-                    const MetaBmpExAction* pA = static_cast< const MetaBmpExAction* >(pAction);
-                    const Bitmap& rBitmap = pA->GetBitmap();
-
-                    // the logical size depends on the PrefSize of the given bitmap in
-                    // combination with the current MapMode
-                    Size aLogicalSize(rBitmap.GetPrefSize());
-
-                    if(MapUnit::MapPixel == rBitmap.GetPrefMapMode().GetMapUnit())
-                    {
-                        aLogicalSize = Application::GetDefaultDevice()->WindowToLogic(aLogicalSize, aMapModes.back());
-                    }
-                    else
-                    {
-                        aLogicalSize = ::LogicToLogic(aLogicalSize, rBitmap.GetPrefMapMode(), aMapModes.back());
-                    }
-
-                    bDone = handleBitmapContent(
-                        aClips.back(),
-                        pA->GetPoint(),
-                        aLogicalSize,
-                        rBitmap,
-                        aTarget);
+                case MetaActionType::BMP:
+                    bDone = processBitmapAction(static_cast<const MetaBmpAction*>(pAction), aClips, aMapModes, aTarget);
                     break;
-                }
 
-                case MetaActionType::BMP :
-                {
-                    const MetaBmpAction* pA = static_cast< const MetaBmpAction* >(pAction);
-                    const Bitmap& rBitmap = pA->GetBitmap();
-
-                    // the logical size depends on the PrefSize of the given bitmap in
-                    // combination with the current MapMode
-                    Size aLogicalSize(rBitmap.GetPrefSize());
-
-                    if(MapUnit::MapPixel == rBitmap.GetPrefMapMode().GetMapUnit())
-                    {
-                        aLogicalSize = Application::GetDefaultDevice()->WindowToLogic(aLogicalSize, aMapModes.back());
-                    }
-                    else
-                    {
-                        aLogicalSize = ::LogicToLogic(aLogicalSize, rBitmap.GetPrefMapMode(), aMapModes.back());
-                    }
-
-                    bDone = handleBitmapContent(
-                        aClips.back(),
-                        pA->GetPoint(),
-                        aLogicalSize,
-                        rBitmap,
-                        aTarget);
+                case MetaActionType::BMPEX:
+                    bDone = processBitmapAction(static_cast<const MetaBmpExAction*>(pAction), aClips, aMapModes, aTarget);
                     break;
-                }
 
                 case MetaActionType::BMPEXSCALE :
                 {

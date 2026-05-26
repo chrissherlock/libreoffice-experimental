@@ -377,11 +377,15 @@ bool GraphicObject::ImplGetCropParams(const OutputDevice& rOut, Point& rPt, Size
         rClipPolyPoly = tools::PolyPolygon(aClipPoly);
 
         if (maGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
-            aSize100 = Application::GetDefaultDevice()->WindowToLogic( maGraphic.GetPrefSize(), aMap100 );
+        {
+            aSize100 = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+                vcl::WindowSize(maGraphic.GetPrefSize()),
+                aMap100);
+        }
         else
         {
             MapMode m(maGraphic.GetPrefMapMode());
-            aSize100 = rOut.LogicToLogic( maGraphic.GetPrefSize(), &m, &aMap100 );
+            aSize100 = rOut.LogicToLogic(maGraphic.GetPrefSize(), &m, &aMap100);
         }
 
         nTotalWidth = aSize100.Width() - pAttr->GetLeftCrop() - pAttr->GetRightCrop();
@@ -925,9 +929,11 @@ basegfx::B2DVector GraphicObject::calculateCropScaling(
     double fFactorX(1.0);
     double fFactorY(1.0);
 
-    if(MapUnit::MapPixel == GetPrefMapMode().GetMapUnit())
+    if (MapUnit::MapPixel == GetPrefMapMode().GetMapUnit())
     {
-        aBitmapSize = Application::GetDefaultDevice()->WindowToLogic(aBitmapSize, aMapMode100thmm);
+        aBitmapSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(aBitmapSize),
+            aMapMode100thmm);
     }
     else
     {

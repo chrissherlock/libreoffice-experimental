@@ -59,13 +59,13 @@ class GridWindow : public weld::CustomWidgetController
 
         void draw(vcl::RenderContext& rRenderContext, const Bitmap& rBitmap)
         {
-            const Point aOffset(rRenderContext.WindowToLogic(Point(mnOffX, mnOffY)).get());
+            const Point aOffset(rRenderContext.convertTo<vcl::LogicPoint>(vcl::WindowPoint(mnOffX, mnOffY)));
             rRenderContext.DrawBitmap(maPos - aOffset, rBitmap);
         }
 
         bool isHit(OutputDevice const & rWin, const Point& rPos)
         {
-            const Point aOffset(rWin.WindowToLogic(Point(mnOffX, mnOffY)).get());
+            const Point aOffset(rWin.convertTo<vcl::LogicPoint>(vcl::WindowPoint(mnOffX, mnOffY)));
             const tools::Rectangle aTarget(maPos - aOffset, maPos + aOffset);
             return aTarget.Contains(rPos);
         }

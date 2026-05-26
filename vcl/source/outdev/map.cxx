@@ -298,94 +298,9 @@ tools::Long OutputDevice::DevicePixelToLogicHeight(tools::Long nHeight) const
     return mpMapper->DevicePixelToLogicHeight(nHeight, GetMappingPolicy());
 }
 
-vcl::LogicRegion OutputDevice::WindowToLogic(const vcl::Region& rDeviceRegion) const
-{
-    return vcl::LogicRegion(
-        mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()})
-                 .apply(rDeviceRegion)
-    );
-}
-
-vcl::LogicPoint OutputDevice::WindowToLogic(const Point& rDevicePt) const
-{
-    return vcl::LogicPoint(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rDevicePt));
-}
-
 Point OutputDevice::SubPixelToLogic(const basegfx::B2DPoint& rDevicePt) const
 {
     return mpMapper->WindowSubPixelToLogicUnits(rDevicePt, GetMappingPolicy());
-}
-
-vcl::LogicSize OutputDevice::WindowToLogic(const Size& rDeviceSize) const
-{
-    return vcl::LogicSize(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rDeviceSize));
-}
-
-vcl::LogicRect OutputDevice::WindowToLogic(const tools::Rectangle& rDeviceRect) const
-{
-    return vcl::LogicRect(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rDeviceRect));
-}
-
-vcl::LogicPolygon OutputDevice::WindowToLogic(const tools::Polygon& rDevicePoly) const
-{
-    return vcl::LogicPolygon(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rDevicePoly));
-}
-
-vcl::LogicPolyPolygon OutputDevice::WindowToLogic(const tools::PolyPolygon& rDevicePolyPoly) const
-{
-    return vcl::LogicPolyPolygon(mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rDevicePolyPoly));
-}
-
-basegfx::B2DRectangle OutputDevice::WindowToLogic(const basegfx::B2DRectangle& rDeviceRect) const
-{
-    return mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rDeviceRect);
-}
-
-basegfx::B2DPolyPolygon OutputDevice::WindowToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly) const
-{
-    return mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(rPixelPolyPoly);
-}
-
-vcl::LogicPoint OutputDevice::WindowToLogic(const Point& rDevicePt, const MapMode& rMapMode) const
-{
-    return vcl::LogicPoint(
-        vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy()))
-                               .apply(rDevicePt)
-    );
-}
-
-vcl::LogicSize OutputDevice::WindowToLogic(const Size& rDeviceSize, const MapMode& rMapMode) const
-{
-    return vcl::LogicSize(
-        vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy()))
-                               .apply(rDeviceSize)
-    );
-}
-
-vcl::LogicRect OutputDevice::WindowToLogic(const tools::Rectangle& rDeviceRect, const MapMode& rMapMode) const
-{
-    return vcl::LogicRect(
-        vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy()))
-                               .apply(rDeviceRect)
-    );
-}
-
-vcl::LogicPolygon OutputDevice::WindowToLogic(const tools::Polygon& rDevicePoly, const MapMode& rMapMode) const
-{
-    return vcl::LogicPolygon(
-        vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy()))
-                               .apply(rDevicePoly)
-    );
-}
-
-basegfx::B2DPolygon OutputDevice::WindowToLogic(const basegfx::B2DPolygon& rPixelPoly, const MapMode& rMapMode) const
-{
-    return vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy())).apply(rPixelPoly);
-}
-
-basegfx::B2DPolyPolygon OutputDevice::WindowToLogic(const basegfx::B2DPolyPolygon& rPixelPolyPoly, const MapMode& rMapMode) const
-{
-    return vcl::TransformCompiler::Compile(mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy())).apply(rPixelPolyPoly);
 }
 
 Point OutputDevice::LogicToLogic(const Point& rPtSource,

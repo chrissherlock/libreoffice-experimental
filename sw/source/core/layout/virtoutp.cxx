@@ -141,7 +141,7 @@ void SwLayVout::Enter(  SwViewShell *pShell, SwRect &rRect, bool bOn )
         return;
 
     m_pOut = pO;
-    Size aPixSz( m_pOut->WindowToLogic( Size( 1,1 )));
+    Size aPixSz = m_pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(Size(1, 1)), m_pOut->GetMapMode());
     SwRect aTmp( rRect );
     aTmp.AddWidth(aPixSz.Width()/2 + 1 );
     aTmp.AddHeight(aPixSz.Height()/2 + 1 );
@@ -157,7 +157,7 @@ void SwLayVout::Enter(  SwViewShell *pShell, SwRect &rRect, bool bOn )
         return;
     }
 
-    m_aRect = SwRect( pO->WindowToLogic( aTmpRect ));
+    m_aRect = SwRect(pO->convertTo<vcl::LogicRect>(vcl::WindowRect(aTmpRect), pO->GetMapMode()));
 
     SetOutDev( m_pShell, m_pVirDev );
 

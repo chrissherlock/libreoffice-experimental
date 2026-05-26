@@ -2205,10 +2205,12 @@ bool SdrEdgeObj::ImpFindConnector(const Point& rPt, const SdrPageView& rPV, SdrO
     // sensitive area of connectors is twice as large as the one of the handles
     sal_uInt16 nMarkHdSiz=rPV.GetView().GetMarkHdlSizePixel();
     Size aHalfConSiz(nMarkHdSiz,nMarkHdSiz);
+
     if (comphelper::LibreOfficeKit::isActive() && pOut->GetMapMode().GetMapUnit() == MapUnit::Map100thMM)
-        aHalfConSiz=pOut->WindowToLogic(aHalfConSiz, MapMode(MapUnit::Map100thMM));
+        aHalfConSiz = pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(aHalfConSiz), MapMode(MapUnit::Map100thMM));
     else
-        aHalfConSiz= pOut->WindowToLogic(aHalfConSiz);
+        aHalfConSiz = pOut->convertTo<vcl::LogicSize>(vcl::WindowSize(aHalfConSiz));
+
     tools::Rectangle aMouseRect(rPt,rPt);
     aMouseRect.AdjustLeft( -(aHalfConSiz.Width()) );
     aMouseRect.AdjustTop( -(aHalfConSiz.Height()) );

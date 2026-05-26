@@ -203,7 +203,8 @@ awt::Point GraphicHelper::convertHmmToAppFont( const awt::Point& rHmm ) const
         awt::Point aPixel = convertHmmToScreenPixel( rHmm );
         MapMode aMode(MapUnit::MapAppFont);
         ::Point aVCLPoint(aPixel.X, aPixel.Y);
-        ::Point aDevPoint = mxDefaultOutputDevice->WindowToLogic(aVCLPoint, aMode );
+        ::Point aDevPoint = mxDefaultOutputDevice->convertTo<vcl::LogicPoint>(
+            vcl::WindowPoint(aVCLPoint), aMode);
         return awt::Point(aDevPoint.X(), aDevPoint.Y());
     }
     catch( Exception& )
@@ -220,7 +221,8 @@ awt::Size GraphicHelper::convertHmmToAppFont( const awt::Size& rHmm ) const
         awt::Size aPixel = convertHmmToScreenPixel( rHmm );
         MapMode aMode(MapUnit::MapAppFont);
         ::Size aVCLSize(aPixel.Width, aPixel.Height);
-        ::Size aDevSz = mxDefaultOutputDevice->WindowToLogic(aVCLSize, aMode );
+        ::Size aDevSz = mxDefaultOutputDevice->convertTo<vcl::LogicSize>(
+            vcl::WindowSize(aVCLSize), aMode);
         return awt::Size(aDevSz.Width(), aDevSz.Height());
     }
     catch( Exception& )

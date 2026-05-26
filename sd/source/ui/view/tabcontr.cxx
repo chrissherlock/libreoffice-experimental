@@ -93,7 +93,7 @@ void  TabControl::MouseButtonDown(const MouseEvent& rMEvt)
         && !rMEvt.IsMod2()
         && !rMEvt.IsShift())
     {
-        Point aPos = WindowToLogic( rMEvt.GetPosPixel() );
+        Point aPos = convertTo<vcl::LogicPoint>(vcl::WindowPoint(rMEvt.GetPosPixel()));
         sal_uInt16 aPageId = GetPageId(aPos);
 
         //initialize

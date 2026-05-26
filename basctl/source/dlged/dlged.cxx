@@ -223,7 +223,7 @@ DlgEditor::DlgEditor (
     m_aRepaintIdle.SetInvokeHandler(LINK(this, DlgEditor, DeferredRepaint));
 
     rWindow.SetMapMode( MapMode( MapUnit::Map100thMM ) );
-    pDlgEdPage->SetSize( rWindow.WindowToLogic( Size(DLGED_PAGE_WIDTH_MIN, DLGED_PAGE_HEIGHT_MIN) ) );
+    pDlgEdPage->SetSize(rWindow.convertTo<vcl::LogicSize>(vcl::WindowSize(DLGED_PAGE_WIDTH_MIN, DLGED_PAGE_HEIGHT_MIN)));
 
     pDlgEdView->ShowSdrPage(pDlgEdView->GetModel().GetPage(0));
     pDlgEdView->SetLayerVisible( u"HiddenLayer"_ustr, false );
@@ -499,7 +499,7 @@ void DlgEditor::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
 
             if (nWidth == 0 && nHeight == 0)
             {
-                Size   aSize = rRenderContext.WindowToLogic( Size( 400, 300 ) ).get();
+                Size aSize = rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(400, 300)).get();
 
                 // align with grid
                 Size aGridSize_(tools::Long(pDlgEdView->GetSnapGridWidthX()), tools::Long(pDlgEdView->GetSnapGridWidthY()));
@@ -516,7 +516,7 @@ void DlgEditor::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle
                 aPos.AdjustY( -(aPos.Y() % aGridSize_.Height()) );
 
                 // don't put in the corner
-                Point aMinPos = rRenderContext.WindowToLogic( Point( 30, 20 ) ).get();
+                Point aMinPos = rRenderContext.convertTo<vcl::LogicPoint>(vcl::WindowPoint(30, 20)).get();
                 if( (aPos.X() < aMinPos.X()) || (aPos.Y() < aMinPos.Y()) )
                 {
                     aPos = aMinPos;
@@ -620,7 +620,7 @@ void DlgEditor::CreateDefaultObject()
         return;
 
     // set position and size
-    Size aSize = rWindow.WindowToLogic( Size( 96, 24 ) );
+    Size aSize = rWindow.convertTo<vcl::LogicSize>(vcl::WindowSize(96, 24));
     Point aPoint = pDlgEdForm->GetSnapRect().Center();
     aPoint.AdjustX( -(aSize.Width() / 2) );
     aPoint.AdjustY( -(aSize.Height() / 2) );
@@ -1153,7 +1153,7 @@ void DlgEditor::Print( Printer* pPrinter, const OUString& rTitle )    // not wor
     lcl_PrintHeader( pPrinter, rTitle );
 
     Bitmap aDlg;
-    Size aBmpSz( pPrinter->WindowToLogic( aDlg.GetSizePixel() ).get() );
+    Size aBmpSz(pPrinter->convertTo<vcl::LogicSize>(vcl::WindowSize(aDlg.GetSizePixel())));
     double nPaperSzWidth = aPaperSz.Width();
     double nPaperSzHeight = aPaperSz.Height();
     double nBmpSzWidth = aBmpSz.Width();
@@ -1203,13 +1203,13 @@ bool DlgEditor::AdjustPageSize()
         if ( pDlgEdForm && pDlgEdForm->TransformFormToSdrCoordinates( nFormXIn, nFormYIn, nFormWidthIn, nFormHeightIn, nFormX, nFormY, nFormWidth, nFormHeight ) )
         {
             Size aPageSizeDelta( 400, 300 );
-            aPageSizeDelta = rWindow.WindowToLogic( aPageSizeDelta, MapMode( MapUnit::Map100thMM ) );
+            aPageSizeDelta = rWindow.convertTo<vcl::LogicSize>(vcl::WindowSize(aPageSizeDelta), MapMode( MapUnit::Map100thMM ) );
 
             sal_Int32 nNewPageWidth = nFormX + nFormWidth + aPageSizeDelta.Width();
             sal_Int32 nNewPageHeight = nFormY + nFormHeight + aPageSizeDelta.Height();
 
             Size aPageSizeMin( DLGED_PAGE_WIDTH_MIN, DLGED_PAGE_HEIGHT_MIN );
-            aPageSizeMin = rWindow.WindowToLogic( aPageSizeMin, MapMode( MapUnit::Map100thMM ) );
+            aPageSizeMin = rWindow.convertTo<vcl::LogicSize>(vcl::WindowSize(aPageSizeMin), MapMode( MapUnit::Map100thMM ) );
             sal_Int32 nPageWidthMin = aPageSizeMin.Width();
             sal_Int32 nPageHeightMin = aPageSizeMin.Height();
 

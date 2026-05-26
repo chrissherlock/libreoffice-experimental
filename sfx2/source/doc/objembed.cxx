@@ -197,7 +197,7 @@ void SfxObjectShell::DoDraw_Impl( OutputDevice* pDev,
     }
     if( pDev->IsClipRegion() && pDev->GetOutDevType() != OUTDEV_PRINTER )
     {
-        aRegion = pDev->WindowToLogic( aRegion );
+        aRegion = pDev->convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion));
         pDev->SetClipRegion( aRegion );
     }
     if( pMtf )

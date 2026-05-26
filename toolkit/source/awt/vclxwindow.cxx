@@ -2273,9 +2273,8 @@ void VCLXWindow::draw( sal_Int32 nX, sal_Int32 nY )
     TabPage* pTabPage = dynamic_cast< TabPage* >( pWindow.get() );
     if ( pTabPage )
     {
-        Point aPos( nX, nY );
-        aPos = pDev->WindowToLogic( aPos ).get();
-        pTabPage->Draw(*pDev, aPos, SystemTextColorFlags::NONE);
+        auto aPos = pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(nX, nY));
+        pTabPage->Draw( *pDev, aPos, SystemTextColorFlags::NONE );
         return;
     }
 
@@ -2322,7 +2321,7 @@ void VCLXWindow::draw( sal_Int32 nX, sal_Int32 nY )
     }
     else if ( pDev )
     {
-        Point aP = pDev->WindowToLogic( aPos ).get();
+        Point aP = pDev->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos));
 
         vcl::PDFExtOutDevData* pPDFExport   = dynamic_cast<vcl::PDFExtOutDevData*>(pDev->GetExtOutDevData());
         bool bDrawSimple =    ( pDev->GetOutDevType() == OUTDEV_PRINTER )

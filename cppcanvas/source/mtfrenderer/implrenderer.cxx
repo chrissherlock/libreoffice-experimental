@@ -886,7 +886,7 @@ namespace cppcanvas::internal
             if( rState.textReliefStyle != FontRelief::NONE )
             {
                 // calculate relief offset (similar to outdev3.cxx)
-                sal_Int32 nReliefOffset = rParms.mrVDev.WindowToLogic( Size( 1, 1 ) )->Height();
+                sal_Int32 nReliefOffset = rParms.mrVDev.convertTo<vcl::LogicSize>(vcl::WindowSize(1, 1))->Height();
                 nReliefOffset += nReliefOffset/2;
                 if( nReliefOffset < 1 )
                     nReliefOffset = 1;

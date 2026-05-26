@@ -1376,8 +1376,7 @@ SvxXRectPreview::SvxXRectPreview()
 
 tools::Rectangle SvxPreviewBase::GetPreviewSize() const
 {
-    tools::Rectangle aObjectSize(Point(), getBufferDevice().WindowToLogic(GetOutputSizePixel()));
-    return aObjectSize;
+    return tools::Rectangle(Point(), getBufferDevice().convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
 }
 
 void SvxXRectPreview::SetDrawingArea(weld::DrawingArea* pDrawingArea)

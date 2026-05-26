@@ -42,7 +42,8 @@ Size GetGraphicSizeTwip(const Graphic& rGraphic, vcl::RenderContext* pOutDev)
     {
         if (!pOutDev)
             pOutDev = Application::GetDefaultDevice();
-        aSize = pOutDev->WindowToLogic(aSize, aMapTwip);
+
+        aSize = pOutDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize), aMapTwip);
     }
     else
     {

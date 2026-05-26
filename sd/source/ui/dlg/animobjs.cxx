@@ -877,7 +877,7 @@ void AnimationWindow::CreateAnimObj (::sd::View& rView )
     Size                aMaxSizeLog;
     Size                aMaxSizePix;
     Size                aTemp( pOutWin->GetOutputSizePixel() );
-    const Point         aWindowCenter( pOutWin->WindowToLogic( Point( aTemp.Width() >> 1, aTemp.Height() >> 1 ) ) );
+    const Point aWindowCenter(pOutWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(Point(aTemp.Width() >> 1, aTemp.Height() >> 1))));
     const OutputDevice* pDefDev = Application::GetDefaultDevice();
     const size_t nCount = m_FrameList.size();
     BitmapAdjustment    eBA = static_cast<BitmapAdjustment>(m_xLbAdjustment->get_active());
@@ -890,10 +890,10 @@ void AnimationWindow::CreateAnimObj (::sd::View& rView )
         Size            aTmpSizeLog;
         const Size      aTmpSizePix( rBmp.GetSizePixel() );
 
-        if ( aGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel )
-            aTmpSizeLog = pDefDev->WindowToLogic( aGraphic.GetPrefSize(), aMap100 );
+        if (aGraphic.GetPrefMapMode().GetMapUnit() == MapUnit::MapPixel)
+            aTmpSizeLog = pDefDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aGraphic.GetPrefSize()), aMap100);
         else
-            aTmpSizeLog = ::LogicToLogic( aGraphic.GetPrefSize(), aGraphic.GetPrefMapMode(), aMap100 );
+            aTmpSizeLog = ::LogicToLogic(aGraphic.GetPrefSize(), aGraphic.GetPrefMapMode(), aMap100);
 
         aMaxSizeLog.setWidth( std::max( aMaxSizeLog.Width(), aTmpSizeLog.Width() ) );
         aMaxSizeLog.setHeight( std::max( aMaxSizeLog.Height(), aTmpSizeLog.Height() ) );

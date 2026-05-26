@@ -1456,18 +1456,6 @@ public:
     Size                        GetOutputSizePixel() const;
     SAL_DLLPRIVATE tools::Rectangle GetOutputRectPixel() const;
 
-    Point                       WindowToLogic( const Point& rDevicePt ) const;
-    Size                        WindowToLogic( const Size& rDeviceSize ) const;
-    tools::Rectangle                   WindowToLogic( const tools::Rectangle& rDeviceRect ) const;
-    tools::PolyPolygon          WindowToLogic( const tools::PolyPolygon& rDevicePolyPoly ) const;
-    SAL_DLLPRIVATE vcl::Region  WindowToLogic( const vcl::Region& rDeviceRegion ) const;
-    Point                       WindowToLogic( const Point& rDevicePt,
-                                              const MapMode& rMapMode ) const;
-    Size                        WindowToLogic( const Size& rDeviceSize,
-                                              const MapMode& rMapMode ) const;
-    tools::Rectangle            WindowToLogic( const tools::Rectangle& rDeviceRect,
-                                              const MapMode& rMapMode ) const;
-
     Size                        LogicToLogic( const Size&       rSzSource,
                                               const MapMode*    pMapModeSource,
                                               const MapMode*    pMapModeDest ) const;

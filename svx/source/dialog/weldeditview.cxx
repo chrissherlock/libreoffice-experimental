@@ -112,7 +112,8 @@ IMPL_LINK_NOARG(WeldEditView, BlinkTimerHdl, Timer*, void)
     if (!m_aCachedCursorPixRect.IsEmpty())
     {
         OutputDevice& rDevice = EditViewOutputDevice();
-        Invalidate(rDevice.WindowToLogic(m_aCachedCursorPixRect), weld::InvalidateFlags::Cursor);
+        Invalidate(rDevice.convertTo<vcl::LogicRect>(vcl::WindowRect(m_aCachedCursorPixRect)),
+                   weld::InvalidateFlags::Cursor);
     }
     else
         Invalidate();
@@ -150,7 +151,7 @@ void WeldEditView::Resize()
     if (EditView* pEditView = GetEditView())
     {
         OutputDevice& rDevice = GetDrawingArea()->get_ref_device();
-        Size aOutputSize(rDevice.WindowToLogic(GetOutputSizePixel()));
+        Size aOutputSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
         // Resizes the edit engine to adjust to the size of the output area
         pEditView->SetOutputArea(tools::Rectangle(Point(0, 0), aOutputSize));
         GetEditEngine()->SetPaperSize(aOutputSize);
@@ -198,7 +199,7 @@ void WeldEditView::PaintSelection(vcl::RenderContext& rRenderContext, tools::Rec
         nMaxY = std::max(nMaxY, aRect.Bottom());
     }
 
-    const Size aLogicPixel(rRenderContext.WindowToLogic(Size(1, 1)));
+    const Size aLogicPixel(rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(1, 1)));
     for (const auto& aRect : rLogicRects)
     {
         // Extend each range by one pixel so multiple lines touch each
@@ -263,7 +264,9 @@ void WeldEditView::DoPaint(vcl::RenderContext& rRenderContext, const tools::Rect
     rRenderContext.SetClipRegion();
 
     pEditView->DrawText_ToEditView(
-        comphelper::LibreOfficeKit::isActive() ? rRenderContext.WindowToLogic(rRect) : rRect,
+        comphelper::LibreOfficeKit::isActive()
+            ? rRenderContext.convertTo<vcl::LogicRect>(vcl::WindowRect(rRect))
+            : rRect,
         &rRenderContext);
 
     if (HasFocus())
@@ -907,7 +910,7 @@ Point WeldViewForwarder::WindowToLogic(const Point& rPoint, const MapMode& rMapM
     OutputDevice& rOutDev = pEditView->GetOutputDevice();
     MapMode aMapMode(rOutDev.GetMapMode());
     aMapMode.SetOrigin(Point());
-    Point aPoint(rOutDev.WindowToLogic(rPoint, aMapMode));
+    Point aPoint(rOutDev.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPoint), aMapMode));
     return ::LogicToLogic(aPoint, MapMode(aMapMode.GetMapUnit()), rMapMode);
 }
 
@@ -1501,7 +1504,7 @@ Point WeldEditViewForwarder::WindowToLogic(const Point& rPoint, const MapMode& r
     OutputDevice& rOutDev = pEditView->GetOutputDevice();
     MapMode aMapMode(rOutDev.GetMapMode());
     aMapMode.SetOrigin(Point());
-    Point aPoint(rOutDev.WindowToLogic(rPoint, aMapMode));
+    Point aPoint(rOutDev.convertTo<vcl::LogicPoint>(vcl::WindowPoint(rPoint), aMapMode));
     return ::LogicToLogic(aPoint, MapMode(aMapMode.GetMapUnit()), rMapMode);
 }
 
@@ -1588,7 +1591,7 @@ void WeldEditView::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     rDevice.SetMapMode(MapMode(MapUnit::MapTwip));
     rDevice.SetBackground(aBgColor);
 
-    Size aOutputSize(rDevice.WindowToLogic(aSize));
+    Size aOutputSize(rDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(aSize)));
 
     makeEditEngine();
     m_xEditEngine->SetPaperSize(aOutputSize);

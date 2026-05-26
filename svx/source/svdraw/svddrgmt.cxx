@@ -3820,7 +3820,7 @@ bool SdrDragCrop::EndSdrDrag(bool /*bCopy*/)
 
         if(MapUnit::MapPixel == rGraphicObject.GetPrefMapMode().GetMapUnit())
         {
-            aGraphicSize = Application::GetDefaultDevice()->WindowToLogic(aGraphicSize, aMapModePool);
+            aGraphicSize = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(vcl::WindowSize(aGraphicSize), aMapModePool);
         }
         else
         {

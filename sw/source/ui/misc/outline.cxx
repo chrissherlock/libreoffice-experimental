@@ -869,7 +869,8 @@ static tools::Long lcl_DrawGraphic(vcl::RenderContext& rVDev, const SwNumFormat&
             aGSize.setWidth(aGSize.Width() / nDivision);
             nRet = aGSize.Width();
             aGSize.setHeight(aGSize.Height() / nDivision);
-            pGraphic->Draw(rVDev, Point(nXStart, nYStart), rVDev.WindowToLogic(aGSize));
+            pGraphic->Draw(rVDev, Point(nXStart, nYStart),
+                           rVDev.convertTo<vcl::LogicSize>(vcl::WindowSize(aGSize)));
         }
     }
     return nRet;
@@ -877,7 +878,8 @@ static tools::Long lcl_DrawGraphic(vcl::RenderContext& rVDev, const SwNumFormat&
 
 void NumberingPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&)
 {
-    const vcl::LogicSize aSize(rRenderContext.WindowToLogic(GetOutputSizePixel()));
+    const vcl::LogicSize aSize(
+        rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
 
     ScopedVclPtrInstance<VirtualDevice> pVDev(rRenderContext);
     pVDev->SetMapMode(rRenderContext.GetMapMode());

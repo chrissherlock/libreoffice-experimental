@@ -1505,7 +1505,7 @@ void BreakPointWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Re
         GetImage(RID_BMP_BRKENABLED)
     };
 
-    Size const aBmpSz = rRenderContext.WindowToLogic(aBrk[1].GetSizePixel()).get();
+    Size const aBmpSz = rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(aBrk[1].GetSizePixel())).get();
     Point const aBmpOff((aOutSz.Width() - aBmpSz.Width()) / 2,
                         (nLineHeight - aBmpSz.Height()) / 2);
 
@@ -1530,7 +1530,7 @@ void BreakPointWindow::ShowMarker(vcl::RenderContext& rRenderContext)
     Image aMarker = GetImage(bErrorMarker ? RID_BMP_ERRORMARKER : RID_BMP_STEPMARKER);
 
     Size aMarkerSz(aMarker.GetSizePixel());
-    aMarkerSz = rRenderContext.WindowToLogic(aMarkerSz).get();
+    aMarkerSz = rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(aMarkerSz)).get();
     Point aMarkerOff(0, 0);
     aMarkerOff.setX( (aOutSz.Width() - aMarkerSz.Width()) / 2 );
     aMarkerOff.setY( (nLineHeight - aMarkerSz.Height()) / 2 );
@@ -1584,7 +1584,7 @@ void BreakPointWindow::MouseButtonDown( const MouseEvent& rMEvt )
 {
     if ( rMEvt.GetClicks() == 2 )
     {
-        Point aMousePos( WindowToLogic( rMEvt.GetPosPixel() ) );
+        Point aMousePos(convertTo<vcl::LogicPoint>( vcl::WindowPoint(rMEvt.GetPosPixel())));
         tools::Long nLineHeight = GetTextHeight();
         if(nLineHeight)
         {
@@ -1607,7 +1607,7 @@ void BreakPointWindow::Command( const CommandEvent& rCEvt )
 
     std::unique_ptr<weld::Builder> xUIBuilder(Application::CreateBuilder(pPopupParent, u"modules/BasicIDE/ui/breakpointmenus.ui"_ustr));
 
-    Point aEventPos( WindowToLogic( aPos ) );
+    Point aEventPos(convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPos)));
     BreakPoint* pBrk = rCEvt.IsMouseEvent() ? FindBreakPoint( aEventPos ) : nullptr;
     if ( pBrk )
     {

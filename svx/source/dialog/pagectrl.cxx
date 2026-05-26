@@ -88,7 +88,7 @@ void SvxPageWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
         aMapMode.SetScaleY(aXScale);
     }
     rRenderContext.SetMapMode(aMapMode);
-    Size aSz(rRenderContext.WindowToLogic(GetOutputSizePixel()));
+    Size aSz(rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel())));
     tools::Long nYPos = (aSz.Height() - m_aSize.Height()) / 2;
 
     if (m_eUsage == SvxPageUsage::All)
@@ -105,7 +105,7 @@ void SvxPageWindow::Paint(vcl::RenderContext& rRenderContext, const tools::Recta
             aMapMode.SetScaleX(aX);
             aMapMode.SetScaleY(aY);
             rRenderContext.SetMapMode(aMapMode);
-            aSz =  rRenderContext.WindowToLogic(GetOutputSizePixel());
+            aSz =  rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(GetOutputSizePixel()));
             nYPos = (aSz.Height() - m_aSize.Height()) / 2;
             tools::Long nXPos = (aSz.Width() - m_aSize.Width()) / 2;
             DrawPage(rRenderContext, Point(nXPos,nYPos),false,true);
@@ -235,7 +235,7 @@ void SvxPageWindow::DrawPage(vcl::RenderContext& rRenderContext, const Point& rO
         {
         case SvxFrameDirection::Horizontal_LR_TB:
             aPos = aRect.TopLeft();
-            aPos.AdjustX(rRenderContext.WindowToLogic(Point(1,1))->X() );
+            aPos.AdjustX(rRenderContext.convertTo<vcl::LogicPoint>(vcl::WindowPoint(1, 1))->X() );
             aMove.setY( 0 );
             cArrow = 0x2192;
             break;
@@ -248,7 +248,7 @@ void SvxPageWindow::DrawPage(vcl::RenderContext& rRenderContext, const Point& rO
             break;
         case SvxFrameDirection::Vertical_LR_TB:
             aPos = aRect.TopLeft();
-            aPos.AdjustX(rRenderContext.WindowToLogic(Point(1,1))->X() );
+            aPos.AdjustX(rRenderContext.convertTo<vcl::LogicPoint>(vcl::WindowPoint(1, 1))->X() );
             aMove.setX( 0 );
             break;
         case SvxFrameDirection::Vertical_RL_TB:
@@ -395,7 +395,7 @@ void SvxPageWindow::SetDrawingArea(weld::DrawingArea* pDrawingArea)
     m_aWinSize.AdjustHeight( -4 );
     m_aWinSize.AdjustWidth( -4 );
 
-    m_aWinSize =  rRefDevice.WindowToLogic(m_aWinSize);
+    m_aWinSize =  rRefDevice.convertTo<vcl::LogicSize>(vcl::WindowSize(m_aWinSize));
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

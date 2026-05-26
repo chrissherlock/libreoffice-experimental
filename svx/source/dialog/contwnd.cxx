@@ -140,7 +140,9 @@ bool ContourWindow::MouseButtonDown( const MouseEvent& rMEvt )
 {
     if ( bWorkplaceMode )
     {
-        const Point aLogPt(GetDrawingArea()->get_ref_device().WindowToLogic(rMEvt.GetPosPixel()));
+        const Point aLogPt = GetDrawingArea()->get_ref_device().convertTo<vcl::LogicPoint>(
+            vcl::WindowPoint(rMEvt.GetPosPixel())
+        ).get();
 
         SetPolyPolygon( tools::PolyPolygon() );
         aWorkRect = tools::Rectangle( aLogPt, aLogPt );
@@ -160,7 +162,9 @@ bool ContourWindow::MouseMove( const MouseEvent& rMEvt )
 
     if ( bPipetteMode )
     {
-        const Point aLogPt( GetDrawingArea()->get_ref_device().WindowToLogic( rMEvt.GetPosPixel() ));
+        const Point aLogPt(GetDrawingArea()->get_ref_device().convertTo<vcl::LogicPoint>(
+                vcl::WindowPoint(rMEvt.GetPosPixel())
+            ));
 
         aPipetteColor = GetDrawingArea()->get_ref_device().GetPixel( aLogPt );
         weld::CustomWidgetController::MouseMove( rMEvt );
@@ -180,7 +184,11 @@ bool ContourWindow::MouseMove( const MouseEvent& rMEvt )
 bool ContourWindow::MouseButtonUp(const MouseEvent& rMEvt)
 {
     const tools::Rectangle aGraphRect( Point(), GetGraphicSize() );
-    const Point     aLogPt( GetDrawingArea()->get_ref_device().WindowToLogic( rMEvt.GetPosPixel() ));
+    const Point aLogPt(
+        GetDrawingArea()->get_ref_device().convertTo<vcl::LogicPoint>(
+            vcl::WindowPoint(rMEvt.GetPosPixel())
+        )
+    );
 
     bClickValid = aGraphRect.Contains( aLogPt );
     ReleaseMouse();

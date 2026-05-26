@@ -768,7 +768,7 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
     }
 
     Push( vcl::PushFlags::CLIPREGION );
-    IntersectClipRegion( static_cast<const tools::Rectangle&>(WindowToLogic(aPixelRect)) );
+    IntersectClipRegion(convertTo<vcl::LogicRect>(vcl::WindowRect(aPixelRect)).get());
     if( mbInitClipRegion )
         InitClipRegion();
 
@@ -1085,7 +1085,8 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
         if ( aWavylinebmp.ImplGetSalBitmap() != nullptr )
         {
             Size _size( nEndX - nStartX, aWavylinebmp.GetSizePixel().Height() );
-            DrawBitmap(Point( rStartPos.X(), rStartPos.Y() ), static_cast<const Size&>(WindowToLogic( _size )), Point(), _size, aWavylinebmp);
+            DrawBitmap(Point(rStartPos.X(), rStartPos.Y()),
+                       static_cast<const Size&>(convertTo<vcl::LogicSize>(vcl::WindowSize(_size)).get()), Point(), _size, aWavylinebmp);
         }
         return;
     }

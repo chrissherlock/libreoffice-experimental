@@ -223,8 +223,8 @@ VclPtr<VirtualDevice> VDevBuffer::alloc(OutputDevice& rOutDev, const Size& rSize
         {
             if (bOkay)
             {
-                pRetval->Erase(
-                    pRetval->WindowToLogic(tools::Rectangle(Point(0, 0), rSizePixel)).get());
+                pRetval->Erase(pRetval->convertTo<vcl::LogicRect>(
+                    vcl::WindowRect(tools::Rectangle(Point(0, 0), rSizePixel))));
             }
             else
             {
@@ -418,7 +418,8 @@ impBufferDevice::impBufferDevice(OutputDevice& rOutDev, const tools::Rectangle& 
 
     MapMode aNewMapMode(mrOutDev.GetMapMode());
 
-    const Point aLogicTopLeft(mrOutDev.WindowToLogic(maDestPixel.TopLeft()).get());
+    const Point aLogicTopLeft
+        = mrOutDev.convertTo<vcl::LogicPoint>(vcl::WindowPoint(maDestPixel.TopLeft())).get();
     aNewMapMode.SetOrigin(Point(-aLogicTopLeft.X(), -aLogicTopLeft.Y()));
 
     mpContent->SetMapMode(aNewMapMode);

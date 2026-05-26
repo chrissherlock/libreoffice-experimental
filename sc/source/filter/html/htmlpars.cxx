@@ -386,7 +386,7 @@ ErrCode ScHTMLLayoutParser::Read( SvStream& rStream, const OUString& rBaseURL )
     for ( sal_uInt16 j = 1; j < nCount; j++ )
     {
         aSize.setWidth( maColOffset[j] - nOff );
-        aSize = pDefaultDev->WindowToLogic( aSize, MapMode( MapUnit::MapTwip ) );
+        aSize = pDefaultDev->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize), MapMode(MapUnit::MapTwip));
         maColWidths[ j-1 ] = aSize.Width();
         nOff = maColOffset[j];
     }

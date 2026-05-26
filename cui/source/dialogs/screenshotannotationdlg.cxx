@@ -303,7 +303,7 @@ ScreenshotAnnotationDlg_Impl::ScreenshotAnnotationDlg_Impl(
     // copying content to clipboard is allowed
     mxText->set_size_request(400, mxText->get_height_rows(10));
     OUString aHelpId = mrParentDialog.get_help_id();
-    Size aSizeCm = Application::GetDefaultDevice()->WindowToLogic(maParentDialogSize, MapMode(MapUnit::MapCM));
+    Size aSizeCm = Application::GetDefaultDevice()->convertTo<vcl::LogicSize>(vcl::WindowSize(maParentDialogSize), MapMode(MapUnit::MapCM));
     maMainMarkupText = lcl_ParagraphWithImage( aHelpId, aSizeCm );
     mxText->set_text( maMainMarkupText );
     mxText->set_editable(false);

@@ -862,7 +862,7 @@ void ScTabView::TestHintWindow()
                 Point aHintPos = calcHintWindowPosition(
                     aPos, Size(nCellSizeX,nCellSizeY), aWinSize, aHintWndSize);
 
-                pOverlay->SetPos(pWin->WindowToLogic(aHintPos, pWin->GetDrawMapMode()), pWin->GetDrawMapMode());
+                pOverlay->SetPos(pWin->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aHintPos), pWin->GetDrawMapMode()), pWin->GetDrawMapMode());
                 for (VclPtr<ScGridWindow> & pWindow : pGridWin)
                 {
                     if (!pWindow)
@@ -888,7 +888,7 @@ void ScTabView::TestHintWindow()
                                                                                        aCommentBack,
                                                                                        aCommentText,
                                                                                        pFrameWin->GetFont()));
-                        Point aFooPos(pWindow->WindowToLogic(aOtherPos, pWindow->GetDrawMapMode()));
+                        Point aFooPos(pWindow->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aOtherPos), pWindow->GetDrawMapMode()));
                         pOtherOverlay->SetPos(aFooPos, pWindow->GetDrawMapMode());
                         xOverlayManager->add(*pOtherOverlay);
                         mxInputHintOO->append(std::move(pOtherOverlay));
@@ -2931,7 +2931,7 @@ void ScTabView::PaintArea( SCCOL nStartCol, SCROW nStartRow, SCCOL nEndCol, SCRO
             aStart.AdjustX( -(nMarkPixel * nLayoutSign) );
         }
 
-        pGridWin[i]->Invalidate( pGridWin[i]->WindowToLogic( tools::Rectangle( aStart,aEnd ) ) );
+        pGridWin[i]->Invalidate(pGridWin[i]->convertTo<vcl::LogicRect>(vcl::WindowRect(tools::Rectangle(aStart, aEnd)), pGridWin[i]->GetMapMode()));
     }
 
     // #i79909# Calling UpdateAllOverlays here isn't necessary and would lead to overlay calls from a timer,

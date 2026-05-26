@@ -202,7 +202,16 @@ FontMetric OutputDevice::GetFontMetric() const
     // set aMetric with info from font
     aMetric.SetFamilyName( maFont.GetFamilyName() );
     aMetric.SetStyleName( xFontMetric->GetStyleName() );
-    aMetric.SetFontSize( WindowToLogic( Size( xFontMetric->GetWidth(), xFontMetric->GetAscent() + xFontMetric->GetDescent() - xFontMetric->GetInternalLeading() ) ) );
+
+    aMetric.SetFontSize(
+        convertTo<vcl::LogicSize>(
+            vcl::WindowSize(
+                xFontMetric->GetWidth(),
+                xFontMetric->GetAscent() + xFontMetric->GetDescent() - xFontMetric->GetInternalLeading()
+            )
+        )
+    );
+
     aMetric.SetCharSet( xFontMetric->IsMicrosoftSymbolEncoded() ? RTL_TEXTENCODING_SYMBOL : RTL_TEXTENCODING_UNICODE );
     aMetric.SetFamily( xFontMetric->GetFamilyType() );
     aMetric.SetPitch( xFontMetric->GetPitch() );

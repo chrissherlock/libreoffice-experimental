@@ -350,7 +350,7 @@ SdrObject* SdPage::CreatePresObj(PresObjKind eObjKind, bool bVertical, const ::t
             Size aSizePix =  aOutDev.convertTo<vcl::WindowSize>(vcl::LogicSize(aGraphic.GetPrefSize()));
             aOutDev.SetMapMode(MapMode(MapUnit::Map100thMM));
 
-            Size aSize =  aOutDev.WindowToLogic(aSizePix);
+            Size aSize =  aOutDev.convertTo<vcl::LogicSize>(vcl::WindowSize(aSizePix));
             Point aPnt (0, 0);
             ::tools::Rectangle aRect (aPnt, aSize);
             pSdrObj = new SdrGrafObj(getSdrModelFromSdrPage(), aGraphic, aRect);

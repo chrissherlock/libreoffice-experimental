@@ -119,7 +119,7 @@ void SwView::SetZoom_( const Size &rEditSize, SvxZoomType eZoomType,
             aPageSize.AdjustWidth(pPostItMgr->GetSidebarWidth() + pPostItMgr->GetSidebarBorderWidth() );
 
         const MapMode aTmpMap( MapUnit::MapTwip );
-        const Size aWindowSize( GetEditWin().WindowToLogic( rEditSize, aTmpMap ) );
+        const Size aWindowSize(GetEditWin().convertTo<vcl::LogicSize>(vcl::WindowSize(rEditSize), aTmpMap));
 
         if( SvxZoomType::OPTIMAL == eZoomType )
         {
@@ -356,8 +356,9 @@ void SwView::MoveNavigation(bool bNext)
             Point aAlPt(AlignToPixel(aPt));
             // If there is a difference, has been truncated --> then add one pixel,
             // so that no residue of the previous page is visible.
-            if(aPt.Y() != aAlPt.Y())
-                aAlPt.AdjustY(3 * GetEditWin().WindowToLogic(Size(0, 1)).Height());
+            if (aPt.Y() != aAlPt.Y())
+                aAlPt.AdjustY(3 * GetEditWin().convertTo<vcl::LogicSize>(vcl::WindowSize(0, 1))->Height());
+
             SetVisArea(aAlPt);
         }
         break;

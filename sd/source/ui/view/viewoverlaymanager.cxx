@@ -415,7 +415,7 @@ void ChangePlaceholderTag::addCustomHandles( SdrHdlList& rHandlerList )
 
     bool bLarge = nShapeSizePix > 250;
 
-    Size aButtonSize( pDev->WindowToLogic( getButtonImage(0, bLarge ).GetSizePixel()));
+    Size aButtonSize = pDev->convertTo<vcl::LogicSize>(vcl::WindowSize(getButtonImage(0, bLarge).GetSizePixel()), pDev->GetMapMode());
 
     const int nColumns = 2;
     const int nRows = 2;
