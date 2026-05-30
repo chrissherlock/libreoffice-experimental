@@ -722,7 +722,7 @@ std::unique_ptr<SvStream> EmbeddedObjectRef::GetGraphicStream( bool bUpdate ) co
 void EmbeddedObjectRef::DrawPaintReplacement( const tools::Rectangle &rRect, const OUString &rText, OutputDevice *pOut )
 {
     MapMode aMM( MapUnit::MapAppFont );
-    Size aAppFontSz = pOut->LogicToLogic( Size( 0, 8 ), &aMM, nullptr );
+    Size aAppFontSz = pOut->convertLogic<vcl::LogicSize>(vcl::LogicSize(Size(0, 8)), &aMM);
     vcl::Font aFnt( u"Noto Sans"_ustr, aAppFontSz );
     aFnt.SetTransparent( true );
     aFnt.SetColor( COL_LIGHTRED );
