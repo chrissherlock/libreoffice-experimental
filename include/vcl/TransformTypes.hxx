@@ -271,6 +271,12 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPoint, vcl::Wind
                                 const MapMode* pMapOverride = nullptr);
 };
 
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPoint, vcl::LogicPoint>
+{
+    static vcl::LogicPoint cast(const OutputDevice& rDev, const vcl::LogicPoint& rSrc,
+                                const MapMode* pMapOverride = nullptr);
+};
+
 // Sizes
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowSize, vcl::LogicSize>
 {
@@ -281,6 +287,12 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowSize, vcl::Logi
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicSize, vcl::WindowSize>
 {
     static vcl::LogicSize cast(const OutputDevice& rDev, const vcl::WindowSize& rSrc,
+                               const MapMode* pMapOverride = nullptr);
+};
+
+template <> struct CoordinateCastTraits<vcl::LogicSize, vcl::LogicSize>
+{
+    static vcl::LogicSize cast(const OutputDevice& rDev, const vcl::LogicSize& rSrc,
                                const MapMode* pMapOverride = nullptr);
 };
 
@@ -300,6 +312,12 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRect, vcl::Logi
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRect, vcl::WindowRect>
 {
     static vcl::LogicRect cast(const OutputDevice& rDev, const vcl::WindowRect& rSrc,
+                               const MapMode* pMapOverride = nullptr);
+};
+
+template <> struct CoordinateCastTraits<vcl::LogicRect, vcl::LogicRect>
+{
+    static vcl::LogicRect cast(const OutputDevice& rDev, const vcl::LogicRect& rSrc,
                                const MapMode* pMapOverride = nullptr);
 };
 
