@@ -3833,6 +3833,11 @@ FactoryFunction Window::GetUITestFactory() const
     return WindowUIObject::create;
 }
 
+tools::Long Window::LogicWidthToDevicePixel(tools::Long nWidth) const
+{
+    return GetOutDev()->LogicWidthToDevicePixel(nWidth);
+}
+
 WindowOutputDevice::WindowOutputDevice(vcl::Window& rOwnerWindow) :
     ::OutputDevice(OUTDEV_WINDOW),
     mxOwnerWindow(&rOwnerWindow)
