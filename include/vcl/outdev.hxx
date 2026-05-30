@@ -1706,6 +1706,7 @@ public:
 
     SAL_DLLPRIVATE basegfx::B2DPoint LogicToDeviceSubPixel(const Point& rLogicPt) const;
 
+protected:
     /** Convert a logical width to a width in units of device pixels.
 
      To get the number of device pixels, it must calculate the X-DPI of the device and
@@ -1719,7 +1720,6 @@ public:
     tools::Long LogicWidthToDevicePixel(tools::Long nWidth) const;
     double LogicWidthToDeviceSubPixel(tools::Long nWidth) const;
 
-protected:
     /** Convert a logical height to a height in units of device pixels.
 
      To get the number of device pixels, it must calculate the Y-DPI of the device and

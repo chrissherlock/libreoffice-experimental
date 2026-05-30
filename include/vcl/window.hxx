@@ -545,6 +545,8 @@ public:
                    void                 IncModalCount();
                    void                 DecModalCount();
 
+    SAL_DLLPRIVATE tools::Long          LogicWidthToDevicePixel(tools::Long nWidth) const;
+
     SAL_DLLPRIVATE static void          ImplCalcSymbolRect( tools::Rectangle& rRect );
 
 protected:
