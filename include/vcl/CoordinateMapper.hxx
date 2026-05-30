@@ -160,6 +160,8 @@ public:
         return aObj;
     }
 
+    basegfx::B2DHomMatrix GetLogicToLogicMatrix(const MapMode& rSrc, const MapMode& rDst) const;
+
     // Distance Extractors
     tools::Long LogicWidthToDevicePixel(tools::Long nWidth,
                                         vcl::MappingPolicy ePolicy

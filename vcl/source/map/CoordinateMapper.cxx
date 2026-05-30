@@ -434,6 +434,18 @@ double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth,
     return static_cast<double>(nWidth) * vcl::detail::GetBasisVectorMagnitudeX(rTransform.maMatrix);
 }
 
+basegfx::B2DHomMatrix CoordinateMapper::GetLogicToLogicMatrix(const MapMode& rSrc,
+                                                              const MapMode& rDst) const
+{
+    // Use the existing ResolveMap to get coefficients, then build the matrix
+    auto aConv = ResolveMap(rSrc, rDst, vcl::MappingPolicy::ApplyMapMode);
+
+    basegfx::B2DHomMatrix aMat;
+    aMat.scale(aConv.mfScaleX, aConv.mfScaleY);
+    aMat.translate(aConv.mnOffsetX, aConv.mnOffsetY);
+    return aMat;
+}
+
 // ========================================================================
 // EXPLICIT TEMPLATE INSTANTIATIONS
 // ========================================================================

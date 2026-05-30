@@ -381,6 +381,64 @@ CoordinateCastTraits<vcl::LogicB2DPolyPolygon, vcl::DeviceB2DPolyPolygon>::cast(
     return vcl::LogicB2DPolyPolygon(aResult);
 }
 
+// LogicPoint Logic-to-Logic
+vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::LogicPoint>::cast(
+    const OutputDevice& rDev, const vcl::LogicPoint& rSrc, const MapMode* pMapOverride)
+{
+    const MapMode& rSrcMap = rDev.GetMapMode();
+    const MapMode& rDstMap = pMapOverride ? *pMapOverride : rDev.GetMapMode();
+
+    if (rSrcMap == rDstMap)
+        return rSrc;
+
+    // Build the transformation matrix between the two MapModes
+    basegfx::B2DHomMatrix aMat = rDev.GetMapper().GetLogicToLogicMatrix(rSrcMap, rDstMap);
+
+    // Apply the matrix
+    basegfx::B2DPoint aPt(rSrc.get().X(), rSrc.get().Y());
+    aPt *= aMat;
+
+    return vcl::LogicPoint(Point(basegfx::fround(aPt.getX()), basegfx::fround(aPt.getY())));
+}
+
+// LogicSize Logic-to-Logic
+vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::LogicSize>::cast(
+    const OutputDevice& rDev, const vcl::LogicSize& rSrc, const MapMode* pMapOverride)
+{
+    if (!pMapOverride || rDev.GetMapMode() == *pMapOverride)
+        return rSrc;
+
+    basegfx::B2DHomMatrix aMat
+        = rDev.GetMapper().GetLogicToLogicMatrix(rDev.GetMapMode(), *pMapOverride);
+
+    // Extract scale only
+    double fScaleX = aMat.get(0, 0);
+    double fScaleY = aMat.get(1, 1);
+
+    return vcl::LogicSize(Size(basegfx::fround(rSrc.get().Width() * fScaleX),
+                               basegfx::fround(rSrc.get().Height() * fScaleY)));
+}
+
+// LogicRect Logic-to-Logic
+vcl::LogicRect CoordinateCastTraits<vcl::LogicRect, vcl::LogicRect>::cast(
+    const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pMapOverride)
+{
+    if (!pMapOverride || rDev.GetMapMode() == *pMapOverride)
+        return rSrc;
+
+    basegfx::B2DHomMatrix aMat
+        = rDev.GetMapper().GetLogicToLogicMatrix(rDev.GetMapMode(), *pMapOverride);
+
+    // Convert Rect to B2DRange for transformation
+    basegfx::B2DRange aRange(rSrc.get().Left(), rSrc.get().Top(), rSrc.get().Right(),
+                             rSrc.get().Bottom());
+    aRange.transform(aMat);
+
+    return vcl::LogicRect(
+        tools::Rectangle(basegfx::fround(aRange.getMinX()), basegfx::fround(aRange.getMinY()),
+                         basegfx::fround(aRange.getMaxX()), basegfx::fround(aRange.getMaxY())));
+}
+
 } // namespace vcl::detail
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
