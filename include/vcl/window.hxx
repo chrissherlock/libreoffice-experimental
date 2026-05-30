@@ -474,6 +474,14 @@ public:
         return GetOutDev()->convertTo<TargetType>(rSource);
     }
 
+    template <typename TargetT, typename SourceT>
+    TargetT convertLogic(const SourceT& rSourceGeom,
+                         const MapMode* pSrc = nullptr,
+                         const MapMode* pDst = nullptr) const
+    {
+        return GetOutDev()->convertLogic<TargetT, SourceT>(rSourceGeom, pSrc, pDst);
+    }
+
     DECL_DLLPRIVATE_LINK( ImplHandlePaintHdl, Timer*, void );
     DECL_DLLPRIVATE_LINK( ImplGenerateMouseMoveHdl, void*, void );
     DECL_DLLPRIVATE_LINK( ImplTrackTimerHdl, Timer*, void );
@@ -1457,10 +1465,6 @@ public:
 
     Size                        GetOutputSizePixel() const;
     SAL_DLLPRIVATE tools::Rectangle GetOutputRectPixel() const;
-
-    Size                        LogicToLogic( const Size&       rSzSource,
-                                              const MapMode*    pMapModeSource,
-                                              const MapMode*    pMapModeDest ) const;
 
     const AllSettings&          GetSettings() const;
     void SetSettings( const AllSettings& rSettings );

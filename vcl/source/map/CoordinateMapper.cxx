@@ -437,13 +437,24 @@ double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth,
 basegfx::B2DHomMatrix CoordinateMapper::GetLogicToLogicMatrix(const MapMode& rSrc,
                                                               const MapMode& rDst) const
 {
-    // Use the existing ResolveMap to get coefficients, then build the matrix
-    auto aConv = ResolveMap(rSrc, rDst, vcl::MappingPolicy::ApplyMapMode);
+    if (rSrc == rDst)
+        return basegfx::B2DHomMatrix();
 
-    basegfx::B2DHomMatrix aMat;
-    aMat.scale(aConv.mfScaleX, aConv.mfScaleY);
-    aMat.translate(aConv.mnOffsetX, aConv.mnOffsetY);
-    return aMat;
+    // Resolve the coefficients using the device's actual DPI
+    MappingCoefficients aSrcRes(rSrc, GetDPIX(), GetDPIY());
+    MappingCoefficients aDstRes(rDst, GetDPIX(), GetDPIY());
+
+    const double fDestScX = (aDstRes.mfScaleX != 0.0) ? aDstRes.mfScaleX : 1.0;
+    const double fDestScY = (aDstRes.mfScaleY != 0.0) ? aDstRes.mfScaleY : 1.0;
+
+    const double fScaleFactorX = aSrcRes.mfScaleX / fDestScX;
+    const double fScaleFactorY = aSrcRes.mfScaleY / fDestScY;
+
+    // Build the affine matrix respecting the strict translation-scale-translation invariant
+    return vcl::BuildAffineMatrix(
+        fScaleFactorX, fScaleFactorY, static_cast<double>(aSrcRes.mnTranslationX),
+        static_cast<double>(aSrcRes.mnTranslationY), static_cast<double>(-aDstRes.mnTranslationX),
+        static_cast<double>(-aDstRes.mnTranslationY));
 }
 
 // ========================================================================
