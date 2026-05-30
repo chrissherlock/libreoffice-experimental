@@ -1692,9 +1692,6 @@ public:
     SAL_WARN_UNUSED_RESULT tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
                                                          const MapMode* pMapModeSource,
                                                          const MapMode* pMapModeDest) const;
-
-    SAL_DLLPRIVATE basegfx::B2DPoint LogicToDeviceSubPixel(const Point& rLogicPt) const;
-
 protected:
     /** Convert a logical width to a width in units of device pixels.
 
