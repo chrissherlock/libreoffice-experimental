@@ -381,59 +381,48 @@ CoordinateCastTraits<vcl::LogicB2DPolyPolygon, vcl::DeviceB2DPolyPolygon>::cast(
     return vcl::LogicB2DPolyPolygon(aResult);
 }
 
-// LogicPoint Logic-to-Logic
+// LogicPoint
 vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::LogicPoint>::cast(
-    const OutputDevice& rDev, const vcl::LogicPoint& rSrc, const MapMode* pMapOverride)
+    const OutputDevice& rDev, const vcl::LogicPoint& rSrc, const MapMode* pSrc, const MapMode* pDst)
 {
-    const MapMode& rSrcMap = rDev.GetMapMode();
-    const MapMode& rDstMap = pMapOverride ? *pMapOverride : rDev.GetMapMode();
-
+    const MapMode& rSrcMap = pSrc ? *pSrc : rDev.GetMapMode();
+    const MapMode& rDstMap = pDst ? *pDst : rDev.GetMapMode();
     if (rSrcMap == rDstMap)
         return rSrc;
 
-    // Build the transformation matrix between the two MapModes
     basegfx::B2DHomMatrix aMat = rDev.GetMapper().GetLogicToLogicMatrix(rSrcMap, rDstMap);
-
-    // Apply the matrix
     basegfx::B2DPoint aPt(rSrc.get().X(), rSrc.get().Y());
     aPt *= aMat;
-
     return vcl::LogicPoint(Point(basegfx::fround(aPt.getX()), basegfx::fround(aPt.getY())));
 }
 
-// LogicSize Logic-to-Logic
+// LogicSize
 vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::LogicSize>::cast(
-    const OutputDevice& rDev, const vcl::LogicSize& rSrc, const MapMode* pMapOverride)
+    const OutputDevice& rDev, const vcl::LogicSize& rSrc, const MapMode* pSrc, const MapMode* pDst)
 {
-    if (!pMapOverride || rDev.GetMapMode() == *pMapOverride)
+    const MapMode& rSrcMap = pSrc ? *pSrc : rDev.GetMapMode();
+    const MapMode& rDstMap = pDst ? *pDst : rDev.GetMapMode();
+    if (rSrcMap == rDstMap)
         return rSrc;
 
-    basegfx::B2DHomMatrix aMat
-        = rDev.GetMapper().GetLogicToLogicMatrix(rDev.GetMapMode(), *pMapOverride);
-
-    // Extract scale only
-    double fScaleX = aMat.get(0, 0);
-    double fScaleY = aMat.get(1, 1);
-
-    return vcl::LogicSize(Size(basegfx::fround(rSrc.get().Width() * fScaleX),
-                               basegfx::fround(rSrc.get().Height() * fScaleY)));
+    basegfx::B2DHomMatrix aMat = rDev.GetMapper().GetLogicToLogicMatrix(rSrcMap, rDstMap);
+    return vcl::LogicSize(Size(basegfx::fround(rSrc.get().Width() * aMat.get(0, 0)),
+                               basegfx::fround(rSrc.get().Height() * aMat.get(1, 1))));
 }
 
-// LogicRect Logic-to-Logic
+// LogicRect
 vcl::LogicRect CoordinateCastTraits<vcl::LogicRect, vcl::LogicRect>::cast(
-    const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pMapOverride)
+    const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pSrc, const MapMode* pDst)
 {
-    if (!pMapOverride || rDev.GetMapMode() == *pMapOverride)
+    const MapMode& rSrcMap = pSrc ? *pSrc : rDev.GetMapMode();
+    const MapMode& rDstMap = pDst ? *pDst : rDev.GetMapMode();
+    if (rSrcMap == rDstMap)
         return rSrc;
 
-    basegfx::B2DHomMatrix aMat
-        = rDev.GetMapper().GetLogicToLogicMatrix(rDev.GetMapMode(), *pMapOverride);
-
-    // Convert Rect to B2DRange for transformation
+    basegfx::B2DHomMatrix aMat = rDev.GetMapper().GetLogicToLogicMatrix(rSrcMap, rDstMap);
     basegfx::B2DRange aRange(rSrc.get().Left(), rSrc.get().Top(), rSrc.get().Right(),
                              rSrc.get().Bottom());
     aRange.transform(aMat);
-
     return vcl::LogicRect(
         tools::Rectangle(basegfx::fround(aRange.getMinX()), basegfx::fround(aRange.getMinY()),
                          basegfx::fround(aRange.getMaxX()), basegfx::fround(aRange.getMaxY())));

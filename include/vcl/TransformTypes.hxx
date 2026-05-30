@@ -274,7 +274,7 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPoint, vcl::Wind
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPoint, vcl::LogicPoint>
 {
     static vcl::LogicPoint cast(const OutputDevice& rDev, const vcl::LogicPoint& rSrc,
-                                const MapMode* pMapOverride = nullptr);
+                                const MapMode* pSrc = nullptr, const MapMode* pDst = nullptr);
 };
 
 // Sizes
@@ -290,10 +290,10 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicSize, vcl::Windo
                                const MapMode* pMapOverride = nullptr);
 };
 
-template <> struct CoordinateCastTraits<vcl::LogicSize, vcl::LogicSize>
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicSize, vcl::LogicSize>
 {
     static vcl::LogicSize cast(const OutputDevice& rDev, const vcl::LogicSize& rSrc,
-                               const MapMode* pMapOverride = nullptr);
+                               const MapMode* pSrc = nullptr, const MapMode* pDst = nullptr);
 };
 
 // Rectangles
@@ -315,10 +315,10 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRect, vcl::Windo
                                const MapMode* pMapOverride = nullptr);
 };
 
-template <> struct CoordinateCastTraits<vcl::LogicRect, vcl::LogicRect>
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRect, vcl::LogicRect>
 {
     static vcl::LogicRect cast(const OutputDevice& rDev, const vcl::LogicRect& rSrc,
-                               const MapMode* pMapOverride = nullptr);
+                               const MapMode* pSrc = nullptr, const MapMode* pDst = nullptr);
 };
 
 // Polygons
@@ -421,6 +421,7 @@ struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicB2DPolyPolygon, vcl::DeviceB
                                          const vcl::DeviceB2DPolyPolygon& rSrc,
                                          const MapMode* pMapOverride = nullptr);
 };
+
 } // namespace vcl::details
 } // namespace vcl
 
