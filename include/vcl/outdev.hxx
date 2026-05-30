@@ -1651,6 +1651,17 @@ public:
         return vcl::detail::CoordinateCastTraits<TargetType, SourceType>::cast(*this, rSourceGeom, &rMapModeOverride);
     }
 
+    /**
+     * @brief Converts geometry within the Logic coordinate space.
+     */
+    template <typename TargetT, typename SourceT>
+    TargetT convertLogic(const SourceT& rSourceGeom,
+                         const MapMode* pSrc = nullptr,
+                         const MapMode* pDst = nullptr) const
+    {
+        return vcl::detail::CoordinateCastTraits<TargetT, SourceT>::cast(*this, rSourceGeom, pSrc, pDst);
+    }
+
     /** Set an offset in pixel
 
         This method offsets every drawing operation that converts its
