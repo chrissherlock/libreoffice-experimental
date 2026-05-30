@@ -31,6 +31,20 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <cmath>
 
+// Helper class to expose protected OutputDevice methods for unit testing
+class TestOutputDevice : public VirtualDevice
+{
+public:
+    using VirtualDevice::LogicWidthToDevicePixel;
+    using VirtualDevice::LogicWidthToDeviceSubPixel;
+
+    // Optional: Add constructor forwarding if needed
+    TestOutputDevice(DeviceFormat eFormat = DeviceFormat::WITHOUT_ALPHA)
+        : VirtualDevice(eFormat)
+    {
+    }
+};
+
 class VclTextTest : public test::BootstrapFixture
 {
     // if enabled - check the result images with:
@@ -1075,7 +1089,7 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testPartialTextArraySizeMatch)
 
 CPPUNIT_TEST_FIXTURE(VclTextTest, testFractionalSingleRounding)
 {
-    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    ScopedVclPtrInstance<TestOutputDevice> pVDev;
     pVDev->SetOutputSizePixel(Size(200, 200));
 
     // Force fractional scaling (critical for exposing the bug)
@@ -1137,7 +1151,7 @@ CPPUNIT_TEST_FIXTURE(VclTextTest, testFractionalSingleRounding)
 
 CPPUNIT_TEST_FIXTURE(VclTextTest, testTextSingleRoundingRegression)
 {
-    ScopedVclPtrInstance<VirtualDevice> pVDev;
+    ScopedVclPtrInstance<TestOutputDevice> pVDev;
     pVDev->SetOutputSizePixel(Size(300, 200));
 
     // Force fractional scaling
