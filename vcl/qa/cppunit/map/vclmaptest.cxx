@@ -287,20 +287,20 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testNullptrMapMode)
 
     // Source is nullptr (falls back to device MapMM) -> Dest is Map100thMM
     // 10mm -> 1000 100thMM, 20mm -> 2000 100thMM
-    Point aResult1 = pDev->LogicToLogic(aPt, nullptr, &aDestMode);
+    Point aResult1 = pDev->convertLogic<vcl::LogicPoint>(vcl::LogicPoint(aPt), nullptr, &aDestMode);
     CPPUNIT_ASSERT_EQUAL(tools::Long(1000), aResult1.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(2000), aResult1.Y());
 
     // Source is Map100thMM -> Dest is nullptr (falls back to device MapMM)
     // 1500 100thMM -> 15mm, 2500 100thMM -> 25mm
     Point aPt2(1500, 2500);
-    Point aResult2 = pDev->LogicToLogic(aPt2, &aDestMode, nullptr);
+    Point aResult2 = pDev->convertLogic<vcl::LogicPoint>(vcl::LogicPoint(aPt2), &aDestMode);
     CPPUNIT_ASSERT_EQUAL(tools::Long(15), aResult2.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(25), aResult2.Y());
 
     // Both are nullptr (falls back to device MapMM for both)
     // Should return the exact same coordinates
-    Point aResult3 = pDev->LogicToLogic(aPt, nullptr, nullptr);
+    Point aResult3 = pDev->convertLogic<vcl::LogicPoint>(vcl::LogicPoint(aPt));
     CPPUNIT_ASSERT_EQUAL(tools::Long(10), aResult3.X());
     CPPUNIT_ASSERT_EQUAL(tools::Long(20), aResult3.Y());
 }
@@ -496,7 +496,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapRelativeScaling)
     Point aPt(50, 50);
 
     // The ResolveMapRes logic inside the mapper is triggered here:
-    Point aResult = pVDev->LogicToLogic(aPt, &aRelativeMode, nullptr);
+    Point aResult = pVDev->convertLogic<vcl::LogicPoint>(vcl::LogicPoint(aPt), &aRelativeMode);
 
     // EXPECTED CALCULATION:
     // VCL MapMode math applies the Origin translation BEFORE the Scale factor!
