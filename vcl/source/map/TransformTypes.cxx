@@ -18,18 +18,22 @@ namespace vcl::detail
 vcl::DevicePoint CoordinateCastTraits<vcl::DevicePoint, vcl::LogicPoint>::cast(
     const OutputDevice& rDev, const vcl::LogicPoint& rSrc, const MapMode* pMapOverride)
 {
-    // If an override is provided, we must temporarily apply it to the device
     if (pMapOverride)
     {
-        OutputDevice* pMutableDev = const_cast<OutputDevice*>(&rDev);
-        MapMode aOldMap = pMutableDev->GetMapMode();
-        pMutableDev->SetMapMode(*pMapOverride);
+        const auto& rMapper = rDev.GetMapper();
 
-        vcl::DevicePoint aResult(
-            rDev.GetMapper().LogicToDevicePixel(rSrc.get(), rDev.GetMappingPolicy()));
+        // Resolve the MapMode difference statelessly
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
 
-        pMutableDev->SetMapMode(aOldMap); // Restore original state
-        return aResult;
+        // Build the View transformation matrix (Logic -> Window)
+        basegfx::B2DHomMatrix aMat = rMapper.GetViewTransformation(aConv);
+
+        // Extend to Device Space (Window -> Device)
+        aMat.translate(static_cast<double>(rMapper.GetDeviceToWindowOffsetX()),
+                       static_cast<double>(rMapper.GetDeviceToWindowOffsetY()));
+
+        // Compile the temporary plan and apply geometry directly
+        return vcl::DevicePoint(vcl::TransformCompiler::Compile(aMat).apply(rSrc.get()));
     }
 
     return vcl::DevicePoint(
@@ -41,15 +45,24 @@ vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::DevicePoint>::cast(
 {
     if (pMapOverride)
     {
-        OutputDevice* pMutableDev = const_cast<OutputDevice*>(&rDev);
-        MapMode aOldMap = pMutableDev->GetMapMode();
-        pMutableDev->SetMapMode(*pMapOverride);
+        const auto& rMapper = rDev.GetMapper();
 
-        vcl::LogicPoint aResult(
-            rDev.GetMapper().DevicePixelToLogic(rSrc.get(), rDev.GetMappingPolicy()));
+        // Resolve the MapMode difference statelessly
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
 
-        pMutableDev->SetMapMode(aOldMap);
-        return aResult;
+        // Build the View transformation matrix (Logic -> Window)
+        basegfx::B2DHomMatrix aMat = rMapper.GetViewTransformation(aConv);
+
+        // Extend to Device Space (Window -> Device)
+        aMat.translate(static_cast<double>(rMapper.GetDeviceToWindowOffsetX()),
+                       static_cast<double>(rMapper.GetDeviceToWindowOffsetY()));
+
+        // Invert for the Device -> Logic direction
+        if (aMat.isInvertible())
+            aMat.invert();
+
+        // Compile the temporary plan and apply geometry directly
+        return vcl::LogicPoint(vcl::TransformCompiler::Compile(aMat).apply(rSrc.get()));
     }
 
     return vcl::LogicPoint(
