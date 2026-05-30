@@ -141,12 +141,6 @@ bool Window::IsRTLEnabled() const { return GetOutDev()->IsRTLEnabled(); }
 TextAlign Window::GetTextAlign() const { return GetOutDev()->GetTextAlign(); }
 const AllSettings& Window::GetSettings() const { return GetOutDev()->GetSettings(); }
 
-Size Window::LogicToLogic(const Size& rSzSource, const MapMode* pMapModeSource,
-                          const MapMode* pMapModeDest) const
-{
-    return GetOutDev()->LogicToLogic(rSzSource, pMapModeSource, pMapModeDest);
-}
-
 tools::Rectangle Window::GetTextRect(const tools::Rectangle& rRect, const OUString& rStr,
                                      DrawTextFlags nStyle, TextRectInfo* pInfo,
                                      const vcl::TextLayoutCommon* _pTextLayout) const

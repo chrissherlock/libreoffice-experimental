@@ -385,7 +385,7 @@ bool GraphicObject::ImplGetCropParams(const OutputDevice& rOut, Point& rPt, Size
         else
         {
             MapMode m(maGraphic.GetPrefMapMode());
-            aSize100 = rOut.LogicToLogic(maGraphic.GetPrefSize(), &m, &aMap100);
+            aSize100 = rOut.convertLogic<vcl::LogicSize>(vcl::LogicSize(maGraphic.GetPrefSize()), &m, &aMap100);
         }
 
         nTotalWidth = aSize100.Width() - pAttr->GetLeftCrop() - pAttr->GetRightCrop();

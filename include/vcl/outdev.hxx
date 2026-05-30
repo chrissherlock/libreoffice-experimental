@@ -1705,15 +1705,6 @@ public:
      */
     SAL_WARN_UNUSED_RESULT Size GetPixelOffset() const;
 
-    SAL_WARN_UNUSED_RESULT Point LogicToLogic(const Point& rPtSource,
-                                              const MapMode* pMapModeSource,
-                                              const MapMode* pMapModeDest) const;
-    SAL_WARN_UNUSED_RESULT Size LogicToLogic(const Size& rSzSource,
-                                             const MapMode* pMapModeSource,
-                                             const MapMode* pMapModeDest) const;
-    SAL_WARN_UNUSED_RESULT tools::Rectangle LogicToLogic(const tools::Rectangle& rRectSource,
-                                                         const MapMode* pMapModeSource,
-                                                         const MapMode* pMapModeDest) const;
 protected:
     /** Convert a logical width to a width in units of device pixels.
 
