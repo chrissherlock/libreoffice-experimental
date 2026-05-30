@@ -77,7 +77,7 @@ void ImplDrawDefault(OutputDevice& rOutDev, const OUString* pText,
     if ( !aSize.IsEmpty() && pFont && pText && pText->getLength() && rOutDev.IsOutputEnabled() )
     {
         MapMode aMapMode( MapUnit::MapPoint );
-        Size aSz = rOutDev.LogicToLogic( Size( 0, 12 ), &aMapMode, nullptr );
+        Size aSz = rOutDev.convertLogic<vcl::LogicSize>(vcl::LogicSize(Size(0, 12)), &aMapMode).get();
         tools::Long    nThreshold = aSz.Height() / 2;
         tools::Long    nStep = nThreshold / 3;
 

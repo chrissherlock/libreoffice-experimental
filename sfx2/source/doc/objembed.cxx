@@ -144,7 +144,7 @@ void SfxObjectShell::DoDraw( OutputDevice* pDev,
     MapMode aMod = pDev->GetMapMode();
     Size aSize = GetVisArea( nAspect ).GetSize();
     MapMode aWilliMode( GetMapUnit() );
-    aSize = pDev->LogicToLogic( aSize, &aWilliMode, &aMod );
+    aSize = pDev->convertLogic<vcl::LogicSize>(vcl::LogicSize(aSize), &aWilliMode, &aMod);
     if( aSize.Width() && aSize.Height() )
     {
         double fXF = double(rSize.Width()) / aSize.Width();
@@ -169,7 +169,7 @@ void SfxObjectShell::DoDraw_Impl( OutputDevice* pDev,
     aMapMode.SetScaleY( fScaleY );
 
     // Target in Pixels
-    Point aOrg   = pDev->LogicToLogic( rViewPos, nullptr, &aMapMode );
+    Point aOrg = pDev->convertLogic<vcl::LogicPoint>(vcl::LogicPoint(rViewPos), nullptr, &aMapMode);
     Point aDelta = aOrg - aVisArea.TopLeft();
 
     // Origin moved according to the viewable area
