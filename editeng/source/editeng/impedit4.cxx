@@ -591,9 +591,12 @@ ErrCode ImpEditEngine::WriteRTF( SvStream& rOutput, EditSelection aSel, bool bCl
 
     // DefTab:
     MapMode aTwpMode( MapUnit::MapTwip );
-    sal_uInt16 nDefTabTwps = static_cast<sal_uInt16>(GetRefDevice()->LogicToLogic(
-                                        Point( maEditDoc.GetDefTab(), 0 ),
-                                        &GetRefMapMode(), &aTwpMode ).X());
+
+    sal_uInt16 nDefTabTwps = static_cast<sal_uInt16>(GetRefDevice()->convertLogic<vcl::LogicPoint>(
+        vcl::LogicPoint(Point(maEditDoc.GetDefTab(), 0)),
+        &GetRefMapMode(),
+        &aTwpMode)->X());
+
     rOutput.WriteOString( OOO_STRING_SVTOOLS_RTF_DEFTAB );
     rOutput.WriteNumberAsString( nDefTabTwps );
     rOutput << endl;
@@ -1024,8 +1027,12 @@ void ImpEditEngine::WriteItemAsRTF( const SfxPoolItem& rItem, SvStream& rOutput,
             ContentNode* pNode = maEditDoc.GetObject( nPara );
             SeekCursor( pNode, nPos, aFont );
             MapMode aPntMode( MapUnit::MapPoint );
-            tools::Long nFontHeight = GetRefDevice()->LogicToLogic(
-                    aFont.GetFontSize(), &GetRefMapMode(), &aPntMode ).Height();
+
+            tools::Long nFontHeight = GetRefDevice()->convertLogic<vcl::LogicSize>(
+                vcl::LogicSize(aFont.GetFontSize()),
+                &GetRefMapMode(),
+                &aPntMode)->Height();
+
             nFontHeight *=2;    // Half Points
             sal_uInt16 const nProp = static_cast<const SvxEscapementItem&>(rItem).GetProportionalHeight();
             sal_uInt16 nProp100 = nProp*100;    // For SWG-Token Prop in 100th percent.
@@ -3308,7 +3315,7 @@ sal_Int32 ImpEditEngine::LogicToTwips(sal_Int32 n)
 {
     Size aSz(n, 0);
     MapMode aTwipsMode( MapUnit::MapTwip );
-    aSz = mpRefDev->LogicToLogic( aSz, nullptr, &aTwipsMode );
+    aSz = mpRefDev->convertLogic<vcl::LogicSize>(vcl::LogicSize(aSz), nullptr, &aTwipsMode);
     return aSz.Width();
 }
 
