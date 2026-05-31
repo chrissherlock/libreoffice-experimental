@@ -11,9 +11,8 @@
 
 #include <vcl/TransformRouter.hxx>
 
+#include <CoordinateMath.hxx>
 #include <TransformCompiler.hxx>
-
-#include "CoordinateMath.hxx"
 
 #include <cstdlib>
 
