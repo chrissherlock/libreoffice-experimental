@@ -19,7 +19,7 @@
 #include <vcl/lineinfo.hxx>
 #include <vcl/GeometryAdapter.hxx>
 
-#include "CoordinateMath.hxx"
+#include <CoordinateMath.hxx>
 
 #include <cmath>
 #include <algorithm>
