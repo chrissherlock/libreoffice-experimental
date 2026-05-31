@@ -666,8 +666,6 @@ template VCL_DLLPUBLIC basegfx::B2DRange
 CoordinateMapper::WindowToLogicUnits<basegfx::B2DRange>(const basegfx::B2DRange&,
                                                         const vcl::detail::MapConversion&) const;
 
-/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
-
 template <typename Geom>
 vcl::TypedGeom<vcl::SpaceWindow, Geom>
 CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogicGeom,
@@ -729,3 +727,5 @@ CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, vcl::Region>
 template vcl::TypedGeom<vcl::SpaceDevice, vcl::Region>
 CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, vcl::Region>&,
                               const MapMode&) const;
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
