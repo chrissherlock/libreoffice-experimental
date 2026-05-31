@@ -12,7 +12,7 @@
 #include <vcl/outdev.hxx>
 #include <vcl/mapmod.hxx>
 
-#include "CoordinateMath.hxx"
+#include <CoordinateMath.hxx>
 
 #include <type_traits>
 
