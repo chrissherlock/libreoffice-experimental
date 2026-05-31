@@ -443,8 +443,13 @@ vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::LogicSize>::cast(
         return rSrc;
 
     basegfx::B2DHomMatrix aMat = rDev.GetMapper().GetLogicToLogicMatrix(rSrcMap, rDstMap);
-    return vcl::LogicSize(Size(basegfx::fround(rSrc.get().Width() * aMat.get(0, 0)),
-                               basegfx::fround(rSrc.get().Height() * aMat.get(1, 1))));
+
+    // Extract affine basis vector magnitudes instead of scalar diagonals
+    const double fMagX = vcl::detail::GetBasisVectorMagnitudeX(aMat);
+    const double fMagY = vcl::detail::GetBasisVectorMagnitudeY(aMat);
+
+    return vcl::LogicSize(Size(basegfx::fround(rSrc.get().Width() * fMagX),
+                               basegfx::fround(rSrc.get().Height() * fMagY)));
 }
 
 // LogicRect
