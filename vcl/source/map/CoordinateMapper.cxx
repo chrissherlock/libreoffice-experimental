@@ -673,8 +673,27 @@ CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogi
 {
     vcl::detail::MapConversion aConv
         = ResolveMap(MapMode(), rCustomMapMode, vcl::MappingPolicy::ApplyMapMode);
-    vcl::TransformPlan aPlan = vcl::TransformCompiler::Compile(GetViewTransformation(aConv));
-    return vcl::TypedGeom<vcl::SpaceWindow, Geom>(aPlan.apply(rLogicGeom.get()));
+    basegfx::B2DHomMatrix aMat = GetViewTransformation(aConv);
+
+    // Monadic Bind: Extract raw geometry, apply math, and seal into SpaceWindow
+    return rLogicGeom.and_then([&aMat](const Geom& rRawGeom) {
+        if constexpr (vcl::detail::B2DTransformable<Geom>)
+        {
+            Geom aResult(rRawGeom);
+            aResult.transform(aMat);
+            return vcl::TypedGeom<vcl::SpaceWindow, Geom>(aResult);
+        }
+        else if constexpr (vcl::detail::B2DMultipliable<Geom>)
+        {
+            return vcl::TypedGeom<vcl::SpaceWindow, Geom>(aMat * rRawGeom);
+        }
+        else
+        {
+            // Legacy geometry requires the sub-pixel rounding compiler
+            return vcl::TypedGeom<vcl::SpaceWindow, Geom>(
+                vcl::TransformCompiler::Compile(aMat).apply(rRawGeom));
+        }
+    });
 }
 
 template <typename Geom>
@@ -687,8 +706,26 @@ CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogi
     basegfx::B2DHomMatrix aMat = GetViewTransformation(aConv);
     aMat.translate(static_cast<double>(maState.GetDeviceToWindowOffsetX()),
                    static_cast<double>(maState.GetDeviceToWindowOffsetY()));
-    vcl::TransformPlan aPlan = vcl::TransformCompiler::Compile(aMat);
-    return vcl::TypedGeom<vcl::SpaceDevice, Geom>(aPlan.apply(rLogicGeom.get()));
+
+    // Monadic Bind: Extract raw geometry, apply math, and seal into SpaceDevice
+    return rLogicGeom.and_then([&aMat](const Geom& rRawGeom) {
+        if constexpr (vcl::detail::B2DTransformable<Geom>)
+        {
+            Geom aResult(rRawGeom);
+            aResult.transform(aMat);
+            return vcl::TypedGeom<vcl::SpaceDevice, Geom>(aResult);
+        }
+        else if constexpr (vcl::detail::B2DMultipliable<Geom>)
+        {
+            return vcl::TypedGeom<vcl::SpaceDevice, Geom>(aMat * rRawGeom);
+        }
+        else
+        {
+            // Legacy geometry requires the sub-pixel rounding compiler
+            return vcl::TypedGeom<vcl::SpaceDevice, Geom>(
+                vcl::TransformCompiler::Compile(aMat).apply(rRawGeom));
+        }
+    });
 }
 
 // Explicit Instantiations to satisfy the linker
