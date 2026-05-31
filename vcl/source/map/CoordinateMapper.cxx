@@ -440,9 +440,33 @@ basegfx::B2DHomMatrix CoordinateMapper::GetLogicToLogicMatrix(const MapMode& rSr
     if (rSrc == rDst)
         return basegfx::B2DHomMatrix();
 
-    // Resolve the coefficients using the device's actual DPI
-    MappingCoefficients aSrcRes(rSrc, GetDPIX(), GetDPIY());
-    MappingCoefficients aDstRes(rDst, GetDPIX(), GetDPIY());
+    const bool bSrcRelative = (rSrc.GetMapUnit() == MapUnit::MapRelative);
+    const bool bDstRelative = (rDst.GetMapUnit() == MapUnit::MapRelative);
+
+    MappingCoefficients aSrcRes;
+    MappingCoefficients aDstRes;
+
+    if (bSrcRelative || bDstRelative)
+    {
+        // Relative MapModes have no absolute meaning on their own — they
+        // inherit scale and origin from a baseline. We cross-resolve each
+        // side against the other as its baseline so that a relative source
+        // is correctly inherited from the destination's coordinate space
+        // and vice versa. Device state (maState) is only consulted here
+        // as a fallback if neither side can serve as the other's baseline,
+        // which in practice cannot happen given the branch condition above.
+        aSrcRes = maState.ResolveMapResRelative(&rSrc, &rDst, vcl::MappingPolicy::ApplyMapMode);
+        aDstRes = maState.ResolveMapResRelative(&rDst, &rSrc, vcl::MappingPolicy::ApplyMapMode);
+    }
+    else
+    {
+        // Absolute MapModes resolve purely from their own definition and
+        // the device DPI. This path is intentionally free of device state
+        // beyond DPI so that GetLogicToLogicMatrix is a pure function of
+        // its two arguments for all non-relative MapMode combinations.
+        aSrcRes = MappingCoefficients(rSrc, GetDPIX(), GetDPIY());
+        aDstRes = MappingCoefficients(rDst, GetDPIX(), GetDPIY());
+    }
 
     const double fDestScX = (aDstRes.mfScaleX != 0.0) ? aDstRes.mfScaleX : 1.0;
     const double fDestScY = (aDstRes.mfScaleY != 0.0) ? aDstRes.mfScaleY : 1.0;
@@ -450,7 +474,11 @@ basegfx::B2DHomMatrix CoordinateMapper::GetLogicToLogicMatrix(const MapMode& rSr
     const double fScaleFactorX = aSrcRes.mfScaleX / fDestScX;
     const double fScaleFactorY = aSrcRes.mfScaleY / fDestScY;
 
-    // Build the affine matrix respecting the strict translation-scale-translation invariant
+    // Use canonical builder to enforce translation-scale-translation invariant:
+    //   P' = ((P + SrcOrigin) * Scale) - DstOrigin
+    // The source origin grows with the scale factor (it is in source logical
+    // units). The destination origin is subtracted post-scale as a physical
+    // offset, matching the semantics in LegacyCoordinateAdapter::LogicToLogic.
     return vcl::BuildAffineMatrix(
         fScaleFactorX, fScaleFactorY, static_cast<double>(aSrcRes.mnTranslationX),
         static_cast<double>(aSrcRes.mnTranslationY), static_cast<double>(-aDstRes.mnTranslationX),
