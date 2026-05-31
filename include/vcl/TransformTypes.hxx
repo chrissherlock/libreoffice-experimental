@@ -176,15 +176,19 @@ template <typename Space, typename T> struct TypedGeom
      * Takes a callable function/lambda, applies it to the underlying geometry,
      * and returns a NEW TypedGeom wrapped safely back in the SAME space context.
      */
-    template <typename Func> constexpr auto map(Func&& f) const
+    template <typename Func> constexpr auto transform(Func&& f) const
     {
         using ReturnType = std::invoke_result_t<Func, const T&>;
         return TypedGeom<Space, ReturnType>(f(maData));
     }
 
-    template <typename Func>
-    constexpr auto and_then(Func&& f) const requires
-        std::same_as<Space, typename std::invoke_result_t<Func, const T&>::space_type>
+    /**
+     * and_then (Monadic Bind)
+     * Passes the entire TypedGeom into a function. The function is entirely
+     * responsible for returning a new type (e.g., a different CoordinateSpace
+     * or a std::optional<TypedGeom>).
+     */
+    template <typename Func> constexpr auto and_then(Func&& f) const
     {
         return std::invoke(std::forward<Func>(f), maData);
     }

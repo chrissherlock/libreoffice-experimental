@@ -19,7 +19,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMapFunctorChaining)
     vcl::LogicSize aLogicSize(Size(10, 20));
 
     // Use map to multiply dimensions (Functor translation layer)
-    auto aMapped = aLogicSize.map(
+    auto aMapped = aLogicSize.transform(
         [](const Size& rSize) { return Size(rSize.Width() * 2, rSize.Height() * 3); });
 
     // Assert structural type consistency and value mapping: 20x60
