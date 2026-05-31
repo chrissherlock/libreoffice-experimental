@@ -37,8 +37,7 @@
 
 #include <TransformCompiler.hxx>
 #include <MappingCoefficients.hxx>
-
-#include "CoordinateMath.hxx"
+#include <CoordinateMath.hxx>
 
 #include <cmath>
 #include <cassert>
