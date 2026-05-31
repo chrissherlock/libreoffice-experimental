@@ -12,8 +12,7 @@
 #include <tools/debug.hxx>
 #include <o3tl/unit_conversion.hxx>
 
-#include "CoordinateMath.hxx"
-
+#include <CoordinateMath.hxx>
 #include <LegacyCoordinateAdapter.hxx>
 #include <MappingCoefficients.hxx>
 
