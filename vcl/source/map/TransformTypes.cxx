@@ -14,266 +14,7 @@
 
 #include "CoordinateMath.hxx"
 
-namespace vcl::detail
-{
-// POINTS
-vcl::DevicePoint CoordinateCastTraits<vcl::DevicePoint, vcl::LogicPoint>::cast(
-    const OutputDevice& rDev, const vcl::LogicPoint& rSrc, const MapMode* pMapOverride)
-{
-    if (pMapOverride)
-    {
-        const auto& rMapper = rDev.GetMapper();
-
-        // Resolve the MapMode difference statelessly
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-
-        // Build the View transformation matrix (Logic -> Window)
-        basegfx::B2DHomMatrix aMat = rMapper.GetViewTransformation(aConv);
-
-        // Extend to Device Space (Window -> Device)
-        aMat.translate(static_cast<double>(rMapper.GetDeviceToWindowOffsetX()),
-                       static_cast<double>(rMapper.GetDeviceToWindowOffsetY()));
-
-        // Compile the temporary plan and apply geometry directly
-        return vcl::DevicePoint(vcl::TransformCompiler::Compile(aMat).apply(rSrc.get()));
-    }
-
-    return vcl::DevicePoint(
-        rDev.GetMapper().LogicToDevicePixel(rSrc.get(), rDev.GetMappingPolicy()));
-}
-
-vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::DevicePoint>::cast(
-    const OutputDevice& rDev, const vcl::DevicePoint& rSrc, const MapMode* pMapOverride)
-{
-    if (pMapOverride)
-    {
-        const auto& rMapper = rDev.GetMapper();
-
-        // Resolve the MapMode difference statelessly
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-
-        // Build the View transformation matrix (Logic -> Window)
-        basegfx::B2DHomMatrix aMat = rMapper.GetViewTransformation(aConv);
-
-        // Extend to Device Space (Window -> Device)
-        aMat.translate(static_cast<double>(rMapper.GetDeviceToWindowOffsetX()),
-                       static_cast<double>(rMapper.GetDeviceToWindowOffsetY()));
-
-        // Invert for the Device -> Logic direction
-        if (aMat.isInvertible())
-            aMat.invert();
-
-        // Compile the temporary plan and apply geometry directly
-        return vcl::LogicPoint(vcl::TransformCompiler::Compile(aMat).apply(rSrc.get()));
-    }
-
-    return vcl::LogicPoint(
-        rDev.GetMapper().DevicePixelToLogic(rSrc.get(), rDev.GetMappingPolicy()));
-}
-
-vcl::WindowPoint CoordinateCastTraits<vcl::WindowPoint, vcl::LogicPoint>::cast(
-    const OutputDevice& rDev, const vcl::LogicPoint& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::WindowPoint(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
-    }
-    return vcl::WindowPoint(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
-
-vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::WindowPoint>::cast(
-    const OutputDevice& rDev, const vcl::WindowPoint& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::LogicPoint(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
-    }
-    return vcl::LogicPoint(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
-
-// SIZES
-
-vcl::WindowSize CoordinateCastTraits<vcl::WindowSize, vcl::LogicSize>::cast(
-    const OutputDevice& rDev, const vcl::LogicSize& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::WindowSize(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
-    }
-    return vcl::WindowSize(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
-
-vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::WindowSize>::cast(
-    const OutputDevice& rDev, const vcl::WindowSize& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::LogicSize(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
-    }
-    return vcl::LogicSize(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
-
-// RECTANGLES
-vcl::DeviceRect CoordinateCastTraits<vcl::DeviceRect, vcl::LogicRect>::cast(
-    const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pMapOverride)
-{
-    const MapMode& rMapMode = pMapOverride ? *pMapOverride : rDev.GetMapMode();
-
-    return rDev.GetMapper().MapToDevice(rSrc, rMapMode);
-}
-
-vcl::WindowRect CoordinateCastTraits<vcl::WindowRect, vcl::LogicRect>::cast(
-    const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::WindowRect(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
-    }
-    return vcl::WindowRect(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
-
-vcl::LogicRect CoordinateCastTraits<vcl::LogicRect, vcl::WindowRect>::cast(
-    const OutputDevice& rDev, const vcl::WindowRect& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::LogicRect(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
-    }
-    return vcl::LogicRect(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
-
-// POLYGONS
-
-vcl::WindowPolygon CoordinateCastTraits<vcl::WindowPolygon, vcl::LogicPolygon>::cast(
-    const OutputDevice& rDev, const vcl::LogicPolygon& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::WindowPolygon(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
-    }
-    return vcl::WindowPolygon(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
-
-vcl::LogicPolygon CoordinateCastTraits<vcl::LogicPolygon, vcl::WindowPolygon>::cast(
-    const OutputDevice& rDev, const vcl::WindowPolygon& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::LogicPolygon(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
-    }
-    return vcl::LogicPolygon(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
-
-// POLYPOLYGONS
-
-vcl::WindowPolyPolygon CoordinateCastTraits<vcl::WindowPolyPolygon, vcl::LogicPolyPolygon>::cast(
-    const OutputDevice& rDev, const vcl::LogicPolyPolygon& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::WindowPolyPolygon(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
-    }
-    return vcl::WindowPolyPolygon(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
-
-vcl::LogicPolyPolygon CoordinateCastTraits<vcl::LogicPolyPolygon, vcl::WindowPolyPolygon>::cast(
-    const OutputDevice& rDev, const vcl::WindowPolyPolygon& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::LogicPolyPolygon(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
-    }
-    return vcl::LogicPolyPolygon(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
-
-// REGIONS
-vcl::DeviceRegion CoordinateCastTraits<vcl::DeviceRegion, vcl::LogicRegion>::cast(
-    const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)
-{
-    const MapMode& rMapMode = pMapOverride ? *pMapOverride : rDev.GetMapMode();
-
-    return rDev.GetMapper().MapToDevice(rSrc, rMapMode);
-}
-
-vcl::WindowRegion CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>::cast(
-    const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::WindowRegion(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
-    }
-    return vcl::WindowRegion(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
-
-vcl::LogicRegion CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>::cast(
-    const OutputDevice& rDev, const vcl::WindowRegion& rSrc, const MapMode* pMapOverride)
-{
-    const auto& rMapper = rDev.GetMapper();
-    if (pMapOverride)
-    {
-        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
-        return vcl::LogicRegion(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
-    }
-    return vcl::LogicRegion(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
-}
+#include <type_traits>
 
 static basegfx::B2DHomMatrix lcl_BuildRawMatrix(const MapMode& rMapOverride)
 {
@@ -292,20 +33,337 @@ static basegfx::B2DHomMatrix lcl_BuildRawMatrix(const MapMode& rMapOverride)
                                   static_cast<double>(rMapOverride.GetOrigin().Y()));
 }
 
-// BASEGFX B2DPOINT
+namespace
+{
+template <typename TargetGeom, typename SourceGeom> class ApplyAffineTransform
+{
+private:
+    const basegfx::B2DHomMatrix& mrMat;
+
+public:
+    explicit ApplyAffineTransform(const basegfx::B2DHomMatrix& rMat)
+        : mrMat(rMat)
+    {
+    }
+
+    TargetGeom operator()(const SourceGeom& rSrc) const
+    {
+        using PrimitiveType = std::decay_t<decltype(rSrc.get())>;
+
+        // Path A: Modern BaseB2D Types (Native affine support)
+        if constexpr (std::is_same_v<PrimitiveType, basegfx::B2DPoint>)
+        {
+            return TargetGeom(mrMat * rSrc.get());
+        }
+        else if constexpr (
+            std::is_same_v<
+                PrimitiveType,
+                basegfx::
+                    B2DPolygon> || std::is_same_v<PrimitiveType, basegfx::B2DPolyPolygon> || std::is_same_v<PrimitiveType, basegfx::B2DRange>)
+        {
+            PrimitiveType aResult(rSrc.get());
+            aResult.transform(mrMat);
+            return TargetGeom(aResult);
+        }
+        // Path B: Legacy VCL Types (Requires TransformCompiler rounding safety)
+        else
+        {
+            return TargetGeom(vcl::TransformCompiler::Compile(mrMat).apply(rSrc.get()));
+        }
+    }
+};
+
+} // end anonymous namespace
+
+namespace vcl::detail
+{
+// ========================================================================
+// LEGACY GEOMETRY (Points, Sizes, Rects, Polygons, Regions)
+// ========================================================================
+
+// POINTS
+vcl::DevicePoint CoordinateCastTraits<vcl::DevicePoint, vcl::LogicPoint>::cast(
+    const OutputDevice& rDev, const vcl::LogicPoint& rSrc, const MapMode* pMapOverride)
+{
+    if (pMapOverride)
+    {
+        const auto& rMapper = rDev.GetMapper();
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        basegfx::B2DHomMatrix aMat = rMapper.GetViewTransformation(aConv);
+        aMat.translate(static_cast<double>(rMapper.GetDeviceToWindowOffsetX()),
+                       static_cast<double>(rMapper.GetDeviceToWindowOffsetY()));
+
+        return vcl::DevicePoint(vcl::TransformCompiler::Compile(aMat).apply(rSrc.get()));
+    }
+
+    return vcl::DevicePoint(
+        rDev.GetMapper().LogicToDevicePixel(rSrc.get(), rDev.GetMappingPolicy()));
+}
+
+vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::DevicePoint>::cast(
+    const OutputDevice& rDev, const vcl::DevicePoint& rSrc, const MapMode* pMapOverride)
+{
+    if (pMapOverride)
+    {
+        const auto& rMapper = rDev.GetMapper();
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        basegfx::B2DHomMatrix aMat = rMapper.GetViewTransformation(aConv);
+        aMat.translate(static_cast<double>(rMapper.GetDeviceToWindowOffsetX()),
+                       static_cast<double>(rMapper.GetDeviceToWindowOffsetY()));
+
+        if (aMat.isInvertible())
+            aMat.invert();
+
+        return vcl::LogicPoint(vcl::TransformCompiler::Compile(aMat).apply(rSrc.get()));
+    }
+
+    return vcl::LogicPoint(
+        rDev.GetMapper().DevicePixelToLogic(rSrc.get(), rDev.GetMappingPolicy()));
+}
+
+vcl::WindowPoint CoordinateCastTraits<vcl::WindowPoint, vcl::LogicPoint>::cast(
+    const OutputDevice& rDev, const vcl::LogicPoint& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::WindowPoint(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::WindowPoint(
+        rMapper
+            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::WindowPoint>::cast(
+    const OutputDevice& rDev, const vcl::WindowPoint& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::LogicPoint(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::LogicPoint(
+        rMapper
+            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+// SIZES
+vcl::WindowSize CoordinateCastTraits<vcl::WindowSize, vcl::LogicSize>::cast(
+    const OutputDevice& rDev, const vcl::LogicSize& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::WindowSize(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::WindowSize(
+        rMapper
+            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::WindowSize>::cast(
+    const OutputDevice& rDev, const vcl::WindowSize& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::LogicSize(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::LogicSize(
+        rMapper
+            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+// RECTANGLES
+vcl::DeviceRect CoordinateCastTraits<vcl::DeviceRect, vcl::LogicRect>::cast(
+    const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pMapOverride)
+{
+    const MapMode& rMapMode = pMapOverride ? *pMapOverride : rDev.GetMapMode();
+    return rDev.GetMapper().MapToDevice(rSrc, rMapMode);
+}
+
+vcl::WindowRect CoordinateCastTraits<vcl::WindowRect, vcl::LogicRect>::cast(
+    const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::WindowRect(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::WindowRect(
+        rMapper
+            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+vcl::LogicRect CoordinateCastTraits<vcl::LogicRect, vcl::WindowRect>::cast(
+    const OutputDevice& rDev, const vcl::WindowRect& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::LogicRect(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::LogicRect(
+        rMapper
+            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+// POLYGONS
+vcl::WindowPolygon CoordinateCastTraits<vcl::WindowPolygon, vcl::LogicPolygon>::cast(
+    const OutputDevice& rDev, const vcl::LogicPolygon& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::WindowPolygon(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::WindowPolygon(
+        rMapper
+            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+vcl::LogicPolygon CoordinateCastTraits<vcl::LogicPolygon, vcl::WindowPolygon>::cast(
+    const OutputDevice& rDev, const vcl::WindowPolygon& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::LogicPolygon(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::LogicPolygon(
+        rMapper
+            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+// POLYPOLYGONS
+vcl::WindowPolyPolygon CoordinateCastTraits<vcl::WindowPolyPolygon, vcl::LogicPolyPolygon>::cast(
+    const OutputDevice& rDev, const vcl::LogicPolyPolygon& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::WindowPolyPolygon(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::WindowPolyPolygon(
+        rMapper
+            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+vcl::LogicPolyPolygon CoordinateCastTraits<vcl::LogicPolyPolygon, vcl::WindowPolyPolygon>::cast(
+    const OutputDevice& rDev, const vcl::WindowPolyPolygon& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::LogicPolyPolygon(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::LogicPolyPolygon(
+        rMapper
+            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+// REGIONS
+vcl::DeviceRegion CoordinateCastTraits<vcl::DeviceRegion, vcl::LogicRegion>::cast(
+    const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)
+{
+    const MapMode& rMapMode = pMapOverride ? *pMapOverride : rDev.GetMapMode();
+    return rDev.GetMapper().MapToDevice(rSrc, rMapMode);
+}
+
+vcl::WindowRegion CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>::cast(
+    const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::WindowRegion(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::WindowRegion(
+        rMapper
+            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+vcl::LogicRegion CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>::cast(
+    const OutputDevice& rDev, const vcl::WindowRegion& rSrc, const MapMode* pMapOverride)
+{
+    const auto& rMapper = rDev.GetMapper();
+
+    if (pMapOverride)
+    {
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        return vcl::LogicRegion(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
+    }
+
+    return vcl::LogicRegion(
+        rMapper
+            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
+            .apply(rSrc.get()));
+}
+
+// ========================================================================
+// BASEGFX B2D GEOMETRY (Utilizing ApplyAffineTransform Functor)
+// ========================================================================
+
+// B2DPOINT
 vcl::DeviceB2DPoint CoordinateCastTraits<vcl::DeviceB2DPoint, vcl::LogicB2DPoint>::cast(
     const OutputDevice& rDev, const vcl::LogicB2DPoint& rSrc, const MapMode* pMap)
 {
     basegfx::B2DHomMatrix aMat
         = pMap ? lcl_BuildRawMatrix(*pMap)
                : rDev.GetMapper().GetLogicToDeviceMatrix(rDev.GetMappingPolicy());
-    return vcl::DeviceB2DPoint(aMat * rSrc.get());
+
+    return ApplyAffineTransform<vcl::DeviceB2DPoint, vcl::LogicB2DPoint>(aMat)(rSrc);
 }
 
 vcl::LogicB2DPoint CoordinateCastTraits<vcl::LogicB2DPoint, vcl::DeviceB2DPoint>::cast(
     const OutputDevice& rDev, const vcl::DeviceB2DPoint& rSrc, const MapMode* pMap)
 {
     basegfx::B2DHomMatrix aMat;
+
     if (pMap)
     {
         aMat = lcl_BuildRawMatrix(*pMap);
@@ -313,13 +371,13 @@ vcl::LogicB2DPoint CoordinateCastTraits<vcl::LogicB2DPoint, vcl::DeviceB2DPoint>
     }
     else
     {
-        // Optimization: Use the natively inverted & cached DeviceToLogic matrix!
         aMat = rDev.GetMapper().GetDeviceToLogicMatrix(rDev.GetMappingPolicy());
     }
-    return vcl::LogicB2DPoint(aMat * rSrc.get());
+
+    return ApplyAffineTransform<vcl::LogicB2DPoint, vcl::DeviceB2DPoint>(aMat)(rSrc);
 }
 
-// BASEGFX B2DPOLYGON
+// B2DPOLYGON
 vcl::DeviceB2DPolygon CoordinateCastTraits<vcl::DeviceB2DPolygon, vcl::LogicB2DPolygon>::cast(
     const OutputDevice& rDev, const vcl::LogicB2DPolygon& rSrc, const MapMode* pMap)
 {
@@ -327,15 +385,14 @@ vcl::DeviceB2DPolygon CoordinateCastTraits<vcl::DeviceB2DPolygon, vcl::LogicB2DP
         = pMap ? lcl_BuildRawMatrix(*pMap)
                : rDev.GetMapper().GetLogicToDeviceMatrix(rDev.GetMappingPolicy());
 
-    basegfx::B2DPolygon aResult(rSrc.get());
-    aResult.transform(aMat);
-    return vcl::DeviceB2DPolygon(aResult);
+    return ApplyAffineTransform<vcl::DeviceB2DPolygon, vcl::LogicB2DPolygon>(aMat)(rSrc);
 }
 
 vcl::LogicB2DPolygon CoordinateCastTraits<vcl::LogicB2DPolygon, vcl::DeviceB2DPolygon>::cast(
     const OutputDevice& rDev, const vcl::DeviceB2DPolygon& rSrc, const MapMode* pMap)
 {
     basegfx::B2DHomMatrix aMat;
+
     if (pMap)
     {
         aMat = lcl_BuildRawMatrix(*pMap);
@@ -346,12 +403,10 @@ vcl::LogicB2DPolygon CoordinateCastTraits<vcl::LogicB2DPolygon, vcl::DeviceB2DPo
         aMat = rDev.GetMapper().GetDeviceToLogicMatrix(rDev.GetMappingPolicy());
     }
 
-    basegfx::B2DPolygon aResult(rSrc.get());
-    aResult.transform(aMat);
-    return vcl::LogicB2DPolygon(aResult);
+    return ApplyAffineTransform<vcl::LogicB2DPolygon, vcl::DeviceB2DPolygon>(aMat)(rSrc);
 }
 
-// BASEGFX B2DRANGE
+// B2DRANGE
 vcl::DeviceB2DRange CoordinateCastTraits<vcl::DeviceB2DRange, vcl::LogicB2DRange>::cast(
     const OutputDevice& rDev, const vcl::LogicB2DRange& rSrc, const MapMode* pMap)
 {
@@ -359,16 +414,14 @@ vcl::DeviceB2DRange CoordinateCastTraits<vcl::DeviceB2DRange, vcl::LogicB2DRange
         = pMap ? lcl_BuildRawMatrix(*pMap)
                : rDev.GetMapper().GetLogicToDeviceMatrix(rDev.GetMappingPolicy());
 
-    // Ranges require the transform() method for batch-processing the bounds
-    basegfx::B2DRange aResult(rSrc.get());
-    aResult.transform(aMat);
-    return vcl::DeviceB2DRange(aResult);
+    return ApplyAffineTransform<vcl::DeviceB2DRange, vcl::LogicB2DRange>(aMat)(rSrc);
 }
 
 vcl::LogicB2DRange CoordinateCastTraits<vcl::LogicB2DRange, vcl::DeviceB2DRange>::cast(
     const OutputDevice& rDev, const vcl::DeviceB2DRange& rSrc, const MapMode* pMap)
 {
     basegfx::B2DHomMatrix aMat;
+
     if (pMap)
     {
         aMat = lcl_BuildRawMatrix(*pMap);
@@ -379,12 +432,10 @@ vcl::LogicB2DRange CoordinateCastTraits<vcl::LogicB2DRange, vcl::DeviceB2DRange>
         aMat = rDev.GetMapper().GetDeviceToLogicMatrix(rDev.GetMappingPolicy());
     }
 
-    basegfx::B2DRange aResult(rSrc.get());
-    aResult.transform(aMat);
-    return vcl::LogicB2DRange(aResult);
+    return ApplyAffineTransform<vcl::LogicB2DRange, vcl::DeviceB2DRange>(aMat)(rSrc);
 }
 
-// BASEGFX B2DPOLYPOLYGON
+// B2DPOLYPOLYGON
 vcl::DeviceB2DPolyPolygon
 CoordinateCastTraits<vcl::DeviceB2DPolyPolygon, vcl::LogicB2DPolyPolygon>::cast(
     const OutputDevice& rDev, const vcl::LogicB2DPolyPolygon& rSrc, const MapMode* pMap)
@@ -393,9 +444,7 @@ CoordinateCastTraits<vcl::DeviceB2DPolyPolygon, vcl::LogicB2DPolyPolygon>::cast(
         = pMap ? lcl_BuildRawMatrix(*pMap)
                : rDev.GetMapper().GetLogicToDeviceMatrix(rDev.GetMappingPolicy());
 
-    basegfx::B2DPolyPolygon aResult(rSrc.get());
-    aResult.transform(aMat);
-    return vcl::DeviceB2DPolyPolygon(aResult);
+    return ApplyAffineTransform<vcl::DeviceB2DPolyPolygon, vcl::LogicB2DPolyPolygon>(aMat)(rSrc);
 }
 
 vcl::LogicB2DPolyPolygon
@@ -403,6 +452,7 @@ CoordinateCastTraits<vcl::LogicB2DPolyPolygon, vcl::DeviceB2DPolyPolygon>::cast(
     const OutputDevice& rDev, const vcl::DeviceB2DPolyPolygon& rSrc, const MapMode* pMap)
 {
     basegfx::B2DHomMatrix aMat;
+
     if (pMap)
     {
         aMat = lcl_BuildRawMatrix(*pMap);
@@ -413,10 +463,12 @@ CoordinateCastTraits<vcl::LogicB2DPolyPolygon, vcl::DeviceB2DPolyPolygon>::cast(
         aMat = rDev.GetMapper().GetDeviceToLogicMatrix(rDev.GetMappingPolicy());
     }
 
-    basegfx::B2DPolyPolygon aResult(rSrc.get());
-    aResult.transform(aMat);
-    return vcl::LogicB2DPolyPolygon(aResult);
+    return ApplyAffineTransform<vcl::LogicB2DPolyPolygon, vcl::DeviceB2DPolyPolygon>(aMat)(rSrc);
 }
+
+// ========================================================================
+// LOGIC TO LOGIC GEOMETRY
+// ========================================================================
 
 // LogicPoint
 vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::LogicPoint>::cast(
@@ -424,12 +476,14 @@ vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::LogicPoint>::cast(
 {
     const MapMode& rSrcMap = pSrc ? *pSrc : rDev.GetMapMode();
     const MapMode& rDstMap = pDst ? *pDst : rDev.GetMapMode();
+
     if (rSrcMap == rDstMap)
         return rSrc;
 
     basegfx::B2DHomMatrix aMat = rDev.GetMapper().GetLogicToLogicMatrix(rSrcMap, rDstMap);
     basegfx::B2DPoint aPt(rSrc.get().X(), rSrc.get().Y());
     aPt *= aMat;
+
     return vcl::LogicPoint(Point(basegfx::fround(aPt.getX()), basegfx::fround(aPt.getY())));
 }
 
@@ -439,6 +493,7 @@ vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::LogicSize>::cast(
 {
     const MapMode& rSrcMap = pSrc ? *pSrc : rDev.GetMapMode();
     const MapMode& rDstMap = pDst ? *pDst : rDev.GetMapMode();
+
     if (rSrcMap == rDstMap)
         return rSrc;
 
@@ -458,6 +513,7 @@ vcl::LogicRect CoordinateCastTraits<vcl::LogicRect, vcl::LogicRect>::cast(
 {
     const MapMode& rSrcMap = pSrc ? *pSrc : rDev.GetMapMode();
     const MapMode& rDstMap = pDst ? *pDst : rDev.GetMapMode();
+
     if (rSrcMap == rDstMap)
         return rSrc;
 
@@ -465,6 +521,7 @@ vcl::LogicRect CoordinateCastTraits<vcl::LogicRect, vcl::LogicRect>::cast(
     basegfx::B2DRange aRange(rSrc.get().Left(), rSrc.get().Top(), rSrc.get().Right(),
                              rSrc.get().Bottom());
     aRange.transform(aMat);
+
     return vcl::LogicRect(
         tools::Rectangle(basegfx::fround(aRange.getMinX()), basegfx::fround(aRange.getMinY()),
                          basegfx::fround(aRange.getMaxX()), basegfx::fround(aRange.getMaxY())));
