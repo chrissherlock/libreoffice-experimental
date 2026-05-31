@@ -7,6 +7,8 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
+#include <sal/log.hxx>
+
 #include <vcl/TransformRouter.hxx>
 
 #include <TransformCompiler.hxx>
@@ -49,7 +51,12 @@ TransformKey TransformRouter::ResolveKey(const TransformRequest& rReq) const
     if (rReq.eFrom == CoordinateSpace::Window && rReq.eTo == CoordinateSpace::Device)
         return TransformKey::WindowToDevice;
 
-    std::abort(); // Failsafe for invalid un-indexed routing
+    // Graceful fallback for invalid routing
+    SAL_WARN("vcl.map", "Invalid coordinate space routing requested.");
+
+    // Return a safe unmapped key. This prevents cache out-of-bounds errors
+    // and effectively results in a 1:1 pixel rendering fallback.
+    return TransformKey::LogicToDevice_Unmapped;
 }
 
 basegfx::B2DHomMatrix TransformRouter::BuildMatrix(const CoordinateState& rState,
