@@ -280,8 +280,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
     mpMetaFile = nullptr;
 
     tools::PolyPolygon aPolyPoly = convertTo<vcl::WindowPolyPolygon>(
-        vcl::LogicPolyPolygon(rPolyPoly),
-        GetMapMode()
+        vcl::LogicPolyPolygon(rPolyPoly)
     ).get();
 
     tools::Rectangle aPolyRect( aPolyPoly.GetBoundRect() );
