@@ -454,10 +454,13 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
 
     if (nSrcWidth && nSrcHeight && nDestWidth && nDestHeight)
     {
-        SalTwoRect aPosAry(mpMapper->LogicToDevicePixel(Point(rSrcPt.X(), 0), GetMappingPolicy()).X(), mpMapper->LogicToDevicePixel(Point(0, rSrcPt.Y()), GetMappingPolicy()).Y(),
-                           nSrcWidth, nSrcHeight,
-                           mpMapper->LogicToDevicePixel(Point(rDestPt.X(), 0), GetMappingPolicy()).X(), mpMapper->LogicToDevicePixel(Point(0, rDestPt.Y()), GetMappingPolicy()).Y(),
-                           nDestWidth, nDestHeight);
+        Point aSrcDev = mpMapper->LogicToDevicePixel(rSrcPt, GetMappingPolicy());
+        Point aDestDev = mpMapper->LogicToDevicePixel(rDestPt, GetMappingPolicy());
+
+        SalTwoRect aPosAry(
+            aSrcDev.X(), aSrcDev.Y(), nSrcWidth, nSrcHeight,
+            aDestDev.X(), aDestDev.Y(), nDestWidth, nDestHeight
+        );
 
         AdjustTwoRect( aPosAry, GetOutputRectPixel() );
 
@@ -498,14 +501,24 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( mbOutputClipped )
         return;
 
-    SalTwoRect aPosAry(rOutDev.mpMapper->LogicToDevicePixel(Point(rSrcPt.X(), 0), rOutDev.GetMappingPolicy()).X(),
-                             rOutDev.mpMapper->LogicToDevicePixel(Point(0, rSrcPt.Y()), rOutDev.GetMappingPolicy()).Y(),
-                             rOutDev.LogicWidthToDevicePixel(rSrcSize.Width()),
-                             rOutDev.LogicHeightToDevicePixel(rSrcSize.Height()),
-                             mpMapper->LogicToDevicePixel(Point(rDestPt.X(), 0), GetMappingPolicy()).X(),
-                             mpMapper->LogicToDevicePixel(Point(0, rDestPt.Y()), GetMappingPolicy()).Y(),
-                             LogicWidthToDevicePixel(rDestSize.Width()),
-                             LogicHeightToDevicePixel(rDestSize.Height()));
+    Point aSrcDevPt = rOutDev.mpMapper->LogicToDevicePixel(rSrcPt, rOutDev.GetMappingPolicy());
+    Size aSrcDevSz(
+        rOutDev.LogicWidthToDevicePixel(rSrcSize.Width()),
+        rOutDev.LogicHeightToDevicePixel(rSrcSize.Height())
+    );
+
+    Point aDestDevPt = mpMapper->LogicToDevicePixel(rDestPt, GetMappingPolicy());
+    Size aDestDevSz(
+        LogicWidthToDevicePixel(rDestSize.Width()),
+        LogicHeightToDevicePixel(rDestSize.Height())
+    );
+
+    SalTwoRect aPosAry(
+        aSrcDevPt.X(), aSrcDevPt.Y(),
+        aSrcDevSz.Width(), aSrcDevSz.Height(),
+        aDestDevPt.X(), aDestDevPt.Y(),
+        aDestDevSz.Width(), aDestDevSz.Height()
+    );
 
     // if we have alpha, this will blend source over destination
     drawOutDevDirect(rOutDev, aPosAry);
@@ -537,10 +550,11 @@ void OutputDevice::CopyArea( const Point& rDestPt,
     tools::Long nSrcHeight = LogicHeightToDevicePixel(rSrcSize.Height());
     if (nSrcWidth && nSrcHeight)
     {
-        SalTwoRect aPosAry(mpMapper->LogicToDevicePixel(Point(rSrcPt.X(), 0), GetMappingPolicy()).X(), mpMapper->LogicToDevicePixel(Point(0, rSrcPt.Y()), GetMappingPolicy()).Y(),
-                           nSrcWidth, nSrcHeight,
-                           mpMapper->LogicToDevicePixel(Point(rDestPt.X(), 0), GetMappingPolicy()).X(), mpMapper->LogicToDevicePixel(Point(0, rDestPt.Y()), GetMappingPolicy()).Y(),
-                           nSrcWidth, nSrcHeight);
+        Point aSrcDev = mpMapper->LogicToDevicePixel(rSrcPt, GetMappingPolicy());
+        Point aDestDev = mpMapper->LogicToDevicePixel(rDestPt, GetMappingPolicy());
+
+        SalTwoRect aPosAry(aSrcDev.X(), aSrcDev.Y(), nSrcWidth, nSrcHeight,
+                           aDestDev.X(), aDestDev.Y(), nSrcWidth, nSrcHeight);
 
         AdjustTwoRect( aPosAry, GetOutputRectPixel() );
 
