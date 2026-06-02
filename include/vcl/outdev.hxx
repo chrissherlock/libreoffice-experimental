@@ -651,6 +651,10 @@ public:
                                     tools::Long nCornerRadius = 0,
                                     Color const * pPaintColor = nullptr);
 
+private:
+    void ImplDrawRect(const vcl::LogicRect& rLogicRect);
+
+
     ///@}
 
     /** @name Invert functions
