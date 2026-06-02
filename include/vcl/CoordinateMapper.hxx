@@ -208,8 +208,6 @@ public:
     float GetDPIScaleFactor() const;
     void SetDPIScalePercentage(sal_Int32 nPercentage);
 
-    float GetDPIScaleFactor() const;
-
     void SetPixelOffset(const Size& rSize);
 
     tools::Long GetDeviceToWindowOffsetX() const;

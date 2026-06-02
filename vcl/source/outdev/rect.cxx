@@ -50,40 +50,40 @@ void OutputDevice::DrawBorder(tools::Rectangle aBorderRect)
     DrawRect(aBorderRect);
 }
 
-void OutputDevice::DrawRect( const tools::Rectangle& rRect )
+void OutputDevice::DrawRect(const tools::Rectangle& rRect)
 {
-    assert(!is_double_buffered_window());
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaRectAction(rRect));
 
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRectAction( rRect ) );
+    if (!IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout())
+         return;
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
-        return;
+    if (!mpGraphics && !AcquireGraphics())
+         return;
 
-    tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
-
-    if ( aRect.IsEmpty() )
-        return;
-
-    aRect.Normalize();
-
-    if ( !mpGraphics && !AcquireGraphics() )
-        return;
-    assert(mpGraphics);
-
-    if ( mbInitClipRegion )
+    if (mbInitClipRegion)
         InitClipRegion();
 
-    if ( mbOutputClipped )
-        return;
+    if (mbOutputClipped)
+         return;
 
-    if ( mbInitLineColor )
+    if (mbInitLineColor)
         InitLineColor();
 
-    if ( mbInitFillColor )
+    if (mbInitFillColor)
         InitFillColor();
 
-    mpGraphics->DrawRect( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(), *this );
+    ImplDrawRect(vcl::LogicRect(rRect));
+}
+
+void OutputDevice::ImplDrawRect(const vcl::LogicRect& rLogicRect)
+{
+    auto aTransform = vcl::ResolveTransform(*this);
+
+    vcl::DeviceRect aDevRect = ApplyTransform(aTransform, rLogicRect);
+
+    mpGraphics->DrawRect(aDevRect->Left(), aDevRect->Top(),
+                         aDevRect->GetWidth(), aDevRect->GetHeight(), *this);
 }
 
 void OutputDevice::DrawRect( const tools::Rectangle& rRect,

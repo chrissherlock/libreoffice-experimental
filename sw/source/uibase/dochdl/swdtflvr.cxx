@@ -46,7 +46,6 @@
 #include <sfx2/linkmgr.hxx>
 #include <tools/urlobj.hxx>
 #include <vcl/weld/MessageDialog.hxx>
-#include <vcl/weld/weld.hxx>
 #include <vcl/mapconvert.hxx>
 #include <sfx2/dispatch.hxx>
 #include <sfx2/viewfrm.hxx>
