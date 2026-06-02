@@ -18,6 +18,7 @@
 #include <vcl/region.hxx>
 #include <vcl/lineinfo.hxx>
 #include <vcl/TransformPlan.hxx>
+#include <vcl/ResolvedTransform.hxx>
 
 namespace vcl::GeometryAdapter
 {
@@ -43,8 +44,6 @@ VCL_DLLPUBLIC basegfx::B2DPolyPolygon Apply(const TransformPlan& rPlan,
 VCL_DLLPUBLIC basegfx::B2DRange Apply(const TransformPlan& rPlan, const basegfx::B2DRange& rRange);
 }
 
-/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
-
 // ========================================================================
 // Inline execution adapter (Must be defined AFTER Apply declarations)
 // ========================================================================
@@ -55,3 +54,14 @@ template <typename T> inline auto TransformPlan::apply(const T& rGeom) const
     return vcl::GeometryAdapter::Apply(*this, rGeom);
 }
 }
+
+template <typename Geom>
+auto ApplyTransform(const vcl::ResolvedTransform& rTransform,
+                    const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogicGeom)
+{
+    auto aResult = vcl::GeometryAdapter::Apply(rTransform.mrPlan, rLogicGeom.get());
+
+    return vcl::TypedGeom<vcl::SpaceDevice, decltype(aResult)>(aResult);
+}
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

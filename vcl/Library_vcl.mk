@@ -318,6 +318,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/outdev/vclreferencebase \
     vcl/source/outdev/nativecontrols \
     vcl/source/outdev/map \
+    vcl/source/outdev/transform \
     vcl/source/text/ImplLayoutArgs \
     vcl/source/text/ImplLayoutRuns \
     vcl/source/text/mnemonic \
