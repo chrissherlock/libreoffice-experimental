@@ -114,13 +114,10 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
         return;
 
     // draw gradients without border
-    if( mbLineColor || mbInitLineColor )
-    {
+    if (IsLineColor())
         mpGraphics->SetLineColor();
-        mbInitLineColor = true;
-    }
 
-    mbInitFillColor = true;
+    SyncRenderStateToBackend();
 
     // calculate step count if necessary
     if ( !aGradient.GetSteps() )

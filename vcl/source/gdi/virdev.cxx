@@ -53,8 +53,7 @@ bool VirtualDevice::AcquireGraphics() const
     if ( mpGraphics )
         return true;
 
-    mbInitLineColor     = true;
-    mbInitFillColor     = true;
+    SyncRenderStateToBackend();
     mbInitFont          = true;
     mbInitTextColor     = true;
     mbInitClipRegion    = true;
@@ -86,9 +85,12 @@ bool VirtualDevice::AcquireGraphics() const
 
     if ( mpGraphics )
     {
-        mpGraphics->SetXORMode( (RasterOp::Invert == meRasterOp) || (RasterOp::Xor == meRasterOp), RasterOp::Invert == meRasterOp );
+        mpGraphics->SetXORMode( (RasterOp::Invert == GetRasterOp() ) || (RasterOp::Xor == GetRasterOp() ), RasterOp::Invert == GetRasterOp() );
         mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
     }
+
+    ResetRenderStateSync();
+    SyncRenderStateToBackend();
 
     return mpGraphics != nullptr;
 }

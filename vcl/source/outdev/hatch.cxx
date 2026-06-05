@@ -87,7 +87,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
         SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
         Push( vcl::PushFlags::LINECOLOR );
         SetLineColor( aHatch.GetColor() );
-        InitLineColor();
+        SyncRenderStateToBackend();
         DrawHatch( aPolyPoly, aHatch, false );
         Pop();
         SetMappingPolicy( eOldPolicy );

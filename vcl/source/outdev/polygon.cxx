@@ -43,7 +43,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
 
     sal_uInt16 nPoly = rPolyPoly.Count();
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || !nPoly || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || !nPoly || ImplIsRecordLayout() )
         return;
 
     // we need a graphics
@@ -57,11 +57,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
-        InitLineColor();
-
-    if ( mbInitFillColor )
-        InitFillColor();
+    SyncRenderStateToBackend();
 
     // use b2dpolygon drawing if possible
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
@@ -155,7 +151,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
 
     sal_uInt16 nPoints = rPoly.GetSize();
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || (nPoints < 2) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || (nPoints < 2) || ImplIsRecordLayout() )
         return;
 
     // we need a graphics
@@ -169,11 +165,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
-        InitLineColor();
-
-    if ( mbInitFillColor )
-        InitFillColor();
+    SyncRenderStateToBackend();
 
     // use b2dpolygon drawing if possible
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
@@ -270,11 +262,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
     if( mbOutputClipped )
         return;
 
-    if( mbInitLineColor )
-        InitLineColor();
-
-    if( mbInitFillColor )
-        InitFillColor();
+    SyncRenderStateToBackend();
 
     bool bSuccess(false);
 

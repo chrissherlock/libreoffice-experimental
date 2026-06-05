@@ -89,7 +89,7 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
     if( ImplIsRecordLayout() )
         return;
 
-    if ( RasterOp::Invert == meRasterOp )
+    if ( RasterOp::Invert == m_aRenderState.rasterOp )
     {
         DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
         return;
@@ -207,7 +207,7 @@ void OutputDevice::DrawAlphaBitmap( const Point& rDestPt, const Size& rDestSize,
     if( ImplIsRecordLayout() )
         return;
 
-    if (RasterOp::Invert == meRasterOp)
+    if (RasterOp::Invert == m_aRenderState.rasterOp)
     {
         DrawRect(tools::Rectangle(rDestPt, rDestSize));
         return;

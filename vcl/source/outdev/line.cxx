@@ -38,53 +38,43 @@
 
 void OutputDevice::SetLineColor()
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaLineColorAction( Color(), false ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaLineColorAction(Color(), false));
 
-    if ( mbLineColor )
+    // Must check if the boolean is set, even if the color integer is already transparent
+    if (m_aRenderState.bLineColorSet || m_aRenderState.lineColor != COL_TRANSPARENT)
     {
-        mbInitLineColor = true;
-        mbLineColor = false;
-        maLineColor = COL_TRANSPARENT;
+        m_aRenderState.lineColor = COL_TRANSPARENT;
+        m_aRenderState.bLineColorSet = false;
+        m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::LineColor;
+        m_aRenderState.epoch++;
+
+        // Eager Synchronization (missing from your original commit)
+        if (!ImplIsRecordLayout())
+            SyncRenderStateToBackend();
     }
 }
 
-void OutputDevice::SetLineColor( const Color& rColor )
+void OutputDevice::SetLineColor(const Color& rColor)
 {
+    // DrawMode Evaluation: Resolve High Contrast / Monochrome overrides immediately.
+    // We want our RenderState to hold the *final* computed physical color,
+    // ensuring the Scene Graph nodes don't need to know about UI settings.
     Color aColor = vcl::drawmode::GetLineColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
 
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaLineColorAction( aColor, true ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaLineColorAction(aColor, true));
 
-    if( maLineColor != aColor )
+    if (!m_aRenderState.bLineColorSet || m_aRenderState.lineColor != aColor)
     {
-        mbInitLineColor = true;
-        mbLineColor = true;
-        maLineColor = aColor;
-    }
-}
-
-void OutputDevice::InitLineColor()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if( mbLineColor )
-    {
-        if( RasterOp::N0 == meRasterOp )
-            mpGraphics->SetROPLineColor( SalROPColor::N0 );
-        else if( RasterOp::N1 == meRasterOp )
-            mpGraphics->SetROPLineColor( SalROPColor::N1 );
-        else if( RasterOp::Invert == meRasterOp )
-            mpGraphics->SetROPLineColor( SalROPColor::Invert );
-        else
-            mpGraphics->SetLineColor( maLineColor );
-    }
-    else
-    {
-        mpGraphics->SetLineColor();
+        m_aRenderState.lineColor = aColor;
+        m_aRenderState.bLineColorSet = true;
+        m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::LineColor;
+        m_aRenderState.epoch++;
     }
 
-    mbInitLineColor = false;
+    if (!ImplIsRecordLayout())
+        SyncRenderStateToBackend();
 }
 
 void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
@@ -101,7 +91,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaLineAction( rStartPt, rEndPt, rLineInfo ) );
 
-    if ( !IsDeviceOutputNecessary() || !mbLineColor || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !IsLineColor() || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
         return;
 
     if( !mpGraphics && !AcquireGraphics() )
@@ -120,8 +110,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
 
-    if ( mbInitLineColor )
-        InitLineColor();
+    SyncRenderStateToBackend();
 
     if(bDashUsed || bLineWidthUsed)
     {
@@ -144,7 +133,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaLineAction( rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || !mbLineColor || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !IsLineColor() || ImplIsRecordLayout() )
         return;
 
     if ( !mpGraphics && !AcquireGraphics() )
@@ -157,8 +146,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
-        InitLineColor();
+    SyncRenderStateToBackend();
 
     bool bDrawn = false;
 
@@ -292,13 +280,12 @@ void OutputDevice::drawLine( basegfx::B2DPolyPolygon aLinePolyPolygon, const Lin
 
     if(aFillPolyPolygon.count())
     {
-        const Color     aOldLineColor( maLineColor );
-        const Color     aOldFillColor( maFillColor );
+        const Color aOldLineColor(m_aRenderState.lineColor);
+        const Color aOldFillColor(m_aRenderState.fillColor);
 
         SetLineColor();
-        InitLineColor();
-        SetFillColor( aOldLineColor );
-        InitFillColor();
+        SetFillColor(aOldLineColor);
+        SyncRenderStateToBackend();
 
         bool bDone(false);
 
