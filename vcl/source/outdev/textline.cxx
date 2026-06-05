@@ -172,20 +172,22 @@ void OutputDevice::SetWaveLineColors(Color const& rColor, tools::Long nLineWidth
     // On printers that output pixel via DrawRect()
     if (nLineWidth > 1)
     {
-        if (mbLineColor || mbInitLineColor)
+        if (IsLineColor())
         {
+            // Reset line color in backend for this specific operation
+            // Note: If you want this to persist, use SetLineColor(COL_TRANSPARENT)
             mpGraphics->SetLineColor();
-            mbInitLineColor = true;
         }
 
         mpGraphics->SetFillColor( rColor );
-        mbInitFillColor = true;
     }
     else
     {
         mpGraphics->SetLineColor( rColor );
-        mbInitLineColor = true;
     }
+
+    // Ensure the backend and RenderState are aligned before rendering
+    SyncRenderStateToBackend();
 }
 
 Size OutputDevice::GetWaveLineSize(tools::Long nLineWidth) const
@@ -211,10 +213,11 @@ void OutputDevice::ImplDrawWaveLine( tools::Long nBaseX, tools::Long nBaseY,
     // If the height is 1 pixel, it's enough output a line
     if ( (nLineWidth == 1) && (nHeight == 1) )
     {
-        mpGraphics->SetLineColor( rColor );
-        mbInitLineColor = true;
+        SetLineColor( rColor );
 
-        tools::Long nEndX = nStartX+nWidth;
+        SyncRenderStateToBackend();
+
+        tools::Long nEndX = nStartX + nWidth;
         tools::Long nEndY = nStartY;
         if ( nOrientation )
         {
@@ -222,6 +225,7 @@ void OutputDevice::ImplDrawWaveLine( tools::Long nBaseX, tools::Long nBaseY,
             aOriginPt.RotateAround( nStartX, nStartY, nOrientation );
             aOriginPt.RotateAround( nEndX, nEndY, nOrientation );
         }
+
         mpGraphics->DrawLine( nStartX, nStartY, nEndX, nEndY, *this );
     }
     else
@@ -454,13 +458,12 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
     if ( !nLineHeight )
         return;
 
-    if ( mbLineColor || mbInitLineColor )
-    {
-        mpGraphics->SetLineColor();
-        mbInitLineColor = true;
-    }
-    mpGraphics->SetFillColor( aColor );
-    mbInitFillColor = true;
+    if (IsLineColor())
+        SetLineColor(COL_TRANSPARENT);
+
+    SetFillColor(aColor);
+
+    SyncRenderStateToBackend();
 
     tools::Long nLeft = nDistX;
 
@@ -661,13 +664,12 @@ void OutputDevice::ImplDrawStrikeoutLine( tools::Long nBaseX, tools::Long nBaseY
     if ( !nLineHeight )
         return;
 
-    if ( mbLineColor || mbInitLineColor )
-    {
-        mpGraphics->SetLineColor();
-        mbInitLineColor = true;
-    }
-    mpGraphics->SetFillColor( aColor );
-    mbInitFillColor = true;
+    if (IsLineColor())
+        SetLineColor(COL_TRANSPARENT);
+
+    SetFillColor(aColor);
+
+    SyncRenderStateToBackend();
 
     const tools::Long& nLeft = nDistX;
 

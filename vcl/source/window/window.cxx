@@ -831,8 +831,6 @@ bool WindowOutputDevice::AcquireGraphics() const
     if (mpGraphics)
         return true;
 
-    mbInitLineColor     = true;
-    mbInitFillColor     = true;
     mbInitFont          = true;
     mbInitTextColor     = true;
     mbInitClipRegion    = true;
@@ -881,9 +879,13 @@ bool WindowOutputDevice::AcquireGraphics() const
         if ( !pSVData->maGDIData.mpLastWinGraphics )
             pSVData->maGDIData.mpLastWinGraphics = const_cast<vcl::WindowOutputDevice*>(this);
 
-        mpGraphics->SetXORMode( (RasterOp::Invert == meRasterOp) || (RasterOp::Xor == meRasterOp), RasterOp::Invert == meRasterOp );
+        mpGraphics->SetXORMode( (RasterOp::Invert == GetRasterOp()) || (RasterOp::Xor == GetRasterOp()), RasterOp::Invert == GetRasterOp() );
         mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
     }
+
+    // Force the pipeline to flush the window's expected state into the newly acquired (and potentially dirty) backend.
+    ResetRenderStateSync();
+    SyncRenderStateToBackend();
 
     return mpGraphics != nullptr;
 }
@@ -3632,7 +3634,7 @@ bool Window::DeleteSurroundingText(const Selection& rSelection)
 
 bool WindowOutputDevice::UsePolyPolygonForComplexGradient()
 {
-    return meRasterOp != RasterOp::OverPaint;
+    return GetRasterOp() != RasterOp::OverPaint;
 }
 
 void Window::ApplySettings(vcl::RenderContext& /*rRenderContext*/)

@@ -39,7 +39,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
 
     sal_uInt16 nPoints = rPoly.GetSize();
 
-    if ( !IsDeviceOutputNecessary() || !mbLineColor || (nPoints < 2) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !IsLineColor() || (nPoints < 2) || ImplIsRecordLayout() )
         return;
 
     // we need a graphics
@@ -53,8 +53,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
-        InitLineColor();
+    SyncRenderStateToBackend();
 
     // use b2dpolygon drawing if possible
     if(DrawPolyLineDirectInternal(
@@ -179,8 +178,7 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
     if( mbOutputClipped )
         return;
 
-    if( mbInitLineColor )
-        InitLineColor();
+    SyncRenderStateToBackend();
 
     // use b2dpolygon drawing if possible
     if(DrawPolyLineDirectInternal(
@@ -211,13 +209,13 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
                                                     eLineJoin,
                                                     eLineCap,
                                                     fMiterMinimumAngle));
-        const Color aOldLineColor(maLineColor);
-        const Color aOldFillColor(maFillColor);
+
+        const Color aOldLineColor(m_aRenderState.lineColor);
+        const Color aOldFillColor(m_aRenderState.fillColor);
 
         SetLineColor();
-        InitLineColor();
         SetFillColor(aOldLineColor);
-        InitFillColor();
+        SyncRenderStateToBackend();
 
         // draw using a loop; else the topology will paint a PolyPolygon
         for(auto const& rPolygon : aAreaPolyPolygon)
@@ -227,9 +225,8 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
         }
 
         SetLineColor(aOldLineColor);
-        InitLineColor();
         SetFillColor(aOldFillColor);
-        InitFillColor();
+        SyncRenderStateToBackend();
 
         // when AA it is necessary to also paint the filled polygon's outline
         // to avoid optical gaps
@@ -256,7 +253,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
 {
     sal_uInt16 nPoints(rPoly.GetSize());
 
-    if ( !IsDeviceOutputNecessary() || !mbLineColor || ( nPoints < 2 ) || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !IsLineColor() || ( nPoints < 2 ) || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
         return;
 
     // we need a graphics
@@ -270,8 +267,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
-        InitLineColor();
+    SyncRenderStateToBackend();
 
     const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo, GetMappingPolicy()));
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
@@ -359,8 +355,7 @@ bool OutputDevice::DrawPolyLineDirectInternal(
     if( mbOutputClipped )
         return true;
 
-    if( mbInitLineColor )
-        InitLineColor();
+    SyncRenderStateToBackend();
 
     const bool bTryB2d(RasterOp::OverPaint == GetRasterOp() && IsLineColor());
 

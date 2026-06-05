@@ -113,11 +113,7 @@ void OutputDevice::DrawTransparent(
     if( mbOutputClipped )
         return;
 
-    if( mbInitLineColor )
-        InitLineColor();
-
-    if( mbInitFillColor )
-        InitFillColor();
+    SyncRenderStateToBackend();
 
     if (RasterOp::OverPaint == GetRasterOp())
     {
@@ -212,18 +208,14 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
         if( mbOutputClipped )
             return true;
 
-        if( mbInitLineColor )
-            InitLineColor();
-
-        if( mbInitFillColor )
-            InitFillColor();
+        SyncRenderStateToBackend();
 
         // get the polygon in device coordinates
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
         const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(GetMappingPolicy()));
 
         const double fTransparency = 0.01 * nTransparencePercent;
-        if( mbFillColor )
+        if( IsFillColor() )
         {
             // #i121591#
             // CAUTION: Only non printing (pixel-renderer) VCL commands from OutputDevices
@@ -242,7 +234,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
             bDrawn = true;
         }
 
-        if( mbLineColor )
+        if( IsLineColor() )
         {
             // disable the fill color for now
             mpGraphics->SetFillColor();
@@ -264,9 +256,6 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
                     bPixelSnapHairline,
                     *this );
             }
-
-            // prepare to restore the fill color
-            mbInitFillColor = mbFillColor;
         }
     }
 
@@ -303,11 +292,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
             if ( mbInitClipRegion )
                 InitClipRegion();
 
-            if ( mbInitLineColor )
-                InitLineColor();
-
-            if ( mbInitFillColor )
-                InitFillColor();
+            SyncRenderStateToBackend();
 
             tools::Rectangle aLogicPolyRect( rPolyPoly.GetBoundRect() );
             tools::Rectangle aPixelRect(mpMapper->LogicToDevicePixel(aLogicPolyRect, GetMappingPolicy()));
@@ -419,7 +404,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 
                     SetMappingPolicy(eOldPolicy);
 
-                    if( mbLineColor )
+                    if( IsLineColor() )
                     {
                         auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR);
                         SetFillColor();
@@ -450,7 +435,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     }
 
     // short circuit for drawing an invisible polygon
-    if( (!mbFillColor && !mbLineColor) || (nTransparencePercent >= 100) )
+    if( (!IsFillColor() && !IsLineColor()) || (nTransparencePercent >= 100) )
         return; // tdf#84294: do not record it in metafile
 
     // handle metafile recording

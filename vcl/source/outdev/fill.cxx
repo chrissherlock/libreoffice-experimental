@@ -28,53 +28,45 @@
 
 void OutputDevice::SetFillColor()
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaFillColorAction( Color(), false ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaFillColorAction(Color(), false));
 
-    if ( mbFillColor )
+    // The MVCC State Mutation
+    // Only update and trigger a sync if the state actually changes from "set"
+    // to "unset" (TRANSPARENT).
+    if (m_aRenderState.bFillColorSet || m_aRenderState.fillColor != COL_TRANSPARENT)
     {
-        mbInitFillColor = true;
-        mbFillColor = false;
-        maFillColor = COL_TRANSPARENT;
+        m_aRenderState.fillColor = COL_TRANSPARENT;
+        m_aRenderState.bFillColorSet = false; // Mark as unset
+        m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::FillColor;
+        m_aRenderState.epoch++;
+
+        // Eager Synchronization
+        // If we are not recording a layout, we ensure the backend reflects
+        // the transition to transparent immediately.
+        if (!ImplIsRecordLayout())
+            SyncRenderStateToBackend();
     }
 }
 
 void OutputDevice::SetFillColor( const Color& rColor )
 {
-    Color aColor(vcl::drawmode::GetFillColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings()));
+    Color aColor = vcl::drawmode::GetFillColor(rColor, GetDrawMode(), GetSettings().GetStyleSettings());
 
-    if ( mpMetaFile )
+    // RECORD ALWAYS: Metafile needs every explicit state change
+    if( mpMetaFile )
         mpMetaFile->AddAction( new MetaFillColorAction( aColor, true ) );
 
-    if ( maFillColor != aColor )
+    if( !m_aRenderState.bFillColorSet || m_aRenderState.fillColor != aColor )
     {
-        mbInitFillColor = true;
-        mbFillColor = true;
-        maFillColor = aColor;
-    }
-}
-
-void OutputDevice::InitFillColor()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if( mbFillColor )
-    {
-        if( RasterOp::N0 == meRasterOp )
-            mpGraphics->SetROPFillColor( SalROPColor::N0 );
-        else if( RasterOp::N1 == meRasterOp )
-            mpGraphics->SetROPFillColor( SalROPColor::N1 );
-        else if( RasterOp::Invert == meRasterOp )
-            mpGraphics->SetROPFillColor( SalROPColor::Invert );
-        else
-            mpGraphics->SetFillColor( maFillColor );
-    }
-    else
-    {
-        mpGraphics->SetFillColor();
+        m_aRenderState.fillColor = aColor;
+        m_aRenderState.bFillColorSet = true;
+        m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::FillColor;
+        m_aRenderState.epoch++;
     }
 
-    mbInitFillColor = false;
+    if (!ImplIsRecordLayout())
+        SyncRenderStateToBackend();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

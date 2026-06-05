@@ -65,7 +65,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpMapper(std::make_unique<CoordinateMapper>()),
     meOutDevType(eOutDevType),
     maRegion(true),
-    maFillColor( COL_WHITE ),
     maTextLineColor( COL_TRANSPARENT ),
     moSettings( Application::GetSettings() )
 {
@@ -96,13 +95,8 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mbOutputClipped                 = false;
     maTextColor                     = COL_BLACK;
     maOverlineColor                 = COL_TRANSPARENT;
-    meRasterOp                      = RasterOp::OverPaint;
     mnAntialiasing                  = AntialiasingFlags::NONE;
     meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
-    mbLineColor                     = true;
-    mbFillColor                     = true;
-    mbInitLineColor                 = true;
-    mbInitFillColor                 = true;
     mbInitFont                      = true;
     mbInitTextColor                 = true;
     mbInitClipRegion                = true;
@@ -341,21 +335,16 @@ void OutputDevice::SetRefPoint( const Point& rRefPoint )
     maRefPoint = rRefPoint;
 }
 
-void OutputDevice::SetRasterOp( RasterOp eRasterOp )
+void OutputDevice::SetRasterOp(RasterOp eRasterOp)
 {
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRasterOpAction( eRasterOp ) );
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaRasterOpAction(eRasterOp));
 
-    if ( meRasterOp != eRasterOp )
+    if (m_aRenderState.rasterOp != eRasterOp)
     {
-        meRasterOp = eRasterOp;
-        mbInitLineColor = mbInitFillColor = true;
-
-        if( mpGraphics || AcquireGraphics() )
-        {
-            assert(mpGraphics);
-            mpGraphics->SetXORMode( (RasterOp::Invert == meRasterOp) || (RasterOp::Xor == meRasterOp), RasterOp::Invert == meRasterOp );
-        }
+        m_aRenderState.rasterOp = eRasterOp;
+        m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::RasterOp;
+        m_aRenderState.epoch++;
     }
 }
 
@@ -422,7 +411,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if( ImplIsRecordLayout() )
         return;
 
-    if ( RasterOp::Invert == meRasterOp )
+    if ( RasterOp::Invert == m_aRenderState.rasterOp )
     {
         DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
         return;
@@ -476,7 +465,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     if ( ImplIsRecordLayout() )
         return;
 
-    if ( RasterOp::Invert == meRasterOp )
+    if ( RasterOp::Invert == m_aRenderState.rasterOp )
     {
         DrawRect( tools::Rectangle( rDestPt, rDestSize ) );
         return;
