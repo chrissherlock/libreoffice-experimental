@@ -38,6 +38,8 @@
 #include <vcl/rendercontext/InvertFlags.hxx>
 #include <vcl/rendercontext/SalLayoutFlags.hxx>
 #include <vcl/rendercontext/State.hxx>
+#include <vcl/state/RenderState.hxx>
+#include <vcl/state/PushFrame.hxx>
 #include <vcl/mapmod.hxx>
 #include <vcl/wall.hxx>
 #include <vcl/settings.hxx>
@@ -186,7 +188,11 @@ private:
     mutable rtl::Reference<LogicalFontInstance> mpFontInstance;
     rtl::Reference<LogicalFontInstance> mpForcedFallbackInstance;
     mutable std::unique_ptr<vcl::font::PhysicalFontFaceCollection>  mpFontFaceCollection;
+
     std::vector<vcl::State>        maOutDevStateStack;
+    mutable vcl::rstate::RenderState m_aRenderState;
+    std::vector<vcl::rstate::PushFrame> m_aPushFrames;
+
     std::unique_ptr<ImplOutDevData> mpOutDevData;
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
@@ -211,13 +217,10 @@ private:
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
     vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)
-    Color                           maLineColor;
-    Color                           maFillColor;
     vcl::Font                       maFont;
     Color                           maTextColor;
     Color                           maTextLineColor;
     Color                           maOverlineColor;
-    RasterOp                        meRasterOp;
     Wallpaper                       maBackground;
     std::optional<AllSettings>      moSettings;
     Point                           maRefPoint;
@@ -229,10 +232,6 @@ private:
     mutable bool                    mbOutput : 1;
     mutable bool                    mbDevOutput : 1;
     mutable bool                    mbOutputClipped : 1;
-    mutable bool                    mbLineColor : 1;
-    mutable bool                    mbFillColor : 1;
-    mutable bool                    mbInitLineColor : 1;
-    mutable bool                    mbInitFillColor : 1;
     mutable bool                    mbInitFont : 1;
     mutable bool                    mbInitTextColor : 1;
     mutable bool                    mbInitClipRegion : 1;
@@ -454,8 +453,12 @@ private:
 
 public:
 
+    void                        SyncRenderStateToBackend() const;
+    void                        ResetRenderStateSync() const;
     void                        Push( vcl::PushFlags nFlags = vcl::PushFlags::ALL );
+    void                        LegacyPush( vcl::PushFlags nFlags = vcl::PushFlags::ALL );
     void                        Pop();
+    void                        LegacyPop();
     SAL_DLLPRIVATE void         ClearStack();
 
     // Pushes the state, and returns a RAII object that pops it in destructor
@@ -478,7 +481,7 @@ public:
     LanguageType                GetDigitLanguage() const { return meTextLanguage; }
 
     void                        SetRasterOp( RasterOp eRasterOp );
-    RasterOp                    GetRasterOp() const { return meRasterOp; }
+    RasterOp GetRasterOp() const { return m_aRenderState.rasterOp; }
 
     /**
     If this OutputDevice is used for displaying a Print Preview
@@ -492,13 +495,14 @@ public:
 
     void                        SetLineColor();
     void                        SetLineColor( const Color& rColor );
-    const Color&                GetLineColor() const { return maLineColor; }
-    bool                        IsLineColor() const { return mbLineColor; }
+    Color GetLineColor() const { return m_aRenderState.lineColor; }
+    bool IsLineColor() const { return m_aRenderState.bLineColorSet; }
+
 
     void                        SetFillColor();
     void                        SetFillColor( const Color& rColor );
-    const Color&                GetFillColor() const { return maFillColor; }
-    bool                        IsFillColor() const { return mbFillColor; }
+    Color GetFillColor() const { return m_aRenderState.fillColor; }
+    bool IsFillColor() const { return m_aRenderState.bFillColorSet; }
 
     void                        SetBackground();
     void                        SetBackground( const Wallpaper& rBackground );
@@ -516,13 +520,6 @@ public:
 protected:
 
     virtual void                ImplReleaseFonts();
-
-private:
-
-    SAL_DLLPRIVATE void         InitLineColor();
-
-    SAL_DLLPRIVATE void         InitFillColor();
-
     ///@}
 
 

@@ -157,13 +157,9 @@ void OutputDevice::ImplDrawTextBackground( const SalLayout& rSalLayout )
     const tools::Long nX = aBase.getX();
     const tools::Long nY = aBase.getY();
 
-    if ( mbLineColor || mbInitLineColor )
-    {
-        mpGraphics->SetLineColor();
-        mbInitLineColor = true;
-    }
+    SyncRenderStateToBackend();
+
     mpGraphics->SetFillColor( GetTextFillColor() );
-    mbInitFillColor = true;
 
     ImplDrawTextRect( nX, nY, 0, -(mpFontInstance->mxFontMetric->GetAscent() + mnEmphasisAscent),
                       nWidth,

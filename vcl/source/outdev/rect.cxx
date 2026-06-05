@@ -55,7 +55,7 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaRectAction(rRect));
 
-    if (!IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout())
+    if (!IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || ImplIsRecordLayout())
          return;
 
     if (!mpGraphics && !AcquireGraphics())
@@ -67,11 +67,7 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
     if (mbOutputClipped)
          return;
 
-    if (mbInitLineColor)
-        InitLineColor();
-
-    if (mbInitFillColor)
-        InitFillColor();
+    SyncRenderStateToBackend();
 
     ImplDrawRect(vcl::LogicRect(rRect));
 }
@@ -94,7 +90,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRoundRectAction( rRect, nHorzRound, nVertRound ) );
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || ImplIsRecordLayout() )
         return;
 
     const tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
@@ -116,11 +112,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
-        InitLineColor();
-
-    if ( mbInitFillColor )
-        InitFillColor();
+    SyncRenderStateToBackend();
 
     if ( !nHorzRound && !nVertRound )
     {
@@ -134,7 +126,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
         {
             Point* pPtAry = aRoundRectPoly.GetPointAry();
 
-            if ( !mbFillColor )
+            if (!IsFillColor())
                 mpGraphics->DrawPolyLine( aRoundRectPoly.GetSize(), pPtAry, *this );
             else
                 mpGraphics->DrawPolygon( aRoundRectPoly.GetSize(), pPtAry, *this );
@@ -286,11 +278,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         }
     }
 
-    if( mbInitLineColor )
-        InitLineColor();
-
-    if( mbInitFillColor )
-        InitFillColor();
+    SyncRenderStateToBackend();
 
     const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
     SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
@@ -334,7 +322,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
 {
     assert(!is_double_buffered_window());
 
-    if (!mbLineColor || ImplIsRecordLayout())
+    if (!IsLineColor() || ImplIsRecordLayout())
     {
         return;
     }
@@ -355,10 +343,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
         return;
     }
 
-    if (mbInitLineColor)
-    {
-        InitLineColor();
-    }
+    SyncRenderStateToBackend();
 
     if (rDrawingArea.IsEmpty())
     {
