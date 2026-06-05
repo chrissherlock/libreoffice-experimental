@@ -463,8 +463,8 @@ bool Printer::AcquireGraphics() const
     if ( mpGraphics )
         return true;
 
-    mbInitLineColor     = true;
-    mbInitFillColor     = true;
+    SyncRenderStateToBackend();
+
     mbInitFont          = true;
     mbInitTextColor     = true;
     mbInitClipRegion    = true;
@@ -521,9 +521,12 @@ bool Printer::AcquireGraphics() const
 
     if ( mpGraphics )
     {
-        mpGraphics->SetXORMode( (RasterOp::Invert == meRasterOp) || (RasterOp::Xor == meRasterOp), RasterOp::Invert == meRasterOp );
+        mpGraphics->SetXORMode( (RasterOp::Invert == GetRasterOp()) || (RasterOp::Xor == GetRasterOp()), RasterOp::Invert == GetRasterOp());
         mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
     }
+
+    ResetRenderStateSync();
+    SyncRenderStateToBackend();
 
     return mpGraphics != nullptr;
 }
@@ -716,8 +719,7 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     Push( vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR );
     SetLineColor( rMaskColor );
     SetFillColor( rMaskColor );
-    InitLineColor();
-    InitFillColor();
+    SyncRenderStateToBackend();
 
     // create forward mapping tables
     for( nX = 0; nX <= nSrcWidth; nX++ )
@@ -1676,14 +1678,12 @@ css::awt::DeviceInfo Printer::GetDeviceInfo() const
 
 void Printer::SetWaveLineColors(Color const& rColor, tools::Long)
 {
-    if (mbLineColor || mbInitLineColor)
-    {
+    if (IsLineColor())
         mpGraphics->SetLineColor();
-        mbInitLineColor = true;
-    }
 
     mpGraphics->SetFillColor(rColor);
-    mbInitFillColor = true;
+
+    SyncRenderStateToBackend();
 }
 
 Size Printer::GetWaveLineSize(tools::Long nLineWidth) const

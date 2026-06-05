@@ -20,6 +20,7 @@
 #include <sal/config.h>
 #include <sal/log.hxx>
 #include <tools/debug.hxx>
+#include <comphelper/scopeguard.hxx>
 
 #include <vcl/metaact.hxx>
 #include <vcl/rendercontext/State.hxx>
@@ -35,16 +36,32 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaPushAction(nFlags));
 
+    // Snapshot the MVCC RenderState
+    // We create a new frame, save the requested mask, and take a full copy
+    // of the current authoritative state. This is copy-by-value and
+    // is extremely efficient for modern CPUs.
+    vcl::rstate::PushFrame aFrame;
+    aFrame.isolationMask = nFlags;
+    aFrame.renderSnapshot = m_aRenderState;
+
+    aFrame.renderDelta = {};
+
+    m_aPushFrames.push_back(aFrame);
+
+    // Bridge to legacy state
+    // We call LegacyPush to handle non-refactored state like Fonts, Clips, and MapModes.
+    LegacyPush(nFlags);
+}
+
+void OutputDevice::LegacyPush(vcl::PushFlags nFlags)
+{
     maOutDevStateStack.emplace_back();
     vcl::State& rState = maOutDevStateStack.back();
 
     rState.mnFlags = nFlags;
 
-    if (nFlags & vcl::PushFlags::LINECOLOR && mbLineColor)
-        rState.mpLineColor = maLineColor;
-
-    if (nFlags & vcl::PushFlags::FILLCOLOR && mbFillColor)
-        rState.mpFillColor = maFillColor;
+    // Note: We intentionally skip LINECOLOR, FILLCOLOR, and RASTEROP
+    // because they are now handled by the new vcl::rstate::RenderState pipeline.
 
     if (nFlags & vcl::PushFlags::FONT)
         rState.mpFont = maFont;
@@ -70,9 +87,6 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
     if (nFlags & vcl::PushFlags::TEXTLANGUAGE)
         rState.meTextLanguage = GetDigitLanguage();
 
-    if (nFlags & vcl::PushFlags::RASTEROP)
-        rState.meRasterOp = GetRasterOp();
-
     if (nFlags & vcl::PushFlags::MAPMODE)
     {
         rState.mpMapMode = maMapMode;
@@ -88,107 +102,161 @@ void OutputDevice::Push(vcl::PushFlags nFlags)
 
 void OutputDevice::Pop()
 {
-    if( mpMetaFile )
-        mpMetaFile->AddAction( new MetaPopAction() );
-
-    GDIMetaFile* pOldMetaFile = mpMetaFile;
-    mpMetaFile = nullptr;
-
-    if ( maOutDevStateStack.empty() )
     {
-        SAL_WARN( "vcl.gdi", "OutputDevice::Pop() without OutputDevice::Push()" );
+        GDIMetaFile* pOldMetaFile = mpMetaFile;
+        mpMetaFile = nullptr;
+
+        comphelper::ScopeGuard aMetaGuard([this, pOldMetaFile]() {
+            this->mpMetaFile = pOldMetaFile;
+
+            if (this->mpMetaFile)
+                this->mpMetaFile->AddAction(new MetaPopAction());
+        });
+
+        if (m_aPushFrames.empty())
+        {
+            SAL_WARN("vcl.gdi", "OutputDevice::Pop() without OutputDevice::Push()");
+            mpMetaFile = pOldMetaFile; // Restore before exit
+            return;
+        }
+
+        vcl::rstate::PushFrame rFrame = m_aPushFrames.back();
+        m_aPushFrames.pop_back();
+
+        bool bStateReconciled = false;
+
+        // MVCC Reconciliation Logic
+        // If the flag was set, we RESTORE the snapshot.
+        // If the flag was NOT set, we keep the mutated state (the "bleed").
+
+        // Line Color Reconciliation
+        if ((rFrame.isolationMask & vcl::PushFlags::LINECOLOR) &&
+            (m_aRenderState.lineColor != rFrame.renderSnapshot.lineColor))
+        {
+            m_aRenderState.lineColor = rFrame.renderSnapshot.lineColor;
+            m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::LineColor;
+            bStateReconciled = true;
+        }
+
+        // Fill Color Reconciliation
+        if ((rFrame.isolationMask & vcl::PushFlags::FILLCOLOR) &&
+            (m_aRenderState.fillColor != rFrame.renderSnapshot.fillColor))
+        {
+            m_aRenderState.fillColor = rFrame.renderSnapshot.fillColor;
+            m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::FillColor;
+            bStateReconciled = true;
+        }
+
+        // RasterOp Reconciliation
+        if ((rFrame.isolationMask & vcl::PushFlags::RASTEROP) &&
+            (m_aRenderState.rasterOp != rFrame.renderSnapshot.rasterOp))
+        {
+            m_aRenderState.rasterOp = rFrame.renderSnapshot.rasterOp;
+            m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::RasterOp;
+            bStateReconciled = true;
+        }
+
+        if (bStateReconciled)
+            m_aRenderState.epoch++;
+    }
+
+    // Legacy Cleanup: Call the original implementation for
+    // properties not yet refactored (Fonts, ClipRegions, etc.)
+    LegacyPop();
+}
+
+void OutputDevice::LegacyPop()
+{
+    // This is the original logic that was previously inside OutputDevice::Pop()
+    // but moved here so we can call it after our MVCC reconciliation.
+
+    if (maOutDevStateStack.empty())
+    {
+        SAL_WARN("vcl.gdi", "OutputDevice::LegacyPop() without OutputDevice::Push()");
         return;
     }
+
     const vcl::State& rState = maOutDevStateStack.back();
 
-    if ( rState.mnFlags & vcl::PushFlags::LINECOLOR )
+    if (rState.mnFlags & vcl::PushFlags::FONT)
+        SetFont(*rState.mpFont);
+
+    if (rState.mnFlags & vcl::PushFlags::TEXTCOLOR)
+        SetTextColor(*rState.mpTextColor);
+
+    if (rState.mnFlags & vcl::PushFlags::TEXTFILLCOLOR)
     {
-        if ( rState.mpLineColor )
-            SetLineColor( *rState.mpLineColor );
-        else
-            SetLineColor();
-    }
-
-    if ( rState.mnFlags & vcl::PushFlags::FILLCOLOR )
-    {
-        if ( rState.mpFillColor )
-            SetFillColor( *rState.mpFillColor );
-        else
-            SetFillColor();
-    }
-
-    if ( rState.mnFlags & vcl::PushFlags::FONT )
-        SetFont( *rState.mpFont );
-
-    if ( rState.mnFlags & vcl::PushFlags::TEXTCOLOR )
-        SetTextColor( *rState.mpTextColor );
-
-    if ( rState.mnFlags & vcl::PushFlags::TEXTFILLCOLOR )
-    {
-        if ( rState.mpTextFillColor )
-            SetTextFillColor( *rState.mpTextFillColor );
+        if (rState.mpTextFillColor)
+            SetTextFillColor(*rState.mpTextFillColor);
         else
             SetTextFillColor();
     }
 
-    if ( rState.mnFlags & vcl::PushFlags::TEXTLINECOLOR )
+    if (rState.mnFlags & vcl::PushFlags::TEXTLINECOLOR)
     {
-        if ( rState.mpTextLineColor )
-            SetTextLineColor( *rState.mpTextLineColor );
+        if (rState.mpTextLineColor)
+            SetTextLineColor(*rState.mpTextLineColor);
         else
             SetTextLineColor();
     }
 
-    if ( rState.mnFlags & vcl::PushFlags::OVERLINECOLOR )
+    if (rState.mnFlags & vcl::PushFlags::OVERLINECOLOR)
     {
-        if ( rState.mpOverlineColor )
-            SetOverlineColor( *rState.mpOverlineColor );
+        if (rState.mpOverlineColor)
+            SetOverlineColor(*rState.mpOverlineColor);
         else
             SetOverlineColor();
     }
 
-    if ( rState.mnFlags & vcl::PushFlags::TEXTALIGN )
-        SetTextAlign( rState.meTextAlign );
+    if (rState.mnFlags & vcl::PushFlags::TEXTALIGN)
+        SetTextAlign(rState.meTextAlign);
 
-    if( rState.mnFlags & vcl::PushFlags::TEXTLAYOUTMODE )
-        SetLayoutMode( rState.mnTextLayoutMode );
+    if (rState.mnFlags & vcl::PushFlags::TEXTLAYOUTMODE)
+        SetLayoutMode(rState.mnTextLayoutMode);
 
-    if( rState.mnFlags & vcl::PushFlags::TEXTLANGUAGE )
-        SetDigitLanguage( rState.meTextLanguage );
+    if (rState.mnFlags & vcl::PushFlags::TEXTLANGUAGE)
+        SetDigitLanguage(rState.meTextLanguage);
 
-    if ( rState.mnFlags & vcl::PushFlags::RASTEROP )
-        SetRasterOp( rState.meRasterOp );
-
-    if ( rState.mnFlags & vcl::PushFlags::MAPMODE )
+    if (rState.mnFlags & vcl::PushFlags::MAPMODE)
     {
-        if ( rState.mpMapMode )
-            SetMapMode( *rState.mpMapMode );
+        if (rState.mpMapMode)
+            SetMapMode(*rState.mpMapMode);
         else
             SetMapMode();
         SetMappingPolicy(rState.meMapMode);
     }
 
-    if ( rState.mnFlags & vcl::PushFlags::CLIPREGION )
-        SetDeviceClipRegion( rState.mpClipRegion.get() );
+    if (rState.mnFlags & vcl::PushFlags::CLIPREGION)
+        SetDeviceClipRegion(rState.mpClipRegion.get());
 
-    if ( rState.mnFlags & vcl::PushFlags::REFPOINT )
+    if (rState.mnFlags & vcl::PushFlags::REFPOINT)
     {
-        if ( rState.mpRefPoint )
-            SetRefPoint( *rState.mpRefPoint );
+        if (rState.mpRefPoint)
+            SetRefPoint(*rState.mpRefPoint);
         else
             SetRefPoint();
     }
 
     maOutDevStateStack.pop_back();
-
-    mpMetaFile = pOldMetaFile;
 }
 
 void OutputDevice::ClearStack()
 {
-    sal_uInt32 nCount = maOutDevStateStack.size();
-    while( nCount-- )
+    // Drain the primary MVCC stack.
+    // Pop() internally handles the Metafile recording, state reconciliation,
+    // and automatically calls LegacyPop() for the legacy state variables.
+    while ( !m_aPushFrames.empty() )
+    {
         Pop();
+    }
+
+    // Failsafe: Drain any orphaned legacy state frames.
+    // This guarantees we satisfy the ~OutputDevice() assertion that
+    // Push() calls == Pop() calls, even if the stacks somehow desynced.
+    while ( !maOutDevStateStack.empty() )
+    {
+        LegacyPop();
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
