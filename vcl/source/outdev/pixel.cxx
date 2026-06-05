@@ -26,6 +26,7 @@
 #include <salgdi.hxx>
 
 #include <cassert>
+#include <iostream>
 
 Color OutputDevice::GetPixel(const Point& rPoint) const
 {
@@ -54,8 +55,11 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaPointAction( rPt ) );
 
-    if ( !IsDeviceOutputNecessary() || !mbLineColor || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !IsLineColor() || ImplIsRecordLayout() )
+    {
+        std::cerr << "  ! DrawPixel skipped (Invisible/RecordLayout)" << std::endl;
         return;
+    }
 
     Point aPt = mpMapper->LogicToDevicePixel(rPt, GetMappingPolicy());
 
@@ -69,8 +73,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
-        InitLineColor();
+    SyncRenderStateToBackend();
 
     mpGraphics->DrawPixel( aPt.X(), aPt.Y(), *this );
 }

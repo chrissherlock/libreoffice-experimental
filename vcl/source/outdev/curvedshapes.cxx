@@ -32,7 +32,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaEllipseAction( rRect ) );
 
-    if  ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if  ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
@@ -49,20 +49,22 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
-        InitLineColor();
+    SyncRenderStateToBackend();
 
     tools::Polygon aRectPoly( aRect.Center(), aRect.GetWidth() >> 1, aRect.GetHeight() >> 1 );
     if ( aRectPoly.GetSize() >= 2 )
     {
         Point* pPtAry = aRectPoly.GetPointAry();
-        if ( !mbFillColor )
-            mpGraphics->DrawPolyLine( aRectPoly.GetSize(), pPtAry, *this );
+
+        if (!IsFillColor())
+        {
+            mpGraphics->DrawPolyLine(aRectPoly.GetSize(), pPtAry, *this);
+        }
         else
         {
-            if ( mbInitFillColor )
-                InitFillColor();
-            mpGraphics->DrawPolygon( aRectPoly.GetSize(), pPtAry, *this );
+            SyncRenderStateToBackend();
+
+            mpGraphics->DrawPolygon(aRectPoly.GetSize(), pPtAry, *this);
         }
     }
 }
@@ -75,7 +77,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaArcAction( rRect, rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || !mbLineColor || ImplIsRecordLayout() )
+    if (!IsDeviceOutputNecessary() || !IsLineColor() || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
@@ -92,8 +94,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
-        InitLineColor();
+    SyncRenderStateToBackend();
 
     const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
     const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, GetMappingPolicy()));
@@ -114,7 +115,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaPieAction( rRect, rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
@@ -131,8 +132,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
-        InitLineColor();
+    SyncRenderStateToBackend();
 
     const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
     const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, GetMappingPolicy()));
@@ -141,12 +141,15 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     if ( aPiePoly.GetSize() >= 2 )
     {
         Point* pPtAry = aPiePoly.GetPointAry();
-        if ( !mbFillColor )
+
+        if ( !IsFillColor() )
+        {
             mpGraphics->DrawPolyLine( aPiePoly.GetSize(), pPtAry, *this );
+        }
         else
         {
-            if ( mbInitFillColor )
-                InitFillColor();
+            SyncRenderStateToBackend();
+
             mpGraphics->DrawPolygon( aPiePoly.GetSize(), pPtAry, *this );
         }
     }
@@ -160,7 +163,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaChordAction( rRect, rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || (!mbLineColor && !mbFillColor) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
@@ -177,8 +180,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     if ( mbOutputClipped )
         return;
 
-    if ( mbInitLineColor )
-        InitLineColor();
+    SyncRenderStateToBackend();
 
     const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
     const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, GetMappingPolicy()));
@@ -187,13 +189,16 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     if ( aChordPoly.GetSize() >= 2 )
     {
         Point* pPtAry = aChordPoly.GetPointAry();
-        if ( !mbFillColor )
-            mpGraphics->DrawPolyLine( aChordPoly.GetSize(), pPtAry, *this );
+
+        if (!IsFillColor())
+        {
+            mpGraphics->DrawPolyLine(aChordPoly.GetSize(), pPtAry, *this);
+        }
         else
         {
-            if ( mbInitFillColor )
-                InitFillColor();
-            mpGraphics->DrawPolygon( aChordPoly.GetSize(), pPtAry, *this );
+            SyncRenderStateToBackend();
+
+            mpGraphics->DrawPolygon(aChordPoly.GetSize(), pPtAry, *this);
         }
     }
 }
