@@ -303,11 +303,13 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
 
 
             // if possible use accelerated path
-            if( eStyle == WallpaperStyle::Tile
+            if (eStyle == WallpaperStyle::Tile
                 && (m_aRenderState.rasterOp == RasterOp::OverPaint)
-                && (mnDrawMode == DrawModeFlags::Default)
-                && nWidth > 0 && nHeight > 0 )
+                && (m_aRenderState.drawMode == DrawModeFlags::Default)
+                && nWidth > 0 && nHeight > 0)
+            {
                 bDrawn = mpGraphics->DrawBitmapWallpaper(nStartX, nStartY, nRight, nBottom, nBmpWidth, nBmpHeight, *aBmp.ImplGetSalBitmap());
+            }
 
             if (!bDrawn)
             {
