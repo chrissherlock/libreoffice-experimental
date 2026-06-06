@@ -81,7 +81,6 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mnTextOffY                      = 0;
     mnEmphasisAscent                = 0;
     mnEmphasisDescent               = 0;
-    mnDrawMode                      = DrawModeFlags::Default;
     mnTextLayoutMode                = vcl::text::ComplexTextLayoutFlags::Default;
 
     if( AllSettings::GetLayoutRTL() ) //#i84553# tip BiDi preference to RTL
@@ -365,9 +364,17 @@ void OutputDevice::SetAntialiasing( AntialiasingFlags nMode )
     }
 }
 
-void OutputDevice::SetDrawMode(DrawModeFlags nDrawMode)
+void OutputDevice::SetDrawMode(DrawModeFlags eDrawMode)
 {
-    mnDrawMode = nDrawMode;
+    if (m_aRenderState.drawMode == eDrawMode)
+        return;
+
+    m_aRenderState.drawMode = eDrawMode;
+    m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::DrawMode;
+    m_aRenderState.epoch++;
+
+    if (!ImplIsRecordLayout())
+        SyncRenderStateToBackend();
 }
 
 sal_uInt16 OutputDevice::GetBitCount() const
