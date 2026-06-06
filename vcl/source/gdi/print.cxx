@@ -474,8 +474,6 @@ bool Printer::AcquireGraphics() const
     if ( mpGraphics )
         return true;
 
-    SyncRenderStateToBackend();
-
     mbInitFont          = true;
     mbInitTextColor     = true;
     mbInitClipRegion    = true;
@@ -535,9 +533,6 @@ bool Printer::AcquireGraphics() const
         mpGraphics->SetXORMode( (RasterOp::Invert == GetRasterOp()) || (RasterOp::Xor == GetRasterOp()), RasterOp::Invert == GetRasterOp());
         mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
     }
-
-    ResetRenderStateSync();
-    SyncRenderStateToBackend();
 
     return mpGraphics != nullptr;
 }
@@ -686,6 +681,8 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
 
     if( !(!rMask.IsEmpty() && aSrcRect.GetWidth() && aSrcRect.GetHeight() && aDestSz.Width() && aDestSz.Height()) )
         return;
+
+    EnsureRenderStateSynced();
 
     Bitmap  aMask( rMask );
     BmpMirrorFlags nMirrFlags = BmpMirrorFlags::NONE;
@@ -1690,7 +1687,9 @@ css::awt::DeviceInfo Printer::GetDeviceInfo() const
 void Printer::SetWaveLineColors(Color const& rColor, tools::Long)
 {
     if (IsLineColor())
-        mpGraphics->SetLineColor();
+        SetLineColor();
+
+    SetFillColor(rColor);
 
     mpGraphics->SetFillColor(rColor);
 

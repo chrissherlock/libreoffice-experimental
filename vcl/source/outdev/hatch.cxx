@@ -68,6 +68,8 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if( mbInitClipRegion )
         InitClipRegion();
 
@@ -87,7 +89,10 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
         SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
         Push( vcl::PushFlags::LINECOLOR );
         SetLineColor( aHatch.GetColor() );
+
+        // COMMIT: Sync state transition to backend before internal drawing operation.
         SyncRenderStateToBackend();
+
         DrawHatch( aPolyPoly, aHatch, false );
         Pop();
         SetMappingPolicy( eOldPolicy );

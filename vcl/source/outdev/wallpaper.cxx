@@ -74,34 +74,41 @@ void OutputDevice::DrawWallpaper( tools::Long nX, tools::Long nY,
         DrawColorWallpaper(  nX, nY, nWidth, nHeight, rWallpaper );
 }
 
-void OutputDevice::DrawColorWallpaper( tools::Long nX, tools::Long nY,
-                                       tools::Long nWidth, tools::Long nHeight,
-                                       const Wallpaper& rWallpaper )
+void OutputDevice::DrawColorWallpaper(tools::Long nX, tools::Long nY,
+                                      tools::Long nWidth, tools::Long nHeight,
+                                      const Wallpaper& rWallpaper)
 {
     assert(!is_double_buffered_window());
 
-    // draw wallpaper without border
-    bool bOldIsLineColor = IsLineColor();
-    Color aOldLineColor = GetLineColor();
-    bool bOldIsFillColor = IsFillColor();
-    Color aOldFillColor = GetFillColor();
+    const Color aOldLineColor = GetLineColor();
+    const bool bOldIsLineColor = IsLineColor();
+    const Color aOldFillColor = GetFillColor();
+    const bool bOldIsFillColor = IsFillColor();
     const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
     SetLineColor();
-    SetFillColor( rWallpaper.GetColor() );
-    SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
+    SetFillColor(rWallpaper.GetColor());
+    SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
 
-    DrawRect( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
+    // FORCE SYNC: We have changed the state, but we are inside an "internal"
+    // method that doesn't have a natural return-to-user-space sync point.
+    SyncRenderStateToBackend();
 
-    SetMappingPolicy( eOldPolicy );
+    DrawRect(tools::Rectangle(Point(nX, nY), Size(nWidth, nHeight)));
+
+    SetMappingPolicy(eOldPolicy);
+
     if (bOldIsFillColor)
         SetFillColor(aOldFillColor);
     else
         SetFillColor();
+
     if (bOldIsLineColor)
         SetLineColor(aOldLineColor);
     else
         SetLineColor();
+
+    SyncRenderStateToBackend();
 }
 
 void OutputDevice::Erase()
@@ -112,9 +119,12 @@ void OutputDevice::Erase()
     if ( mbBackground )
     {
         RasterOp eRasterOp = GetRasterOp();
+
         if ( eRasterOp != RasterOp::OverPaint )
             SetRasterOp( RasterOp::OverPaint );
+
         DrawWallpaper( 0, 0, GetOutputWidthPixel(), GetOutputHeightPixel(), maBackground );
+
         if ( eRasterOp != RasterOp::OverPaint )
             SetRasterOp( eRasterOp );
     }
@@ -123,9 +133,12 @@ void OutputDevice::Erase()
 void OutputDevice::Erase(const tools::Rectangle& rRect)
 {
     const RasterOp eRasterOp = GetRasterOp();
+
     if ( eRasterOp != RasterOp::OverPaint )
         SetRasterOp( RasterOp::OverPaint );
+
     DrawWallpaper(rRect, GetBackground());
+
     if ( eRasterOp != RasterOp::OverPaint )
         SetRasterOp( eRasterOp );
 }
@@ -138,6 +151,8 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
 
     if( ImplIsRecordLayout() )
         return;
+
+    EnsureRenderStateSynced();
 
     const Bitmap* pCached = rWallpaper.ImplGetCachedBitmap();
 
@@ -308,6 +323,7 @@ void OutputDevice::DrawBitmapWallpaper( tools::Long nX, tools::Long nY,
                 && (m_aRenderState.drawMode == DrawModeFlags::Default)
                 && nWidth > 0 && nHeight > 0)
             {
+                SyncRenderStateToBackend();
                 bDrawn = mpGraphics->DrawBitmapWallpaper(nStartX, nStartY, nRight, nBottom, nBmpWidth, nBmpHeight, *aBmp.ImplGetSalBitmap());
             }
 
@@ -405,6 +421,8 @@ void OutputDevice::DrawGradientWallpaper( tools::Long nX, tools::Long nY,
     SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion( tools::Rectangle( Point( nX, nY ), Size( nWidth, nHeight ) ) );
+
+    EnsureRenderStateSynced();
 
     DrawGradient( aBound, rWallpaper.GetGradient() );
 

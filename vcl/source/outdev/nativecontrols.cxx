@@ -254,6 +254,7 @@ static std::unique_ptr< ImplControlValue > TransformControlValue( const ImplCont
     }
     return aResult;
 }
+
 bool OutputDevice::DrawNativeControl( ControlType nType,
                             ControlPart nPart,
                             const tools::Rectangle& rControlRegion,
@@ -272,12 +273,13 @@ bool OutputDevice::DrawNativeControl( ControlType nType,
         return false;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
+
     if ( mbOutputClipped )
         return true;
-
-    SyncRenderStateToBackend();
 
     // Convert the coordinates from relative to Window-absolute, so we draw
     // in the correct place in platform code

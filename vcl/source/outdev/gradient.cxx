@@ -99,6 +99,8 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     if( !mpGraphics && !AcquireGraphics() )
         return;
 
+    EnsureRenderStateSynced();
+
     // secure clip region
     auto popIt = ScopedPush(vcl::PushFlags::CLIPREGION);
     IntersectClipRegion( aBoundRect );
@@ -116,8 +118,6 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     // draw gradients without border
     if (IsLineColor())
         mpGraphics->SetLineColor();
-
-    SyncRenderStateToBackend();
 
     // calculate step count if necessary
     if ( !aGradient.GetSteps() )

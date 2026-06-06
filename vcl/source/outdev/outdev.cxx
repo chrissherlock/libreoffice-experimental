@@ -437,6 +437,8 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
@@ -491,6 +493,8 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
@@ -535,6 +539,8 @@ void OutputDevice::CopyArea( const Point& rDestPt,
     if ( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
+
+    EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
         InitClipRegion();
@@ -801,6 +807,16 @@ void OutputDevice::ImplDisposeCanvas()
         css::uno::Reference< css::lang::XComponent >  xCanvasComponent( xCanvas, css::uno::UNO_QUERY );
         if( xCanvasComponent.is() )
             xCanvasComponent->dispose();
+    }
+}
+
+void OutputDevice::EnsureRenderStateSynced() const
+{
+    if (m_aRenderState.epoch != m_aRenderState.lastSyncedEpoch)
+    {
+        // We are out of sync. This is a common occurrence during
+        // batch operations, so we silently synchronize the state.
+        const_cast<OutputDevice*>(this)->SyncRenderStateToBackend();
     }
 }
 

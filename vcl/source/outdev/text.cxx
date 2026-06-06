@@ -704,6 +704,8 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
     if (!mpGraphics && !AcquireGraphics())
         return;
 
+    EnsureRenderStateSynced();
+
     assert(mpGraphics);
     if (mbInitClipRegion)
         InitClipRegion();
@@ -742,11 +744,16 @@ void OutputDevice::DrawTextArray( const Point& rStartPt, const OUString& rStr,
 
     if ( !IsDeviceOutputNecessary() )
         return;
+
     if( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
+
+    EnsureRenderStateSynced();
+
     if( mbInitClipRegion )
         InitClipRegion();
+
     if( mbOutputClipped )
         return;
 
@@ -1768,8 +1775,12 @@ void OutputDevice::DrawText( const tools::Rectangle& rRect, const OUString& rOri
     if( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
+
+    EnsureRenderStateSynced();
+
     if( mbInitClipRegion )
         InitClipRegion();
+
     if (mbOutputClipped && !bDecomposeTextRectAction && !pDisplayText)
         return;
 
@@ -1932,8 +1943,12 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
     if( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
+
+    EnsureRenderStateSynced();
+
     if( mbInitClipRegion )
         InitClipRegion();
+
     if ( mbOutputClipped )
         return;
 
