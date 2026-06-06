@@ -100,6 +100,8 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 

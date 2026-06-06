@@ -51,13 +51,13 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
     if ( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     // use b2dpolygon drawing if possible
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
@@ -159,13 +159,13 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
     if ( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     // use b2dpolygon drawing if possible
     if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
@@ -256,13 +256,13 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if( mbInitClipRegion )
         InitClipRegion();
 
     if( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     bool bSuccess(false);
 
