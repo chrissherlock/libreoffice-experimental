@@ -72,9 +72,6 @@ void OutputDevice::SetLineColor(const Color& rColor)
         m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::LineColor;
         m_aRenderState.epoch++;
     }
-
-    if (!ImplIsRecordLayout())
-        SyncRenderStateToBackend();
 }
 
 void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
@@ -98,6 +95,8 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
@@ -109,8 +108,6 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo, GetMappingPolicy()));
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
     const bool bLineWidthUsed(aInfo.GetWidth() > 1);
-
-    SyncRenderStateToBackend();
 
     if(bDashUsed || bLineWidthUsed)
     {
@@ -140,13 +137,13 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
     if ( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     bool bDrawn = false;
 

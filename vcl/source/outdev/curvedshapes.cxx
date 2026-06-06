@@ -44,12 +44,13 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
+
     if ( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     tools::Polygon aRectPoly( aRect.Center(), aRect.GetWidth() >> 1, aRect.GetHeight() >> 1 );
     if ( aRectPoly.GetSize() >= 2 )
@@ -62,8 +63,6 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
         }
         else
         {
-            SyncRenderStateToBackend();
-
             mpGraphics->DrawPolygon(aRectPoly.GetSize(), pPtAry, *this);
         }
     }
@@ -89,12 +88,13 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
+
     if ( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
     const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, GetMappingPolicy()));
@@ -127,12 +127,13 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
+
     if ( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
     const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, GetMappingPolicy()));
@@ -148,8 +149,6 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
         }
         else
         {
-            SyncRenderStateToBackend();
-
             mpGraphics->DrawPolygon( aPiePoly.GetSize(), pPtAry, *this );
         }
     }
@@ -175,12 +174,13 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
+
     if ( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
     const Point aEnd(mpMapper->LogicToDevicePixel(rEndPt, GetMappingPolicy()));
@@ -196,8 +196,6 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
         }
         else
         {
-            SyncRenderStateToBackend();
-
             mpGraphics->DrawPolygon(aChordPoly.GetSize(), pPtAry, *this);
         }
     }
