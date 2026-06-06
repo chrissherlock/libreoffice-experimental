@@ -212,7 +212,6 @@ private:
     mutable tools::Long                    mnTextOffY;
     mutable tools::Long                    mnEmphasisAscent;
     mutable tools::Long                    mnEmphasisDescent;
-    DrawModeFlags                   mnDrawMode;
     vcl::text::ComplexTextLayoutFlags mnTextLayoutMode;
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
@@ -472,7 +471,7 @@ public:
     AntialiasingFlags           GetAntialiasing() const { return mnAntialiasing; }
 
     void                        SetDrawMode( DrawModeFlags nDrawMode );
-    DrawModeFlags               GetDrawMode() const { return mnDrawMode; }
+    DrawModeFlags GetDrawMode() const { return m_aRenderState.drawMode; }
 
     void                        SetLayoutMode( vcl::text::ComplexTextLayoutFlags nTextLayoutMode );
     vcl::text::ComplexTextLayoutFlags GetLayoutMode() const { return mnTextLayoutMode; }
