@@ -58,7 +58,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     if (!rPolyPoly.Count() || !rPolyPoly[0].GetSize())
         return;
 
-    if ( mnDrawMode & ( DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) )
+    if (m_aRenderState.drawMode & (DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient))
     {
         Color aColor = GetSingleColorGradientFill();
 
@@ -71,7 +71,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
 
     Gradient aGradient( rGradient );
 
-    if ( mnDrawMode & DrawModeFlags::GrayGradient )
+    if (m_aRenderState.drawMode & DrawModeFlags::GrayGradient)
         aGradient.MakeGrayscale();
 
     DrawGradientToMetafile( rPolyPoly, rGradient );
@@ -172,7 +172,7 @@ void OutputDevice::DrawGradientToMetafile ( const tools::PolyPolygon& rPolyPoly,
 
     Gradient aGradient( rGradient );
 
-    if (mnDrawMode & DrawModeFlags::GrayGradient)
+    if (m_aRenderState.drawMode & DrawModeFlags::GrayGradient)
         aGradient.MakeGrayscale();
 
     if ( rPolyPoly.IsRect() )
@@ -592,13 +592,15 @@ Color OutputDevice::GetSingleColorGradientFill()
     Color aColor;
 
     // we should never call on this function if any of these aren't set!
-    assert( mnDrawMode & ( DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient) );
+    assert(m_aRenderState.drawMode & (DrawModeFlags::WhiteGradient | DrawModeFlags::SettingsGradient));
 
-    if ( mnDrawMode & DrawModeFlags::WhiteGradient )
-        aColor = COL_WHITE;
-    else if ( mnDrawMode & DrawModeFlags::SettingsGradient )
+    if (m_aRenderState.drawMode & DrawModeFlags::WhiteGradient)
     {
-        if (mnDrawMode & DrawModeFlags::SettingsForSelection)
+        aColor = COL_WHITE;
+    }
+    else if (m_aRenderState.drawMode & DrawModeFlags::SettingsGradient)
+    {
+        if (m_aRenderState.drawMode & DrawModeFlags::SettingsForSelection)
             aColor = GetSettings().GetStyleSettings().GetHighlightColor();
         else
             aColor = GetSettings().GetStyleSettings().GetWindowColor();

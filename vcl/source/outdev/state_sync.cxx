@@ -95,6 +95,17 @@ void OutputDevice::SyncRenderStateToBackend() const
         m_aRenderState.changeMask &= ~vcl::rstate::RenderChangeMask::FillColor;
     }
 
+    if (m_aRenderState.changeMask & vcl::rstate::RenderChangeMask::DrawMode)
+    {
+        m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::LineColor;
+        m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::FillColor;
+
+        // Note: SalGraphics doesn't always have a direct SetDrawMode()
+        // call, so this bit trigger effectively forces the colors
+        // to be re-calculated via GetLineColor(..., m_aRenderState.drawMode)
+        m_aRenderState.changeMask &= ~vcl::rstate::RenderChangeMask::DrawMode;
+    }
+
     m_aRenderState.lastSyncedEpoch = m_aRenderState.epoch;
 }
 

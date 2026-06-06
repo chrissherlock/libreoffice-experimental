@@ -12,6 +12,7 @@
 #include <tools/color.hxx>
 #include <o3tl/typed_flags_set.hxx>
 
+#include <vcl/rendercontext/DrawModeFlags.hxx>
 #include <vcl/vclenum.hxx>
 
 namespace vcl::rstate
@@ -22,6 +23,7 @@ enum class RenderChangeMask : uint32_t
     LineColor = 1 << 0,
     FillColor = 1 << 1,
     RasterOp = 1 << 2,
+    DrawMode = 1 << 3,
     All = ~0U
 };
 }
@@ -59,6 +61,7 @@ struct RenderState
     bool bFillColorSet = true;
 
     RasterOp rasterOp = RasterOp::OverPaint;
+    DrawModeFlags drawMode = DrawModeFlags::Default;
 };
 
 } // namespace vcl::state

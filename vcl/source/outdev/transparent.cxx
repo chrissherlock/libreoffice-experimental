@@ -428,7 +428,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     assert(!is_double_buffered_window());
 
     // short circuit for drawing an opaque polygon
-    if( (nTransparencePercent < 1) || (mnDrawMode & DrawModeFlags::NoTransparency) )
+    if ((nTransparencePercent < 1) || (m_aRenderState.drawMode & DrawModeFlags::NoTransparency))
     {
         DrawPolyPolygon( rPolyPoly );
         return;
@@ -481,8 +481,8 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
     if ( !IsDeviceOutputNecessary() )
         return;
 
-    if( ( rTransparenceGradient.GetStartColor() == aBlack && rTransparenceGradient.GetEndColor() == aBlack ) ||
-        ( mnDrawMode & DrawModeFlags::NoTransparency ) )
+    if ((rTransparenceGradient.GetStartColor() == aBlack && rTransparenceGradient.GetEndColor() == aBlack) ||
+        (m_aRenderState.drawMode & DrawModeFlags::NoTransparency))
     {
         const_cast<GDIMetaFile&>(rMtf).WindStart();
         const_cast<GDIMetaFile&>(rMtf).Play(*this, rMtfPos, rMtfSize);
