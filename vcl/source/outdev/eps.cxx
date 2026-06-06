@@ -59,6 +59,8 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
             return bDrawn;
         assert(mpGraphics);
 
+        EnsureRenderStateSynced();
+
         if( mbInitClipRegion )
             InitClipRegion();
 

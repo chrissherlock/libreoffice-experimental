@@ -521,6 +521,9 @@ public:
 protected:
 
     virtual void                ImplReleaseFonts();
+
+private:
+    void EnsureRenderStateSynced() const;
     ///@}
 
 

@@ -47,13 +47,13 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
     if ( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     // use b2dpolygon drawing if possible
     if(DrawPolyLineDirectInternal(
@@ -172,13 +172,13 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if( mbInitClipRegion )
         InitClipRegion();
 
     if( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     // use b2dpolygon drawing if possible
     if(DrawPolyLineDirectInternal(
@@ -215,7 +215,6 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
 
         SetLineColor();
         SetFillColor(aOldLineColor);
-        SyncRenderStateToBackend();
 
         // draw using a loop; else the topology will paint a PolyPolygon
         for(auto const& rPolygon : aAreaPolyPolygon)
@@ -226,7 +225,6 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
 
         SetLineColor(aOldLineColor);
         SetFillColor(aOldFillColor);
-        SyncRenderStateToBackend();
 
         // when AA it is necessary to also paint the filled polygon's outline
         // to avoid optical gaps
@@ -261,13 +259,13 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
     if ( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo, GetMappingPolicy()));
     const bool bDashUsed(LineStyle::Dash == aInfo.GetStyle());
@@ -349,13 +347,13 @@ bool OutputDevice::DrawPolyLineDirectInternal(
         return false;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if( mbInitClipRegion )
         InitClipRegion();
 
     if( mbOutputClipped )
         return true;
-
-    SyncRenderStateToBackend();
 
     const bool bTryB2d(RasterOp::OverPaint == GetRasterOp() && IsLineColor());
 

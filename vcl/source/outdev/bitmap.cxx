@@ -145,6 +145,8 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
@@ -242,6 +244,8 @@ void OutputDevice::DrawAlphaBitmap( const Point& rDestPt, const Size& rDestSize,
 
     if (!mpGraphics && !AcquireGraphics())
         return;
+
+    EnsureRenderStateSynced();
 
     if (mbInitClipRegion)
         InitClipRegion();

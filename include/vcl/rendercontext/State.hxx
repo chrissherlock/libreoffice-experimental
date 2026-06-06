@@ -104,14 +104,11 @@ struct State
     std::optional<MapMode> mpMapMode;
     std::optional<vcl::Font> mpFont;
     std::optional<Point> mpRefPoint;
-    std::optional<Color> mpLineColor;
-    std::optional<Color> mpFillColor;
     std::optional<Color> mpTextColor;
     std::optional<Color> mpTextFillColor;
     std::optional<Color> mpTextLineColor;
     std::optional<Color> mpOverlineColor;
     TextAlign meTextAlign = ALIGN_TOP;
-    RasterOp meRasterOp = RasterOp::OverPaint;
     text::ComplexTextLayoutFlags mnTextLayoutMode = text::ComplexTextLayoutFlags::Default;
     LanguageType meTextLanguage = LANGUAGE_SYSTEM;
     PushFlags mnFlags = PushFlags::NONE;
