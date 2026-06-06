@@ -67,13 +67,13 @@ void OutputDevice::DrawPixel( const Point& rPt )
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
     if ( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     mpGraphics->DrawPixel( aPt.X(), aPt.Y(), *this );
 }
@@ -95,6 +95,8 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     if ( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
+
+    EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
         InitClipRegion();

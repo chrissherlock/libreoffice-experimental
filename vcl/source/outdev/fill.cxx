@@ -40,12 +40,6 @@ void OutputDevice::SetFillColor()
         m_aRenderState.bFillColorSet = false; // Mark as unset
         m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::FillColor;
         m_aRenderState.epoch++;
-
-        // Eager Synchronization
-        // If we are not recording a layout, we ensure the backend reflects
-        // the transition to transparent immediately.
-        if (!ImplIsRecordLayout())
-            SyncRenderStateToBackend();
     }
 }
 
@@ -64,9 +58,6 @@ void OutputDevice::SetFillColor( const Color& rColor )
         m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::FillColor;
         m_aRenderState.epoch++;
     }
-
-    if (!ImplIsRecordLayout())
-        SyncRenderStateToBackend();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

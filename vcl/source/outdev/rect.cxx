@@ -61,13 +61,13 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
     if (!mpGraphics && !AcquireGraphics())
          return;
 
+    EnsureRenderStateSynced();
+
     if (mbInitClipRegion)
         InitClipRegion();
 
     if (mbOutputClipped)
          return;
-
-    SyncRenderStateToBackend();
 
     ImplDrawRect(vcl::LogicRect(rRect));
 }
@@ -106,13 +106,13 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
     if ( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     if ( !nHorzRound && !nVertRound )
     {
@@ -151,6 +151,8 @@ void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if ( mbInitClipRegion )
         InitClipRegion();
 
@@ -182,6 +184,8 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
     if ( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
+
+    EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
         InitClipRegion();
@@ -236,6 +240,8 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if( mbInitClipRegion )
         InitClipRegion();
 
@@ -277,8 +283,6 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
             aHorzBuf[ nHorzCount++ ] = mpMapper->LogicToDevicePixel(Point(nX, 0), GetMappingPolicy()).X();
         }
     }
-
-    SyncRenderStateToBackend();
 
     const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
     SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
@@ -333,6 +337,8 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
     }
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if (mbInitClipRegion)
     {
         InitClipRegion();
@@ -342,8 +348,6 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
     {
         return;
     }
-
-    SyncRenderStateToBackend();
 
     if (rDrawingArea.IsEmpty())
     {

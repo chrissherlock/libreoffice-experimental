@@ -107,13 +107,13 @@ void OutputDevice::DrawTransparent(
         return;
     assert(mpGraphics);
 
+    EnsureRenderStateSynced();
+
     if( mbInitClipRegion )
         InitClipRegion();
 
     if( mbOutputClipped )
         return;
-
-    SyncRenderStateToBackend();
 
     if (RasterOp::OverPaint == GetRasterOp())
     {
@@ -450,6 +450,8 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     if( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
+
+    EnsureRenderStateSynced();
 
     // try hard to draw it directly, because the emulation layers are slower
     bDrawn = DrawTransparentNatively( rPolyPoly, nTransparencePercent );
