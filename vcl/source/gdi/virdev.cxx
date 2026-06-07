@@ -370,26 +370,29 @@ bool VirtualDevice::SetOutputSizePixelScaleOffsetAndLOKBuffer(
     assert(comphelper::LibreOfficeKit::isActive());
     assert(pBuffer);
     MapMode mm = GetMapMode();
-    mm.SetOrigin( rNewOffset );
-    mm.SetScaleX( fScale );
-    mm.SetScaleY( fScale );
-    SetMapMode( mm );
+    mm.SetOrigin(rNewOffset);
+    mm.SetScaleX(fScale);
+    mm.SetScaleY(fScale);
+    SetMapMode(mm);
 
     assert(meFormatAndAlpha == DeviceFormat::WITHOUT_ALPHA);
     assert(mpVirDev);
-    assert( rNewSize != GetOutputSizePixel() &&  "Trying to re-use a VirtualDevice but this time using a pre-allocated buffer");
-    assert( rNewSize.Width() >= 1 );
-    assert( rNewSize.Height() >= 1 );
+    assert(rNewSize != GetOutputSizePixel() &&  "Trying to re-use a VirtualDevice but this time using a pre-allocated buffer");
+    assert(rNewSize.Width() >= 1);
+    assert(rNewSize.Height() >= 1);
 
-    bool bRet = mpVirDev->SetSizeUsingBuffer( rNewSize.Width(), rNewSize.Height(), pBuffer );
-    if ( bRet )
-    {
-        SetOutputWidthPixel(rNewSize.Width());
-        SetOutputHeightPixel(rNewSize.Height());
-    }
+    if (!mpVirDev->SetSizeUsingBuffer(rNewSize.Width(), rNewSize.Height(), pBuffer))
+        return false;
 
-    return bRet;
+    SetOutputWidthPixel(rNewSize.Width());
+    SetOutputHeightPixel(rNewSize.Height());
 
+    // The LOK buffer has been swapped; the hardware surface is now blank.
+    // Reset the epoch trackers to force the gatekeeper to re-apply
+    // the current OutputDevice state to this new buffer.
+    ResetRenderStateSync();
+
+    return true;
 }
 
 void VirtualDevice::SetReferenceDevice( RefDevMode i_eRefDevMode )
