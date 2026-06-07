@@ -202,10 +202,6 @@ private:
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
 
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long                            mnOutOffX;
-    /// Output offset for device output in pixel (pseudo window offset within window system's frames)
-    tools::Long                            mnOutOffY;
     /// font specific text alignment offsets in pixel units
     mutable tools::Long                    mnTextOffX;
     mutable tools::Long                    mnTextOffY;
