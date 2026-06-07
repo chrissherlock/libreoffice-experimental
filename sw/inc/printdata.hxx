@@ -21,7 +21,8 @@
 
 #include <sal/types.h>
 #include <rtl/ustring.hxx>
-#include <vcl/print.hxx>
+#include <vcl/vclptr.hxx>
+#include <vcl/PrinterOptionsHelper.hxx>
 #include <sfx2/objsh.hxx>
 
 #include <o3tl/sorted_vector.hxx>

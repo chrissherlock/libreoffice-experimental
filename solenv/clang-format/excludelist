@@ -13970,6 +13970,7 @@ vcl/source/accessibility/vclxaccessibletextcomponent.cxx
 vcl/source/accessibility/vclxaccessibletextfield.cxx
 vcl/source/accessibility/vclxaccessibletoolbox.cxx
 vcl/source/accessibility/vclxaccessibletoolboxitem.cxx
+vcl/source/printer/PrinterOptionsHelper.cxx
 vcl/inc/accmgr.hxx
 vcl/inc/animate/AnimationRenderer.hxx
 vcl/inc/brdwin.hxx

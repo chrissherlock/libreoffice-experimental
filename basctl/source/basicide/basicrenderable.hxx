@@ -21,7 +21,10 @@
 #include <com/sun/star/view/XRenderable.hpp>
 #include <cppuhelper/compbase.hxx>
 
-#include <vcl/print.hxx>
+#include <vcl/vclptr.hxx>
+#include <vcl/PrinterOptionsHelper.hxx>
+
+class Printer;
 
 namespace basctl
 {
