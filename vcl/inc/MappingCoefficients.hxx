@@ -21,6 +21,8 @@
 
 #include <tools/long.hxx>
 #include <o3tl/unit_conversion.hxx>
+#include <o3tl/hash_combine.hxx>
+
 #include <vcl/MappingPolicy.hxx>
 
 class MapMode;
@@ -53,6 +55,16 @@ struct MappingCoefficients
                                 const MappingCoefficients& rDestRes) const;
     tools::Long TransformPointY(const tools::Long nLocalY,
                                 const MappingCoefficients& rDestRes) const;
+
+    size_t GetHash() const
+    {
+        size_t nSeed = 0;
+        o3tl::hash_combine(nSeed, mnTranslationX);
+        o3tl::hash_combine(nSeed, mnTranslationY);
+        o3tl::hash_combine(nSeed, mfScaleX);
+        o3tl::hash_combine(nSeed, mfScaleY);
+        return nSeed;
+    }
 
     tools::Long mnTranslationX = 0; ///< Offset in X direction
     tools::Long mnTranslationY = 0; ///< Offset in Y direction
