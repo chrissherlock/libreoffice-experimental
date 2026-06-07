@@ -190,7 +190,6 @@ private:
     mutable std::unique_ptr<vcl::font::PhysicalFontFaceCollection>  mpFontFaceCollection;
 
     std::vector<vcl::State>        maOutDevStateStack;
-    mutable vcl::rstate::RenderState m_aRenderState;
     std::vector<vcl::rstate::PushFrame> m_aPushFrames;
 
     std::unique_ptr<ImplOutDevData> mpOutDevData;
@@ -245,6 +244,7 @@ private:
 protected:
     mutable std::shared_ptr<vcl::font::PhysicalFontCollection> mxFontCollection;
     mutable std::shared_ptr<ImplFontCache> mxFontCache;
+    mutable vcl::rstate::RenderState m_aRenderState;
 
     /** @name Initialization and accessor functions
      */
