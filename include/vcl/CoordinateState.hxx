@@ -12,6 +12,7 @@
 
 #include <tools/long.hxx>
 #include <tools/gen.hxx>
+#include <o3tl/hash_combine.hxx>
 
 #include <vcl/mapmod.hxx>
 
@@ -27,6 +28,16 @@ struct MapConversion
     double mfScaleY = 1.0;
     tools::Long mnOffsetX = 0;
     tools::Long mnOffsetY = 0;
+
+    size_t GetHash() const
+    {
+        size_t nSeed = 0;
+        o3tl::hash_combine(nSeed, mfScaleX);
+        o3tl::hash_combine(nSeed, mfScaleY);
+        o3tl::hash_combine(nSeed, mnOffsetX);
+        o3tl::hash_combine(nSeed, mnOffsetY);
+        return nSeed;
+    }
 };
 }
 
@@ -136,6 +147,35 @@ public:
                                               vcl::MappingPolicy ePolicy) const
     {
         return maMapRes.ResolveMapRes(pTarget, *pBaseline, ePolicy, mnDPIX, mnDPIY);
+    }
+
+    size_t GetHash() const
+    {
+        size_t nSeed = 0;
+
+        // Hardware & DPI Scale Context
+        o3tl::hash_combine(nSeed, static_cast<size_t>(mnDPIX));
+        o3tl::hash_combine(nSeed, static_cast<size_t>(mnDPIY));
+        o3tl::hash_combine(nSeed, static_cast<size_t>(mnDPIScalePercentage));
+
+        // Complete Coordinate Sub-System Offsets
+        o3tl::hash_combine(nSeed, mnWindowToViewOffsetX);
+        o3tl::hash_combine(nSeed, mnWindowToViewOffsetY);
+        o3tl::hash_combine(nSeed, mnDeviceToWindowOffsetX);
+        o3tl::hash_combine(nSeed, mnDeviceToWindowOffsetY);
+        o3tl::hash_combine(nSeed, mnLogicToAbsoluteOffsetX);
+        o3tl::hash_combine(nSeed, mnLogicToAbsoluteOffsetY);
+
+        // User-Facing MapMode State
+        o3tl::hash_combine(nSeed, maMapMode.GetHashValue());
+
+        // Pre-calculated Mapping Coefficients
+        o3tl::hash_combine(nSeed, maMapRes.GetHash());
+
+        // Internal MapConversion State
+        o3tl::hash_combine(nSeed, maMapConversion.GetHash());
+
+        return nSeed;
     }
 };
 
