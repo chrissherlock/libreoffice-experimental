@@ -838,15 +838,19 @@ Printer::Printer()
     : OutputDevice(OUTDEV_PRINTER)
 {
     ImplInitData();
-    SalPrinterQueueInfo* pInfo = ImplGetQueueInfo( GetDefaultPrinterName(), nullptr );
-    if ( pInfo )
+    SalPrinterQueueInfo* pInfo = ImplGetQueueInfo(GetDefaultPrinterName(), nullptr);
+
+    if (pInfo)
     {
         ImplInit(*pInfo);
-        if ( !IsDisplayPrinter() )
+
+        if (!IsDisplayPrinter())
             mbDefPrinter = true;
+
+        return;
     }
-    else
-        ImplInitDisplay();
+
+    ImplInitDisplay();
 }
 
 Printer::Printer( const JobSetup& rJobSetup )
