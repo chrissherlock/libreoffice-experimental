@@ -1135,33 +1135,32 @@ bool Printer::SetOrientation( Orientation eOrientation )
     if ( mbInPrintPage )
         return false;
 
-    if ( maJobSetup.ImplGetConstData().GetOrientation() != eOrientation )
+    if ( maJobSetup.ImplGetConstData().GetOrientation() == eOrientation )
+        return true;
+
+    JobSetup      aJobSetup = maJobSetup;
+    ImplJobSetup& rData = aJobSetup.ImplGetData();
+
+    rData.SetOrientation(eOrientation);
+
+    if ( IsDisplayPrinter() )
     {
-        JobSetup      aJobSetup = maJobSetup;
-        ImplJobSetup& rData = aJobSetup.ImplGetData();
-
-        rData.SetOrientation(eOrientation);
-
-        if ( IsDisplayPrinter() )
-        {
-            mbNewJobSetup = true;
-            maJobSetup = aJobSetup;
-            return true;
-        }
-
-        ReleaseGraphics();
-        if (mpInfoPrinter->SetData(JobSetFlags::ORIENTATION, rData))
-        {
-            lcl_UpdateJobSetupPaper( aJobSetup );
-            mbNewJobSetup = true;
-            maJobSetup = std::move(aJobSetup);
-            ImplUpdatePageData();
-            ImplUpdateFontList();
-            return true;
-        }
-        else
-            return false;
+        mbNewJobSetup = true;
+        maJobSetup = aJobSetup;
+        return true;
     }
+
+    ReleaseGraphics();
+    if (!mpInfoPrinter->SetData(JobSetFlags::ORIENTATION, rData))
+        return false;
+
+    lcl_UpdateJobSetupPaper( aJobSetup );
+
+    mbNewJobSetup = true;
+    maJobSetup = std::move(aJobSetup);
+
+    ImplUpdatePageData();
+    ImplUpdateFontList();
 
     return true;
 }
