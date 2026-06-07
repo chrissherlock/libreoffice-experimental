@@ -1743,6 +1743,9 @@ protected:
      */
     SAL_DLLPRIVATE tools::Long DevicePixelToLogicHeight(tools::Long nHeight) const;
 
+private:
+    void ImplGetAsymmetricTransform(basegfx::B2DHomMatrix& rMatrix) const;
+
     /** @name Native Widget Rendering functions
 
         These all just call through to the private mpGraphics functions of the same name.

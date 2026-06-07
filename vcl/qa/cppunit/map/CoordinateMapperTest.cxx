@@ -54,8 +54,8 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMatrixEngine)
 
     // The "Offset Sandwich" (The 13 vs 10 Regression Guard)
     // LogicOffset is applied BEFORE scale. WindowOffset is applied AFTER scale.
-    aMapper.SetLogicOffset(Size(100, 100)); // 100 logic units
-    aMapper.SetWindowOffset(Size(50, 50)); // 50 pixels
+    aMapper.SetPixelOffset(Size(100, 100)); // 100 logic units via SetPixelOffset snapshot adapter
+    aMapper.SetWindowToViewOffset(Size(50, 50)); // 50 pixels
 
     // Math: round((1000 + 100) * 0.07559) + 50
     // round(1100 * 0.07559) + 50 = round(83.149) + 50 = 83 + 50 = 133
@@ -109,19 +109,19 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testBMapFalseSemantics)
     aMapper.SetMapMode(MapMode(MapUnit::Map100thMM));
 
     // Set heavy logical offsets (should be ignored)
-    aMapper.SetLogicOffset(Size(5000, 5000));
+    aMapper.SetPixelOffset(Size(5000, 5000));
 
     // Set pixel view/device offsets (should be applied)
-    aMapper.SetWindowOffset(Size(50, 50));
+    aMapper.SetWindowToViewOffset(Size(50, 50));
     aMapper.SetDeviceToWindowOffsetX(10);
     aMapper.SetDeviceToWindowOffsetY(10);
 
-    // Request translation with bMap = false
+    // Request translation with MappingPolicy = IgnoreMapMode
     Point aPt(10, 10);
     Point aResult = aMapper.LogicToDevicePixel(aPt, vcl::MappingPolicy::IgnoreMapMode);
 
     // Expect: (10 + 0 logical scaling/offset) + 50 window + 10 device = 70
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("bMap=false must ignore logic but apply pixel offsets",
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("IgnoreMapMode must ignore logic but apply pixel offsets",
                                  tools::Long(70), aResult.X());
 }
 
@@ -129,11 +129,11 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testTransformPlanStability)
 {
     CoordinateMapper aMapper;
     aMapper.SetMapMode(MapMode(MapUnit::MapPixel));
-    aMapper.SetWindowOffset(Size(10, 10));
+    aMapper.SetWindowToViewOffset(Size(10, 10));
 
     vcl::TransformPlan aTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
 
-    aMapper.SetWindowOffset(Size(999, 999));
+    aMapper.SetWindowToViewOffset(Size(999, 999));
 
     basegfx::B2DPoint aPt(0, 0);
     aPt *= aTransform.maMatrix;
@@ -155,16 +155,15 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testAffineCompositionOrder)
 
     // Setup Asymmetric Scaling
     // X scale = 2.0, Y scale = 3.0
-    // (We fake this using DPI to bypass MapMode resolution complexities for a pure math test)
     aMapper.SetDPIX(2);
     aMapper.SetDPIY(3);
     aMapper.SetDPIScalePercentage(100);
 
     // Setup Logical Offset (Should be SCALED)
-    aMapper.SetLogicOffset(Size(10, -20));
+    aMapper.SetPixelOffset(Size(10, -20));
 
     // Setup Viewport Offset (Should NOT be scaled)
-    aMapper.SetWindowOffset(Size(15, 5));
+    aMapper.SetWindowToViewOffset(Size(15, 5));
 
     // Execute the transform on Point(100, 50)
     // EXPECTED MATH:
@@ -253,7 +252,6 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionRectilinearCollapsePreventi
     vcl::Region aTransformed = rTransform.apply(aRegion);
 
     // ASSERTION 1: The region MUST NOT vanish.
-    // (This asserts the fix for the SwVirtFlyDrawObj empty-viewport crash)
     CPPUNIT_ASSERT_MESSAGE("Rectangular region collapsed to empty during severe downscale!",
                            !aTransformed.IsEmpty());
 
@@ -272,8 +270,6 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionCollapsePrevention)
     aMapper.SetDPIY(100);
 
     // Force extreme minification: 0.001 scale factor.
-    // A 10x10 logical rect (100 units area) * 0.001 = 0.01 pixel footprint.
-    // This will force the rounding logic to confront 0-pixel dimensions.
     aMapper.SetMapResolutionScaleX(0.001);
     aMapper.SetMapResolutionScaleY(0.001);
 
@@ -305,7 +301,6 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionTransformationCoverage)
     aMapper.SetMapResolutionScaleY(0.02);
 
     // Create a 100x100 logical rectangle.
-    // In VCL, this is Point(0,0) to Point(99,99) for a width of 100.
     vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
 
     const auto& rTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
@@ -314,8 +309,6 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRegionTransformationCoverage)
 
     // Verification:
     // Logical 100 units * 2.0 = 200 physical pixels.
-    // We use a delta or a range check to handle VCL's inclusive integer coordinate system
-    // which can drift by 1 pixel depending on scanline conversion.
     tools::Long nWidth = aBound.GetWidth();
     CPPUNIT_ASSERT_MESSAGE("Region width scaling failed significantly",
                            nWidth >= 199 && nWidth <= 201);
@@ -339,7 +332,6 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRectangleBoundaryIntegrity)
     aMapper.SetMapMode(aMap);
 
     // Create a 10x10 rectangle at (10, 10)
-    // Inclusive bounds: Left=10, Right=19 (Width is 10)
     tools::Rectangle aRect(Point(10, 10), Size(10, 10));
 
     tools::Rectangle aResult = aMapper.LogicToDevicePixel(aRect);
@@ -353,11 +345,6 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRectangleBoundaryIntegrity)
     CPPUNIT_ASSERT_EQUAL(tools::Long(15), aResult.GetWidth());
 }
 
-/**
- * THE CARET/THIN LINE PRESERVATION TEST:
- * Verifies that a thin rectangle representing a 1D vertical primitive (like a text cursor)
- * does not completely collapse to a zero-geometry empty rect if only its width is sub-pixel.
- */
 CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCaretLineHeightPreservation)
 {
     CoordinateMapper aMapper;
@@ -370,9 +357,6 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCaretLineHeightPreservation)
     aMap.SetScaleY(1.0);
     aMapper.SetMapMode(aMap);
 
-    // Input: Left=10, Top=10, Width=1, Height=20 (A typical text insertion caret)
-    // Horizontal Math: Left = 10 * 0.4 = 4.0. Right+1 = 11 * 0.4 = 4.4. Extent = 0.4px (< 0.5px)
-    // Vertical Math:   Top = 10 * 1.0 = 10.0. Bottom+1 = 30 * 1.0 = 30.0. Extent = 20.0px
     tools::Rectangle aCaretRect(Point(10, 10), Size(1, 20));
 
     tools::Rectangle aResult = aMapper.LogicToDevicePixel(aCaretRect);
@@ -380,7 +364,6 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testCaretLineHeightPreservation)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Vertical height metrics must be preserved for 1D carets/lines",
                                  tools::Long(20), aResult.GetHeight());
 
-    // Explicitly verify the vertical screen coordinates remain intact for the paint engine
     CPPUNIT_ASSERT_EQUAL(tools::Long(10), aResult.Top());
     CPPUNIT_ASSERT_EQUAL(tools::Long(29), aResult.Bottom());
 }
@@ -411,42 +394,19 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testRotationScaleIntegrity)
     aMapper.SetDPIX(1);
     aMapper.SetDPIY(1);
 
-    // Construct a pure affine transform with rotation (no MapConversion abuse)
     basegfx::B2DHomMatrix aAffine;
-
-    // 90-degree rotation:
-    // [ 0 -1  0 ]
-    // [ 1  0  0 ]
-    // [ 0  0  1 ]
     aAffine.rotate(M_PI / 2.0);
 
-    // Inject this as the effective view transform context
-    // (via MapConversion-free path: we simulate by using identity MapConversion
-    // and applying affine directly through the mapper’s transform pipeline)
     vcl::detail::MapConversion aIdentityConv;
     aIdentityConv.mfScaleX = 1.0;
     aIdentityConv.mfScaleY = 1.0;
     aIdentityConv.mnOffsetX = 0;
     aIdentityConv.mnOffsetY = 0;
 
-    // NOTE:
-    // We intentionally do NOT encode rotation in MapConversion,
-    // because MapConversion is not an affine carrier.
-
-    // Input geometry (axis-aligned size in logic space)
     Size aLogicSize(100, 50);
 
-    // Apply transformation via mapper (affine path is resolved internally)
     Size aViewSize = aMapper.LogicToWindowUnits(aLogicSize, aIdentityConv);
 
-    // Affine invariants:
-    //
-    // Under pure rotation:
-    // - vector lengths are preserved
-    // - width/height are derived from basis vector magnitudes
-    //
-    // So:
-    //   (100, 50) must NOT collapse
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Width must be preserved under affine rotation", tools::Long(100),
                                  aViewSize.Width());
 
@@ -460,7 +420,6 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testSizeIsBasisVectorScaledUnderRotat
     aMapper.SetDPIX(1);
     aMapper.SetDPIY(1);
 
-    // Identity MapMode (no scaling, pure geometry test)
     vcl::detail::MapConversion aConv;
     aConv.mfScaleX = 1.0;
     aConv.mfScaleY = 1.0;
@@ -469,15 +428,7 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testSizeIsBasisVectorScaledUnderRotat
 
     const Size aLogicSize(100, 50);
 
-    // Transform once through affine pipeline
     const Size aResult = aMapper.LogicToWindowUnits(aLogicSize, aConv);
-
-    // Instead of "width must stay 100", we assert vector invariants:
-    //
-    // In a pure rotation, the *lengths of basis contributions* are preserved.
-    //
-    // So the transformed rectangle must still span the same total extent
-    // in Euclidean space, even if axis-aligned components change.
 
     const double fExpectedMagnitude = std::sqrt(100.0 * 100.0 + 50.0 * 50.0);
 
@@ -492,16 +443,13 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testSizeIsBasisVectorScaledUnderRotat
 CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testHairlinePreservation)
 {
     CoordinateMapper aMapper;
-    // Set a scale that would make a 1-unit line mathematically 0.1 pixels.
     aMapper.SetMapResolutionScaleX(0.1);
 
-    // 1-unit logical line.
     vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(1, 1)));
 
     const auto& rTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
     vcl::Region aTransformed = rTransform.apply(aRegion);
 
-    // The clamp MUST force it to a 1x1 pixel footprint.
     CPPUNIT_ASSERT_MESSAGE("Hairline collapsed!", !aTransformed.IsEmpty());
     CPPUNIT_ASSERT_EQUAL(tools::Long(1), aTransformed.GetBoundRect().GetWidth());
 }
@@ -509,21 +457,15 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testHairlinePreservation)
 CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testMirroringSymmetry)
 {
     CoordinateMapper aMapper;
-    // Force a mirror (negative scale)
     aMapper.SetMapResolutionScaleX(-1.0);
 
-    // A rectangle at (10, 10) with size 20x20
     tools::Rectangle aRect(Point(10, 10), Size(20, 20));
 
     const auto& rTransform = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
     tools::Rectangle aTransformed = rTransform.apply(aRect);
 
-    // The scale includes the custom -1.0 AND the system DPI (e.g., -72 on macOS)
     const double fScaleX = rTransform.maMatrix.get(0, 0);
 
-    // Under proper AABB sorting with a negative scale, the old Right bound
-    // mathematically becomes the new Left bound.
-    // Logical Right bound = 10 + 20 = 30.
     tools::Long nExpectedLeft = static_cast<tools::Long>(30.0 * fScaleX);
     tools::Long nExpectedWidth = static_cast<tools::Long>(20.0 * std::abs(fScaleX));
 
@@ -536,16 +478,14 @@ CPPUNIT_TEST_FIXTURE(CppUnit::TestFixture, testPolicySwitchInvalidation)
     CoordinateMapper aMapper;
     Point aLogicPt(100, 100);
 
-    // 1. Test Applied Mode
+    // 1. Test Applied Mode (Pass only the vcl::MappingPolicy flag)
     aMapper.SetMapResolutionScaleX(2.0);
-    auto aTransform1 = aMapper.Compile(
-        { CoordinateSpace::Logic, CoordinateSpace::Device, vcl::MappingPolicy::ApplyMapMode });
+    auto& aTransform1 = aMapper.Compile(vcl::MappingPolicy::ApplyMapMode);
     Point aDevPt1 = aTransform1.apply(aLogicPt);
     CPPUNIT_ASSERT(aDevPt1.X() > 100); // Scale applied
 
-    // 2. Test Ignore Mode (Should be identity/direct)
-    auto aTransform2 = aMapper.Compile(
-        { CoordinateSpace::Logic, CoordinateSpace::Device, vcl::MappingPolicy::IgnoreMapMode });
+    // 2. Test Ignore Mode (Pass only the vcl::MappingPolicy flag)
+    auto& aTransform2 = aMapper.Compile(vcl::MappingPolicy::IgnoreMapMode);
     Point aDevPt2 = aTransform2.apply(aLogicPt);
     CPPUNIT_ASSERT_EQUAL(aLogicPt.X(), aDevPt2.X()); // Identity logic
 }

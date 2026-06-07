@@ -242,20 +242,21 @@ void OutputDevice::LegacyPop()
 
 void OutputDevice::ClearStack()
 {
-    // Drain the primary MVCC stack.
-    // Pop() internally handles the Metafile recording, state reconciliation,
-    // and automatically calls LegacyPop() for the legacy state variables.
-    while ( !m_aPushFrames.empty() )
+    // Drain the State Snapshot Stack.
+    // Pop() handles the required state reconciliation (fonts, map modes, etc.)
+    // as it unwinds the snapshots.
+    while (!m_aPushFrames.empty())
     {
         Pop();
     }
 
     // Failsafe: Drain any orphaned legacy state frames.
-    // This guarantees we satisfy the ~OutputDevice() assertion that
-    // Push() calls == Pop() calls, even if the stacks somehow desynced.
-    while ( !maOutDevStateStack.empty() )
+    // We avoid LegacyPop() if possible to prevent applying stale state
+    // to a device that is meant to be reset.
+    if (!maOutDevStateStack.empty())
     {
-        LegacyPop();
+        SAL_WARN( "vcl.gdi", "OutputDevice::ClearStack(): Orphaned legacy frames found." );
+        maOutDevStateStack.clear();
     }
 }
 
