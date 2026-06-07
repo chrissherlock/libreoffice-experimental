@@ -14504,9 +14504,6 @@ vcl/source/gdi/mapmod.cxx
 vcl/source/gdi/metaact.cxx
 vcl/source/gdi/mtfxmldump.cxx
 vcl/source/gdi/oldprintadaptor.cxx
-vcl/source/gdi/print.cxx
-vcl/source/gdi/print2.cxx
-vcl/source/gdi/print3.cxx
 vcl/source/gdi/regband.cxx
 vcl/source/gdi/region.cxx
 vcl/source/gdi/regionband.cxx
@@ -14571,6 +14568,8 @@ vcl/source/pdf/pdfwriter_impl.cxx
 vcl/source/pdf/pdfwriter_impl2.cxx
 vcl/source/pdf/pdfwriterimpl_utils.cxx
 vcl/source/pdf/pwdinteract.cxx
+vcl/source/printer/PrinterController.cxx
+vcl/source/printer/Printer.cxx
 vcl/source/text/ImplLayoutRuns.cxx
 vcl/source/text/textlayout.cxx
 vcl/source/toolkit/group.cxx
