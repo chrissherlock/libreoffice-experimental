@@ -1586,15 +1586,15 @@ void Printer::ImplEndPage()
 
     mbInPrintPage = false;
 
-    if ( mpPrinter )
-    {
-        ReleaseGraphics();
-        mpPrinter->EndPage();
-        mbDevOutput = false;
+    if ( !mpPrinter )
+        return;
 
-        mpJobGraphics = nullptr;
-        mbNewJobSetup = false;
-    }
+    ReleaseGraphics();
+    mpPrinter->EndPage();
+    mbDevOutput = false;
+
+    mpJobGraphics = nullptr;
+    mbNewJobSetup = false;
 }
 
 void Printer::updatePrinters()
