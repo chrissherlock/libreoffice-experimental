@@ -758,48 +758,46 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
     mpMetaFile = pOldMetaFile;
 }
 
-SalPrinterQueueInfo* Printer::ImplGetQueueInfo( const OUString& rPrinterName,
-                                                const OUString* pDriver )
+SalPrinterQueueInfo* Printer::ImplGetQueueInfo(const OUString& rPrinterName,
+                                               const OUString* pDriver)
 {
     ImplSVData* pSVData = ImplGetSVData();
-    if ( !pSVData->maGDIData.mpPrinterQueueList )
+    if (!pSVData->maGDIData.mpPrinterQueueList)
         ImplInitPrnQueueList();
 
     ImplPrnQueueList* pPrnList = pSVData->maGDIData.mpPrinterQueueList.get();
-    if ( pPrnList && !pPrnList->m_aQueueInfos.empty() )
+    if (!pPrnList || pPrnList->m_aQueueInfos.empty())
+        return nullptr;
+
+    // first search for the printer name directly
+    ImplPrnQueueData* pInfo = pPrnList->Get(rPrinterName);
+    if (pInfo)
+        return pInfo->mpSalQueueInfo.get();
+
+    // then search case insensitive
+    for (const ImplPrnQueueData & rQueueInfo : pPrnList->m_aQueueInfos)
     {
-        // first search for the printer name directly
-        ImplPrnQueueData* pInfo = pPrnList->Get( rPrinterName );
-        if( pInfo )
-            return pInfo->mpSalQueueInfo.get();
-
-        // then search case insensitive
-        for(const ImplPrnQueueData & rQueueInfo : pPrnList->m_aQueueInfos)
-        {
-            if( rQueueInfo.mpSalQueueInfo->maPrinterName.equalsIgnoreAsciiCase( rPrinterName ) )
-                return rQueueInfo.mpSalQueueInfo.get();
-        }
-
-        // then search for driver name
-        if ( pDriver )
-        {
-            for(const ImplPrnQueueData & rQueueInfo : pPrnList->m_aQueueInfos)
-            {
-                if( rQueueInfo.mpSalQueueInfo->maDriver == *pDriver )
-                    return rQueueInfo.mpSalQueueInfo.get();
-            }
-        }
-
-        // then the default printer
-        pInfo = pPrnList->Get( GetDefaultPrinterName() );
-        if( pInfo )
-            return pInfo->mpSalQueueInfo.get();
-
-        // last chance: the first available printer
-        return pPrnList->m_aQueueInfos[0].mpSalQueueInfo.get();
+        if (rQueueInfo.mpSalQueueInfo->maPrinterName.equalsIgnoreAsciiCase(rPrinterName))
+            return rQueueInfo.mpSalQueueInfo.get();
     }
 
-    return nullptr;
+    // then search for driver name
+    if (pDriver)
+    {
+        for (const ImplPrnQueueData & rQueueInfo : pPrnList->m_aQueueInfos)
+        {
+            if (rQueueInfo.mpSalQueueInfo->maDriver == *pDriver)
+                return rQueueInfo.mpSalQueueInfo.get();
+        }
+    }
+
+    // then the default printer
+    pInfo = pPrnList->Get(GetDefaultPrinterName());
+    if (pInfo)
+        return pInfo->mpSalQueueInfo.get();
+
+    // last chance: the first available printer
+    return pPrnList->m_aQueueInfos[0].mpSalQueueInfo.get();
 }
 
 void Printer::ImplUpdatePageData()
