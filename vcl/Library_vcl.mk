@@ -169,6 +169,8 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/cnttype/mcnttfactory \
     vcl/source/cnttype/mcnttype \
     vcl/source/printer/Options \
+    vcl/source/printer/Printer \
+    vcl/source/printer/PrinterController \
     vcl/source/printer/PrinterOptionsHelper \
     vcl/source/printer/QueueInfo \
     vcl/source/window/bubblewindow \
@@ -368,9 +370,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/gdi/mapmod \
     vcl/source/gdi/metaact \
     vcl/source/gdi/oldprintadaptor \
-    vcl/source/gdi/print2 \
-    vcl/source/gdi/print3 \
-    vcl/source/gdi/print \
     vcl/source/gdi/regband \
     vcl/source/gdi/region \
     vcl/source/gdi/regionband \
