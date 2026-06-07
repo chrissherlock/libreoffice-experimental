@@ -22,6 +22,7 @@
 #include <iderid.hxx>
 #include <strings.hrc>
 
+#include <vcl/print.hxx>
 #include <toolkit/awt/vclxdevice.hxx>
 #include <tools/mapunit.hxx>
 #include <tools/multisel.hxx>
