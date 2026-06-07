@@ -907,16 +907,20 @@ Printer::~Printer()
 
 void Printer::dispose()
 {
-    SAL_WARN_IF( IsPrinting(), "vcl.gdi", "Printer::~Printer() - Job is printing" );
-    SAL_WARN_IF( IsJobActive(), "vcl.gdi", "Printer::~Printer() - Job is active" );
+    SAL_WARN_IF(IsPrinting(), "vcl.gdi", "Printer::~Printer() - Job is printing");
+    SAL_WARN_IF(IsJobActive(), "vcl.gdi", "Printer::~Printer() - Job is active");
 
     mpPrinterOptions.reset();
 
     ImplReleaseGraphics();
-    if ( mpInfoPrinter )
+
+    if (mpInfoPrinter)
         GetSalInstance()->DestroyInfoPrinter(mpInfoPrinter);
-    if ( mpDisplayDev )
+
+    if (mpDisplayDev)
+    {
         mpDisplayDev.disposeAndClear();
+    }
     else
     {
         // OutputDevice Dtor is trying the same thing; that why we need to set
@@ -930,11 +934,13 @@ void Printer::dispose()
 
     // Add printer from the list
     ImplSVData* pSVData = ImplGetSVData();
-    if ( mpPrev )
+
+    if (mpPrev)
         mpPrev->mpNext = mpNext;
     else
         pSVData->maGDIData.mpFirstPrinter = mpNext;
-    if ( mpNext )
+
+    if (mpNext)
         mpNext->mpPrev = mpPrev;
 
     mpPrev.reset();
