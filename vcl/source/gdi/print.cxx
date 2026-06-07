@@ -976,25 +976,25 @@ bool Printer::HasSupport( PrinterSupport eFeature ) const
     return true;
 }
 
-bool Printer::SetJobSetup( const JobSetup& rSetup )
+bool Printer::SetJobSetup(const JobSetup& rSetup)
 {
-    if ( IsDisplayPrinter() || mbInPrintPage )
+    if (IsDisplayPrinter() || mbInPrintPage)
         return false;
 
     JobSetup aJobSetup = rSetup;
 
     ReleaseGraphics();
-    if (mpInfoPrinter->SetPrinterData(aJobSetup.ImplGetData()))
-    {
-        lcl_UpdateJobSetupPaper( aJobSetup );
-        mbNewJobSetup = true;
-        maJobSetup = std::move(aJobSetup);
-        ImplUpdatePageData();
-        ImplUpdateFontList();
-        return true;
-    }
 
-    return false;
+    if (!mpInfoPrinter->SetPrinterData(aJobSetup.ImplGetData()))
+        return false;
+
+    lcl_UpdateJobSetupPaper( aJobSetup );
+    mbNewJobSetup = true;
+    maJobSetup = std::move(aJobSetup);
+    ImplUpdatePageData();
+    ImplUpdateFontList();
+
+    return true;
 }
 
 bool Printer::Setup(weld::Window* pWindow, PrinterSetupMode eMode)
