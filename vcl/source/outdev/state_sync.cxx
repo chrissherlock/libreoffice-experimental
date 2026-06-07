@@ -95,14 +95,72 @@ void OutputDevice::SyncRenderStateToBackend() const
         m_aRenderState.changeMask &= ~vcl::rstate::RenderChangeMask::FillColor;
     }
 
+    if (m_aRenderState.changeMask & vcl::rstate::RenderChangeMask::TextColor)
+    {
+        if (!m_aRenderState.bTextColorSet)
+        {
+            // If the user hasn't set a specific text color,
+            // we should likely fall back to a default (like Black)
+            // or perform a reset on the backend.
+            mpGraphics->SetTextColor(COL_BLACK);
+        }
+        else
+        {
+            mpGraphics->SetTextColor(m_aRenderState.textColor);
+        }
+
+        m_aRenderState.changeMask &= ~vcl::rstate::RenderChangeMask::TextColor;
+    }
+
     if (m_aRenderState.changeMask & vcl::rstate::RenderChangeMask::DrawMode)
     {
+        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
+
+        // High Contrast / Settings Override
+        if (m_aRenderState.drawMode & DrawModeFlags::SettingsLine)
+            m_aRenderState.lineColor = rStyleSettings.GetWindowTextColor();
+
+        if (m_aRenderState.drawMode & DrawModeFlags::SettingsFill)
+            m_aRenderState.fillColor = rStyleSettings.GetWindowColor();
+
+        if (m_aRenderState.drawMode & DrawModeFlags::SettingsText)
+            m_aRenderState.textColor = rStyleSettings.GetWindowTextColor();
+
+        // Black Overrides
+        if (m_aRenderState.drawMode & DrawModeFlags::BlackLine)
+            m_aRenderState.lineColor = COL_BLACK;
+
+        if (m_aRenderState.drawMode & DrawModeFlags::BlackFill)
+            m_aRenderState.fillColor = COL_BLACK;
+
+        if (m_aRenderState.drawMode & DrawModeFlags::BlackText)
+            m_aRenderState.textColor = COL_BLACK;
+
+        // Gray Overrides
+        if (m_aRenderState.drawMode & DrawModeFlags::GrayLine)
+            m_aRenderState.lineColor = COL_GRAY;
+
+        if (m_aRenderState.drawMode & DrawModeFlags::GrayFill)
+            m_aRenderState.fillColor = COL_GRAY;
+
+        if (m_aRenderState.drawMode & DrawModeFlags::GrayText)
+            m_aRenderState.textColor = COL_GRAY;
+
+        // White Overrides
+        if (m_aRenderState.drawMode & DrawModeFlags::WhiteLine)
+            m_aRenderState.lineColor = COL_WHITE;
+
+        if (m_aRenderState.drawMode & DrawModeFlags::WhiteFill)
+            m_aRenderState.fillColor = COL_WHITE;
+
+        if (m_aRenderState.drawMode & DrawModeFlags::WhiteText)
+            m_aRenderState.textColor = COL_WHITE;
+
+        // Force a re-sync of color states to the backend
         m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::LineColor;
         m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::FillColor;
+        m_aRenderState.changeMask |= vcl::rstate::RenderChangeMask::TextColor;
 
-        // Note: SalGraphics doesn't always have a direct SetDrawMode()
-        // call, so this bit trigger effectively forces the colors
-        // to be re-calculated via GetLineColor(..., m_aRenderState.drawMode)
         m_aRenderState.changeMask &= ~vcl::rstate::RenderChangeMask::DrawMode;
     }
 
