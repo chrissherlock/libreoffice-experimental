@@ -197,9 +197,9 @@ bool Printer::TransformAndReduceBitmapExToTargetRange(
     return true;
 }
 
-void Printer::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
-                                const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                Bitmap& rBmp )
+void Printer::DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
+                               const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+                               Bitmap& rBmp)
 {
 #ifdef MACOSX
     // tdf#172059 draw alpha bitmaps directly to print graphics on macOS
@@ -211,19 +211,15 @@ void Printer::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
     // bitmaps so just draw the alpha mask directly without any blending.
     DrawDeviceAlphaBitmap( Bitmap(rBmp.CreateColorBitmap(), rBmp.CreateAlphaMask()), rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel );
 #else
-    if( rBmp.HasAlpha() )
-    {
-        // #107169# For true alpha bitmaps, no longer masking the
-        // bitmap, but perform a full alpha blend against a white
-        // background here.
-        Bitmap aBmp( rBmp.CreateColorBitmap() );
-        aBmp.Blend( rBmp.CreateAlphaMask(), COL_WHITE );
-        DrawBitmap( rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp );
-    }
-    else
-    {
-        ImplPrintTransparent( rBmp, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel );
-    }
+    if (!rBmp.HasAlpha())
+        ImplPrintTransparent(rBmp, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
+
+    // #107169# For true alpha bitmaps, no longer masking the
+    // bitmap, but perform a full alpha blend against a white
+    // background here.
+    Bitmap aBmp(rBmp.CreateColorBitmap());
+    aBmp.Blend(rBmp.CreateAlphaMask(), COL_WHITE);
+    DrawBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
 #endif
 }
 
