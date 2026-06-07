@@ -788,9 +788,7 @@ void Printer::ImplUpdateFontList()
 tools::Long Printer::GetGradientStepCount( tools::Long nMinRect )
 {
     // use display-equivalent step size calculation
-    tools::Long nInc = (nMinRect < 800) ? 10 : 20;
-
-    return nInc;
+    return (nMinRect < 800) ? 10 : 20;
 }
 
 Printer::Printer()
@@ -1271,6 +1269,7 @@ void Printer::SetPaper( Paper ePaper )
     ReleaseGraphics();
     if ( ePaper == PAPER_USER )
         ImplFindPaperFormatForUserSize( aJobSetup );
+
     if (mpInfoPrinter->SetData(JobSetFlags::PAPERSIZE | JobSetFlags::ORIENTATION, rData))
     {
         lcl_UpdateJobSetupPaper( aJobSetup );
