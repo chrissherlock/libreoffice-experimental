@@ -24,6 +24,7 @@ enum class RenderChangeMask : uint32_t
     FillColor = 1 << 1,
     RasterOp = 1 << 2,
     DrawMode = 1 << 3,
+    TextColor = 1 << 4,
     All = ~0U
 };
 }
@@ -32,7 +33,7 @@ namespace o3tl
 {
 template <>
 struct typed_flags<vcl::rstate::RenderChangeMask>
-    : is_typed_flags<vcl::rstate::RenderChangeMask, 0x07>
+    : is_typed_flags<vcl::rstate::RenderChangeMask, 0x1F>
 {
 };
 }
@@ -59,6 +60,9 @@ struct RenderState
 
     Color fillColor = COL_WHITE;
     bool bFillColorSet = true;
+
+    Color textColor = COL_BLACK;
+    bool bTextColorSet = true;
 
     RasterOp rasterOp = RasterOp::OverPaint;
     DrawModeFlags drawMode = DrawModeFlags::Default;
