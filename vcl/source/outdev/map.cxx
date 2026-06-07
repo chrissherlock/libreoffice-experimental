@@ -68,9 +68,9 @@ Size OutputDevice::GetPixelOffset() const { return mpMapper->GetWindowToViewOffs
 
 void OutputDevice::SetMappingPolicy(vcl::MappingPolicy ePolicy)
 {
-    if (meMapMode != ePolicy)
+    if (meMapPolicy != ePolicy)
     {
-        meMapMode = ePolicy;
+        meMapPolicy = ePolicy;
         // The version update here is what tells CoordinateMapper
         // that its 8-slot cache is now stale.
         mpMapper->InvalidateViewTransform();
@@ -79,7 +79,7 @@ void OutputDevice::SetMappingPolicy(vcl::MappingPolicy ePolicy)
 
 vcl::MappingPolicy OutputDevice::GetMappingPolicy() const
 {
-    return meMapMode;
+    return meMapPolicy;
 }
 
 const MapMode& OutputDevice::GetMapMode() const { return mpMapper->GetMapMode(); }
