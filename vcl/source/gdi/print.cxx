@@ -1010,15 +1010,15 @@ bool Printer::SetJobSetup(const JobSetup& rSetup)
 
 bool Printer::Setup(weld::Window* pWindow, PrinterSetupMode eMode)
 {
-    if ( IsDisplayPrinter() )
+    if (IsDisplayPrinter())
         return false;
 
-    if ( IsJobActive() || IsPrinting() )
+    if (IsJobActive() || IsPrinting())
         return false;
 
     JobSetup aJobSetup = maJobSetup;
     ImplJobSetup& rData = aJobSetup.ImplGetData();
-    rData.SetPrinterSetupMode( eMode );
+    rData.SetPrinterSetupMode(eMode);
     // TODO: orig page size
 
     if (!pWindow)
@@ -1026,26 +1026,31 @@ bool Printer::Setup(weld::Window* pWindow, PrinterSetupMode eMode)
         vcl::Window* pDefWin = ImplGetDefaultWindow();
         pWindow = pDefWin ? pDefWin->GetFrameWeld() : nullptr;
     }
-    if( !pWindow )
+
+    if (!pWindow)
         return false;
 
     ReleaseGraphics();
     ImplSVData* pSVData = ImplGetSVData();
     pSVData->maAppData.mnModalMode++;
     nImplSysDialog++;
+
     bool bSetup = mpInfoPrinter->Setup(*pWindow, rData);
+
     pSVData->maAppData.mnModalMode--;
     nImplSysDialog--;
-    if ( bSetup )
-    {
-        lcl_UpdateJobSetupPaper( aJobSetup );
-        mbNewJobSetup = true;
-        maJobSetup = std::move(aJobSetup);
-        ImplUpdatePageData();
-        ImplUpdateFontList();
-        return true;
-    }
-    return false;
+
+    if (!bSetup)
+        return false;
+
+    lcl_UpdateJobSetupPaper(aJobSetup);
+    mbNewJobSetup = true;
+    maJobSetup = std::move(aJobSetup);
+
+    ImplUpdatePageData();
+    ImplUpdateFontList();
+
+    return true;
 }
 
 bool Printer::SetPrinterProps( const Printer* pPrinter )
