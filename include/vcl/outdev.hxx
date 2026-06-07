@@ -286,10 +286,10 @@ public:
     css::uno::Any               GetNativeSurfaceHandle(cairo::SurfaceSharedPtr& rSurface, const basegfx::B2ISize& rSize) const;
     SAL_DLLPRIVATE css::uno::Any GetSystemGfxDataAny() const;
 
-    void                        SetRefPoint();
-    void                        SetRefPoint( const Point& rRefPoint );
-    const Point&                GetRefPoint() const { return maRefPoint; }
-    bool                        IsRefPoint() const { return mbRefPoint; }
+    void                        SetReferencePoint();
+    void                        SetReferencePoint( const Point& rRefPoint );
+    const Point&                GetReferencePoint() const { return maRefPoint; }
+    bool                        IsReferencePoint() const { return mbRefPoint; }
 
     virtual bool                IsScreenComp() const { return true; }
 

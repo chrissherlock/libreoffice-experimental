@@ -672,10 +672,10 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDefaultRefPoint)
     GDIMetaFile aMtf;
     aMtf.Record(pVDev.get());
 
-    pVDev->SetRefPoint();
+    pVDev->SetReferencePoint();
 
-    CPPUNIT_ASSERT(!pVDev->IsRefPoint());
-    CPPUNIT_ASSERT_EQUAL(Point(), pVDev->GetRefPoint());
+    CPPUNIT_ASSERT(!pVDev->IsReferencePoint());
+    CPPUNIT_ASSERT_EQUAL(Point(), pVDev->GetReferencePoint());
 
     MetaAction* pAction = aMtf.GetAction(0);
     CPPUNIT_ASSERT_EQUAL(MetaActionType::REFPOINT, pAction->GetType());
@@ -690,10 +690,10 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testRefPoint)
     GDIMetaFile aMtf;
     aMtf.Record(pVDev.get());
 
-    pVDev->SetRefPoint(Point(10, 20));
+    pVDev->SetReferencePoint(Point(10, 20));
 
-    CPPUNIT_ASSERT(pVDev->IsRefPoint());
-    CPPUNIT_ASSERT_EQUAL(Point(10, 20), pVDev->GetRefPoint());
+    CPPUNIT_ASSERT(pVDev->IsReferencePoint());
+    CPPUNIT_ASSERT_EQUAL(Point(10, 20), pVDev->GetReferencePoint());
 
     MetaAction* pAction = aMtf.GetAction(0);
     CPPUNIT_ASSERT_EQUAL(MetaActionType::REFPOINT, pAction->GetType());
@@ -815,7 +815,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testStackFunctions)
     pVDev->SetDigitLanguage(LANGUAGE_FRENCH);
     pVDev->SetRasterOp(RasterOp::N0);
     pVDev->SetMapMode(MapMode(MapUnit::MapTwip));
-    pVDev->SetRefPoint(Point(10, 10));
+    pVDev->SetReferencePoint(Point(10, 10));
 
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Text color", COL_BROWN, pVDev->GetTextColor());
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Text fill color", COL_BLUE, pVDev->GetTextFillColor());
@@ -826,7 +826,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testStackFunctions)
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Language", LANGUAGE_FRENCH, pVDev->GetDigitLanguage());
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Raster operation", RasterOp::N0, pVDev->GetRasterOp());
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Map mode", MapMode(MapUnit::MapTwip), pVDev->GetMapMode());
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Ref point", Point(10, 10), pVDev->GetRefPoint());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Ref point", Point(10, 10), pVDev->GetReferencePoint());
 
     pVDev->Pop();
     pAction = aMtf.GetAction(13);
@@ -848,7 +848,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testStackFunctions)
                                  pVDev->GetRasterOp());
     CPPUNIT_ASSERT_EQUAL_MESSAGE("Default map mode", MapMode(MapUnit::MapPixel),
                                  pVDev->GetMapMode());
-    CPPUNIT_ASSERT_EQUAL_MESSAGE("Default ref point", Point(0, 0), pVDev->GetRefPoint());
+    CPPUNIT_ASSERT_EQUAL_MESSAGE("Default ref point", Point(0, 0), pVDev->GetReferencePoint());
 }
 
 CPPUNIT_TEST_FIXTURE(VclOutdevTest, testSystemTextColor)

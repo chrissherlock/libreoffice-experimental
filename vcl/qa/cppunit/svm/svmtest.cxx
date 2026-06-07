@@ -2289,9 +2289,9 @@ void SvmTest::testRefPoint()
     ScopedVclPtrInstance<VirtualDevice> pVirtualDev;
     setupBaseVirtualDevice(*pVirtualDev, aGDIMetaFile);
 
-    pVirtualDev->SetRefPoint();
+    pVirtualDev->SetReferencePoint();
 
-    pVirtualDev->SetRefPoint(Point(1,2));
+    pVirtualDev->SetReferencePoint(Point(1,2));
 
     checkRefPoint(writeAndReadStream(aGDIMetaFile));
     checkRefPoint(readFile(u"refpoint.svm"));
