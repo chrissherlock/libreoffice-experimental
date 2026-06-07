@@ -89,7 +89,7 @@ void OutputDevice::LegacyPush(vcl::PushFlags nFlags)
 
     if (nFlags & vcl::PushFlags::MAPMODE)
     {
-        rState.mpMapMode = maMapMode;
+        rState.mpMapMode = mpMapper->GetMapMode();
         rState.meMapMode = GetMappingPolicy();
     }
 

@@ -198,7 +198,6 @@ private:
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;
     vcl::MappingPolicy meMapMode = vcl::MappingPolicy::IgnoreMapMode;
-    MapMode                         maMapMode;
 
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
