@@ -232,9 +232,9 @@ void OutputDevice::LegacyPop()
     if (rState.mnFlags & vcl::PushFlags::REFPOINT)
     {
         if (rState.mpRefPoint)
-            SetRefPoint(*rState.mpRefPoint);
+            SetReferencePoint(*rState.mpRefPoint);
         else
-            SetRefPoint();
+            SetReferencePoint();
     }
 
     maOutDevStateStack.pop_back();

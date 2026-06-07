@@ -247,7 +247,7 @@ void OutputDevice::CalcHatchValues( const tools::Rectangle& rRect, tools::Long n
     if( nAngle > 900_deg10 )
         nAngle -= 1800_deg10;
 
-    aRef = ( !IsRefPoint() ? rRect.TopLeft() : GetRefPoint() );
+    aRef = ( !IsReferencePoint() ? rRect.TopLeft() : GetReferencePoint() );
 
     if( 0_deg10 == nAngle )
     {

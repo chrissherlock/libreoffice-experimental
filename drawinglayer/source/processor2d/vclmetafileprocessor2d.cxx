@@ -256,7 +256,7 @@ VclMetafileProcessor2D::impDumpToMetaFile(const primitive2d::Primitive2DContaine
     aContentVDev->SetFont(pLastOutputDevice->GetFont());
     aContentVDev->SetDrawMode(pLastOutputDevice->GetDrawMode());
     aContentVDev->SetSettings(pLastOutputDevice->GetSettings());
-    aContentVDev->SetRefPoint(pLastOutputDevice->GetRefPoint());
+    aContentVDev->SetReferencePoint(pLastOutputDevice->GetReferencePoint());
 
     // dump to MetaFile
     process(rContent);

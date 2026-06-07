@@ -334,4 +334,23 @@ basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation(const MapMode& 
     return mpMapper->GetInverseViewTransformation(mpMapper->GetMapMode(), rMapMode, GetMappingPolicy());
 }
 
+void OutputDevice::SetReferencePoint()
+{
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaRefPointAction(Point(), false));
+
+    mbRefPoint = false;
+    maRefPoint.setX(0);
+    maRefPoint.setY(0);
+}
+
+void OutputDevice::SetReferencePoint(const Point& rRefPoint)
+{
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaRefPointAction(rRefPoint, true));
+
+    mbRefPoint = true;
+    maRefPoint = rRefPoint;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
