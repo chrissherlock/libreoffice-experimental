@@ -1161,9 +1161,9 @@ void SVMConverter::ImplConvertFromSVM1( SvStream& rIStm, GDIMetaFile& rMtf,
 
                 // #106172# Track font relevant data in shadow VDev
                 if( bSet )
-                    aFontVDev->SetRefPoint( aRefPoint );
+                    aFontVDev->SetReferencePoint( aRefPoint );
                 else
-                    aFontVDev->SetRefPoint();
+                    aFontVDev->SetReferencePoint();
             }
             break;
 

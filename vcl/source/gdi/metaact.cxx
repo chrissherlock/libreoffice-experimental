@@ -1854,9 +1854,9 @@ MetaRefPointAction::MetaRefPointAction( const Point& rRefPoint, bool bSet ) :
 void MetaRefPointAction::Execute( OutputDevice* pOut )
 {
     if( mbSet )
-        pOut->SetRefPoint( maRefPoint );
+        pOut->SetReferencePoint( maRefPoint );
     else
-        pOut->SetRefPoint();
+        pOut->SetReferencePoint();
 }
 
 rtl::Reference<MetaAction> MetaRefPointAction::Clone() const
