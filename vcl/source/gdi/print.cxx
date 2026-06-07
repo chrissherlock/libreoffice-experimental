@@ -961,15 +961,15 @@ Size Printer::GetButtonBorderSize()
     return aBrdSize;
 }
 
-sal_uInt32 Printer::GetCapabilities( PrinterCapType nType ) const
+sal_uInt32 Printer::GetCapabilities(PrinterCapType nType) const
 {
-    if ( IsDisplayPrinter() )
+    if (IsDisplayPrinter())
         return 0;
 
-    if( mpInfoPrinter )
-        return mpInfoPrinter->GetCapabilities( &maJobSetup.ImplGetConstData(), nType );
-    else
-        return 0;
+    if (mpInfoPrinter)
+        return mpInfoPrinter->GetCapabilities(&maJobSetup.ImplGetConstData(), nType);
+
+    return 0;
 }
 
 bool Printer::HasSupport( PrinterSupport eFeature ) const
