@@ -290,6 +290,17 @@ public:
     void SetOutputWidthPixel(tools::Long nWidth);
     void SetOutputHeightPixel(tools::Long nHeight);
 
+    const MapMode& GetMapMode() const { return maState.GetMapMode(); }
+    bool IsDefaultMapMode() const { return maState.GetMapMode().IsDefault(); }
+    MapUnit GetMapUnit() const { return maState.GetMapMode().GetMapUnit(); }
+    double GetScaleX() const { return maState.GetMapMode().GetScaleX(); }
+    double GetScaleY() const { return maState.GetMapMode().GetScaleY(); }
+
+    void SetStateMapMode(MapMode aMapMode) { maState.SetMapMode(aMapMode); }
+    void SetScaleX(double nX) { maState.SetScaleX(nX); }
+    void SetScaleY(double nY) { maState.SetScaleY(nY); }
+    void SetOrigin(const Point& rLogicOrig) { maState.SetOrigin(rLogicOrig); }
+
     tools::Long GetMappingXOffset() const { return maState.GetMapRes().mnTranslationX; }
     tools::Long GetMappingYOffset() const { return maState.GetMapRes().mnTranslationY; }
     double GetMapResolutionScaleX() const { return maState.GetMapRes().mfScaleX; }

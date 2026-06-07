@@ -82,7 +82,7 @@ vcl::MappingPolicy OutputDevice::GetMappingPolicy() const
     return meMapMode;
 }
 
-const MapMode& OutputDevice::GetMapMode() const { return maMapMode; }
+const MapMode& OutputDevice::GetMapMode() const { return mpMapper->GetMapMode(); }
 
 void OutputDevice::SetPixelOffset(const Size& rOffset)
 {
@@ -94,7 +94,7 @@ void OutputDevice::SetMapMode()
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaMapModeAction( MapMode() ) );
 
-    if ((GetMappingPolicy() == vcl::MappingPolicy::IgnoreMapMode) && maMapMode.IsDefault())
+    if ((GetMappingPolicy() == vcl::MappingPolicy::IgnoreMapMode) && mpMapper->IsDefaultMapMode())
         return;
 
     SetMappingPolicy( vcl::MappingPolicy::IgnoreMapMode );
@@ -121,7 +121,7 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
         mpMetaFile->AddAction( new MetaMapModeAction( rNewMapMode ) );
 
     // do nothing if MapMode was not changed
-    if (maMapMode == rNewMapMode)
+    if (mpMapper->GetMapMode() == rNewMapMode)
         return;
 
      // if default MapMode calculate nothing
@@ -130,10 +130,10 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
     if ( GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode )
     {
         // if only the origin is converted, do not scale new
-        if ( (rNewMapMode.GetMapUnit() == maMapMode.GetMapUnit()) &&
-             (rNewMapMode.GetScaleX()  == maMapMode.GetScaleX())  &&
-             (rNewMapMode.GetScaleY()  == maMapMode.GetScaleY())  &&
-             (eOldPolicy                  == GetMappingPolicy()) )
+        if ( (rNewMapMode.GetMapUnit() == mpMapper->GetMapUnit()) &&
+             (rNewMapMode.GetScaleX()  == mpMapper->GetScaleX())  &&
+             (rNewMapMode.GetScaleY()  == mpMapper->GetScaleY())  &&
+             (eOldPolicy               == GetMappingPolicy()) )
         {
             // set offset
             Point aOrigin = rNewMapMode.GetOrigin();
@@ -161,9 +161,9 @@ void OutputDevice::SetMapMode( const MapMode& rNewMapMode )
     // set new MapMode
     if (bRelMap)
     {
-        maMapMode.SetScaleX(maMapMode.GetScaleX() * rNewMapMode.GetScaleX());
-        maMapMode.SetScaleY(maMapMode.GetScaleY() * rNewMapMode.GetScaleY());
-        maMapMode.SetOrigin(Point(mpMapper->GetMappingXOffset(), mpMapper->GetMappingYOffset()));
+        mpMapper->SetScaleX(mpMapper->GetScaleX() * rNewMapMode.GetScaleX());
+        mpMapper->SetScaleY(mpMapper->GetScaleY() * rNewMapMode.GetScaleY());
+        mpMapper->SetOrigin(Point(mpMapper->GetMappingXOffset(), mpMapper->GetMappingYOffset()));
     }
     else
     {
@@ -195,14 +195,14 @@ void OutputDevice::ImplInitMapModeObjects() {}
 void OutputDevice::SetRelativeMapMode( const MapMode& rNewMapMode )
 {
     // do nothing if MapMode did not change
-    if (maMapMode == rNewMapMode)
+    if (mpMapper->GetMapMode() == rNewMapMode)
         return;
 
-    MapUnit eOld = maMapMode.GetMapUnit();
+    MapUnit eOld = mpMapper->GetMapUnit();
     MapUnit eNew = rNewMapMode.GetMapUnit();
 
-    double fXF = rNewMapMode.GetScaleX() / maMapMode.GetScaleX();
-    double fYF = rNewMapMode.GetScaleY() / maMapMode.GetScaleY();
+    double fXF = rNewMapMode.GetScaleX() / mpMapper->GetScaleX();
+    double fYF = rNewMapMode.GetScaleY() / mpMapper->GetScaleY();
 
     Point aPt = convertLogic<vcl::LogicPoint>(vcl::LogicPoint(Point()), nullptr, &rNewMapMode);
 
@@ -251,31 +251,31 @@ void OutputDevice::SetRelativeMapMode( const MapMode& rNewMapMode )
 
 void OutputDevice::ResetMapMode()
 {
-    maMapMode = MapMode();
+    mpMapper->SetStateMapMode(MapMode());
     mpMapper->InvalidateViewTransform();
 }
 
 void OutputDevice::ResetMapMode(const MapMode& rMapMode)
 {
-    maMapMode = rMapMode;
+    mpMapper->SetStateMapMode(rMapMode);
     mpMapper->InvalidateViewTransform();
 }
 
 void OutputDevice::SetScaleX(double nX)
 {
-    maMapMode.SetScaleX(nX);
+    mpMapper->SetScaleX(nX);
     mpMapper->InvalidateViewTransform();
 }
 
 void OutputDevice::SetScaleY(double nY)
 {
-    maMapMode.SetScaleY(nY);
+    mpMapper->SetScaleY(nY);
     mpMapper->InvalidateViewTransform();
 }
 
 void OutputDevice::SetOrigin(const Point& rPt)
 {
-    maMapMode.SetOrigin(rPt);
+    mpMapper->SetOrigin(rPt);
     mpMapper->InvalidateViewTransform();
 }
 
@@ -321,7 +321,7 @@ basegfx::B2DHomMatrix OutputDevice::GetViewTransformation() const
 
 basegfx::B2DHomMatrix OutputDevice::GetViewTransformation(const MapMode& rMapMode) const
 {
-    return mpMapper->GetViewTransformation(maMapMode, rMapMode, GetMappingPolicy());
+    return mpMapper->GetViewTransformation(mpMapper->GetMapMode(), rMapMode, GetMappingPolicy());
 }
 
 basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation() const
@@ -331,7 +331,7 @@ basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation() const
 
 basegfx::B2DHomMatrix OutputDevice::GetInverseViewTransformation(const MapMode& rMapMode) const
 {
-    return mpMapper->GetInverseViewTransformation(maMapMode, rMapMode, GetMappingPolicy());
+    return mpMapper->GetInverseViewTransformation(mpMapper->GetMapMode(), rMapMode, GetMappingPolicy());
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

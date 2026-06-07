@@ -49,6 +49,7 @@ private:
     tools::Long mnLogicToAbsoluteOffsetX = 0;
     tools::Long mnLogicToAbsoluteOffsetY = 0;
 
+    MapMode maMapMode;
     MappingCoefficients maMapRes;
     vcl::detail::MapConversion maMapConversion;
 
@@ -65,6 +66,12 @@ public:
     tools::Long GetDeviceToWindowOffsetY() const { return mnDeviceToWindowOffsetY; }
     tools::Long GetLogicToAbsoluteOffsetX() const { return mnLogicToAbsoluteOffsetX; }
     tools::Long GetLogicToAbsoluteOffsetY() const { return mnLogicToAbsoluteOffsetY; }
+
+    const MapMode& GetMapMode() const { return maMapMode; }
+    void SetMapMode(MapMode aMapMode) { maMapMode = aMapMode; }
+    void SetScaleX(double nX) { maMapMode.SetScaleX(nX); }
+    void SetScaleY(double nY) { maMapMode.SetScaleY(nY); }
+    void SetOrigin(const Point& rLogicOrig) { maMapMode.SetOrigin(rLogicOrig); }
 
     const MappingCoefficients& GetMapRes() const { return maMapRes; }
     const vcl::detail::MapConversion& GetMapConversion() const { return maMapConversion; }
