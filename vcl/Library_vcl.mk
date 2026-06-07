@@ -169,6 +169,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/cnttype/mcnttfactory \
     vcl/source/cnttype/mcnttype \
     vcl/source/printer/Options \
+    vcl/source/printer/PrinterOptionsHelper \
     vcl/source/printer/QueueInfo \
     vcl/source/window/bubblewindow \
     vcl/source/window/errinf \
