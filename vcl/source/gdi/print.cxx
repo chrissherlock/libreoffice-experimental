@@ -1506,8 +1506,8 @@ OUString Printer::GetPaperBinName( sal_uInt16 nPaperBin ) const
 
     if ( nPaperBin < GetPaperBinCount() )
         return mpInfoPrinter->GetPaperBinName( &maJobSetup.ImplGetConstData(), nPaperBin );
-    else
-        return OUString();
+
+    return OUString();
 }
 
 sal_uInt16 Printer::GetPaperBinBySourceIndex(sal_uInt16 nPaperSource) const
