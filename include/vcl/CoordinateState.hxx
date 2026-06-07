@@ -153,27 +153,23 @@ public:
     {
         size_t nSeed = 0;
 
-        // Hardware & DPI Scale Context
-        o3tl::hash_combine(nSeed, static_cast<size_t>(mnDPIX));
-        o3tl::hash_combine(nSeed, static_cast<size_t>(mnDPIY));
-        o3tl::hash_combine(nSeed, static_cast<size_t>(mnDPIScalePercentage));
+        // Hash the parameters that define the projection
+        o3tl::hash_combine(nSeed, static_cast<size_t>(maMapMode.GetMapUnit()));
+        o3tl::hash_combine(nSeed, maMapMode.GetOrigin().X());
+        o3tl::hash_combine(nSeed, maMapMode.GetOrigin().Y());
+        o3tl::hash_combine(nSeed, maMapMode.GetScaleX());
+        o3tl::hash_combine(nSeed, maMapMode.GetScaleY());
 
-        // Complete Coordinate Sub-System Offsets
-        o3tl::hash_combine(nSeed, mnWindowToViewOffsetX);
-        o3tl::hash_combine(nSeed, mnWindowToViewOffsetY);
-        o3tl::hash_combine(nSeed, mnDeviceToWindowOffsetX);
-        o3tl::hash_combine(nSeed, mnDeviceToWindowOffsetY);
+        // Hash the Environment
+        o3tl::hash_combine(nSeed, mnDPIX);
+        o3tl::hash_combine(nSeed, mnDPIY);
+        o3tl::hash_combine(nSeed, mnDPIScalePercentage);
+
+        // Hash the Offsets (Use the Long members directly)
         o3tl::hash_combine(nSeed, mnLogicToAbsoluteOffsetX);
         o3tl::hash_combine(nSeed, mnLogicToAbsoluteOffsetY);
-
-        // User-Facing MapMode State
-        o3tl::hash_combine(nSeed, maMapMode.GetHashValue());
-
-        // Pre-calculated Mapping Coefficients
-        o3tl::hash_combine(nSeed, maMapRes.GetHash());
-
-        // Internal MapConversion State
-        o3tl::hash_combine(nSeed, maMapConversion.GetHash());
+        o3tl::hash_combine(nSeed, mnWindowToViewOffsetX);
+        o3tl::hash_combine(nSeed, mnWindowToViewOffsetY);
 
         return nSeed;
     }

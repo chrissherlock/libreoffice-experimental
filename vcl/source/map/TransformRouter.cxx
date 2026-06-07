@@ -19,57 +19,36 @@
 namespace vcl
 {
 const TransformPlan& TransformRouter::Compile(const CoordinateState& rState,
-                                              const TransformRequest& rReq) const
+                                              const vcl::MappingPolicy ePolicy) const
 {
-    TransformKey eKey = ResolveKey(rReq);
+    size_t nStateHash = rState.GetHash();
 
-    if (const TransformPlan* pCached = maCache.Get(eKey))
+    if (const TransformPlan* pCached = maCache.Get(nStateHash, ePolicy))
         return *pCached;
 
-    basegfx::B2DHomMatrix aMat = BuildMatrix(rState, rReq);
+    basegfx::B2DHomMatrix aMat = BuildMatrix(rState, ePolicy);
+    TransformPlan aPlan = vcl::TransformCompiler::Compile(aMat);
 
-    maCache.Store(eKey, vcl::TransformCompiler::Compile(aMat));
+    maCache.Store(nStateHash, ePolicy, aPlan);
 
-    return *maCache.Get(eKey);
-}
-
-TransformKey TransformRouter::ResolveKey(const TransformRequest& rReq) const
-{
-    const bool bMapped = (rReq.Policy == vcl::MappingPolicy::ApplyMapMode);
-
-    if (rReq.eFrom == CoordinateSpace::Logic && rReq.eTo == CoordinateSpace::Window)
-        return bMapped ? TransformKey::LogicToWindow_Mapped : TransformKey::LogicToWindow_Unmapped;
-    if (rReq.eFrom == CoordinateSpace::Window && rReq.eTo == CoordinateSpace::Logic)
-        return bMapped ? TransformKey::WindowToLogic_Mapped : TransformKey::WindowToLogic_Unmapped;
-    if (rReq.eFrom == CoordinateSpace::Logic && rReq.eTo == CoordinateSpace::Device)
-        return bMapped ? TransformKey::LogicToDevice_Mapped : TransformKey::LogicToDevice_Unmapped;
-    if (rReq.eFrom == CoordinateSpace::Device && rReq.eTo == CoordinateSpace::Logic)
-        return bMapped ? TransformKey::DeviceToLogic_Mapped : TransformKey::DeviceToLogic_Unmapped;
-    if (rReq.eFrom == CoordinateSpace::Device && rReq.eTo == CoordinateSpace::Window)
-        return TransformKey::DeviceToWindow;
-    if (rReq.eFrom == CoordinateSpace::Window && rReq.eTo == CoordinateSpace::Device)
-        return TransformKey::WindowToDevice;
-
-    // Graceful fallback for invalid routing
-    SAL_WARN("vcl.map", "Invalid coordinate space routing requested.");
-
-    // Return a safe unmapped key. This prevents cache out-of-bounds errors
-    // and effectively results in a 1:1 pixel rendering fallback.
-    return TransformKey::LogicToDevice_Unmapped;
+    // Return the reference FROM THE CACHE, not the local aPlan
+    // Note: It is safe to dereference here because we just stored it.
+    return *maCache.Get(nStateHash, ePolicy);
 }
 
 basegfx::B2DHomMatrix TransformRouter::BuildMatrix(const CoordinateState& rState,
-                                                   const TransformRequest& rReq) const
+                                                   vcl::MappingPolicy ePolicy) const
 {
     basegfx::B2DHomMatrix aMat;
 
-    // Composition Phase 1: Logic-to-Window (The Zoom/MapMode layer)
-    if (rReq.Policy == vcl::MappingPolicy::ApplyMapMode)
+    if (ePolicy == vcl::MappingPolicy::ApplyMapMode)
     {
-        const double fScaleX = rState.GetMapRes().mfScaleX * static_cast<double>(rState.GetDPIX())
-                               * rState.GetDPIScaleFactor();
-        const double fScaleY = rState.GetMapRes().mfScaleY * static_cast<double>(rState.GetDPIY())
-                               * rState.GetDPIScaleFactor();
+        // Safe logical scaling leveraging both Physical DPI and UI scaling percentage
+        const double fUiScale = static_cast<double>(rState.GetDPIScalePercentage()) / 100.0;
+        const double fScaleX
+            = rState.GetMapRes().mfScaleX * static_cast<double>(rState.GetDPIX()) * fUiScale;
+        const double fScaleY
+            = rState.GetMapRes().mfScaleY * static_cast<double>(rState.GetDPIY()) * fUiScale;
 
         aMat = vcl::BuildAffineMatrix(fScaleX, fScaleY,
                                       static_cast<double>(rState.GetMapRes().mnTranslationX
@@ -81,26 +60,10 @@ basegfx::B2DHomMatrix TransformRouter::BuildMatrix(const CoordinateState& rState
     }
     else
     {
-        // Unmapped math is just the window viewport translation
+        // CRITICAL FIX: IgnoreMapMode means purely unscaled pixel-to-pixel mapping.
+        // We must strictly return to purely shifting the unmapped viewport offset.
         aMat.translate(static_cast<double>(rState.GetWindowToViewOffsetX()),
                        static_cast<double>(rState.GetWindowToViewOffsetY()));
-    }
-
-    // Composition Phase 2: Extend to Device Space if either end of the request is 'Device'
-    if (rReq.eTo == CoordinateSpace::Device || rReq.eFrom == CoordinateSpace::Device)
-    {
-        aMat.translate(static_cast<double>(rState.GetDeviceToWindowOffsetX()),
-                       static_cast<double>(rState.GetDeviceToWindowOffsetY()));
-    }
-
-    // Composition Phase 3: Directionality
-    // If we are coming FROM Window/Device, we need the Inverse of the Logic->Physical stack
-    if (rReq.eFrom == CoordinateSpace::Window || rReq.eFrom == CoordinateSpace::Device)
-    {
-        if (aMat.isInvertible())
-            aMat.invert();
-        else
-            return basegfx::B2DHomMatrix(); // Singular fallback
     }
 
     return aMat;

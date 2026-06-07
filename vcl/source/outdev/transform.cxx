@@ -1,4 +1,3 @@
-
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -8,18 +7,16 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <vcl/ResolvedTransform.hxx>
 #include <vcl/outdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
+#include <vcl/TransformPlan.hxx>
 
-namespace vcl
+// Historical note: eFrom and eTo coordinate spaces are now implicitly managed
+// by the wrapper layout functions inside CoordinateMapper itself.
+void OutputDevice::ImplGetAsymmetricTransform(basegfx::B2DHomMatrix& rMatrix) const
 {
-ResolvedTransform ResolveTransform(const OutputDevice& rDev, CoordinateSpace eFrom,
-                                   CoordinateSpace eTo)
-{
-    const auto& rPlan = rDev.GetMapper().Compile({ eFrom, eTo, rDev.GetMappingPolicy() });
-    return vcl::ResolvedTransform{ rPlan.maMatrix, rPlan };
-}
+    const auto& rPlan = mpMapper->Compile(GetMappingPolicy());
+    rMatrix = rPlan.maMatrix;
 }
 
-/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

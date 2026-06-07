@@ -15,6 +15,9 @@
 #include <vcl/TransformPlan.hxx>
 #include <vcl/TransformTypes.hxx>
 #include <vcl/TransformCache.hxx>
+#include <vcl/MappingPolicy.hxx>
+
+#include <memory>
 
 namespace vcl
 {
@@ -28,15 +31,16 @@ private:
     // The O(1) artifact storage
     mutable vcl::TransformCache maCache;
 
-    TransformKey ResolveKey(const TransformRequest& rReq) const;
+    std::shared_ptr<TransformPlan> GetPlan(const CoordinateState& rState,
+                                           vcl::MappingPolicy ePolicy);
 
-    // The core compositional math logic
+    // Changed: Accept MappingPolicy directly instead of legacy TransformRequest
     basegfx::B2DHomMatrix BuildMatrix(const CoordinateState& rState,
-                                      const TransformRequest& rReq) const;
+                                      vcl::MappingPolicy ePolicy) const;
 
 public:
-    // Entry point: Resolves the request to a Plan, utilizing the cache if possible.
-    const TransformPlan& Compile(const CoordinateState& rState, const TransformRequest& rReq) const;
+    const TransformPlan& Compile(const CoordinateState& rState,
+                                 const vcl::MappingPolicy ePolicy) const;
 
     void Invalidate() { maCache.Invalidate(); }
 };
