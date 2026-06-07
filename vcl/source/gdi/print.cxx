@@ -1079,39 +1079,42 @@ bool Printer::SetPrinterProps( const Printer* pPrinter )
     }
 
     // Destroy old printer?
-    if ( GetName() != pPrinter->GetName() )
+    if (GetName() == pPrinter->GetName())
     {
-        ReleaseGraphics();
-        if ( mpDisplayDev )
-        {
-            mpDisplayDev.disposeAndClear();
-        }
-        else
-        {
-            GetSalInstance()->DestroyInfoPrinter(mpInfoPrinter);
+        SetJobSetup(pPrinter->GetJobSetup());
+        return false;
+    }
 
-            mpFontInstance.clear();
-            mpFontFaceCollection.reset();
-            mxFontCache.reset();
-            mxFontCollection.reset();
-            mbInitFont = true;
-            mbNewFont = true;
-            mpInfoPrinter = nullptr;
-        }
-
-        // Construct new printer
-        const OUString& aDriver = pPrinter->GetDriverName();
-        SalPrinterQueueInfo* pInfo = ImplGetQueueInfo( pPrinter->GetName(), &aDriver );
-        if ( pInfo )
-        {
-            ImplInit(*pInfo);
-            SetJobSetup( pPrinter->GetJobSetup() );
-        }
-        else
-            ImplInitDisplay();
+    ReleaseGraphics();
+    if ( mpDisplayDev )
+    {
+        mpDisplayDev.disposeAndClear();
     }
     else
+    {
+        GetSalInstance()->DestroyInfoPrinter(mpInfoPrinter);
+
+        mpFontInstance.clear();
+        mpFontFaceCollection.reset();
+        mxFontCache.reset();
+        mxFontCollection.reset();
+        mbInitFont = true;
+        mbNewFont = true;
+        mpInfoPrinter = nullptr;
+    }
+
+    // Construct new printer
+    const OUString& aDriver = pPrinter->GetDriverName();
+    SalPrinterQueueInfo* pInfo = ImplGetQueueInfo( pPrinter->GetName(), &aDriver );
+    if ( pInfo )
+    {
+        ImplInit(*pInfo);
         SetJobSetup( pPrinter->GetJobSetup() );
+    }
+    else
+    {
+        ImplInitDisplay();
+    }
 
     return false;
 }
