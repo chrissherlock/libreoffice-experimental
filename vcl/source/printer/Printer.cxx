@@ -325,7 +325,7 @@ bool Printer::HasMirroredGraphics() const
     return false;
 }
 
-static void ImplInitPrnQueueList()
+static void lcl_InitPrnQueueList()
 {
     ImplSVData* pSVData = ImplGetSVData();
 
@@ -346,7 +346,7 @@ const std::vector<OUString>& Printer::GetPrinterQueues()
 {
     ImplSVData* pSVData = ImplGetSVData();
     if ( !pSVData->maGDIData.mpPrinterQueueList )
-        ImplInitPrnQueueList();
+        lcl_InitPrnQueueList();
     assert(pSVData->maGDIData.mpPrinterQueueList && "mpPrinterQueueList exists by now");
     return pSVData->maGDIData.mpPrinterQueueList->m_aPrinterList;
 }
@@ -356,7 +356,7 @@ const QueueInfo* Printer::GetQueueInfo(const OUString& rPrinterName, bool bStatu
     ImplSVData* pSVData = ImplGetSVData();
 
     if (!pSVData->maGDIData.mpPrinterQueueList)
-        ImplInitPrnQueueList();
+        lcl_InitPrnQueueList();
 
     if (!pSVData->maGDIData.mpPrinterQueueList)
         return nullptr;
@@ -718,7 +718,7 @@ SalPrinterQueueInfo* Printer::ImplGetQueueInfo(const OUString& rPrinterName,
 {
     ImplSVData* pSVData = ImplGetSVData();
     if (!pSVData->maGDIData.mpPrinterQueueList)
-        ImplInitPrnQueueList();
+        lcl_InitPrnQueueList();
 
     ImplPrnQueueList* pPrnList = pSVData->maGDIData.mpPrinterQueueList.get();
     if (!pPrnList || pPrnList->m_aQueueInfos.empty())
@@ -1716,7 +1716,7 @@ void Printer::PrintJob(const std::shared_ptr<vcl::PrinterController>& i_xControl
     }
 }
 
-static OUString queryFile( Printer const * pPrinter, const OUString & rJobName )
+static OUString lcl_QueryFile( Printer const * pPrinter, const OUString & rJobName )
 {
     OUString aResult;
 
@@ -1974,7 +1974,7 @@ bool Printer::PreparePrintJob(std::shared_ptr<vcl::PrinterController> xControlle
                 css::beans::PropertyValue* pJobNameVal = xController->getValue( u"JobName"_ustr );
                 if( pJobNameVal )
                     pJobNameVal->Value >>= aJobName;
-                OUString aFile = queryFile( xController->getPrinter().get(), aJobName );
+                OUString aFile = lcl_QueryFile( xController->getPrinter().get(), aJobName );
                 if( aFile.isEmpty() )
                 {
                     xController->abortJob();
@@ -2270,4 +2270,5 @@ void Printer::DrawGradientEx(OutputDevice* pOut, const tools::Rectangle& rRect, 
     aNewGradient.SetSteps(rPrinterOptions.GetReducedGradientStepCount());
     pOut->DrawGradient(rRect, aNewGradient);
 }
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
