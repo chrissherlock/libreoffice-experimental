@@ -1207,15 +1207,15 @@ bool Printer::GetPrinterSettingsPreferred() const
 // it will be used in follow-up commits
 void Printer::SetPrinterSettingsPreferred( bool bPaperSizeFromSetup)
 {
-    if ( maJobSetup.ImplGetConstData().GetPapersizeFromSetup() != bPaperSizeFromSetup )
-    {
-        JobSetup      aJobSetup = maJobSetup;
-        ImplJobSetup& rData = aJobSetup.ImplGetData();
-        rData.SetPapersizeFromSetup(bPaperSizeFromSetup);
+    if (maJobSetup.ImplGetConstData().GetPapersizeFromSetup() == bPaperSizeFromSetup)
+        return;
 
-        mbNewJobSetup = true;
-        maJobSetup = std::move(aJobSetup);
-    }
+    JobSetup      aJobSetup = maJobSetup;
+    ImplJobSetup& rData = aJobSetup.ImplGetData();
+    rData.SetPapersizeFromSetup(bPaperSizeFromSetup);
+
+    mbNewJobSetup = true;
+    maJobSetup = std::move(aJobSetup);
 }
 
 // Map user paper format to an available printer paper format
