@@ -197,9 +197,9 @@ bool Printer::TransformAndReduceBitmapExToTargetRange(
     return true;
 }
 
-void Printer::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
-                                const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                Bitmap& rBmp )
+void Printer::DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
+                               const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+                               Bitmap& rBmp)
 {
 #ifdef MACOSX
     // tdf#172059 draw alpha bitmaps directly to print graphics on macOS
