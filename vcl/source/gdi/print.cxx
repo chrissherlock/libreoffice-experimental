@@ -141,15 +141,11 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
 
     // source cropped?
     if( aSrcRect != tools::Rectangle( Point(), aPaint.GetSizePixel() ) )
-    {
         aPaint.Crop( aSrcRect );
-    }
 
     // destination mirrored
     if( nMirrFlags != BmpMirrorFlags::NONE )
-    {
         aPaint.Mirror( nMirrFlags );
-    }
 
     // do painting
     const tools::Long nSrcWidth = aSrcRect.GetWidth(), nSrcHeight = aSrcRect.GetHeight();
@@ -162,10 +158,14 @@ void Printer::ImplPrintTransparent( const Bitmap& rBmp,
 
     // create forward mapping tables
     for( nX = 0; nX <= nSrcWidth; nX++ )
+    {
         pMapX[ nX ] = aDestPt.X() + basegfx::fround<tools::Long>( static_cast<double>(aDestSz.Width()) * nX / nSrcWidth );
+    }
 
     for( nY = 0; nY <= nSrcHeight; nY++ )
+    {
         pMapY[ nY ] = aDestPt.Y() + basegfx::fround<tools::Long>( static_cast<double>(aDestSz.Height()) * nY / nSrcHeight );
+    }
 
     tools::Rectangle rectangle { Point(0,0), aSrcRect.GetSize() };
     const Point aMapPt(pMapX[rectangle.Left()], pMapY[rectangle.Top()]);
