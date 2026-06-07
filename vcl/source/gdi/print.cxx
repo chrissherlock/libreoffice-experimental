@@ -1357,38 +1357,35 @@ bool Printer::SetPaperSizeUser( const Size& rSize )
         }
     }
 
-    if(bNeedToChange)
+    if (!bNeedToChange)
+        return true;
+
+    JobSetup      aJobSetup = maJobSetup;
+    ImplJobSetup& rData = aJobSetup.ImplGetData();
+    rData.SetPaperFormat( PAPER_USER );
+    rData.SetPaperWidth( aPageSize.Width() );
+    rData.SetPaperHeight( aPageSize.Height() );
+    rData.SetOrientation( Orientation::Portrait );
+
+    if ( IsDisplayPrinter() )
     {
-        JobSetup      aJobSetup = maJobSetup;
-        ImplJobSetup& rData = aJobSetup.ImplGetData();
-        rData.SetPaperFormat( PAPER_USER );
-        rData.SetPaperWidth( aPageSize.Width() );
-        rData.SetPaperHeight( aPageSize.Height() );
-        rData.SetOrientation( Orientation::Portrait );
-
-        if ( IsDisplayPrinter() )
-        {
-            mbNewJobSetup = true;
-            maJobSetup = std::move(aJobSetup);
-            return true;
-        }
-
-        ReleaseGraphics();
-        ImplFindPaperFormatForUserSize( aJobSetup );
-
-        // Changing the paper size can also change the orientation!
-        if (mpInfoPrinter->SetData(JobSetFlags::PAPERSIZE | JobSetFlags::ORIENTATION, rData))
-        {
-            lcl_UpdateJobSetupPaper( aJobSetup );
-            mbNewJobSetup = true;
-            maJobSetup = std::move(aJobSetup);
-            ImplUpdatePageData();
-            ImplUpdateFontList();
-            return true;
-        }
-        else
-            return false;
+        mbNewJobSetup = true;
+        maJobSetup = std::move(aJobSetup);
+        return true;
     }
+
+    ReleaseGraphics();
+    ImplFindPaperFormatForUserSize( aJobSetup );
+
+    // Changing the paper size can also change the orientation!
+    if (!mpInfoPrinter->SetData(JobSetFlags::PAPERSIZE | JobSetFlags::ORIENTATION, rData))
+        return false;
+
+    lcl_UpdateJobSetupPaper( aJobSetup );
+    mbNewJobSetup = true;
+    maJobSetup = std::move(aJobSetup);
+    ImplUpdatePageData();
+    ImplUpdateFontList();
 
     return true;
 }
