@@ -1143,7 +1143,7 @@ PrinterController::PageSize PrinterController::getPageFile( int i_nUnfilteredPag
     return aPageSize;
 }
 
-static void appendSubPage( GDIMetaFile& o_rMtf, const tools::Rectangle& i_rClipRect, GDIMetaFile& io_rSubPage, bool i_bDrawBorder )
+static void lcl_appendSubPage( GDIMetaFile& o_rMtf, const tools::Rectangle& i_rClipRect, GDIMetaFile& io_rSubPage, bool i_bDrawBorder )
 {
     // intersect all clipregion actions with our clip rect
     io_rSubPage.WindStart();
@@ -1320,7 +1320,7 @@ PrinterController::PageSize PrinterController::getFilteredPageFile( int i_nFilte
                                               tools::Long(double(aPageSize.aSize.Height())*fScale) ) );
 
                 // append subpage to page
-                appendSubPage( o_rMtf, aSubPageRect, aPageFile, rMPS.bDrawBorder );
+                lcl_appendSubPage( o_rMtf, aSubPageRect, aPageFile, rMPS.bDrawBorder );
             }
         }
     }
