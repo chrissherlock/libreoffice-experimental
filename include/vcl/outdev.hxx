@@ -196,7 +196,6 @@ private:
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;
-    vcl::MappingPolicy meMapPolicy = vcl::MappingPolicy::IgnoreMapMode;
 
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;

@@ -133,6 +133,7 @@ class VCL_DLLPUBLIC CoordinateMapper
 private:
     vcl::CoordinateState maState;
     vcl::TransformRouter maRouter;
+    vcl::MappingPolicy meMapPolicy = vcl::MappingPolicy::IgnoreMapMode;
 
     tools::Long mnOutWidth = 0;
     tools::Long mnOutHeight = 0;
@@ -159,6 +160,9 @@ public:
             aObj *= GetDeviceToLogicMatrix(ePolicy);
         return aObj;
     }
+
+    void SetMappingPolicy(vcl::MappingPolicy ePolicy) { meMapPolicy = ePolicy; }
+    vcl::MappingPolicy GetMappingPolicy() const { return meMapPolicy; }
 
     basegfx::B2DHomMatrix GetLogicToLogicMatrix(const MapMode& rSrc, const MapMode& rDst) const;
 
