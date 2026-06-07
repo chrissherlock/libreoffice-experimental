@@ -1164,33 +1164,31 @@ bool Printer::SetPaperBin( sal_uInt16 nPaperBin )
     if ( mbInPrintPage )
         return false;
 
-    if ( maJobSetup.ImplGetConstData().GetPaperBin() != nPaperBin &&
-         nPaperBin < GetPaperBinCount() )
+    if ( maJobSetup.ImplGetConstData().GetPaperBin() == nPaperBin || nPaperBin >= GetPaperBinCount() )
+        return true;
+
+    JobSetup      aJobSetup = maJobSetup;
+    ImplJobSetup& rData = aJobSetup.ImplGetData();
+    rData.SetPaperBin(nPaperBin);
+
+    if ( IsDisplayPrinter() )
     {
-        JobSetup      aJobSetup = maJobSetup;
-        ImplJobSetup& rData = aJobSetup.ImplGetData();
-        rData.SetPaperBin(nPaperBin);
-
-        if ( IsDisplayPrinter() )
-        {
-            mbNewJobSetup = true;
-            maJobSetup = aJobSetup;
-            return true;
-        }
-
-        ReleaseGraphics();
-        if (mpInfoPrinter->SetData(JobSetFlags::PAPERBIN, rData))
-        {
-            lcl_UpdateJobSetupPaper( aJobSetup );
-            mbNewJobSetup = true;
-            maJobSetup = std::move(aJobSetup);
-            ImplUpdatePageData();
-            ImplUpdateFontList();
-            return true;
-        }
-        else
-            return false;
+        mbNewJobSetup = true;
+        maJobSetup = aJobSetup;
+        return true;
     }
+
+    ReleaseGraphics();
+    if (!mpInfoPrinter->SetData(JobSetFlags::PAPERBIN, rData))
+        return false;
+
+    lcl_UpdateJobSetupPaper( aJobSetup );
+
+    mbNewJobSetup = true;
+    maJobSetup = std::move(aJobSetup);
+
+    ImplUpdatePageData();
+    ImplUpdateFontList();
 
     return true;
 }
