@@ -94,7 +94,7 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
     else
         pFrameData->mpBuffer->SetLineColor(rDev.GetLineColor());
     pFrameData->mpBuffer->SetMapMode(pWindow->GetMapMode());
-    pFrameData->mpBuffer->SetRefPoint(rDev.GetRefPoint());
+    pFrameData->mpBuffer->SetReferencePoint(rDev.GetReferencePoint());
     pFrameData->mpBuffer->SetSettings(pWindow->GetSettings());
     pFrameData->mpBuffer->SetTextColor(pWindow->GetTextColor());
     pFrameData->mpBuffer->SetTextLineColor(pWindow->GetTextLineColor());
@@ -1370,10 +1370,10 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
         SetTextFillColor();
     SetTextAlign( GetTextAlign() );
     GetOutDev()->SetRasterOp( GetOutDev()->GetRasterOp() );
-    if( GetOutDev()->IsRefPoint() )
-        GetOutDev()->SetRefPoint( GetOutDev()->GetRefPoint() );
+    if( GetOutDev()->IsReferencePoint() )
+        GetOutDev()->SetReferencePoint( GetOutDev()->GetReferencePoint() );
     else
-        GetOutDev()->SetRefPoint();
+        GetOutDev()->SetReferencePoint();
     GetOutDev()->SetLayoutMode( GetOutDev()->GetLayoutMode() );
 
     GetOutDev()->SetDigitLanguage( GetOutDev()->GetDigitLanguage() );

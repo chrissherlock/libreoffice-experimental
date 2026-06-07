@@ -315,25 +315,6 @@ css::uno::Any OutputDevice::GetSystemGfxDataAny() const
     return css::uno::Any(aSeq);
 }
 
-void OutputDevice::SetRefPoint()
-{
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRefPointAction( Point(), false ) );
-
-    mbRefPoint = false;
-    maRefPoint.setX(0);
-    maRefPoint.setY(0);
-}
-
-void OutputDevice::SetRefPoint( const Point& rRefPoint )
-{
-    if ( mpMetaFile )
-        mpMetaFile->AddAction( new MetaRefPointAction( rRefPoint, true ) );
-
-    mbRefPoint = true;
-    maRefPoint = rRefPoint;
-}
-
 void OutputDevice::SetRasterOp(RasterOp eRasterOp)
 {
     if (mpMetaFile)

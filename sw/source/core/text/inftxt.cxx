@@ -603,7 +603,7 @@ SwTransparentTextGuard::SwTransparentTextGuard(const SwLinePortion& rPor,
     m_aContentVDev->SetFont(rPaintInf.GetOut()->GetFont());
     m_aContentVDev->SetDrawMode(rPaintInf.GetOut()->GetDrawMode());
     m_aContentVDev->SetSettings(rPaintInf.GetOut()->GetSettings());
-    m_aContentVDev->SetRefPoint(rPaintInf.GetOut()->GetRefPoint());
+    m_aContentVDev->SetReferencePoint(rPaintInf.GetOut()->GetReferencePoint());
 }
 
 SwTransparentTextGuard::~SwTransparentTextGuard()
