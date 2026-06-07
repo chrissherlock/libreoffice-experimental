@@ -263,88 +263,90 @@ bool VirtualDevice::SetOutputSizePixel(const Size& rNewSize, bool bErase,
                                                                  << rNewSize.Height() << ", "
                                                                  << int(bErase) << " )");
 
-    if ( !mpVirDev )
+    if (!mpVirDev)
         return false;
-    else if ( rNewSize == GetOutputSizePixel() )
+
+    if (rNewSize == GetOutputSizePixel())
     {
-        if ( bErase )
+        if (bErase)
             Erase();
+
         SAL_INFO( "vcl.virdev", "Trying to re-use a VirtualDevice but this time using a pre-allocated buffer");
+
         return true;
     }
 
-    bool bRet;
     tools::Long nNewWidth = rNewSize.Width(), nNewHeight = rNewSize.Height();
 
-    if ( nNewWidth < 1 )
+    if (nNewWidth < 1)
         nNewWidth = 1;
 
-    if ( nNewHeight < 1 )
+    if (nNewHeight < 1)
         nNewHeight = 1;
 
-    if ( bErase )
+    if (bErase)
     {
-        bRet = mpVirDev->SetSize( nNewWidth, nNewHeight, bAlphaMaskTransparent );
-        if ( bRet )
-        {
-            SetOutputWidthPixel(rNewSize.Width());
-            SetOutputHeightPixel(rNewSize.Height());
-
-            // So, in theory, the bAlphaMaskTransparent param to the SetSize() call just above should
-            // be initialising the data to transparent. But this only works on Linux. On Windows and macOS we
-            // have two different kinds of problems in the VirtualDevice subclasses,
-            // which means that it ends up being completely ineffective.
-            // So just take the heavy handed approach here and force the data to transparent.
-            if (bAlphaMaskTransparent)
-                DrawWallpaper(tools::Rectangle(0, 0, GetOutputWidthPixel(), GetOutputHeightPixel()), Wallpaper(COL_TRANSPARENT));
-            else
-                Erase();
-        }
-    }
-    else
-    {
-        // we need a graphics
-        if ( !mpGraphics && !AcquireGraphics() )
+        if (!mpVirDev->SetSize(nNewWidth, nNewHeight, bAlphaMaskTransparent))
             return false;
 
-        assert(mpGraphics);
+        SetOutputWidthPixel(rNewSize.Width());
+        SetOutputHeightPixel(rNewSize.Height());
 
-        std::unique_ptr<SalVirtualDevice> pNewVirDev = GetSalInstance()->CreateVirtualDevice(
-            *mpGraphics, nNewWidth, nNewHeight, meFormatAndAlpha, bAlphaMaskTransparent);
-        if ( pNewVirDev )
-        {
-            SalGraphics* pGraphics = pNewVirDev->AcquireGraphics();
-            if ( pGraphics )
-            {
-                tools::Long nWidth;
-                tools::Long nHeight;
-                if ( GetOutputWidthPixel() < nNewWidth )
-                    nWidth = GetOutputWidthPixel();
-                else
-                    nWidth = nNewWidth;
-                if ( GetOutputHeightPixel() < nNewHeight )
-                    nHeight = GetOutputHeightPixel();
-                else
-                    nHeight = nNewHeight;
-                SalTwoRect aPosAry(0, 0, nWidth, nHeight, 0, 0, nWidth, nHeight);
-                pGraphics->CopyBits( aPosAry, *mpGraphics, *this, *this );
-                pNewVirDev->ReleaseGraphics( pGraphics );
-                ReleaseGraphics();
-                mpVirDev = std::move(pNewVirDev);
-                SetOutputWidthPixel(rNewSize.Width());
-                SetOutputHeightPixel(rNewSize.Height());
-                bRet = true;
-            }
-            else
-            {
-                bRet = false;
-            }
-        }
+        // So, in theory, the bAlphaMaskTransparent param to the SetSize() call just above should
+        // be initialising the data to transparent. But this only works on Linux. On Windows and macOS we
+        // have two different kinds of problems in the VirtualDevice subclasses,
+        // which means that it ends up being completely ineffective.
+        // So just take the heavy handed approach here and force the data to transparent.
+        if (bAlphaMaskTransparent)
+            DrawWallpaper(tools::Rectangle(0, 0, GetOutputWidthPixel(), GetOutputHeightPixel()), Wallpaper(COL_TRANSPARENT));
         else
-            bRet = false;
+            Erase();
+
+        return true;
     }
 
-    return bRet;
+    // we need a graphics
+    if (!mpGraphics && !AcquireGraphics())
+        return false;
+
+    assert(mpGraphics);
+
+    std::unique_ptr<SalVirtualDevice> pNewVirDev = GetSalInstance()->CreateVirtualDevice(
+        *mpGraphics, nNewWidth, nNewHeight, meFormatAndAlpha, bAlphaMaskTransparent);
+
+    if (!pNewVirDev)
+        return false;
+
+    SalGraphics* pGraphics = pNewVirDev->AcquireGraphics();
+
+    if (!pGraphics)
+        return false;
+
+    tools::Long nWidth;
+    tools::Long nHeight;
+
+    if (GetOutputWidthPixel() < nNewWidth)
+        nWidth = GetOutputWidthPixel();
+    else
+        nWidth = nNewWidth;
+
+    if (GetOutputHeightPixel() < nNewHeight)
+        nHeight = GetOutputHeightPixel();
+    else
+        nHeight = nNewHeight;
+
+    SalTwoRect aPosAry(0, 0, nWidth, nHeight, 0, 0, nWidth, nHeight);
+    pGraphics->CopyBits(aPosAry, *mpGraphics, *this, *this);
+
+    pNewVirDev->ReleaseGraphics(pGraphics);
+    ReleaseGraphics();
+
+    mpVirDev = std::move(pNewVirDev);
+
+    SetOutputWidthPixel(rNewSize.Width());
+    SetOutputHeightPixel(rNewSize.Height());
+
+    return true;
 }
 
 void VirtualDevice::EnableRTL( bool bEnable )
