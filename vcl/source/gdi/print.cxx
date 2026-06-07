@@ -725,10 +725,14 @@ void Printer::DrawDeviceMask( const Bitmap& rMask, const Color& rMaskColor,
 
     // create forward mapping tables
     for( nX = 0; nX <= nSrcWidth; nX++ )
+    {
         pMapX[ nX ] = aDestPt.X() + basegfx::fround<tools::Long>( static_cast<double>(aDestSz.Width()) * nX / nSrcWidth );
+    }
 
     for( nY = 0; nY <= nSrcHeight; nY++ )
+    {
         pMapY[ nY ] = aDestPt.Y() + basegfx::fround<tools::Long>( static_cast<double>(aDestSz.Height()) * nY / nSrcHeight );
+    }
 
     // walk through all rectangles of mask
     const vcl::Region aWorkRgn(aMask.CreateRegion(COL_BLACK, tools::Rectangle(Point(), aMask.GetSizePixel())));
