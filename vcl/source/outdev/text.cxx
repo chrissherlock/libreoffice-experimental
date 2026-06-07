@@ -2121,7 +2121,8 @@ bool OutputDevice::GetTextBoundRect(basegfx::B2DRectangle& rRect, const OUString
             basegfx::B2DPoint aPos = pSalLayout->GetDrawPosition(basegfx::B2DPoint(nXOffset, 0));
             aPixelRect.translate(mnTextOffX - aPos.getX(), mnTextOffY - aPos.getY());
 
-            rRect = mpMapper->Compile({CoordinateSpace::Window, CoordinateSpace::Logic, GetMappingPolicy()}).apply(aPixelRect);
+            basegfx::B2DHomMatrix aInvMatrix = mpMapper->GetWindowToLogicMatrix(GetMappingPolicy());
+            rRect = vcl::TransformCompiler::Compile(aInvMatrix).apply(aPixelRect);
 
             if ((GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode))
             {

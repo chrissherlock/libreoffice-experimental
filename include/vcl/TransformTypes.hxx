@@ -44,33 +44,6 @@ enum class CoordinateSpace
     Device
 };
 
-struct TransformRequest
-{
-    CoordinateSpace eFrom = CoordinateSpace::Logic;
-    CoordinateSpace eTo = CoordinateSpace::Device;
-    vcl::MappingPolicy Policy = vcl::MappingPolicy::ApplyMapMode;
-};
-
-/**
- * Explicit routing keys for the TransformPlan cache.
- * This maps a CoordinateSpace pair + a MappingPolicy directly to a cache slot,
- * completely eliminating fragile slot arithmetic.
- */
-enum class TransformKey : size_t
-{
-    LogicToWindow_Mapped = 0,
-    LogicToWindow_Unmapped,
-    WindowToLogic_Mapped,
-    WindowToLogic_Unmapped,
-    LogicToDevice_Mapped,
-    LogicToDevice_Unmapped,
-    DeviceToLogic_Mapped,
-    DeviceToLogic_Unmapped,
-    DeviceToWindow,
-    WindowToDevice,
-    Count
-};
-
 enum class GeometryInvariant : size_t
 {
     AxisAlignment, // Edges remain parallel to X/Y axes (Critical for Rectangle/Scalar)

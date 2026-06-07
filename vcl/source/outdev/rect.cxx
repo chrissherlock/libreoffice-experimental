@@ -74,9 +74,8 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
 
 void OutputDevice::ImplDrawRect(const vcl::LogicRect& rLogicRect)
 {
-    auto aTransform = vcl::ResolveTransform(*this);
-
-    vcl::DeviceRect aDevRect = ApplyTransform(aTransform, rLogicRect);
+    vcl::DeviceRect aDevRect(
+        mpMapper->LogicToDevicePixel(rLogicRect.get(), GetMappingPolicy()));
 
     mpGraphics->DrawRect(aDevRect->Left(), aDevRect->Top(),
                          aDevRect->GetWidth(), aDevRect->GetHeight(), *this);

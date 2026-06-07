@@ -211,13 +211,7 @@ public:
     // Legacy Window Management Helper
     vcl::Region ViewToDevice(const vcl::Region& rRegion) const;
 
-    const vcl::TransformPlan& Compile(const TransformRequest& rReq) const;
-
-    // Legacy bridge
-    const vcl::TransformPlan& Compile(vcl::MappingPolicy ePolicy) const
-    {
-        return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
-    }
+    const vcl::TransformPlan& Compile(vcl::MappingPolicy ePolicy) const;
 
     uint64_t GetSemanticKey(vcl::MappingPolicy ePolicy) const;
 

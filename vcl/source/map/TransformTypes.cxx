@@ -132,10 +132,7 @@ vcl::WindowPoint CoordinateCastTraits<vcl::WindowPoint, vcl::LogicPoint>::cast(
         return vcl::WindowPoint(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
     }
 
-    return vcl::WindowPoint(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::WindowPoint(rMapper.LogicToWindowUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::WindowPoint>::cast(
@@ -149,10 +146,7 @@ vcl::LogicPoint CoordinateCastTraits<vcl::LogicPoint, vcl::WindowPoint>::cast(
         return vcl::LogicPoint(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
     }
 
-    return vcl::LogicPoint(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::LogicPoint(rMapper.WindowToLogicUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 // SIZES
@@ -167,10 +161,7 @@ vcl::WindowSize CoordinateCastTraits<vcl::WindowSize, vcl::LogicSize>::cast(
         return vcl::WindowSize(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
     }
 
-    return vcl::WindowSize(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::WindowSize(rMapper.LogicToWindowUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::WindowSize>::cast(
@@ -184,10 +175,7 @@ vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::WindowSize>::cast(
         return vcl::LogicSize(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
     }
 
-    return vcl::LogicSize(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::LogicSize(rMapper.WindowToLogicUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 // RECTANGLES
@@ -209,10 +197,7 @@ vcl::WindowRect CoordinateCastTraits<vcl::WindowRect, vcl::LogicRect>::cast(
         return vcl::WindowRect(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
     }
 
-    return vcl::WindowRect(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::WindowRect(rMapper.LogicToWindowUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 vcl::LogicRect CoordinateCastTraits<vcl::LogicRect, vcl::WindowRect>::cast(
@@ -226,10 +211,7 @@ vcl::LogicRect CoordinateCastTraits<vcl::LogicRect, vcl::WindowRect>::cast(
         return vcl::LogicRect(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
     }
 
-    return vcl::LogicRect(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::LogicRect(rMapper.WindowToLogicUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 // POLYGONS
@@ -244,10 +226,7 @@ vcl::WindowPolygon CoordinateCastTraits<vcl::WindowPolygon, vcl::LogicPolygon>::
         return vcl::WindowPolygon(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
     }
 
-    return vcl::WindowPolygon(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::WindowPolygon(rMapper.LogicToWindowUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 vcl::LogicPolygon CoordinateCastTraits<vcl::LogicPolygon, vcl::WindowPolygon>::cast(
@@ -261,10 +240,7 @@ vcl::LogicPolygon CoordinateCastTraits<vcl::LogicPolygon, vcl::WindowPolygon>::c
         return vcl::LogicPolygon(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
     }
 
-    return vcl::LogicPolygon(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::LogicPolygon(rMapper.WindowToLogicUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 // POLYPOLYGONS
@@ -279,10 +255,7 @@ vcl::WindowPolyPolygon CoordinateCastTraits<vcl::WindowPolyPolygon, vcl::LogicPo
         return vcl::WindowPolyPolygon(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
     }
 
-    return vcl::WindowPolyPolygon(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::WindowPolyPolygon(rMapper.LogicToWindowUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 vcl::LogicPolyPolygon CoordinateCastTraits<vcl::LogicPolyPolygon, vcl::WindowPolyPolygon>::cast(
@@ -296,10 +269,7 @@ vcl::LogicPolyPolygon CoordinateCastTraits<vcl::LogicPolyPolygon, vcl::WindowPol
         return vcl::LogicPolyPolygon(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
     }
 
-    return vcl::LogicPolyPolygon(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::LogicPolyPolygon(rMapper.WindowToLogicUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 // REGIONS
@@ -321,10 +291,7 @@ vcl::WindowRegion CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>::cas
         return vcl::WindowRegion(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
     }
 
-    return vcl::WindowRegion(
-        rMapper
-            .Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::WindowRegion(rMapper.LogicToWindowUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 vcl::LogicRegion CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>::cast(
@@ -338,10 +305,7 @@ vcl::LogicRegion CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>::cast
         return vcl::LogicRegion(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
     }
 
-    return vcl::LogicRegion(
-        rMapper
-            .Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, rDev.GetMappingPolicy() })
-            .apply(rSrc.get()));
+    return vcl::LogicRegion(rMapper.WindowToLogicUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
 // ========================================================================
@@ -499,7 +463,6 @@ vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::LogicSize>::cast(
 
     basegfx::B2DHomMatrix aMat = rDev.GetMapper().GetLogicToLogicMatrix(rSrcMap, rDstMap);
 
-    // Extract affine basis vector magnitudes instead of scalar diagonals
     const double fMagX = vcl::detail::GetBasisVectorMagnitudeX(aMat);
     const double fMagY = vcl::detail::GetBasisVectorMagnitudeY(aMat);
 
