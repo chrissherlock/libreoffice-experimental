@@ -51,6 +51,7 @@
 #include <svx/unopage.hxx>
 #include <vcl/pdfextoutdevdata.hxx>
 #include <vcl/print.hxx>
+#include <vcl/PrinterOptionsHelper.hxx>
 #include <vcl/ptrstyle.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/themecolors.hxx>

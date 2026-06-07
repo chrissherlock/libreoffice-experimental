@@ -59,6 +59,7 @@
 #include <unotools/localedatawrapper.hxx>
 #include <utility>
 #include <vcl/mapconvert.hxx>
+#include <vcl/PrinterOptionsHelper.hxx>
 #include <vcl/print.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/weld/MessageDialog.hxx>
