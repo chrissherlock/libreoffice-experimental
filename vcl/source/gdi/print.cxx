@@ -1545,16 +1545,16 @@ void Printer::EndJob()
 
     mbJobActive = false;
 
-    if ( mpPrinter )
-    {
-        ReleaseGraphics();
+    if ( !mpPrinter )
+        return;
 
-        mbPrinting      = false;
+    ReleaseGraphics();
 
-        mbDevOutput = false;
-        mpPrinter->EndJob();
-        mpPrinter.reset();
-    }
+    mbPrinting = false;
+
+    mbDevOutput = false;
+    mpPrinter->EndJob();
+    mpPrinter.reset();
 }
 
 void Printer::ImplStartPage()
