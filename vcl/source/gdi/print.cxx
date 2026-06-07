@@ -197,23 +197,19 @@ bool Printer::TransformAndReduceBitmapExToTargetRange(
     return true;
 }
 
-void Printer::DrawDeviceBitmap( const Point& rDestPt, const Size& rDestSize,
-                                const Point& rSrcPtPixel, const Size& rSrcSizePixel,
-                                Bitmap& rBmp )
+void Printer::DrawDeviceBitmap(const Point& rDestPt, const Size& rDestSize,
+                               const Point& rSrcPtPixel, const Size& rSrcSizePixel,
+                               Bitmap& rBmp)
 {
-    if( rBmp.HasAlpha() )
-    {
-        // #107169# For true alpha bitmaps, no longer masking the
-        // bitmap, but perform a full alpha blend against a white
-        // background here.
-        Bitmap aBmp( rBmp.CreateColorBitmap() );
-        aBmp.Blend( rBmp.CreateAlphaMask(), COL_WHITE );
-        DrawBitmap( rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp );
-    }
-    else
-    {
-        ImplPrintTransparent( rBmp, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel );
-    }
+    if (!rBmp.HasAlpha())
+        ImplPrintTransparent(rBmp, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel);
+
+    // #107169# For true alpha bitmaps, no longer masking the
+    // bitmap, but perform a full alpha blend against a white
+    // background here.
+    Bitmap aBmp(rBmp.CreateColorBitmap());
+    aBmp.Blend(rBmp.CreateAlphaMask(), COL_WHITE);
+    DrawBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);
 }
 
 void Printer::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
