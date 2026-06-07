@@ -857,25 +857,24 @@ Printer::Printer()
     ImplInitDisplay();
 }
 
-Printer::Printer( const JobSetup& rJobSetup )
+Printer::Printer(const JobSetup& rJobSetup)
     : OutputDevice(OUTDEV_PRINTER)
     , maJobSetup(rJobSetup)
 {
     ImplInitData();
     const ImplJobSetup& rConstData = rJobSetup.ImplGetConstData();
     const OUString& aDriver = rConstData.GetDriver();
-    SalPrinterQueueInfo* pInfo = ImplGetQueueInfo( rConstData.GetPrinterName(),
-                                                   &aDriver );
-    if ( pInfo )
+    SalPrinterQueueInfo* pInfo = ImplGetQueueInfo(rConstData.GetPrinterName(),
+                                                  &aDriver);
+    if (pInfo)
     {
         ImplInit(*pInfo);
-        SetJobSetup( rJobSetup );
+        SetJobSetup(rJobSetup);
+        return;
     }
-    else
-    {
-        ImplInitDisplay();
-        maJobSetup = JobSetup();
-    }
+
+    ImplInitDisplay();
+    maJobSetup = JobSetup();
 }
 
 Printer::Printer( const QueueInfo& rQueueInfo )
