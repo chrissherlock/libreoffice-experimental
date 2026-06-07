@@ -325,16 +325,6 @@ bool Printer::HasMirroredGraphics() const
     return false;
 }
 
-SalPrinterQueueInfo::SalPrinterQueueInfo()
-{
-    mnStatus    = PrintQueueFlags::NONE;
-    mnJobs      = QUEUE_JOBS_DONTKNOW;
-}
-
-SalPrinterQueueInfo::~SalPrinterQueueInfo()
-{
-}
-
 ImplPrnQueueList::~ImplPrnQueueList()
 {
 }
