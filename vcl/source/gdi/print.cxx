@@ -381,34 +381,35 @@ const std::vector<OUString>& Printer::GetPrinterQueues()
     return pSVData->maGDIData.mpPrinterQueueList->m_aPrinterList;
 }
 
-const QueueInfo* Printer::GetQueueInfo( const OUString& rPrinterName, bool bStatusUpdate )
+const QueueInfo* Printer::GetQueueInfo(const OUString& rPrinterName, bool bStatusUpdate)
 {
     ImplSVData* pSVData = ImplGetSVData();
 
-    if ( !pSVData->maGDIData.mpPrinterQueueList )
+    if (!pSVData->maGDIData.mpPrinterQueueList)
         ImplInitPrnQueueList();
 
-    if ( !pSVData->maGDIData.mpPrinterQueueList )
+    if (!pSVData->maGDIData.mpPrinterQueueList)
         return nullptr;
 
-    ImplPrnQueueData* pInfo = pSVData->maGDIData.mpPrinterQueueList->Get( rPrinterName );
-    if( pInfo )
-    {
-        if( !pInfo->mpQueueInfo || bStatusUpdate )
-            pSVData->mpDefInst->GetPrinterQueueState( pInfo->mpSalQueueInfo.get() );
+    ImplPrnQueueData* pInfo = pSVData->maGDIData.mpPrinterQueueList->Get(rPrinterName);
 
-        if ( !pInfo->mpQueueInfo )
-            pInfo->mpQueueInfo.reset(new QueueInfo);
+    if (!pInfo)
+        return nullptr;
 
-        pInfo->mpQueueInfo->maPrinterName   = pInfo->mpSalQueueInfo->maPrinterName;
-        pInfo->mpQueueInfo->maDriver        = pInfo->mpSalQueueInfo->maDriver;
-        pInfo->mpQueueInfo->maLocation      = pInfo->mpSalQueueInfo->maLocation;
-        pInfo->mpQueueInfo->maComment       = pInfo->mpSalQueueInfo->maComment;
-        pInfo->mpQueueInfo->mnStatus        = pInfo->mpSalQueueInfo->mnStatus;
-        pInfo->mpQueueInfo->mnJobs          = pInfo->mpSalQueueInfo->mnJobs;
-        return pInfo->mpQueueInfo.get();
-    }
-    return nullptr;
+    if (!pInfo->mpQueueInfo || bStatusUpdate)
+        pSVData->mpDefInst->GetPrinterQueueState(pInfo->mpSalQueueInfo.get());
+
+    if (!pInfo->mpQueueInfo)
+        pInfo->mpQueueInfo.reset(new QueueInfo);
+
+    pInfo->mpQueueInfo->maPrinterName = pInfo->mpSalQueueInfo->maPrinterName;
+    pInfo->mpQueueInfo->maDriver = pInfo->mpSalQueueInfo->maDriver;
+    pInfo->mpQueueInfo->maLocation = pInfo->mpSalQueueInfo->maLocation;
+    pInfo->mpQueueInfo->maComment = pInfo->mpSalQueueInfo->maComment;
+    pInfo->mpQueueInfo->mnStatus = pInfo->mpSalQueueInfo->mnStatus;
+    pInfo->mpQueueInfo->mnJobs = pInfo->mpSalQueueInfo->mnJobs;
+
+    return pInfo->mpQueueInfo.get();
 }
 
 OUString Printer::GetDefaultPrinterName()
