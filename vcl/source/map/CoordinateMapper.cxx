@@ -57,10 +57,6 @@
  * For the full algebraic derivation, see CoordinateMath.hxx.
  */
 
-// Conceptual Pipeline Separation (Mathematical Invariant):
-// Logic -> View: Scaled transformations (Scale * Logic) + Scaled Offsets ((MapOfs + LogicOfs) * Scale)
-// View -> Window: Pure translation (WindowOfs)
-// Window -> Device: Pure translation (DeviceOfs)
 void CoordinateMapper::GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX,
                                              double& rTransY, vcl::MappingPolicy ePolicy) const
 {
@@ -200,7 +196,6 @@ vcl::detail::MapConversion CoordinateMapper::ResolveMap(const MapMode& rBaseline
                                                         const MapMode& rTarget,
                                                         vcl::MappingPolicy ePolicy) const
 {
-    // Evaluates a temporary MapMode against the current accumulated state
     MappingCoefficients aRes = maState.ResolveMapResRelative(&rTarget, &rBaseline, ePolicy);
     return { aRes.mfScaleX, aRes.mfScaleY, aRes.mnTranslationX, aRes.mnTranslationY };
 }
@@ -224,14 +219,10 @@ CoordinateMapper::GetInverseViewTransformation(vcl::MappingPolicy ePolicy) const
 basegfx::B2DHomMatrix
 CoordinateMapper::GetViewTransformation(const vcl::detail::MapConversion& rConv) const
 {
-    // NOTE: This path intentionally bypasses the transform cache because MapConversion
-    // represents a temporary, externally resolved mapping state (e.g. for MapMode evaluation).
-    //
-    // IMPORTANT: The affine composition performed here must remain algebraically consistent
-    // with UpdateCache(ePolicy=true), specifically regarding logical-offset scaling semantics
-    // and the ordering of physical viewport offsets.
-    const double fScaleFactorX = static_cast<double>(GetDPIX()) * rConv.mfScaleX;
-    const double fScaleFactorY = static_cast<double>(GetDPIY()) * rConv.mfScaleY;
+    // Fix: Inject missing DPIScalePercentage so custom MapMode casts properly respect UI Zoom
+    const double fUiScale = static_cast<double>(maState.GetDPIScalePercentage()) / 100.0;
+    const double fScaleFactorX = static_cast<double>(GetDPIX()) * rConv.mfScaleX * fUiScale;
+    const double fScaleFactorY = static_cast<double>(GetDPIY()) * rConv.mfScaleY * fUiScale;
 
     return vcl::BuildAffineMatrix(
         fScaleFactorX, fScaleFactorY,
@@ -270,25 +261,25 @@ CoordinateMapper::GetInverseViewTransformation(const MapMode& rBaseline, const M
 template <typename T>
 T CoordinateMapper::LogicToDevicePixel(const T& rObj, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).apply(rObj);
+    return vcl::TransformCompiler::Compile(GetLogicToDeviceMatrix(ePolicy)).apply(rObj);
 }
 
 template <typename T>
 T CoordinateMapper::DevicePixelToLogic(const T& rObj, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).apply(rObj);
+    return vcl::TransformCompiler::Compile(GetDeviceToLogicMatrix(ePolicy)).apply(rObj);
 }
 
 template <typename T>
 T CoordinateMapper::LogicToWindowUnits(const T& rObj, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).apply(rObj);
+    return vcl::TransformCompiler::Compile(GetLogicToWindowMatrix(ePolicy)).apply(rObj);
 }
 
 template <typename T>
 T CoordinateMapper::WindowToLogicUnits(const T& rObj, vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).apply(rObj);
+    return vcl::TransformCompiler::Compile(GetWindowToLogicMatrix(ePolicy)).apply(rObj);
 }
 
 template <typename T>
@@ -332,7 +323,7 @@ basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPt,
                                                           vcl::MappingPolicy ePolicy) const
 {
     basegfx::B2DPoint aPt(rPt.X(), rPt.Y());
-    aPt *= Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).maMatrix;
+    aPt *= GetLogicToDeviceMatrix(ePolicy);
     return aPt;
 }
 
@@ -340,7 +331,7 @@ basegfx::B2DPoint CoordinateMapper::DevicePixelToLogicSubPixel(const Point& rPt,
                                                                vcl::MappingPolicy ePolicy) const
 {
     basegfx::B2DPoint aPt(rPt.X(), rPt.Y());
-    aPt *= Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).maMatrix;
+    aPt *= GetDeviceToLogicMatrix(ePolicy);
     return aPt;
 }
 
@@ -356,29 +347,36 @@ Point CoordinateMapper::WindowSubPixelToLogicUnits(const basegfx::B2DPoint& rPt,
 // THE ROUTER DELEGATION & MATRIX BUILDERS
 // ============================================================================
 
-const vcl::TransformPlan& CoordinateMapper::Compile(const TransformRequest& rReq) const
+const vcl::TransformPlan& CoordinateMapper::Compile(vcl::MappingPolicy ePolicy) const
 {
-    return maRouter.Compile(maState, rReq);
+    return maRouter.Compile(maState, ePolicy);
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetLogicToDeviceMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy }).maMatrix;
+    basegfx::B2DHomMatrix aMatrix = GetLogicToWindowMatrix(ePolicy);
+    aMatrix.translate(static_cast<double>(maState.GetDeviceToWindowOffsetX()),
+                      static_cast<double>(maState.GetDeviceToWindowOffsetY()));
+    return aMatrix;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetDeviceToLogicMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy }).maMatrix;
+    basegfx::B2DHomMatrix aMatrix = GetLogicToDeviceMatrix(ePolicy);
+    aMatrix.invert();
+    return aMatrix;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetLogicToWindowMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy }).maMatrix;
+    return Compile(ePolicy).maMatrix;
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetWindowToLogicMatrix(vcl::MappingPolicy ePolicy) const
 {
-    return Compile({ CoordinateSpace::Window, CoordinateSpace::Logic, ePolicy }).maMatrix;
+    basegfx::B2DHomMatrix aMatrix = GetLogicToWindowMatrix(ePolicy);
+    aMatrix.invert();
+    return aMatrix;
 }
 
 // ========================================================================
@@ -388,7 +386,7 @@ basegfx::B2DHomMatrix CoordinateMapper::GetWindowToLogicMatrix(vcl::MappingPolic
 tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth,
                                                       vcl::MappingPolicy ePolicy) const
 {
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
+    const auto& rTransform = Compile(ePolicy);
     if (!rTransform.PreservesAxisAlignment())
         return vcl::detail::RoundToLong(
             static_cast<double>(nWidth)
@@ -399,7 +397,7 @@ tools::Long CoordinateMapper::LogicWidthToDevicePixel(tools::Long nWidth,
 tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight,
                                                        vcl::MappingPolicy ePolicy) const
 {
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
+    const auto& rTransform = Compile(ePolicy);
     if (!rTransform.PreservesAxisAlignment())
         return vcl::detail::RoundToLong(
             static_cast<double>(nHeight)
@@ -410,29 +408,23 @@ tools::Long CoordinateMapper::LogicHeightToDevicePixel(tools::Long nHeight,
 tools::Long CoordinateMapper::DevicePixelToLogicWidth(tools::Long nWidth,
                                                       vcl::MappingPolicy ePolicy) const
 {
-    const auto& rTransform = Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy });
-    if (!rTransform.PreservesAxisAlignment())
-        return vcl::detail::RoundToLong(
-            static_cast<double>(nWidth)
-            * vcl::detail::GetBasisVectorMagnitudeX(rTransform.maMatrix));
-    return vcl::detail::RoundToLong(static_cast<double>(nWidth) * rTransform.maMatrix.get(0, 0));
+    basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(ePolicy);
+    return vcl::detail::RoundToLong(static_cast<double>(nWidth)
+                                    * vcl::detail::GetBasisVectorMagnitudeX(aMat));
 }
 
 tools::Long CoordinateMapper::DevicePixelToLogicHeight(tools::Long nHeight,
                                                        vcl::MappingPolicy ePolicy) const
 {
-    const auto& rTransform = Compile({ CoordinateSpace::Device, CoordinateSpace::Logic, ePolicy });
-    if (!rTransform.PreservesAxisAlignment())
-        return vcl::detail::RoundToLong(
-            static_cast<double>(nHeight)
-            * vcl::detail::GetBasisVectorMagnitudeY(rTransform.maMatrix));
-    return vcl::detail::RoundToLong(static_cast<double>(nHeight) * rTransform.maMatrix.get(1, 1));
+    basegfx::B2DHomMatrix aMat = GetDeviceToLogicMatrix(ePolicy);
+    return vcl::detail::RoundToLong(static_cast<double>(nHeight)
+                                    * vcl::detail::GetBasisVectorMagnitudeY(aMat));
 }
 
 double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth,
                                                     vcl::MappingPolicy ePolicy) const
 {
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
+    const auto& rTransform = Compile(ePolicy);
     if (!rTransform.PreservesAxisAlignment())
         return static_cast<double>(nWidth)
                * vcl::detail::GetBasisVectorMagnitudeX(rTransform.maMatrix);
@@ -442,7 +434,7 @@ double CoordinateMapper::LogicWidthToWindowSubPixel(tools::Long nWidth,
 double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight,
                                                      vcl::MappingPolicy ePolicy) const
 {
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Window, ePolicy });
+    const auto& rTransform = Compile(ePolicy);
     if (!rTransform.PreservesAxisAlignment())
         return static_cast<double>(nHeight)
                * vcl::detail::GetBasisVectorMagnitudeY(rTransform.maMatrix);
@@ -452,10 +444,8 @@ double CoordinateMapper::LogicHeightToWindowSubPixel(tools::Long nHeight,
 double CoordinateMapper::LogicWidthToDeviceSubPixel(tools::Long nWidth,
                                                     vcl::MappingPolicy ePolicy) const
 {
-    const auto& rTransform = Compile({ CoordinateSpace::Logic, CoordinateSpace::Device, ePolicy });
-    if (rTransform.PreservesAxisAlignment())
-        return static_cast<double>(nWidth) * rTransform.maMatrix.get(0, 0);
-    return static_cast<double>(nWidth) * vcl::detail::GetBasisVectorMagnitudeX(rTransform.maMatrix);
+    basegfx::B2DHomMatrix aMat = GetLogicToDeviceMatrix(ePolicy);
+    return static_cast<double>(nWidth) * vcl::detail::GetBasisVectorMagnitudeX(aMat);
 }
 
 basegfx::B2DHomMatrix CoordinateMapper::GetLogicToLogicMatrix(const MapMode& rSrc,
@@ -472,22 +462,11 @@ basegfx::B2DHomMatrix CoordinateMapper::GetLogicToLogicMatrix(const MapMode& rSr
 
     if (bSrcRelative || bDstRelative)
     {
-        // Relative MapModes have no absolute meaning on their own — they
-        // inherit scale and origin from a baseline. We cross-resolve each
-        // side against the other as its baseline so that a relative source
-        // is correctly inherited from the destination's coordinate space
-        // and vice versa. Device state (maState) is only consulted here
-        // as a fallback if neither side can serve as the other's baseline,
-        // which in practice cannot happen given the branch condition above.
         aSrcRes = maState.ResolveMapResRelative(&rSrc, &rDst, vcl::MappingPolicy::ApplyMapMode);
         aDstRes = maState.ResolveMapResRelative(&rDst, &rSrc, vcl::MappingPolicy::ApplyMapMode);
     }
     else
     {
-        // Absolute MapModes resolve purely from their own definition and
-        // the device DPI. This path is intentionally free of device state
-        // beyond DPI so that GetLogicToLogicMatrix is a pure function of
-        // its two arguments for all non-relative MapMode combinations.
         aSrcRes = MappingCoefficients(rSrc, GetDPIX(), GetDPIY());
         aDstRes = MappingCoefficients(rDst, GetDPIX(), GetDPIY());
     }
@@ -498,11 +477,6 @@ basegfx::B2DHomMatrix CoordinateMapper::GetLogicToLogicMatrix(const MapMode& rSr
     const double fScaleFactorX = aSrcRes.mfScaleX / fDestScX;
     const double fScaleFactorY = aSrcRes.mfScaleY / fDestScY;
 
-    // Use canonical builder to enforce translation-scale-translation invariant:
-    //   P' = ((P + SrcOrigin) * Scale) - DstOrigin
-    // The source origin grows with the scale factor (it is in source logical
-    // units). The destination origin is subtracted post-scale as a physical
-    // offset, matching the semantics in LegacyCoordinateAdapter::LogicToLogic.
     return vcl::BuildAffineMatrix(
         fScaleFactorX, fScaleFactorY, static_cast<double>(aSrcRes.mnTranslationX),
         static_cast<double>(aSrcRes.mnTranslationY), static_cast<double>(-aDstRes.mnTranslationX),
@@ -700,7 +674,6 @@ CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogi
         = ResolveMap(MapMode(), rCustomMapMode, vcl::MappingPolicy::ApplyMapMode);
     basegfx::B2DHomMatrix aMat = GetViewTransformation(aConv);
 
-    // Monadic Bind: Extract raw geometry, apply math, and seal into SpaceWindow
     return rLogicGeom.and_then([&aMat](const Geom& rRawGeom) {
         if constexpr (vcl::detail::B2DTransformable<Geom>)
         {
@@ -714,7 +687,6 @@ CoordinateMapper::MapToWindow(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogi
         }
         else
         {
-            // Legacy geometry requires the sub-pixel rounding compiler
             return vcl::TypedGeom<vcl::SpaceWindow, Geom>(
                 vcl::TransformCompiler::Compile(aMat).apply(rRawGeom));
         }
@@ -732,7 +704,6 @@ CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogi
     aMat.translate(static_cast<double>(maState.GetDeviceToWindowOffsetX()),
                    static_cast<double>(maState.GetDeviceToWindowOffsetY()));
 
-    // Monadic Bind: Extract raw geometry, apply math, and seal into SpaceDevice
     return rLogicGeom.and_then([&aMat](const Geom& rRawGeom) {
         if constexpr (vcl::detail::B2DTransformable<Geom>)
         {
@@ -746,7 +717,6 @@ CoordinateMapper::MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogi
         }
         else
         {
-            // Legacy geometry requires the sub-pixel rounding compiler
             return vcl::TypedGeom<vcl::SpaceDevice, Geom>(
                 vcl::TransformCompiler::Compile(aMat).apply(rRawGeom));
         }

@@ -124,6 +124,13 @@ OutputDevice::~OutputDevice()
 
 void OutputDevice::dispose()
 {
+    SAL_WARN_IF(!m_aPushFrames.empty() || !maOutDevStateStack.empty(),
+             "vcl.gdi", "OutputDevice::dispose(): Stack not empty, possible leak of state frames.");
+
+    // Clear the memory directly without triggering reconciliation/pop logic
+    m_aPushFrames.clear();
+    maOutDevStateStack.clear();
+
     if ( GetUnoGraphicsList() )
     {
         UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper( false );
@@ -144,6 +151,7 @@ void OutputDevice::dispose()
     if ( !maOutDevStateStack.empty() )
         SAL_WARN( "vcl.gdi", "OutputDevice::~OutputDevice(): OutputDevice::Push() calls != OutputDevice::Pop() calls" );
     maOutDevStateStack.clear();
+    m_aPushFrames.clear();
 
     // release the active font instance
     mpFontInstance.clear();
