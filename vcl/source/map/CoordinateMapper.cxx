@@ -327,6 +327,31 @@ const vcl::TransformPlan& CoordinateMapper::Compile(vcl::MappingPolicy ePolicy) 
     return maRouter.Compile(maState, ePolicy);
 }
 
+uint64_t CoordinateMapper::GetSemanticKey(vcl::MappingPolicy ePolicy) const
+{
+    std::size_t nSeed = 0;
+
+    // 1. Hash the physical hardware state (this always applies)
+    o3tl::hash_combine(nSeed, maState.GetDPIX());
+    o3tl::hash_combine(nSeed, maState.GetDPIY());
+    o3tl::hash_combine(nSeed, maState.GetDeviceToWindowOffsetX());
+    o3tl::hash_combine(nSeed, maState.GetDeviceToWindowOffsetY());
+    o3tl::hash_combine(nSeed, static_cast<int>(ePolicy));
+
+    // 2. Hash the logical state ONLY if the policy dictates we are using it
+    if (ePolicy == vcl::MappingPolicy::ApplyMapMode)
+    {
+        const MapMode& rMap = maState.GetMapMode();
+        o3tl::hash_combine(nSeed, static_cast<int>(rMap.GetMapUnit()));
+        o3tl::hash_combine(nSeed, rMap.GetScaleX());
+        o3tl::hash_combine(nSeed, rMap.GetScaleY());
+        o3tl::hash_combine(nSeed, rMap.GetOrigin().X());
+        o3tl::hash_combine(nSeed, rMap.GetOrigin().Y());
+    }
+
+    return static_cast<uint64_t>(nSeed);
+}
+
 basegfx::B2DHomMatrix CoordinateMapper::GetLogicToDeviceMatrix(vcl::MappingPolicy ePolicy) const
 {
     basegfx::B2DHomMatrix aMatrix = GetLogicToWindowMatrix(ePolicy);

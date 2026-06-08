@@ -297,6 +297,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/map/TransformRouter \
     vcl/source/map/GeometryAdapter \
     vcl/source/map/MappingCoefficients \
+    vcl/source/outdev/ClippingController \
     vcl/source/outdev/background \
     vcl/source/outdev/eps \
     vcl/source/outdev/outdev \
