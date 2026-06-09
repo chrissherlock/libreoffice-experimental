@@ -163,11 +163,10 @@ void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)
         rDstRect.Intersection(convertTo<vcl::WindowRect>(vcl::LogicRect(aPaintRgn.GetBoundRect()), GetMapMode()).get());
 }
 
-void Window::EnableClipSiblings( bool bClipSiblings )
+void Window::EnableClipSiblings(bool bClipSiblings)
 {
-
-    if ( mpWindowImpl->mpBorderWindow )
-        mpWindowImpl->mpBorderWindow->EnableClipSiblings( bClipSiblings );
+    if (mpWindowImpl->mpBorderWindow)
+        mpWindowImpl->mpBorderWindow->EnableClipSiblings(bClipSiblings);
 
     mpWindowImpl->mbClipSiblings = bClipSiblings;
 }
