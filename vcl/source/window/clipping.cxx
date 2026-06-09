@@ -211,21 +211,26 @@ void Window::ImplClipBoundaries( vcl::Region& rRegion, bool bThis, bool bOverlap
     ImplExcludeOverlapWindows(rRegion);
 }
 
-bool Window::ImplClipChildren( vcl::Region& rRegion ) const
+bool Window::ImplClipChildren(vcl::Region& rRegion) const
 {
-    bool    bOtherClip = false;
+    bool bOtherClip = false;
     vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
-    while ( pWindow )
+
+    while (pWindow)
     {
-        if ( pWindow->mpWindowImpl->mbReallyVisible )
+        if (pWindow->mpWindowImpl->mbReallyVisible)
         {
             // read-out ParentClipMode-Flags
             ParentClipMode nClipMode = pWindow->GetParentClipMode();
-            if ( !(nClipMode & ParentClipMode::NoClip) &&
-                 ((nClipMode & ParentClipMode::Clip) || (GetStyle() & WB_CLIPCHILDREN)) )
-                pWindow->ImplExcludeWindowRegion( rRegion );
+            if (!(nClipMode & ParentClipMode::NoClip) &&
+                 ((nClipMode & ParentClipMode::Clip) || (GetStyle() & WB_CLIPCHILDREN)))
+            {
+                pWindow->ImplExcludeWindowRegion(rRegion);
+            }
             else
+            {
                 bOtherClip = true;
+            }
         }
 
         pWindow = pWindow->mpWindowImpl->mpNext;
