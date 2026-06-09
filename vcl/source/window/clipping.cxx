@@ -608,10 +608,12 @@ void Window::ImplCalcOverlapRegionOverlaps( const vcl::Region& rInterRegion, vcl
 {
     // Clip Overlap Siblings
     vcl::Window const * pStartOverlapWindow;
+
     if ( !ImplIsOverlapWindow() )
         pStartOverlapWindow = mpWindowImpl->mpOverlapWindow;
     else
         pStartOverlapWindow = this;
+
     while ( !pStartOverlapWindow->mpWindowImpl->mbFrame )
     {
         vcl::Window* pOverlapWindow = pStartOverlapWindow->mpWindowImpl->mpOverlapWindow->mpWindowImpl->mpFirstOverlap;
