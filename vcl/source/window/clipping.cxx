@@ -405,23 +405,25 @@ void Window::ImplUpdateSysObjOverlapsClip()
 
 void Window::ImplUpdateSysObjClip()
 {
-    if ( !ImplIsOverlapWindow() )
+    if (ImplIsOverlapWindow())
     {
-        ImplUpdateSysObjChildrenClip();
-
-        // siblings should recalculate their clip region
-        if ( mpWindowImpl->mbClipSiblings )
-        {
-            vcl::Window* pWindow = mpWindowImpl->mpNext;
-            while ( pWindow )
-            {
-                pWindow->ImplUpdateSysObjChildrenClip();
-                pWindow = pWindow->mpWindowImpl->mpNext;
-            }
-        }
-    }
-    else
         mpWindowImpl->mpFrameWindow->ImplUpdateSysObjOverlapsClip();
+        return;
+    }
+
+    ImplUpdateSysObjChildrenClip();
+
+    // siblings should recalculate their clip region
+    if (!mpWindowImpl->mbClipSiblings)
+        return;
+
+    vcl::Window* pWindow = mpWindowImpl->mpNext;
+
+    while (pWindow)
+    {
+        pWindow->ImplUpdateSysObjChildrenClip();
+        pWindow = pWindow->mpWindowImpl->mpNext;
+    }
 }
 
 bool Window::ImplSetClipFlagChildren( bool bSysObjOnlySmaller )
