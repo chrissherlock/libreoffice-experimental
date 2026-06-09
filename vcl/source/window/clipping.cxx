@@ -250,16 +250,17 @@ void Window::ImplClipAllChildren( vcl::Region& rRegion ) const
     }
 }
 
-void Window::ImplClipSiblings( vcl::Region& rRegion ) const
+void Window::ImplClipSiblings(vcl::Region& rRegion) const
 {
     vcl::Window* pWindow = ImplGetParent()->mpWindowImpl->mpFirstChild;
-    while ( pWindow )
+
+    while (pWindow)
     {
-        if ( pWindow == this )
+        if (pWindow == this)
             break;
 
-        if ( pWindow->mpWindowImpl->mbReallyVisible )
-            pWindow->ImplExcludeWindowRegion( rRegion );
+        if (pWindow->mpWindowImpl->mbReallyVisible)
+            pWindow->ImplExcludeWindowRegion(rRegion);
 
         pWindow = pWindow->mpWindowImpl->mpNext;
     }
