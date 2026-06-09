@@ -143,14 +143,14 @@ vcl::Region WindowOutputDevice::GetActiveClipRegion() const
 {
     vcl::Region aRegion(true);
 
-    if ( mxOwnerWindow->mpWindowImpl->mbInPaint )
+    if (mxOwnerWindow->mpWindowImpl->mbInPaint)
     {
         aRegion = *(mxOwnerWindow->mpWindowImpl->mpPaintRegion);
-        aRegion.Move( -GetDeviceOriginX(), -GetDeviceOriginY() );
+        aRegion.Move(-GetDeviceOriginX(), -GetDeviceOriginY());
     }
 
-    if ( mbClipRegion )
-        aRegion.Intersect( maRegion );
+    if (mbClipRegion)
+        aRegion.Intersect(maRegion);
 
     return convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
 }
