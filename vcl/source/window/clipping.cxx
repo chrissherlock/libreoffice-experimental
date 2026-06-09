@@ -18,6 +18,7 @@
  */
 
 #include <tools/debug.hxx>
+#include <comphelper/scopeguard.hxx>
 
 #include <vcl/window.hxx>
 #include <vcl/virdev.hxx>
@@ -373,6 +374,8 @@ bool Window::ImplSysObjClip(const vcl::Region* pOldRegion)
             }
 
             ImplUpdateSysObjClipRegion(rWinChildClipRegion, vcl::Region(GetOutputRectPixel()));
+
+            bVisibleState = true;
         }
         else
         {
@@ -709,40 +712,44 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
 
 void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize, const Size&) const
 {
-    if (mxOwnerWindow && mxOwnerWindow->mpWindowImpl && mxOwnerWindow->mpWindowImpl->mpPaintRegion)
-    {
-        vcl::Region aClip(*mxOwnerWindow->mpWindowImpl->mpPaintRegion);
-        aClip.Move(-GetDeviceOriginX(), -GetDeviceOriginY());
+    comphelper::ScopeGuard aResetMapMode([&rSaveDevice]() { rSaveDevice.SetMapMode(MapMode()); });
 
-        // Modernized coordinate transformations
-        const auto aPixPos = convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos), GetMapMode());
-        const auto boundRect = convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle(rPos, rSize)), GetMapMode());
-
-        aClip.Intersect(boundRect.get());
-
-        if (!aClip.IsEmpty())
-        {
-            const vcl::Region aOldClip(rSaveDevice.GetClipRegion());
-            const auto aPixOffset = rSaveDevice.convertTo<vcl::WindowPoint>(vcl::LogicPoint(0, 0), rSaveDevice.GetMapMode());
-            const vcl::MappingPolicy eOldPolicy = rSaveDevice.GetMappingPolicy();
-
-            // Move clip region to have the same distance to DestOffset
-            aClip.Move(aPixOffset->X() - aPixPos->X(), aPixOffset->Y() - aPixPos->Y());
-
-            // Set pixel clip region
-            rSaveDevice.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
-            rSaveDevice.SetClipRegion(aClip);
-            rSaveDevice.DrawOutDev(Point(), rSize, rPos, rSize, *this);
-            rSaveDevice.SetMappingPolicy(eOldPolicy);
-            rSaveDevice.SetClipRegion(aOldClip);
-        }
-    }
-    else
+    if (!mxOwnerWindow || !mxOwnerWindow->mpWindowImpl || !mxOwnerWindow->mpWindowImpl->mpPaintRegion)
     {
         rSaveDevice.DrawOutDev(Point(), rSize, rPos, rSize, *this);
+        return;
     }
 
-    rSaveDevice.SetMapMode(MapMode());
+    vcl::Region aClip(*mxOwnerWindow->mpWindowImpl->mpPaintRegion);
+    aClip.Move(-GetDeviceOriginX(), -GetDeviceOriginY());
+
+    // Modernized coordinate transformations
+    const auto aPixPos = convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos), GetMapMode());
+    const auto boundRect = convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle(rPos, rSize)), GetMapMode());
+
+    aClip.Intersect(boundRect.get());
+
+    if (!aClip.IsEmpty())
+    {
+        const vcl::Region aOldClip(rSaveDevice.GetClipRegion());
+        const vcl::MappingPolicy eOldPolicy = rSaveDevice.GetMappingPolicy();
+
+        comphelper::ScopeGuard aDeviceGuard([&rSaveDevice, aOldClip, eOldPolicy]() {
+            rSaveDevice.SetMappingPolicy(eOldPolicy);
+            rSaveDevice.SetClipRegion(aOldClip);
+        });
+
+        const auto aPixOffset = rSaveDevice.convertTo<vcl::WindowPoint>(vcl::LogicPoint(0, 0), rSaveDevice.GetMapMode());
+
+        // Move clip region to have the same distance to DestOffset
+        aClip.Move(aPixOffset->X() - aPixPos->X(), aPixOffset->Y() - aPixPos->Y());
+
+        // Set pixel clip region
+        rSaveDevice.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
+        rSaveDevice.SetClipRegion(aClip);
+
+        rSaveDevice.DrawOutDev(Point(), rSize, rPos, rSize, *this);
+    }
 }
 
 } /* namespace vcl */
