@@ -359,34 +359,27 @@ bool Window::ImplSysObjClip(const vcl::Region* pOldRegion)
     if (!mpWindowImpl->mpSysObj)
         return true;
 
-    bool bVisibleState = mpWindowImpl->mbReallyVisible;
-    bool bUpdate = true;
-
-    if (bVisibleState)
+    // If the window is hidden or its clipping region is empty, hide the system object early
+    if (!mpWindowImpl->mbReallyVisible || ImplGetWinChildClipRegion().IsEmpty())
     {
-        vcl::Region& rWinChildClipRegion = ImplGetWinChildClipRegion();
-
-        if (!rWinChildClipRegion.IsEmpty())
-        {
-            if (pOldRegion)
-            {
-                vcl::Region aNewRegion = rWinChildClipRegion;
-                rWinChildClipRegion.Intersect(*pOldRegion);
-                bUpdate = aNewRegion == rWinChildClipRegion;
-            }
-
-            ImplUpdateSysObjClipRegion(rWinChildClipRegion, vcl::Region(GetOutputRectPixel()));
-
-            bVisibleState = true;
-        }
-        else
-        {
-            bVisibleState = false;
-        }
+        mpWindowImpl->mpSysObj->Show(false);
+        return true;
     }
 
-    // update visible status
-    mpWindowImpl->mpSysObj->Show(bVisibleState);
+    vcl::Region& rWinChildClipRegion = ImplGetWinChildClipRegion();
+
+    // the system object is definitively visible
+    bool bUpdate = true;
+    if (pOldRegion)
+    {
+        vcl::Region aNewRegion = rWinChildClipRegion;
+        rWinChildClipRegion.Intersect(*pOldRegion);
+        bUpdate = (aNewRegion == rWinChildClipRegion);
+    }
+
+    ImplUpdateSysObjClipRegion(rWinChildClipRegion, vcl::Region(GetOutputRectPixel()));
+
+    mpWindowImpl->mpSysObj->Show(true);
 
     return bUpdate;
 }
