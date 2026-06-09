@@ -43,7 +43,9 @@ void WindowOutputDevice::InitClipRegion()
     vcl::Region  aRegion;
 
     if ( mxOwnerWindow->mpWindowImpl->mbInPaint )
+    {
         aRegion = *(mxOwnerWindow->mpWindowImpl->mpPaintRegion);
+    }
     else
     {
         aRegion = mxOwnerWindow->ImplGetWinChildClipRegion();
@@ -57,12 +59,15 @@ void WindowOutputDevice::InitClipRegion()
         aRegion.Intersect( GetMapper().ViewToDevice( maRegion ) );
 
     if ( aRegion.IsEmpty() )
+    {
         mbOutputClipped = true;
+    }
     else
     {
         mbOutputClipped = false;
         SelectClipRegion( aRegion );
     }
+
     mbClipRegionSet = true;
 
     mbInitClipRegion = false;
@@ -211,6 +216,12 @@ void Window::ImplClipBoundaries( vcl::Region& rRegion, bool bThis, bool bOverlap
     ImplExcludeOverlapWindows(rRegion);
 }
 
+static bool lcl_IsParentClipRequired(ParentClipMode nClipMode, WinBits nStyle)
+{
+    return !(nClipMode & ParentClipMode::NoClip)
+           && ((nClipMode & ParentClipMode::Clip) || (nStyle & WB_CLIPCHILDREN));
+}
+
 bool Window::ImplClipChildren(vcl::Region& rRegion) const
 {
     bool bOtherClip = false;
@@ -222,15 +233,11 @@ bool Window::ImplClipChildren(vcl::Region& rRegion) const
         {
             // read-out ParentClipMode-Flags
             ParentClipMode nClipMode = pWindow->GetParentClipMode();
-            if (!(nClipMode & ParentClipMode::NoClip) &&
-                 ((nClipMode & ParentClipMode::Clip) || (GetStyle() & WB_CLIPCHILDREN)))
-            {
+
+            if (lcl_IsParentClipRequired(nClipMode, GetStyle()))
                 pWindow->ImplExcludeWindowRegion(rRegion);
-            }
             else
-            {
                 bOtherClip = true;
-            }
         }
 
         pWindow = pWindow->mpWindowImpl->mpNext;
