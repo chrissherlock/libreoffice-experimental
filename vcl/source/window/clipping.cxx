@@ -315,12 +315,15 @@ void Window::ImplInitWinChildClipRegion()
 
 Region& Window::ImplGetWinChildClipRegion()
 {
-    if ( mpWindowImpl->mbInitWinClipRegion )
+    if (mpWindowImpl->mbInitWinClipRegion)
         ImplInitWinClipRegion();
-    if ( mpWindowImpl->mbInitChildRegion )
+
+    if (mpWindowImpl->mbInitChildRegion)
         ImplInitWinChildClipRegion();
-    if ( mpWindowImpl->mpChildClipRegion )
+
+    if (mpWindowImpl->mpChildClipRegion)
         return *mpWindowImpl->mpChildClipRegion;
+
     return mpWindowImpl->maWinClipRegion;
 }
 
