@@ -173,35 +173,42 @@ void Window::EnableClipSiblings(bool bClipSiblings)
 
 void Window::ImplClipBoundaries( vcl::Region& rRegion, bool bThis, bool bOverlaps )
 {
-    if ( bThis )
-        ImplIntersectWindowClipRegion( rRegion );
-    else if ( ImplIsOverlapWindow() )
+    if (bThis)
     {
-        // clip to frame if required
-        if ( !mpWindowImpl->mbFrame )
-            rRegion.Intersect( tools::Rectangle( Point( 0, 0 ), mpWindowImpl->mpFrameWindow->GetOutputSizePixel() ) );
-
-        if ( bOverlaps && !rRegion.IsEmpty() )
-        {
-            // Clip Overlap Siblings
-            vcl::Window* pStartOverlapWindow = this;
-            while ( !pStartOverlapWindow->mpWindowImpl->mbFrame )
-            {
-                vcl::Window* pOverlapWindow = pStartOverlapWindow->mpWindowImpl->mpOverlapWindow->mpWindowImpl->mpFirstOverlap;
-                while ( pOverlapWindow && (pOverlapWindow != pStartOverlapWindow) )
-                {
-                    pOverlapWindow->ImplExcludeOverlapWindows2( rRegion );
-                    pOverlapWindow = pOverlapWindow->mpWindowImpl->mpNext;
-                }
-                pStartOverlapWindow = pStartOverlapWindow->mpWindowImpl->mpOverlapWindow;
-            }
-
-            // Clip Child Overlap Windows
-            ImplExcludeOverlapWindows( rRegion );
-        }
+        ImplIntersectWindowClipRegion(rRegion);
+        return;
     }
-    else
-        ImplGetParent()->ImplIntersectWindowClipRegion( rRegion );
+
+    if (!ImplIsOverlapWindow())
+    {
+        ImplGetParent()->ImplIntersectWindowClipRegion(rRegion);
+        return;
+    }
+
+    // clip to frame if required
+    if (!mpWindowImpl->mbFrame)
+        rRegion.Intersect(tools::Rectangle(Point(0, 0), mpWindowImpl->mpFrameWindow->GetOutputSizePixel()));
+
+    if (!bOverlaps || rRegion.IsEmpty())
+        return;
+
+    // Clip Overlap Siblings
+    vcl::Window* pStartOverlapWindow = this;
+    while (!pStartOverlapWindow->mpWindowImpl->mbFrame)
+    {
+        vcl::Window* pOverlapWindow = pStartOverlapWindow->mpWindowImpl->mpOverlapWindow->mpWindowImpl->mpFirstOverlap;
+
+        while (pOverlapWindow && (pOverlapWindow != pStartOverlapWindow))
+        {
+            pOverlapWindow->ImplExcludeOverlapWindows2(rRegion);
+            pOverlapWindow = pOverlapWindow->mpWindowImpl->mpNext;
+        }
+
+        pStartOverlapWindow = pStartOverlapWindow->mpWindowImpl->mpOverlapWindow;
+    }
+
+    // Clip Child Overlap Windows
+    ImplExcludeOverlapWindows(rRegion);
 }
 
 bool Window::ImplClipChildren( vcl::Region& rRegion ) const
