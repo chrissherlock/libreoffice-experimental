@@ -87,10 +87,10 @@ void Window::SetParentClipMode(ParentClipMode nMode)
 
 ParentClipMode Window::GetParentClipMode() const
 {
-    if ( mpWindowImpl->mpBorderWindow )
+    if (mpWindowImpl->mpBorderWindow)
         return mpWindowImpl->mpBorderWindow->GetParentClipMode();
-    else
-        return mpWindowImpl->mnParentClipMode;
+
+    return mpWindowImpl->mnParentClipMode;
 }
 
 void Window::ExpandPaintClipRegion( const vcl::Region& rRegion )
