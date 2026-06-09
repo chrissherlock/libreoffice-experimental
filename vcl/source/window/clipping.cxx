@@ -491,36 +491,36 @@ bool Window::ImplSetClipFlagOverlapWindows( bool bSysObjOnlySmaller )
     return bUpdate;
 }
 
-bool Window::ImplSetClipFlag( bool bSysObjOnlySmaller )
+bool Window::ImplSetClipFlag(bool bSysObjOnlySmaller)
 {
-    if ( !ImplIsOverlapWindow() )
+    if (!ImplIsOverlapWindow())
+        return mpWindowImpl->mpFrameWindow->ImplSetClipFlagOverlapWindows(bSysObjOnlySmaller);
+
+    bool bUpdate = ImplSetClipFlagChildren(bSysObjOnlySmaller);
+
+    vcl::Window* pParent = ImplGetParent();
+
+    if (pParent &&
+        ((pParent->GetStyle() & WB_CLIPCHILDREN) || (mpWindowImpl->mnParentClipMode & ParentClipMode::Clip)))
     {
-        bool bUpdate = ImplSetClipFlagChildren( bSysObjOnlySmaller );
-
-        vcl::Window* pParent = ImplGetParent();
-        if ( pParent &&
-             ((pParent->GetStyle() & WB_CLIPCHILDREN) || (mpWindowImpl->mnParentClipMode & ParentClipMode::Clip)) )
-        {
-            pParent->GetOutDev()->mbInitClipRegion = true;
-            pParent->mpWindowImpl->mbInitChildRegion = true;
-        }
-
-        // siblings should recalculate their clip region
-        if ( mpWindowImpl->mbClipSiblings )
-        {
-            vcl::Window* pWindow = mpWindowImpl->mpNext;
-            while ( pWindow )
-            {
-                if ( !pWindow->ImplSetClipFlagChildren( bSysObjOnlySmaller ) )
-                    bUpdate = false;
-                pWindow = pWindow->mpWindowImpl->mpNext;
-            }
-        }
-
-        return bUpdate;
+        pParent->GetOutDev()->mbInitClipRegion = true;
+        pParent->mpWindowImpl->mbInitChildRegion = true;
     }
-    else
-        return mpWindowImpl->mpFrameWindow->ImplSetClipFlagOverlapWindows( bSysObjOnlySmaller );
+
+    // siblings should recalculate their clip region
+    if (mpWindowImpl->mbClipSiblings)
+    {
+        vcl::Window* pWindow = mpWindowImpl->mpNext;
+        while (pWindow)
+        {
+            if (!pWindow->ImplSetClipFlagChildren(bSysObjOnlySmaller))
+                bUpdate = false;
+
+            pWindow = pWindow->mpWindowImpl->mpNext;
+        }
+    }
+
+    return bUpdate;
 }
 
 void Window::ImplIntersectWindowClipRegion( vcl::Region& rRegion )
