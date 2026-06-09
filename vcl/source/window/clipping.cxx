@@ -68,19 +68,21 @@ void WindowOutputDevice::InitClipRegion()
     mbInitClipRegion = false;
 }
 
-void Window::SetParentClipMode( ParentClipMode nMode )
+void Window::SetParentClipMode(ParentClipMode nMode)
 {
-    if ( mpWindowImpl->mpBorderWindow )
-        mpWindowImpl->mpBorderWindow->SetParentClipMode( nMode );
-    else
+    if (mpWindowImpl->mpBorderWindow)
     {
-        if ( !ImplIsOverlapWindow() )
-        {
-            mpWindowImpl->mnParentClipMode = nMode;
-            if ( nMode & ParentClipMode::Clip )
-                mpWindowImpl->mpParent->mpWindowImpl->mbClipChildren = true;
-        }
+        mpWindowImpl->mpBorderWindow->SetParentClipMode(nMode);
+        return;
     }
+
+    if (ImplIsOverlapWindow())
+        return;
+
+    mpWindowImpl->mnParentClipMode = nMode;
+
+    if (nMode & ParentClipMode::Clip)
+        mpWindowImpl->mpParent->mpWindowImpl->mbClipChildren = true;
 }
 
 ParentClipMode Window::GetParentClipMode() const
