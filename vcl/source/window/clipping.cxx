@@ -123,16 +123,17 @@ vcl::Region Window::GetWindowClipRegionPixel() const
 {
     vcl::Region aWinClipRegion;
 
-    if ( mpWindowImpl->mbInitWinClipRegion )
+    if (mpWindowImpl->mbInitWinClipRegion)
         const_cast<vcl::Window*>(this)->ImplInitWinClipRegion();
+
     aWinClipRegion = mpWindowImpl->maWinClipRegion;
 
-    vcl::Region   aWinRegion( GetOutputRectPixel() );
+    vcl::Region aWinRegion(GetOutputRectPixel());
 
-    if ( aWinRegion == aWinClipRegion )
+    if (aWinRegion == aWinClipRegion)
         aWinClipRegion.SetNull();
 
-    aWinClipRegion.Move( -GetOutDev()->GetDeviceOriginX(), -GetOutDev()->GetDeviceOriginY() );
+    aWinClipRegion.Move(-GetOutDev()->GetDeviceOriginX(), -GetOutDev()->GetDeviceOriginY());
 
     return aWinClipRegion;
 }
