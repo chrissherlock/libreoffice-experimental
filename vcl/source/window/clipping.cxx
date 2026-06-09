@@ -93,28 +93,30 @@ ParentClipMode Window::GetParentClipMode() const
     return mpWindowImpl->mnParentClipMode;
 }
 
-void Window::ExpandPaintClipRegion( const vcl::Region& rRegion )
+void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
 {
-    if( !mpWindowImpl->mpPaintRegion )
+    if (!mpWindowImpl->mpPaintRegion)
         return;
 
     WindowRegion aPixRegion(rRegion);
     vcl::Region aDevPixRegion = GetOutDev()->GetMapper().ViewToDevice(aPixRegion.get());
 
     vcl::Region aWinChildRegion = ImplGetWinChildClipRegion();
+
     // only this region is in frame coordinates, so re-mirror it
-    if( GetOutDev()->ImplIsAntiparallel() )
+    if (GetOutDev()->ImplIsAntiparallel())
     {
         const OutputDevice *pOutDev = GetOutDev();
-        pOutDev->ReMirror( aWinChildRegion );
+        pOutDev->ReMirror(aWinChildRegion);
     }
 
-    aDevPixRegion.Intersect( aWinChildRegion );
-    if( ! aDevPixRegion.IsEmpty() )
-    {
-        mpWindowImpl->mpPaintRegion->Union( aDevPixRegion );
-        GetOutDev()->mbInitClipRegion = true;
-    }
+    aDevPixRegion.Intersect(aWinChildRegion);
+
+    if (aDevPixRegion.IsEmpty())
+        return;
+
+    mpWindowImpl->mpPaintRegion->Union(aDevPixRegion);
+    GetOutDev()->mbInitClipRegion = true;
 }
 
 vcl::Region Window::GetWindowClipRegionPixel() const
