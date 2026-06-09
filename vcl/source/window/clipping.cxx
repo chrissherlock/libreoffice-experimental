@@ -297,21 +297,20 @@ void Window::ImplInitWinClipRegion()
 
 void Window::ImplInitWinChildClipRegion()
 {
-    if ( !mpWindowImpl->mpFirstChild )
+    comphelper::ScopeGuard aDeinitChildRegion([this]() { mpWindowImpl->mbInitChildRegion = false; });
+
+    if (!mpWindowImpl->mpFirstChild)
     {
         mpWindowImpl->mpChildClipRegion.reset();
+        return;
     }
+
+    if (!mpWindowImpl->mpChildClipRegion)
+        mpWindowImpl->mpChildClipRegion.reset(new vcl::Region(mpWindowImpl->maWinClipRegion));
     else
-    {
-        if ( !mpWindowImpl->mpChildClipRegion )
-            mpWindowImpl->mpChildClipRegion.reset( new vcl::Region( mpWindowImpl->maWinClipRegion ) );
-        else
-            *mpWindowImpl->mpChildClipRegion = mpWindowImpl->maWinClipRegion;
+        *mpWindowImpl->mpChildClipRegion = mpWindowImpl->maWinClipRegion;
 
-        ImplClipChildren( *mpWindowImpl->mpChildClipRegion );
-    }
-
-    mpWindowImpl->mbInitChildRegion = false;
+    ImplClipChildren(*mpWindowImpl->mpChildClipRegion);
 }
 
 Region& Window::ImplGetWinChildClipRegion()
