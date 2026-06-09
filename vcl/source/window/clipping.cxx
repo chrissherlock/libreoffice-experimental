@@ -317,60 +317,63 @@ Region& Window::ImplGetWinChildClipRegion()
     return mpWindowImpl->maWinClipRegion;
 }
 
-bool Window::ImplSysObjClip( const vcl::Region* pOldRegion )
+bool Window::ImplSysObjClip(const vcl::Region* pOldRegion)
 {
+    if (!mpWindowImpl->mpSysObj)
+        return true;
+
+    bool bVisibleState = mpWindowImpl->mbReallyVisible;
     bool bUpdate = true;
 
-    if ( mpWindowImpl->mpSysObj )
+    if (bVisibleState)
     {
-        bool bVisibleState = mpWindowImpl->mbReallyVisible;
+        vcl::Region& rWinChildClipRegion = ImplGetWinChildClipRegion();
 
-        if ( bVisibleState )
+        if (!rWinChildClipRegion.IsEmpty())
         {
-            vcl::Region& rWinChildClipRegion = ImplGetWinChildClipRegion();
-
-            if (!rWinChildClipRegion.IsEmpty())
+            if (pOldRegion)
             {
-                if ( pOldRegion )
-                {
-                    vcl::Region aNewRegion = rWinChildClipRegion;
-                    rWinChildClipRegion.Intersect(*pOldRegion);
-                    bUpdate = aNewRegion == rWinChildClipRegion;
-                }
+                vcl::Region aNewRegion = rWinChildClipRegion;
+                rWinChildClipRegion.Intersect(*pOldRegion);
+                bUpdate = aNewRegion == rWinChildClipRegion;
+            }
 
-                vcl::Region      aRegion = rWinChildClipRegion;
-                vcl::Region      aWinRectRegion( GetOutputRectPixel() );
+            vcl::Region aRegion = rWinChildClipRegion;
+            vcl::Region aWinRectRegion(GetOutputRectPixel());
 
-                if ( aRegion == aWinRectRegion )
-                    mpWindowImpl->mpSysObj->ResetClipRegion();
-                else
-                {
-                    aRegion.Move( -GetOutDev()->GetDeviceOriginX(), -GetOutDev()->GetDeviceOriginY() );
-
-                    // set/update clip region
-                    RectangleVector aRectangles;
-                    aRegion.GetRegionRectangles(aRectangles);
-                    mpWindowImpl->mpSysObj->BeginSetClipRegion(aRectangles.size());
-
-                    for (auto const& rectangle : aRectangles)
-                    {
-                        mpWindowImpl->mpSysObj->UnionClipRegion(
-                            rectangle.Left(),
-                            rectangle.Top(),
-                            rectangle.GetWidth(),   // orig nWidth was ((R - L) + 1), same as GetWidth does
-                            rectangle.GetHeight()); // same for height
-                    }
-
-                    mpWindowImpl->mpSysObj->EndSetClipRegion();
-                }
+            if (aRegion == aWinRectRegion)
+            {
+                mpWindowImpl->mpSysObj->ResetClipRegion();
             }
             else
-                bVisibleState = false;
-        }
+            {
+                aRegion.Move(-GetOutDev()->GetDeviceOriginX(), -GetOutDev()->GetDeviceOriginY());
 
-        // update visible status
-        mpWindowImpl->mpSysObj->Show( bVisibleState );
+                // set/update clip region
+                RectangleVector aRectangles;
+                aRegion.GetRegionRectangles(aRectangles);
+                mpWindowImpl->mpSysObj->BeginSetClipRegion(aRectangles.size());
+
+                for (auto const& rectangle : aRectangles)
+                {
+                    mpWindowImpl->mpSysObj->UnionClipRegion(
+                        rectangle.Left(),
+                        rectangle.Top(),
+                        rectangle.GetWidth(),   // orig nWidth was ((R - L) + 1), same as GetWidth does
+                        rectangle.GetHeight()); // same for height
+                }
+
+                mpWindowImpl->mpSysObj->EndSetClipRegion();
+            }
+        }
+        else
+        {
+            bVisibleState = false;
+        }
     }
+
+    // update visible status
+    mpWindowImpl->mpSysObj->Show(bVisibleState);
 
     return bUpdate;
 }
