@@ -11,6 +11,8 @@
 
 #include <vcl/dllapi.h>
 
+#include <vector>
+
 class Window;
 class WindowImpl;
 
@@ -21,12 +23,31 @@ class Region;
 
 namespace vcl::clipping
 {
+struct NativeSyncStatus
+{
+    bool bUpdate;
+    bool bInvalidateDevice;
+};
+
 // Returns true if child clipping needs to be executed by the window
 VCL_DLLPUBLIC bool initChildRegion(WindowImpl& rImpl);
 
 // Core visibility synchronization pipeline
 VCL_DLLPUBLIC bool syncNativeWindow(WindowImpl& rImpl, vcl::Region& rWinChildClipRegion,
                                     const vcl::Region* pOldRegion, bool& rOutUpdate);
+
+VCL_DLLPUBLIC std::unique_ptr<vcl::Region> prepareClipInvalidation(WindowImpl& rImpl,
+                                                                   bool bSysObjOnlySmaller);
+VCL_DLLPUBLIC bool invalidateParentClipIfRequired(const WindowImpl& rChildImpl,
+                                                  WindowImpl& rParentImpl, WinBits nParentStyle);
+VCL_DLLPUBLIC NativeSyncStatus processClipResult(WindowImpl& rImpl, bool bClipSuccess,
+                                                 bool bCurrentUpdate);
+
+VCL_DLLPUBLIC std::vector<vcl::Window*> getChildWindows(const WindowImpl& rImpl);
+VCL_DLLPUBLIC std::vector<vcl::Window*> getOverlapWindows(const WindowImpl& rImpl);
+VCL_DLLPUBLIC std::vector<vcl::Window*> getFollowingSiblings(const WindowImpl& rImpl);
+VCL_DLLPUBLIC void gatherNativeSyncTargets(vcl::Window* pWindow,
+                                           std::vector<vcl::Window*>& rTargets);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
