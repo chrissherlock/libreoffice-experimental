@@ -46,6 +46,8 @@ VCL_DLLPUBLIC NativeSyncStatus processClipResult(WindowImpl& rImpl, bool bClipSu
 VCL_DLLPUBLIC std::vector<vcl::Window*> getChildWindows(const WindowImpl& rImpl);
 VCL_DLLPUBLIC std::vector<vcl::Window*> getOverlapWindows(const WindowImpl& rImpl);
 VCL_DLLPUBLIC std::vector<vcl::Window*> getFollowingSiblings(const WindowImpl& rImpl);
+VCL_DLLPUBLIC std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow);
+
 VCL_DLLPUBLIC void gatherNativeSyncTargets(vcl::Window* pWindow,
                                            std::vector<vcl::Window*>& rTargets);
 }
