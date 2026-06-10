@@ -24,6 +24,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <salobj.hxx>
 #include <window.h>
 
@@ -297,20 +298,8 @@ void Window::ImplInitWinClipRegion()
 
 void Window::ImplInitWinChildClipRegion()
 {
-    comphelper::ScopeGuard aDeinitChildRegion([this]() { mpWindowImpl->mbInitChildRegion = false; });
-
-    if (!mpWindowImpl->mpFirstChild)
-    {
-        mpWindowImpl->mpChildClipRegion.reset();
-        return;
-    }
-
-    if (!mpWindowImpl->mpChildClipRegion)
-        mpWindowImpl->mpChildClipRegion.reset(new vcl::Region(mpWindowImpl->maWinClipRegion));
-    else
-        *mpWindowImpl->mpChildClipRegion = mpWindowImpl->maWinClipRegion;
-
-    ImplClipChildren(*mpWindowImpl->mpChildClipRegion);
+    if (vcl::clipping::initChildRegion(*mpWindowImpl))
+        ImplClipChildren(*mpWindowImpl->mpChildClipRegion);
 }
 
 Region& Window::ImplGetWinChildClipRegion()
@@ -359,26 +348,13 @@ bool Window::ImplSysObjClip(const vcl::Region* pOldRegion)
     if (!mpWindowImpl->mpSysObj)
         return true;
 
-    // If the window is hidden or its clipping region is empty, hide the system object early
-    if (!mpWindowImpl->mbReallyVisible || ImplGetWinChildClipRegion().IsEmpty())
-    {
-        mpWindowImpl->mpSysObj->Show(false);
-        return true;
-    }
-
     vcl::Region& rWinChildClipRegion = ImplGetWinChildClipRegion();
-
-    // the system object is definitively visible
     bool bUpdate = true;
-    if (pOldRegion)
-    {
-        vcl::Region aNewRegion = rWinChildClipRegion;
-        rWinChildClipRegion.Intersect(*pOldRegion);
-        bUpdate = (aNewRegion == rWinChildClipRegion);
-    }
+
+    if (vcl::clipping::syncNativeWindow(*mpWindowImpl, rWinChildClipRegion, pOldRegion, bUpdate))
+        return bUpdate;
 
     ImplUpdateSysObjClipRegion(rWinChildClipRegion, vcl::Region(GetOutputRectPixel()));
-
     mpWindowImpl->mpSysObj->Show(true);
 
     return bUpdate;
