@@ -227,13 +227,11 @@ static bool lcl_IsParentClipRequired(ParentClipMode nClipMode, WinBits nStyle)
 bool Window::ImplClipChildren(vcl::Region& rRegion) const
 {
     bool bOtherClip = false;
-    vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
 
-    while (pWindow)
+    for (vcl::Window* pWindow : vcl::clipping::getChildWindows(*mpWindowImpl))
     {
         if (pWindow->mpWindowImpl->mbReallyVisible)
         {
-            // read-out ParentClipMode-Flags
             ParentClipMode nClipMode = pWindow->GetParentClipMode();
 
             if (lcl_IsParentClipRequired(nClipMode, GetStyle()))
@@ -241,21 +239,17 @@ bool Window::ImplClipChildren(vcl::Region& rRegion) const
             else
                 bOtherClip = true;
         }
-
-        pWindow = pWindow->mpWindowImpl->mpNext;
     }
 
     return bOtherClip;
 }
 
-void Window::ImplClipAllChildren( vcl::Region& rRegion ) const
+void Window::ImplClipAllChildren(vcl::Region& rRegion) const
 {
-    vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
-    while ( pWindow )
+    for (vcl::Window* pWindow : vcl::clipping::getChildWindows(*mpWindowImpl))
     {
-        if ( pWindow->mpWindowImpl->mbReallyVisible )
-            pWindow->ImplExcludeWindowRegion( rRegion );
-        pWindow = pWindow->mpWindowImpl->mpNext;
+        if (pWindow->mpWindowImpl->mbReallyVisible)
+            pWindow->ImplExcludeWindowRegion(rRegion);
     }
 }
 
@@ -360,98 +354,89 @@ bool Window::ImplSysObjClip(const vcl::Region* pOldRegion)
     return bUpdate;
 }
 
-void Window::ImplUpdateSysObjChildrenClip()
-{
-    if ( mpWindowImpl->mpSysObj && mpWindowImpl->mbInitWinClipRegion )
-        ImplSysObjClip( nullptr );
-
-    vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
-    while ( pWindow )
-    {
-        pWindow->ImplUpdateSysObjChildrenClip();
-        pWindow = pWindow->mpWindowImpl->mpNext;
-    }
-}
-
-void Window::ImplUpdateSysObjOverlapsClip()
-{
-    ImplUpdateSysObjChildrenClip();
-
-    vcl::Window* pWindow = mpWindowImpl->mpFirstOverlap;
-    while ( pWindow )
-    {
-        pWindow->ImplUpdateSysObjOverlapsClip();
-        pWindow = pWindow->mpWindowImpl->mpNext;
-    }
-}
-
 void Window::ImplUpdateSysObjClip()
 {
     if (ImplIsOverlapWindow())
     {
-        mpWindowImpl->mpFrameWindow->ImplUpdateSysObjOverlapsClip();
+        // Fixes error: replaces the deleted ImplUpdateSysObjOverlapsClip call via snapshot pipeline
+        std::vector<vcl::Window*> aFrameTargets;
+        vcl::clipping::gatherNativeSyncTargets(mpWindowImpl->mpFrameWindow, aFrameTargets);
+
+        for (vcl::Window* pWin : aFrameTargets)
+        {
+            if (pWin->ImplGetWindowImpl()->mpSysObj && pWin->ImplGetWindowImpl()->mbInitWinClipRegion)
+            {
+                pWin->ImplSysObjClip(nullptr);
+            }
+        }
         return;
     }
 
-    ImplUpdateSysObjChildrenClip();
+    // Gather every downstream window node in a single structural snapshot
+    std::vector<vcl::Window*> aSyncTargets;
+    vcl::clipping::gatherNativeSyncTargets(this, aSyncTargets);
 
-    // siblings should recalculate their clip region
-    if (!mpWindowImpl->mbClipSiblings)
-        return;
-
-    vcl::Window* pWindow = mpWindowImpl->mpNext;
-
-    while (pWindow)
+    for (vcl::Window* pWin : aSyncTargets)
     {
-        pWindow->ImplUpdateSysObjChildrenClip();
-        pWindow = pWindow->mpWindowImpl->mpNext;
+        if (pWin->ImplGetWindowImpl()->mpSysObj && pWin->ImplGetWindowImpl()->mbInitWinClipRegion)
+        {
+            pWin->ImplSysObjClip(nullptr);
+        }
+    }
+
+    // Handle edge-case sibling invalidations if required
+    if (mpWindowImpl->mbClipSiblings)
+    {
+        for (vcl::Window* pSibling : vcl::clipping::getFollowingSiblings(*mpWindowImpl))
+        {
+            std::vector<vcl::Window*> aSiblingTargets;
+            vcl::clipping::gatherNativeSyncTargets(pSibling, aSiblingTargets);
+            for (vcl::Window* pTarget : aSiblingTargets)
+            {
+                if (pTarget->ImplGetWindowImpl()->mpSysObj && pTarget->ImplGetWindowImpl()->mbInitWinClipRegion)
+                    pTarget->ImplSysObjClip(nullptr);
+            }
+        }
     }
 }
 
 bool Window::ImplSetClipFlagChildren(bool bSysObjOnlySmaller)
 {
-    std::unique_ptr<vcl::Region> pOldRegion;
-
-    if (mpWindowImpl->mpSysObj && bSysObjOnlySmaller && !mpWindowImpl->mbInitWinClipRegion)
-        pOldRegion.reset(new vcl::Region(mpWindowImpl->maWinClipRegion));
+    auto pOldRegion = vcl::clipping::prepareClipInvalidation(*mpWindowImpl, bSysObjOnlySmaller);
 
     GetOutDev()->mbInitClipRegion = true;
     mpWindowImpl->mbInitWinClipRegion = true;
 
+    // The linked-list logic is gone. We loop over a clean, modern sequence.
     bool bUpdate = true;
-    vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
-
-    while (pWindow)
+    for (vcl::Window* pChild : vcl::clipping::getChildWindows(*mpWindowImpl))
     {
-        if (!pWindow->ImplSetClipFlagChildren(bSysObjOnlySmaller))
+        if (!pChild->ImplSetClipFlagChildren(bSysObjOnlySmaller))
             bUpdate = false;
-
-        pWindow = pWindow->mpWindowImpl->mpNext;
     }
 
     if (!mpWindowImpl->mpSysObj)
         return bUpdate;
 
-    if (!ImplSysObjClip(pOldRegion.get()))
-    {
+    bool bClipSuccess = ImplSysObjClip(pOldRegion.get());
+
+    auto [bNewUpdate, bInvalidateDevice] = vcl::clipping::processClipResult(*mpWindowImpl, bClipSuccess, bUpdate);
+    bUpdate = bNewUpdate;
+
+    if (bInvalidateDevice)
         GetOutDev()->mbInitClipRegion = true;
-        mpWindowImpl->mbInitWinClipRegion = true;
-        bUpdate = false;
-    }
 
     return bUpdate;
 }
 
-bool Window::ImplSetClipFlagOverlapWindows( bool bSysObjOnlySmaller )
+bool Window::ImplSetClipFlagOverlapWindows(bool bSysObjOnlySmaller)
 {
-    bool bUpdate = ImplSetClipFlagChildren( bSysObjOnlySmaller );
+    bool bUpdate = ImplSetClipFlagChildren(bSysObjOnlySmaller);
 
-    vcl::Window* pWindow = mpWindowImpl->mpFirstOverlap;
-    while ( pWindow )
+    for (vcl::Window* pWindow : vcl::clipping::getOverlapWindows(*mpWindowImpl))
     {
-        if ( !pWindow->ImplSetClipFlagOverlapWindows( bSysObjOnlySmaller ) )
+        if (!pWindow->ImplSetClipFlagOverlapWindows(bSysObjOnlySmaller))
             bUpdate = false;
-        pWindow = pWindow->mpWindowImpl->mpNext;
     }
 
     return bUpdate;
@@ -466,14 +451,13 @@ bool Window::ImplSetClipFlag(bool bSysObjOnlySmaller)
 
     vcl::Window* pParent = ImplGetParent();
 
-    if (pParent &&
-        ((pParent->GetStyle() & WB_CLIPCHILDREN) || (mpWindowImpl->mnParentClipMode & ParentClipMode::Clip)))
+    if (pParent)
     {
-        pParent->GetOutDev()->mbInitClipRegion = true;
-        pParent->mpWindowImpl->mbInitChildRegion = true;
+        // Explicit return value checking replaces hidden references
+        if (vcl::clipping::invalidateParentClipIfRequired(*mpWindowImpl, *pParent->mpWindowImpl, pParent->GetStyle()))
+            pParent->GetOutDev()->mbInitClipRegion = true;
     }
 
-    // siblings should recalculate their clip region
     if (mpWindowImpl->mbClipSiblings)
     {
         vcl::Window* pWindow = mpWindowImpl->mpNext;
@@ -518,18 +502,15 @@ void Window::ImplExcludeWindowRegion( vcl::Region& rRegion )
     }
 }
 
-void Window::ImplExcludeOverlapWindows( vcl::Region& rRegion ) const
+void Window::ImplExcludeOverlapWindows(vcl::Region& rRegion) const
 {
-    vcl::Window* pWindow = mpWindowImpl->mpFirstOverlap;
-    while ( pWindow )
+    for (vcl::Window* pWindow : vcl::clipping::getOverlapWindows(*mpWindowImpl))
     {
-        if ( pWindow->mpWindowImpl->mbReallyVisible )
+        if (pWindow->mpWindowImpl->mbReallyVisible)
         {
-            pWindow->ImplExcludeWindowRegion( rRegion );
-            pWindow->ImplExcludeOverlapWindows( rRegion );
+            pWindow->ImplExcludeWindowRegion(rRegion);
+            pWindow->ImplExcludeOverlapWindows(rRegion);
         }
-
-        pWindow = pWindow->mpWindowImpl->mpNext;
     }
 }
 
