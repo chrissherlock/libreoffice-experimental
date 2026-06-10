@@ -135,6 +135,33 @@ std::vector<vcl::Window*> getFollowingSiblings(const WindowImpl& rImpl)
     return aSiblings;
 }
 
+std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow)
+{
+    std::vector<vcl::Window*> aTargets;
+    vcl::Window* pCurrentLevel = pStartWindow;
+
+    // Traverse up the overlap window hierarchy until we hit the frame boundary
+    while (pCurrentLevel && !pCurrentLevel->ImplGetWindowImpl()->mbFrame)
+    {
+        vcl::Window* pParentOverlap = pCurrentLevel->ImplGetWindowImpl()->mpOverlapWindow;
+        if (!pParentOverlap)
+            break; // Safety guard
+
+        // Gather preceding overlap siblings at this specific tier
+        vcl::Window* pSibling = pParentOverlap->ImplGetWindowImpl()->mpFirstOverlap;
+        while (pSibling && (pSibling != pCurrentLevel))
+        {
+            aTargets.push_back(pSibling);
+            pSibling = pSibling->ImplGetWindowImpl()->mpNext;
+        }
+
+        // Step up to the next hierarchical level
+        pCurrentLevel = pParentOverlap;
+    }
+
+    return aTargets;
+}
+
 void gatherNativeSyncTargets(vcl::Window* pWindow, std::vector<vcl::Window*>& rTargets)
 {
     if (!pWindow)
