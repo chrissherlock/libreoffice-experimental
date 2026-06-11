@@ -454,13 +454,10 @@ bool Window::ImplSetClipFlag(bool bSysObjOnlySmaller)
 
     if (mpWindowImpl->mpClippingState->mbClipSiblings)
     {
-        vcl::Window* pWindow = mpWindowImpl->mpNext;
-        while (pWindow)
+        for (vcl::Window* pSibling : vcl::clipping::getFollowingSiblings(*mpWindowImpl))
         {
-            if (!pWindow->ImplSetClipFlagChildren(bSysObjOnlySmaller))
+            if (!pSibling->ImplSetClipFlagChildren(bSysObjOnlySmaller))
                 bUpdate = false;
-
-            pWindow = pWindow->mpWindowImpl->mpNext;
         }
     }
 
