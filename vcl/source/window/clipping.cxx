@@ -505,59 +505,25 @@ void Window::ImplExcludeOverlapWindows2( vcl::Region& rRegion )
 
 void Window::ImplIntersectAndUnionOverlapWindows( const vcl::Region& rInterRegion, vcl::Region& rRegion ) const
 {
-    vcl::Window* pWindow = mpWindowImpl->mpFirstOverlap;
-    while ( pWindow )
-    {
-        if ( pWindow->mpWindowImpl->mbReallyVisible )
-        {
-            vcl::Region aTempRegion( rInterRegion );
-            pWindow->ImplIntersectWindowRegion( aTempRegion );
-            rRegion.Union( aTempRegion );
-            pWindow->ImplIntersectAndUnionOverlapWindows( rInterRegion, rRegion );
-        }
-
-        pWindow = pWindow->mpWindowImpl->mpNext;
-    }
+    vcl::clipping::accumulateChildOverlaps(const_cast<Window*>(this), rInterRegion, rRegion);
 }
 
 void Window::ImplIntersectAndUnionOverlapWindows2( const vcl::Region& rInterRegion, vcl::Region& rRegion )
 {
-    if ( mpWindowImpl->mbReallyVisible )
-    {
-        vcl::Region aTempRegion( rInterRegion );
-        ImplIntersectWindowRegion( aTempRegion );
-        rRegion.Union( aTempRegion );
-    }
-
-    ImplIntersectAndUnionOverlapWindows( rInterRegion, rRegion );
+    vcl::clipping::accumulateWindowAndChildOverlaps(this, rInterRegion, rRegion);
 }
 
 void Window::ImplCalcOverlapRegionOverlaps( const vcl::Region& rInterRegion, vcl::Region& rRegion ) const
 {
-    // Clip Overlap Siblings
-    vcl::Window const * pStartOverlapWindow;
-
-    if ( !ImplIsOverlapWindow() )
-        pStartOverlapWindow = mpWindowImpl->mpOverlapWindow;
-    else
-        pStartOverlapWindow = this;
-
-    while ( !pStartOverlapWindow->mpWindowImpl->mbFrame )
+    // High-level ancestral sibling walk
+    for (vcl::Window* pOverlapWin : vcl::clipping::getAncestralOverlapSiblings(const_cast<Window*>(this)))
     {
-        vcl::Window* pOverlapWindow = pStartOverlapWindow->mpWindowImpl->mpOverlapWindow->mpWindowImpl->mpFirstOverlap;
-        while ( pOverlapWindow && (pOverlapWindow != pStartOverlapWindow) )
-        {
-            pOverlapWindow->ImplIntersectAndUnionOverlapWindows2( rInterRegion, rRegion );
-            pOverlapWindow = pOverlapWindow->mpWindowImpl->mpNext;
-        }
-        pStartOverlapWindow = pStartOverlapWindow->mpWindowImpl->mpOverlapWindow;
+        vcl::clipping::accumulateWindowAndChildOverlaps(pOverlapWin, rInterRegion, rRegion);
     }
 
-    // Clip Child Overlap Windows
-    if ( !ImplIsOverlapWindow() )
-        mpWindowImpl->mpOverlapWindow->ImplIntersectAndUnionOverlapWindows( rInterRegion, rRegion );
-    else
-        ImplIntersectAndUnionOverlapWindows( rInterRegion, rRegion );
+    // Child overlap window execution
+    vcl::Window* pOverlapParent = !ImplIsOverlapWindow() ? mpWindowImpl->mpOverlapWindow.get() : const_cast<Window*>(this);
+    vcl::clipping::accumulateChildOverlaps(pOverlapParent, rInterRegion, rRegion);
 }
 
 void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Region& rRegion,

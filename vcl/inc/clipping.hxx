@@ -47,9 +47,19 @@ VCL_DLLPUBLIC std::vector<vcl::Window*> getChildWindows(const WindowImpl& rImpl)
 VCL_DLLPUBLIC std::vector<vcl::Window*> getOverlapWindows(const WindowImpl& rImpl);
 VCL_DLLPUBLIC std::vector<vcl::Window*> getFollowingSiblings(const WindowImpl& rImpl);
 VCL_DLLPUBLIC std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow);
+VCL_DLLPUBLIC std::vector<vcl::Window*> getParentAncestorsUntilOverlap(vcl::Window* pStartWindow);
 
 VCL_DLLPUBLIC void gatherNativeSyncTargets(vcl::Window* pWindow,
                                            std::vector<vcl::Window*>& rTargets);
+
+VCL_DLLPUBLIC void intersectWindowRegion(vcl::Window* pWindow, vcl::Region& rRegion);
+VCL_DLLPUBLIC void excludeWindowRegion(vcl::Window* pWindow, vcl::Region& rRegion);
+
+VCL_DLLPUBLIC void accumulateChildOverlaps(vcl::Window* pWindow, const vcl::Region& rInterRegion,
+                                           vcl::Region& rRegion);
+VCL_DLLPUBLIC void accumulateWindowAndChildOverlaps(vcl::Window* pWindow,
+                                                    const vcl::Region& rInterRegion,
+                                                    vcl::Region& rRegion);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
