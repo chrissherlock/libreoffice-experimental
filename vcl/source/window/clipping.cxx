@@ -140,10 +140,10 @@ vcl::Region Window::GetWindowClipRegionPixel() const
 {
     vcl::Region aWinClipRegion;
 
-    if (mpWindowImpl->mbInitWinClipRegion)
+    if (mpWindowImpl->mpClippingState->mbInitWinClipRegion)
         const_cast<vcl::Window*>(this)->ImplInitWinClipRegion();
 
-    aWinClipRegion = mpWindowImpl->maWinClipRegion;
+    aWinClipRegion = mpWindowImpl->mpClippingState->maWinClipRegion;
 
     vcl::Region aWinRegion(GetOutputRectPixel());
 
@@ -192,7 +192,7 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     if (mpWindowImpl->mpBorderWindow)
         mpWindowImpl->mpBorderWindow->EnableClipSiblings(bClipSiblings);
 
-    mpWindowImpl->mbClipSiblings = bClipSiblings;
+    mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
 void Window::ImplClipBoundaries( vcl::Region& rRegion, bool bThis, bool bOverlaps )
@@ -273,39 +273,39 @@ void Window::ImplClipSiblings(vcl::Region& rRegion) const
 
 void Window::ImplInitWinClipRegion()
 {
-    mpWindowImpl->maWinClipRegion = GetOutputRectPixel();
+    mpWindowImpl->mpClippingState->maWinClipRegion = GetOutputRectPixel();
     if (mpWindowImpl->mbWinRegion)
-        mpWindowImpl->maWinClipRegion.Intersect(GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->maWinRegion));
+        mpWindowImpl->mpClippingState->maWinClipRegion.Intersect(GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->maWinRegion));
 
-    if (mpWindowImpl->mbClipSiblings && !ImplIsOverlapWindow())
-        ImplClipSiblings(mpWindowImpl->maWinClipRegion);
+    if (mpWindowImpl->mpClippingState->mbClipSiblings && !ImplIsOverlapWindow())
+        ImplClipSiblings(mpWindowImpl->mpClippingState->maWinClipRegion);
 
-    ImplClipBoundaries(mpWindowImpl->maWinClipRegion, false, true);
+    ImplClipBoundaries(mpWindowImpl->mpClippingState->maWinClipRegion, false, true);
 
     if ((GetStyle() & WB_CLIPCHILDREN) || mpWindowImpl->mbClipChildren)
-        mpWindowImpl->mbInitChildRegion = true;
+        mpWindowImpl->mpClippingState->mbInitChildRegion = true;
 
-    mpWindowImpl->mbInitWinClipRegion = false;
+    mpWindowImpl->mpClippingState->mbInitWinClipRegion = false;
 }
 
 void Window::ImplInitWinChildClipRegion()
 {
     if (vcl::clipping::initChildRegion(*mpWindowImpl))
-        ImplClipChildren(*mpWindowImpl->mpChildClipRegion);
+        ImplClipChildren(*mpWindowImpl->mpClippingState->mpChildClipRegion);
 }
 
 Region& Window::ImplGetWinChildClipRegion()
 {
-    if (mpWindowImpl->mbInitWinClipRegion)
+    if (mpWindowImpl->mpClippingState->mbInitWinClipRegion)
         ImplInitWinClipRegion();
 
-    if (mpWindowImpl->mbInitChildRegion)
+    if (mpWindowImpl->mpClippingState->mbInitChildRegion)
         ImplInitWinChildClipRegion();
 
-    if (mpWindowImpl->mpChildClipRegion)
-        return *mpWindowImpl->mpChildClipRegion;
+    if (mpWindowImpl->mpClippingState->mpChildClipRegion)
+        return *mpWindowImpl->mpClippingState->mpChildClipRegion;
 
-    return mpWindowImpl->maWinClipRegion;
+    return mpWindowImpl->mpClippingState->maWinClipRegion;
 }
 
 void Window::ImplUpdateSysObjClipRegion(vcl::Region aRegion, const vcl::Region& rWinRectRegion)
@@ -362,7 +362,7 @@ void Window::ImplUpdateSysObjClip()
 
         for (vcl::Window* pWin : aFrameTargets)
         {
-            if (pWin->ImplGetWindowImpl()->mpSysObj && pWin->ImplGetWindowImpl()->mbInitWinClipRegion)
+            if (pWin->ImplGetWindowImpl()->mpSysObj && pWin->ImplGetWindowImpl()->mpClippingState->mbInitWinClipRegion)
             {
                 pWin->ImplSysObjClip(nullptr);
             }
@@ -376,14 +376,14 @@ void Window::ImplUpdateSysObjClip()
 
     for (vcl::Window* pWin : aSyncTargets)
     {
-        if (pWin->ImplGetWindowImpl()->mpSysObj && pWin->ImplGetWindowImpl()->mbInitWinClipRegion)
+        if (pWin->ImplGetWindowImpl()->mpSysObj && pWin->ImplGetWindowImpl()->mpClippingState->mbInitWinClipRegion)
         {
             pWin->ImplSysObjClip(nullptr);
         }
     }
 
     // Handle edge-case sibling invalidations if required
-    if (mpWindowImpl->mbClipSiblings)
+    if (mpWindowImpl->mpClippingState->mbClipSiblings)
     {
         for (vcl::Window* pSibling : vcl::clipping::getFollowingSiblings(*mpWindowImpl))
         {
@@ -391,7 +391,7 @@ void Window::ImplUpdateSysObjClip()
             vcl::clipping::gatherNativeSyncTargets(pSibling, aSiblingTargets);
             for (vcl::Window* pTarget : aSiblingTargets)
             {
-                if (pTarget->ImplGetWindowImpl()->mpSysObj && pTarget->ImplGetWindowImpl()->mbInitWinClipRegion)
+                if (pTarget->ImplGetWindowImpl()->mpSysObj && pTarget->ImplGetWindowImpl()->mpClippingState->mbInitWinClipRegion)
                     pTarget->ImplSysObjClip(nullptr);
             }
         }
@@ -403,7 +403,7 @@ bool Window::ImplSetClipFlagChildren(bool bSysObjOnlySmaller)
     auto pOldRegion = vcl::clipping::prepareClipInvalidation(*mpWindowImpl, bSysObjOnlySmaller);
 
     GetOutDev()->mbInitClipRegion = true;
-    mpWindowImpl->mbInitWinClipRegion = true;
+    mpWindowImpl->mpClippingState->mbInitWinClipRegion = true;
 
     // The linked-list logic is gone. We loop over a clean, modern sequence.
     bool bUpdate = true;
@@ -456,7 +456,7 @@ bool Window::ImplSetClipFlag(bool bSysObjOnlySmaller)
             pParent->GetOutDev()->mbInitClipRegion = true;
     }
 
-    if (mpWindowImpl->mbClipSiblings)
+    if (mpWindowImpl->mpClippingState->mbClipSiblings)
     {
         vcl::Window* pWindow = mpWindowImpl->mpNext;
         while (pWindow)
@@ -473,10 +473,10 @@ bool Window::ImplSetClipFlag(bool bSysObjOnlySmaller)
 
 void Window::ImplIntersectWindowClipRegion( vcl::Region& rRegion )
 {
-    if ( mpWindowImpl->mbInitWinClipRegion )
+    if ( mpWindowImpl->mpClippingState->mbInitWinClipRegion )
         ImplInitWinClipRegion();
 
-    rRegion.Intersect( mpWindowImpl->maWinClipRegion );
+    rRegion.Intersect( mpWindowImpl->mpClippingState->maWinClipRegion );
 }
 
 void Window::ImplIntersectWindowRegion( vcl::Region& rRegion )

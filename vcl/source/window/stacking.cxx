@@ -543,10 +543,10 @@ void Window::SetZOrder( vcl::Window* pRefWindow, ZOrderFlags nFlags )
     if ( !IsReallyVisible() )
         return;
 
-    if ( !mpWindowImpl->mbInitWinClipRegion && mpWindowImpl->maWinClipRegion.IsEmpty() )
+    if ( !mpWindowImpl->mpClippingState->mbInitWinClipRegion && mpWindowImpl->mpClippingState->maWinClipRegion.IsEmpty() )
         return;
 
-    bool bInitWinClipRegion = mpWindowImpl->mbInitWinClipRegion;
+    bool bInitWinClipRegion = mpWindowImpl->mpClippingState->mbInitWinClipRegion;
     ImplSetClipFlag();
 
     // When ClipRegion was not initialised, assume
