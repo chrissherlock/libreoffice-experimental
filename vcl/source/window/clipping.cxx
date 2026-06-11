@@ -348,7 +348,7 @@ bool Window::ImplNativeObjectClip(const vcl::Region* pOldRegion)
     return bUpdate;
 }
 
-void Window::ImplUpdateSysObjClip()
+void Window::ImplUpdateNativeObjectClip()
 {
     if (ImplIsOverlapWindow())
     {

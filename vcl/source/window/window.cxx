@@ -1725,7 +1725,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
 
     // adapt system objects
     if ( bUpdateSysObjClip )
-        ImplUpdateSysObjClip();
+        ImplUpdateNativeObjectClip();
     if ( bUpdateSysObjPos )
         ImplUpdateSysObjPos();
     if ( bNewSize && mpWindowImpl->mpSysObj )
