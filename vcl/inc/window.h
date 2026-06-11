@@ -217,6 +217,14 @@ namespace o3tl {
     template<> struct typed_flags<ImplPaintFlags> : is_typed_flags<ImplPaintFlags, 0x003f> {};
 }
 
+struct WindowClippingState
+{
+    vcl::Region                 maWinClipRegion;
+    std::unique_ptr<vcl::Region> mpChildClipRegion; // If applicable in your branch
+    bool                        mbInitWinClipRegion = true;
+    bool                        mbInitChildRegion = false;
+    bool                        mbClipSiblings = false;
+};
 
 class WindowImpl
 {
@@ -290,10 +298,9 @@ public:
     std::vector<VclPtr<FixedText>> m_aMnemonicLabels;
     std::unique_ptr<ImplAccessibleInfos> mpAccessibleInfos;
     VCLXWindow*         mpVCLXWindow;
+    std::unique_ptr<WindowClippingState> mpClippingState;
     vcl::Region              maWinRegion;            //< region to 'shape' the VCL window (frame coordinates)
-    vcl::Region              maWinClipRegion;        //< the (clipping) region that finally corresponds to the VCL window (frame coordinates)
     vcl::Region              maInvalidateRegion;     //< region that has to be redrawn (frame coordinates)
-    std::unique_ptr<vcl::Region> mpChildClipRegion;  //< child clip region if CLIPCHILDREN is set (frame coordinates)
     vcl::Region*             mpPaintRegion;          //< only set during Paint() method call (window coordinates)
     WinBits             mnStyle;
     WinBits             mnPrevStyle;
@@ -351,11 +358,8 @@ public:
                         mbCallMove:1,
                         mbCallResize:1,
                         mbWaitSystemResize:1,
-                        mbInitWinClipRegion:1,
-                        mbInitChildRegion:1,
                         mbWinRegion:1,
                         mbClipChildren:1,
-                        mbClipSiblings:1,
                         mbChildTransparent:1,
                         mbPaintTransparent:1,
                         mbMouseTransparent:1,

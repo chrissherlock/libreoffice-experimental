@@ -593,12 +593,14 @@ bool WindowOutputDevice::CanEnableNativeWidget() const
 
 WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
 {
+    mpClippingState = std::make_unique<WindowClippingState>();
+
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(rWindow);
     mfZoom                              = 1.0;
     mfPartialScrollX                    = 0.0;
     mfPartialScrollY                    = 0.0;
     maWinRegion                         = vcl::Region(true);
-    maWinClipRegion                     = vcl::Region(true);
+    mpClippingState->maWinClipRegion    = vcl::Region(true);
     mpWinData                           = nullptr;                      // Extra Window Data, that we don't need for all windows
     mpFrameData                         = nullptr;                      // Frame Data
     mpFrame                             = nullptr;                      // Pointer to frame window
@@ -637,7 +639,7 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mnX                                 = 0;                         // X-Position to Parent
     mnY                                 = 0;                         // Y-Position to Parent
     mnAbsScreenX                        = 0;                         // absolute X-position on screen, used for RTL window positioning
-    mpChildClipRegion                   = nullptr;                      // Child-Clip-Region when ClipChildren
+    mpClippingState->mpChildClipRegion  = nullptr;                      // Child-Clip-Region when ClipChildren
     mpPaintRegion                       = nullptr;                      // Paint-ClipRegion
     mnStyle                             = 0;                         // style (init in ImplInitWindow)
     mnPrevStyle                         = 0;                         // prevstyle (set in SetStyle)
@@ -698,11 +700,8 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mbCallMove                          = true;                      // true: Move must be called by Show
     mbCallResize                        = true;                      // true: Resize must be called by Show
     mbWaitSystemResize                  = true;                      // true: Wait for System-Resize
-    mbInitWinClipRegion                 = true;                      // true: Calc Window Clip Region
-    mbInitChildRegion                   = false;                     // true: InitChildClipRegion
     mbWinRegion                         = false;                     // true: Window Region
     mbClipChildren                      = false;                     // true: Child-window should be clipped
-    mbClipSiblings                      = false;                     // true: Adjacent Child-window should be clipped
     mbChildTransparent                  = false;                     // true: Child-windows are allowed to switch to transparent (incl. Parent-CLIPCHILDREN)
     mbPaintTransparent                  = false;                     // true: Paints should be executed on the Parent
     mbMouseTransparent                  = false;                     // true: Window is transparent for Mouse
@@ -745,7 +744,7 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
 
 WindowImpl::~WindowImpl()
 {
-    mpChildClipRegion.reset();
+    mpClippingState->mpChildClipRegion.reset();
     mpAccessibleInfos.reset();
 }
 
@@ -1476,7 +1475,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             pOldRegion->Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->maWinRegion ) );
 
         if ( GetOutDev()->GetOutputWidthPixel() && GetOutDev()->GetOutputHeightPixel() && !mpWindowImpl->mbPaintTransparent &&
-             !mpWindowImpl->mbInitWinClipRegion && !mpWindowImpl->maWinClipRegion.IsEmpty() &&
+             !mpWindowImpl->mpClippingState->mbInitWinClipRegion && !mpWindowImpl->mpClippingState->maWinClipRegion.IsEmpty() &&
              !HasPaintEvent() )
             bCopyBits = true;
     }
@@ -2216,10 +2215,10 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
 
         if ( mpWindowImpl->mbReallyVisible )
         {
-            if ( mpWindowImpl->mbInitWinClipRegion )
+            if ( mpWindowImpl->mpClippingState->mbInitWinClipRegion )
                 ImplInitWinClipRegion();
 
-            vcl::Region aInvRegion = mpWindowImpl->maWinClipRegion;
+            vcl::Region aInvRegion = mpWindowImpl->mpClippingState->maWinClipRegion;
 
             if( !xWindow->mpWindowImpl )
                 return;
