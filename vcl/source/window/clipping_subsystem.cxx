@@ -94,46 +94,35 @@ NativeSyncStatus processClipResult(WindowImpl& rImpl, bool bClipSuccess, bool bC
     return { bCurrentUpdate, false }; // Unchanged state
 }
 
-std::vector<vcl::Window*> getChildWindows(const WindowImpl& rImpl)
+/** Linearly traverses an intrusive linked list of window nodes following
+    the sibling chain until a terminator null pointer is encountered. */
+static std::vector<vcl::Window*> lcl_gatherWindowChain(vcl::Window* pStartWindow)
 {
-    std::vector<vcl::Window*> aChildren;
-    vcl::Window* pChild = rImpl.mpFirstChild;
+    std::vector<vcl::Window*> aWindows;
+    vcl::Window* pCurrent = pStartWindow;
 
-    while (pChild)
+    while (pCurrent)
     {
-        aChildren.push_back(pChild);
-        pChild = pChild->ImplGetWindowImpl()->mpNext;
+        aWindows.push_back(pCurrent);
+        pCurrent = pCurrent->ImplGetWindowImpl()->mpNext;
     }
 
-    return aChildren;
+    return aWindows;
+}
+
+std::vector<vcl::Window*> getChildWindows(const WindowImpl& rImpl)
+{
+    return lcl_gatherWindowChain(rImpl.mpFirstChild);
 }
 
 std::vector<vcl::Window*> getOverlapWindows(const WindowImpl& rImpl)
 {
-    std::vector<vcl::Window*> aOverlaps;
-    vcl::Window* pOverlap = rImpl.mpFirstOverlap;
-
-    while (pOverlap)
-    {
-        aOverlaps.push_back(pOverlap);
-        pOverlap = pOverlap->ImplGetWindowImpl()->mpNext;
-    }
-
-    return aOverlaps;
+    return lcl_gatherWindowChain(rImpl.mpFirstOverlap);
 }
 
 std::vector<vcl::Window*> getFollowingSiblings(const WindowImpl& rImpl)
 {
-    std::vector<vcl::Window*> aSiblings;
-    vcl::Window* pSibling = rImpl.mpNext;
-
-    while (pSibling)
-    {
-        aSiblings.push_back(pSibling);
-        pSibling = pSibling->ImplGetWindowImpl()->mpNext; // Fixes private visibility error
-    }
-
-    return aSiblings;
+    return lcl_gatherWindowChain(rImpl.mpNext);
 }
 
 std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow)
