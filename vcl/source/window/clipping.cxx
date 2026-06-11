@@ -351,41 +351,36 @@ bool Window::ImplNativeObjectClip(const vcl::Region* pOldRegion)
     return bUpdate;
 }
 
+void Window::ImplInvalidateNativeClipTargets(vcl::Window* pStartWindow)
+{
+    if (!pStartWindow)
+        return;
+
+    std::vector<vcl::Window*> aTargets;
+    vcl::clipping::gatherNativeSyncTargets(pStartWindow, aTargets);
+
+    for (vcl::Window* pTarget : aTargets)
+    {
+        pTarget->ImplNativeObjectClip(nullptr);
+    }
+}
+
 void Window::ImplUpdateNativeObjectClip()
 {
     if (ImplIsOverlapWindow())
     {
-        std::vector<vcl::Window*> aFrameTargets;
-        vcl::clipping::gatherNativeSyncTargets(mpWindowImpl->mpFrameWindow, aFrameTargets);
-
-        for (vcl::Window* pWin : aFrameTargets)
-        {
-            pWin->ImplNativeObjectClip(nullptr);
-        }
-
+        ImplInvalidateNativeClipTargets(mpWindowImpl->mpFrameWindow);
         return;
     }
 
-    std::vector<vcl::Window*> aSyncTargets;
-    vcl::clipping::gatherNativeSyncTargets(this, aSyncTargets);
-
-    for (vcl::Window* pWin : aSyncTargets)
-    {
-        pWin->ImplNativeObjectClip(nullptr);
-    }
+    ImplInvalidateNativeClipTargets(this);
 
     if (!mpWindowImpl->mpClippingState->mbClipSiblings)
         return;
 
     for (vcl::Window* pSibling : vcl::clipping::getFollowingSiblings(*mpWindowImpl))
     {
-        std::vector<vcl::Window*> aSiblingTargets;
-        vcl::clipping::gatherNativeSyncTargets(pSibling, aSiblingTargets);
-
-        for (vcl::Window* pTarget : aSiblingTargets)
-        {
-            pTarget->ImplNativeObjectClip(nullptr);
-        }
+        ImplInvalidateNativeClipTargets(pSibling);
     }
 }
 
