@@ -304,7 +304,7 @@ Region& Window::ImplGetWinChildClipRegion()
     return mpWindowImpl->mpClippingState->maWinClipRegion;
 }
 
-void Window::ImplUpdateSysObjClipRegion(vcl::Region aRegion, const vcl::Region& rWinRectRegion)
+void Window::ImplUpdateNativeObjectClipRegion(vcl::Region aRegion, const vcl::Region& rWinRectRegion)
 {
     if (aRegion == rWinRectRegion)
     {
@@ -342,7 +342,7 @@ bool Window::ImplSysObjClip(const vcl::Region* pOldRegion)
     if (vcl::clipping::syncNativeWindow(*mpWindowImpl, rWinChildClipRegion, pOldRegion, bUpdate))
         return bUpdate;
 
-    ImplUpdateSysObjClipRegion(rWinChildClipRegion, vcl::Region(GetOutputRectPixel()));
+    ImplUpdateNativeObjectClipRegion(rWinChildClipRegion, vcl::Region(GetOutputRectPixel()));
     mpWindowImpl->mpSysObj->Show(true);
 
     return bUpdate;
