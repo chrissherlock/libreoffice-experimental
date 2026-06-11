@@ -1440,7 +1440,7 @@ bool Window::ImplUpdatePos()
     return bSysChild;
 }
 
-void Window::ImplUpdateSysObjPos()
+void Window::ImplUpdateNativeObjectPos()
 {
     if ( mpWindowImpl->mpSysObj )
         mpWindowImpl->mpSysObj->SetPosSize( GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY(), GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel() );
@@ -1448,7 +1448,7 @@ void Window::ImplUpdateSysObjPos()
     VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
     while ( pChild )
     {
-        pChild->ImplUpdateSysObjPos();
+        pChild->ImplUpdateNativeObjectPos();
         pChild = pChild->mpWindowImpl->mpNext;
     }
 }
@@ -1730,7 +1730,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     if ( bUpdateSysObjClip )
         ImplUpdateNativeObjectClip();
     if ( bUpdateSysObjPos )
-        ImplUpdateSysObjPos();
+        ImplUpdateNativeObjectPos();
     if ( bNewSize && mpWindowImpl->mpSysObj )
         mpWindowImpl->mpSysObj->SetPosSize( GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY(), GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel() );
 }
