@@ -9,6 +9,7 @@
 
 #include <vcl/region.hxx>
 #include <vcl/window.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 #include <clipping.hxx>
 #include <window.h>
@@ -177,6 +178,59 @@ void gatherNativeSyncTargets(vcl::Window* pWindow, std::vector<vcl::Window*>& rT
     for (vcl::Window* pOverlap : getOverlapWindows(*pWindow->ImplGetWindowImpl()))
     {
         gatherNativeSyncTargets(pOverlap, rTargets);
+    }
+}
+
+void accumulateChildOverlaps(vcl::Window* pWindow, const vcl::Region& rInterRegion,
+                             vcl::Region& rRegion)
+{
+    for (vcl::Window* pOverlap : getOverlapWindows(*pWindow->ImplGetWindowImpl()))
+    {
+        accumulateWindowAndChildOverlaps(pOverlap, rInterRegion, rRegion);
+    }
+}
+
+void accumulateWindowAndChildOverlaps(vcl::Window* pWindow, const vcl::Region& rInterRegion,
+                                      vcl::Region& rRegion)
+{
+    if (pWindow->ImplGetWindowImpl()->mbReallyVisible)
+    {
+        vcl::Region aTempRegion(rInterRegion);
+        intersectWindowRegion(pWindow, aTempRegion);
+        rRegion.Union(aTempRegion);
+    }
+
+    // Delegate down to collect this node's downstream children
+    accumulateChildOverlaps(pWindow, rInterRegion, rRegion);
+}
+
+void intersectWindowRegion(vcl::Window* pWindow, vcl::Region& rRegion)
+{
+    // First, clip to the base rectangular output boundary
+    rRegion.Intersect(pWindow->GetOutputRectPixel());
+
+    // If the window has a custom user-defined geometric clip path, apply it as well
+    if (pWindow->ImplGetWindowImpl()->mbWinRegion)
+    {
+        rRegion.Intersect(pWindow->GetOutDev()->GetMapper().ViewToDevice(
+            pWindow->ImplGetWindowImpl()->maWinRegion));
+    }
+}
+
+void excludeWindowRegion(vcl::Window* pWindow, vcl::Region& rRegion)
+{
+    // If the target window has a custom boundary path, extract its intersection block
+    if (pWindow->ImplGetWindowImpl()->mbWinRegion)
+    {
+        vcl::Region aRegion(pWindow->GetOutputRectPixel());
+        aRegion.Intersect(pWindow->GetOutDev()->GetMapper().ViewToDevice(
+            pWindow->ImplGetWindowImpl()->maWinRegion));
+        rRegion.Exclude(aRegion);
+    }
+    else
+    {
+        // Otherwise, simply exclude the standard bounding box
+        rRegion.Exclude(pWindow->GetOutputRectPixel());
     }
 }
 
