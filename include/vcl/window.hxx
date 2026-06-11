@@ -615,7 +615,7 @@ private:
 
     SAL_DLLPRIVATE bool                 ImplNativeObjectClip( const vcl::Region* pOldRegion );
     SAL_DLLPRIVATE void                 ImplUpdateNativeObjectClipRegion(vcl::Region aRegion, const vcl::Region& rWinRectRegion);
-    SAL_DLLPRIVATE void                 ImplUpdateSysObjClip();
+    SAL_DLLPRIVATE void                 ImplUpdateNativeObjectClip();
 
     SAL_DLLPRIVATE void                 ImplIntersectWindowClipRegion( vcl::Region& rRegion );
     SAL_DLLPRIVATE void                 ImplIntersectWindowRegion( vcl::Region& rRegion );
