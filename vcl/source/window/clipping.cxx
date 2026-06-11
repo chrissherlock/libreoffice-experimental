@@ -571,35 +571,31 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
     }
 
     // Siblings
-    if ( bSiblings && !ImplIsOverlapWindow() )
+    if (bSiblings && !ImplIsOverlapWindow())
     {
-        pWindow = mpWindowImpl->mpParent->mpWindowImpl->mpFirstChild;
-        do
+        for (vcl::Window* pSibling : vcl::clipping::getChildWindows(*ImplGetParent()->ImplGetWindowImpl()))
         {
-            if ( pWindow->mpWindowImpl->mbReallyVisible && (pWindow != this) )
+            if (pSibling->ImplGetWindowImpl()->mbReallyVisible && (pSibling != this))
             {
                 aTempRegion = aRegion;
-                pWindow->ImplIntersectWindowRegion( aTempRegion );
-                rRegion.Union( aTempRegion );
+                pSibling->ImplIntersectWindowRegion(aTempRegion);
+                rRegion.Union(aTempRegion);
             }
-            pWindow = pWindow->mpWindowImpl->mpNext;
         }
-        while ( pWindow );
     }
 
     if ( !bChildren )
         return;
 
-    pWindow = mpWindowImpl->mpFirstChild;
-    while ( pWindow )
+    // Children
+    for (vcl::Window* pChild : vcl::clipping::getChildWindows(*mpWindowImpl))
     {
-        if ( pWindow->mpWindowImpl->mbReallyVisible )
+        if (pChild->ImplGetWindowImpl()->mbReallyVisible)
         {
             aTempRegion = aRegion;
-            pWindow->ImplIntersectWindowRegion( aTempRegion );
-            rRegion.Union( aTempRegion );
+            pChild->ImplIntersectWindowRegion(aTempRegion);
+            rRegion.Union(aTempRegion);
         }
-        pWindow = pWindow->mpWindowImpl->mpNext;
     }
 }
 
