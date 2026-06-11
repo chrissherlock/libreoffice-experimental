@@ -653,7 +653,7 @@ private:
     SAL_DLLPRIVATE void                 ImplUpdateOverlapWindowPtr( bool bNewFrame );
 
     SAL_DLLPRIVATE bool                 ImplUpdatePos();
-    SAL_DLLPRIVATE void                 ImplUpdateSysObjPos();
+    SAL_DLLPRIVATE void                 ImplUpdateNativeObjectPos();
 
     SAL_DLLPRIVATE void                 ImplUpdateGlobalSettings( AllSettings& rSettings, bool bCallHdl = true ) const;
 
