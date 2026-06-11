@@ -42,36 +42,46 @@ void WindowOutputDevice::InitClipRegion()
 {
     DBG_TESTSOLARMUTEX();
 
-    vcl::Region  aRegion;
+    vcl::Region aRegion;
+    WindowImpl* pImpl = mxOwnerWindow->mpWindowImpl.get();
 
-    if ( mxOwnerWindow->mpWindowImpl->mbInPaint )
+    // 1. Establish the baseline layout geometry path
+    if (pImpl->mbInPaint)
     {
-        aRegion = *(mxOwnerWindow->mpWindowImpl->mpPaintRegion);
+        if (pImpl->mpPaintRegion)
+        {
+            aRegion = *(pImpl->mpPaintRegion);
+        }
     }
     else
     {
         aRegion = mxOwnerWindow->ImplGetWinChildClipRegion();
-        // only this region is in frame coordinates, so re-mirror it
-        // the mpWindowImpl->mpPaintRegion above is already correct (see ImplCallPaint()) !
-        if( ImplIsAntiparallel() )
-            ReMirror ( aRegion );
+
+        // Handle Right-to-Left (RTL) text and coordinate orientation switches
+        if (ImplIsAntiparallel())
+        {
+            ReMirror(aRegion);
+        }
     }
 
-    if ( mbClipRegion )
-        aRegion.Intersect( GetMapper().ViewToDevice( maRegion ) );
+    // 2. Intersect with any active user-defined clipping regions
+    if (mbClipRegion)
+    {
+        aRegion.Intersect(GetMapper().ViewToDevice(maRegion));
+    }
 
-    if ( aRegion.IsEmpty() )
+    // 3. Dispatch the final sync commands to the graphics hardware driver
+    if (aRegion.IsEmpty())
     {
         mbOutputClipped = true;
     }
     else
     {
         mbOutputClipped = false;
-        SelectClipRegion( aRegion );
+        SelectClipRegion(aRegion);
     }
 
     mbClipRegionSet = true;
-
     mbInitClipRegion = false;
 }
 
@@ -145,14 +155,16 @@ vcl::Region Window::GetWindowClipRegionPixel() const
     return aWinClipRegion;
 }
 
-
 vcl::Region WindowOutputDevice::GetActiveClipRegion() const
 {
     vcl::Region aRegion(true);
+    WindowImpl* pImpl = mxOwnerWindow->mpWindowImpl.get();
 
-    if (mxOwnerWindow->mpWindowImpl->mbInPaint)
+    if (pImpl->mbInPaint)
     {
-        aRegion = *(mxOwnerWindow->mpWindowImpl->mpPaintRegion);
+        if (pImpl->mpPaintRegion)
+            aRegion = *(pImpl->mpPaintRegion);
+
         aRegion.Move(-GetDeviceOriginX(), -GetDeviceOriginY());
     }
 
@@ -165,9 +177,14 @@ vcl::Region WindowOutputDevice::GetActiveClipRegion() const
 void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)
 {
     const vcl::Region aPaintRgn(mxOwnerWindow->GetPaintRegion());
+    if (aPaintRgn.IsNull())
+        return;
 
-    if (!aPaintRgn.IsNull())
-        rDstRect.Intersection(convertTo<vcl::WindowRect>(vcl::LogicRect(aPaintRgn.GetBoundRect()), GetMapMode()).get());
+    // Flatten the nested geometry type conversions for readability
+    auto aBoundRect   = vcl::LogicRect(aPaintRgn.GetBoundRect());
+    auto aWindowRect  = convertTo<vcl::WindowRect>(aBoundRect, GetMapMode()).get();
+
+    rDstRect.Intersection(aWindowRect);
 }
 
 void Window::EnableClipSiblings(bool bClipSiblings)
