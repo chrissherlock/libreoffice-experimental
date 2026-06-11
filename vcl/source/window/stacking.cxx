@@ -793,7 +793,7 @@ void Window::ImplUpdateOverlapWindowPtr( bool bNewFrame )
     mpWindowImpl->mpRealParent = pRealParent;
     ImplUpdateWindowPtr();
     if ( ImplUpdatePos() )
-        ImplUpdateSysObjPos();
+        ImplUpdateNativeObjectPos();
 
     if ( bNewFrame )
     {
@@ -931,7 +931,7 @@ void Window::SetParent( vcl::Window* pNewParent )
         pNewParent->mpWindowImpl->mbClipChildren = true;
     ImplUpdateWindowPtr();
     if ( ImplUpdatePos() )
-        ImplUpdateSysObjPos();
+        ImplUpdateNativeObjectPos();
 
     // If the Overlap-Window has changed, we need to test whether
     // OverlapWindows that had the Child window as their parent
