@@ -90,7 +90,7 @@ void InterimItemWindow::UnclipVisibleSysObj()
     pWindowImpl->mpSysObj->Show(true);
     pWindowImpl->mpSysObj->ResetClipRegion();
     // flag that sysobj clip is dirty and needs to be recalculated on next use
-    pWindowImpl->mbInitWinClipRegion = true;
+    pWindowImpl->mpClippingState->mbInitWinClipRegion = true;
 }
 
 IMPL_LINK_NOARG(InterimItemWindow, DoLayout, Timer*, void) { Layout(); }
