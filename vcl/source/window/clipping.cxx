@@ -45,13 +45,11 @@ void WindowOutputDevice::InitClipRegion()
     vcl::Region aRegion;
     WindowImpl* pImpl = mxOwnerWindow->mpWindowImpl.get();
 
-    // 1. Establish the baseline layout geometry path
+    // Establish the baseline layout geometry path
     if (pImpl->mbInPaint)
     {
         if (pImpl->mpPaintRegion)
-        {
             aRegion = *(pImpl->mpPaintRegion);
-        }
     }
     else
     {
@@ -59,18 +57,16 @@ void WindowOutputDevice::InitClipRegion()
 
         // Handle Right-to-Left (RTL) text and coordinate orientation switches
         if (ImplIsAntiparallel())
-        {
             ReMirror(aRegion);
-        }
     }
 
-    // 2. Intersect with any active user-defined clipping regions
+    // Intersect with any active user-defined clipping regions
     if (mbClipRegion)
     {
         aRegion.Intersect(GetMapper().ViewToDevice(maRegion));
     }
 
-    // 3. Dispatch the final sync commands to the graphics hardware driver
+    // Dispatch the final sync commands to the graphics hardware driver
     if (aRegion.IsEmpty())
     {
         mbOutputClipped = true;
