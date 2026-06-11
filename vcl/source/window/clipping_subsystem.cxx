@@ -20,18 +20,20 @@ namespace vcl::clipping
 bool initChildRegion(WindowImpl& rImpl)
 {
     // Safely clear the initialization flag on function exit
-    comphelper::ScopeGuard aDeinitChildRegion([&rImpl]() { rImpl.mbInitChildRegion = false; });
+    comphelper::ScopeGuard aDeinitChildRegion(
+        [&rImpl]() { rImpl.mpClippingState->mbInitChildRegion = false; });
 
     if (!rImpl.mpFirstChild)
     {
-        rImpl.mpChildClipRegion.reset();
+        rImpl.mpClippingState->mpChildClipRegion.reset();
         return false; // No children present; skip downstream clipping
     }
 
-    if (!rImpl.mpChildClipRegion)
-        rImpl.mpChildClipRegion.reset(new vcl::Region(rImpl.maWinClipRegion));
+    if (!rImpl.mpClippingState->mpChildClipRegion)
+        rImpl.mpClippingState->mpChildClipRegion.reset(
+            new vcl::Region(rImpl.mpClippingState->maWinClipRegion));
     else
-        *rImpl.mpChildClipRegion = rImpl.maWinClipRegion;
+        *rImpl.mpClippingState->mpChildClipRegion = rImpl.mpClippingState->maWinClipRegion;
 
     return true; // Context contains children; signal the window to clip them
 }
@@ -65,8 +67,8 @@ bool syncNativeWindow(WindowImpl& rImpl, vcl::Region& rWinChildClipRegion,
 
 std::unique_ptr<vcl::Region> prepareClipInvalidation(WindowImpl& rImpl, bool bSysObjOnlySmaller)
 {
-    if (rImpl.mpSysObj && bSysObjOnlySmaller && !rImpl.mbInitWinClipRegion)
-        return std::make_unique<vcl::Region>(rImpl.maWinClipRegion);
+    if (rImpl.mpSysObj && bSysObjOnlySmaller && !rImpl.mpClippingState->mbInitWinClipRegion)
+        return std::make_unique<vcl::Region>(rImpl.mpClippingState->maWinClipRegion);
 
     return nullptr;
 }
@@ -76,7 +78,7 @@ bool invalidateParentClipIfRequired(const WindowImpl& rChildImpl, WindowImpl& rP
 {
     if ((nParentStyle & WB_CLIPCHILDREN) || (rChildImpl.mnParentClipMode & ParentClipMode::Clip))
     {
-        rParentImpl.mbInitChildRegion = true;
+        rParentImpl.mpClippingState->mbInitChildRegion = true;
         return true; // Signals that parent device clip region needs invalidation
     }
 
@@ -87,7 +89,7 @@ NativeSyncStatus processClipResult(WindowImpl& rImpl, bool bClipSuccess, bool bC
 {
     if (!bClipSuccess)
     {
-        rImpl.mbInitWinClipRegion = true;
+        rImpl.mpClippingState->mbInitWinClipRegion = true;
         return { false, true }; // bUpdate = false, bInvalidateDevice = true
     }
 
