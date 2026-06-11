@@ -614,7 +614,7 @@ private:
                                          vcl::Font& rFont) const;
     SAL_DLLPRIVATE void                 ImplLogicToPoint(vcl::RenderContext const & rRenderContext, vcl::Font& rFont) const;
 
-    SAL_DLLPRIVATE bool                 ImplSysObjClip( const vcl::Region* pOldRegion );
+    SAL_DLLPRIVATE bool                 ImplNativeObjectClip( const vcl::Region* pOldRegion );
     SAL_DLLPRIVATE void                 ImplUpdateNativeObjectClipRegion(vcl::Region aRegion, const vcl::Region& rWinRectRegion);
     SAL_DLLPRIVATE void                 ImplUpdateSysObjClip();
 
