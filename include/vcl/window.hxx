@@ -614,7 +614,7 @@ private:
     SAL_DLLPRIVATE void                 ImplLogicToPoint(vcl::RenderContext const & rRenderContext, vcl::Font& rFont) const;
 
     SAL_DLLPRIVATE bool                 ImplSysObjClip( const vcl::Region* pOldRegion );
-    SAL_DLLPRIVATE void                 ImplUpdateSysObjClipRegion(vcl::Region aRegion, const vcl::Region& rWinRectRegion);
+    SAL_DLLPRIVATE void                 ImplUpdateNativeObjectClipRegion(vcl::Region aRegion, const vcl::Region& rWinRectRegion);
     SAL_DLLPRIVATE void                 ImplUpdateSysObjClip();
 
     SAL_DLLPRIVATE void                 ImplIntersectWindowClipRegion( vcl::Region& rRegion );
