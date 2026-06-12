@@ -202,21 +202,21 @@ void intersectWindowRegion(vcl::Window* pWindow, vcl::Region& rRegion)
     rRegion.Intersect(pWindow->GetOutputRectPixel());
 
     // If the window has a custom user-defined geometric clip path, apply it as well
-    if (pWindow->ImplGetWindowImpl()->mbWinRegion)
+    if (pWindow->ImplGetWindowImpl()->mpClippingState->mbWinRegion)
     {
         rRegion.Intersect(pWindow->GetOutDev()->GetMapper().ViewToDevice(
-            pWindow->ImplGetWindowImpl()->maWinRegion));
+            pWindow->ImplGetWindowImpl()->mpClippingState->maWinRegion));
     }
 }
 
 void excludeWindowRegion(vcl::Window* pWindow, vcl::Region& rRegion)
 {
     // If the target window has a custom boundary path, extract its intersection block
-    if (pWindow->ImplGetWindowImpl()->mbWinRegion)
+    if (pWindow->ImplGetWindowImpl()->mpClippingState->mbWinRegion)
     {
         vcl::Region aRegion(pWindow->GetOutputRectPixel());
         aRegion.Intersect(pWindow->GetOutDev()->GetMapper().ViewToDevice(
-            pWindow->ImplGetWindowImpl()->maWinRegion));
+            pWindow->ImplGetWindowImpl()->mpClippingState->maWinRegion));
         rRegion.Exclude(aRegion);
     }
     else
