@@ -1733,8 +1733,8 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
         xWindow->SetHelpId(getHelpRoot() + id);
         SAL_INFO("vcl.builder", "for name '" << name << "' and id '" << id <<
             "', created " << xWindow.get() << " child of " <<
-            pParent << "(" << xWindow->ImplGetWindowImpl()->mpParent.get() << "/" <<
-            xWindow->ImplGetWindowImpl()->mpRealParent.get() << "/" <<
+            pParent << "(" << xWindow->ImplGetWindowImpl()->mpHierarchy->mpParent.get() << "/" <<
+            xWindow->ImplGetWindowImpl()->mpHierarchy->mpRealParent.get() << "/" <<
             xWindow->ImplGetWindowImpl()->mpBorderWindow.get() << ") with helpid " <<
             xWindow->GetHelpId());
         m_aChildren.emplace_back(id, xWindow, bVertical);
@@ -1820,10 +1820,10 @@ namespace BuilderUtils
     void reorderWithinParent(vcl::Window &rWindow, sal_uInt16 nNewPosition)
     {
         WindowImpl *pWindowImpl = rWindow.ImplGetWindowImpl();
-        if (pWindowImpl->mpParent != pWindowImpl->mpRealParent)
+        if (pWindowImpl->mpHierarchy->mpParent != pWindowImpl->mpHierarchy->mpRealParent)
         {
-            assert(pWindowImpl->mpBorderWindow == pWindowImpl->mpParent);
-            assert(pWindowImpl->mpBorderWindow->ImplGetWindowImpl()->mpParent == pWindowImpl->mpRealParent);
+            assert(pWindowImpl->mpBorderWindow == pWindowImpl->mpHierarchy->mpParent);
+            assert(pWindowImpl->mpBorderWindow->ImplGetWindowImpl()->mpHierarchy->mpParent == pWindowImpl->mpHierarchy->mpRealParent);
             reorderWithinParent(*pWindowImpl->mpBorderWindow, nNewPosition);
             return;
         }

@@ -401,12 +401,12 @@ PaintHelper::~PaintHelper()
     if ( m_nPaintFlags & (ImplPaintFlags::PaintAllChildren | ImplPaintFlags::PaintChildren) )
     {
         // Paint from the bottom child window and frontward.
-        vcl::Window* pTempWindow = pWindowImpl->mpLastChild;
+        vcl::Window* pTempWindow = pWindowImpl->mpHierarchy->mpLastChild;
         while (pTempWindow)
         {
             if (pTempWindow->mpWindowImpl->mbVisible)
                 pTempWindow->ImplCallPaint(m_pChildRegion.get(), m_nPaintFlags);
-            pTempWindow = pTempWindow->mpWindowImpl->mpPrev;
+            pTempWindow = pTempWindow->mpWindowImpl->mpHierarchy->mpPrev;
         }
     }
 
@@ -451,7 +451,7 @@ void Window::ImplCallPaint(const vcl::Region* pRegion, ImplPaintFlags nPaintFlag
         mpWindowImpl->mnPaintFlags |= ImplPaintFlags::Erase;
     if (nPaintFlags & ImplPaintFlags::CheckRtl)
         mpWindowImpl->mnPaintFlags |= ImplPaintFlags::CheckRtl;
-    if (!mpWindowImpl->mpFirstChild)
+    if (!mpWindowImpl->mpHierarchy->mpFirstChild)
         mpWindowImpl->mnPaintFlags &= ~ImplPaintFlags::PaintAllChildren;
 
     // If tiled rendering is used, windows are only invalidated, never painted to.
@@ -487,12 +487,12 @@ void Window::ImplCallOverlapPaint()
         return;
 
     // emit overlapping windows first
-    vcl::Window* pTempWindow = mpWindowImpl->mpFirstOverlap;
+    vcl::Window* pTempWindow = mpWindowImpl->mpHierarchy->mpFirstOverlap;
     while ( pTempWindow )
     {
         if ( pTempWindow->mpWindowImpl->mbReallyVisible )
             pTempWindow->ImplCallOverlapPaint();
-        pTempWindow = pTempWindow->mpWindowImpl->mpNext;
+        pTempWindow = pTempWindow->mpWindowImpl->mpHierarchy->mpNext;
     }
 
     // only then ourself
@@ -615,13 +615,13 @@ void Window::ImplInvalidateOverlapFrameRegion( const vcl::Region& rRegion )
         ImplInvalidateFrameRegion( &aRegion, InvalidateFlags::Children );
 
     // now we invalidate the overlapping windows
-    vcl::Window* pTempWindow = mpWindowImpl->mpFirstOverlap;
+    vcl::Window* pTempWindow = mpWindowImpl->mpHierarchy->mpFirstOverlap;
     while ( pTempWindow )
     {
         if ( pTempWindow->IsVisible() )
             pTempWindow->ImplInvalidateOverlapFrameRegion( rRegion );
 
-        pTempWindow = pTempWindow->mpWindowImpl->mpNext;
+        pTempWindow = pTempWindow->mpWindowImpl->mpHierarchy->mpNext;
     }
 }
 
@@ -672,7 +672,7 @@ void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags 
         else
             nFlags |= InvalidateFlags::Children;
     }
-    if ( (nFlags & InvalidateFlags::NoChildren) && mpWindowImpl->mpFirstChild )
+    if ( (nFlags & InvalidateFlags::NoChildren) && mpWindowImpl->mpHierarchy->mpFirstChild )
         bInvalidateAll = false;
     if ( bInvalidateAll )
         ImplInvalidateFrameRegion( nullptr, nFlags );
@@ -730,11 +730,11 @@ void Window::ImplMoveInvalidateRegion( const tools::Rectangle& rRect,
 
     if ( bChildren && (mpWindowImpl->mnPaintFlags & ImplPaintFlags::PaintChildren) )
     {
-        vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
+        vcl::Window* pWindow = mpWindowImpl->mpHierarchy->mpFirstChild;
         while ( pWindow )
         {
             pWindow->ImplMoveInvalidateRegion( rRect, nHorzScroll, nVertScroll, true );
-            pWindow = pWindow->mpWindowImpl->mpNext;
+            pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
         }
     }
 }
@@ -783,18 +783,18 @@ void Window::ImplValidateFrameRegion( const vcl::Region* pRegion, ValidateFlags 
     else
     {
         // when all child windows have to be drawn we need to invalidate them before doing so
-        if ( (mpWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAllChildren) && mpWindowImpl->mpFirstChild )
+        if ( (mpWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAllChildren) && mpWindowImpl->mpHierarchy->mpFirstChild )
         {
             vcl::Region aChildRegion = mpWindowImpl->maInvalidateRegion;
             if ( mpWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAll )
             {
                 aChildRegion = GetOutputRectPixel();
             }
-            vcl::Window* pChild = mpWindowImpl->mpFirstChild;
+            vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
             while ( pChild )
             {
                 pChild->Invalidate( aChildRegion, InvalidateFlags::Children | InvalidateFlags::NoTransparent );
-                pChild = pChild->mpWindowImpl->mpNext;
+                pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
             }
         }
         if ( mpWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAll )
@@ -807,11 +807,11 @@ void Window::ImplValidateFrameRegion( const vcl::Region* pRegion, ValidateFlags 
 
     if ( nFlags & ValidateFlags::Children )
     {
-        vcl::Window* pChild = mpWindowImpl->mpFirstChild;
+        vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
         while ( pChild )
         {
             pChild->ImplValidateFrameRegion( pRegion, nFlags );
-            pChild = pChild->mpWindowImpl->mpNext;
+            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
         }
     }
 }
@@ -825,7 +825,7 @@ void Window::ImplValidate()
         nFlags |= ValidateFlags::NoChildren;
     else
         nFlags |= ValidateFlags::Children;
-    if ( (nFlags & ValidateFlags::NoChildren) && mpWindowImpl->mpFirstChild )
+    if ( (nFlags & ValidateFlags::NoChildren) && mpWindowImpl->mpHierarchy->mpFirstChild )
         bValidateAll = false;
     if ( bValidateAll )
         ImplValidateFrameRegion( nullptr, nFlags );
@@ -1200,13 +1200,13 @@ void Window::PaintImmediately()
         // otherwise holes would remain
         vcl::Window* pUpdateOverlapWindow = ImplGetFirstOverlapWindow();
         if (pUpdateOverlapWindow->mpWindowImpl)
-            pUpdateOverlapWindow = pUpdateOverlapWindow->mpWindowImpl->mpFirstOverlap;
+            pUpdateOverlapWindow = pUpdateOverlapWindow->mpWindowImpl->mpHierarchy->mpFirstOverlap;
         else
             pUpdateOverlapWindow = nullptr;
         while ( pUpdateOverlapWindow )
         {
              pUpdateOverlapWindow->PaintImmediately();
-             pUpdateOverlapWindow = pUpdateOverlapWindow->mpWindowImpl->mpNext;
+             pUpdateOverlapWindow = pUpdateOverlapWindow->mpWindowImpl->mpHierarchy->mpNext;
         }
 
         pUpdateWindow->ImplCallPaint(nullptr, pUpdateWindow->mpWindowImpl->mnPaintFlags);
@@ -1290,7 +1290,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
         pDevice.disposeAndClear();
 
 
-        for( vcl::Window* pChild = mpWindowImpl->mpFirstChild; pChild; pChild = pChild->mpWindowImpl->mpNext )
+        for( vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild; pChild; pChild = pChild->mpWindowImpl->mpHierarchy->mpNext )
         {
             if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
             {
@@ -1410,7 +1410,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
     // get rid of virtual device now so they don't pile up during recursive calls
     pMaskedDevice.disposeAndClear();
 
-    for( vcl::Window* pChild = mpWindowImpl->mpFirstChild; pChild; pChild = pChild->mpWindowImpl->mpNext )
+    for( vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild; pChild; pChild = pChild->mpWindowImpl->mpHierarchy->mpNext )
     {
         if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
         {
@@ -1540,7 +1540,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     vcl::Region  aInvalidateRegion;
     bool    bScrollChildren(nFlags & ScrollFlags::Children);
 
-    if ( !mpWindowImpl->mpFirstChild )
+    if ( !mpWindowImpl->mpHierarchy->mpFirstChild )
         bScrollChildren = false;
 
     OutputDevice *pOutDev = GetOutDev();
@@ -1664,14 +1664,14 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
 
     if ( bScrollChildren )
     {
-        vcl::Window* pWindow = mpWindowImpl->mpFirstChild;
+        vcl::Window* pWindow = mpWindowImpl->mpHierarchy->mpFirstChild;
         while ( pWindow )
         {
             Point aPos = pWindow->GetPosPixel();
             aPos += Point( nHorzScroll, nVertScroll );
             pWindow->SetPosPixel( aPos );
 
-            pWindow = pWindow->mpWindowImpl->mpNext;
+            pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
         }
     }
 

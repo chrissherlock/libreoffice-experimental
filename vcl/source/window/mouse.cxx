@@ -278,7 +278,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         }
         if (!pParent->mpWindowImpl)
             break;
-        pParent = pParent->mpWindowImpl->mpParent;
+        pParent = pParent->mpWindowImpl->mpHierarchy->mpParent;
     }
 
     if ( !(( pSVData->mpWinData->mpFocusWin.get() != this &&

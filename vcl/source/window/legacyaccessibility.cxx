@@ -101,8 +101,8 @@ Window* Window::getLegacyNonLayoutAccessibleRelationLabelFor() const
     sal_Unicode nAccel = getAccel( GetText() );
 
     Window* pWindow = ImplGetLabelFor(pFrameWindow, GetType(), this, nAccel);
-    if( ! pWindow && mpWindowImpl->mpRealParent )
-        pWindow = ImplGetLabelFor(mpWindowImpl->mpRealParent, GetType(), this, nAccel);
+    if( ! pWindow && mpWindowImpl->mpHierarchy->mpRealParent )
+        pWindow = ImplGetLabelFor(mpWindowImpl->mpHierarchy->mpRealParent, GetType(), this, nAccel);
     return pWindow;
 }
 
@@ -176,8 +176,8 @@ Window* Window::getLegacyNonLayoutAccessibleRelationLabeledBy() const
     // See tools/options/print for example.
 
     Window* pWindow = ImplGetLabeledBy(pFrameWindow, GetType(), this);
-    if( ! pWindow && mpWindowImpl->mpRealParent )
-        pWindow = ImplGetLabeledBy(mpWindowImpl->mpRealParent, GetType(), this);
+    if( ! pWindow && mpWindowImpl->mpHierarchy->mpRealParent )
+        pWindow = ImplGetLabeledBy(mpWindowImpl->mpHierarchy->mpRealParent, GetType(), this);
 
     return pWindow;
 }
