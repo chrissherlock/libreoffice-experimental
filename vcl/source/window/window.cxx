@@ -600,7 +600,7 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mfZoom                              = 1.0;
     mfPartialScrollX                    = 0.0;
     mfPartialScrollY                    = 0.0;
-    maWinRegion                         = vcl::Region(true);
+    mpClippingState->maWinRegion        = vcl::Region(true);
     mpClippingState->maWinClipRegion    = vcl::Region(true);
     mpWinData                           = nullptr;                      // Extra Window Data, that we don't need for all windows
     mpFrameData                         = nullptr;                      // Frame Data
@@ -691,7 +691,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mbCallMove                          = true;                      // true: Move must be called by Show
     mbCallResize                        = true;                      // true: Resize must be called by Show
     mbWaitSystemResize                  = true;                      // true: Wait for System-Resize
-    mbWinRegion                         = false;                     // true: Window Region
     mbChildTransparent                  = false;                     // true: Child-windows are allowed to switch to transparent (incl. Parent-CLIPCHILDREN)
     mbPaintTransparent                  = false;                     // true: Paints should be executed on the Parent
     mbMouseTransparent                  = false;                     // true: Window is transparent for Mouse
@@ -1461,8 +1460,8 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
         tools::Rectangle aOldWinRect( Point( nOldOutOffX, nOldOutOffY ),
                                Size( nOldOutWidth, nOldOutHeight ) );
         pOldRegion.reset( new vcl::Region( aOldWinRect ) );
-        if ( mpWindowImpl->mbWinRegion )
-            pOldRegion->Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->maWinRegion ) );
+        if ( mpWindowImpl->mpClippingState->mbWinRegion )
+            pOldRegion->Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
 
         if ( GetOutDev()->GetOutputWidthPixel() && GetOutDev()->GetOutputHeightPixel() && !mpWindowImpl->mbPaintTransparent &&
              !mpWindowImpl->mpClippingState->mbInitWinClipRegion && !mpWindowImpl->mpClippingState->maWinClipRegion.IsEmpty() &&
@@ -1644,8 +1643,8 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                 if ( bCopyBits && bParentPaint && !HasPaintEvent() )
                 {
                     vcl::Region aRegion( GetOutputRectPixel() );
-                    if ( mpWindowImpl->mbWinRegion )
-                        aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->maWinRegion ) );
+                    if ( mpWindowImpl->mpClippingState->mbWinRegion )
+                        aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
                     ImplClipBoundaries( aRegion, false, true );
                     if ( !pOverlapRegion->IsEmpty() )
                     {
@@ -1695,8 +1694,8 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             {
                 vcl::Region aRegion( GetOutputRectPixel() );
                 aRegion.Exclude( *pOldRegion );
-                if ( mpWindowImpl->mbWinRegion )
-                    aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->maWinRegion ) );
+                if ( mpWindowImpl->mpClippingState->mbWinRegion )
+                    aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
                 ImplClipBoundaries( aRegion, false, true );
                 if ( !aRegion.IsEmpty() )
                     ImplInvalidateFrameRegion( &aRegion, InvalidateFlags::Children );

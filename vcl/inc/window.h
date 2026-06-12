@@ -220,12 +220,15 @@ namespace o3tl {
 struct WindowClippingState
 {
     vcl::Region                  maWinClipRegion;
-    std::unique_ptr<vcl::Region> mpChildClipRegion; // If applicable in your branch
+    std::unique_ptr<vcl::Region> mpChildClipRegion;
     ParentClipMode               meParentClipMode = ParentClipMode::NONE;
     bool                         mbInitWinClipRegion = true;
     bool                         mbInitChildRegion = false;
     bool                         mbClipSiblings = false;
     bool                         mbClipChildren = false;
+
+    vcl::Region                  maWinRegion;
+    bool                         mbWinRegion = false;
 };
 
 struct WindowHierarchy
@@ -324,6 +327,7 @@ public:
     sal_uInt16          mnWaitCount;
     ImplPaintFlags      mnPaintFlags;
     GetFocusFlags       mnGetFocusFlags;
+    ParentClipMode      mnParentClipMode;
     ActivateModeFlags   mnActivateMode;
     DialogControlFlags  mnDlgCtrlFlags;
     AlwaysInputMode     meAlwaysInputMode;
