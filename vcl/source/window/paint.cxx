@@ -31,6 +31,7 @@
 #include <sal/types.h>
 #include <sal/log.hxx>
 
+#include <clipping.hxx>
 #include <window.h>
 #include <salgdi.hxx>
 #include <salframe.hxx>
@@ -699,10 +700,10 @@ void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags 
             if ( !(nFlags & InvalidateFlags::NoClipChildren) )
             {
                 if ( nOrgFlags & InvalidateFlags::NoChildren )
-                    ImplClipAllChildren( aRegion );
+                    vcl::clipping::clipAllChildren(*this, aRegion);
                 else
                 {
-                    if ( ImplClipChildren( aRegion ) )
+                    if (vcl::clipping::clipChildren(*this, aRegion))
                         nFlags |= InvalidateFlags::Children;
                 }
             }
@@ -835,7 +836,7 @@ void Window::ImplValidate()
         if ( nFlags & ValidateFlags::NoChildren )
         {
             nFlags &= ~ValidateFlags::Children;
-            if ( ImplClipChildren( aRegion ) )
+            if (vcl::clipping::clipChildren(*this, aRegion))
                 nFlags |= ValidateFlags::Children;
         }
         if ( !aRegion.IsEmpty() )
@@ -1593,9 +1594,9 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if ( !bScrollChildren )
     {
         if ( nOrgFlags & ScrollFlags::NoChildren )
-            ImplClipAllChildren( aRegion );
+            vcl::clipping::clipAllChildren(*this, aRegion);
         else
-            ImplClipChildren( aRegion );
+            vcl::clipping::clipChildren(*this, aRegion);
     }
     if ( GetOutDev()->mbClipRegion && (nFlags & ScrollFlags::UseClipRegion) )
         aRegion.Intersect( GetOutDev()->maRegion );
@@ -1654,9 +1655,9 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         if ( !bScrollChildren )
         {
             if ( nOrgFlags & ScrollFlags::NoChildren )
-                ImplClipAllChildren( aInvalidateRegion );
+                vcl::clipping::clipAllChildren(*this, aInvalidateRegion);
             else
-                ImplClipChildren( aInvalidateRegion );
+                vcl::clipping::clipChildren(*this, aInvalidateRegion);
         }
         ImplInvalidateFrameRegion( &aInvalidateRegion, InvalidateFlags::Children );
     }
