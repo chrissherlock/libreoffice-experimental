@@ -934,7 +934,7 @@ vcl::Window* Window::GetFrameWindow() const
 
 vcl::Window* Window::ImplGetParent() const
 {
-    return mpWindowImpl ? mpWindowImpl->mpParent.get() : nullptr;
+    return mpWindowImpl ? mpWindowImpl->mpHierarchy->mpParent.get() : nullptr;
 }
 
 vcl::Window* Window::ImplGetClientWindow() const
@@ -1179,7 +1179,7 @@ bool Window::IsInPaint() const
 
 vcl::Window* Window::GetParent() const
 {
-    return mpWindowImpl ? mpWindowImpl->mpRealParent.get() : nullptr;
+    return mpWindowImpl ? mpWindowImpl->mpHierarchy->mpRealParent.get() : nullptr;
 }
 
 bool Window::IsVisible() const

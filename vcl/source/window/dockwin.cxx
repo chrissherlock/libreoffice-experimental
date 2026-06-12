@@ -725,7 +725,7 @@ void DockingWindow::SetFloatingMode( bool bFloatMode )
 
         maDockPos = Window::GetPosPixel();
 
-        vcl::Window* pRealParent = mpWindowImpl->mpRealParent;
+        vcl::Window* pRealParent = mpWindowImpl->mpHierarchy->mpRealParent;
         mpOldBorderWin = mpWindowImpl->mpBorderWindow;
 
         VclPtrInstance<ImplDockFloatWin> pWin(
@@ -750,7 +750,7 @@ void DockingWindow::SetFloatingMode( bool bFloatMode )
         SetPosPixel( Point() );
         mpWindowImpl->mpBorderWindow = pWin;
         pWin->mpWindowImpl->mpClientWindow = this;
-        mpWindowImpl->mpRealParent = pRealParent;
+        mpWindowImpl->mpHierarchy->mpRealParent = pRealParent;
         pWin->SetText( Window::GetText() );
         Size aSize(Window::GetSizePixel());
         pWin->SetOutputSizePixel(aSize);
@@ -773,7 +773,7 @@ void DockingWindow::SetFloatingMode( bool bFloatMode )
         maMinOutSize    = mpFloatWin->GetMinOutputSizePixel();
         mpImplData->maMaxOutSize = mpFloatWin->GetMaxOutputSizePixel();
 
-        vcl::Window* pRealParent = mpWindowImpl->mpRealParent;
+        vcl::Window* pRealParent = mpWindowImpl->mpHierarchy->mpRealParent;
         mpWindowImpl->mpBorderWindow = nullptr;
         if ( mpOldBorderWin )
         {
@@ -783,7 +783,7 @@ void DockingWindow::SetFloatingMode( bool bFloatMode )
         }
         mpWindowImpl->mpBorderWindow = mpOldBorderWin;
         SetParent( pRealParent );
-        mpWindowImpl->mpRealParent = pRealParent;
+        mpWindowImpl->mpHierarchy->mpRealParent = pRealParent;
         mpFloatWin.disposeAndClear();
         SetPosPixel( maDockPos );
     }

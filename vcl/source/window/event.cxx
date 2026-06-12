@@ -41,19 +41,19 @@ void Window::NotifyAllChildren( DataChangedEvent& rDCEvt )
 {
     CompatDataChanged( rDCEvt );
 
-    vcl::Window* pChild = mpWindowImpl->mpFirstChild;
+    vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
     while ( pChild )
     {
         pChild->NotifyAllChildren( rDCEvt );
-        pChild = pChild->mpWindowImpl->mpNext;
+        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
     }
 }
 
 bool Window::PreNotify( NotifyEvent& rNEvt )
 {
     bool bDone = false;
-    if ( mpWindowImpl->mpParent && !ImplIsOverlapWindow() )
-        bDone = mpWindowImpl->mpParent->CompatPreNotify( rNEvt );
+    if ( mpWindowImpl->mpHierarchy->mpParent && !ImplIsOverlapWindow() )
+        bDone = mpWindowImpl->mpHierarchy->mpParent->CompatPreNotify( rNEvt );
 
     if ( !bDone )
     {
@@ -209,8 +209,8 @@ bool Window::EventNotify( NotifyEvent& rNEvt )
 
     if ( !bRet )
     {
-        if ( mpWindowImpl->mpParent && !ImplIsOverlapWindow() )
-            bRet = mpWindowImpl->mpParent->CompatNotify( rNEvt );
+        if ( mpWindowImpl->mpHierarchy->mpParent && !ImplIsOverlapWindow() )
+            bRet = mpWindowImpl->mpHierarchy->mpParent->CompatNotify( rNEvt );
     }
 
     return bRet;
@@ -499,20 +499,20 @@ void Window::ImplCallInitShow()
     CompatStateChanged( StateChangedType::InitShow );
     mpWindowImpl->mbInInitShow    = false;
 
-    vcl::Window* pWindow = mpWindowImpl->mpFirstOverlap;
+    vcl::Window* pWindow = mpWindowImpl->mpHierarchy->mpFirstOverlap;
     while ( pWindow )
     {
         if ( pWindow->mpWindowImpl->mbVisible )
             pWindow->ImplCallInitShow();
-        pWindow = pWindow->mpWindowImpl->mpNext;
+        pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
     }
 
-    pWindow = mpWindowImpl->mpFirstChild;
+    pWindow = mpWindowImpl->mpHierarchy->mpFirstChild;
     while ( pWindow )
     {
         if ( pWindow->mpWindowImpl->mbVisible )
             pWindow->ImplCallInitShow();
-        pWindow = pWindow->mpWindowImpl->mpNext;
+        pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
     }
 }
 

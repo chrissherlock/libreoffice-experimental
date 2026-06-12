@@ -71,11 +71,11 @@ void WindowOutputDevice::SetSettings( const AllSettings& rSettings, bool bChild 
 
     if ( bChild )
     {
-        vcl::Window* pChild = mxOwnerWindow->mpWindowImpl->mpFirstChild;
+        vcl::Window* pChild = mxOwnerWindow->mpWindowImpl->mpHierarchy->mpFirstChild;
         while ( pChild )
         {
             static_cast<vcl::WindowOutputDevice*>(pChild->GetOutDev())->SetSettings( rSettings, bChild );
-            pChild = pChild->mpWindowImpl->mpNext;
+            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
         }
     }
 }
@@ -141,11 +141,11 @@ void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
 
     if ( bChild )
     {
-        vcl::Window* pChild = mpWindowImpl->mpFirstChild;
+        vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
         while ( pChild )
         {
             pChild->UpdateSettings( rSettings, bChild );
-            pChild = pChild->mpWindowImpl->mpNext;
+            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
         }
     }
 }

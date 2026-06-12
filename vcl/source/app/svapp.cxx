@@ -661,7 +661,7 @@ void Application::SetSettings(const AllSettings& rSettings, bool bTemporary)
                     while ( pClientWin->ImplGetClientWindow() )
                         pClientWin = pClientWin->ImplGetClientWindow();
                     pClientWin->UpdateSettings( rSettings, true );
-                    pTempWin = pTempWin->mpWindowImpl->mpNextOverlap;
+                    pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNextOverlap;
                 }
 
                 pFrame = pFrame->mpWindowImpl->mpFrameData->mpNextFrame;
@@ -741,7 +741,7 @@ void Application::NotifyAllWindows( DataChangedEvent& rDCEvt )
         while ( pSysWin )
         {
             pSysWin->NotifyAllChildren( rDCEvt );
-            pSysWin = pSysWin->mpWindowImpl->mpNextOverlap;
+            pSysWin = pSysWin->mpWindowImpl->mpHierarchy->mpNextOverlap;
         }
 
         pFrame = pFrame->mpWindowImpl->mpFrameData->mpNextFrame;
@@ -1176,7 +1176,7 @@ vcl::Window* Application::GetActiveTopWindow()
     {
         if( pWin->IsTopWindow() )
             return pWin;
-        pWin = pWin->mpWindowImpl->mpParent;
+        pWin = pWin->mpWindowImpl->mpHierarchy->mpParent;
     }
     return nullptr;
 }
@@ -1437,8 +1437,8 @@ vcl::Window* Dialog::GetDefDialogParent()
     vcl::Window *pWin = pSVData->mpWinData->mpFocusWin;
     if (pWin && !pWin->IsMenuFloatingWindow())
     {
-        while (pWin->mpWindowImpl && pWin->mpWindowImpl->mpParent)
-            pWin = pWin->mpWindowImpl->mpParent;
+        while (pWin->mpWindowImpl && pWin->mpWindowImpl->mpHierarchy->mpParent)
+            pWin = pWin->mpWindowImpl->mpHierarchy->mpParent;
 
         // check for corrupted window hierarchy, #122232#, may be we now crash somewhere else
         if (!pWin->mpWindowImpl)
@@ -1470,8 +1470,8 @@ vcl::Window* Dialog::GetDefDialogParent()
             (pWin->mpWindowImpl->mnStyle & WB_INTROWIN) == 0
         )
         {
-            while( pWin->mpWindowImpl->mpParent )
-                pWin = pWin->mpWindowImpl->mpParent;
+            while( pWin->mpWindowImpl->mpHierarchy->mpParent )
+                pWin = pWin->mpWindowImpl->mpHierarchy->mpParent;
             return pWin->mpWindowImpl->mpFrameWindow->ImplGetWindow();
         }
         pWin = pWin->mpWindowImpl->mpFrameData->mpNextFrame;

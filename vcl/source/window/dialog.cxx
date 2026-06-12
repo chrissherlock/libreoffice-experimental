@@ -434,7 +434,7 @@ VclPtr<vcl::Window> Dialog::AddBorderWindow(vcl::Window* pParent, WinBits nStyle
     pBorderWin->mpWindowImpl->mpClientWindow = this;
     pBorderWin->GetBorder( mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder, mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder );
     mpWindowImpl->mpBorderWindow  = pBorderWin;
-    mpWindowImpl->mpRealParent    = pParent;
+    mpWindowImpl->mpHierarchy->mpRealParent    = pParent;
 
     return pBorderWin;
 }
@@ -483,7 +483,7 @@ void Dialog::ImplInitDialog( vcl::Window* pParent, WinBits nStyle, InitFlag eFla
         pBorderWin->mpWindowImpl->mpClientWindow = this;
         pBorderWin->GetBorder( mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder, mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder );
         mpWindowImpl->mpBorderWindow  = pBorderWin;
-        mpWindowImpl->mpRealParent    = pParent;
+        mpWindowImpl->mpHierarchy->mpRealParent    = pParent;
     }
 
     SetActivateMode( ActivateModeFlags::GrabFocus );
