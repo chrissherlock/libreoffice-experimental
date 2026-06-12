@@ -222,10 +222,10 @@ void Window::ImplClipBoundaries( vcl::Region& rRegion, bool bThis, bool bOverlap
 void Window::ImplInitWinClipRegion()
 {
     mpWindowImpl->mpClippingState->maWinClipRegion = GetOutputRectPixel();
-    if (mpWindowImpl->mbWinRegion)
+    if (mpWindowImpl->mpClippingState->mbWinRegion)
     {
         mpWindowImpl->mpClippingState->maWinClipRegion.Intersect(
-            GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->maWinRegion));
+            GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
     }
 
     if (mpWindowImpl->mpClippingState->mbClipSiblings && !ImplIsOverlapWindow())
@@ -420,16 +420,16 @@ void Window::ImplIntersectWindowClipRegion( vcl::Region& rRegion )
 void Window::ImplIntersectWindowRegion( vcl::Region& rRegion )
 {
     rRegion.Intersect( GetOutputRectPixel() );
-    if ( mpWindowImpl->mbWinRegion )
-        rRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->maWinRegion ) );
+    if ( mpWindowImpl->mpClippingState->mbWinRegion )
+        rRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
 }
 
 void Window::ImplExcludeWindowRegion( vcl::Region& rRegion )
 {
-    if ( mpWindowImpl->mbWinRegion )
+    if ( mpWindowImpl->mpClippingState->mbWinRegion )
     {
         vcl::Region aRegion( GetOutputRectPixel() );
-        aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->maWinRegion ) );
+        aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
         rRegion.Exclude( aRegion );
     }
     else
@@ -485,8 +485,8 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
                                     bool bChildren, bool bSiblings )
 {
     vcl::Region  aRegion( rSourceRect );
-    if ( mpWindowImpl->mbWinRegion )
-        rRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->maWinRegion ) );
+    if ( mpWindowImpl->mpClippingState->mbWinRegion )
+        rRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
     vcl::Region  aTempRegion;
     vcl::Window* pWindow;
 

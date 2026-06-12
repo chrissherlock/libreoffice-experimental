@@ -65,12 +65,12 @@ WindowHitTest Window::ImplHitTest( const Point& rFramePos )
     }
     if ( !GetOutputRectPixel().Contains( aFramePos ) )
         return WindowHitTest::NONE;
-    if ( mpWindowImpl->mbWinRegion )
+    if ( mpWindowImpl->mpClippingState->mbWinRegion )
     {
         Point aTempPos = aFramePos;
         aTempPos.AdjustX( -GetOutDev()->GetDeviceOriginX() );
         aTempPos.AdjustY( -GetOutDev()->GetDeviceOriginY() );
-        if ( !mpWindowImpl->maWinRegion.Contains( aTempPos ) )
+        if ( !mpWindowImpl->mpClippingState->maWinRegion.Contains( aTempPos ) )
             return WindowHitTest::NONE;
     }
 
