@@ -617,6 +617,7 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mpLastOverlap                       = nullptr;                      // last overlap window (only set in overlap windows)
     mpPrev                              = nullptr;                      // prev window
     mpNext                              = nullptr;                      // next window
+    mpPrevOverlap                       = nullptr;                      // previous overlap window of frame
     mpNextOverlap                       = nullptr;                      // next overlap window of frame
     mpLastFocusWindow                   = nullptr;                      // window for focus restore
     mpDlgCtrlDownWindow                 = nullptr;                      // window for dialog control
