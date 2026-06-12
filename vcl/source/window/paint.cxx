@@ -610,7 +610,7 @@ void Window::ImplInvalidateOverlapFrameRegion( const vcl::Region& rRegion )
 {
     vcl::Region aRegion = rRegion;
 
-    ImplClipBoundaries( aRegion, true, true );
+    vcl::clipping::clipBoundaries(*this, aRegion, true, true);
     if ( !aRegion.IsEmpty() )
         ImplInvalidateFrameRegion( &aRegion, InvalidateFlags::Children );
 
@@ -693,7 +693,9 @@ void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags 
             else
                 aRegion.Intersect( *pRegion );
         }
-        ImplClipBoundaries( aRegion, true, true );
+
+        vcl::clipping::clipBoundaries(*this, aRegion, true, true);
+
         if ( nFlags & InvalidateFlags::NoChildren )
         {
             nFlags &= ~InvalidateFlags::Children;
@@ -832,7 +834,8 @@ void Window::ImplValidate()
     else
     {
         vcl::Region      aRegion( GetOutputRectPixel() );
-        ImplClipBoundaries( aRegion, true, true );
+        vcl::clipping::clipBoundaries(*this, aRegion, true, true);
+
         if ( nFlags & ValidateFlags::NoChildren )
         {
             nFlags &= ~ValidateFlags::Children;
@@ -1590,7 +1593,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
 
     aRegion.Exclude( aInvalidateRegion );
 
-    ImplClipBoundaries( aRegion, false, true );
+    vcl::clipping::clipBoundaries(*this, aRegion, false, true);
     if ( !bScrollChildren )
     {
         if ( nOrgFlags & ScrollFlags::NoChildren )

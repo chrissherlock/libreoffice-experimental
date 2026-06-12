@@ -84,6 +84,24 @@ void clipAllChildren(const vcl::Window& rWindow, vcl::Region& rRegion);
  * @param rRegion The target clip region to be mutated in-place.
  */
 void clipSiblings(const vcl::Window& rWindow, vcl::Region& rRegion);
+
+/**
+ * Evaluates a window's state flags, lazily computing its baseline bounding box
+ * geometry and intersecting it against preceding sibling layers.
+ */
+void initWinClipRegion(const vcl::Window& rWindow);
+
+/**
+ * Recursively traverses the child overlap hierarchy, subtracting visible overlap
+ * window footprints from the target canvas region.
+ */
+void excludeOverlapWindows(const vcl::Window& rWindow, vcl::Region& rRegion);
+
+/**
+ * Evaluates ancestral parent nodes and stacking context constraints to calculate
+ * the definitive bounding canvas clipping box for a window layer.
+ */
+void clipBoundaries(const vcl::Window& rWindow, vcl::Region& rRegion, bool bThis, bool bOverlaps);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
