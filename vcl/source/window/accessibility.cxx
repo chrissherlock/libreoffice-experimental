@@ -148,13 +148,13 @@ vcl::Window* Window::GetAccessibleParentWindow() const
         return nullptr;
     }
 
-    vcl::Window* pParent = mpWindowImpl->mpParent;
+    vcl::Window* pParent = mpWindowImpl->mpHierarchy->mpParent;
     if( GetType() == WindowType::MENUBARWINDOW )
     {
         // report the menubar as a child of THE workwindow
-        vcl::Window *pWorkWin = GetParent()->mpWindowImpl->mpFirstChild;
+        vcl::Window *pWorkWin = GetParent()->mpWindowImpl->mpHierarchy->mpFirstChild;
         while( pWorkWin && (pWorkWin == this) )
-            pWorkWin = pWorkWin->mpWindowImpl->mpNext;
+            pWorkWin = pWorkWin->mpWindowImpl->mpHierarchy->mpNext;
         pParent = pWorkWin;
     }
     // If this is a floating window which has a native border window, then that border should be reported as
@@ -166,7 +166,7 @@ vcl::Window* Window::GetAccessibleParentWindow() const
     }
     else if( pParent && !pParent->ImplIsAccessibleCandidate() )
     {
-        pParent = pParent->mpWindowImpl->mpParent;
+        pParent = pParent->mpWindowImpl->mpHierarchy->mpParent;
     }
     return pParent;
 }
@@ -177,12 +177,12 @@ sal_uInt16 Window::GetAccessibleChildWindowCount()
         return 0;
 
     sal_uInt16 nChildren = 0;
-    vcl::Window* pChild = mpWindowImpl->mpFirstChild;
+    vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
     while( pChild )
     {
         if( pChild->IsVisible() )
             nChildren++;
-        pChild = pChild->mpWindowImpl->mpNext;
+        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
     }
 
     // report the menubarwindow as a child of THE workwindow
@@ -224,7 +224,7 @@ vcl::Window* Window::GetAccessibleChildWindow( sal_uInt16 n )
 
     // transform n to child number including invisible children
     sal_uInt16 nChildren = n;
-    vcl::Window* pChild = mpWindowImpl->mpFirstChild;
+    vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
     while( pChild )
     {
         if( pChild->IsVisible() )
@@ -233,12 +233,12 @@ vcl::Window* Window::GetAccessibleChildWindow( sal_uInt16 n )
                 break;
             nChildren--;
         }
-        pChild = pChild->mpWindowImpl->mpNext;
+        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
     }
 
     if( GetType() == WindowType::BORDERWINDOW && pChild && pChild->GetType() == WindowType::MENUBARWINDOW )
     {
-        do pChild = pChild->mpWindowImpl->mpNext; while( pChild && ! pChild->IsVisible() );
+        do pChild = pChild->mpWindowImpl->mpHierarchy->mpNext; while( pChild && ! pChild->IsVisible() );
         SAL_WARN_IF( !pChild, "vcl", "GetAccessibleChildWindow(): wrong index in border window");
     }
 
@@ -670,7 +670,7 @@ bool Window::IsAccessibilityEventsSuppressed()
         if (pParent->mpWindowImpl->mbSuppressAccessibilityEvents)
             return true;
         else
-            pParent = pParent->mpWindowImpl->mpParent; // do not use GetParent() to find borderwindows that are frames
+            pParent = pParent->mpWindowImpl->mpHierarchy->mpParent; // do not use GetParent() to find borderwindows that are frames
     }
     return false;
 }

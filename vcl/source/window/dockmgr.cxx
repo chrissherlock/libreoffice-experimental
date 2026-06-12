@@ -793,7 +793,7 @@ void ImplDockingWindowWrapper::ImplPreparePopupMode()
     // correct border window pointers
     xWindow->mpWindowImpl->mpBorderWindow = pWin;
     pWin->mpWindowImpl->mpClientWindow = xWindow;
-    xWindow->mpWindowImpl->mpRealParent = pRealParent;
+    xWindow->mpWindowImpl->mpHierarchy->mpRealParent = pRealParent;
 
     // set mpFloatWin not until all window positioning is done !!!
     // (SetPosPixel etc. check for valid mpFloatWin pointer)
@@ -868,7 +868,7 @@ IMPL_LINK_NOARG(ImplDockingWindowWrapper, PopupModeEnd, FloatingWindow*, void)
     }
     xWindow->mpWindowImpl->mpBorderWindow = mpOldBorderWin;
     xWindow->SetParent( pRealParent );
-    xWindow->mpWindowImpl->mpRealParent = pRealParent;
+    xWindow->mpWindowImpl->mpHierarchy->mpRealParent = pRealParent;
 
     // take ownership to local variable to protect against maPopupModeEndHdl destroying this object
     auto xFloatWin = std::move(mpFloatWin);
@@ -941,7 +941,7 @@ void ImplDockingWindowWrapper::SetFloatingMode( bool bFloatMode )
 
         GetWindow()->mpWindowImpl->mpBorderWindow = pWin;
         pWin->mpWindowImpl->mpClientWindow = mpDockingWindow;
-        GetWindow()->mpWindowImpl->mpRealParent = pRealParent;
+        GetWindow()->mpWindowImpl->mpHierarchy->mpRealParent = pRealParent;
 
         pWin->SetOutputSizePixel( GetWindow()->GetSizePixel() );
         pWin->SetPosPixel( maFloatPos );
@@ -969,7 +969,7 @@ void ImplDockingWindowWrapper::SetFloatingMode( bool bFloatMode )
         maMinOutSize    = mpFloatWin->GetMinOutputSizePixel();
         maMaxOutSize    = mpFloatWin->GetMaxOutputSizePixel();
 
-        vcl::Window* pRealParent = GetWindow()->GetWindow( GetWindowType::Parent ); //mpWindowImpl->mpRealParent;
+        vcl::Window* pRealParent = GetWindow()->GetWindow( GetWindowType::Parent );
         GetWindow()->mpWindowImpl->mpBorderWindow = nullptr;
         if ( mpOldBorderWin )
         {
@@ -981,7 +981,7 @@ void ImplDockingWindowWrapper::SetFloatingMode( bool bFloatMode )
         }
         GetWindow()->mpWindowImpl->mpBorderWindow = mpOldBorderWin;
         GetWindow()->SetParent( pRealParent );
-        GetWindow()->mpWindowImpl->mpRealParent = pRealParent;
+        GetWindow()->mpWindowImpl->mpHierarchy->mpRealParent = pRealParent;
 
         mpFloatWin.disposeAndClear();
         GetWindow()->SetPosPixel( maDockPos );

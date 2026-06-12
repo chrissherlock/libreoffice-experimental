@@ -23,7 +23,7 @@ bool initChildRegion(WindowImpl& rImpl)
     comphelper::ScopeGuard aDeinitChildRegion(
         [&rImpl]() { rImpl.mpClippingState->mbInitChildRegion = false; });
 
-    if (!rImpl.mpFirstChild)
+    if (!rImpl.mpHierarchy->mpFirstChild)
     {
         rImpl.mpClippingState->mpChildClipRegion.reset();
         return false; // No children present; skip downstream clipping
@@ -107,7 +107,7 @@ static std::vector<vcl::Window*> lcl_gatherWindowChain(vcl::Window* pStartWindow
     while (pCurrent)
     {
         aWindows.push_back(pCurrent);
-        pCurrent = pCurrent->ImplGetWindowImpl()->mpNext;
+        pCurrent = pCurrent->ImplGetWindowImpl()->mpHierarchy->mpNext;
     }
 
     return aWindows;
@@ -115,17 +115,17 @@ static std::vector<vcl::Window*> lcl_gatherWindowChain(vcl::Window* pStartWindow
 
 std::vector<vcl::Window*> getChildWindows(const WindowImpl& rImpl)
 {
-    return lcl_gatherWindowChain(rImpl.mpFirstChild);
+    return lcl_gatherWindowChain(rImpl.mpHierarchy->mpFirstChild);
 }
 
 std::vector<vcl::Window*> getOverlapWindows(const WindowImpl& rImpl)
 {
-    return lcl_gatherWindowChain(rImpl.mpFirstOverlap);
+    return lcl_gatherWindowChain(rImpl.mpHierarchy->mpFirstOverlap);
 }
 
 std::vector<vcl::Window*> getFollowingSiblings(const WindowImpl& rImpl)
 {
-    return lcl_gatherWindowChain(rImpl.mpNext);
+    return lcl_gatherWindowChain(rImpl.mpHierarchy->mpNext);
 }
 
 std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow)
@@ -141,11 +141,11 @@ std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow)
             break; // Safety guard
 
         // Gather preceding overlap siblings at this specific tier
-        vcl::Window* pSibling = pParentOverlap->ImplGetWindowImpl()->mpFirstOverlap;
+        vcl::Window* pSibling = pParentOverlap->ImplGetWindowImpl()->mpHierarchy->mpFirstOverlap;
         while (pSibling && (pSibling != pCurrentLevel))
         {
             aTargets.push_back(pSibling);
-            pSibling = pSibling->ImplGetWindowImpl()->mpNext;
+            pSibling = pSibling->ImplGetWindowImpl()->mpHierarchy->mpNext;
         }
 
         // Step up to the next hierarchical level

@@ -150,8 +150,8 @@ void Window::dispose()
 {
     assert( mpWindowImpl );
     assert( !mpWindowImpl->mbInDispose ); // should only be called from disposeOnce()
-    assert( (!mpWindowImpl->mpParent ||
-             mpWindowImpl->mpParent->mpWindowImpl) &&
+    assert( (!mpWindowImpl->mpHierarchy->mpParent ||
+             mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl) &&
             "vcl::Window child should have its parent disposed first" );
 
     // remove Key and Mouse events issued by Application::PostKey/MouseEvent
@@ -253,16 +253,16 @@ void Window::dispose()
         bool        bError = false;
         vcl::Window*     pTempWin;
 
-        if ( mpWindowImpl->mpFirstChild )
+        if ( mpWindowImpl->mpHierarchy->mpFirstChild )
         {
             OStringBuffer aTempStr = "Window (" +
                 lcl_createWindowInfo(this) +
                 ") with live children destroyed: ";
-            pTempWin = mpWindowImpl->mpFirstChild;
+            pTempWin = mpWindowImpl->mpHierarchy->mpFirstChild;
             while ( pTempWin )
             {
                 aTempStr.append(lcl_createWindowInfo(pTempWin));
-                pTempWin = pTempWin->mpWindowImpl->mpNext;
+                pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNext;
             }
             OSL_FAIL( aTempStr.getStr() );
             Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
@@ -278,7 +278,7 @@ void Window::dispose()
                     bError = true;
                     aErrorStr.append(lcl_createWindowInfo(pTempWin));
                 }
-                pTempWin = pTempWin->mpWindowImpl->mpNextOverlap;
+                pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNextOverlap;
             }
             if ( bError )
             {
@@ -313,16 +313,16 @@ void Window::dispose()
             Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
         }
 
-        if ( mpWindowImpl->mpFirstOverlap )
+        if ( mpWindowImpl->mpHierarchy->mpFirstOverlap )
         {
             OStringBuffer aTempStr = "Window (" +
                 lcl_createWindowInfo(this) +
                 ") with live SystemWindows destroyed: ";
-            pTempWin = mpWindowImpl->mpFirstOverlap;
+            pTempWin = mpWindowImpl->mpHierarchy->mpFirstOverlap;
             while ( pTempWin )
             {
                 aTempStr.append(lcl_createWindowInfo(pTempWin));
-                pTempWin = pTempWin->mpWindowImpl->mpNext;
+                pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNext;
             }
             OSL_FAIL( aTempStr.getStr() );
             Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
@@ -495,9 +495,9 @@ void Window::dispose()
     {
         bool bIsTopWindow
             = mpWindowImpl->mpWinData && (mpWindowImpl->mpWinData->mnIsTopWindow == 1);
-        if ( mpWindowImpl->mpRealParent && bIsTopWindow )
+        if ( mpWindowImpl->mpHierarchy->mpRealParent && bIsTopWindow )
         {
-            ImplWinData* pParentWinData = mpWindowImpl->mpRealParent->ImplGetWinData();
+            ImplWinData* pParentWinData = mpWindowImpl->mpHierarchy->mpRealParent->ImplGetWinData();
 
             auto myPos = ::std::find( pParentWinData->maTopWindowChildren.begin(),
                 pParentWinData->maTopWindowChildren.end(), VclPtr<vcl::Window>(this) );
@@ -594,6 +594,7 @@ bool WindowOutputDevice::CanEnableNativeWidget() const
 WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
 {
     mpClippingState = std::make_unique<WindowClippingState>();
+    mpHierarchy     = std::make_unique<WindowHierarchy>();
 
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(rWindow);
     mfZoom                              = 1.0;
@@ -609,16 +610,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mpOverlapWindow                     = nullptr;                      // first overlap parent
     mpBorderWindow                      = nullptr;                      // Border-Window
     mpClientWindow                      = nullptr;                      // Client-Window of a FrameWindow
-    mpParent                            = nullptr;                      // parent (incl. BorderWindow)
-    mpRealParent                        = nullptr;                      // real parent (excl. BorderWindow)
-    mpFirstChild                        = nullptr;                      // first child window
-    mpLastChild                         = nullptr;                      // last child window
-    mpFirstOverlap                      = nullptr;                      // first overlap window (only set in overlap windows)
-    mpLastOverlap                       = nullptr;                      // last overlap window (only set in overlap windows)
-    mpPrev                              = nullptr;                      // prev window
-    mpNext                              = nullptr;                      // next window
-    mpPrevOverlap                       = nullptr;                      // previous overlap window of frame
-    mpNextOverlap                       = nullptr;                      // next overlap window of frame
     mpLastFocusWindow                   = nullptr;                      // window for focus restore
     mpDlgCtrlDownWindow                 = nullptr;                      // window for dialog control
     mnEventListenersIteratingCount = 0;
@@ -1085,7 +1076,7 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     }
 
     // init data
-    mpWindowImpl->mpRealParent = pRealParent;
+    mpWindowImpl->mpHierarchy->mpRealParent = pRealParent;
 
     // #99318: make sure fontcache and list is available before call to SetSettings
     mpWindowImpl->mxOutDev->mxFontCollection = mpWindowImpl->mpFrameData->mxFontCollection;
@@ -1322,20 +1313,20 @@ void Window::ImplSetReallyVisible()
         // TODO. It's kind of a hack that we're re-using the VclEventId::WindowShow. Normally, we should
         // introduce another event which explicitly triggers the Accessibility implementations.
 
-    vcl::Window* pWindow = mpWindowImpl->mpFirstOverlap;
+    vcl::Window* pWindow = mpWindowImpl->mpHierarchy->mpFirstOverlap;
     while ( pWindow )
     {
         if ( pWindow->mpWindowImpl->mbVisible )
             pWindow->ImplSetReallyVisible();
-        pWindow = pWindow->mpWindowImpl->mpNext;
+        pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
     }
 
-    pWindow = mpWindowImpl->mpFirstChild;
+    pWindow = mpWindowImpl->mpHierarchy->mpFirstChild;
     while ( pWindow )
     {
         if ( pWindow->mpWindowImpl->mbVisible )
             pWindow->ImplSetReallyVisible();
-        pWindow = pWindow->mpWindowImpl->mpNext;
+        pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
     }
 }
 
@@ -1352,11 +1343,11 @@ void Window::ImplInitResolutionSettings()
         const StyleSettings& rStyleSettings = GetOutDev()->moSettings->GetStyleSettings();
         SetPointFont(*GetOutDev(), rStyleSettings.GetAppFont());
     }
-    else if ( mpWindowImpl->mpParent )
+    else if ( mpWindowImpl->mpHierarchy->mpParent )
     {
-        GetOutDev()->SetDPIX(mpWindowImpl->mpParent->GetOutDev()->GetDPIX());
-        GetOutDev()->SetDPIY(mpWindowImpl->mpParent->GetOutDev()->GetDPIY());
-        GetOutDev()->SetDPIScalePercentage(mpWindowImpl->mpParent->GetOutDev()->GetDPIScalePercentage());
+        GetOutDev()->SetDPIX(mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDPIX());
+        GetOutDev()->SetDPIY(mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDPIY());
+        GetOutDev()->SetDPIScalePercentage(mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDPIScalePercentage());
     }
 
     // update the recalculated values for logical units
@@ -1425,12 +1416,12 @@ bool Window::ImplUpdatePos()
         GetOutDev()->SetDeviceOriginY(mpWindowImpl->mnY + pParent->GetOutDev()->GetDeviceOriginY());
     }
 
-    VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
+    VclPtr< vcl::Window > pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
     while ( pChild )
     {
         if ( pChild->ImplUpdatePos() )
             bSysChild = true;
-        pChild = pChild->mpWindowImpl->mpNext;
+        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
     }
 
     if ( mpWindowImpl->mpSysObj )
@@ -1444,11 +1435,11 @@ void Window::ImplUpdateNativeObjectPos()
     if ( mpWindowImpl->mpSysObj )
         mpWindowImpl->mpSysObj->SetPosSize( GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY(), GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel() );
 
-    VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
+    VclPtr< vcl::Window > pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
     while ( pChild )
     {
         pChild->ImplUpdateNativeObjectPos();
-        pChild = pChild->mpWindowImpl->mpNext;
+        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
     }
 }
 
@@ -1522,9 +1513,9 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             // #106948# always mirror our pos if our parent is not mirroring, even
             // if we are also not mirroring
             // RTL: check if parent is in different coordinates
-            if( !bnXRecycled && mpWindowImpl->mpParent && !mpWindowImpl->mpParent->mpWindowImpl->mbFrame && mpWindowImpl->mpParent->GetOutDev()->ImplIsAntiparallel() )
+            if( !bnXRecycled && mpWindowImpl->mpHierarchy->mpParent && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel() )
             {
-                nX = mpWindowImpl->mpParent->GetOutDev()->GetOutputWidthPixel() - GetOutDev()->GetOutputWidthPixel() - nX;
+                nX = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel() - GetOutDev()->GetOutputWidthPixel() - nX;
             }
             /* #i99166# An LTR window in RTL UI that gets sized only would be
                expected to not moved its upper left point
@@ -1538,10 +1529,10 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                 }
             }
         }
-        else if( !bnXRecycled && mpWindowImpl->mpParent && !mpWindowImpl->mpParent->mpWindowImpl->mbFrame && mpWindowImpl->mpParent->GetOutDev()->ImplIsAntiparallel() )
+        else if( !bnXRecycled && mpWindowImpl->mpHierarchy->mpParent && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel() )
         {
             // mirrored window in LTR UI
-            nX = mpWindowImpl->mpParent->GetOutDev()->GetOutputWidthPixel() - GetOutDev()->GetOutputWidthPixel() - nX;
+            nX = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel() - GetOutDev()->GetOutputWidthPixel() - nX;
         }
 
         // check maPos as well, as it could have been changed for client windows (ImplCallMove())
@@ -1649,7 +1640,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                 bool bInvalidate = false;
                 bool bParentPaint = true;
                 if ( !ImplIsOverlapWindow() )
-                    bParentPaint = mpWindowImpl->mpParent->IsPaintEnabled();
+                    bParentPaint = mpWindowImpl->mpHierarchy->mpParent->IsPaintEnabled();
                 if ( bCopyBits && bParentPaint && !HasPaintEvent() )
                 {
                     vcl::Region aRegion( GetOutputRectPixel() );
@@ -1994,7 +1985,7 @@ void Window::SetBorderStyle( WindowBorderStyle nBorderStyle )
 
     if( nBorderStyle == WindowBorderStyle::REMOVEBORDER &&
         ! mpWindowImpl->mpBorderWindow->mpWindowImpl->mbFrame &&
-        mpWindowImpl->mpBorderWindow->mpWindowImpl->mpParent
+        mpWindowImpl->mpBorderWindow->mpWindowImpl->mpHierarchy->mpParent
         )
     {
         // this is a little awkward: some controls (e.g. svtools ProgressBar)
@@ -2004,9 +1995,9 @@ void Window::SetBorderStyle( WindowBorderStyle nBorderStyle )
         // remove us as border window's client
         pBorderWin->mpWindowImpl->mpClientWindow = nullptr;
         mpWindowImpl->mpBorderWindow = nullptr;
-        mpWindowImpl->mpRealParent = pBorderWin->mpWindowImpl->mpParent;
+        mpWindowImpl->mpHierarchy->mpRealParent = pBorderWin->mpWindowImpl->mpHierarchy->mpParent;
         // reparent us above the border window
-        SetParent( pBorderWin->mpWindowImpl->mpParent );
+        SetParent( pBorderWin->mpWindowImpl->mpHierarchy->mpParent );
         // set us to the position and size of our previous border
         Point aBorderPos( pBorderWin->GetPosPixel() );
         Size aBorderSize( pBorderWin->GetSizePixel() );
@@ -2157,11 +2148,11 @@ void Window::CollectChildren(::std::vector<vcl::Window *>& rAllChildren )
 {
     rAllChildren.push_back( this );
 
-    VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
+    VclPtr< vcl::Window > pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
     while ( pChild )
     {
         pChild->CollectChildren( rAllChildren );
-        pChild = pChild->mpWindowImpl->mpNext;
+        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
     }
 }
 
@@ -2481,11 +2472,11 @@ void Window::Enable( bool bEnable, bool bChild )
 
     if ( bChild )
     {
-        VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
+        VclPtr< vcl::Window > pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
         while ( pChild )
         {
             pChild->Enable( bEnable, bChild );
-            pChild = pChild->mpWindowImpl->mpNext;
+            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
         }
     }
 
@@ -2535,11 +2526,11 @@ void Window::EnableInput( bool bEnable, bool bChild )
 
     if ( bChild )
     {
-        VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
+        VclPtr< vcl::Window > pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
         while ( pChild )
         {
             pChild->EnableInput( bEnable, bChild );
-            pChild = pChild->mpWindowImpl->mpNext;
+            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
         }
     }
 
@@ -2569,7 +2560,7 @@ void Window::EnableInput( bool bEnable, const vcl::Window* pExcludeWindow )
             if ( !pExcludeWindow || !pExcludeWindow->ImplIsWindowOrChild( pSysWin, true ) )
                 pSysWin->EnableInput( bEnable );
         }
-        pSysWin = pSysWin->mpWindowImpl->mpNextOverlap;
+        pSysWin = pSysWin->mpWindowImpl->mpHierarchy->mpNextOverlap;
     }
 
     // enable/disable floating system windows as well
@@ -2626,11 +2617,11 @@ void Window::AlwaysEnableInput( bool bAlways, bool bChild )
 
     if ( bChild )
     {
-        VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
+        VclPtr< vcl::Window > pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
         while ( pChild )
         {
             pChild->AlwaysEnableInput( bAlways, bChild );
-            pChild = pChild->mpWindowImpl->mpNext;
+            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
         }
     }
 }
@@ -2825,15 +2816,15 @@ tools::Long Window::ImplGetUnmirroredOutOffX() const
     const OutputDevice *pOutDev = GetOutDev();
     if( pOutDev->HasMirroredGraphics() )
     {
-        if( mpWindowImpl->mpParent && !mpWindowImpl->mpParent->mpWindowImpl->mbFrame && mpWindowImpl->mpParent->GetOutDev()->ImplIsAntiparallel() )
+        if( mpWindowImpl->mpHierarchy->mpParent && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel() )
         {
             if ( !ImplIsOverlapWindow() )
-                offx -= mpWindowImpl->mpParent->GetOutDev()->GetDeviceOriginX();
+                offx -= mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDeviceOriginX();
 
-            offx = mpWindowImpl->mpParent->GetOutDev()->GetOutputWidthPixel() - GetOutDev()->GetOutputWidthPixel() - offx;
+            offx = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel() - GetOutDev()->GetOutputWidthPixel() - offx;
 
             if ( !ImplIsOverlapWindow() )
-                offx += mpWindowImpl->mpParent->GetOutDev()->GetDeviceOriginX();
+                offx += mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDeviceOriginX();
 
         }
     }
@@ -3078,16 +3069,16 @@ const Wallpaper& Window::GetDisplayBackground() const
 
     if( !IsBackground() )
     {
-        if( mpWindowImpl->mpParent )
-            return mpWindowImpl->mpParent->GetDisplayBackground();
+        if( mpWindowImpl->mpHierarchy->mpParent )
+            return mpWindowImpl->mpHierarchy->mpParent->GetDisplayBackground();
     }
 
     const Wallpaper& rBack = GetBackground();
     if( ! rBack.IsBitmap() &&
         ! rBack.IsGradient() &&
         rBack.GetColor()== COL_TRANSPARENT &&
-        mpWindowImpl->mpParent )
-            return mpWindowImpl->mpParent->GetDisplayBackground();
+        mpWindowImpl->mpHierarchy->mpParent )
+            return mpWindowImpl->mpHierarchy->mpParent->GetDisplayBackground();
     return rBack;
 }
 
@@ -3330,13 +3321,13 @@ void Window::RecordLayoutData( vcl::ControlLayoutData* pLayout, const tools::Rec
 bool Window::IsScrollable() const
 {
     // check for scrollbars
-    VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
+    VclPtr< vcl::Window > pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
     while( pChild )
     {
         if( pChild->GetType() == WindowType::SCROLLBAR )
             return true;
         else
-            pChild = pChild->mpWindowImpl->mpNext;
+            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
     }
     return false;
 }
@@ -3452,11 +3443,11 @@ void Window::EnableNativeWidget( bool bEnable )
     }
 
     // push down, useful for compound controls
-    VclPtr< vcl::Window > pChild = mpWindowImpl->mpFirstChild;
+    VclPtr< vcl::Window > pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
     while( pChild )
     {
         pChild->EnableNativeWidget( bEnable );
-        pChild = pChild->mpWindowImpl->mpNext;
+        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
     }
 }
 
