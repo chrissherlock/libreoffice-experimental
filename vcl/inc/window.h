@@ -252,6 +252,7 @@ public:
     VclPtr<vcl::Window> mpLastOverlap;
     VclPtr<vcl::Window> mpPrev;
     VclPtr<vcl::Window> mpNext;
+    VclPtr<vcl::Window> mpPrevOverlap;
     VclPtr<vcl::Window> mpNextOverlap;
     VclPtr<vcl::Window> mpLastFocusWindow;
     VclPtr<PushButton> mpDlgCtrlDownWindow;
