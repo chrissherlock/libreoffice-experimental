@@ -137,7 +137,7 @@ vcl::Region Window::GetWindowClipRegionPixel() const
     vcl::Region aWinClipRegion;
 
     if (mpWindowImpl->mpClippingState->mbInitWinClipRegion)
-        const_cast<vcl::Window*>(this)->ImplInitWinClipRegion();
+        clipping::initWinClipRegion(*this);
 
     aWinClipRegion = mpWindowImpl->mpClippingState->maWinClipRegion;
 
@@ -191,54 +191,6 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-void Window::ImplClipBoundaries( vcl::Region& rRegion, bool bThis, bool bOverlaps )
-{
-    if (bThis)
-    {
-        ImplIntersectWindowClipRegion(rRegion);
-        return;
-    }
-
-    if (!ImplIsOverlapWindow())
-    {
-        ImplGetParent()->ImplIntersectWindowClipRegion(rRegion);
-        return;
-    }
-
-    if (!mpWindowImpl->mbFrame)
-        rRegion.Intersect(tools::Rectangle(Point(0, 0), mpWindowImpl->mpFrameWindow->GetOutputSizePixel()));
-
-    if (!bOverlaps || rRegion.IsEmpty())
-        return;
-
-    for (vcl::Window* pOverlapWin : vcl::clipping::getAncestralOverlapSiblings(this))
-    {
-        pOverlapWin->ImplExcludeOverlapWindows2(rRegion);
-    }
-
-    ImplExcludeOverlapWindows(rRegion);
-}
-
-void Window::ImplInitWinClipRegion()
-{
-    mpWindowImpl->mpClippingState->maWinClipRegion = GetOutputRectPixel();
-    if (mpWindowImpl->mpClippingState->mbWinRegion)
-    {
-        mpWindowImpl->mpClippingState->maWinClipRegion.Intersect(
-            GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
-    }
-
-    if (mpWindowImpl->mpClippingState->mbClipSiblings && !ImplIsOverlapWindow())
-        vcl::clipping::clipSiblings(*this, mpWindowImpl->mpClippingState->maWinClipRegion);
-
-    ImplClipBoundaries(mpWindowImpl->mpClippingState->maWinClipRegion, false, true);
-
-    if ((GetStyle() & WB_CLIPCHILDREN) || mpWindowImpl->mpClippingState->mbClipChildren)
-        mpWindowImpl->mpClippingState->mbInitChildRegion = true;
-
-    mpWindowImpl->mpClippingState->mbInitWinClipRegion = false;
-}
-
 void Window::ImplInitWinChildClipRegion()
 {
     if (vcl::clipping::initChildRegion(*mpWindowImpl))
@@ -248,7 +200,7 @@ void Window::ImplInitWinChildClipRegion()
 Region& Window::ImplGetWinChildClipRegion()
 {
     if (mpWindowImpl->mpClippingState->mbInitWinClipRegion)
-        ImplInitWinClipRegion();
+        clipping::initWinClipRegion(*this);
 
     if (mpWindowImpl->mpClippingState->mbInitChildRegion)
         ImplInitWinChildClipRegion();
@@ -412,7 +364,7 @@ bool Window::ImplSetClipFlag(bool bSysObjOnlySmaller)
 void Window::ImplIntersectWindowClipRegion( vcl::Region& rRegion )
 {
     if ( mpWindowImpl->mpClippingState->mbInitWinClipRegion )
-        ImplInitWinClipRegion();
+        clipping::initWinClipRegion(*this);
 
     rRegion.Intersect( mpWindowImpl->mpClippingState->maWinClipRegion );
 }
@@ -438,24 +390,12 @@ void Window::ImplExcludeWindowRegion( vcl::Region& rRegion )
     }
 }
 
-void Window::ImplExcludeOverlapWindows(vcl::Region& rRegion) const
-{
-    for (vcl::Window* pWindow : vcl::clipping::getOverlapWindows(*mpWindowImpl))
-    {
-        if (pWindow->mpWindowImpl->mbReallyVisible)
-        {
-            pWindow->ImplExcludeWindowRegion(rRegion);
-            pWindow->ImplExcludeOverlapWindows(rRegion);
-        }
-    }
-}
-
 void Window::ImplExcludeOverlapWindows2( vcl::Region& rRegion )
 {
     if ( mpWindowImpl->mbReallyVisible )
         ImplExcludeWindowRegion( rRegion );
 
-    ImplExcludeOverlapWindows( rRegion );
+    vcl::clipping::excludeOverlapWindows(*this, rRegion);
 }
 
 void Window::ImplIntersectAndUnionOverlapWindows( const vcl::Region& rInterRegion, vcl::Region& rRegion ) const

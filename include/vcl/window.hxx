@@ -621,12 +621,8 @@ private:
     SAL_DLLPRIVATE void                 ImplIntersectWindowClipRegion( vcl::Region& rRegion );
     SAL_DLLPRIVATE void                 ImplIntersectWindowRegion( vcl::Region& rRegion );
     SAL_DLLPRIVATE void                 ImplExcludeWindowRegion( vcl::Region& rRegion );
-    SAL_DLLPRIVATE void                 ImplExcludeOverlapWindows( vcl::Region& rRegion ) const;
     SAL_DLLPRIVATE void                 ImplExcludeOverlapWindows2( vcl::Region& rRegion );
 
-    SAL_DLLPRIVATE void                 ImplClipBoundaries( vcl::Region& rRegion, bool bThis, bool bOverlaps );
-
-    SAL_DLLPRIVATE void                 ImplInitWinClipRegion();
     SAL_DLLPRIVATE void                 ImplInitWinChildClipRegion();
     SAL_DLLPRIVATE vcl::Region&         ImplGetWinChildClipRegion();
 
