@@ -398,16 +398,6 @@ void Window::ImplExcludeOverlapWindows2( vcl::Region& rRegion )
     vcl::clipping::excludeOverlapWindows(*this, rRegion);
 }
 
-void Window::ImplIntersectAndUnionOverlapWindows( const vcl::Region& rInterRegion, vcl::Region& rRegion ) const
-{
-    vcl::clipping::accumulateChildOverlaps(const_cast<Window*>(this), rInterRegion, rRegion);
-}
-
-void Window::ImplIntersectAndUnionOverlapWindows2( const vcl::Region& rInterRegion, vcl::Region& rRegion )
-{
-    vcl::clipping::accumulateWindowAndChildOverlaps(this, rInterRegion, rRegion);
-}
-
 void Window::ImplCalcOverlapRegionOverlaps( const vcl::Region& rInterRegion, vcl::Region& rRegion ) const
 {
     // High-level ancestral sibling walk
