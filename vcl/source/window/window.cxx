@@ -1,4 +1,3 @@
-#include <vcl/MappingPolicy.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -52,9 +51,11 @@
 
 #include <vcl/uitest/uiobject.hxx>
 #include <vcl/CoordinateMapper.hxx>
+#include <vcl/MappingPolicy.hxx>
 
 #include <CanvasFactory.hxx>
 #include <ImplOutDevData.hxx>
+#include <clipping.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
@@ -1649,7 +1650,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                     vcl::Region aRegion( GetOutputRectPixel() );
                     if ( mpWindowImpl->mpClippingState->mbWinRegion )
                         aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
-                    ImplClipBoundaries( aRegion, false, true );
+                    vcl::clipping::clipBoundaries(*this, aRegion, false, true);
                     if ( !pOverlapRegion->IsEmpty() )
                     {
                         pOverlapRegion->Move( GetOutDev()->GetDeviceOriginX() - nOldOutOffX, GetOutDev()->GetDeviceOriginY() - nOldOutOffY );
@@ -1700,7 +1701,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                 aRegion.Exclude( *pOldRegion );
                 if ( mpWindowImpl->mpClippingState->mbWinRegion )
                     aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
-                ImplClipBoundaries( aRegion, false, true );
+                vcl::clipping::clipBoundaries(*this, aRegion, false, true);
                 if ( !aRegion.IsEmpty() )
                     ImplInvalidateFrameRegion( &aRegion, InvalidateFlags::Children );
             }
@@ -1713,7 +1714,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             vcl::Region aRegion( *pOldRegion );
             if ( !mpWindowImpl->mbPaintTransparent )
                 ImplExcludeWindowRegion( aRegion );
-            ImplClipBoundaries( aRegion, false, true );
+            vcl::clipping::clipBoundaries(*this, aRegion, false, true);
             if ( !aRegion.IsEmpty() && !mpWindowImpl->mpBorderWindow )
                 ImplInvalidateParentFrameRegion( aRegion );
         }
@@ -2208,7 +2209,7 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
         if ( mpWindowImpl->mbReallyVisible )
         {
             if ( mpWindowImpl->mpClippingState->mbInitWinClipRegion )
-                ImplInitWinClipRegion();
+                clipping::initWinClipRegion(*this);
 
             vcl::Region aInvRegion = mpWindowImpl->mpClippingState->maWinClipRegion;
 

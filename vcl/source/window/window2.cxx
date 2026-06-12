@@ -1,4 +1,3 @@
-#include <vcl/MappingPolicy.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -26,6 +25,7 @@
 #include <tools/helpers.hxx>
 #include <tools/mapunit.hxx>
 
+#include <vcl/MappingPolicy.hxx>
 #include <vcl/toolkit/dialog.hxx>
 #include <vcl/event.hxx>
 #include <vcl/toolkit/fixed.hxx>
@@ -40,6 +40,7 @@
 #include <o3tl/string_view.hxx>
 
 #include <vcl/CoordinateMapper.hxx>
+#include <clipping.hxx>
 #include <window.h>
 #include <svdata.hxx>
 #include <salgdi.hxx>
@@ -200,7 +201,7 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
         if ( nFlags & ShowTrackFlags::Clip )
         {
             vcl::Region aRegion( GetOutputRectPixel() );
-            ImplClipBoundaries( aRegion, false, false );
+            vcl::clipping::clipBoundaries(*this, aRegion, false, false);
             pOutDev->SelectClipRegion( aRegion, pGraphics );
         }
     }
