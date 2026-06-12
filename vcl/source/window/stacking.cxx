@@ -84,8 +84,12 @@ void Window::ImplInsertWindow( vcl::Window* pParent )
             pFirstOverlapParent = pFirstOverlapParent->ImplGetParent();
         mpWindowImpl->mpOverlapWindow = pFirstOverlapParent;
 
+        // --- Update global frame overlap list pointers ---
         mpWindowImpl->mpNextOverlap = mpWindowImpl->mpFrameData->mpFirstOverlap;
+        if ( mpWindowImpl->mpNextOverlap )
+            mpWindowImpl->mpNextOverlap->mpWindowImpl->mpPrevOverlap = this; // Set backward link
         mpWindowImpl->mpFrameData->mpFirstOverlap = this;
+        mpWindowImpl->mpPrevOverlap = nullptr; // New head node has no previous node
 
         // Overlap-Windows are by default the uppermost
         mpWindowImpl->mpNext = pFirstOverlapParent->mpWindowImpl->mpFirstOverlap;
@@ -112,51 +116,53 @@ void Window::ImplInsertWindow( vcl::Window* pParent )
 
 void Window::ImplRemoveWindow( bool bRemoveFrameData )
 {
-    // remove window from the lists
-    if ( !mpWindowImpl->mbFrame )
+    // Frame windows do not participate in parent/sibling tree updates
+    if ( mpWindowImpl->mbFrame )
     {
-        if ( ImplIsOverlapWindow() )
-        {
-            if ( mpWindowImpl->mpFrameData->mpFirstOverlap.get() == this )
-                mpWindowImpl->mpFrameData->mpFirstOverlap = mpWindowImpl->mpNextOverlap;
-            else
-            {
-                vcl::Window* pTempWin = mpWindowImpl->mpFrameData->mpFirstOverlap;
-                while ( pTempWin->mpWindowImpl->mpNextOverlap.get() != this )
-                    pTempWin = pTempWin->mpWindowImpl->mpNextOverlap;
-                pTempWin->mpWindowImpl->mpNextOverlap = mpWindowImpl->mpNextOverlap;
-            }
-
-            if ( mpWindowImpl->mpPrev )
-                mpWindowImpl->mpPrev->mpWindowImpl->mpNext = mpWindowImpl->mpNext;
-            else
-                mpWindowImpl->mpOverlapWindow->mpWindowImpl->mpFirstOverlap = mpWindowImpl->mpNext;
-            if ( mpWindowImpl->mpNext )
-                mpWindowImpl->mpNext->mpWindowImpl->mpPrev = mpWindowImpl->mpPrev;
-            else
-                mpWindowImpl->mpOverlapWindow->mpWindowImpl->mpLastOverlap = mpWindowImpl->mpPrev;
-        }
-        else
-        {
-            if ( mpWindowImpl->mpPrev )
-                mpWindowImpl->mpPrev->mpWindowImpl->mpNext = mpWindowImpl->mpNext;
-            else if ( mpWindowImpl->mpParent )
-                mpWindowImpl->mpParent->mpWindowImpl->mpFirstChild = mpWindowImpl->mpNext;
-            if ( mpWindowImpl->mpNext )
-                mpWindowImpl->mpNext->mpWindowImpl->mpPrev = mpWindowImpl->mpPrev;
-            else if ( mpWindowImpl->mpParent )
-                mpWindowImpl->mpParent->mpWindowImpl->mpLastChild = mpWindowImpl->mpPrev;
-        }
-
-        mpWindowImpl->mpPrev = nullptr;
-        mpWindowImpl->mpNext = nullptr;
+        if ( bRemoveFrameData )
+            GetOutDev()->ReleaseGraphics();
+        return;
     }
+
+    // Unlink from the absolute FrameData global overlap collection
+    if ( ImplIsOverlapWindow() )
+    {
+        // True O(1) extraction utilizing our new mpPrevOverlap pointer
+        if ( mpWindowImpl->mpPrevOverlap )
+            mpWindowImpl->mpPrevOverlap->mpWindowImpl->mpNextOverlap = mpWindowImpl->mpNextOverlap;
+        else
+            mpWindowImpl->mpFrameData->mpFirstOverlap = mpWindowImpl->mpNextOverlap;
+
+        if ( mpWindowImpl->mpNextOverlap )
+            mpWindowImpl->mpNextOverlap->mpWindowImpl->mpPrevOverlap = mpWindowImpl->mpPrevOverlap;
+
+        mpWindowImpl->mpPrevOverlap = nullptr;
+        mpWindowImpl->mpNextOverlap = nullptr;
+    }
+
+    // Unlink from the forward sibling chains (Adjusting heads)
+    if ( mpWindowImpl->mpPrev )
+        mpWindowImpl->mpPrev->mpWindowImpl->mpNext = mpWindowImpl->mpNext;
+    else if ( ImplIsOverlapWindow() )
+        mpWindowImpl->mpOverlapWindow->mpWindowImpl->mpFirstOverlap = mpWindowImpl->mpNext;
+    else if ( mpWindowImpl->mpParent )
+        mpWindowImpl->mpParent->mpWindowImpl->mpFirstChild = mpWindowImpl->mpNext;
+
+    // Unlink from the backward sibling chains (Adjusting tails)
+    if ( mpWindowImpl->mpNext )
+        mpWindowImpl->mpNext->mpWindowImpl->mpPrev = mpWindowImpl->mpPrev;
+    else if ( ImplIsOverlapWindow() )
+        mpWindowImpl->mpOverlapWindow->mpWindowImpl->mpLastOverlap = mpWindowImpl->mpPrev;
+    else if ( mpWindowImpl->mpParent )
+        mpWindowImpl->mpParent->mpWindowImpl->mpLastChild = mpWindowImpl->mpPrev;
+
+    // Isolate this specific window node instance completely
+    mpWindowImpl->mpPrev = nullptr;
+    mpWindowImpl->mpNext = nullptr;
 
     if ( bRemoveFrameData )
     {
-        // release the graphic
-        OutputDevice *pOutDev = GetOutDev();
-        pOutDev->ReleaseGraphics();
+        GetOutDev()->ReleaseGraphics();
     }
 }
 
