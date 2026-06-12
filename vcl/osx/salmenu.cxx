@@ -301,7 +301,7 @@ AquaSalMenu::~AquaSalMenu()
 bool AquaSalMenu::ShowNativePopupMenu(FloatingWindow * pWin, const tools::Rectangle& rRect, FloatWinPopupFlags nFlags)
 {
     // get the pointers
-    AquaSalFrame * pParentAquaSalFrame = static_cast<AquaSalFrame *>(pWin->ImplGetWindowImpl()->mpRealParent->ImplGetFrame());
+    AquaSalFrame * pParentAquaSalFrame = static_cast<AquaSalFrame *>(pWin->ImplGetWindowImpl()->mpHierarchy->mpRealParent->ImplGetFrame());
     NSWindow* pParentNSWindow = pParentAquaSalFrame->mpNSWindow;
     NSView* pParentNSView = [pParentNSWindow contentView];
     NSView* pPopupNSView = static_cast<AquaSalFrame *>(pWin->ImplGetWindow()->ImplGetFrame())->mpNSView;

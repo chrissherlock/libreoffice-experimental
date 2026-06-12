@@ -1415,7 +1415,7 @@ const vcl::Window *VclBin::get_child() const
 {
     const WindowImpl* pWindowImpl = ImplGetWindowImpl();
 
-    return pWindowImpl->mpFirstChild;
+    return pWindowImpl->mpHierarchy->mpFirstChild;
 }
 
 vcl::Window *VclBin::get_child()
@@ -1518,9 +1518,9 @@ const vcl::Window *VclFrame::get_label_widget() const
     assert(GetChildCount() <= 2);
     //The label widget is normally the first (of two) children
     const WindowImpl* pWindowImpl = ImplGetWindowImpl();
-    if (pWindowImpl->mpFirstChild == pWindowImpl->mpLastChild) //no label exists
+    if (pWindowImpl->mpHierarchy->mpFirstChild == pWindowImpl->mpHierarchy->mpLastChild) //no label exists
         return nullptr;
-    return pWindowImpl->mpFirstChild;
+    return pWindowImpl->mpHierarchy->mpFirstChild;
 }
 
 vcl::Window *VclFrame::get_label_widget()
@@ -1534,10 +1534,10 @@ const vcl::Window *VclFrame::get_child() const
     const WindowImpl* pWindowImpl = ImplGetWindowImpl();
     assert(GetChildCount() == 2 || pWindowImpl->mbInDispose);
     if (!m_pLabel)
-        return pWindowImpl->mpLastChild;
-    if (pWindowImpl->mpFirstChild == pWindowImpl->mpLastChild) //only label exists
+        return pWindowImpl->mpHierarchy->mpLastChild;
+    if (pWindowImpl->mpHierarchy->mpFirstChild == pWindowImpl->mpHierarchy->mpLastChild) //only label exists
         return nullptr;
-    return pWindowImpl->mpLastChild;
+    return pWindowImpl->mpHierarchy->mpLastChild;
 }
 
 vcl::Window *VclFrame::get_child()
@@ -1684,9 +1684,9 @@ const vcl::Window *VclExpander::get_child() const
 {
     const WindowImpl* pWindowImpl = ImplGetWindowImpl();
 
-    assert(pWindowImpl->mpFirstChild == m_pDisclosureButton);
+    assert(pWindowImpl->mpHierarchy->mpFirstChild == m_pDisclosureButton);
 
-    return pWindowImpl->mpFirstChild->GetWindow(GetWindowType::Next);
+    return pWindowImpl->mpHierarchy->mpFirstChild->GetWindow(GetWindowType::Next);
 }
 
 vcl::Window *VclExpander::get_child()
@@ -1701,7 +1701,7 @@ Size VclExpander::calculateRequisition() const
     WindowImpl* pWindowImpl = ImplGetWindowImpl();
 
     const vcl::Window *pChild = get_child();
-    const vcl::Window *pLabel = pChild != pWindowImpl->mpLastChild ? pWindowImpl->mpLastChild.get() : nullptr;
+    const vcl::Window *pLabel = pChild != pWindowImpl->mpHierarchy->mpLastChild ? pWindowImpl->mpHierarchy->mpLastChild.get() : nullptr;
 
     if (pChild && pChild->IsVisible() && m_pDisclosureButton->IsChecked())
         aRet = getLayoutRequisition(*pChild);
@@ -1730,7 +1730,7 @@ void VclExpander::setAllocation(const Size &rAllocation)
 
     //The label widget is the last (of two) children
     vcl::Window *pChild = get_child();
-    vcl::Window *pLabel = pChild != pWindowImpl->mpLastChild.get() ? pWindowImpl->mpLastChild.get() : nullptr;
+    vcl::Window *pLabel = pChild != pWindowImpl->mpHierarchy->mpLastChild.get() ? pWindowImpl->mpHierarchy->mpLastChild.get() : nullptr;
 
     Size aButtonSize = getLayoutRequisition(*m_pDisclosureButton);
     Size aLabelSize;
@@ -1891,7 +1891,7 @@ const vcl::Window *VclScrolledWindow::get_child() const
 {
     const WindowImpl* pWindowImpl = ImplGetWindowImpl();
     assert(GetChildCount() == 4 || pWindowImpl->mbInDispose);
-    return pWindowImpl->mpLastChild;
+    return pWindowImpl->mpHierarchy->mpLastChild;
 }
 
 vcl::Window *VclScrolledWindow::get_child()
@@ -2164,9 +2164,9 @@ const vcl::Window *VclEventBox::get_child() const
 {
     const WindowImpl* pWindowImpl = ImplGetWindowImpl();
 
-    assert(pWindowImpl->mpFirstChild.get() == m_aEventBoxHelper.get());
+    assert(pWindowImpl->mpHierarchy->mpFirstChild.get() == m_aEventBoxHelper.get());
 
-    return pWindowImpl->mpFirstChild->GetWindow(GetWindowType::Next);
+    return pWindowImpl->mpHierarchy->mpFirstChild->GetWindow(GetWindowType::Next);
 }
 
 vcl::Window *VclEventBox::get_child()

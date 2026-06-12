@@ -228,6 +228,24 @@ struct WindowClippingState
     bool                         mbClipChildren = false;
 };
 
+struct WindowHierarchy
+{
+    VclPtr<vcl::Window> mpParent;            // Parent (includes BorderWindow)
+    VclPtr<vcl::Window> mpRealParent;        // Real parent (excludes BorderWindow)
+
+    VclPtr<vcl::Window> mpFirstChild;        // First child window
+    VclPtr<vcl::Window> mpLastChild;         // Last child window
+
+    VclPtr<vcl::Window> mpFirstOverlap;      // First overlap window child
+    VclPtr<vcl::Window> mpLastOverlap;       // Last overlap window child
+
+    VclPtr<vcl::Window> mpPrev;              // Previous sibling window
+    VclPtr<vcl::Window> mpNext;              // Next sibling window
+
+    VclPtr<vcl::Window> mpPrevOverlap;       // Previous overlap window of frame
+    VclPtr<vcl::Window> mpNextOverlap;       // Next overlap window of frame
+};
+
 class WindowImpl
 {
 private:
@@ -246,16 +264,6 @@ public:
     VclPtr<vcl::Window> mpOverlapWindow;
     VclPtr<vcl::Window> mpBorderWindow;
     VclPtr<vcl::Window> mpClientWindow;
-    VclPtr<vcl::Window> mpParent;
-    VclPtr<vcl::Window> mpRealParent;
-    VclPtr<vcl::Window> mpFirstChild;
-    VclPtr<vcl::Window> mpLastChild;
-    VclPtr<vcl::Window> mpFirstOverlap;
-    VclPtr<vcl::Window> mpLastOverlap;
-    VclPtr<vcl::Window> mpPrev;
-    VclPtr<vcl::Window> mpNext;
-    VclPtr<vcl::Window> mpPrevOverlap;
-    VclPtr<vcl::Window> mpNextOverlap;
     VclPtr<vcl::Window> mpLastFocusWindow;
     VclPtr<PushButton> mpDlgCtrlDownWindow;
     std::vector<Link<VclWindowEvent&,void>> maEventListeners;
@@ -301,7 +309,10 @@ public:
     std::vector<VclPtr<FixedText>> m_aMnemonicLabels;
     std::unique_ptr<ImplAccessibleInfos> mpAccessibleInfos;
     VCLXWindow*         mpVCLXWindow;
+
     std::unique_ptr<WindowClippingState> mpClippingState;
+    std::unique_ptr<WindowHierarchy>     mpHierarchy;
+
     vcl::Region              maWinRegion;            //< region to 'shape' the VCL window (frame coordinates)
     vcl::Region              maInvalidateRegion;     //< region that has to be redrawn (frame coordinates)
     vcl::Region*             mpPaintRegion;          //< only set during Paint() method call (window coordinates)

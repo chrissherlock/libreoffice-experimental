@@ -2050,7 +2050,7 @@ static void ImplHandleMoveResize( vcl::Window* pWindow, tools::Long nNewWidth, t
 static void ImplActivateFloatingWindows( vcl::Window const * pWindow, bool bActive )
 {
     // First check all overlapping windows
-    vcl::Window* pTempWindow = pWindow->ImplGetWindowImpl()->mpFirstOverlap;
+    vcl::Window* pTempWindow = pWindow->ImplGetWindowImpl()->mpHierarchy->mpFirstOverlap;
     while ( pTempWindow )
     {
         if ( pTempWindow->GetActivateMode() == ActivateModeFlags::NONE )
@@ -2061,7 +2061,7 @@ static void ImplActivateFloatingWindows( vcl::Window const * pWindow, bool bActi
         }
 
         ImplActivateFloatingWindows( pTempWindow, bActive );
-        pTempWindow = pTempWindow->ImplGetWindowImpl()->mpNext;
+        pTempWindow = pTempWindow->ImplGetWindowImpl()->mpHierarchy->mpNext;
     }
 }
 
@@ -2398,12 +2398,12 @@ static bool ImplHandleMenuEvent( vcl::Window const * pWindow, SalMenuEvent* pEve
 {
     // Find SystemWindow and its Menubar and let it dispatch the command
     bool bRet = false;
-    vcl::Window *pWin = pWindow->ImplGetWindowImpl()->mpFirstChild;
+    vcl::Window *pWin = pWindow->ImplGetWindowImpl()->mpHierarchy->mpFirstChild;
     while ( pWin )
     {
         if ( pWin->ImplGetWindowImpl()->mbSysWin )
             break;
-        pWin = pWin->ImplGetWindowImpl()->mpNext;
+        pWin = pWin->ImplGetWindowImpl()->mpHierarchy->mpNext;
     }
     if( pWin )
     {

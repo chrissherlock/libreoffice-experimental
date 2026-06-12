@@ -117,7 +117,7 @@ void FloatingWindow::ImplInitFloating( vcl::Window* pParent, WinBits nStyle )
                                   mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder);
             pBorderWin->SetDisplayActive(true);
             mpWindowImpl->mpBorderWindow = pBorderWin;
-            mpWindowImpl->mpRealParent = pParent;
+            mpWindowImpl->mpHierarchy->mpRealParent = pParent;
         }
     }
     SetActivateMode( ActivateModeFlags::NONE );
@@ -239,8 +239,8 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
 
     // convert...
     vcl::Window* pW = pWindow;
-    if ( pW->mpWindowImpl->mpRealParent )
-        pW = pW->mpWindowImpl->mpRealParent;
+    if ( pW->mpWindowImpl->mpHierarchy->mpRealParent )
+        pW = pW->mpWindowImpl->mpHierarchy->mpRealParent;
 
     tools::Rectangle normRect( rRect );  // rRect is already relative to top-level window
     normRect.SetPos( pW->ScreenToOutputPixel( normRect.TopLeft() ) );

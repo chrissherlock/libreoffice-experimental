@@ -95,7 +95,7 @@ void Window::SetParentClipMode(ParentClipMode nMode)
     mpWindowImpl->mpClippingState->meParentClipMode = nMode;
 
     if (nMode & ParentClipMode::Clip)
-        mpWindowImpl->mpParent->mpWindowImpl->mpClippingState->mbClipChildren = true;
+        mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mpClippingState->mbClipChildren = true;
 }
 
 ParentClipMode Window::GetParentClipMode() const
