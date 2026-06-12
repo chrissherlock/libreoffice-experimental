@@ -361,6 +361,7 @@ public:
                         mbCallResize:1,
                         mbWaitSystemResize:1,
                         mbWinRegion:1,
+                        mbClipChildren:1,
                         mbChildTransparent:1,
                         mbPaintTransparent:1,
                         mbMouseTransparent:1,
