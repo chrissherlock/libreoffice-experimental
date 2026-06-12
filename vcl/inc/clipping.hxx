@@ -60,6 +60,30 @@ VCL_DLLPUBLIC void accumulateChildOverlaps(vcl::Window* pWindow, const vcl::Regi
 VCL_DLLPUBLIC void accumulateWindowAndChildOverlaps(vcl::Window* pWindow,
                                                     const vcl::Region& rInterRegion,
                                                     vcl::Region& rRegion);
+/**
+ * Evaluates visible child windows against parent style and clip mode constraints,
+ * subtracting matching child geometries from the target tracking region.
+ * * @param rWindow The parent window context executing the layout pass.
+ * @param rRegion The target clip region to be mutated in-place.
+ * @return true if any visible child bypassed exclusion (requires special handling).
+ */
+bool clipChildren(const vcl::Window& rWindow, vcl::Region& rRegion);
+
+/**
+ * Unconditionally subtracts the geometric boundaries of all visible child windows
+ * from the passed clipping region layout.
+ * * @param rWindow The parent window context executing the layout pass.
+ * @param rRegion The target clip region to be mutated in-place.
+ */
+void clipAllChildren(const vcl::Window& rWindow, vcl::Region& rRegion);
+
+/**
+ * Traverses the parent's child chain backwards to isolate preceding sibling layout
+ * boxes, subtracting their visible regions from the current window's paint layer.
+ * * @param rWindow The current window context whose siblings are being evaluated.
+ * @param rRegion The target clip region to be mutated in-place.
+ */
+void clipSiblings(const vcl::Window& rWindow, vcl::Region& rRegion);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

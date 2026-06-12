@@ -226,6 +226,58 @@ void excludeWindowRegion(vcl::Window* pWindow, vcl::Region& rRegion)
     }
 }
 
+static bool lcl_IsParentClipRequired(ParentClipMode nClipMode, WinBits nStyle)
+{
+    return !(nClipMode & ParentClipMode::NoClip)
+           && ((nClipMode & ParentClipMode::Clip) || (nStyle & WB_CLIPCHILDREN));
+}
+
+bool clipChildren(const vcl::Window& rWindow, vcl::Region& rRegion)
+{
+    bool bOtherClip = false;
+    WinBits nParentStyle = rWindow.GetStyle();
+
+    for (vcl::Window* pChild : getChildWindows(*rWindow.ImplGetWindowImpl()))
+    {
+        if (pChild->ImplGetWindowImpl()->mbReallyVisible)
+        {
+            ParentClipMode nClipMode = pChild->GetParentClipMode();
+
+            if (lcl_IsParentClipRequired(nClipMode, nParentStyle))
+                excludeWindowRegion(pChild, rRegion);
+            else
+                bOtherClip = true;
+        }
+    }
+
+    return bOtherClip;
+}
+
+void clipAllChildren(const vcl::Window& rWindow, vcl::Region& rRegion)
+{
+    for (vcl::Window* pChild : getChildWindows(*rWindow.ImplGetWindowImpl()))
+    {
+        if (pChild->ImplGetWindowImpl()->mbReallyVisible)
+            excludeWindowRegion(pChild, rRegion);
+    }
+}
+
+void clipSiblings(const vcl::Window& rWindow, vcl::Region& rRegion)
+{
+    vcl::Window* pParent = rWindow.ImplGetParent();
+    if (!pParent)
+        return;
+
+    for (vcl::Window* pSibling : getChildWindows(*pParent->ImplGetWindowImpl()))
+    {
+        if (pSibling == &rWindow)
+            break; // We only clip against preceding siblings
+
+        if (pSibling->ImplGetWindowImpl()->mbReallyVisible)
+            excludeWindowRegion(pSibling, rRegion);
+    }
+}
+
 } // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
