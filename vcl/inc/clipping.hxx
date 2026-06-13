@@ -103,6 +103,22 @@ void excludeOverlapWindows(const vcl::Window& rWindow, vcl::Region& rRegion);
  * the definitive bounding canvas clipping box for a window layer.
  */
 void clipBoundaries(const vcl::Window& rWindow, vcl::Region& rRegion, bool bThis, bool bOverlaps);
+
+/**
+ * Traverses the window border wrapper hierarchy to assign a ParentClipMode,
+ * updating child-clipping state attributes on parental ancestors if required.
+ */
+void setParentClipMode(vcl::Window* pWindow, ParentClipMode nMode);
+
+/**
+ * @brief Resolves the effective parent clipping mode for a window context.
+ *
+ * If the provided window is managed by a border window wrapper, this function
+ * recurses down to query the underlying frame decoration instead. Otherwise,
+ * it directly extracts the ParentClipMode currently tracked inside the
+ * window's clipping state block.
+ */
+ParentClipMode getParentClipMode(const vcl::Window& pWindow);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
