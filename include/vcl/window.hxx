@@ -609,9 +609,6 @@ private:
                                          vcl::Font& rFont) const;
     SAL_DLLPRIVATE void                 ImplLogicToPoint(vcl::RenderContext const & rRenderContext, vcl::Font& rFont) const;
 
-    SAL_DLLPRIVATE void                 ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Region& rRegion,
-                                                               bool bChildren, bool bSiblings );
-
     /** Invoke the actual painting.
 
         This function is kind of recursive - it may be called from the

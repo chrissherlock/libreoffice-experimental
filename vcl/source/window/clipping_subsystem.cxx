@@ -197,6 +197,92 @@ void gatherNativeSyncTargets(vcl::Window* pWindow, std::vector<vcl::Window*>& rT
     }
 }
 
+void accumulateParentBoundaries(vcl::Window& rWindow, const vcl::Region& rInterRegion,
+                                vcl::Region& rRegion)
+{
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl)
+        return;
+
+    vcl::Region aTempRegion;
+    vcl::Window* pWindow = &rWindow;
+
+    if (!rWindow.ImplIsOverlapWindow())
+    {
+        pWindow = rWindow.ImplGetParent();
+        do
+        {
+            aTempRegion = rInterRegion;
+            excludeWindowRegion(*pWindow, aTempRegion);
+            rRegion.Union(aTempRegion);
+
+            if (pWindow->ImplIsOverlapWindow())
+                break;
+
+            pWindow = pWindow->ImplGetParent();
+        } while (pWindow);
+    }
+
+    if (pWindow && pWindow->ImplGetWindowImpl() && !pWindow->ImplGetWindowImpl()->mbFrame)
+    {
+        if (pImpl->mpFrameWindow)
+        {
+            aTempRegion = rInterRegion;
+            aTempRegion.Exclude(
+                tools::Rectangle(Point(0, 0), pImpl->mpFrameWindow->GetOutputSizePixel()));
+            rRegion.Union(aTempRegion);
+        }
+    }
+}
+
+void accumulateSiblingBoundaries(vcl::Window& rWindow, const vcl::Region& rInterRegion,
+                                 vcl::Region& rRegion, bool bSiblings)
+{
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl)
+        return;
+
+    if (!bSiblings || rWindow.ImplIsOverlapWindow())
+        return;
+
+    vcl::Window* pParent = rWindow.ImplGetParent();
+    if (!pParent || !pParent->ImplGetWindowImpl())
+        return;
+
+    vcl::Region aTempRegion;
+
+    for (vcl::Window* pSibling : getChildWindows(*pParent->ImplGetWindowImpl()))
+    {
+        WindowImpl* pSiblingImpl = pSibling->ImplGetWindowImpl();
+        if (pSiblingImpl && pSiblingImpl->mbReallyVisible && (pSibling != &rWindow))
+        {
+            aTempRegion = rInterRegion;
+            intersectWindowRegion(*pSibling, aTempRegion);
+            rRegion.Union(aTempRegion);
+        }
+    }
+}
+
+void accumulateChildBoundaries(vcl::Window& rWindow, const vcl::Region& rInterRegion,
+                               vcl::Region& rRegion)
+{
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl)
+        return;
+
+    vcl::Region aTempRegion;
+    for (vcl::Window* pChild : getChildWindows(*pImpl))
+    {
+        WindowImpl* pChildImpl = pChild->ImplGetWindowImpl();
+        if (pChildImpl && pChildImpl->mbReallyVisible)
+        {
+            aTempRegion = rInterRegion;
+            intersectWindowRegion(*pChild, aTempRegion);
+            rRegion.Union(aTempRegion);
+        }
+    }
+}
+
 void accumulateChildOverlaps(vcl::Window* pWindow, const vcl::Region& rInterRegion,
                              vcl::Region& rRegion)
 {
@@ -629,6 +715,31 @@ void calcOverlapRegionOverlaps(const vcl::Window& rWindow, const vcl::Region& rI
     vcl::Window* pOverlapParent
         = !pImpl->mbOverlapWin ? pImpl->mpOverlapWindow.get() : const_cast<vcl::Window*>(&rWindow);
     accumulateChildOverlaps(pOverlapParent, rInterRegion, rRegion);
+}
+
+void calcOverlapRegion(vcl::Window& rWindow, const tools::Rectangle& rSourceRect,
+                       vcl::Region& rRegion, bool bChildren, bool bSiblings)
+{
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl)
+        return;
+
+    vcl::Region aRegion(rSourceRect);
+
+    if (pImpl->mpClippingState->mbWinRegion)
+    {
+        rRegion.Intersect(
+            rWindow.GetOutDev()->GetMapper().ViewToDevice(pImpl->mpClippingState->maWinRegion));
+    }
+
+    calcOverlapRegionOverlaps(rWindow, aRegion, rRegion);
+    accumulateParentBoundaries(rWindow, aRegion, rRegion);
+    accumulateSiblingBoundaries(rWindow, aRegion, rRegion, bSiblings);
+
+    if (!bChildren)
+        return;
+
+    accumulateChildBoundaries(rWindow, aRegion, rRegion);
 }
 
 } // namespace vcl::clipping
