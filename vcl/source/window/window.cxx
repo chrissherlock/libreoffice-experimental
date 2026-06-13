@@ -1626,7 +1626,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
         if ( bNewPos || bNewSize )
         {
             // set Clip-Flag
-            bUpdateSysObjClip = !ImplSetClipFlag( true );
+            bUpdateSysObjClip = !vcl::clipping::setClipFlag(*this, true);
         }
 
         // invalidate window content ?
@@ -2216,7 +2216,7 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
 
             bRealVisibilityChanged = mpWindowImpl->mbReallyVisible;
             ImplResetReallyVisible();
-            ImplSetClipFlag();
+            vcl::clipping::setClipFlag(*this);
 
             if ( ImplIsOverlapWindow() && !mpWindowImpl->mbFrame )
             {
@@ -2317,7 +2317,7 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
             ImplSetReallyVisible();
 
             // assure clip rectangles will be recalculated
-            ImplSetClipFlag();
+            vcl::clipping::setClipFlag(*this);
 
             if ( !mpWindowImpl->mbFrame )
             {

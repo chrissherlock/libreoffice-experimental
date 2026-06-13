@@ -176,47 +176,6 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-bool Window::ImplSetClipFlagOverlapWindows(bool bSysObjOnlySmaller)
-{
-    bool bUpdate = vcl::clipping::setClipFlagChildren(*this, bSysObjOnlySmaller);
-
-    for (vcl::Window* pWindow : vcl::clipping::getOverlapWindows(*mpWindowImpl))
-    {
-        if (!pWindow->ImplSetClipFlagOverlapWindows(bSysObjOnlySmaller))
-            bUpdate = false;
-    }
-
-    return bUpdate;
-}
-
-bool Window::ImplSetClipFlag(bool bSysObjOnlySmaller)
-{
-    if (!ImplIsOverlapWindow())
-        return mpWindowImpl->mpFrameWindow->ImplSetClipFlagOverlapWindows(bSysObjOnlySmaller);
-
-    bool bUpdate = clipping::setClipFlagChildren(*this, bSysObjOnlySmaller);
-
-    vcl::Window* pParent = ImplGetParent();
-
-    if (pParent)
-    {
-        // Explicit return value checking replaces hidden references
-        if (clipping::invalidateParentClipIfRequired(*mpWindowImpl, *pParent->mpWindowImpl, pParent->GetStyle()))
-            pParent->GetOutDev()->mbInitClipRegion = true;
-    }
-
-    if (mpWindowImpl->mpClippingState->mbClipSiblings)
-    {
-        for (vcl::Window* pSibling : vcl::clipping::getFollowingSiblings(*mpWindowImpl))
-        {
-            if (!clipping::setClipFlagChildren(*pSibling, bSysObjOnlySmaller))
-                bUpdate = false;
-        }
-    }
-
-    return bUpdate;
-}
-
 void Window::ImplIntersectWindowClipRegion( vcl::Region& rRegion )
 {
     if ( mpWindowImpl->mpClippingState->mbInitWinClipRegion )
