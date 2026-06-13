@@ -176,69 +176,6 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Region& rRegion,
-                                    bool bChildren, bool bSiblings )
-{
-    vcl::Region  aRegion( rSourceRect );
-    if ( mpWindowImpl->mpClippingState->mbWinRegion )
-        rRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
-    vcl::Region  aTempRegion;
-    vcl::Window* pWindow;
-
-    vcl::clipping::calcOverlapRegionOverlaps(*this, aRegion, rRegion);
-
-    // Parent-Boundaries
-    pWindow = this;
-    if ( !ImplIsOverlapWindow() )
-    {
-        pWindow = ImplGetParent();
-        do
-        {
-            aTempRegion = aRegion;
-            vcl::clipping::excludeWindowRegion(*pWindow, aTempRegion);
-            rRegion.Union( aTempRegion );
-            if ( pWindow->ImplIsOverlapWindow() )
-                break;
-            pWindow = pWindow->ImplGetParent();
-        }
-        while ( pWindow );
-    }
-    if ( pWindow && !pWindow->mpWindowImpl->mbFrame )
-    {
-        aTempRegion = aRegion;
-        aTempRegion.Exclude( tools::Rectangle( Point( 0, 0 ), mpWindowImpl->mpFrameWindow->GetOutputSizePixel() ) );
-        rRegion.Union( aTempRegion );
-    }
-
-    // Siblings
-    if (bSiblings && !ImplIsOverlapWindow())
-    {
-        for (vcl::Window* pSibling : vcl::clipping::getChildWindows(*ImplGetParent()->ImplGetWindowImpl()))
-        {
-            if (pSibling->ImplGetWindowImpl()->mbReallyVisible && (pSibling != this))
-            {
-                aTempRegion = aRegion;
-                vcl::clipping::intersectWindowRegion(*pSibling, aTempRegion);
-                rRegion.Union(aTempRegion);
-            }
-        }
-    }
-
-    if ( !bChildren )
-        return;
-
-    // Children
-    for (vcl::Window* pChild : vcl::clipping::getChildWindows(*mpWindowImpl))
-    {
-        if (pChild->ImplGetWindowImpl()->mbReallyVisible)
-        {
-            aTempRegion = aRegion;
-            vcl::clipping::intersectWindowRegion(*pChild, aTempRegion);
-            rRegion.Union(aTempRegion);
-        }
-    }
-}
-
 void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize, const Size&) const
 {
     comphelper::ScopeGuard aResetMapMode([&rSaveDevice]() { rSaveDevice.SetMapMode(MapMode()); });
