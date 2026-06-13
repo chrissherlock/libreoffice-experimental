@@ -52,7 +52,7 @@ VCL_DLLPUBLIC std::vector<vcl::Window*> getParentAncestorsUntilOverlap(vcl::Wind
 VCL_DLLPUBLIC void gatherNativeSyncTargets(vcl::Window* pWindow,
                                            std::vector<vcl::Window*>& rTargets);
 
-VCL_DLLPUBLIC void intersectWindowRegion(vcl::Window* pWindow, vcl::Region& rRegion);
+VCL_DLLPUBLIC void intersectWindowRegion(vcl::Window& rWindow, vcl::Region& rRegion);
 VCL_DLLPUBLIC void excludeWindowRegion(vcl::Window& rWindow, vcl::Region& rRegion);
 VCL_DLLPUBLIC void excludeWindowAndOverlapRegions(vcl::Window& rWindow, vcl::Region& rRegion);
 
