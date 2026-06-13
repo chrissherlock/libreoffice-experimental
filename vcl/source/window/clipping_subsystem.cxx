@@ -612,6 +612,20 @@ bool setClipFlagOverlapWindows(vcl::Window& rWindow, bool bSysObjOnlySmaller)
     return bUpdate;
 }
 
+void intersectWindowClipRegion(vcl::Window& rWindow, vcl::Region& rRegion)
+{
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl)
+        return;
+
+    if (pImpl->mpClippingState->mbInitWinClipRegion)
+    {
+        initWinClipRegion(rWindow);
+    }
+
+    rRegion.Intersect(pImpl->mpClippingState->maWinClipRegion);
+}
+
 } // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

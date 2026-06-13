@@ -201,6 +201,12 @@ bool setClipFlag(vcl::Window& rWindow, bool bSysObjOnlySmaller = false);
  * @return true if the hierarchical update pass completed successfully.
  */
 bool setClipFlagOverlapWindows(vcl::Window& rWindow, bool bSysObjOnlySmaller = false);
+
+/**
+ * Intersects the provided region with the window's cached clip region boundary,
+ * automatically triggering a lazy initialization pass if the cache is currently dirty.
+ */
+void intersectWindowClipRegion(vcl::Window& rWindow, vcl::Region& rRegion);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
