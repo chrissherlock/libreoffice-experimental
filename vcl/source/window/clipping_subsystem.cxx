@@ -523,6 +523,38 @@ void updateNativeObjectClip(vcl::Window& rWindow)
     }
 }
 
+bool setClipFlagChildren(vcl::Window& rWindow, bool bSysObjOnlySmaller)
+{
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl)
+        return true;
+
+    auto pOldRegion = prepareClipInvalidation(*pImpl, bSysObjOnlySmaller);
+
+    dirtyInitClipRegion(rWindow);
+    pImpl->mpClippingState->mbInitWinClipRegion = true;
+
+    bool bUpdate = true;
+    for (vcl::Window* pChild : getChildWindows(*pImpl))
+    {
+        if (!setClipFlagChildren(*pChild, bSysObjOnlySmaller))
+            bUpdate = false;
+    }
+
+    if (!pImpl->mpSysObj)
+        return bUpdate;
+
+    bool bClipSuccess = nativeObjectClip(rWindow, pOldRegion.get());
+
+    auto[bNewUpdate, bInvalidateDevice] = processClipResult(*pImpl, bClipSuccess, bUpdate);
+    bUpdate = bNewUpdate;
+
+    if (bInvalidateDevice)
+        dirtyInitClipRegion(rWindow);
+
+    return bUpdate;
+}
+
 } // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

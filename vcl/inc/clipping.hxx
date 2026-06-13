@@ -10,10 +10,10 @@
 #pragma once
 
 #include <vcl/dllapi.h>
+#include <vcl/window.hxx>
 
 #include <vector>
 
-class Window;
 class WindowImpl;
 
 namespace vcl
@@ -167,6 +167,23 @@ void invalidateNativeClipTargets(vcl::Window* pStartWindow);
  * clipping flags are enabled.
  */
 void updateNativeObjectClip(vcl::Window& rWindow);
+
+/**
+ * Recursively propagates clip-flag updates down through the child window hierarchy,
+ * recalculating native platform clipping bounds where necessary.
+ *
+ * @param rWindow The window context initiating the propagation loop.
+ * @param bSysObjOnlySmaller Optimization flag to limit bounds checking.
+ * @return true if all children and native clipping setups updated successfully.
+ */
+bool setClipFlagChildren(vcl::Window& rWindow, bool bSysObjOnlySmaller);
+
+inline void dirtyInitClipRegion(vcl::Window& rWindow)
+{
+    // Calling SetClipRegion() with no arguments or an empty region
+    // is the standard, public VCL way to trip the mbInitClipRegion flag to true.
+    rWindow.GetOutDev()->SetClipRegion();
+}
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
