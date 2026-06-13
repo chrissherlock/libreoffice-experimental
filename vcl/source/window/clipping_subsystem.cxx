@@ -486,6 +486,20 @@ bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion)
     return bUpdate;
 }
 
+void invalidateNativeClipTargets(vcl::Window* pStartWindow)
+{
+    if (!pStartWindow)
+        return;
+
+    std::vector<vcl::Window*> aTargets;
+    gatherNativeSyncTargets(pStartWindow, aTargets);
+
+    for (vcl::Window* pTarget : aTargets)
+    {
+        nativeObjectClip(*pTarget, nullptr);
+    }
+}
+
 } // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
