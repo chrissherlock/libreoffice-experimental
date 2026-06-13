@@ -176,36 +176,22 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-void Window::ImplInvalidateNativeClipTargets(vcl::Window* pStartWindow)
-{
-    if (!pStartWindow)
-        return;
-
-    std::vector<vcl::Window*> aTargets;
-    vcl::clipping::gatherNativeSyncTargets(pStartWindow, aTargets);
-
-    for (vcl::Window* pTarget : aTargets)
-    {
-        vcl::clipping::nativeObjectClip(*pTarget, nullptr);
-    }
-}
-
 void Window::ImplUpdateNativeObjectClip()
 {
     if (ImplIsOverlapWindow())
     {
-        ImplInvalidateNativeClipTargets(mpWindowImpl->mpFrameWindow);
+        vcl::clipping::invalidateNativeClipTargets(this);
         return;
     }
 
-    ImplInvalidateNativeClipTargets(this);
+    vcl::clipping::invalidateNativeClipTargets(this);
 
     if (!mpWindowImpl->mpClippingState->mbClipSiblings)
         return;
 
     for (vcl::Window* pSibling : vcl::clipping::getFollowingSiblings(*mpWindowImpl))
     {
-        ImplInvalidateNativeClipTargets(pSibling);
+        vcl::clipping::invalidateNativeClipTargets(pSibling);
     }
 }
 
