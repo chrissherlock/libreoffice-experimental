@@ -93,6 +93,15 @@ void clipSiblings(const vcl::Window& rWindow, vcl::Region& rRegion);
 void initWinClipRegion(const vcl::Window& rWindow);
 
 /**
+ * @brief Lazily initializes the tracking child clipping region for a window.
+ *
+ * Checks the underlying dirty flags and, if required, triggers the cascading
+ * geometry calculations to subtract overlapping or hidden child bounds from
+ * the target layout element.
+ */
+void initWinChildClipRegion(const vcl::Window& rWindow);
+
+/**
  * Recursively traverses the child overlap hierarchy, subtracting visible overlap
  * window footprints from the target canvas region.
  */
