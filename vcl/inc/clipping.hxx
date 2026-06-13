@@ -160,6 +160,13 @@ bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion);
  * platform refresh on each target.
  */
 void invalidateNativeClipTargets(vcl::Window* pStartWindow);
+
+/**
+ * Triggers a cascading invalidation of native system control clip targets
+ * for the given window, and handles trailing sibling nodes if sibling
+ * clipping flags are enabled.
+ */
+void updateNativeObjectClip(vcl::Window& rWindow);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

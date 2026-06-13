@@ -176,25 +176,6 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-void Window::ImplUpdateNativeObjectClip()
-{
-    if (ImplIsOverlapWindow())
-    {
-        vcl::clipping::invalidateNativeClipTargets(this);
-        return;
-    }
-
-    vcl::clipping::invalidateNativeClipTargets(this);
-
-    if (!mpWindowImpl->mpClippingState->mbClipSiblings)
-        return;
-
-    for (vcl::Window* pSibling : vcl::clipping::getFollowingSiblings(*mpWindowImpl))
-    {
-        vcl::clipping::invalidateNativeClipTargets(pSibling);
-    }
-}
-
 bool Window::ImplSetClipFlagChildren(bool bSysObjOnlySmaller)
 {
     auto pOldRegion = vcl::clipping::prepareClipInvalidation(*mpWindowImpl, bSysObjOnlySmaller);

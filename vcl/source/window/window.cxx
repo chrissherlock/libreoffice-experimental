@@ -1714,7 +1714,9 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             vcl::Region aRegion( *pOldRegion );
             if ( !mpWindowImpl->mbPaintTransparent )
                 vcl::clipping::excludeWindowRegion(*this, aRegion);
+
             vcl::clipping::clipBoundaries(*this, aRegion, false, true);
+
             if ( !aRegion.IsEmpty() && !mpWindowImpl->mpBorderWindow )
                 ImplInvalidateParentFrameRegion( aRegion );
         }
@@ -1722,9 +1724,11 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
 
     // adapt system objects
     if ( bUpdateSysObjClip )
-        ImplUpdateNativeObjectClip();
+        vcl::clipping::updateNativeObjectClip(*this);
+
     if ( bUpdateSysObjPos )
         ImplUpdateNativeObjectPos();
+
     if ( bNewSize && mpWindowImpl->mpSysObj )
         mpWindowImpl->mpSysObj->SetPosSize( GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY(), GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel() );
 }
