@@ -122,6 +122,8 @@ public:
     SAL_DLLPRIVATE void         ImplStartPage();
     SAL_DLLPRIVATE void         ImplEndPage();
 
+    vcl::Region                 ClipToDeviceBounds(vcl::Region aRegion) const override;
+
 protected:
     virtual bool                AcquireGraphics() const override;
     virtual void                ReleaseGraphics( bool bRelease = true ) override;
@@ -134,7 +136,6 @@ protected:
                                     const tools::PolyPolygon &rPolyPoly ) override;
 
     bool                        CanSubsampleBitmap() const override { return false; }
-    vcl::Region                 ClipToDeviceBounds(vcl::Region aRegion) const override;
 
 public:
     void                        SetSystemTextColor(SystemTextColorFlags, bool) override;

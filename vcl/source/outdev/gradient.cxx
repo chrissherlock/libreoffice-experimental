@@ -27,6 +27,7 @@
 #include <vcl/window.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -52,7 +53,8 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     assert(!is_double_buffered_window());
 
     if (mbInitClipRegion)
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
+
     // don't return on mbOutputClipped here, as we may need to draw the clipped metafile, even if the output is clipped
 
     if (!rPolyPoly.Count() || !rPolyPoly[0].GetSize())
@@ -106,7 +108,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     IntersectClipRegion( aBoundRect );
 
     if (mbInitClipRegion)
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     // try to draw gradient natively
     if (!mbOutputClipped)

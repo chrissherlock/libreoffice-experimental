@@ -25,6 +25,7 @@
 #include <vcl/window.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <salgdi.hxx>
 #include <toolbarvalue.hxx>
 #include <menubarvalue.hxx>
@@ -276,7 +277,7 @@ bool OutputDevice::DrawNativeControl( ControlType nType,
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return true;

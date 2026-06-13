@@ -26,7 +26,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/idle.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 
 #include <tools/json_writer.hxx>
 

@@ -42,6 +42,7 @@
 
 #include <ImplLayoutArgs.hxx>
 #include <ImplOutDevData.hxx>
+#include <clipping.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
@@ -450,9 +451,11 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
 void OutputDevice::ImplDrawText( SalLayout& rSalLayout )
 {
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
+
     if( mbOutputClipped )
         return;
+
     if( mbInitTextColor )
         ImplInitTextColor();
 
@@ -708,7 +711,7 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
 
     assert(mpGraphics);
     if (mbInitClipRegion)
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if (mbOutputClipped)
         return;
@@ -752,7 +755,7 @@ void OutputDevice::DrawTextArray( const Point& rStartPt, const OUString& rStr,
     EnsureRenderStateSynced();
 
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if( mbOutputClipped )
         return;
@@ -1730,9 +1733,11 @@ void OutputDevice::AddTextRectActions( const tools::Rectangle& rRect,
     // we need a graphics
     if( !mpGraphics && !AcquireGraphics() )
         return;
+
     assert(mpGraphics);
+
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     // temporarily swap in passed mtf for action generation, and
     // disable output generation.
@@ -1779,7 +1784,7 @@ void OutputDevice::DrawText( const tools::Rectangle& rRect, const OUString& rOri
     EnsureRenderStateSynced();
 
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if (mbOutputClipped && !bDecomposeTextRectAction && !pDisplayText)
         return;
@@ -1947,7 +1952,7 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
     EnsureRenderStateSynced();
 
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;

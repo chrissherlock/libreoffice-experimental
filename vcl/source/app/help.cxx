@@ -31,7 +31,7 @@
 #include <vcl/help.hxx>
 #include <vcl/settings.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 #include <helpwin.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
