@@ -176,14 +176,6 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-void Window::ImplIntersectWindowClipRegion( vcl::Region& rRegion )
-{
-    if ( mpWindowImpl->mpClippingState->mbInitWinClipRegion )
-        clipping::initWinClipRegion(*this);
-
-    rRegion.Intersect( mpWindowImpl->mpClippingState->maWinClipRegion );
-}
-
 void Window::ImplIntersectWindowRegion( vcl::Region& rRegion )
 {
     rRegion.Intersect( GetOutputRectPixel() );
