@@ -24,6 +24,7 @@
 #include <vcl/MappingPolicy.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <salgdi.hxx>
 
 bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
@@ -62,7 +63,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
         EnsureRenderStateSynced();
 
         if( mbInitClipRegion )
-            InitClipRegion();
+            vcl::clipping::initDeviceClipRegion(*this);
 
         aRect.Normalize();
         bDrawn = mpGraphics->DrawEPS( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),

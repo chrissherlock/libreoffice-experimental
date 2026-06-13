@@ -11,7 +11,7 @@
 #include <vcl/window.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 #include <window.h>
 #include <salobj.hxx>
 

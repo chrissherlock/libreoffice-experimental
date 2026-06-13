@@ -30,6 +30,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
@@ -98,7 +99,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -140,7 +141,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;

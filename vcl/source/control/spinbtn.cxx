@@ -24,6 +24,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/vclevent.hxx>
 
+#include <clipping.hxx>
 #include <spin.hxx>
 #include <vcl/TransformTypes.hxx>
 
@@ -442,7 +443,8 @@ bool SpinButton::PreNotify( NotifyEvent& rNEvt )
                 tools::Rectangle* pLastRect = ImplFindPartRect( GetLastPointerPosPixel() );
                 if (pRect != pLastRect || (pMouseEvt->IsLeaveWindow() || pMouseEvt->IsEnterWindow()))
                 {
-                    vcl::Region aRgn(GetOutDev()->GetActiveClipRegion());
+                    vcl::Region aRgn(vcl::clipping::getActiveClipRegion(*GetOutDev()));
+
                     if (pLastRect)
                     {
                         GetOutDev()->SetClipRegion(vcl::Region(*pLastRect));

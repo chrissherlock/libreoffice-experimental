@@ -38,9 +38,10 @@
 #include <vcl/settings.hxx>
 #include <vcl/builder.hxx>
 #include <o3tl/string_view.hxx>
-
 #include <vcl/CoordinateMapper.hxx>
+
 #include <clipping.hxx>
+#include <clipping_window.hxx>
 #include <window.h>
 #include <svdata.hxx>
 #include <salgdi.hxx>
@@ -187,7 +188,7 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
         }
 
         if ( GetOutDev()->mbInitClipRegion )
-            GetOutDev()->InitClipRegion();
+            vcl::clipping::initDeviceClipRegion(*GetOutDev());
 
         if ( GetOutDev()->mbOutputClipped )
             return;

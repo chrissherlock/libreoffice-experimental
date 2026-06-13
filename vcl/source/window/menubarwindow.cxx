@@ -28,7 +28,7 @@
 #include <vcl/taskpanelist.hxx>
 #include <sal/log.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <salmenu.hxx>
 #include <svdata.hxx>

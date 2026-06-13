@@ -22,6 +22,7 @@
 #include <vcl/MappingPolicy.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
@@ -35,8 +36,9 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
     if (mpGraphics || AcquireGraphics())
     {
         assert(mpGraphics);
+
         if (mbInitClipRegion)
-            const_cast<OutputDevice*>(this)->InitClipRegion();
+            vcl::clipping::initDeviceClipRegion(const_cast<OutputDevice&>(*this));
 
         if (!mbOutputClipped)
         {
@@ -70,7 +72,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -99,7 +101,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;

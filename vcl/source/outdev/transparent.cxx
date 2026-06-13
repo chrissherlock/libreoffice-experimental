@@ -38,6 +38,7 @@
 #include <vcl/BitmapWriteAccess.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <pdf/pdfwriter_impl.hxx>
 #include <salgdi.hxx>
 
@@ -110,7 +111,7 @@ void OutputDevice::DrawTransparent(
     EnsureRenderStateSynced();
 
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if( mbOutputClipped )
         return;
@@ -203,7 +204,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
     {
         // prepare the graphics device
         if( mbInitClipRegion )
-            InitClipRegion();
+            vcl::clipping::initDeviceClipRegion(*this);
 
         if( mbOutputClipped )
             return true;
@@ -277,7 +278,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 
     aDstRect.Intersection( aPolyRect );
 
-    ClipToPaintRegion( aDstRect );
+    vcl::clipping::clipToPaintRegion(*this, aDstRect);
 
     if( !aDstRect.IsEmpty() )
     {
@@ -290,7 +291,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
             // setup Graphics only here (other cases delegate
             // to basic OutDev methods)
             if ( mbInitClipRegion )
-                InitClipRegion();
+                vcl::clipping::initDeviceClipRegion(*this);
 
             SyncRenderStateToBackend();
 
@@ -505,7 +506,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
         mpMetaFile = nullptr;
         aDstRect.Intersection( aOutRect.get() );
 
-        ClipToPaintRegion( aDstRect );
+        vcl::clipping::clipToPaintRegion(*this, aDstRect);
 
         if( !aDstRect.IsEmpty() )
         {

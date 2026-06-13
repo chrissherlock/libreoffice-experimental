@@ -22,9 +22,15 @@
 #include <tools/debug.hxx>
 
 #include <vcl/metaact.hxx>
+#include <vcl/window.hxx>
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <window.h>
+#include <clipping.hxx>
+#include <clipping_window.hxx>
+#include <windowdev.hxx>
+#include <devicedispatcher.hxx>
 #include <salgdi.hxx>
 
 void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
@@ -119,49 +125,6 @@ void OutputDevice::IntersectClipRegion( const vcl::Region& rRegion )
     }
 }
 
-void OutputDevice::InitClipRegion()
-{
-    DBG_TESTSOLARMUTEX();
-
-    if ( mbClipRegion )
-    {
-        if ( maRegion.IsEmpty() )
-            mbOutputClipped = true;
-        else
-        {
-            mbOutputClipped = false;
-
-            // #102532# Respect output offset also for clip region
-            vcl::Region aRegion = ClipToDeviceBounds(mpMapper->ViewToDevice(maRegion));
-
-            if ( aRegion.IsEmpty() )
-            {
-                mbOutputClipped = true;
-            }
-            else
-            {
-                mbOutputClipped = false;
-                SelectClipRegion( aRegion );
-            }
-        }
-
-        mbClipRegionSet = true;
-    }
-    else
-    {
-        if ( mbClipRegionSet )
-        {
-            if (mpGraphics)
-                mpGraphics->ResetClipRegion();
-            mbClipRegionSet = false;
-        }
-
-        mbOutputClipped = false;
-    }
-
-    mbInitClipRegion = false;
-}
-
 vcl::Region OutputDevice::ClipToDeviceBounds(vcl::Region aRegion) const
 {
     aRegion.Intersect(tools::Rectangle{GetDeviceOriginX(),
@@ -170,17 +133,6 @@ vcl::Region OutputDevice::ClipToDeviceBounds(vcl::Region aRegion) const
                                        GetDeviceOriginY() + GetOutputHeightPixel() - 1
                                       });
     return aRegion;
-}
-
-vcl::Region OutputDevice::GetActiveClipRegion() const
-{
-    return GetClipRegion();
-}
-
-void OutputDevice::ClipToPaintRegion(tools::Rectangle& /*rDstRect*/)
-{
-    // this is only used in Window, but we still need it as it's called
-    // on in other clipping functions
 }
 
 void OutputDevice::SetDeviceClipRegion( const vcl::Region* pRegion )
@@ -203,5 +155,153 @@ void OutputDevice::SetDeviceClipRegion( const vcl::Region* pRegion )
         mbInitClipRegion    = true;
     }
 }
+
+void OutputDevice::ResetGraphicsClipRegion()
+{
+    if (mpGraphics)
+        mpGraphics->ResetClipRegion();
+}
+
+vcl::Region OutputDevice::GetActiveClipRegion() const
+{
+    return vcl::clipping::getActiveClipRegion(*this);
+}
+
+namespace vcl::clipping {
+
+void clipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect)
+{
+    vcl::DispatchDevice(rDevice, [&rDstRect](auto& rTypedDev) {
+        using T = std::decay_t<decltype(rTypedDev)>;
+
+        if constexpr (std::is_same_v<T, WindowOutputDevice>)
+        {
+            // Only WindowOutputDevices have owner windows and paint regions
+            const vcl::Region aPaintRgn(rTypedDev.GetOwnerWindow()->GetPaintRegion());
+            if (aPaintRgn.IsNull())
+                return;
+
+            auto aBoundRect  = vcl::LogicRect(aPaintRgn.GetBoundRect());
+            auto aWindowRect = rTypedDev.template convertTo<vcl::WindowRect>(aBoundRect, rTypedDev.GetMapMode()).get();
+
+            rDstRect.Intersection(aWindowRect);
+        }
+        // For Printer, VirtualDevice, or base OutputDevice, this does nothing (which is correct)
+    });
+}
+
+vcl::Region getActiveClipRegion(const OutputDevice& rDevice)
+{
+    return vcl::DispatchDevice(rDevice, [](const auto& rTypedDev) -> vcl::Region {
+        using T = std::decay_t<decltype(rTypedDev)>;
+
+        if constexpr (std::is_same_v<T, WindowOutputDevice>)
+        {
+            vcl::Region aRegion(true);
+            WindowImpl* pImpl = rTypedDev.GetOwnerWindow()->ImplGetWindowImpl();
+
+            if (pImpl->mbInPaint)
+            {
+                if (pImpl->mpPaintRegion)
+                    aRegion = *(pImpl->mpPaintRegion);
+
+                aRegion.Move(-rTypedDev.GetDeviceOriginX(), -rTypedDev.GetDeviceOriginY());
+            }
+
+            if (rTypedDev.IsClipRegion())
+                aRegion.Intersect(rTypedDev.GetRegion());
+
+            return rTypedDev.template convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
+        }
+        else
+        {
+            if (rTypedDev.IsClipRegion())
+                return rTypedDev.GetClipRegion();
+
+            return vcl::Region(tools::Rectangle(Point(0, 0), rTypedDev.GetOutputSizePixel()));
+        }
+    });
+}
+
+void initDeviceClipRegion(OutputDevice& rDevice)
+{
+    vcl::DispatchDevice(rDevice, [](auto& rTypedDev) {
+        using T = std::decay_t<decltype(rTypedDev)>;
+        DBG_TESTSOLARMUTEX();
+
+        if constexpr (std::is_same_v<T, WindowOutputDevice>)
+        {
+            vcl::Region aRegion;
+            WindowImpl* pImpl = rTypedDev.GetOwnerWindow()->ImplGetWindowImpl();
+
+            if (pImpl->mbInPaint)
+            {
+                if (pImpl->mpPaintRegion)
+                    aRegion = *(pImpl->mpPaintRegion);
+            }
+            else
+            {
+                aRegion = getWinChildClipRegion(*rTypedDev.GetOwnerWindow());
+
+                if (rTypedDev.ImplIsAntiparallel())
+                    rTypedDev.ReMirror(aRegion);
+            }
+
+            if (rTypedDev.IsClipRegion())
+                aRegion.Intersect(rTypedDev.GetMapper().ViewToDevice(rTypedDev.GetRegion()));
+
+            if (aRegion.IsEmpty())
+            {
+                rTypedDev.SetOutputClipped(true); // Assuming setter exists or maps to mbOutputClipped
+            }
+            else
+            {
+                rTypedDev.SetOutputClipped(false);
+                rTypedDev.SelectClipRegion(aRegion);
+            }
+
+            rTypedDev.SetClipRegionSet(true);
+            rTypedDev.SetInitClipRegion(false);
+        }
+        else
+        {
+            // Standard OutputDevice layout path
+            if (rTypedDev.IsClipRegion())
+            {
+                if (rTypedDev.GetRegion().IsEmpty())
+                {
+                    rTypedDev.SetOutputClipped(true);
+                }
+                else
+                {
+                    rTypedDev.SetOutputClipped(false);
+                    vcl::Region aRegion = rTypedDev.ClipToDeviceBounds(
+                        rTypedDev.GetMapper().ViewToDevice(rTypedDev.GetRegion()));
+
+                    if (aRegion.IsEmpty())
+                        rTypedDev.SetOutputClipped(true);
+                    else
+                        rTypedDev.SelectClipRegion(aRegion);
+                }
+
+                rTypedDev.SetClipRegionSet(true);
+            }
+            else
+            {
+                if (rTypedDev.IsClipRegionSet())
+                {
+                    rTypedDev.ResetGraphicsClipRegion();
+                    rTypedDev.SetClipRegionSet(false);
+                }
+
+                rTypedDev.SetOutputClipped(false);
+            }
+
+            rTypedDev.SetInitClipRegion(false);
+        }
+    });
+}
+
+} // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

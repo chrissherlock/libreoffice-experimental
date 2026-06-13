@@ -21,6 +21,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -47,7 +48,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -91,7 +92,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -130,7 +131,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -177,7 +178,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;

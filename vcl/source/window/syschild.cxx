@@ -22,7 +22,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/syschild.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 #include <window.h>
 #include <salframe.hxx>
 #include <salinst.hxx>

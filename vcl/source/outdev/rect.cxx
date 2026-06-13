@@ -27,6 +27,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -64,7 +65,7 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
     EnsureRenderStateSynced();
 
     if (mbInitClipRegion)
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if (mbOutputClipped)
          return;
@@ -108,7 +109,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -153,7 +154,7 @@ void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -187,7 +188,7 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -242,7 +243,7 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
     EnsureRenderStateSynced();
 
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if( mbOutputClipped )
         return;
@@ -326,32 +327,23 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
     assert(!is_double_buffered_window());
 
     if (!IsLineColor() || ImplIsRecordLayout())
-    {
         return;
-    }
 
     if (!mpGraphics && !AcquireGraphics())
-    {
         return;
-    }
+
     assert(mpGraphics);
 
     EnsureRenderStateSynced();
 
     if (mbInitClipRegion)
-    {
-        InitClipRegion();
-    }
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if (mbOutputClipped)
-    {
         return;
-    }
 
     if (rDrawingArea.IsEmpty())
-    {
         return;
-    }
 
     const tools::Long nDistanceX = rGridDistance.Width();
     const tools::Long nDistanceY = rGridDistance.Height();
