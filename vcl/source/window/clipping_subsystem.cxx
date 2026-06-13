@@ -433,8 +433,8 @@ ParentClipMode getParentClipMode(const vcl::Window& rWindow)
     return pWindowImpl->mpClippingState->meParentClipMode;
 }
 
-void updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region aRegion,
-                                  const vcl::Region& rWinRectRegion)
+static void lcl_updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region aRegion,
+                                             const vcl::Region& rWinRectRegion)
 {
     WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
     if (!pImpl || !pImpl->mpSysObj)
@@ -461,6 +461,29 @@ void updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region aRegion,
     }
 
     pImpl->mpSysObj->EndSetClipRegion();
+}
+
+bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion)
+{
+    WindowImpl* pWindowImpl = rWindow.ImplGetWindowImpl();
+    if (!pWindowImpl || !pWindowImpl->mpSysObj)
+        return true;
+
+    if (!pOldRegion && !pWindowImpl->mpClippingState->mbInitWinClipRegion)
+        return true;
+
+    vcl::Region& rWinChildClipRegion = getWinChildClipRegion(rWindow);
+    bool bUpdate = true;
+
+    if (syncNativeWindow(*pWindowImpl, rWinChildClipRegion, pOldRegion, bUpdate))
+        return bUpdate;
+
+    lcl_updateNativeObjectClipRegion(rWindow, rWinChildClipRegion,
+                                     vcl::Region(rWindow.GetOutputRectPixel()));
+
+    pWindowImpl->mpSysObj->Show(true);
+
+    return bUpdate;
 }
 
 } // namespace vcl::clipping

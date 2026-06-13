@@ -176,27 +176,6 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-bool Window::ImplNativeObjectClip(const vcl::Region* pOldRegion)
-{
-    if (!mpWindowImpl->mpSysObj)
-        return true;
-
-    if (!pOldRegion && !mpWindowImpl->mpClippingState->mbInitWinClipRegion)
-        return true;
-
-    vcl::Region& rWinChildClipRegion = vcl::clipping::getWinChildClipRegion(*this);
-    bool bUpdate = true;
-
-    if (vcl::clipping::syncNativeWindow(*mpWindowImpl, rWinChildClipRegion, pOldRegion, bUpdate))
-        return bUpdate;
-
-    vcl::clipping::updateNativeObjectClipRegion(*this, rWinChildClipRegion, vcl::Region(GetOutputRectPixel()));
-
-    mpWindowImpl->mpSysObj->Show(true);
-
-    return bUpdate;
-}
-
 void Window::ImplInvalidateNativeClipTargets(vcl::Window* pStartWindow)
 {
     if (!pStartWindow)
@@ -207,7 +186,7 @@ void Window::ImplInvalidateNativeClipTargets(vcl::Window* pStartWindow)
 
     for (vcl::Window* pTarget : aTargets)
     {
-        pTarget->ImplNativeObjectClip(nullptr);
+        vcl::clipping::nativeObjectClip(*pTarget, nullptr);
     }
 }
 
@@ -248,7 +227,7 @@ bool Window::ImplSetClipFlagChildren(bool bSysObjOnlySmaller)
     if (!mpWindowImpl->mpSysObj)
         return bUpdate;
 
-    bool bClipSuccess = ImplNativeObjectClip(pOldRegion.get());
+    bool bClipSuccess = vcl::clipping::nativeObjectClip(*this, pOldRegion.get());
 
     auto [bNewUpdate, bInvalidateDevice] = vcl::clipping::processClipResult(*mpWindowImpl, bClipSuccess, bUpdate);
     bUpdate = bNewUpdate;

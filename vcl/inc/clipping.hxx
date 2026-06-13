@@ -145,6 +145,14 @@ Region& getWinChildClipRegion(vcl::Window& rWindow);
  */
 void updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region aRegion,
                                   const vcl::Region& rWinRectRegion);
+
+/**
+ * Syncs the window's tracking child clip region with the underlying platform
+ * system object, triggering region updates and layout flushes if required.
+ *
+ * @return true if the native object layout update succeeded or was bypassed.
+ */
+bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
