@@ -1538,9 +1538,9 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             if ( bCopyBits && !pOverlapRegion )
             {
                 pOverlapRegion.reset( new vcl::Region() );
-                ImplCalcOverlapRegion( GetOutputRectPixel(),
-                                       *pOverlapRegion, false, true );
+                vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *pOverlapRegion, false, true);
             }
+
             mpWindowImpl->mnX = nX;
             mpWindowImpl->maPos.setX( nOrgX );
             mpWindowImpl->mnAbsScreenX = aPtDev.X();
@@ -1555,8 +1555,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             if ( bCopyBits && !pOverlapRegion )
             {
                 pOverlapRegion.reset( new vcl::Region() );
-                ImplCalcOverlapRegion( GetOutputRectPixel(),
-                                       *pOverlapRegion, false, true );
+                vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *pOverlapRegion, false, true);
             }
             mpWindowImpl->mnY = nY;
             mpWindowImpl->maPos.setY( nY );

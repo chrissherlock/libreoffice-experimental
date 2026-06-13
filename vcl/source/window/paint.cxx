@@ -1562,7 +1562,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     // adapt paint areas
     ImplMoveAllInvalidateRegions( aRectMirror, nHorzScroll, nVertScroll, bScrollChildren );
 
-    ImplCalcOverlapRegion( aRectMirror, aInvalidateRegion, !bScrollChildren, false );
+    vcl::clipping::calcOverlapRegion(*this, aRectMirror, aInvalidateRegion, !bScrollChildren, false);
 
     // if the scrolling on the device is performed in the opposite direction
     // then move the overlaps in that direction to compute the invalidate region

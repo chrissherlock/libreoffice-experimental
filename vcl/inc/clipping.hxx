@@ -62,6 +62,37 @@ VCL_DLLPUBLIC void accumulateWindowAndChildOverlaps(vcl::Window* pWindow,
                                                     const vcl::Region& rInterRegion,
                                                     vcl::Region& rRegion);
 /**
+ * Calculates and accumulates layout overlap boundaries by walking up the window's
+ * parent ancestry to the frame root, subtracting visibility regions along the path.
+ */
+void accumulateParentBoundaries(vcl::Window& rWindow, const vcl::Region& rInterRegion,
+                                vcl::Region& rRegion);
+
+/**
+ * Iterates through a window's sibling layout tree, accumulating the coordinate
+ * bounds of all overlapping visible sibling nodes into the target region.
+ *
+ * @return The state of bChildren to determine if downstream evaluation should continue.
+ */
+void accumulateSiblingBoundaries(vcl::Window& rWindow, const vcl::Region& rInterRegion,
+                                 vcl::Region& rRegion, bool bSiblings);
+
+/**
+ * Iterates through a window's immediate child layout tree, accumulating the coordinate
+ * bounds of all visible child nodes into the target region.
+ */
+void accumulateChildBoundaries(vcl::Window& rWindow, const vcl::Region& rInterRegion,
+                               vcl::Region& rRegion);
+
+/**
+ * Coordinates the full sequence of visibility overlap evaluations for a given
+ * source layout rectangle, factoring in custom window masks, frame boundaries,
+ * parents, siblings, and child collections.
+ */
+void calcOverlapRegion(vcl::Window& rWindow, const tools::Rectangle& rSourceRect,
+                       vcl::Region& rRegion, bool bChildren, bool bSiblings);
+
+/**
  * Evaluates visible child windows against parent style and clip mode constraints,
  * subtracting matching child geometries from the target tracking region.
  * * @param rWindow The parent window context executing the layout pass.
