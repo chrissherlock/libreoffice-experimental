@@ -486,7 +486,7 @@ bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion)
     return bUpdate;
 }
 
-void invalidateNativeClipTargets(vcl::Window* pStartWindow)
+static void lcl_invalidateNativeClipTargets(vcl::Window* pStartWindow)
 {
     if (!pStartWindow)
         return;
@@ -497,6 +497,29 @@ void invalidateNativeClipTargets(vcl::Window* pStartWindow)
     for (vcl::Window* pTarget : aTargets)
     {
         nativeObjectClip(*pTarget, nullptr);
+    }
+}
+
+void updateNativeObjectClip(vcl::Window& rWindow)
+{
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl)
+        return;
+
+    if (pImpl->mbOverlapWin)
+    {
+        lcl_invalidateNativeClipTargets(&rWindow);
+        return;
+    }
+
+    lcl_invalidateNativeClipTargets(&rWindow);
+
+    if (!pImpl->mpClippingState->mbClipSiblings)
+        return;
+
+    for (vcl::Window* pSibling : getFollowingSiblings(*pImpl))
+    {
+        lcl_invalidateNativeClipTargets(pSibling);
     }
 }
 
