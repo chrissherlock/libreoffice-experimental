@@ -153,6 +153,13 @@ void updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region aRegion,
  * @return true if the native object layout update succeeded or was bypassed.
  */
 bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion);
+
+/**
+ * Traverses the window tree starting from the given context node to identify
+ * all active native system controls, forcing a clip region invalidation and
+ * platform refresh on each target.
+ */
+void invalidateNativeClipTargets(vcl::Window* pStartWindow);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
