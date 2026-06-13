@@ -249,7 +249,7 @@ bool clipChildren(const vcl::Window& rWindow, vcl::Region& rRegion)
     {
         if (pChild->ImplGetWindowImpl()->mbReallyVisible)
         {
-            ParentClipMode nClipMode = pChild->GetParentClipMode();
+            ParentClipMode nClipMode = getParentClipMode(*pChild);
 
             if (lcl_IsParentClipRequired(nClipMode, nParentStyle))
                 excludeWindowRegion(*pChild, rRegion);
@@ -369,6 +369,44 @@ void clipBoundaries(const vcl::Window& rWindow, vcl::Region& rRegion, bool bThis
     }
 
     excludeOverlapWindows(rWindow, rRegion);
+}
+
+void setParentClipMode(vcl::Window* pWindow, ParentClipMode nMode)
+{
+    if (!pWindow)
+        return;
+
+    WindowImpl* pImpl = pWindow->ImplGetWindowImpl();
+
+    if (pImpl->mpBorderWindow)
+    {
+        setParentClipMode(pImpl->mpBorderWindow.get(), nMode);
+        return;
+    }
+
+    if (pImpl->mbOverlapWin)
+        return;
+
+    pImpl->mpClippingState->meParentClipMode = nMode;
+
+    if (nMode & ParentClipMode::Clip)
+    {
+        if (pImpl->mpHierarchy && pImpl->mpHierarchy->mpParent)
+        {
+            WindowImpl* pParentImpl = pImpl->mpHierarchy->mpParent->ImplGetWindowImpl();
+            pParentImpl->mpClippingState->mbClipChildren = true;
+        }
+    }
+}
+
+ParentClipMode getParentClipMode(const vcl::Window& rWindow)
+{
+    WindowImpl* pWindowImpl = rWindow.ImplGetWindowImpl();
+
+    if (pWindowImpl->mpBorderWindow)
+        return getParentClipMode(*pWindowImpl->mpBorderWindow);
+
+    return pWindowImpl->mpClippingState->meParentClipMode;
 }
 
 } // namespace vcl::clipping

@@ -25,6 +25,9 @@
 #include <sal/log.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/idle.hxx>
+
+#include <clipping.hxx>
+
 #include <tools/json_writer.hxx>
 
 #define PROGRESSBAR_OFFSET          3
@@ -87,7 +90,7 @@ void ProgressBar::ImplInitSettings( bool bFont,
             EnableChildTransparentMode();
             SetPaintTransparent( true );
             SetBackground();
-            SetParentClipMode( ParentClipMode::NoClip );
+            vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
         }
         else
         {

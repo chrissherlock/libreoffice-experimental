@@ -30,6 +30,8 @@
 #include <vcl/menu.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/ptrstyle.hxx>
+
+#include <clipping.hxx>
 #include <bitmaps.hlst>
 #include <toolbarvalue.hxx>
 
@@ -1193,7 +1195,7 @@ void ToolBox::ApplyBackgroundSettings(vcl::RenderContext& rRenderContext, const 
     {
         rRenderContext.SetBackground(GetControlBackground());
         SetPaintTransparent(false);
-        SetParentClipMode();
+        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
     }
     else
     {
@@ -1202,7 +1204,7 @@ void ToolBox::ApplyBackgroundSettings(vcl::RenderContext& rRenderContext, const 
             rRenderContext.SetBackground();
             rRenderContext.SetTextColor(rStyleSettings.GetToolTextColor());
             SetPaintTransparent(true);
-            SetParentClipMode(ParentClipMode::NoClip);
+            vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
             mpData->maDisplayBackground = Wallpaper(rStyleSettings.GetFaceColor());
         }
         else
@@ -1214,7 +1216,7 @@ void ToolBox::ApplyBackgroundSettings(vcl::RenderContext& rRenderContext, const 
                 aColor = rStyleSettings.GetWindowColor();
             rRenderContext.SetBackground(aColor);
             SetPaintTransparent(false);
-            SetParentClipMode();
+            vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
         }
     }
 }

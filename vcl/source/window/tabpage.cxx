@@ -24,6 +24,8 @@
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/toolkit/scrbar.hxx>
+
+#include <clipping.hxx>
 #include <svdata.hxx>
 
 void TabPage::ImplInit( vcl::Window* pParent, WinBits nStyle )
@@ -77,14 +79,14 @@ void TabPage::ImplInitSettings()
     if (pParent && pParent->IsChildTransparentModeEnabled() && !IsControlBackground())
     {
         EnableChildTransparentMode();
-        SetParentClipMode( ParentClipMode::NoClip );
+        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent( true );
         SetBackground();
     }
     else
     {
         EnableChildTransparentMode( false );
-        SetParentClipMode();
+        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
         SetPaintTransparent( false );
 
         if (IsControlBackground() || !pParent)
