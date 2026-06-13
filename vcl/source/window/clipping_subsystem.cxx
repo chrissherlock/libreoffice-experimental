@@ -163,6 +163,22 @@ std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow)
     return aTargets;
 }
 
+Region& getWinChildClipRegion(vcl::Window& rWindow)
+{
+    WindowImpl* pWindowImpl = rWindow.ImplGetWindowImpl();
+
+    if (pWindowImpl->mpClippingState->mbInitWinClipRegion)
+        initWinClipRegion(rWindow);
+
+    if (pWindowImpl->mpClippingState->mbInitChildRegion)
+        initWinChildClipRegion(rWindow);
+
+    if (pWindowImpl->mpClippingState->mpChildClipRegion)
+        return *pWindowImpl->mpClippingState->mpChildClipRegion;
+
+    return pWindowImpl->mpClippingState->maWinClipRegion;
+}
+
 void gatherNativeSyncTargets(vcl::Window* pWindow, std::vector<vcl::Window*>& rTargets)
 {
     if (!pWindow)

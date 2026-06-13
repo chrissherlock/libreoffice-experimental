@@ -256,7 +256,7 @@ void PaintHelper::DoPaint(const vcl::Region* pRegion)
 {
     WindowImpl* pWindowImpl = m_pWindow->ImplGetWindowImpl();
 
-    vcl::Region& rWinChildClipRegion = m_pWindow->ImplGetWinChildClipRegion();
+    vcl::Region& rWinChildClipRegion = vcl::clipping::getWinChildClipRegion(*m_pWindow);
     ImplFrameData* pFrameData = m_pWindow->mpWindowImpl->mpFrameData;
     if (pWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAll || pFrameData->mbInBufferedPaint)
     {
@@ -591,7 +591,7 @@ void Window::ImplInvalidateFrameRegion( const vcl::Region* pRegion, InvalidateFl
             vcl::Region *pChildRegion;
             if ( mpWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAll )
                 // invalidate the whole child window region in the parent
-                pChildRegion = &ImplGetWinChildClipRegion();
+                pChildRegion = &vcl::clipping::getWinChildClipRegion(*this);
             else
                 // invalidate the same region in the parent that has to be repainted in the child
                 pChildRegion = &mpWindowImpl->maInvalidateRegion;
