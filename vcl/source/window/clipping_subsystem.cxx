@@ -212,7 +212,7 @@ void accumulateWindowAndChildOverlaps(vcl::Window* pWindow, const vcl::Region& r
     if (pWindow->ImplGetWindowImpl()->mbReallyVisible)
     {
         vcl::Region aTempRegion(rInterRegion);
-        intersectWindowRegion(pWindow, aTempRegion);
+        intersectWindowRegion(*pWindow, aTempRegion);
         rRegion.Union(aTempRegion);
     }
 
@@ -220,16 +220,16 @@ void accumulateWindowAndChildOverlaps(vcl::Window* pWindow, const vcl::Region& r
     accumulateChildOverlaps(pWindow, rInterRegion, rRegion);
 }
 
-void intersectWindowRegion(vcl::Window* pWindow, vcl::Region& rRegion)
+void intersectWindowRegion(vcl::Window& rWindow, vcl::Region& rRegion)
 {
     // First, clip to the base rectangular output boundary
-    rRegion.Intersect(pWindow->GetOutputRectPixel());
+    rRegion.Intersect(rWindow.GetOutputRectPixel());
 
     // If the window has a custom user-defined geometric clip path, apply it as well
-    if (pWindow->ImplGetWindowImpl()->mpClippingState->mbWinRegion)
+    if (rWindow.ImplGetWindowImpl()->mpClippingState->mbWinRegion)
     {
-        rRegion.Intersect(pWindow->GetOutDev()->GetMapper().ViewToDevice(
-            pWindow->ImplGetWindowImpl()->mpClippingState->maWinRegion));
+        rRegion.Intersect(rWindow.GetOutDev()->GetMapper().ViewToDevice(
+            rWindow.ImplGetWindowImpl()->mpClippingState->maWinRegion));
     }
 }
 

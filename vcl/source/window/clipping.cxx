@@ -176,13 +176,6 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-void Window::ImplIntersectWindowRegion( vcl::Region& rRegion )
-{
-    rRegion.Intersect( GetOutputRectPixel() );
-    if ( mpWindowImpl->mpClippingState->mbWinRegion )
-        rRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
-}
-
 void Window::ImplCalcOverlapRegionOverlaps( const vcl::Region& rInterRegion, vcl::Region& rRegion ) const
 {
     // High-level ancestral sibling walk
@@ -238,7 +231,7 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
             if (pSibling->ImplGetWindowImpl()->mbReallyVisible && (pSibling != this))
             {
                 aTempRegion = aRegion;
-                pSibling->ImplIntersectWindowRegion(aTempRegion);
+                vcl::clipping::intersectWindowRegion(*pSibling, aTempRegion);
                 rRegion.Union(aTempRegion);
             }
         }
@@ -253,7 +246,7 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
         if (pChild->ImplGetWindowImpl()->mbReallyVisible)
         {
             aTempRegion = aRegion;
-            pChild->ImplIntersectWindowRegion(aTempRegion);
+            vcl::clipping::intersectWindowRegion(*pChild, aTempRegion);
             rRegion.Union(aTempRegion);
         }
     }
