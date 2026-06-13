@@ -376,14 +376,6 @@ void Window::ImplIntersectWindowRegion( vcl::Region& rRegion )
         rRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
 }
 
-void Window::ImplExcludeOverlapWindows2( vcl::Region& rRegion )
-{
-    if ( mpWindowImpl->mbReallyVisible )
-        vcl::clipping::excludeWindowRegion(this, rRegion);
-
-    vcl::clipping::excludeOverlapWindows(*this, rRegion);
-}
-
 void Window::ImplCalcOverlapRegionOverlaps( const vcl::Region& rInterRegion, vcl::Region& rRegion ) const
 {
     // High-level ancestral sibling walk
@@ -416,7 +408,7 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
         do
         {
             aTempRegion = aRegion;
-            vcl::clipping::excludeWindowRegion(pWindow, aTempRegion);
+            vcl::clipping::excludeWindowRegion(*pWindow, aTempRegion);
             rRegion.Union( aTempRegion );
             if ( pWindow->ImplIsOverlapWindow() )
                 break;
