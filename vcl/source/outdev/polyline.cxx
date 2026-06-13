@@ -26,6 +26,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <salgdi.hxx>
 
 #include <cassert>
@@ -50,7 +51,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -175,7 +176,7 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
     EnsureRenderStateSynced();
 
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if( mbOutputClipped )
         return;
@@ -262,7 +263,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -350,7 +351,7 @@ bool OutputDevice::DrawPolyLineDirectInternal(
     EnsureRenderStateSynced();
 
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if( mbOutputClipped )
         return true;

@@ -37,7 +37,7 @@
 #include <vcl/stdtext.hxx>
 #include <vcl/uitest/uiobject.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 
 #include <accessibility/vclxaccessiblebutton.hxx>
 #include <accessibility/vclxaccessiblecheckbox.hxx>

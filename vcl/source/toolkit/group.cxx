@@ -22,7 +22,7 @@
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
 #include <vcl/settings.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 
 #define GROUP_BORDER            12
 #define GROUP_TEXT_BORDER       2

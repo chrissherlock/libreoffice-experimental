@@ -38,6 +38,7 @@
 #include <vcl/uitest/uiobject.hxx>
 
 #include <clipping.hxx>
+#include <clipping_window.hxx>
 
 #include <bitmaps.hlst>
 #include <svdata.hxx>
@@ -1080,7 +1081,7 @@ void TabControl::KeyInput( const KeyEvent& rKEvt )
 static bool lcl_canPaint(const vcl::RenderContext& rRenderContext, const tools::Rectangle& rDrawRect,
                          const tools::Rectangle& rItemRect)
 {
-    vcl::Region aClipRgn(rRenderContext.GetActiveClipRegion());
+    vcl::Region aClipRgn(vcl::clipping::getActiveClipRegion(rRenderContext));
     aClipRgn.Intersect(rItemRect);
     if (!rDrawRect.IsEmpty())
         aClipRgn.Intersect(rDrawRect);

@@ -32,6 +32,7 @@
 #include <vcl/ptrstyle.hxx>
 
 #include <clipping.hxx>
+#include <clipping_window.hxx>
 #include <bitmaps.hlst>
 #include <toolbarvalue.hxx>
 
@@ -487,7 +488,7 @@ void ToolBox::ImplDrawBackground(vcl::RenderContext& rRenderContext, const tools
 
     // make sure we do not invalidate/erase too much
     if (IsInPaint())
-        aPaintRegion.Intersect(GetOutDev()->GetActiveClipRegion());
+        aPaintRegion.Intersect(vcl::clipping::getActiveClipRegion(*GetOutDev()));
 
     auto popIt = rRenderContext.ScopedPush(vcl::PushFlags::CLIPREGION);
     rRenderContext.IntersectClipRegion( aPaintRegion );

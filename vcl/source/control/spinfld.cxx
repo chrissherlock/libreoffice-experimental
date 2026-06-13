@@ -27,6 +27,7 @@
 #include <vcl/uitest/uiobject.hxx>
 #include <sal/log.hxx>
 
+#include <clipping.hxx>
 #include <spin.hxx>
 #include <svdata.hxx>
 
@@ -881,7 +882,8 @@ bool SpinField::PreNotify(NotifyEvent& rNEvt)
                         !IsNativeControlSupported(ControlType::Editbox, ControlPart::Entire))
                     {
                         // paint directly
-                        vcl::Region aRgn( GetOutDev()->GetActiveClipRegion() );
+                        vcl::Region aRgn(vcl::clipping::getActiveClipRegion(*GetOutDev()));
+
                         if (pLastRect)
                         {
                             GetOutDev()->SetClipRegion(vcl::Region(*pLastRect));

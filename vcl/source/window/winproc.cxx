@@ -51,7 +51,7 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/MappingPolicy.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 #include <svdata.hxx>
 #include <salwtype.hxx>
 #include <salframe.hxx>

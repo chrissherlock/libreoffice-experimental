@@ -28,6 +28,7 @@
 #include <vcl/rendercontext/AntialiasingFlags.hxx>
 #include <vcl/virdev.hxx>
 
+#include <clipping.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>

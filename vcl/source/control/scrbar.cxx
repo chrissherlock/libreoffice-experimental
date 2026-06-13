@@ -27,6 +27,7 @@
 #include <vcl/toolkit/scrbar.hxx>
 #include <vcl/vclevent.hxx>
 
+#include <clipping.hxx>
 #include <sal/log.hxx>
 #include <tools/mapunit.hxx>
 #include <scrollbarvalue.hxx>
@@ -1339,7 +1340,7 @@ bool ScrollBar::PreNotify( NotifyEvent& rNEvt )
                 tools::Rectangle* pLastRect = ImplFindPartRect( GetLastPointerPosPixel() );
                 if( pRect != pLastRect || pMouseEvt->IsLeaveWindow() || pMouseEvt->IsEnterWindow() )
                 {
-                    vcl::Region aRgn( GetOutDev()->GetActiveClipRegion() );
+                    vcl::Region aRgn(vcl::clipping::getActiveClipRegion(*GetOutDev()));
                     vcl::Region aClipRegion;
 
                     if ( pRect )

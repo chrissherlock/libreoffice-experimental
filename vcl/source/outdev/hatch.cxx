@@ -28,6 +28,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
@@ -71,7 +72,7 @@ void OutputDevice::DrawHatch( const tools::PolyPolygon& rPolyPoly, const Hatch& 
     EnsureRenderStateSynced();
 
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if( mbOutputClipped )
         return;

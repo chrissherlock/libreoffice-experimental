@@ -23,7 +23,7 @@
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/settings.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 
 #include "thumbpos.hxx"
 
