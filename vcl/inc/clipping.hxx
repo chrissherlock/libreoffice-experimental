@@ -201,6 +201,13 @@ bool setClipFlag(vcl::Window& rWindow, bool bSysObjOnlySmaller = false);
  * @return true if the hierarchical update pass completed successfully.
  */
 bool setClipFlagOverlapWindows(vcl::Window& rWindow, bool bSysObjOnlySmaller = false);
+
+/**
+ * Calculates and accumulates layout overlap boundaries across the window's
+ * high-level ancestral siblings and child overlap trees.
+ */
+void calcOverlapRegionOverlaps(const vcl::Window& rWindow, const vcl::Region& rInterRegion,
+                               vcl::Region& rRegion);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
