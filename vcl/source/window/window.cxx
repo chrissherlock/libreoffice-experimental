@@ -53,7 +53,7 @@
 #include <vcl/MappingPolicy.hxx>
 
 #include <ImplOutDevData.hxx>
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>

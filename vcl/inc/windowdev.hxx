@@ -40,7 +40,6 @@ public:
 
     css::awt::DeviceInfo GetDeviceInfo() const override;
 
-    virtual vcl::Region GetActiveClipRegion() const override;
     virtual vcl::Region GetOutputBoundsClipRegion() const override;
 
     virtual bool AcquireGraphics() const override;
@@ -65,8 +64,6 @@ public:
     virtual bool HasAlpha() const override { return true; }
 
 private:
-    virtual void InitClipRegion() override;
-
     void ImplClearFontData(bool bNewFontLists) override;
     void ImplRefreshFontData(bool bNewFontLists) override;
     void ImplInitMapModeObjects() override;
@@ -75,7 +72,6 @@ private:
     virtual const OutputDevice* DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const override;
     virtual void DrawOutDevDirectProcess(const OutputDevice& rSrcDev, SalTwoRect& rPosAry,
                                          SalGraphics* pSrcGraphics) override;
-    virtual void ClipToPaintRegion(tools::Rectangle& rDstRect) override;
     virtual bool UsePolyPolygonForComplexGradient() override;
 
     VclPtr<vcl::Window> mxOwnerWindow;

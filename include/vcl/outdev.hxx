@@ -538,12 +538,16 @@ public:
     void                        IntersectClipRegion(const vcl::LogicRect& rLogicRect);
     void                        IntersectClipRegion( const vcl::Region& rRegion );
 
-    virtual vcl::Region         GetActiveClipRegion() const;
     virtual vcl::Region         GetOutputBoundsClipRegion() const;
 
-protected:
+    const vcl::Region&  GetRegion() const { return maRegion; }
 
-    virtual void                InitClipRegion();
+    bool                IsClipRegionSet() const { return mbClipRegionSet; }
+    void                SetClipRegionSet(bool bSet) { mbClipRegionSet = bSet; }
+
+    void                SetInitClipRegion(bool bInit) { mbInitClipRegion = bInit; }
+    void                SetOutputClipped(bool bClipped) { mbOutputClipped = bClipped; }
+    void                ResetGraphicsClipRegion();
 
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.
@@ -552,7 +556,8 @@ protected:
         @returns            region clipped to the device bounds
      **/
     virtual vcl::Region         ClipToDeviceBounds(vcl::Region aRegion) const;
-    virtual void                ClipToPaintRegion    ( tools::Rectangle& rDstRect );
+
+    vcl::Region                 GetActiveClipRegion() const;
 
 private:
 

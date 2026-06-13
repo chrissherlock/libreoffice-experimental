@@ -24,7 +24,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 #include <salobj.hxx>
 #include <window.h>
 
@@ -36,49 +36,6 @@ vcl::Region WindowOutputDevice::GetOutputBoundsClipRegion() const
     aClip.Intersect(tools::Rectangle(Point(), GetOutputSize()));
 
     return aClip;
-}
-
-void WindowOutputDevice::InitClipRegion()
-{
-    DBG_TESTSOLARMUTEX();
-
-    vcl::Region aRegion;
-    WindowImpl* pImpl = mxOwnerWindow->mpWindowImpl.get();
-
-    // Establish the baseline layout geometry path
-    if (pImpl->mbInPaint)
-    {
-        if (pImpl->mpPaintRegion)
-            aRegion = *(pImpl->mpPaintRegion);
-    }
-    else
-    {
-        aRegion = vcl::clipping::getWinChildClipRegion(*mxOwnerWindow);
-
-        // Handle Right-to-Left (RTL) text and coordinate orientation switches
-        if (ImplIsAntiparallel())
-            ReMirror(aRegion);
-    }
-
-    // Intersect with any active user-defined clipping regions
-    if (mbClipRegion)
-    {
-        aRegion.Intersect(GetMapper().ViewToDevice(maRegion));
-    }
-
-    // Dispatch the final sync commands to the graphics hardware driver
-    if (aRegion.IsEmpty())
-    {
-        mbOutputClipped = true;
-    }
-    else
-    {
-        mbOutputClipped = false;
-        SelectClipRegion(aRegion);
-    }
-
-    mbClipRegionSet = true;
-    mbInitClipRegion = false;
 }
 
 void Window::SetParentClipMode(ParentClipMode eMode)
@@ -134,38 +91,6 @@ vcl::Region Window::GetWindowClipRegionPixel() const
     aWinClipRegion.Move(-GetOutDev()->GetDeviceOriginX(), -GetOutDev()->GetDeviceOriginY());
 
     return aWinClipRegion;
-}
-
-vcl::Region WindowOutputDevice::GetActiveClipRegion() const
-{
-    vcl::Region aRegion(true);
-    WindowImpl* pImpl = mxOwnerWindow->mpWindowImpl.get();
-
-    if (pImpl->mbInPaint)
-    {
-        if (pImpl->mpPaintRegion)
-            aRegion = *(pImpl->mpPaintRegion);
-
-        aRegion.Move(-GetDeviceOriginX(), -GetDeviceOriginY());
-    }
-
-    if (mbClipRegion)
-        aRegion.Intersect(maRegion);
-
-    return convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
-}
-
-void WindowOutputDevice::ClipToPaintRegion(tools::Rectangle& rDstRect)
-{
-    const vcl::Region aPaintRgn(mxOwnerWindow->GetPaintRegion());
-    if (aPaintRgn.IsNull())
-        return;
-
-    // Flatten the nested geometry type conversions for readability
-    auto aBoundRect   = vcl::LogicRect(aPaintRgn.GetBoundRect());
-    auto aWindowRect  = convertTo<vcl::WindowRect>(aBoundRect, GetMapMode()).get();
-
-    rDstRect.Intersection(aWindowRect);
 }
 
 void Window::EnableClipSiblings(bool bClipSiblings)

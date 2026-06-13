@@ -31,6 +31,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 
@@ -61,7 +62,7 @@ bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
 
     if(IsClipRegion())
     {
-        tools::Rectangle aRegionRectangle(GetActiveClipRegion().GetBoundRect());
+        tools::Rectangle aRegionRectangle(vcl::clipping::getActiveClipRegion(*this).GetBoundRect());
 
         // caution! Range from rectangle, one too much (!)
         aRegionRectangle.AdjustRight(-1);
@@ -208,7 +209,7 @@ void OutputDevice::DrawTransformedBitmapEx(
         return;
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     /*
        tdf#135325 typically in these OutputDevice methods, for the in

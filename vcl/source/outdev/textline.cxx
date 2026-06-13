@@ -35,6 +35,7 @@
 #include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <impglyphitem.hxx>
@@ -771,8 +772,9 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
 
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion(convertTo<vcl::LogicRect>(vcl::WindowRect(aPixelRect)).get());
+
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     pLayout->DrawText( *mpGraphics );
 
@@ -978,7 +980,7 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
         return;
 
     if( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if( mbOutputClipped )
         return;
@@ -1009,7 +1011,7 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -1106,7 +1108,7 @@ void OutputDevice::ImplDrawWaveLineBezier(tools::Long nStartX, tools::Long nStar
     assert(mpGraphics);
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;

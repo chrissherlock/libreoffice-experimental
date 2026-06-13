@@ -23,6 +23,7 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/MappingPolicy.hxx>
 
+#include <clipping.hxx>
 #include <salgdi.hxx>
 #include <salbmp.hxx>
 
@@ -103,7 +104,7 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;

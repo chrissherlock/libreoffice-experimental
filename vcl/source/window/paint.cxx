@@ -31,7 +31,7 @@
 #include <sal/types.h>
 #include <sal/log.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 #include <window.h>
 #include <salgdi.hxx>
 #include <salframe.hxx>

@@ -36,6 +36,7 @@
 #include <vcl/MappingPolicy.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>
@@ -429,7 +430,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -485,7 +486,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;
@@ -532,7 +533,7 @@ void OutputDevice::CopyArea( const Point& rDestPt,
     EnsureRenderStateSynced();
 
     if ( mbInitClipRegion )
-        InitClipRegion();
+        vcl::clipping::initDeviceClipRegion(*this);
 
     if ( mbOutputClipped )
         return;

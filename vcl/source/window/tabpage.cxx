@@ -25,7 +25,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/toolkit/scrbar.hxx>
 
-#include <clipping.hxx>
+#include <clipping_window.hxx>
 #include <svdata.hxx>
 
 void TabPage::ImplInit( vcl::Window* pParent, WinBits nStyle )
