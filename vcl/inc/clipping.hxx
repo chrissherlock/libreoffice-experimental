@@ -128,6 +128,16 @@ void setParentClipMode(vcl::Window* pWindow, ParentClipMode nMode);
  * window's clipping state block.
  */
 ParentClipMode getParentClipMode(const vcl::Window& pWindow);
+
+/**
+ * @brief Retrieves the active child clipping region for a window implementation.
+ *
+ * This function enforces the lazy initialization pipeline: if the internal
+ * clipping state is marked as dirty, it invokes the necessary subsystem geometry
+ * calculations (via initWinClipRegion and initWinChildClipRegion) before
+ * returning a reference to the computed region.
+ */
+Region& getWinChildClipRegion(vcl::Window& rWindow);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

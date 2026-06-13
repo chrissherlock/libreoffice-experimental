@@ -53,7 +53,7 @@ void WindowOutputDevice::InitClipRegion()
     }
     else
     {
-        aRegion = mxOwnerWindow->ImplGetWinChildClipRegion();
+        aRegion = vcl::clipping::getWinChildClipRegion(*mxOwnerWindow);
 
         // Handle Right-to-Left (RTL) text and coordinate orientation switches
         if (ImplIsAntiparallel())
@@ -99,7 +99,7 @@ void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
     WindowRegion aPixRegion(rRegion);
     vcl::Region aDevPixRegion = GetOutDev()->GetMapper().ViewToDevice(aPixRegion.get());
 
-    vcl::Region aWinChildRegion = ImplGetWinChildClipRegion();
+    vcl::Region aWinChildRegion = vcl::clipping::getWinChildClipRegion(*this);
 
     // only this region is in frame coordinates, so re-mirror it
     if (GetOutDev()->ImplIsAntiparallel())
@@ -176,20 +176,6 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-Region& Window::ImplGetWinChildClipRegion()
-{
-    if (mpWindowImpl->mpClippingState->mbInitWinClipRegion)
-        clipping::initWinClipRegion(*this);
-
-    if (mpWindowImpl->mpClippingState->mbInitChildRegion)
-        vcl::clipping::initWinChildClipRegion(*this);
-
-    if (mpWindowImpl->mpClippingState->mpChildClipRegion)
-        return *mpWindowImpl->mpClippingState->mpChildClipRegion;
-
-    return mpWindowImpl->mpClippingState->maWinClipRegion;
-}
-
 void Window::ImplUpdateNativeObjectClipRegion(vcl::Region aRegion, const vcl::Region& rWinRectRegion)
 {
     if (aRegion == rWinRectRegion)
@@ -225,7 +211,7 @@ bool Window::ImplNativeObjectClip(const vcl::Region* pOldRegion)
     if (!pOldRegion && !mpWindowImpl->mpClippingState->mbInitWinClipRegion)
         return true;
 
-    vcl::Region& rWinChildClipRegion = ImplGetWinChildClipRegion();
+    vcl::Region& rWinChildClipRegion = vcl::clipping::getWinChildClipRegion(*this);
     bool bUpdate = true;
 
     if (vcl::clipping::syncNativeWindow(*mpWindowImpl, rWinChildClipRegion, pOldRegion, bUpdate))
