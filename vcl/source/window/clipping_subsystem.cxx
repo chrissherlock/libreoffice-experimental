@@ -38,6 +38,14 @@ bool initChildRegion(WindowImpl& rImpl)
     return true; // Context contains children; signal the window to clip them
 }
 
+void initWinChildClipRegion(const vcl::Window& rWindow)
+{
+    WindowImpl* pWindowImpl = rWindow.ImplGetWindowImpl();
+
+    if (initChildRegion(*pWindowImpl))
+        clipChildren(rWindow, *pWindowImpl->mpClippingState->mpChildClipRegion);
+}
+
 bool syncNativeWindow(WindowImpl& rImpl, vcl::Region& rWinChildClipRegion,
                       const vcl::Region* pOldRegion, bool& rOutUpdate)
 {

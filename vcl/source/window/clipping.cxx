@@ -176,19 +176,13 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-void Window::ImplInitWinChildClipRegion()
-{
-    if (vcl::clipping::initChildRegion(*mpWindowImpl))
-        vcl::clipping::clipChildren(*this, *mpWindowImpl->mpClippingState->mpChildClipRegion);
-}
-
 Region& Window::ImplGetWinChildClipRegion()
 {
     if (mpWindowImpl->mpClippingState->mbInitWinClipRegion)
         clipping::initWinClipRegion(*this);
 
     if (mpWindowImpl->mpClippingState->mbInitChildRegion)
-        ImplInitWinChildClipRegion();
+        vcl::clipping::initWinChildClipRegion(*this);
 
     if (mpWindowImpl->mpClippingState->mpChildClipRegion)
         return *mpWindowImpl->mpClippingState->mpChildClipRegion;
