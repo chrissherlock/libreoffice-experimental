@@ -176,19 +176,6 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-void Window::ImplCalcOverlapRegionOverlaps( const vcl::Region& rInterRegion, vcl::Region& rRegion ) const
-{
-    // High-level ancestral sibling walk
-    for (vcl::Window* pOverlapWin : vcl::clipping::getAncestralOverlapSiblings(const_cast<Window*>(this)))
-    {
-        vcl::clipping::accumulateWindowAndChildOverlaps(pOverlapWin, rInterRegion, rRegion);
-    }
-
-    // Child overlap window execution
-    vcl::Window* pOverlapParent = !ImplIsOverlapWindow() ? mpWindowImpl->mpOverlapWindow.get() : const_cast<Window*>(this);
-    vcl::clipping::accumulateChildOverlaps(pOverlapParent, rInterRegion, rRegion);
-}
-
 void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Region& rRegion,
                                     bool bChildren, bool bSiblings )
 {
@@ -198,7 +185,7 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
     vcl::Region  aTempRegion;
     vcl::Window* pWindow;
 
-    ImplCalcOverlapRegionOverlaps( aRegion, rRegion );
+    vcl::clipping::calcOverlapRegionOverlaps(*this, aRegion, rRegion);
 
     // Parent-Boundaries
     pWindow = this;

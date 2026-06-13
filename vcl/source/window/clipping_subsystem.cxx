@@ -612,6 +612,25 @@ bool setClipFlagOverlapWindows(vcl::Window& rWindow, bool bSysObjOnlySmaller)
     return bUpdate;
 }
 
+void calcOverlapRegionOverlaps(const vcl::Window& rWindow, const vcl::Region& rInterRegion,
+                               vcl::Region& rRegion)
+{
+    const WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl)
+        return;
+
+    // High-level ancestral sibling walk
+    for (vcl::Window* pOverlapWin : getAncestralOverlapSiblings(const_cast<vcl::Window*>(&rWindow)))
+    {
+        accumulateWindowAndChildOverlaps(pOverlapWin, rInterRegion, rRegion);
+    }
+
+    // Child overlap window execution
+    vcl::Window* pOverlapParent
+        = !pImpl->mbOverlapWin ? pImpl->mpOverlapWindow.get() : const_cast<vcl::Window*>(&rWindow);
+    accumulateChildOverlaps(pOverlapParent, rInterRegion, rRegion);
+}
+
 } // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
