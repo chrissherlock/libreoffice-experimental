@@ -138,6 +138,13 @@ ParentClipMode getParentClipMode(const vcl::Window& pWindow);
  * returning a reference to the computed region.
  */
 Region& getWinChildClipRegion(vcl::Window& rWindow);
+
+/**
+ * Recalculates and flushes the native system object's clipping rectangles,
+ * normalizing absolute coordinates down to the device origin space.
+ */
+void updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region aRegion,
+                                  const vcl::Region& rWinRectRegion);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
