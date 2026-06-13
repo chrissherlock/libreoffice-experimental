@@ -580,7 +580,6 @@ protected:
 
     SAL_DLLPRIVATE void                 ImplScroll( const tools::Rectangle& rRect, tools::Long nHorzScroll, tools::Long nVertScroll, ScrollFlags nFlags );
 
-    SAL_DLLPRIVATE bool                 ImplSetClipFlagChildren( bool bSysObjOnlySmaller );
     SAL_DLLPRIVATE bool                 ImplSetClipFlagOverlapWindows( bool bSysObjOnlySmaller = false );
 
     SAL_DLLPRIVATE void                 PushPaintHelper(PaintHelper* pHelper, vcl::RenderContext& rRenderContext);
