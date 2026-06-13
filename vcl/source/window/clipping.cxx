@@ -376,24 +376,10 @@ void Window::ImplIntersectWindowRegion( vcl::Region& rRegion )
         rRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
 }
 
-void Window::ImplExcludeWindowRegion( vcl::Region& rRegion )
-{
-    if ( mpWindowImpl->mpClippingState->mbWinRegion )
-    {
-        vcl::Region aRegion( GetOutputRectPixel() );
-        aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
-        rRegion.Exclude( aRegion );
-    }
-    else
-    {
-        rRegion.Exclude( GetOutputRectPixel() );
-    }
-}
-
 void Window::ImplExcludeOverlapWindows2( vcl::Region& rRegion )
 {
     if ( mpWindowImpl->mbReallyVisible )
-        ImplExcludeWindowRegion( rRegion );
+        vcl::clipping::excludeWindowRegion(this, rRegion);
 
     vcl::clipping::excludeOverlapWindows(*this, rRegion);
 }
@@ -430,7 +416,7 @@ void Window::ImplCalcOverlapRegion( const tools::Rectangle& rSourceRect, vcl::Re
         do
         {
             aTempRegion = aRegion;
-            pWindow->ImplExcludeWindowRegion( aTempRegion );
+            vcl::clipping::excludeWindowRegion(pWindow, aTempRegion);
             rRegion.Union( aTempRegion );
             if ( pWindow->ImplIsOverlapWindow() )
                 break;
