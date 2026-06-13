@@ -1278,7 +1278,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
         aClipRegion.Intersect(aPaintRect);
         pDevice->SetClipRegion(aClipRegion);
 
-        if (!IsPaintTransparent() && IsBackground() && ! (GetParentClipMode() & ParentClipMode::NoClip))
+        if (!IsPaintTransparent() && IsBackground() && ! (vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip))
             Erase(*pDevice);
 
         pDevice->SetMapMode(GetMapMode());
@@ -1388,7 +1388,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
     // do the actual paint
 
     // background
-    if( ! IsPaintTransparent() && IsBackground() && ! (GetParentClipMode() & ParentClipMode::NoClip ) )
+    if( ! IsPaintTransparent() && IsBackground() && ! (vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip ) )
     {
         Erase(*GetOutDev());
     }
