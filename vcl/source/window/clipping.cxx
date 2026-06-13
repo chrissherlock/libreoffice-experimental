@@ -176,38 +176,9 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-bool Window::ImplSetClipFlagChildren(bool bSysObjOnlySmaller)
-{
-    auto pOldRegion = vcl::clipping::prepareClipInvalidation(*mpWindowImpl, bSysObjOnlySmaller);
-
-    GetOutDev()->mbInitClipRegion = true;
-    mpWindowImpl->mpClippingState->mbInitWinClipRegion = true;
-
-    // The linked-list logic is gone. We loop over a clean, modern sequence.
-    bool bUpdate = true;
-    for (vcl::Window* pChild : vcl::clipping::getChildWindows(*mpWindowImpl))
-    {
-        if (!pChild->ImplSetClipFlagChildren(bSysObjOnlySmaller))
-            bUpdate = false;
-    }
-
-    if (!mpWindowImpl->mpSysObj)
-        return bUpdate;
-
-    bool bClipSuccess = vcl::clipping::nativeObjectClip(*this, pOldRegion.get());
-
-    auto [bNewUpdate, bInvalidateDevice] = vcl::clipping::processClipResult(*mpWindowImpl, bClipSuccess, bUpdate);
-    bUpdate = bNewUpdate;
-
-    if (bInvalidateDevice)
-        GetOutDev()->mbInitClipRegion = true;
-
-    return bUpdate;
-}
-
 bool Window::ImplSetClipFlagOverlapWindows(bool bSysObjOnlySmaller)
 {
-    bool bUpdate = ImplSetClipFlagChildren(bSysObjOnlySmaller);
+    bool bUpdate = vcl::clipping::setClipFlagChildren(*this, bSysObjOnlySmaller);
 
     for (vcl::Window* pWindow : vcl::clipping::getOverlapWindows(*mpWindowImpl))
     {
@@ -223,14 +194,14 @@ bool Window::ImplSetClipFlag(bool bSysObjOnlySmaller)
     if (!ImplIsOverlapWindow())
         return mpWindowImpl->mpFrameWindow->ImplSetClipFlagOverlapWindows(bSysObjOnlySmaller);
 
-    bool bUpdate = ImplSetClipFlagChildren(bSysObjOnlySmaller);
+    bool bUpdate = clipping::setClipFlagChildren(*this, bSysObjOnlySmaller);
 
     vcl::Window* pParent = ImplGetParent();
 
     if (pParent)
     {
         // Explicit return value checking replaces hidden references
-        if (vcl::clipping::invalidateParentClipIfRequired(*mpWindowImpl, *pParent->mpWindowImpl, pParent->GetStyle()))
+        if (clipping::invalidateParentClipIfRequired(*mpWindowImpl, *pParent->mpWindowImpl, pParent->GetStyle()))
             pParent->GetOutDev()->mbInitClipRegion = true;
     }
 
@@ -238,7 +209,7 @@ bool Window::ImplSetClipFlag(bool bSysObjOnlySmaller)
     {
         for (vcl::Window* pSibling : vcl::clipping::getFollowingSiblings(*mpWindowImpl))
         {
-            if (!pSibling->ImplSetClipFlagChildren(bSysObjOnlySmaller))
+            if (!clipping::setClipFlagChildren(*pSibling, bSysObjOnlySmaller))
                 bUpdate = false;
         }
     }
