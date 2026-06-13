@@ -1706,7 +1706,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
         {
             vcl::Region aRegion( *pOldRegion );
             if ( !mpWindowImpl->mbPaintTransparent )
-                vcl::clipping::excludeWindowRegion(this, aRegion);
+                vcl::clipping::excludeWindowRegion(*this, aRegion);
             vcl::clipping::clipBoundaries(*this, aRegion, false, true);
             if ( !aRegion.IsEmpty() && !mpWindowImpl->mpBorderWindow )
                 ImplInvalidateParentFrameRegion( aRegion );

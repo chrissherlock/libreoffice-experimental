@@ -209,21 +209,29 @@ void intersectWindowRegion(vcl::Window* pWindow, vcl::Region& rRegion)
     }
 }
 
-void excludeWindowRegion(vcl::Window* pWindow, vcl::Region& rRegion)
+void excludeWindowRegion(vcl::Window& rWindow, vcl::Region& rRegion)
 {
     // If the target window has a custom boundary path, extract its intersection block
-    if (pWindow->ImplGetWindowImpl()->mpClippingState->mbWinRegion)
+    if (rWindow.ImplGetWindowImpl()->mpClippingState->mbWinRegion)
     {
-        vcl::Region aRegion(pWindow->GetOutputRectPixel());
-        aRegion.Intersect(pWindow->GetOutDev()->GetMapper().ViewToDevice(
-            pWindow->ImplGetWindowImpl()->mpClippingState->maWinRegion));
+        vcl::Region aRegion(rWindow.GetOutputRectPixel());
+        aRegion.Intersect(rWindow.GetOutDev()->GetMapper().ViewToDevice(
+            rWindow.ImplGetWindowImpl()->mpClippingState->maWinRegion));
         rRegion.Exclude(aRegion);
     }
     else
     {
         // Otherwise, simply exclude the standard bounding box
-        rRegion.Exclude(pWindow->GetOutputRectPixel());
+        rRegion.Exclude(rWindow.GetOutputRectPixel());
     }
+}
+
+void excludeWindowAndOverlapRegions(vcl::Window& rWindow, vcl::Region& rRegion)
+{
+    if (rWindow.ImplGetWindowImpl()->mbReallyVisible)
+        excludeWindowRegion(rWindow, rRegion);
+
+    excludeOverlapWindows(rWindow, rRegion);
 }
 
 static bool lcl_IsParentClipRequired(ParentClipMode nClipMode, WinBits nStyle)
@@ -244,7 +252,7 @@ bool clipChildren(const vcl::Window& rWindow, vcl::Region& rRegion)
             ParentClipMode nClipMode = pChild->GetParentClipMode();
 
             if (lcl_IsParentClipRequired(nClipMode, nParentStyle))
-                excludeWindowRegion(pChild, rRegion);
+                excludeWindowRegion(*pChild, rRegion);
             else
                 bOtherClip = true;
         }
@@ -258,7 +266,7 @@ void clipAllChildren(const vcl::Window& rWindow, vcl::Region& rRegion)
     for (vcl::Window* pChild : getChildWindows(*rWindow.ImplGetWindowImpl()))
     {
         if (pChild->ImplGetWindowImpl()->mbReallyVisible)
-            excludeWindowRegion(pChild, rRegion);
+            excludeWindowRegion(*pChild, rRegion);
     }
 }
 
@@ -274,7 +282,7 @@ void clipSiblings(const vcl::Window& rWindow, vcl::Region& rRegion)
             break; // We only clip against preceding siblings
 
         if (pSibling->ImplGetWindowImpl()->mbReallyVisible)
-            excludeWindowRegion(pSibling, rRegion);
+            excludeWindowRegion(*pSibling, rRegion);
     }
 }
 
@@ -310,7 +318,7 @@ void excludeOverlapWindows(const vcl::Window& rWindow, vcl::Region& rRegion)
     {
         if (pOverlap->ImplGetWindowImpl()->mbReallyVisible)
         {
-            excludeWindowRegion(pOverlap, rRegion);
+            excludeWindowRegion(*pOverlap, rRegion);
             excludeOverlapWindows(*pOverlap, rRegion);
         }
     }
@@ -355,7 +363,7 @@ void clipBoundaries(const vcl::Window& rWindow, vcl::Region& rRegion, bool bThis
     for (vcl::Window* pOverlapWin : getAncestralOverlapSiblings(const_cast<vcl::Window*>(&rWindow)))
     {
         if (pOverlapWin->ImplGetWindowImpl()->mbReallyVisible)
-            excludeWindowRegion(pOverlapWin, rRegion);
+            excludeWindowRegion(*pOverlapWin, rRegion);
 
         excludeOverlapWindows(*pOverlapWin, rRegion);
     }
