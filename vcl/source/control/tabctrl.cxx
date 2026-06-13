@@ -37,6 +37,8 @@
 #include <vcl/toolkit/lstbox.hxx>
 #include <vcl/uitest/uiobject.hxx>
 
+#include <clipping.hxx>
+
 #include <bitmaps.hlst>
 #include <svdata.hxx>
 #include <window.h>
@@ -168,7 +170,7 @@ void TabControl::ImplInitSettings( bool bBackground )
         // set transparent mode for NWF tabcontrols to have
         // the background always cleared properly
         EnableChildTransparentMode();
-        SetParentClipMode( ParentClipMode::NoClip );
+        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent( true );
         SetBackground();
         ImplGetWindowImpl()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
@@ -177,7 +179,7 @@ void TabControl::ImplInitSettings( bool bBackground )
     }
 
     EnableChildTransparentMode( false );
-    SetParentClipMode();
+    vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
     SetPaintTransparent( false );
 
     if ( IsControlBackground() )

@@ -22,6 +22,8 @@
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
 #include <vcl/settings.hxx>
 
+#include <clipping.hxx>
+
 #define GROUP_BORDER            12
 #define GROUP_TEXT_BORDER       2
 
@@ -65,14 +67,14 @@ void GroupBox::ImplInitSettings( bool bBackground )
         !IsControlBackground())
     {
         EnableChildTransparentMode();
-        SetParentClipMode( ParentClipMode::NoClip );
+        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent( true );
         SetBackground();
     }
     else
     {
         EnableChildTransparentMode( false );
-        SetParentClipMode();
+        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
         SetPaintTransparent( false );
 
         if ( IsControlBackground() )
