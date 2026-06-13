@@ -913,7 +913,7 @@ void Window::SetWindowRegionPixel()
         {
             mpWindowImpl->mpClippingState->maWinRegion = vcl::Region(true);
             mpWindowImpl->mpClippingState->mbWinRegion = false;
-            ImplSetClipFlag();
+            vcl::clipping::setClipFlag(*this);
 
             if ( IsReallyVisible() )
             {
@@ -968,14 +968,14 @@ void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
             {
                 mpWindowImpl->mpClippingState->maWinRegion = vcl::Region(true);
                 mpWindowImpl->mpClippingState->mbWinRegion = false;
-                ImplSetClipFlag();
+                vcl::clipping::setClipFlag(*this);
             }
         }
         else
         {
             mpWindowImpl->mpClippingState->maWinRegion = rRegion;
             mpWindowImpl->mpClippingState->mbWinRegion = true;
-            ImplSetClipFlag();
+            vcl::clipping::setClipFlag(*this);
         }
 
         if ( IsReallyVisible() )

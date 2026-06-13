@@ -1,4 +1,3 @@
-#include <vcl/MappingPolicy.hxx>
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -50,7 +49,9 @@
 #include <vcl/uitest/logger.hxx>
 #include <vcl/ptrstyle.hxx>
 #include <vcl/CoordinateMapper.hxx>
+#include <vcl/MappingPolicy.hxx>
 
+#include <clipping.hxx>
 #include <svdata.hxx>
 #include <salwtype.hxx>
 #include <salframe.hxx>
@@ -1962,8 +1963,10 @@ void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long 
             pWindow->GetOutDev()->SetOutputWidthPixel(nNewWidth);
             pWindow->GetOutDev()->SetOutputHeightPixel(nNewHeight);
             pWindow->ImplGetWindowImpl()->mbWaitSystemResize = false;
+
             if ( pWindow->IsReallyVisible() )
-                pWindow->ImplSetClipFlag();
+                vcl::clipping::setClipFlag(*pWindow);
+
             if ( pWindow->IsVisible() || pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize ||
                 ( pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplGetWindowImpl()->mpClientWindow ) )   // propagate resize for system border windows
             {

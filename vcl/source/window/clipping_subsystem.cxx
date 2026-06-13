@@ -555,6 +555,63 @@ bool setClipFlagChildren(vcl::Window& rWindow, bool bSysObjOnlySmaller)
     return bUpdate;
 }
 
+bool setClipFlag(vcl::Window& rWindow, bool bSysObjOnlySmaller)
+{
+    WindowImpl* pWindowImpl = rWindow.ImplGetWindowImpl();
+    if (!pWindowImpl)
+        return true;
+
+    if (!rWindow.ImplIsOverlapWindow())
+    {
+        if (pWindowImpl->mpFrameWindow)
+            return setClipFlagOverlapWindows(*pWindowImpl->mpFrameWindow, bSysObjOnlySmaller);
+
+        return true;
+    }
+
+    bool bUpdate = setClipFlagChildren(rWindow, bSysObjOnlySmaller);
+
+    vcl::Window* pParent = rWindow.ImplGetParent();
+    if (pParent)
+    {
+        WindowImpl* pParentImpl = pParent->ImplGetWindowImpl();
+        // Explicit return value checking replaces hidden references
+        if (pParentImpl
+            && invalidateParentClipIfRequired(*pWindowImpl, *pParentImpl, pParent->GetStyle()))
+        {
+            dirtyInitClipRegion(*pParent);
+        }
+    }
+
+    if (pWindowImpl->mpClippingState->mbClipSiblings)
+    {
+        for (vcl::Window* pSibling : getFollowingSiblings(*pWindowImpl))
+        {
+            if (!setClipFlagChildren(*pSibling, bSysObjOnlySmaller))
+                bUpdate = false;
+        }
+    }
+
+    return bUpdate;
+}
+
+bool setClipFlagOverlapWindows(vcl::Window& rWindow, bool bSysObjOnlySmaller)
+{
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl)
+        return true;
+
+    bool bUpdate = setClipFlagChildren(rWindow, bSysObjOnlySmaller);
+
+    for (vcl::Window* pWindow : getOverlapWindows(*pImpl))
+    {
+        if (!setClipFlagOverlapWindows(*pWindow, bSysObjOnlySmaller))
+            bUpdate = false;
+    }
+
+    return bUpdate;
+}
+
 } // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

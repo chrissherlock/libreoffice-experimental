@@ -184,6 +184,23 @@ inline void dirtyInitClipRegion(vcl::Window& rWindow)
     // is the standard, public VCL way to trip the mbInitClipRegion flag to true.
     rWindow.GetOutDev()->SetClipRegion();
 }
+
+/**
+ * Orchestrates clip invalidation flag setting across the window tree, managing
+ * routing behavior depending on whether the node is an overlap window, has parent
+ * clipping configurations, or requires tracking across sibling components.
+ *
+ * @return true if the hierarchical flag update successfully completed.
+ */
+bool setClipFlag(vcl::Window& rWindow, bool bSysObjOnlySmaller = false);
+
+/**
+ * Iterates over a window context and its nested overlap window sequences,
+ * updating hierarchy clip flags and layout state indicators.
+ *
+ * @return true if the hierarchical update pass completed successfully.
+ */
+bool setClipFlagOverlapWindows(vcl::Window& rWindow, bool bSysObjOnlySmaller = false);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
