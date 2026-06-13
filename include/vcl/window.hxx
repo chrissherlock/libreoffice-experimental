@@ -507,8 +507,6 @@ public:
     SAL_DLLPRIVATE void                 ImplInvalidateFrameRegion( const vcl::Region* pRegion, InvalidateFlags nFlags );
     SAL_DLLPRIVATE void                 ImplInvalidateOverlapFrameRegion( const vcl::Region& rRegion );
 
-    SAL_DLLPRIVATE bool                 ImplSetClipFlag( bool bSysObjOnlySmaller = false );
-
     SAL_DLLPRIVATE bool                 ImplIsWindowOrChild( const vcl::Window* pWindow, bool bSystemWindow = false ) const;
     SAL_DLLPRIVATE bool                 ImplIsChild( const vcl::Window* pWindow, bool bSystemWindow = false ) const;
     SAL_DLLPRIVATE bool                 ImplIsFloatingWindow() const;
@@ -579,8 +577,6 @@ protected:
     SAL_DLLPRIVATE void                 ImplSetMouseTransparent( bool bTransparent );
 
     SAL_DLLPRIVATE void                 ImplScroll( const tools::Rectangle& rRect, tools::Long nHorzScroll, tools::Long nVertScroll, ScrollFlags nFlags );
-
-    SAL_DLLPRIVATE bool                 ImplSetClipFlagOverlapWindows( bool bSysObjOnlySmaller = false );
 
     SAL_DLLPRIVATE void                 PushPaintHelper(PaintHelper* pHelper, vcl::RenderContext& rRenderContext);
     SAL_DLLPRIVATE void                 PopPaintHelper(PaintHelper const * pHelper);

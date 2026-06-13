@@ -23,6 +23,7 @@
 #include <vcl/taskpanelist.hxx>
 #include <sal/log.hxx>
 
+#include <clipping.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
 #include <svdata.hxx>
@@ -315,9 +316,7 @@ void Window::ImplToTop( ToTopFlags nFlags )
 
             // recalculate ClipRegion of this and all overlapping windows
             if ( IsReallyVisible() )
-            {
-                mpWindowImpl->mpOverlapWindow->ImplSetClipFlagOverlapWindows();
-            }
+                vcl::clipping::setClipFlagOverlapWindows(*mpWindowImpl->mpOverlapWindow);
         }
     }
 }
@@ -553,7 +552,7 @@ void Window::SetZOrder( vcl::Window* pRefWindow, ZOrderFlags nFlags )
         return;
 
     bool bInitWinClipRegion = mpWindowImpl->mpClippingState->mbInitWinClipRegion;
-    ImplSetClipFlag();
+    vcl::clipping::setClipFlag(*this);
 
     // When ClipRegion was not initialised, assume
     // the window has not been sent, therefore do not
