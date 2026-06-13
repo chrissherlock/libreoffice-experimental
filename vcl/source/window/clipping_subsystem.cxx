@@ -433,6 +433,36 @@ ParentClipMode getParentClipMode(const vcl::Window& rWindow)
     return pWindowImpl->mpClippingState->meParentClipMode;
 }
 
+void updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region aRegion,
+                                  const vcl::Region& rWinRectRegion)
+{
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl || !pImpl->mpSysObj)
+        return;
+
+    if (aRegion == rWinRectRegion)
+    {
+        pImpl->mpSysObj->ResetClipRegion();
+        return;
+    }
+
+    aRegion.Move(-rWindow.GetOutDev()->GetDeviceOriginX(),
+                 -rWindow.GetOutDev()->GetDeviceOriginY());
+
+    // Set/update system object clip region
+    RectangleVector aRectangles;
+    aRegion.GetRegionRectangles(aRectangles);
+    pImpl->mpSysObj->BeginSetClipRegion(aRectangles.size());
+
+    for (auto const& rectangle : aRectangles)
+    {
+        pImpl->mpSysObj->UnionClipRegion(rectangle.Left(), rectangle.Top(), rectangle.GetWidth(),
+                                         rectangle.GetHeight());
+    }
+
+    pImpl->mpSysObj->EndSetClipRegion();
+}
+
 } // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -176,33 +176,6 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
-void Window::ImplUpdateNativeObjectClipRegion(vcl::Region aRegion, const vcl::Region& rWinRectRegion)
-{
-    if (aRegion == rWinRectRegion)
-    {
-        mpWindowImpl->mpSysObj->ResetClipRegion();
-        return;
-    }
-
-    aRegion.Move(-GetOutDev()->GetDeviceOriginX(), -GetOutDev()->GetDeviceOriginY());
-
-    // Set/update system object clip region
-    RectangleVector aRectangles;
-    aRegion.GetRegionRectangles(aRectangles);
-    mpWindowImpl->mpSysObj->BeginSetClipRegion(aRectangles.size());
-
-    for (auto const& rectangle : aRectangles)
-    {
-        mpWindowImpl->mpSysObj->UnionClipRegion(
-            rectangle.Left(),
-            rectangle.Top(),
-            rectangle.GetWidth(),
-            rectangle.GetHeight());
-    }
-
-    mpWindowImpl->mpSysObj->EndSetClipRegion();
-}
-
 bool Window::ImplNativeObjectClip(const vcl::Region* pOldRegion)
 {
     if (!mpWindowImpl->mpSysObj)
@@ -217,7 +190,8 @@ bool Window::ImplNativeObjectClip(const vcl::Region* pOldRegion)
     if (vcl::clipping::syncNativeWindow(*mpWindowImpl, rWinChildClipRegion, pOldRegion, bUpdate))
         return bUpdate;
 
-    ImplUpdateNativeObjectClipRegion(rWinChildClipRegion, vcl::Region(GetOutputRectPixel()));
+    vcl::clipping::updateNativeObjectClipRegion(*this, rWinChildClipRegion, vcl::Region(GetOutputRectPixel()));
+
     mpWindowImpl->mpSysObj->Show(true);
 
     return bUpdate;
