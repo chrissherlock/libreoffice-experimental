@@ -232,7 +232,7 @@ void Window::ImplCalcToTop( ImplCalcToTopData* pPrevData )
     // calculate region, where the window overlaps with other windows
     vcl::Region  aRegion( GetOutputRectPixel() );
     vcl::Region  aInvalidateRegion;
-    ImplCalcOverlapRegionOverlaps( aRegion, aInvalidateRegion );
+    vcl::clipping::calcOverlapRegionOverlaps(*this, aRegion, aInvalidateRegion);
 
     if ( !aInvalidateRegion.IsEmpty() )
     {
