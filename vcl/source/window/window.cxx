@@ -582,22 +582,6 @@ Window::~Window()
 
 } /* namespace vcl */
 
-ImplWinData::ImplWinData() :
-    mnCursorExtWidth(0),
-    mbVertical(false),
-    mnCompositionCharRects(0),
-    mnTrackFlags(ShowTrackFlags::NONE),
-    mnIsTopWindow(sal_uInt16(~0)), // not initialized yet, 0/1 will indicate TopWindow (see IsTopWindow())
-    mbMouseOver(false),
-    mbEnableNativeWidget(false)
-{
-}
-
-ImplWinData::~ImplWinData()
-{
-    mpCompositionCharRects.reset();
-}
-
 ImplFrameData::ImplFrameData( vcl::Window *pWindow )
     : maPaintIdle( "vcl::Window maPaintIdle" ),
       maResizeIdle( "vcl::Window maResizeIdle" )
