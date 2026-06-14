@@ -825,7 +825,7 @@ public:
     void ApplyControlBackground(vcl::RenderContext& rRenderContext, const Color& rDefaultColor);
 
     void                                SetParentClipMode( ParentClipMode nMode = ParentClipMode::NONE );
-    SAL_DLLPRIVATE ParentClipMode       GetParentClipMode() const;
+    ParentClipMode                      GetParentClipMode() const;
 
     void                                SetWindowRegionPixel();
     void                                SetWindowRegionPixel( const vcl::Region& rRegion );
