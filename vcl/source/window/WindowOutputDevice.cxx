@@ -369,6 +369,55 @@ void WindowOutputDevice::ImplInitMapModeObjects()
     if (mxOwnerWindow->mpWindowImpl->mpCursor)
         mxOwnerWindow->mpWindowImpl->mpCursor->ImplNew();
 }
+
+vcl::Region WindowOutputDevice::GetOutputBoundsClipRegion() const
+{
+    vcl::Region aClip(GetClipRegion());
+    aClip.Intersect(tools::Rectangle(Point(), GetOutputSize()));
+
+    return aClip;
+}
+
+void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize, const Size&) const
+{
+    comphelper::ScopeGuard aResetMapMode([&rSaveDevice]() { rSaveDevice.SetMapMode(MapMode()); });
+
+    if (!mxOwnerWindow || !mxOwnerWindow->mpWindowImpl || !mxOwnerWindow->mpWindowImpl->mpPaintRegion)
+    {
+        rSaveDevice.DrawOutDev(Point(), rSize, rPos, rSize, *this);
+        return;
+    }
+
+    vcl::Region aClip(*mxOwnerWindow->mpWindowImpl->mpPaintRegion);
+    aClip.Move(-GetDeviceOriginX(), -GetDeviceOriginY());
+
+    const auto boundRect = convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle(rPos, rSize)), GetMapMode());
+
+    aClip.Intersect(boundRect.get());
+
+    if (aClip.IsEmpty())
+        return;
+
+    const vcl::Region aOldClip(rSaveDevice.GetClipRegion());
+    const vcl::MappingPolicy eOldPolicy = rSaveDevice.GetMappingPolicy();
+
+    comphelper::ScopeGuard aDeviceGuard([&rSaveDevice, aOldClip, eOldPolicy]() {
+        rSaveDevice.SetMappingPolicy(eOldPolicy);
+        rSaveDevice.SetClipRegion(aOldClip);
+    });
+
+    const auto aPixPos = convertTo<vcl::WindowPoint>(vcl::LogicPoint(rPos), GetMapMode());
+    const auto aPixOffset = rSaveDevice.convertTo<vcl::WindowPoint>(vcl::LogicPoint(0, 0), rSaveDevice.GetMapMode());
+
+    // Move clip region to have the same distance to DestOffset
+    aClip.Move(aPixOffset->X() - aPixPos->X(), aPixOffset->Y() - aPixPos->Y());
+
+    // Set pixel clip region
+    rSaveDevice.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
+    rSaveDevice.SetClipRegion(aClip);
+
+    rSaveDevice.DrawOutDev(Point(), rSize, rPos, rSize, *this);
+}
 } /* namespace vcl */
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
