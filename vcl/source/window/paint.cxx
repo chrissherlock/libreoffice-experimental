@@ -31,6 +31,8 @@
 #include <sal/types.h>
 #include <sal/log.hxx>
 
+#include <clipping/ClippingBridge.hxx>
+#include <clipping/ClipStateBuilder.hxx>
 #include <clipping_window.hxx>
 #include <window.h>
 #include <salgdi.hxx>
@@ -879,8 +881,16 @@ void Window::PostPaint(vcl::RenderContext& /*rRenderContext*/)
 {
 }
 
-void Window::Paint(vcl::RenderContext& /*rRenderContext*/, const tools::Rectangle& rRect)
+void Window::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rRect)
 {
+    auto aState = vcl::clipping::ClipStateBuilder::BuildFromWindow(*this);
+    vcl::clipping::ApplyClipping(rRenderContext, aState);
+
+    // VIRTUAL VERIFICATION:
+    // Check if our new clipping result matches what VCL's legacy state expected.
+    // If this hits, you have found a regression in your compiler logic!
+    assert(rRenderContext.GetClipRegion() == vcl::clipping::ClipCompiler::Compile(aState).maFinalRegion);
+
     CallEventListeners(VclEventId::WindowPaint, const_cast<tools::Rectangle *>(&rRect));
 }
 
