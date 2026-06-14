@@ -132,6 +132,70 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testExcludeWindowRegion_Comprehensive)
     }
 }
 
+CPPUNIT_TEST_FIXTURE(TestClipping, testClipChildren_Comprehensive)
+{
+    ScopedVclPtr<WorkWindow> pRoot(VclPtr<WorkWindow>::Create(nullptr, WB_CLIPCHILDREN));
+    ScopedVclPtr<vcl::Window> pChild(VclPtr<vcl::Window>::Create(pRoot.get()));
+
+    pChild->SetPosSizePixel(Point(50, 50), Size(20, 20));
+
+    // Force the child to clip its parent (disable NoClip)
+    pChild->SetParentClipMode(ParentClipMode::NONE);
+
+    pRoot->Show();
+    pChild->Show();
+    pRoot->Invalidate(InvalidateFlags::Children);
+    Application::Reschedule();
+
+    // Force visibility flags
+    pRoot->ImplGetWindowImpl()->mbVisible = true;
+    pRoot->ImplGetWindowImpl()->mbReallyVisible = true;
+    pChild->ImplGetWindowImpl()->mbVisible = true;
+    pChild->ImplGetWindowImpl()->mbReallyVisible = true;
+
+    // Initialize ALL clipping states (Parent AND Child)
+    vcl::clipping::initWinClipRegion(*pRoot);
+    vcl::clipping::initWinChildClipRegion(*pRoot);
+    vcl::clipping::initWinClipRegion(*pChild);
+
+    // ==========================================
+    // DIAGNOSTIC ASSERTIONS (The VCL polygraph)
+    // ==========================================
+
+    // Does the parent actually have the style?
+    CPPUNIT_ASSERT_MESSAGE("Fail 1: Parent missing WB_CLIPCHILDREN",
+                           (pRoot->GetStyle() & WB_CLIPCHILDREN) != 0);
+
+    // Did the child successfully attach to the parent?
+    CPPUNIT_ASSERT_MESSAGE("Fail 2: Child not in parent's list", pRoot->GetChildCount() == 1);
+
+    // Does VCL believe the child is visible?
+    CPPUNIT_ASSERT_MESSAGE("Fail 3: Child IsVisible() is false", pChild->IsVisible());
+
+    // Does VCL believe the child is REALLY visible? (Frame mapped)
+    CPPUNIT_ASSERT_MESSAGE("Fail 4: Child IsReallyVisible() is false", pChild->IsReallyVisible());
+
+    // Is the ParentClipMode preventing it? (Should be NONE)
+    CPPUNIT_ASSERT_MESSAGE("Fail 5: ParentClipMode is set to NoClip",
+                           pChild->GetParentClipMode() != ParentClipMode::NoClip);
+
+    // ==========================================
+
+    vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
+    bool bIsRegionEmpty = vcl::clipping::clipChildren(*pRoot, aRegion);
+
+    // Because we only punched a 20x20 hole in a 100x100 region, the region is NOT empty.
+    // VCL correctly returns false to tell the paint engine to keep drawing.
+    CPPUNIT_ASSERT_MESSAGE("Fail 6: Region should not be completely empty", !bIsRegionEmpty);
+
+    // The true test of the math: Did it punch the hole?
+    CPPUNIT_ASSERT_MESSAGE("Fail 7: Child region (50,50 to 70,70) not excluded",
+                           !aRegion.Contains(Point(60, 60)));
+
+    CPPUNIT_ASSERT_MESSAGE("Fail 8: Outside region should remain untouched",
+                           aRegion.Contains(Point(10, 10)));
+}
+
 } // end anonymous namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
