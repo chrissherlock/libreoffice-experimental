@@ -16,6 +16,7 @@ $(eval $(call gb_CppunitTest_set_include,vcl_clipping,\
 
 $(eval $(call gb_CppunitTest_add_exception_objects,vcl_clipping, \
 	vcl/qa/cppunit/clipping/vclclippingtest \
+	vcl/qa/cppunit/clipping/vclwindowclippingtest \
 ))
 
 $(eval $(call gb_CppunitTest_use_libraries,vcl_clipping, \

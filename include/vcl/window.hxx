@@ -826,8 +826,8 @@ public:
     void                                SetParentClipMode( ParentClipMode nMode = ParentClipMode::NONE );
     SAL_DLLPRIVATE ParentClipMode       GetParentClipMode() const;
 
-    SAL_DLLPRIVATE void                 SetWindowRegionPixel();
-    SAL_DLLPRIVATE void                 SetWindowRegionPixel( const vcl::Region& rRegion );
+    void                                SetWindowRegionPixel();
+    void                                SetWindowRegionPixel( const vcl::Region& rRegion );
     vcl::Region                         GetWindowClipRegionPixel() const;
     vcl::Region                         GetPaintRegion() const;
     bool                                IsInPaint() const;
