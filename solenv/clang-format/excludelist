@@ -14642,6 +14642,7 @@ vcl/source/window/menuwindow.hxx
 vcl/source/window/mnemonic.cxx
 vcl/source/window/mouse.cxx
 vcl/source/window/paint.cxx
+vcl/source/window/paintinvalidator.cxx
 vcl/source/window/printdlg.cxx
 vcl/source/window/scrwnd.cxx
 vcl/source/window/seleng.cxx
