@@ -555,6 +555,139 @@ Window::~Window()
     return mpWindowImpl ? mpWindowImpl->mxOutDev.get() : nullptr;
 }
 
+Size Window::GetOptimalSize() const { return Size(); }
+
+void Window::ImplAdjustNWFSizes()
+{
+    for (Window* pWin = GetWindow(GetWindowType::FirstChild); pWin;
+         pWin = pWin->GetWindow(GetWindowType::Next))
+        pWin->ImplAdjustNWFSizes();
+}
+
+const Font& Window::GetFont() const { return GetOutDev()->GetFont(); }
+void Window::SetFont(Font const& font) { return GetOutDev()->SetFont(font); }
+
+float Window::approximate_char_width() const { return GetOutDev()->approximate_char_width(); }
+
+const Wallpaper& Window::GetBackground() const { return GetOutDev()->GetBackground(); }
+bool Window::IsBackground() const { return GetOutDev()->IsBackground(); }
+tools::Long Window::GetTextHeight() const { return GetOutDev()->GetTextHeight(); }
+tools::Long Window::GetTextWidth(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
+                                 vcl::text::TextLayoutCache const* pCache,
+                                 SalLayoutGlyphs const* const pLayoutCache) const
+{
+    return GetOutDev()->GetTextWidth(rStr, nIndex, nLen, pCache, pLayoutCache);
+}
+float Window::approximate_digit_width() const { return GetOutDev()->approximate_digit_width(); }
+
+bool Window::IsNativeControlSupported(ControlType nType, ControlPart nPart) const
+{
+    return GetOutDev()->IsNativeControlSupported(nType, nPart);
+}
+
+bool Window::GetNativeControlRegion(ControlType nType, ControlPart nPart,
+                                    const tools::Rectangle& rControlRegion, ControlState nState,
+                                    const ImplControlValue& aValue,
+                                    tools::Rectangle& rNativeBoundingRegion,
+                                    tools::Rectangle& rNativeContentRegion) const
+{
+    return GetOutDev()->GetNativeControlRegion(nType, nPart, rControlRegion, nState, aValue,
+                                               rNativeBoundingRegion, rNativeContentRegion);
+}
+
+Size Window::GetOutputSizePixel() const
+{
+    if (!mpWindowImpl)
+    {
+        return Size();
+    }
+
+    return GetOutDev()->GetOutputSizePixel();
+}
+
+tools::Rectangle Window::GetOutputRectPixel() const { return GetOutDev()->GetOutputRectPixel(); }
+
+void Window::SetTextLineColor() { GetOutDev()->SetTextLineColor(); }
+void Window::SetTextLineColor(const Color& rColor) { GetOutDev()->SetTextLineColor(rColor); }
+void Window::SetOverlineColor() { GetOutDev()->SetOverlineColor(); }
+void Window::SetOverlineColor(const Color& rColor) { GetOutDev()->SetOverlineColor(rColor); }
+void Window::SetTextFillColor() { GetOutDev()->SetTextFillColor(); }
+void Window::SetTextFillColor(const Color& rColor) { GetOutDev()->SetTextFillColor(rColor); }
+const MapMode& Window::GetMapMode() const { return GetOutDev()->GetMapMode(); }
+void Window::SetBackground() { GetOutDev()->SetBackground(); }
+void Window::SetBackground(const Wallpaper& rBackground)
+{
+    GetOutDev()->SetBackground(rBackground);
+}
+void Window::SetMappingPolicy(vcl::MappingPolicy ePolicy)
+{
+    GetOutDev()->SetMappingPolicy(ePolicy);
+}
+vcl::MappingPolicy Window::GetMappingPolicy() const { return GetOutDev()->GetMappingPolicy(); }
+
+void Window::SetTextColor(const Color& rColor) { GetOutDev()->SetTextColor(rColor); }
+const Color& Window::GetTextColor() const { return GetOutDev()->GetTextColor(); }
+const Color& Window::GetTextLineColor() const { return GetOutDev()->GetTextLineColor(); }
+
+bool Window::IsTextLineColor() const { return GetOutDev()->IsTextLineColor(); }
+
+Color Window::GetTextFillColor() const { return GetOutDev()->GetTextFillColor(); }
+
+bool Window::IsTextFillColor() const { return GetOutDev()->IsTextFillColor(); }
+
+const Color& Window::GetOverlineColor() const { return GetOutDev()->GetOverlineColor(); }
+bool Window::IsOverlineColor() const { return GetOutDev()->IsOverlineColor(); }
+void Window::SetTextAlign(TextAlign eAlign) { GetOutDev()->SetTextAlign(eAlign); }
+
+float Window::GetDPIScaleFactor() const { return GetOutDev()->GetDPIScaleFactor(); }
+tools::Long Window::GetDeviceOriginX() const { return GetOutDev()->GetDeviceOriginX(); }
+tools::Long Window::GetDeviceOriginY() const { return GetOutDev()->GetDeviceOriginY(); }
+void Window::SetMapMode() { GetOutDev()->SetMapMode(); }
+void Window::SetMapMode(const MapMode& rNewMapMode) { GetOutDev()->SetMapMode(rNewMapMode); }
+bool Window::IsRTLEnabled() const { return GetOutDev()->IsRTLEnabled(); }
+TextAlign Window::GetTextAlign() const { return GetOutDev()->GetTextAlign(); }
+const AllSettings& Window::GetSettings() const { return GetOutDev()->GetSettings(); }
+
+tools::Rectangle Window::GetTextRect(const tools::Rectangle& rRect, const OUString& rStr,
+                                     DrawTextFlags nStyle, TextRectInfo* pInfo,
+                                     const vcl::TextLayoutCommon* _pTextLayout) const
+{
+    return GetOutDev()->GetTextRect(rRect, rStr, nStyle, pInfo, _pTextLayout);
+}
+
+void Window::SetSettings(const AllSettings& rSettings) { GetOutDev()->SetSettings(rSettings); }
+void Window::SetSettings(const AllSettings& rSettings, bool bChild)
+{
+    static_cast<vcl::WindowOutputDevice*>(GetOutDev())->SetSettings(rSettings, bChild);
+}
+
+Color Window::GetBackgroundColor() const { return GetOutDev()->GetBackgroundColor(); }
+
+void Window::EnableRTL(bool bEnable) { GetOutDev()->EnableRTL(bEnable); }
+
+void Window::FlashWindow() const
+{
+    vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
+
+    if (pMyParent && pMyParent->mpWindowImpl)
+        pMyParent->mpWindowImpl->mpFrame->FlashWindow();
+}
+
+void Window::SetTaskBarProgress(int nCurrentProgress)
+{
+    vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
+
+    if (pMyParent && pMyParent->mpWindowImpl)
+        pMyParent->mpWindowImpl->mpFrame->SetTaskBarProgress(nCurrentProgress);
+}
+
+void Window::SetTaskBarState(VclTaskBarStates eTaskBarState)
+{
+    vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
+
+    if (pMyParent && pMyParent->mpWindowImpl)
+        pMyParent->mpWindowImpl->mpFrame->SetTaskBarState(eTaskBarState);
+}
 static sal_Int32 CountDPIScaleFactor(sal_Int32 nDPI)
 {
 #ifndef MACOSX

@@ -240,7 +240,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/ImplWinData \
     vcl/source/window/WindowOutputDevice \
     vcl/source/window/WindowImpl \
-    vcl/source/window/window3 \
     vcl/source/window/window \
     vcl/source/window/winproc \
     vcl/source/window/wrkwin \

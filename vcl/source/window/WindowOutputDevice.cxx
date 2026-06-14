@@ -347,6 +347,28 @@ css::awt::DeviceInfo WindowOutputDevice::GetDeviceInfo() const
     return aInfo;
 }
 
+void WindowOutputDevice::ImplClearFontData(bool bNewFontLists)
+{
+    OutputDevice::ImplClearFontData(bNewFontLists);
+    for (Window* pChild = mxOwnerWindow->mpWindowImpl->mpHierarchy->mpFirstChild; pChild;
+         pChild = pChild->mpWindowImpl->mpHierarchy->mpNext)
+        pChild->GetOutDev()->ImplClearFontData(bNewFontLists);
+}
+
+void WindowOutputDevice::ImplRefreshFontData(bool bNewFontLists)
+{
+    OutputDevice::ImplRefreshFontData(bNewFontLists);
+    for (Window* pChild = mxOwnerWindow->mpWindowImpl->mpHierarchy->mpFirstChild; pChild;
+         pChild = pChild->mpWindowImpl->mpHierarchy->mpNext)
+        pChild->GetOutDev()->ImplRefreshFontData(bNewFontLists);
+}
+
+void WindowOutputDevice::ImplInitMapModeObjects()
+{
+    OutputDevice::ImplInitMapModeObjects();
+    if (mxOwnerWindow->mpWindowImpl->mpCursor)
+        mxOwnerWindow->mpWindowImpl->mpCursor->ImplNew();
+}
 } /* namespace vcl */
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
