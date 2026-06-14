@@ -2651,38 +2651,6 @@ tools::Rectangle Window::ImplUnmirroredAbsoluteScreenToOutputPixel( const Absolu
 }
 
 
-// with decoration
-tools::Rectangle Window::GetWindowExtentsRelative(const vcl::Window & rRelativeWindow) const
-{
-    AbsoluteScreenPixelRectangle aRect = GetWindowExtentsAbsolute();
-    // #106399# express coordinates relative to borderwindow
-    const vcl::Window *pRelWin = rRelativeWindow.mpWindowImpl->mpBorderWindow ? rRelativeWindow.mpWindowImpl->mpBorderWindow.get() : &rRelativeWindow;
-    return tools::Rectangle(
-        pRelWin->AbsoluteScreenToOutputPixel( aRect.GetPos() ),
-        aRect.GetSize() );
-}
-
-// with decoration
-AbsoluteScreenPixelRectangle Window::GetWindowExtentsAbsolute() const
-{
-    // make sure we use the extent of our border window,
-    // otherwise we miss a few pixels
-    const vcl::Window *pWin = mpWindowImpl->mpBorderWindow ? mpWindowImpl->mpBorderWindow : this;
-
-    AbsoluteScreenPixelPoint aPos( pWin->OutputToAbsoluteScreenPixel( Point(0,0) ) );
-    Size aSize ( pWin->GetSizePixel() );
-    // #104088# do not add decoration to the workwindow to be compatible to java accessibility api
-    if( mpWindowImpl->mbFrame || (mpWindowImpl->mpBorderWindow && mpWindowImpl->mpBorderWindow->mpWindowImpl->mbFrame && GetType() != WindowType::WORKWINDOW) )
-    {
-        SalFrameGeometry g = mpWindowImpl->mpFrame->GetGeometry();
-        aPos.AdjustX( -sal_Int32(g.leftDecoration()) );
-        aPos.AdjustY( -sal_Int32(g.topDecoration()) );
-        aSize.AdjustWidth(g.leftDecoration() + g.rightDecoration() );
-        aSize.AdjustHeight(g.topDecoration() + g.bottomDecoration() );
-    }
-    return AbsoluteScreenPixelRectangle( aPos, aSize );
-}
-
 void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll, ScrollFlags nFlags )
 {
 
