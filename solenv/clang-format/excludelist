@@ -14597,6 +14597,7 @@ vcl/source/uitest/uno/uiobject_uno.cxx
 vcl/source/uitest/uno/uiobject_uno.hxx
 vcl/source/uitest/uno/uitest_uno.cxx
 vcl/source/window/EnumContext.cxx
+vcl/source/window/WindowImpl.cxx
 vcl/source/window/WindowOutputDevice.cxx
 vcl/source/window/accel.cxx
 vcl/source/window/accessibility.cxx
