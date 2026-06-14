@@ -14658,7 +14658,6 @@ vcl/source/window/taskpanelist.cxx
 vcl/source/window/toolbox.cxx
 vcl/source/window/toolbox2.cxx
 vcl/source/window/window.cxx
-vcl/source/window/window2.cxx
 vcl/source/window/winproc.cxx
 vcl/source/window/wrkwin.cxx
 vcl/unx/generic/app/X11Helper.cxx
