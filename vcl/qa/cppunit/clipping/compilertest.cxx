@@ -13,6 +13,7 @@
 
 #include <vcl/window.hxx>
 
+#include <window.h>
 #include <clipping/ClipStateBuilder.hxx>
 #include <clipping/ClipCompiler.hxx>
 
@@ -22,17 +23,26 @@ CPPUNIT_TEST_FIXTURE(test::BootstrapFixture, testBuilderHierarchyCapture)
 {
     using namespace vcl::clipping;
 
-    // 1. Create a parent and a child to test hierarchy capture
+    // Create a parent and a child to test hierarchy capture
     VclPtr<vcl::Window> pParent = VclPtr<vcl::Window>::Create(nullptr, WB_STDWORK);
     VclPtr<vcl::Window> pChild = VclPtr<vcl::Window>::Create(pParent, WB_STDWORK);
 
     pParent->SetOutputSizePixel(Size(100, 100));
     pChild->SetPosSizePixel(Point(10, 10), Size(20, 20));
 
-    // 2. Build the state
+    // Force visibility flags for headless environment
+    pParent->ImplGetWindowImpl()->mbVisible = true;
+    pParent->ImplGetWindowImpl()->mbReallyVisible = true;
+    pChild->ImplGetWindowImpl()->mbVisible = true;
+    pChild->ImplGetWindowImpl()->mbReallyVisible = true;
+
+    // Force the child to clip its parent (disable NoClip)
+    pChild->SetParentClipMode(ParentClipMode::NONE);
+
+    // Build the state
     ClipState aState = ClipStateBuilder::BuildFromWindow(*pParent);
 
-    // 3. Verify capture
+    // Verify capture
     CPPUNIT_ASSERT_EQUAL(size_t(1), aState.maChildren.size());
     CPPUNIT_ASSERT_EQUAL(tools::Long(10), aState.maChildren[0].maBounds.Left());
 

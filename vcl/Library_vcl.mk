@@ -109,6 +109,7 @@ $(eval $(call gb_Library_use_externals,vcl,\
 $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/clipping/ClipCompiler \
     vcl/source/clipping/ClipStateBuilder \
+    vcl/source/clipping/policies \
     vcl/source/rendercontext/drawmode \
     vcl/skia/SkiaHelper \
     vcl/source/accessibility/AccessibleBrowseBox \
@@ -235,6 +236,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/taskpanelist \
     vcl/source/window/toolbox2 \
     vcl/source/window/toolbox \
+    vcl/source/window/WindowOutputDevice \
     vcl/source/window/window2 \
     vcl/source/window/window3 \
     vcl/source/window/window \

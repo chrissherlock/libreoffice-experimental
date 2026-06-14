@@ -1,4 +1,3 @@
-
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -9,9 +8,11 @@
  */
 
 #include <vcl/window.hxx>
+#include <vcl/outdev.hxx>
 
-#include <window.h>
+#include <clipping_window.hxx>
 #include <clipping/ClipStateBuilder.hxx>
+#include <window.h>
 
 namespace vcl::clipping
 {
@@ -20,17 +21,40 @@ ClipState ClipStateBuilder::BuildFromWindow(const vcl::Window& rWindow)
     ClipState aState;
     WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
 
-    aState.bIsVisible = rWindow.IsVisible();
-    aState.bClipChildren = (rWindow.GetStyle() & WB_CLIPCHILDREN) != 0;
+    if (pImpl->mpClippingState->mbInitWinClipRegion)
+        vcl::clipping::initWinClipRegion(const_cast<vcl::Window&>(rWindow));
 
-    aState.maBounds = rWindow.GetWindowExtentsRelative(rWindow);
+    if (pImpl->mpClippingState->mbInitChildRegion)
+        vcl::clipping::initWinChildClipRegion(const_cast<vcl::Window&>(rWindow));
+
+    aState.bIsVisible = rWindow.IsVisible();
+
+    aState.bClipChildren = (rWindow.GetStyle() & WB_CLIPCHILDREN) != 0
+                           || (pImpl->mpClippingState && pImpl->mpClippingState->mbClipChildren);
+
+    aState.bClipSiblings = pImpl->mpClippingState && pImpl->mpClippingState->mbClipSiblings;
+
+    // Map bounds into Frame/Device coordinates
+    const OutputDevice* pOutDev = rWindow.GetOutDev();
+    aState.maBounds
+        = tools::Rectangle(Point(pOutDev->GetDeviceOriginX(), pOutDev->GetDeviceOriginY()),
+                           rWindow.GetOutputSizePixel());
+
+    // Intersect with parent bounds to prevent phantom out-of-bounds painting
+    if (pImpl->mpHierarchy && pImpl->mpHierarchy->mpParent)
+    {
+        const OutputDevice* pParentOutDev = pImpl->mpHierarchy->mpParent->GetOutDev();
+        tools::Rectangle aParentBounds(
+            Point(pParentOutDev->GetDeviceOriginX(), pParentOutDev->GetDeviceOriginY()),
+            pImpl->mpHierarchy->mpParent->GetOutputSizePixel());
+        aState.maBounds.Intersection(aParentBounds);
+    }
 
     // Flatten the hierarchy
     CollectSiblings(rWindow, aState.maSiblings);
     CollectChildren(rWindow, aState.maChildren);
 
     // Extract custom region
-    // The WindowImpl holds the ClippingState and hierarchy pointers
     if (pImpl->mpClippingState && pImpl->mpClippingState->mbWinRegion)
         aState.maCustomRegion = rWindow.GetWindowClipRegionPixel();
 
@@ -39,7 +63,6 @@ ClipState ClipStateBuilder::BuildFromWindow(const vcl::Window& rWindow)
 
 void ClipStateBuilder::CollectSiblings(const vcl::Window& rWindow, std::vector<ClipNode>& rOut)
 {
-    // Access the hierarchy pointer inside WindowImpl
     WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
     if (!pImpl->mpHierarchy)
         return;
@@ -47,8 +70,15 @@ void ClipStateBuilder::CollectSiblings(const vcl::Window& rWindow, std::vector<C
     vcl::Window* pSibling = pImpl->mpHierarchy->mpFirstOverlap;
     while (pSibling)
     {
-        rOut.push_back({ pSibling->GetWindowExtentsRelative(rWindow) });
-        // Correct way to navigate the overlap linked list
+        // Only clip against siblings that are actually visible
+        if (pSibling != &rWindow && pSibling->IsReallyVisible())
+        {
+            const OutputDevice* pSibOutDev = pSibling->GetOutDev();
+            tools::Rectangle aBounds(
+                Point(pSibOutDev->GetDeviceOriginX(), pSibOutDev->GetDeviceOriginY()),
+                pSibling->GetOutputSizePixel());
+            rOut.push_back({ aBounds });
+        }
         pSibling = pSibling->ImplGetWindowImpl()->mpHierarchy->mpNextOverlap;
     }
 }
@@ -62,7 +92,17 @@ void ClipStateBuilder::CollectChildren(const vcl::Window& rWindow, std::vector<C
     vcl::Window* pChild = pImpl->mpHierarchy->mpFirstChild;
     while (pChild)
     {
-        rOut.push_back({ pChild->GetWindowExtentsRelative(rWindow) });
+        // Filter out windows that should NEVER clip the parent
+        // (Hidden windows, transparent backgrounds, or explicitly NoClip windows)
+        if (pChild->IsReallyVisible() && !pChild->IsPaintTransparent()
+            && pChild->GetParentClipMode() != ParentClipMode::NoClip)
+        {
+            const OutputDevice* pChildOutDev = pChild->GetOutDev();
+            tools::Rectangle aBounds(
+                Point(pChildOutDev->GetDeviceOriginX(), pChildOutDev->GetDeviceOriginY()),
+                pChild->GetOutputSizePixel());
+            rOut.push_back({ aBounds });
+        }
         pChild = pChild->ImplGetWindowImpl()->mpHierarchy->mpNext;
     }
 }

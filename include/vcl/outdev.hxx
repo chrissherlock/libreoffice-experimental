@@ -582,9 +582,6 @@ public:
     virtual vcl::Region         ClipToDeviceBounds(vcl::Region aRegion) const;
 
     vcl::Region                 GetActiveClipRegion() const;
-
-private:
-
     SAL_DLLPRIVATE void         SetDeviceClipRegion( const vcl::Region* pRegion );
     ///@}
 

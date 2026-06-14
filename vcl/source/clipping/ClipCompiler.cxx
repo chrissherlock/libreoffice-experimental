@@ -21,11 +21,14 @@ ClipPlan ClipCompiler::Compile(const ClipState& rState)
     if (rState.maCustomRegion)
         aFinalRegion.Intersect(*rState.maCustomRegion);
 
+    // Batch our exclusions to optimize the region geometry algebra
+    vcl::Region aExclusionMask;
+
     if (rState.bClipChildren)
     {
         for (const auto& rChild : rState.maChildren)
         {
-            aFinalRegion.Exclude(rChild.maBounds);
+            aExclusionMask.Union(rChild.maBounds);
         }
     }
 
@@ -33,13 +36,16 @@ ClipPlan ClipCompiler::Compile(const ClipState& rState)
     {
         for (const auto& rSibling : rState.maSiblings)
         {
-            aFinalRegion.Exclude(rSibling.maBounds);
+            aExclusionMask.Union(rSibling.maBounds);
         }
     }
 
-    return ClipPlan{ std::move(aFinalRegion) };
-}
+    // A single, clean exclusion
+    if (!aExclusionMask.IsEmpty())
+        aFinalRegion.Exclude(aExclusionMask);
 
+    return ClipPlan{ std::move(aFinalRegion), aFinalRegion.IsEmpty() };
+}
 } // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

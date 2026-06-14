@@ -257,12 +257,15 @@ void PaintHelper::PaintBuffer()
 void PaintHelper::DoPaint(const vcl::Region* pRegion)
 {
     WindowImpl* pWindowImpl = m_pWindow->ImplGetWindowImpl();
-
-    vcl::Region& rWinChildClipRegion = vcl::clipping::getWinChildClipRegion(*m_pWindow);
     ImplFrameData* pFrameData = m_pWindow->mpWindowImpl->mpFrameData;
+
+    auto aClipState = vcl::clipping::ClipStateBuilder::BuildFromWindow(*m_pWindow);
+    auto aClipPlan = vcl::clipping::ClipCompiler::Compile(aClipState);
+
     if (pWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAll || pFrameData->mbInBufferedPaint)
     {
-        pWindowImpl->maInvalidateRegion = rWinChildClipRegion;
+        // Use the newly compiled pure region
+        pWindowImpl->maInvalidateRegion = aClipPlan.maFinalRegion;
     }
     else
     {
@@ -271,16 +274,19 @@ void PaintHelper::DoPaint(const vcl::Region* pRegion)
 
         if (pWindowImpl->mpWinData && pWindowImpl->mbTrackVisible)
             /* #98602# need to repaint all children within the
-           * tracking rectangle, so the following invert
-           * operation takes places without traces of the previous
-           * one.
-           */
-           pWindowImpl->maInvalidateRegion.Union(*pWindowImpl->mpWinData->mpTrackRect);
+             * tracking rectangle, so the following invert
+             * operation takes places without traces of the previous
+             * one.
+             */
+            pWindowImpl->maInvalidateRegion.Union(*pWindowImpl->mpWinData->mpTrackRect);
 
         if (pWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAllChildren)
             m_pChildRegion.reset( new vcl::Region(pWindowImpl->maInvalidateRegion) );
-        pWindowImpl->maInvalidateRegion.Intersect(rWinChildClipRegion);
+
+        // Intersect the invalidation request with the pure compiled region
+        pWindowImpl->maInvalidateRegion.Intersect(aClipPlan.maFinalRegion);
     }
+
     pWindowImpl->mnPaintFlags = ImplPaintFlags::NONE;
     if (pWindowImpl->maInvalidateRegion.IsEmpty())
         return;
@@ -292,7 +298,6 @@ void PaintHelper::DoPaint(const vcl::Region* pRegion)
     // double-buffering: setup the buffer if it does not exist
     if (!pFrameData->mbInBufferedPaint && m_pWindow->SupportsDoubleBuffering())
         StartBufferedPaint();
-
     // double-buffering: if this window does not support double-buffering,
     // but we are in the middle of double-buffered paint, we might be
     // losing information
@@ -319,6 +324,7 @@ void PaintHelper::DoPaint(const vcl::Region* pRegion)
         {
             m_pWindow->SetBackground(aBackground);
         }
+
         m_pWindow->PushPaintHelper(this, *m_pWindow->GetOutDev());
         m_pWindow->Paint(*m_pWindow->GetOutDev(), m_aPaintRect);
     }

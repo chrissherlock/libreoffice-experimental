@@ -9,35 +9,32 @@
 
 #pragma once
 
+#include <vcl/dllapi.h>
 #include <vcl/region.hxx>
+
 #include "ClipCompiler.hxx"
+
+class OutputDevice;
 
 namespace vcl::clipping
 {
-/**
- * Backend Execution Policies define the 'How' of clipping for different devices.
- * Each rendering backend (Skia, GDI, PDF, etc.) implements its own concrete policy.
- */
+template <typename T> struct BackendClipPolicy;
+
+template <> struct VCL_DLLPUBLIC BackendClipPolicy<OutputDevice>
+{
+    static void Apply(OutputDevice& rDev, const ClipPlan& rPlan);
+};
+
 template <typename T> struct BackendClipPolicy
 {
-    // The mandatory interface for all backends
     static void Apply(T& rDev, const ClipPlan& rPlan)
     {
-        // Default: standard region application
-        rDev.SetClipRegion(rPlan.maFinalRegion);
+        // By default, implicitly cast specific devices (Printer, VirtualDevice, etc.)
+        // to a generic OutputDevice. If a backend (like Skia) needs custom clipping
+        // later, you simply add a specific template specialization for it.
+        BackendClipPolicy<OutputDevice>::Apply(rDev, rPlan);
     }
 };
-
-/**
- * Hierarchy Policy definitions for the ClipStateBuilder.
- * These are used by the ClipStateBuilder to extract data.
- */
-struct HierarchyPolicy
-{
-    static bool ShouldClipChildren(const vcl::Window& rWin);
-    static bool ShouldClipSiblings(const vcl::Window& rWin);
-};
-
 } // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
