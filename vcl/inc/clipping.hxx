@@ -9,6 +9,7 @@
 
 #pragma once
 
+#include <vcl/dllapi.h>
 #include <vcl/outdev.hxx>
 #include <vcl/region.hxx>
 #include <tools/gen.hxx>
@@ -19,19 +20,19 @@ namespace vcl::clipping
  * Evaluates and synchronizes the active hardware/software clip region
  * for the given device.
  */
-void initDeviceClipRegion(OutputDevice& rDevice);
+VCL_DLLPUBLIC void initDeviceClipRegion(OutputDevice& rDevice);
 
 /**
  * Retrieves the currently active logic clip region from the device,
  * factoring in window paint bounds if applicable.
  */
-vcl::Region getActiveClipRegion(const OutputDevice& rDevice);
+VCL_DLLPUBLIC vcl::Region getActiveClipRegion(const OutputDevice& rDevice);
 
 /**
  * Intersects the provided destination rectangle with the device's
  * active paint region bounds.
  */
-void clipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect);
+VCL_DLLPUBLIC void clipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect);
 
 } // namespace vcl::clipping
 
