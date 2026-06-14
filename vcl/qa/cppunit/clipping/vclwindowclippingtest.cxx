@@ -196,6 +196,48 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testClipChildren_Comprehensive)
                            aRegion.Contains(Point(10, 10)));
 }
 
+CPPUNIT_TEST_FIXTURE(TestClipping, testClipSiblings_Comprehensive)
+{
+    ScopedVclPtr<WorkWindow> pRoot(VclPtr<WorkWindow>::Create(nullptr, WB_CLIPCHILDREN));
+
+    // Sibling 1 (Created First -> Back of the Z-Order)
+    ScopedVclPtr<vcl::Window> pS1(VclPtr<vcl::Window>::Create(pRoot.get()));
+    pS1->SetPosSizePixel(Point(10, 10), Size(40, 40));
+    pS1->Show();
+
+    // Sibling 2 (Created Second -> Front of the Z-Order)
+    ScopedVclPtr<vcl::Window> pS2(VclPtr<vcl::Window>::Create(pRoot.get()));
+    pS2->SetPosSizePixel(Point(30, 30), Size(40, 40));
+    pS2->Show();
+
+    pRoot->Show();
+    pRoot->Invalidate(InvalidateFlags::Children);
+    Application::Reschedule();
+
+    // Force headless visibility for the entire tree
+    pRoot->ImplGetWindowImpl()->mbVisible = true;
+    pRoot->ImplGetWindowImpl()->mbReallyVisible = true;
+    pS1->ImplGetWindowImpl()->mbVisible = true;
+    pS1->ImplGetWindowImpl()->mbReallyVisible = true;
+    pS2->ImplGetWindowImpl()->mbVisible = true;
+    pS2->ImplGetWindowImpl()->mbReallyVisible = true;
+
+    // Initialize clipping states
+    vcl::clipping::initWinClipRegion(*pRoot);
+    vcl::clipping::initWinClipRegion(*pS1);
+    vcl::clipping::initWinClipRegion(*pS2);
+
+    vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
+    vcl::clipping::clipSiblings(*pS2, aRegion);
+
+    // Test the Math: S1 (Back) should be punched out
+    CPPUNIT_ASSERT_MESSAGE("S1's region (10,10 to 50,50) should be excluded",
+                           !aRegion.Contains(Point(15, 15)));
+
+    // Test the Math: Area outside the siblings should remain intact
+    CPPUNIT_ASSERT_MESSAGE("Outside area should remain untouched", aRegion.Contains(Point(80, 80)));
+}
+
 } // end anonymous namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
