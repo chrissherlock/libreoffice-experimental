@@ -107,6 +107,8 @@ $(eval $(call gb_Library_use_externals,vcl,\
 ))
 
 $(eval $(call gb_Library_add_exception_objects,vcl,\
+    vcl/source/clipping/ClipCompiler \
+    vcl/source/clipping/ClipStateBuilder \
     vcl/source/rendercontext/drawmode \
     vcl/skia/SkiaHelper \
     vcl/source/accessibility/AccessibleBrowseBox \
