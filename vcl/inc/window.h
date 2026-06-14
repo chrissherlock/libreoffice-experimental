@@ -219,16 +219,27 @@ namespace o3tl {
 
 struct WindowClippingState
 {
+    // Proper constructor ensuring no "garbage" memory patterns
+    WindowClippingState()
+        : meParentClipMode(ParentClipMode::NoClip)
+        , mbInitWinClipRegion(true)
+        , mbInitChildRegion(false)
+        , mbClipSiblings(false)
+        , mbClipChildren(false)
+        , mbWinRegion(false)
+    {
+    }
+
     vcl::Region                  maWinClipRegion;
     std::unique_ptr<vcl::Region> mpChildClipRegion;
-    ParentClipMode               meParentClipMode = ParentClipMode::NONE;
-    bool                         mbInitWinClipRegion = true;
-    bool                         mbInitChildRegion = false;
-    bool                         mbClipSiblings = false;
-    bool                         mbClipChildren = false;
+    ParentClipMode               meParentClipMode;
+    bool                         mbInitWinClipRegion;
+    bool                         mbInitChildRegion;
+    bool                         mbClipSiblings;
+    bool                         mbClipChildren;
 
     vcl::Region                  maWinRegion;
-    bool                         mbWinRegion = false;
+    bool                         mbWinRegion;
 };
 
 struct WindowHierarchy
@@ -316,7 +327,6 @@ public:
     std::unique_ptr<WindowClippingState> mpClippingState;
     std::unique_ptr<WindowHierarchy>     mpHierarchy;
 
-    vcl::Region              maWinRegion;            //< region to 'shape' the VCL window (frame coordinates)
     vcl::Region              maInvalidateRegion;     //< region that has to be redrawn (frame coordinates)
     vcl::Region*             mpPaintRegion;          //< only set during Paint() method call (window coordinates)
     WinBits             mnStyle;
@@ -375,8 +385,6 @@ public:
                         mbCallMove:1,
                         mbCallResize:1,
                         mbWaitSystemResize:1,
-                        mbWinRegion:1,
-                        mbClipChildren:1,
                         mbChildTransparent:1,
                         mbPaintTransparent:1,
                         mbMouseTransparent:1,
