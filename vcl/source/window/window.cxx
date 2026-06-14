@@ -2544,18 +2544,6 @@ AbsoluteScreenPixelRectangle Window::GetDesktopRectPixel() const
     return rRect;
 }
 
-Point Window::OutputToScreenPixel( const Point& rPos ) const
-{
-    // relative to top level parent
-    return Point( rPos.X() + GetOutDev()->GetDeviceOriginX(), rPos.Y() + GetOutDev()->GetDeviceOriginY() );
-}
-
-Point Window::ScreenToOutputPixel( const Point& rPos ) const
-{
-    // relative to top level parent
-    return Point( rPos.X() - GetOutDev()->GetDeviceOriginX(), rPos.Y() - GetOutDev()->GetDeviceOriginY() );
-}
-
 tools::Long Window::ImplGetUnmirroredOutOffX() const
 {
     // revert GetDeviceOriginX() changes that were potentially made in ImplPosSizeWindow
@@ -2577,79 +2565,6 @@ tools::Long Window::ImplGetUnmirroredOutOffX() const
     }
     return offx;
 }
-
-// normalized screen pixel are independent of mirroring
-Point Window::OutputToNormalizedScreenPixel( const Point& rPos ) const
-{
-    // relative to top level parent
-    tools::Long offx = ImplGetUnmirroredOutOffX();
-    return Point( rPos.X()+offx, rPos.Y() + GetOutDev()->GetDeviceOriginY() );
-}
-
-Point Window::NormalizedScreenToOutputPixel( const Point& rPos ) const
-{
-    // relative to top level parent
-    tools::Long offx = ImplGetUnmirroredOutOffX();
-    return Point( rPos.X()-offx, rPos.Y() - GetOutDev()->GetDeviceOriginY() );
-}
-
-AbsoluteScreenPixelPoint Window::OutputToAbsoluteScreenPixel( const Point& rPos ) const
-{
-    // relative to the screen
-    Point p = OutputToScreenPixel( rPos );
-    SalFrameGeometry g = mpWindowImpl->mpFrame->GetGeometry();
-    p.AdjustX(g.x() );
-    p.AdjustY(g.y() );
-    return AbsoluteScreenPixelPoint(p);
-}
-
-Point Window::AbsoluteScreenToOutputPixel( const AbsoluteScreenPixelPoint& rPos ) const
-{
-    // relative to the screen
-    Point p = ScreenToOutputPixel( Point(rPos) );
-    SalFrameGeometry g = mpWindowImpl->mpFrame->GetGeometry();
-    p.AdjustX( -(g.x()) );
-    p.AdjustY( -(g.y()) );
-    return p;
-}
-
-AbsoluteScreenPixelRectangle Window::ImplOutputToUnmirroredAbsoluteScreenPixel( const tools::Rectangle &rRect ) const
-{
-    // this method creates unmirrored screen coordinates to be compared with the desktop
-    // and is used for positioning of RTL popup windows correctly on the screen
-    SalFrameGeometry g = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
-
-    Point p1 = rRect.TopRight();
-    p1 = OutputToScreenPixel(p1);
-    p1.setX( g.x()+g.width()-p1.X() );
-    p1.AdjustY(g.y() );
-
-    Point p2 = rRect.BottomLeft();
-    p2 = OutputToScreenPixel(p2);
-    p2.setX( g.x()+g.width()-p2.X() );
-    p2.AdjustY(g.y() );
-
-    return AbsoluteScreenPixelRectangle( AbsoluteScreenPixelPoint(p1), AbsoluteScreenPixelPoint(p2) );
-}
-
-tools::Rectangle Window::ImplUnmirroredAbsoluteScreenToOutputPixel( const AbsoluteScreenPixelRectangle &rRect ) const
-{
-    // undo ImplOutputToUnmirroredAbsoluteScreenPixel
-    SalFrameGeometry g = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
-
-    Point p1( rRect.TopRight() );
-    p1.AdjustY(-g.y() );
-    p1.setX( g.x()+g.width()-p1.X() );
-    p1 = ScreenToOutputPixel(p1);
-
-    Point p2( rRect.BottomLeft() );
-    p2.AdjustY(-g.y());
-    p2.setX( g.x()+g.width()-p2.X() );
-    p2 = ScreenToOutputPixel(p2);
-
-    return tools::Rectangle( p1, p2 );
-}
-
 
 void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll, ScrollFlags nFlags )
 {
