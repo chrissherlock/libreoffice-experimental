@@ -192,41 +192,42 @@ void clipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect)
     });
 }
 
+static vcl::Region lcl_getWindowActiveClip(const WindowOutputDevice& rWinDev)
+{
+    vcl::Region aRegion(true);
+    WindowImpl* pImpl = rWinDev.GetOwnerWindow()->ImplGetWindowImpl();
+
+    if (pImpl->mbInPaint && pImpl->mpPaintRegion)
+    {
+        aRegion = *(pImpl->mpPaintRegion);
+        aRegion.Move(-rWinDev.GetDeviceOriginX(), -rWinDev.GetDeviceOriginY());
+    }
+
+    const auto& rState = rWinDev.GetClipState();
+    if (rState.mbHasCustomClip)
+        aRegion.Intersect(rState.maRegion);
+
+    return rWinDev.template convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
+}
+
+static vcl::Region lcl_getDeviceActiveClip(const OutputDevice& rDev)
+{
+    const auto& rState = rDev.GetClipState();
+    if (rState.mbHasCustomClip)
+        return rState.maRegion;
+
+    // Return the device bounds instead of an "infinite" region
+    return vcl::Region(tools::Rectangle(Point(0, 0), rDev.GetOutputSizePixel()));
+}
+
 vcl::Region getActiveClipRegion(const OutputDevice& rDevice)
 {
-    return vcl::DispatchDevice(rDevice, [](const auto& rTypedDev) -> vcl::Region {
+    return vcl::DispatchDevice(rDevice, [](const auto& rTypedDev) {
         using T = std::decay_t<decltype(rTypedDev)>;
-
-        // Get the unified state reference
-        const auto& rState = rTypedDev.GetClipState();
-
         if constexpr (std::is_same_v<T, WindowOutputDevice>)
-        {
-            vcl::Region aRegion(true);
-            WindowImpl* pImpl = rTypedDev.GetOwnerWindow()->ImplGetWindowImpl();
-
-            if (pImpl->mbInPaint)
-            {
-                if (pImpl->mpPaintRegion)
-                    aRegion = *(pImpl->mpPaintRegion);
-
-                aRegion.Move(-rTypedDev.GetDeviceOriginX(), -rTypedDev.GetDeviceOriginY());
-            }
-
-            // Check the new state machine flag
-            if (rState.mbHasCustomClip)
-                aRegion.Intersect(rState.maRegion);
-
-            return rTypedDev.template convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
-        }
+            return lcl_getWindowActiveClip(rTypedDev);
         else
-        {
-            // Standard behavior using the state struct
-            if (rState.mbHasCustomClip)
-                return rState.maRegion;
-
-            return vcl::Region(tools::Rectangle(Point(0, 0), rTypedDev.GetOutputSizePixel()));
-        }
+            return lcl_getDeviceActiveClip(rTypedDev);
     });
 }
 
@@ -236,6 +237,7 @@ void initDeviceClipRegion(OutputDevice& rDevice)
         using T = std::decay_t<decltype(rTypedDev)>;
         DBG_TESTSOLARMUTEX();
 
+        // Grab the unified state block
         auto& rState = rTypedDev.GetClipState();
 
         if constexpr (std::is_same_v<T, WindowOutputDevice>)
