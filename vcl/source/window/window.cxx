@@ -4951,11 +4951,11 @@ void Window::set_height_request(sal_Int32 nHeightRequest)
 
     WindowImpl *pWindowImpl = mpWindowImpl->mpBorderWindow ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get() : mpWindowImpl.get();
 
-    if ( pWindowImpl->mnHeightRequest != nHeightRequest )
-    {
-        pWindowImpl->mnHeightRequest = nHeightRequest;
-        queue_resize();
-    }
+    if (pWindowImpl->mnHeightRequest == nHeightRequest)
+        return;
+
+    pWindowImpl->mnHeightRequest = nHeightRequest;
+    queue_resize();
 }
 
 void Window::set_width_request(sal_Int32 nWidthRequest)
@@ -4965,11 +4965,11 @@ void Window::set_width_request(sal_Int32 nWidthRequest)
 
     WindowImpl *pWindowImpl = mpWindowImpl->mpBorderWindow ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get() : mpWindowImpl.get();
 
-    if ( pWindowImpl->mnWidthRequest != nWidthRequest )
-    {
-        pWindowImpl->mnWidthRequest = nWidthRequest;
-        queue_resize();
-    }
+    if (pWindowImpl->mnWidthRequest == nWidthRequest)
+        return;
+
+    pWindowImpl->mnWidthRequest = nWidthRequest;
+    queue_resize();
 }
 
 Size Window::get_ungrouped_preferred_size() const
