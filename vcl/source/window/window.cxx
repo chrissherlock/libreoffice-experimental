@@ -119,6 +119,14 @@ static OString lcl_createWindowInfo(const vcl::Window* pWindow)
 }
 #endif
 
+bool Window::ImplShouldNotifyAccessibleParent() const
+{
+    return !IsNativeFrame()
+        && mpWindowImpl->mbReallyVisible
+        && ImplIsAccessibleCandidate()
+        && GetAccessibleParentWindow();
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -139,9 +147,8 @@ void Window::dispose()
     CallEventListeners( VclEventId::ObjectDying );
 
     // do not send child events for frames that were registered as native frames
-    if( !IsNativeFrame() && mpWindowImpl->mbReallyVisible )
-        if ( ImplIsAccessibleCandidate() && GetAccessibleParentWindow() )
-            GetAccessibleParentWindow()->CallEventListeners( VclEventId::WindowChildDestroyed, this );
+    if (ImplShouldNotifyAccessibleParent())
+        GetAccessibleParentWindow()->CallEventListeners(VclEventId::WindowChildDestroyed, this);
 
     // remove associated data structures from dockingmanager
     ImplGetDockingManager()->RemoveWindow( this );
