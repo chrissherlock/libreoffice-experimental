@@ -247,6 +247,33 @@ void Window::ImplAssertNoWindowLeaks()
 }
 #endif
 
+void Window::ImplRemoveFromTaskPaneList()
+{
+    if (!mpWindowImpl->mbIsInTaskPaneList)
+        return;
+
+    vcl::Window* pMyParent = GetParent();
+    SystemWindow* pMySysWin = nullptr;
+
+    while (pMyParent)
+    {
+        if (pMyParent->IsSystemWindow())
+        {
+            pMySysWin = dynamic_cast<SystemWindow*>(pMyParent);
+        }
+        pMyParent = pMyParent->GetParent();
+    }
+
+    bool bInList = pMySysWin && pMySysWin->ImplIsInTaskPaneList(this);
+
+    if (bInList)
+    {
+        pMySysWin->GetTaskPaneList()->RemoveWindow(this);
+    }
+
+    SAL_WARN_IF(!bInList, "vcl", "Window (" << GetText() << ") not found in TaskPanelList");
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -322,28 +349,7 @@ void Window::dispose()
     ImplAssertNoWindowLeaks();
 #endif
 
-    if( mpWindowImpl->mbIsInTaskPaneList )
-    {
-        vcl::Window* pMyParent = GetParent();
-        SystemWindow* pMySysWin = nullptr;
-
-        while ( pMyParent )
-        {
-            if ( pMyParent->IsSystemWindow() )
-            {
-                pMySysWin = dynamic_cast<SystemWindow *>(pMyParent);
-            }
-            pMyParent = pMyParent->GetParent();
-        }
-        if ( pMySysWin && pMySysWin->ImplIsInTaskPaneList( this ) )
-        {
-            pMySysWin->GetTaskPaneList()->RemoveWindow( this );
-        }
-        else
-        {
-            SAL_WARN( "vcl", "Window (" << GetText() << ") not found in TaskPanelList");
-        }
-    }
+    ImplRemoveFromTaskPaneList();
 
     // remove from size-group if necessary
     remove_from_all_size_groups();

@@ -587,6 +587,7 @@ private:
     SAL_DLLPRIVATE void ImplAssertNoWindowLeaks();
 #endif
 
+    SAL_DLLPRIVATE void                 ImplRemoveFromTaskPaneList();
     SAL_DLLPRIVATE bool                 ImplShouldNotifyAccessibleParent() const;
     SAL_DLLPRIVATE void                 ImplSetFrameParent( const vcl::Window* pParent );
 
