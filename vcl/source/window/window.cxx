@@ -3755,16 +3755,16 @@ void Window::SetControlForeground(const Color& rColor)
             mpWindowImpl->mbControlForeground = false;
             CompatStateChanged(StateChangedType::ControlForeground);
         }
+
+        return;
     }
-    else
-    {
-        if (mpWindowImpl->maControlForeground != rColor)
-        {
-            mpWindowImpl->maControlForeground = rColor;
-            mpWindowImpl->mbControlForeground = true;
-            CompatStateChanged(StateChangedType::ControlForeground);
-        }
-    }
+
+    if (mpWindowImpl->maControlForeground == rColor)
+        return;
+
+    mpWindowImpl->maControlForeground = rColor;
+    mpWindowImpl->mbControlForeground = true;
+    CompatStateChanged(StateChangedType::ControlForeground);
 }
 
 void Window::ApplyControlForeground(vcl::RenderContext& rRenderContext, const Color& rDefaultColor)
