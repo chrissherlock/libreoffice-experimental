@@ -160,6 +160,93 @@ static void lcl_ShutdownDragAndDrop(WindowImpl* pImpl)
     }
 }
 
+#if OSL_DEBUG_LEVEL > 0
+void Window::ImplAssertNoWindowLeaks()
+{
+    OStringBuffer aErrorStr;
+    bool bError = false;
+    vcl::Window* pTempWin;
+    ImplSVData* pSVData = ImplGetSVData();
+
+    // Check for live children
+    if (mpWindowImpl->mpHierarchy->mpFirstChild)
+    {
+        OStringBuffer aTempStr = "Window (" + lcl_createWindowInfo(this) +
+                                 ") with live children destroyed: ";
+        pTempWin = mpWindowImpl->mpHierarchy->mpFirstChild;
+        while (pTempWin)
+        {
+            aTempStr.append(lcl_createWindowInfo(pTempWin));
+            pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNext;
+        }
+        OSL_FAIL(aTempStr.getStr());
+        Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
+    }
+
+    // Check for live overlapping windows
+    if (mpWindowImpl->mpFrameData != nullptr)
+    {
+        pTempWin = mpWindowImpl->mpFrameData->mpFirstOverlap;
+        while (pTempWin)
+        {
+            if (ImplIsRealParentPath(pTempWin))
+            {
+                bError = true;
+                aErrorStr.append(lcl_createWindowInfo(pTempWin));
+            }
+            pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNextOverlap;
+        }
+        if (bError)
+        {
+            OString aTempStr = "Window (" + lcl_createWindowInfo(this) +
+                               ") with live SystemWindows destroyed: " + aErrorStr.makeStringAndClear();
+            OSL_FAIL(aTempStr.getStr());
+            Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
+        }
+    }
+
+    // Check SystemWindows
+    bError = false;
+    pTempWin = pSVData->maFrameData.mpFirstFrame;
+    while (pTempWin)
+    {
+        if (ImplIsRealParentPath(pTempWin))
+        {
+            bError = true;
+            aErrorStr.append(lcl_createWindowInfo(pTempWin));
+        }
+        pTempWin = pTempWin->mpWindowImpl->mpFrameData->mpNextFrame;
+    }
+
+    if (bError)
+    {
+        OString aTempStr = "Window (" + lcl_createWindowInfo(this) +
+                           ") with live SystemWindows destroyed: " + aErrorStr.makeStringAndClear();
+        OSL_FAIL(aTempStr.getStr());
+        Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
+    }
+
+    // TaskPane check
+    vcl::Window* pMyParent = GetParent();
+    SystemWindow* pMySysWin = nullptr;
+
+    while (pMyParent)
+    {
+        if (pMyParent->IsSystemWindow())
+            pMySysWin = dynamic_cast<SystemWindow*>(pMyParent);
+
+        pMyParent = pMyParent->GetParent();
+    }
+
+    if (pMySysWin && pMySysWin->ImplIsInTaskPaneList(this))
+    {
+        OString aTempStr = "Window (" + lcl_createWindowInfo(this) + ") still in TaskPanelList!";
+        OSL_FAIL(aTempStr.getStr());
+        Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
+    }
+}
+#endif
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -227,111 +314,12 @@ void Window::dispose()
     // due to old compatibility
     if (pSVData->mpWinData->mpTrackWin == this)
         EndTracking();
+
     if (IsMouseCaptured())
         ReleaseMouse();
 
 #if OSL_DEBUG_LEVEL > 0
-    // always perform these tests in debug builds
-    {
-        OStringBuffer aErrorStr;
-        bool        bError = false;
-        vcl::Window*     pTempWin;
-
-        if ( mpWindowImpl->mpHierarchy->mpFirstChild )
-        {
-            OStringBuffer aTempStr = "Window (" +
-                lcl_createWindowInfo(this) +
-                ") with live children destroyed: ";
-            pTempWin = mpWindowImpl->mpHierarchy->mpFirstChild;
-            while ( pTempWin )
-            {
-                aTempStr.append(lcl_createWindowInfo(pTempWin));
-                pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNext;
-            }
-            OSL_FAIL( aTempStr.getStr() );
-            Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
-        }
-
-        if (mpWindowImpl->mpFrameData != nullptr)
-        {
-            pTempWin = mpWindowImpl->mpFrameData->mpFirstOverlap;
-            while ( pTempWin )
-            {
-                if ( ImplIsRealParentPath( pTempWin ) )
-                {
-                    bError = true;
-                    aErrorStr.append(lcl_createWindowInfo(pTempWin));
-                }
-                pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNextOverlap;
-            }
-            if ( bError )
-            {
-                OString aTempStr =
-                    "Window (" +
-                    lcl_createWindowInfo(this) +
-                    ") with live SystemWindows destroyed: " +
-                    aErrorStr;
-                OSL_FAIL(aTempStr.getStr());
-                Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
-            }
-        }
-
-        bError = false;
-        pTempWin = pSVData->maFrameData.mpFirstFrame;
-        while ( pTempWin )
-        {
-            if ( ImplIsRealParentPath( pTempWin ) )
-            {
-                bError = true;
-                aErrorStr.append(lcl_createWindowInfo(pTempWin));
-            }
-            pTempWin = pTempWin->mpWindowImpl->mpFrameData->mpNextFrame;
-        }
-        if ( bError )
-        {
-            OString aTempStr =  "Window (" +
-                lcl_createWindowInfo(this) +
-                ") with live SystemWindows destroyed: " +
-                aErrorStr;
-            OSL_FAIL( aTempStr.getStr() );
-            Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
-        }
-
-        if ( mpWindowImpl->mpHierarchy->mpFirstOverlap )
-        {
-            OStringBuffer aTempStr = "Window (" +
-                lcl_createWindowInfo(this) +
-                ") with live SystemWindows destroyed: ";
-            pTempWin = mpWindowImpl->mpHierarchy->mpFirstOverlap;
-            while ( pTempWin )
-            {
-                aTempStr.append(lcl_createWindowInfo(pTempWin));
-                pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNext;
-            }
-            OSL_FAIL( aTempStr.getStr() );
-            Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
-        }
-
-        vcl::Window* pMyParent = GetParent();
-        SystemWindow* pMySysWin = nullptr;
-
-        while ( pMyParent )
-        {
-            if ( pMyParent->IsSystemWindow() )
-            {
-                pMySysWin = dynamic_cast<SystemWindow *>(pMyParent);
-            }
-            pMyParent = pMyParent->GetParent();
-        }
-        if ( pMySysWin && pMySysWin->ImplIsInTaskPaneList( this ) )
-        {
-            OString aTempStr = "Window (" +
-                lcl_createWindowInfo(this) +
-                ") still in TaskPanelList!";
-            OSL_FAIL( aTempStr.getStr() );
-            Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
-        }
-    }
+    ImplAssertNoWindowLeaks();
 #endif
 
     if( mpWindowImpl->mbIsInTaskPaneList )

@@ -583,6 +583,10 @@ protected:
 
 private:
 
+#if OSL_DEBUG_LEVEL > 0
+    SAL_DLLPRIVATE void ImplAssertNoWindowLeaks();
+#endif
+
     SAL_DLLPRIVATE bool                 ImplShouldNotifyAccessibleParent() const;
     SAL_DLLPRIVATE void                 ImplSetFrameParent( const vcl::Window* pParent );
 
