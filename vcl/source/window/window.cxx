@@ -322,6 +322,54 @@ void Window::ImplTransferFocus(bool bHasFocusedChild)
         pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
 }
 
+static void lcl_ResetGlobalWindowHints(vcl::Window* pWindow, ImplSVData* pSVData)
+{
+    // reset hint for DefModalDialogParent
+    if (pSVData->maFrameData.mpActiveApplicationFrame == pWindow)
+        pSVData->maFrameData.mpActiveApplicationFrame = nullptr;
+
+    // reset hint of what was the last wheeled window
+    if (pSVData->mpWinData->mpLastWheelWindow == pWindow)
+        pSVData->mpWinData->mpLastWheelWindow = nullptr;
+}
+
+static void lcl_ResetFrameDataPointers(ImplFrameData* pFrameData, const vcl::Window* pWindow)
+{
+    if (!pFrameData)
+        return;
+
+    if (pFrameData->mpFocusWin == pWindow)
+        pFrameData->mpFocusWin = nullptr;
+
+    if (pFrameData->mpMouseMoveWin == pWindow)
+        pFrameData->mpMouseMoveWin = nullptr;
+
+    if (pFrameData->mpMouseDownWin == pWindow)
+        pFrameData->mpMouseDownWin = nullptr;
+}
+
+static void lcl_ResetDeactivateWindow(const vcl::Window* pWindow, ImplSVData* pSVData)
+{
+    if (pSVData->mpWinData->mpLastDeacWin == pWindow)
+        pSVData->mpWinData->mpLastDeacWin = nullptr;
+}
+
+static void lcl_RemovePendingUserEvents(const WindowImpl* pImpl)
+{
+    if (pImpl->mbFrame && pImpl->mpFrameData)
+    {
+        ImplFrameData* pFrameData = pImpl->mpFrameData;
+
+        if (pFrameData->mnFocusId)
+            Application::RemoveUserEvent(pFrameData->mnFocusId);
+        pFrameData->mnFocusId = nullptr;
+
+        if (pFrameData->mnMouseMoveId)
+            Application::RemoveUserEvent(pFrameData->mnMouseMoveId);
+        pFrameData->mnMouseMoveId = nullptr;
+    }
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -436,38 +484,10 @@ void Window::dispose()
 
     ImplTransferFocus(bHasFocusedChild);
 
-    // reset hint for DefModalDialogParent
-    if( pSVData->maFrameData.mpActiveApplicationFrame == this )
-        pSVData->maFrameData.mpActiveApplicationFrame = nullptr;
-
-    // reset hint of what was the last wheeled window
-    if (pSVData->mpWinData->mpLastWheelWindow == this)
-        pSVData->mpWinData->mpLastWheelWindow = nullptr;
-
-    // reset marked windows
-    if ( mpWindowImpl->mpFrameData != nullptr )
-    {
-        if ( mpWindowImpl->mpFrameData->mpFocusWin == this )
-            mpWindowImpl->mpFrameData->mpFocusWin = nullptr;
-        if ( mpWindowImpl->mpFrameData->mpMouseMoveWin == this )
-            mpWindowImpl->mpFrameData->mpMouseMoveWin = nullptr;
-        if ( mpWindowImpl->mpFrameData->mpMouseDownWin == this )
-            mpWindowImpl->mpFrameData->mpMouseDownWin = nullptr;
-    }
-
-    // reset Deactivate-Window
-    if (pSVData->mpWinData->mpLastDeacWin == this)
-        pSVData->mpWinData->mpLastDeacWin = nullptr;
-
-    if ( mpWindowImpl->mbFrame && mpWindowImpl->mpFrameData )
-    {
-        if ( mpWindowImpl->mpFrameData->mnFocusId )
-            Application::RemoveUserEvent( mpWindowImpl->mpFrameData->mnFocusId );
-        mpWindowImpl->mpFrameData->mnFocusId = nullptr;
-        if ( mpWindowImpl->mpFrameData->mnMouseMoveId )
-            Application::RemoveUserEvent( mpWindowImpl->mpFrameData->mnMouseMoveId );
-        mpWindowImpl->mpFrameData->mnMouseMoveId = nullptr;
-    }
+    lcl_ResetGlobalWindowHints(this, pSVData);
+    lcl_ResetFrameDataPointers(mpWindowImpl->mpFrameData, this);
+    lcl_ResetDeactivateWindow(this, pSVData);
+    lcl_RemovePendingUserEvents(mpWindowImpl.get());
 
     // release SalGraphics
     VclPtr<OutputDevice> pOutDev = GetOutDev();
