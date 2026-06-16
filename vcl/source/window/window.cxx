@@ -4279,8 +4279,8 @@ WindowType Window::GetType() const
 {
     if (mpWindowImpl)
         return mpWindowImpl->meType;
-    else
-        return WindowType::NONE;
+
+    return WindowType::NONE;
 }
 
 bool Window::IsFormControl() const
