@@ -3777,12 +3777,12 @@ void Window::ApplyControlForeground(vcl::RenderContext& rRenderContext, const Co
 
 void Window::SetControlBackground()
 {
-    if (mpWindowImpl->mbControlBackground)
-    {
-        mpWindowImpl->maControlBackground = COL_TRANSPARENT;
-        mpWindowImpl->mbControlBackground = false;
-        CompatStateChanged(StateChangedType::ControlBackground);
-    }
+    if (!mpWindowImpl->mbControlBackground)
+        return;
+
+    mpWindowImpl->maControlBackground = COL_TRANSPARENT;
+    mpWindowImpl->mbControlBackground = false;
+    CompatStateChanged(StateChangedType::ControlBackground);
 }
 
 void Window::SetControlBackground(const Color& rColor)
