@@ -370,6 +370,79 @@ static void lcl_RemovePendingUserEvents(const WindowImpl* pImpl)
     }
 }
 
+void Window::ImplCleanupWinData()
+{
+    // de-register as "top window child" at our parent, if necessary
+    if (mpWindowImpl->mbFrame && mpWindowImpl->mpWinData)
+    {
+        if (mpWindowImpl->mpWinData->mnIsTopWindow == 1 && mpWindowImpl->mpHierarchy->mpRealParent)
+        {
+            ImplWinData* pParentWinData = mpWindowImpl->mpHierarchy->mpRealParent->ImplGetWinData();
+
+            auto myPos = std::find(pParentWinData->maTopWindowChildren.begin(),
+                                   pParentWinData->maTopWindowChildren.end(), VclPtr<vcl::Window>(this));
+
+            SAL_WARN_IF(myPos == pParentWinData->maTopWindowChildren.end(), "vcl", "Window::dispose: inconsistency in top window chain!");
+
+            if (myPos != pParentWinData->maTopWindowChildren.end())
+                pParentWinData->maTopWindowChildren.erase(myPos);
+        }
+    }
+
+    mpWindowImpl->mpWinData.reset();
+}
+
+void Window::ImplDisposeFrameData()
+{
+    // remove BorderWindow or Frame window data
+    mpWindowImpl->mpBorderWindow.disposeAndClear();
+
+    if (!mpWindowImpl->mbFrame)
+        return;
+
+    ImplSVData* pSVData = ImplGetSVData();
+
+    // Remove from the global frame linked list
+    if (pSVData->maFrameData.mpFirstFrame == this)
+    {
+        pSVData->maFrameData.mpFirstFrame = mpWindowImpl->mpFrameData->mpNextFrame;
+    }
+    else
+    {
+        sal_Int32 nWindows = 0;
+        vcl::Window* pSysWin = pSVData->maFrameData.mpFirstFrame;
+        while (pSysWin && pSysWin->mpWindowImpl->mpFrameData->mpNextFrame.get() != this)
+        {
+            pSysWin = pSysWin->mpWindowImpl->mpFrameData->mpNextFrame;
+            nWindows++;
+        }
+
+        if (pSysWin)
+        {
+            assert(mpWindowImpl->mpFrameData->mpNextFrame.get() != pSysWin);
+            pSysWin->mpWindowImpl->mpFrameData->mpNextFrame = mpWindowImpl->mpFrameData->mpNextFrame;
+        }
+
+        SAL_WARN_IF(!pSysWin, "vcl.window", "Window " << this << " marked as frame window, "
+                                            << "is missing from list of " << nWindows << " frames");
+    }
+
+    // Destroy the system frame instance
+    if (mpWindowImpl->mpFrame) // otherwise exception during init
+    {
+        mpWindowImpl->mpFrame->SetCallback(nullptr, nullptr);
+        pSVData->mpDefInst->DestroyFrame(mpWindowImpl->mpFrame);
+    }
+
+    assert(mpWindowImpl->mpFrameData->mnFocusId == nullptr);
+    assert(mpWindowImpl->mpFrameData->mnMouseMoveId == nullptr);
+
+    // Clean up frame data structures
+    mpWindowImpl->mpFrameData->mpBuffer.disposeAndClear();
+    delete mpWindowImpl->mpFrameData;
+    mpWindowImpl->mpFrameData = nullptr;
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -493,65 +566,9 @@ void Window::dispose()
     VclPtr<OutputDevice> pOutDev = GetOutDev();
     pOutDev->ReleaseGraphics();
 
-    // remove window from the lists
     ImplRemoveWindow( true );
-
-    // de-register as "top window child" at our parent, if necessary
-    if ( mpWindowImpl->mbFrame )
-    {
-        bool bIsTopWindow
-            = mpWindowImpl->mpWinData && (mpWindowImpl->mpWinData->mnIsTopWindow == 1);
-        if ( mpWindowImpl->mpHierarchy->mpRealParent && bIsTopWindow )
-        {
-            ImplWinData* pParentWinData = mpWindowImpl->mpHierarchy->mpRealParent->ImplGetWinData();
-
-            auto myPos = ::std::find( pParentWinData->maTopWindowChildren.begin(),
-                pParentWinData->maTopWindowChildren.end(), VclPtr<vcl::Window>(this) );
-            SAL_WARN_IF( myPos == pParentWinData->maTopWindowChildren.end(), "vcl.window", "Window::~Window: inconsistency in top window chain!" );
-            if ( myPos != pParentWinData->maTopWindowChildren.end() )
-                pParentWinData->maTopWindowChildren.erase( myPos );
-        }
-    }
-
-    mpWindowImpl->mpWinData.reset();
-
-    // remove BorderWindow or Frame window data
-    mpWindowImpl->mpBorderWindow.disposeAndClear();
-    if ( mpWindowImpl->mbFrame )
-    {
-        if ( pSVData->maFrameData.mpFirstFrame == this )
-            pSVData->maFrameData.mpFirstFrame = mpWindowImpl->mpFrameData->mpNextFrame;
-        else
-        {
-            sal_Int32 nWindows = 0;
-            vcl::Window* pSysWin = pSVData->maFrameData.mpFirstFrame;
-            while ( pSysWin && pSysWin->mpWindowImpl->mpFrameData->mpNextFrame.get() != this )
-            {
-                pSysWin = pSysWin->mpWindowImpl->mpFrameData->mpNextFrame;
-                nWindows++;
-            }
-
-            if ( pSysWin )
-            {
-                assert (mpWindowImpl->mpFrameData->mpNextFrame.get() != pSysWin);
-                pSysWin->mpWindowImpl->mpFrameData->mpNextFrame = mpWindowImpl->mpFrameData->mpNextFrame;
-            }
-            else // if it is not in the list, we can't remove it.
-                SAL_WARN("vcl.window", "Window " << this << " marked as frame window, "
-                         "is missing from list of " << nWindows << " frames");
-        }
-        if (mpWindowImpl->mpFrame) // otherwise exception during init
-        {
-            mpWindowImpl->mpFrame->SetCallback( nullptr, nullptr );
-            pSVData->mpDefInst->DestroyFrame( mpWindowImpl->mpFrame );
-        }
-        assert (mpWindowImpl->mpFrameData->mnFocusId == nullptr);
-        assert (mpWindowImpl->mpFrameData->mnMouseMoveId == nullptr);
-
-        mpWindowImpl->mpFrameData->mpBuffer.disposeAndClear();
-        delete mpWindowImpl->mpFrameData;
-        mpWindowImpl->mpFrameData = nullptr;
-    }
+    ImplCleanupWinData();
+    ImplDisposeFrameData();
 
     if (mpWindowImpl->mxWindowPeer)
         mpWindowImpl->mxWindowPeer->dispose();
