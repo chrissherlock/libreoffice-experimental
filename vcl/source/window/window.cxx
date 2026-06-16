@@ -3795,16 +3795,16 @@ void Window::SetControlBackground(const Color& rColor)
             mpWindowImpl->mbControlBackground = false;
             CompatStateChanged(StateChangedType::ControlBackground);
         }
+
+        return;
     }
-    else
-    {
-        if (mpWindowImpl->maControlBackground != rColor)
-        {
-            mpWindowImpl->maControlBackground = rColor;
-            mpWindowImpl->mbControlBackground = true;
-            CompatStateChanged(StateChangedType::ControlBackground);
-        }
-    }
+
+    if (mpWindowImpl->maControlBackground == rColor)
+        return;
+
+    mpWindowImpl->maControlBackground = rColor;
+    mpWindowImpl->mbControlBackground = true;
+    CompatStateChanged(StateChangedType::ControlBackground);
 }
 
 void Window::ApplyControlBackground(vcl::RenderContext& rRenderContext, const Color& rDefaultColor)
