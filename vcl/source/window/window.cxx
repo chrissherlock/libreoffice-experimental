@@ -4326,14 +4326,14 @@ bool Window::IsMenuFloatingWindow() const
 
 bool Window::IsNativeFrame() const
 {
-    if( mpWindowImpl->mbFrame )
-        // #101741 do not check for WB_CLOSEABLE because undecorated floaters (like menus!) are closeable
-        if( mpWindowImpl->mnStyle & (WB_MOVEABLE | WB_SIZEABLE) )
-            return true;
-        else
-            return false;
-    else
+    if (!mpWindowImpl->mbFrame)
         return false;
+
+    // #101741 do not check for WB_CLOSEABLE because undecorated floaters (like menus!) are closeable
+    if (mpWindowImpl->mnStyle & (WB_MOVEABLE | WB_SIZEABLE))
+        return true;
+
+    return false;
 }
 
 void Window::EnableAllResize()
