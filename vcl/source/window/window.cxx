@@ -3396,13 +3396,14 @@ void Window::ShowTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlags 
 
 void Window::HideTracking()
 {
-    if ( mpWindowImpl->mbTrackVisible )
-    {
-        ImplWinData* pWinData = ImplGetWinData();
-        if ( !mpWindowImpl->mbInPaint || !(pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
-            InvertTracking( *pWinData->mpTrackRect, pWinData->mnTrackFlags );
-        mpWindowImpl->mbTrackVisible = false;
-    }
+    if (!mpWindowImpl->mbTrackVisible)
+        return;
+
+    ImplWinData* pWinData = ImplGetWinData();
+    if (!mpWindowImpl->mbInPaint || !(pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
+        InvertTracking(*pWinData->mpTrackRect, pWinData->mnTrackFlags);
+
+    mpWindowImpl->mbTrackVisible = false;
 }
 
 void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlags )
