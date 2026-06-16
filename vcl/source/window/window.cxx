@@ -129,6 +129,9 @@ bool Window::ImplShouldNotifyAccessibleParent() const
 
 static void lcl_ShutdownDragAndDrop(WindowImpl* pImpl)
 {
+    if (pImpl->mxDNDListenerContainer.is() )
+        pImpl->mxDNDListenerContainer->dispose();
+
     if (!pImpl->mbFrame || !pImpl->mpFrameData)
         return;
 
@@ -477,10 +480,6 @@ void Window::dispose()
         if( p != rList.end() )
             rList.erase( p );
     }
-
-    // shutdown drag and drop
-    if( mpWindowImpl->mxDNDListenerContainer.is() )
-        mpWindowImpl->mxDNDListenerContainer->dispose();
 
     lcl_ShutdownDragAndDrop(mpWindowImpl.get());
 
