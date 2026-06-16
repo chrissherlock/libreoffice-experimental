@@ -588,47 +588,61 @@ void Window::SetPaintTransparent( bool bTransparent )
 
 void Window::SetWindowRegionPixel()
 {
-
-    if ( mpWindowImpl->mpBorderWindow )
+    if (mpWindowImpl->mpBorderWindow)
+    {
         mpWindowImpl->mpBorderWindow->SetWindowRegionPixel();
-    else if( mpWindowImpl->mbFrame )
+        return;
+    }
+
+    if (mpWindowImpl->mbFrame)
     {
         mpWindowImpl->mpClippingState->maWinRegion = vcl::Region(true);
         mpWindowImpl->mpClippingState->mbWinRegion = false;
-        mpWindowImpl->mpFrame->ResetClipRegion();
-    }
-    else
-    {
-        if ( mpWindowImpl->mpClippingState->mbWinRegion )
-        {
-            mpWindowImpl->mpClippingState->maWinRegion = vcl::Region(true);
-            mpWindowImpl->mpClippingState->mbWinRegion = false;
-            vcl::clipping::setClipFlag(*this);
 
-            if ( IsReallyVisible() )
-            {
-                vcl::Region      aRegion( GetOutputRectPixel() );
-                ImplInvalidateParentFrameRegion( aRegion );
-            }
-        }
+        // This talks directly to the OS window manager (X11, Wayland, Win32)
+        // to remove the system-level shape.
+        mpWindowImpl->mpFrame->ResetClipRegion();
+
+        return;
     }
+
+    if (!mpWindowImpl->mpClippingState->mbWinRegion)
+        return;
+
+    // Reset the internal shape state
+    mpWindowImpl->mpClippingState->maWinRegion = vcl::Region(true);
+    mpWindowImpl->mpClippingState->mbWinRegion = false;
+
+    // REACTIVE TRIGGER: The shape of this window changed (it is now a rectangle).
+    // Notify the ClippingManager that the overlap math is stale.
+    InvalidateClipState();
+
+    if (!IsReallyVisible())
+        return;
+
+    vcl::Region aRegion(GetOutputRectPixel());
+    ImplInvalidateParentFrameRegion(aRegion);
 }
 
-void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
+void Window::SetWindowRegionPixel(const vcl::Region& rRegion)
 {
-
-    if ( mpWindowImpl->mpBorderWindow )
-        mpWindowImpl->mpBorderWindow->SetWindowRegionPixel( rRegion );
-    else if( mpWindowImpl->mbFrame )
+    if (mpWindowImpl->mpBorderWindow)
     {
-        if( !rRegion.IsNull() )
+        mpWindowImpl->mpBorderWindow->SetWindowRegionPixel(rRegion);
+        return;
+    }
+
+    if (mpWindowImpl->mbFrame)
+    {
+        // OS-Level Frame Window
+        if (!rRegion.IsNull())
         {
             mpWindowImpl->mpClippingState->maWinRegion = rRegion;
-            mpWindowImpl->mpClippingState->mbWinRegion = ! rRegion.IsEmpty();
+            mpWindowImpl->mpClippingState->mbWinRegion = !rRegion.IsEmpty();
 
-            if( mpWindowImpl->mpClippingState->mbWinRegion )
+            if (mpWindowImpl->mpClippingState->mbWinRegion)
             {
-                // set/update ClipRegion
+                // set/update ClipRegion on the underlying OS system window
                 RectangleVector aRectangles;
                 mpWindowImpl->mpClippingState->maWinRegion.GetRegionRectangles(aRectangles);
                 mpWindowImpl->mpFrame->BeginSetClipRegion(aRectangles.size());
@@ -638,41 +652,53 @@ void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
                     mpWindowImpl->mpFrame->UnionClipRegion(
                         rectangle.Left(),
                         rectangle.Top(),
-                        rectangle.GetWidth(),       // orig nWidth was ((R - L) + 1), same as GetWidth does
-                        rectangle.GetHeight());     // same for height
+                        rectangle.GetWidth(),
+                        rectangle.GetHeight());
                 }
 
                 mpWindowImpl->mpFrame->EndSetClipRegion();
             }
             else
-                SetWindowRegionPixel();
-        }
-        else
-            SetWindowRegionPixel();
-    }
-    else
-    {
-        if ( rRegion.IsNull() )
-        {
-            if ( mpWindowImpl->mpClippingState->mbWinRegion )
             {
-                mpWindowImpl->mpClippingState->maWinRegion = vcl::Region(true);
-                mpWindowImpl->mpClippingState->mbWinRegion = false;
-                vcl::clipping::setClipFlag(*this);
+                SetWindowRegionPixel();
             }
         }
         else
         {
-            mpWindowImpl->mpClippingState->maWinRegion = rRegion;
-            mpWindowImpl->mpClippingState->mbWinRegion = true;
-            vcl::clipping::setClipFlag(*this);
+            SetWindowRegionPixel();
         }
 
-        if ( IsReallyVisible() )
+        return;
+    }
+
+    // Standard VCL Child Window (Reactive Invalidation)
+    if (rRegion.IsNull())
+    {
+        // If clearing an existing region
+        if (mpWindowImpl->mpClippingState->mbWinRegion)
         {
-            vcl::Region      aRegion( GetOutputRectPixel() );
-            ImplInvalidateParentFrameRegion( aRegion );
+            mpWindowImpl->mpClippingState->maWinRegion = vcl::Region(true);
+            mpWindowImpl->mpClippingState->mbWinRegion = false;
+
+            // REACTIVE TRIGGER: Shape removed, hierarchy math is stale
+            InvalidateClipState();
         }
+    }
+    else
+    {
+        // Setting a new custom shape
+        mpWindowImpl->mpClippingState->maWinRegion = rRegion;
+        mpWindowImpl->mpClippingState->mbWinRegion = true;
+
+        // REACTIVE TRIGGER: Shape applied/changed, hierarchy math is stale
+        InvalidateClipState();
+    }
+
+    // Force a physical repaint of the affected area on screen
+    if (IsReallyVisible())
+    {
+        vcl::Region aRegion(GetOutputRectPixel());
+        ImplInvalidateParentFrameRegion(aRegion);
     }
 }
 

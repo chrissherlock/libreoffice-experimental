@@ -934,6 +934,10 @@ public:
     void                                Invalidate( InvalidateFlags nFlags = InvalidateFlags::NONE );
     void                                Invalidate( const tools::Rectangle& rRect, InvalidateFlags nFlags = InvalidateFlags::NONE );
     void                                Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags = InvalidateFlags::NONE );
+
+    void InvalidateClipState();
+    sal_uInt64 GetClipStateVersion() const;
+
     /**
      * Notification about some rectangle of the output device got invalidated.Used for the main
      * document window.

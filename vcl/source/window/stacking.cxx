@@ -438,7 +438,6 @@ void Window::ToTop( ToTopFlags nFlags )
 
 void Window::SetZOrder( vcl::Window* pRefWindow, ZOrderFlags nFlags )
 {
-
     if ( mpWindowImpl->mpBorderWindow )
     {
         mpWindowImpl->mpBorderWindow->SetZOrder( pRefWindow, nFlags );
@@ -545,62 +544,12 @@ void Window::SetZOrder( vcl::Window* pRefWindow, ZOrderFlags nFlags )
         mpWindowImpl->mpHierarchy->mpPrev->mpWindowImpl->mpHierarchy->mpNext = this;
     }
 
+    InvalidateClipState();
+
     if ( !IsReallyVisible() )
         return;
 
-    if ( !mpWindowImpl->mpClippingState->mbInitWinClipRegion && mpWindowImpl->mpClippingState->maWinClipRegion.IsEmpty() )
-        return;
-
-    bool bInitWinClipRegion = mpWindowImpl->mpClippingState->mbInitWinClipRegion;
-    vcl::clipping::setClipFlag(*this);
-
-    // When ClipRegion was not initialised, assume
-    // the window has not been sent, therefore do not
-    // trigger any Invalidates. This is an optimization
-    // for HTML documents with many controls. If this
-    // check gives problems, a flag should be introduced
-    // which tracks whether the window has already been
-    // emitted after Show
-    if ( bInitWinClipRegion )
-        return;
-
-    // Invalidate all windows which are next to each other
-    // Is INCOMPLETE !!!
-    tools::Rectangle   aWinRect = GetOutputRectPixel();
-    vcl::Window*     pWindow = nullptr;
-    if ( ImplIsOverlapWindow() )
-    {
-        if ( mpWindowImpl->mpOverlapWindow )
-            pWindow = mpWindowImpl->mpOverlapWindow->mpWindowImpl->mpHierarchy->mpFirstOverlap;
-    }
-    else
-        pWindow = ImplGetParent()->mpWindowImpl->mpHierarchy->mpFirstChild;
-    // Invalidate all windows in front of us and which are covered by us
-    while ( pWindow )
-    {
-        if ( pWindow == this )
-            break;
-        tools::Rectangle aCompRect = pWindow->GetOutputRectPixel();
-        if ( aWinRect.Overlaps( aCompRect ) )
-            pWindow->Invalidate( InvalidateFlags::Children | InvalidateFlags::NoTransparent );
-        pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
-    }
-
-    // If we are covered by a window in the background
-    // we should redraw it
-    while ( pWindow )
-    {
-        if ( pWindow != this )
-        {
-            tools::Rectangle aCompRect = pWindow->GetOutputRectPixel();
-            if ( aWinRect.Overlaps( aCompRect ) )
-            {
-                Invalidate( InvalidateFlags::Children | InvalidateFlags::NoTransparent );
-                break;
-            }
-        }
-        pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
-    }
+    Invalidate(InvalidateFlags::Children | InvalidateFlags::NoTransparent);
 }
 
 void Window::EnableAlwaysOnTop( bool bEnable )

@@ -1,3 +1,4 @@
+
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -9,6 +10,7 @@
 
 #include <vcl/window.hxx>
 #include <vcl/outdev.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 #include <clipping_window.hxx>
 #include <clipping/ClipStateBuilder.hxx>
@@ -106,6 +108,101 @@ void ClipStateBuilder::CollectChildren(const vcl::Window& rWindow, std::vector<C
         pChild = pChild->ImplGetWindowImpl()->mpHierarchy->mpNext;
     }
 }
+
+ClipState ClipStateBuilder::Build(vcl::Window& rWindow)
+{
+    ClipState aState;
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+
+    // --- 1. Topological Context ---
+    aState.maBounds = rWindow.GetOutputRectPixel();
+
+    if (pImpl->mpClippingState->mbWinRegion)
+    {
+        aState.maCustomRegion
+            = rWindow.GetOutDev()->GetMapper().ViewToDevice(pImpl->mpClippingState->maWinRegion);
+    }
+    else
+    {
+        aState.maCustomRegion = std::nullopt;
+    }
+
+    // --- 2. Policy Flags ---
+    aState.bIsVisible = pImpl->mbReallyVisible;
+
+    // In VCL, WB_CLIPCHILDREN and WB_CLIPSIBLINGS are standard WinBits used to dictate overlap logic
+    aState.bClipChildren = (rWindow.GetStyle() & WB_CLIPCHILDREN) != 0;
+    aState.bClipSiblings = pImpl->mpClippingState->mbClipSiblings;
+
+    // --- 3. Hierarchy / State Flattening ---
+
+    // Collect Children (If the compiler needs to subtract child bounds)
+    vcl::Window* pChild = pImpl->mpHierarchy->mpFirstChild;
+    while (pChild)
+    {
+        WindowImpl* pChildImpl = pChild->ImplGetWindowImpl();
+        if (pChildImpl->mbReallyVisible)
+        {
+            ClipNode aNode;
+            aNode.maBounds = pChild->GetOutputRectPixel();
+            // If ClipNode later requires custom shapes, add them here
+            aState.maChildren.push_back(aNode);
+        }
+        pChild = pChildImpl->mpHierarchy->mpNext;
+    }
+
+    // Collect Siblings (Windows that share our parent but are physically above us in Z-order)
+    vcl::Window* pSibling = pImpl->mpHierarchy->mpNext;
+    while (pSibling)
+    {
+        WindowImpl* pSibImpl = pSibling->ImplGetWindowImpl();
+        // A sibling only obscures us if it is visible and NOT transparent
+        if (pSibImpl->mbReallyVisible && !pSibImpl->mbPaintTransparent)
+        {
+            ClipNode aNode;
+            aNode.maBounds = pSibling->GetOutputRectPixel();
+            aState.maSiblings.push_back(aNode);
+        }
+        pSibling = pSibImpl->mpHierarchy->mpNext;
+    }
+
+    // Collect Overlaps (Floating windows acting as superior siblings)
+    if (rWindow.ImplIsOverlapWindow())
+    {
+        vcl::Window* pOverlap = pImpl->mpHierarchy->mpNextOverlap;
+        while (pOverlap)
+        {
+            WindowImpl* pOverlapImpl = pOverlap->ImplGetWindowImpl();
+            if (pOverlapImpl->mbReallyVisible && !pOverlapImpl->mbPaintTransparent)
+            {
+                ClipNode aNode;
+                aNode.maBounds = pOverlap->GetOutputRectPixel();
+                aState.maSiblings.push_back(aNode);
+            }
+            pOverlap = pOverlapImpl->mpHierarchy->mpNextOverlap;
+        }
+    }
+    else if (rWindow.ImplGetParent())
+    {
+        // Standard children are obscured by ANY floating window attached to their parent
+        vcl::Window* pOverlap
+            = rWindow.ImplGetParent()->ImplGetWindowImpl()->mpHierarchy->mpFirstOverlap;
+        while (pOverlap)
+        {
+            WindowImpl* pOverlapImpl = pOverlap->ImplGetWindowImpl();
+            if (pOverlapImpl->mbReallyVisible && !pOverlapImpl->mbPaintTransparent)
+            {
+                ClipNode aNode;
+                aNode.maBounds = pOverlap->GetOutputRectPixel();
+                aState.maSiblings.push_back(aNode);
+            }
+            pOverlap = pOverlapImpl->mpHierarchy->mpNextOverlap;
+        }
+    }
+
+    return aState;
+}
+
 } // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

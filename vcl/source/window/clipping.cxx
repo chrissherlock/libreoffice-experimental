@@ -24,6 +24,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping/ClippingObserver.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <salgeom.hxx>
@@ -31,6 +32,19 @@
 #include <window.h>
 
 namespace vcl {
+
+void Window::InvalidateClipState()
+{
+    mpWindowImpl->mnClipStateVersion++;
+
+    if (mpWindowImpl->mpClippingObserver)
+        mpWindowImpl->mpClippingObserver->OnWindowGeometryChanged(*this);
+
+    if (auto* pParent = GetParent())
+        pParent->InvalidateClipState();
+}
+
+sal_uInt64 Window::GetClipStateVersion() const { return mpWindowImpl->mnClipStateVersion; }
 
 void Window::SetParentClipMode(ParentClipMode eMode)
 {

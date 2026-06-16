@@ -108,6 +108,11 @@ enum class SystemTextColorFlags;
 
 namespace vcl
 {
+    namespace clipping
+    {
+        class ClippingManager;
+    }
+
     class ExtOutDevData;
     class TextLayoutCommon;
     struct FontCapabilities;
@@ -214,6 +219,7 @@ private:
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;
+    std::unique_ptr<vcl::clipping::ClippingManager> mpClippingManager;
     mutable DeviceClipState maClipState;
 
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
@@ -332,6 +338,9 @@ public:
     css::uno::Reference< css::rendering::XSpriteCanvas > GetSpriteCanvas() const;
 
     virtual bool CanAnimate() const = 0;
+
+    vcl::clipping::ClippingManager& GetClippingManager(vcl::Window& rRoot);
+    sal_uInt64 GetClipStateVersion() const;
 
 protected:
 

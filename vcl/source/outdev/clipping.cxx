@@ -29,9 +29,20 @@
 #include <window.h>
 #include <clipping.hxx>
 #include <clipping_window.hxx>
+#include <clipping/ClippingManager.hxx>
 #include <windowdev.hxx>
 #include <devicedispatcher.hxx>
 #include <salgdi.hxx>
+
+vcl::clipping::ClippingManager& OutputDevice::GetClippingManager(vcl::Window& rRoot)
+{
+    // Lazy instantiation: Only create the manager if/when
+    // a component actually requests clipping logic.
+    if (!mpClippingManager)
+        mpClippingManager = std::make_unique<vcl::clipping::ClippingManager>(rRoot);
+
+    return *mpClippingManager;
+}
 
 void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
                                   const Point& rPos, const Size& rSize, const Size& rBackgroundSize) const

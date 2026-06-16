@@ -23,6 +23,8 @@ public:
     // This is the factory method that performs the conversion
     static ClipState BuildFromWindow(const vcl::Window& rWindow);
 
+    static ClipState Build(vcl::Window& rWindow);
+
 private:
     // Helper to flatten linked-list pointers into ClipNode vectors
     static void CollectSiblings(const vcl::Window& rWindow, std::vector<ClipNode>& rOut);

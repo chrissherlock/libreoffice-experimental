@@ -44,6 +44,8 @@
 #include <vcl/CoordinateMapper.hxx>
 
 #include <brdwin.hxx>
+#include <clipping/ClippingManager.hxx>
+#include <clipping/ClippingObserver.hxx>
 #include <clipping.hxx>
 #include <clipping_window.hxx>
 #include <dndeventdispatcher.hxx>
@@ -455,6 +457,9 @@ void Window::dispose()
     assert( (!mpWindowImpl->mpHierarchy->mpParent ||
              mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl) &&
             "vcl::Window child should have its parent disposed first" );
+
+    if (mpWindowImpl->mpClippingObserver)
+        mpWindowImpl->mpClippingObserver->OnWindowDestroyed(*this);
 
     // remove Key and Mouse events issued by Application::PostKey/MouseEvent
     Application::RemoveMouseAndKeyEvents( this );
@@ -1256,10 +1261,16 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
         if ( mpWindowImpl->mpClippingState->mbWinRegion )
             pOldRegion->Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
 
+        // --- REFACTORED BIT-COPY OPTIMIZATION CHECK ---
         if ( GetOutDev()->GetOutputWidthPixel() && GetOutDev()->GetOutputHeightPixel() && !mpWindowImpl->mbPaintTransparent &&
-             !mpWindowImpl->mpClippingState->mbInitWinClipRegion && !mpWindowImpl->mpClippingState->maWinClipRegion.IsEmpty() &&
              !HasPaintEvent() )
-            bCopyBits = true;
+        {
+            // Instead of checking mbInitWinClipRegion, we safely query the manager.
+            // If the current plan is not empty, we have pixels we can copy!
+            auto& rManager = GetOutDev()->GetClippingManager(*this);
+            if (!rManager.GetClipPlan(*this).mbEmpty)
+                bCopyBits = true;
+        }
     }
 
     bool bnXRecycled = false; // avoid duplicate mirroring in RTL case
@@ -1302,16 +1313,10 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
         {
             aPtDev.setX( GetOutDev()->mpGraphics->mirror2( aPtDev.X(), *GetOutDev() ) );
 
-            // #106948# always mirror our pos if our parent is not mirroring, even
-            // if we are also not mirroring
-            // RTL: check if parent is in different coordinates
             if( !bnXRecycled && mpWindowImpl->mpHierarchy->mpParent && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel() )
             {
                 nX = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel() - GetOutDev()->GetOutputWidthPixel() - nX;
             }
-            /* #i99166# An LTR window in RTL UI that gets sized only would be
-               expected to not moved its upper left point
-            */
             if( bnXRecycled )
             {
                 if( GetOutDev()->ImplIsAntiparallel() )
@@ -1323,17 +1328,19 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
         }
         else if( !bnXRecycled && mpWindowImpl->mpHierarchy->mpParent && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel() )
         {
-            // mirrored window in LTR UI
             nX = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel() - GetOutDev()->GetOutputWidthPixel() - nX;
         }
 
-        // check maPos as well, as it could have been changed for client windows (ImplCallMove())
         if ( mpWindowImpl->mnAbsScreenX != aPtDev.X() || nX != mpWindowImpl->mnX || nOrgX != mpWindowImpl->maPos.X() )
         {
             if ( bCopyBits && !pOverlapRegion )
             {
-                pOverlapRegion.reset( new vcl::Region() );
-                vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *pOverlapRegion, false, true);
+                // --- REFACTORED OVERLAP CALCULATION ---
+                // Instead of the manual vcl::clipping::calcOverlapRegion walk,
+                // the overlap is simply everything in the bounding box that ISN'T visible.
+                pOverlapRegion.reset( new vcl::Region(GetOutputRectPixel()) );
+                auto& rManager = GetOutDev()->GetClippingManager(*this);
+                pOverlapRegion->Exclude(rManager.GetClipPlan(*this).maFinalRegion);
             }
 
             mpWindowImpl->mnX = nX;
@@ -1344,13 +1351,14 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     }
     if ( nFlags & PosSizeFlags::Y )
     {
-        // check maPos as well, as it could have been changed for client windows (ImplCallMove())
         if ( nY != mpWindowImpl->mnY || nY != mpWindowImpl->maPos.Y() )
         {
             if ( bCopyBits && !pOverlapRegion )
             {
-                pOverlapRegion.reset( new vcl::Region() );
-                vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *pOverlapRegion, false, true);
+                // --- REFACTORED OVERLAP CALCULATION ---
+                pOverlapRegion.reset( new vcl::Region(GetOutputRectPixel()) );
+                auto& rManager = GetOutDev()->GetClippingManager(*this);
+                pOverlapRegion->Exclude(rManager.GetClipPlan(*this).maFinalRegion);
             }
             mpWindowImpl->mnY = nY;
             mpWindowImpl->maPos.setY( nY );
@@ -1365,7 +1373,6 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     if ( bNewPos )
         bUpdateSysObjPos = ImplUpdatePos();
 
-    // the borderwindow always specifies the position for its client window
     if ( mpWindowImpl->mpBorderWindow )
         mpWindowImpl->maPos = mpWindowImpl->mpBorderWindow->mpWindowImpl->maPos;
 
@@ -1377,41 +1384,25 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                                            GetOutDev()->GetOutputHeightPixel() - mpWindowImpl->mpClientWindow->mpWindowImpl->mnTopBorder-mpWindowImpl->mpClientWindow->mpWindowImpl->mnBottomBorder,
                                            PosSizeFlags::X | PosSizeFlags::Y |
                                            PosSizeFlags::Width | PosSizeFlags::Height );
-        // If we have a client window, then this is the position
-        // of the Application's floating windows
         mpWindowImpl->mpClientWindow->mpWindowImpl->maPos = mpWindowImpl->maPos;
         if ( bNewPos )
         {
             if ( mpWindowImpl->mpClientWindow->IsVisible() )
-            {
                 mpWindowImpl->mpClientWindow->ImplCallMove();
-            }
             else
-            {
                 mpWindowImpl->mpClientWindow->mpWindowImpl->mbCallMove = true;
-            }
         }
     }
 
-    // Move()/Resize() will be called only for Show(), such that
-    // at least one is called before Show()
     if ( IsVisible() )
     {
-        if ( bNewPos )
-        {
-            ImplCallMove();
-        }
-        if ( bNewSize )
-        {
-            ImplCallResize();
-        }
+        if ( bNewPos )  ImplCallMove();
+        if ( bNewSize ) ImplCallResize();
     }
     else
     {
-        if ( bNewPos )
-            mpWindowImpl->mbCallMove = true;
-        if ( bNewSize )
-            mpWindowImpl->mbCallResize = true;
+        if ( bNewPos )  mpWindowImpl->mbCallMove = true;
+        if ( bNewSize ) mpWindowImpl->mbCallResize = true;
     }
 
     bool bUpdateSysObjClip = false;
@@ -1419,8 +1410,9 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
     {
         if ( bNewPos || bNewSize )
         {
-            // set Clip-Flag
-            bUpdateSysObjClip = !vcl::clipping::setClipFlag(*this, true);
+            InvalidateClipState();
+
+            bUpdateSysObjClip = true;
         }
 
         // invalidate window content ?
@@ -1432,12 +1424,18 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                 bool bParentPaint = true;
                 if ( !ImplIsOverlapWindow() )
                     bParentPaint = mpWindowImpl->mpHierarchy->mpParent->IsPaintEnabled();
+
                 if ( bCopyBits && bParentPaint && !HasPaintEvent() )
                 {
                     vcl::Region aRegion( GetOutputRectPixel() );
-                    if ( mpWindowImpl->mpClippingState->mbWinRegion )
-                        aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
-                    vcl::clipping::clipBoundaries(*this, aRegion, false, true);
+
+                    // --- REFACTORED BOUNDARY CLIPPING ---
+                    // Because InvalidateClipState() was called above, this triggers a fresh compile!
+                    // This replaces vcl::clipping::clipBoundaries(*this, aRegion, false, true);
+                    auto& rManager = GetOutDev()->GetClippingManager(*this);
+                    const auto& rNewPlan = rManager.GetClipPlan(*this);
+                    aRegion.Intersect(rNewPlan.maFinalRegion);
+
                     if ( !pOverlapRegion->IsEmpty() )
                     {
                         pOverlapRegion->Move( GetOutDev()->GetDeviceOriginX() - nOldOutOffX, GetOutDev()->GetDeviceOriginY() - nOldOutOffY );
@@ -1453,7 +1451,6 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                         SalGraphics* pGraphics = ImplGetFrameGraphics();
                         if ( pGraphics )
                         {
-
                             OutputDevice *pOutDev = GetOutDev();
                             const bool bSelectClipRegion = pOutDev->SelectClipRegion( aRegion, pGraphics );
                             if ( bSelectClipRegion )
@@ -1486,23 +1483,38 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
             {
                 vcl::Region aRegion( GetOutputRectPixel() );
                 aRegion.Exclude( *pOldRegion );
-                if ( mpWindowImpl->mpClippingState->mbWinRegion )
-                    aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
-                vcl::clipping::clipBoundaries(*this, aRegion, false, true);
+
+                // --- REFACTORED BOUNDARY CLIPPING ---
+                auto& rManager = GetOutDev()->GetClippingManager(*this);
+                const auto& rNewPlan = rManager.GetClipPlan(*this);
+                aRegion.Intersect(rNewPlan.maFinalRegion);
+
                 if ( !aRegion.IsEmpty() )
                     ImplInvalidateFrameRegion( &aRegion, InvalidateFlags::Children );
             }
         }
 
-        // invalidate Parent or Overlaps
+        // invalidate Parent or Overlaps (The space we left behind)
         if ( bNewPos ||
              (GetOutDev()->GetOutputWidthPixel() < nOldOutWidth) || (GetOutDev()->GetOutputHeightPixel() < nOldOutHeight) )
         {
             vcl::Region aRegion( *pOldRegion );
-            if ( !mpWindowImpl->mbPaintTransparent )
-                vcl::clipping::excludeWindowRegion(*this, aRegion);
 
-            vcl::clipping::clipBoundaries(*this, aRegion, false, true);
+            // --- REFACTORED EXCLUSION & BOUNDARY ---
+            // Old: vcl::clipping::excludeWindowRegion(*this, aRegion);
+            // Old: vcl::clipping::clipBoundaries(*this, aRegion, false, true);
+
+            auto& rManager = GetOutDev()->GetClippingManager(*this);
+            if ( !mpWindowImpl->mbPaintTransparent )
+            {
+                // Exclude our NEW geometry from our OLD geometry to find the newly exposed parent pixels
+                aRegion.Exclude(rManager.GetClipPlan(*this).maFinalRegion);
+            }
+
+            // Intersect with the parent's visible region so we don't invalidate off-screen parent space
+            if (auto* pParent = ImplGetParent()) {
+                 aRegion.Intersect(rManager.GetClipPlan(*pParent).maFinalRegion);
+            }
 
             if ( !aRegion.IsEmpty() && !mpWindowImpl->mpBorderWindow )
                 ImplInvalidateParentFrameRegion( aRegion );
@@ -2000,17 +2012,21 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
 
         if ( mpWindowImpl->mbReallyVisible )
         {
-            if ( mpWindowImpl->mpClippingState->mbInitWinClipRegion )
-                clipping::initWinClipRegion(*this);
-
-            vcl::Region aInvRegion = mpWindowImpl->mpClippingState->maWinClipRegion;
+            // --- REFACTORED HIDE PATH ---
+            // Capture the exact region this window occupies BEFORE we hide it.
+            // We use the GetWindowClipRegionPixel() method you just refactored
+            // so it pulls safely from the ClippingManager cache.
+            vcl::Region aInvRegion = GetWindowClipRegionPixel();
 
             if( !xWindow->mpWindowImpl )
                 return;
 
             bRealVisibilityChanged = mpWindowImpl->mbReallyVisible;
             ImplResetReallyVisible();
-            vcl::clipping::setClipFlag(*this);
+
+            // Reactive Trigger: The window is now hidden, so the hierarchy is dirty.
+            InvalidateClipState();
+            // -----------------------------
 
             if ( ImplIsOverlapWindow() && !mpWindowImpl->mbFrame )
             {
@@ -2110,8 +2126,7 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
             bRealVisibilityChanged = !mpWindowImpl->mbReallyVisible;
             ImplSetReallyVisible();
 
-            // assure clip rectangles will be recalculated
-            vcl::clipping::setClipFlag(*this);
+            InvalidateClipState();
 
             if ( !mpWindowImpl->mbFrame )
             {
