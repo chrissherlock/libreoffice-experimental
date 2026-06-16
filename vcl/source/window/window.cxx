@@ -2614,8 +2614,8 @@ VclPtr<vcl::Window> Window::GetFocusedWindow() const
 {
     if (mpWindowImpl && mpWindowImpl->mpFrameData)
         return mpWindowImpl->mpFrameData->mpFocusWin;
-    else
-        return VclPtr<vcl::Window>();
+
+    return VclPtr<vcl::Window>();
 }
 
 void Window::SetFakeFocus( bool bFocus )
