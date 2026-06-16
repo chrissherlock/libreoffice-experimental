@@ -359,18 +359,20 @@ static void lcl_ResetDeactivateWindow(const vcl::Window* pWindow, ImplSVData* pS
 
 static void lcl_RemovePendingUserEvents(const WindowImpl* pImpl)
 {
-    if (pImpl->mbFrame && pImpl->mpFrameData)
-    {
-        ImplFrameData* pFrameData = pImpl->mpFrameData;
+    if (!pImpl->mbFrame || !pImpl->mpFrameData)
+        return;
 
-        if (pFrameData->mnFocusId)
-            Application::RemoveUserEvent(pFrameData->mnFocusId);
-        pFrameData->mnFocusId = nullptr;
+    ImplFrameData* pFrameData = pImpl->mpFrameData;
 
-        if (pFrameData->mnMouseMoveId)
-            Application::RemoveUserEvent(pFrameData->mnMouseMoveId);
-        pFrameData->mnMouseMoveId = nullptr;
-    }
+    if (pFrameData->mnFocusId)
+        Application::RemoveUserEvent(pFrameData->mnFocusId);
+
+    pFrameData->mnFocusId = nullptr;
+
+    if (pFrameData->mnMouseMoveId)
+        Application::RemoveUserEvent(pFrameData->mnMouseMoveId);
+
+    pFrameData->mnMouseMoveId = nullptr;
 }
 
 void Window::ImplCleanupWinData()
