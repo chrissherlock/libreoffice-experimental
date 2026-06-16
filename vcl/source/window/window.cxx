@@ -3737,12 +3737,12 @@ void Window::ApplyControlFont(vcl::RenderContext& rRenderContext, const vcl::Fon
 
 void Window::SetControlForeground()
 {
-    if (mpWindowImpl->mbControlForeground)
-    {
-        mpWindowImpl->maControlForeground = COL_TRANSPARENT;
-        mpWindowImpl->mbControlForeground = false;
-        CompatStateChanged(StateChangedType::ControlForeground);
-    }
+    if (!mpWindowImpl->mbControlForeground)
+        return;
+
+    mpWindowImpl->maControlForeground = COL_TRANSPARENT;
+    mpWindowImpl->mbControlForeground = false;
+    CompatStateChanged(StateChangedType::ControlForeground);
 }
 
 void Window::SetControlForeground(const Color& rColor)
