@@ -127,6 +127,39 @@ bool Window::ImplShouldNotifyAccessibleParent() const
         && GetAccessibleParentWindow();
 }
 
+static void lcl_ShutdownDragAndDrop(WindowImpl* pImpl)
+{
+    if (!pImpl->mbFrame || !pImpl->mpFrameData)
+        return;
+
+    try
+    {
+        auto& rFrameData = pImpl->mpFrameData;
+
+        // deregister drop target listener
+        if (rFrameData->mxDropTargetListener.is())
+        {
+            Reference<XDragGestureRecognizer> xDragGestureRecognizer(rFrameData->mxDragSource, UNO_QUERY);
+            if (xDragGestureRecognizer.is())
+            {
+                xDragGestureRecognizer->removeDragGestureListener(rFrameData->mxDropTargetListener);
+            }
+
+            rFrameData->mxDropTarget->removeDropTargetListener(rFrameData->mxDropTargetListener);
+            rFrameData->mxDropTargetListener.clear();
+        }
+
+        // shutdown drag and drop for this frame window
+        Reference<XComponent> xComponent(rFrameData->mxDropTarget, UNO_QUERY);
+        if (xComponent.is())
+            xComponent->dispose();
+    }
+    catch (const Exception&)
+    {
+        // can be safely ignored here.
+    }
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -166,36 +199,7 @@ void Window::dispose()
     if( mpWindowImpl->mxDNDListenerContainer.is() )
         mpWindowImpl->mxDNDListenerContainer->dispose();
 
-    if( mpWindowImpl->mbFrame && mpWindowImpl->mpFrameData )
-    {
-        try
-        {
-            // deregister drop target listener
-            if( mpWindowImpl->mpFrameData->mxDropTargetListener.is() )
-            {
-                Reference< XDragGestureRecognizer > xDragGestureRecognizer(mpWindowImpl->mpFrameData->mxDragSource, UNO_QUERY);
-                if( xDragGestureRecognizer.is() )
-                {
-                    xDragGestureRecognizer->removeDragGestureListener(mpWindowImpl->mpFrameData->mxDropTargetListener);
-                }
-
-                mpWindowImpl->mpFrameData->mxDropTarget->removeDropTargetListener( mpWindowImpl->mpFrameData->mxDropTargetListener );
-                mpWindowImpl->mpFrameData->mxDropTargetListener.clear();
-            }
-
-            // shutdown drag and drop for this frame window
-            Reference< XComponent > xComponent( mpWindowImpl->mpFrameData->mxDropTarget, UNO_QUERY );
-
-            // DNDEventDispatcher does not hold a reference of the DropTarget,
-            // so it's ok if it does not support XComponent
-            if( xComponent.is() )
-                xComponent->dispose();
-        }
-        catch (const Exception&)
-        {
-            // can be safely ignored here.
-        }
-    }
+    lcl_ShutdownDragAndDrop(mpWindowImpl.get());
 
     UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper( false );
     if ( pWrapper )
