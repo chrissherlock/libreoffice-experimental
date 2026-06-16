@@ -4968,22 +4968,25 @@ void Window::set_width_request(sal_Int32 nWidthRequest)
 Size Window::get_ungrouped_preferred_size() const
 {
     Size aRet(get_width_request(), get_height_request());
-    if (aRet.Width() == -1 || aRet.Height() == -1)
-    {
-        //cache gets blown away by queue_resize
-        WindowImpl *pWindowImpl = mpWindowImpl->mpBorderWindow ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get() : mpWindowImpl.get();
-        if (pWindowImpl->mnOptimalWidthCache == -1 || pWindowImpl->mnOptimalHeightCache == -1)
-        {
-            Size aOptimal(GetOptimalSize());
-            pWindowImpl->mnOptimalWidthCache = aOptimal.Width();
-            pWindowImpl->mnOptimalHeightCache = aOptimal.Height();
-        }
 
-        if (aRet.Width() == -1)
-            aRet.setWidth( pWindowImpl->mnOptimalWidthCache );
-        if (aRet.Height() == -1)
-            aRet.setHeight( pWindowImpl->mnOptimalHeightCache );
+    if (aRet.Width() != -1 && aRet.Height() != -1)
+        return aRet;
+
+    // cache gets blown away by queue_resize
+    WindowImpl *pWindowImpl = mpWindowImpl->mpBorderWindow ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get() : mpWindowImpl.get();
+    if (pWindowImpl->mnOptimalWidthCache == -1 || pWindowImpl->mnOptimalHeightCache == -1)
+    {
+        Size aOptimal(GetOptimalSize());
+        pWindowImpl->mnOptimalWidthCache = aOptimal.Width();
+        pWindowImpl->mnOptimalHeightCache = aOptimal.Height();
     }
+
+    if (aRet.Width() == -1)
+        aRet.setWidth( pWindowImpl->mnOptimalWidthCache );
+
+    if (aRet.Height() == -1)
+        aRet.setHeight( pWindowImpl->mnOptimalHeightCache );
+
     return aRet;
 }
 
