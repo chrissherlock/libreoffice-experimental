@@ -3840,16 +3840,17 @@ vcl::Font Window::GetDrawPixelFont(OutputDevice const * pDev) const
     return aFont;
 }
 
-tools::Long Window::GetDrawPixel( OutputDevice const * pDev, tools::Long nPixels ) const
+tools::Long Window::GetDrawPixel(OutputDevice const * pDev, tools::Long nPixels) const
 {
     tools::Long nP = nPixels;
-    if ( pDev->GetOutDevType() != OUTDEV_WINDOW )
-    {
-        MapMode aMap( MapUnit::Map100thMM );
-        auto aSz = convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nP, 0)), aMap);
-        nP = aSz->Width();
-    }
-    return nP;
+
+    if (pDev->GetOutDevType() == OUTDEV_WINDOW)
+        return nPixels;
+
+    MapMode aMap(MapUnit::Map100thMM);
+    auto aSz = convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nP, 0)), aMap);
+
+    return aSz->Width();
 }
 
 // returns how much was actually scrolled (so that abs(retval) <= abs(nN))
