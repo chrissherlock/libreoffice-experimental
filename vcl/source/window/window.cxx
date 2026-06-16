@@ -3722,11 +3722,9 @@ vcl::Font Window::GetControlFont() const
 {
     if (mpWindowImpl->mpControlFont)
         return *mpWindowImpl->mpControlFont;
-    else
-    {
-        vcl::Font aFont;
-        return aFont;
-    }
+
+    vcl::Font aFont;
+    return aFont;
 }
 
 void Window::ApplyControlFont(vcl::RenderContext& rRenderContext, const vcl::Font& rFont)
