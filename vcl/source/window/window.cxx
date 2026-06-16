@@ -2634,15 +2634,16 @@ bool Window::HasChildPathFocus( bool bSystemWindow ) const
 
 void Window::SetCursor( vcl::Cursor* pCursor )
 {
+    if (mpWindowImpl->mpCursor == pCursor)
+        return;
 
-    if ( mpWindowImpl->mpCursor != pCursor )
-    {
-        if ( mpWindowImpl->mpCursor )
-            mpWindowImpl->mpCursor->ImplHide();
-        mpWindowImpl->mpCursor = pCursor;
-        if ( pCursor )
-            pCursor->ImplShow();
-    }
+    if (mpWindowImpl->mpCursor)
+        mpWindowImpl->mpCursor->ImplHide();
+
+    mpWindowImpl->mpCursor = pCursor;
+
+    if (pCursor)
+        pCursor->ImplShow();
 }
 
 void Window::SetText( const OUString& rStr )
