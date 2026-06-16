@@ -274,6 +274,54 @@ void Window::ImplRemoveFromTaskPaneList()
     SAL_WARN_IF(!bInList, "vcl", "Window (" << GetText() << ") not found in TaskPanelList");
 }
 
+void Window::ImplTransferFocus(bool bHasFocusedChild)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+    vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
+
+    // If we or a child have focus, pass it to another window
+    if (pSVData->mpWinData->mpFocusWin == this || bHasFocusedChild)
+    {
+        if (mpWindowImpl->mbFrame)
+        {
+            pSVData->mpWinData->mpFocusWin = nullptr;
+            pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
+        }
+        else
+        {
+            vcl::Window* pParent = GetParent();
+            vcl::Window* pBorderWindow = mpWindowImpl->mpBorderWindow;
+
+            // when windows overlap, give focus to the parent of the next FrameWindow
+            if (pBorderWindow)
+            {
+                if (pBorderWindow->ImplIsOverlapWindow())
+                    pParent = pBorderWindow->mpWindowImpl->mpOverlapWindow;
+            }
+            else if (ImplIsOverlapWindow())
+            {
+                pParent = mpWindowImpl->mpOverlapWindow;
+            }
+
+            if (pParent && pParent->IsEnabled() && pParent->IsInputEnabled() && !pParent->IsInModalMode())
+                pParent->GrabFocus();
+            else
+                mpWindowImpl->mpFrameWindow->GrabFocus();
+
+            // If the focus was set back to 'this' set it to nothing
+            if (pSVData->mpWinData->mpFocusWin == this)
+            {
+                pSVData->mpWinData->mpFocusWin = nullptr;
+                pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
+            }
+        }
+    }
+
+    // Clear any stale cached focus references in the overlap window
+    if (pOverlapWindow != nullptr && pOverlapWindow->mpWindowImpl->mpLastFocusWindow == this)
+        pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -386,47 +434,7 @@ void Window::dispose()
 #endif
     }
 
-    // if we get focus pass focus to another window
-    vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
-    if (pSVData->mpWinData->mpFocusWin == this
-        || bHasFocusedChild) // #122232#, see above, try some cleanup
-    {
-        if ( mpWindowImpl->mbFrame )
-        {
-            pSVData->mpWinData->mpFocusWin = nullptr;
-            pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
-        }
-        else
-        {
-            vcl::Window* pParent = GetParent();
-            vcl::Window* pBorderWindow = mpWindowImpl->mpBorderWindow;
-        // when windows overlap, give focus to the parent
-        // of the next FrameWindow
-            if ( pBorderWindow )
-            {
-                if ( pBorderWindow->ImplIsOverlapWindow() )
-                    pParent = pBorderWindow->mpWindowImpl->mpOverlapWindow;
-            }
-            else if ( ImplIsOverlapWindow() )
-                pParent = mpWindowImpl->mpOverlapWindow;
-
-            if ( pParent && pParent->IsEnabled() && pParent->IsInputEnabled() && ! pParent->IsInModalMode() )
-                pParent->GrabFocus();
-            else
-                mpWindowImpl->mpFrameWindow->GrabFocus();
-
-            // If the focus was set back to 'this' set it to nothing
-            if (pSVData->mpWinData->mpFocusWin == this)
-            {
-                pSVData->mpWinData->mpFocusWin = nullptr;
-                pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
-            }
-        }
-    }
-
-    if ( pOverlapWindow != nullptr &&
-         pOverlapWindow->mpWindowImpl->mpLastFocusWindow == this )
-        pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
+    ImplTransferFocus(bHasFocusedChild);
 
     // reset hint for DefModalDialogParent
     if( pSVData->maFrameData.mpActiveApplicationFrame == this )

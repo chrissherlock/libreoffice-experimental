@@ -589,6 +589,7 @@ private:
 
     SAL_DLLPRIVATE void                 ImplRemoveFromTaskPaneList();
     SAL_DLLPRIVATE bool                 ImplShouldNotifyAccessibleParent() const;
+    SAL_DLLPRIVATE void                 ImplTransferFocus(bool bHasFocusedChild);
     SAL_DLLPRIVATE void                 ImplSetFrameParent( const vcl::Window* pParent );
 
     SAL_DLLPRIVATE void                 ImplInsertWindow( vcl::Window* pParent );
