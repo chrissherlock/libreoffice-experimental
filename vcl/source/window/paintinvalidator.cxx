@@ -24,6 +24,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping/ClippingManager.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <salgeom.hxx>
@@ -75,13 +76,20 @@ void Window::ImplInvalidateFrameRegion( const vcl::Region* pRegion, InvalidateFl
             pParent = pParent->ImplGetParent();
         if( pParent )
         {
+            vcl::Region aChildRegionCache;
             vcl::Region *pChildRegion;
+
             if ( mpWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAll )
-                // invalidate the whole child window region in the parent
-                pChildRegion = &vcl::clipping::getWinChildClipRegion(*this);
+            {
+                auto& rManager = GetOutDev()->GetClippingManager(*this);
+                aChildRegionCache = rManager.GetClipPlan(*this).maFinalRegion;
+                pChildRegion = &aChildRegionCache;
+            }
             else
+            {
                 // invalidate the same region in the parent that has to be repainted in the child
                 pChildRegion = &mpWindowImpl->maInvalidateRegion;
+            }
 
             nFlags |= InvalidateFlags::Children;  // paint should also be done on all children
             nFlags &= ~InvalidateFlags::NoErase;  // parent should paint and erase to create proper background
@@ -97,7 +105,9 @@ void Window::ImplInvalidateOverlapFrameRegion( const vcl::Region& rRegion )
 {
     vcl::Region aRegion = rRegion;
 
-    vcl::clipping::clipBoundaries(*this, aRegion, true, true);
+    auto& rManager = GetOutDev()->GetClippingManager(*this);
+    aRegion.Intersect(rManager.GetClipPlan(*this).maFinalRegion);
+
     if ( !aRegion.IsEmpty() )
         ImplInvalidateFrameRegion( &aRegion, InvalidateFlags::Children );
 
@@ -161,6 +171,7 @@ void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags 
     }
     if ( (nFlags & InvalidateFlags::NoChildren) && mpWindowImpl->mpHierarchy->mpFirstChild )
         bInvalidateAll = false;
+
     if ( bInvalidateAll )
         ImplInvalidateFrameRegion( nullptr, nFlags );
     else
@@ -181,18 +192,44 @@ void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags 
                 aRegion.Intersect( *pRegion );
         }
 
-        vcl::clipping::clipBoundaries(*this, aRegion, true, true);
+        auto& rManager = GetOutDev()->GetClippingManager(*this);
+        aRegion.Intersect(rManager.GetClipPlan(*this).maFinalRegion);
 
         if ( nFlags & InvalidateFlags::NoChildren )
         {
             nFlags &= ~InvalidateFlags::Children;
             if ( !(nFlags & InvalidateFlags::NoClipChildren) )
             {
+                vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
+
                 if ( nOrgFlags & InvalidateFlags::NoChildren )
-                    vcl::clipping::clipAllChildren(*this, aRegion);
+                {
+                    while (pChild)
+                    {
+                        if (pChild->IsReallyVisible())
+                            aRegion.Exclude(rManager.GetClipPlan(*pChild).maFinalRegion);
+                        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+                    }
+                }
                 else
                 {
-                    if (vcl::clipping::clipChildren(*this, aRegion))
+                    bool bOtherClip = false;
+                    WinBits nParentStyle = GetStyle();
+
+                    while (pChild)
+                    {
+                        if (pChild->IsReallyVisible())
+                        {
+                            ParentClipMode nMode = pChild->GetParentClipMode();
+                            if (!(nMode & ParentClipMode::NoClip) && ((nMode & ParentClipMode::Clip) || (nParentStyle & WB_CLIPCHILDREN)))
+                                aRegion.Exclude(rManager.GetClipPlan(*pChild).maFinalRegion);
+                            else
+                                bOtherClip = true;
+                        }
+                        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+                    }
+
+                    if (bOtherClip)
                         nFlags |= InvalidateFlags::Children;
                 }
             }
@@ -316,19 +353,42 @@ void Window::ImplValidate()
         nFlags |= ValidateFlags::Children;
     if ( (nFlags & ValidateFlags::NoChildren) && mpWindowImpl->mpHierarchy->mpFirstChild )
         bValidateAll = false;
+
     if ( bValidateAll )
         ImplValidateFrameRegion( nullptr, nFlags );
     else
     {
         vcl::Region      aRegion( GetOutputRectPixel() );
-        vcl::clipping::clipBoundaries(*this, aRegion, true, true);
+
+        auto& rManager = GetOutDev()->GetClippingManager(*this);
+        aRegion.Intersect(rManager.GetClipPlan(*this).maFinalRegion);
 
         if ( nFlags & ValidateFlags::NoChildren )
         {
             nFlags &= ~ValidateFlags::Children;
-            if (vcl::clipping::clipChildren(*this, aRegion))
+
+            bool bOtherClip = false;
+            WinBits nParentStyle = GetStyle();
+            vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
+
+            while (pChild)
+            {
+                if (pChild->IsReallyVisible())
+                {
+                    ParentClipMode nMode = pChild->GetParentClipMode();
+                    if (!(nMode & ParentClipMode::NoClip) && ((nMode & ParentClipMode::Clip) || (nParentStyle & WB_CLIPCHILDREN)))
+                        aRegion.Exclude(rManager.GetClipPlan(*pChild).maFinalRegion);
+                    else
+                        bOtherClip = true;
+                }
+
+                pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+            }
+
+            if (bOtherClip)
                 nFlags |= ValidateFlags::Children;
         }
+
         if ( !aRegion.IsEmpty() )
             ImplValidateFrameRegion( &aRegion, nFlags );
     }
