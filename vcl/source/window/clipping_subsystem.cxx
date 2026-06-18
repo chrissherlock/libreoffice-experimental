@@ -11,6 +11,7 @@
 #include <vcl/window.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <clipping/ClippingManager.hxx>
 #include <clipping_window.hxx>
 #include <window.h>
 #include <salobj.hxx>
@@ -44,33 +45,6 @@ void initWinChildClipRegion(const vcl::Window& rWindow)
 
     if (initChildRegion(*pWindowImpl))
         clipChildren(rWindow, *pWindowImpl->mpClippingState->mpChildClipRegion);
-}
-
-bool syncNativeWindow(WindowImpl& rImpl, vcl::Region& rWinChildClipRegion,
-                      const vcl::Region* pOldRegion, bool& rOutUpdate)
-{
-    if (!rImpl.mpSysObj)
-    {
-        rOutUpdate = true;
-        return true;
-    }
-
-    if (!rImpl.mbReallyVisible || rWinChildClipRegion.IsEmpty())
-    {
-        rImpl.mpSysObj->Show(false);
-        rOutUpdate = true;
-        return true;
-    }
-
-    rOutUpdate = true;
-    if (pOldRegion)
-    {
-        vcl::Region aNewRegion = rWinChildClipRegion;
-        rWinChildClipRegion.Intersect(*pOldRegion);
-        rOutUpdate = (aNewRegion == rWinChildClipRegion);
-    }
-
-    return false; // Signal that downstream native updates are required
 }
 
 std::unique_ptr<vcl::Region> prepareClipInvalidation(WindowImpl& rImpl, bool bSysObjOnlySmaller)
@@ -177,24 +151,6 @@ Region& getWinChildClipRegion(vcl::Window& rWindow)
         return *pWindowImpl->mpClippingState->mpChildClipRegion;
 
     return pWindowImpl->mpClippingState->maWinClipRegion;
-}
-
-void gatherNativeSyncTargets(vcl::Window* pWindow, std::vector<vcl::Window*>& rTargets)
-{
-    if (!pWindow)
-        return;
-
-    rTargets.push_back(pWindow);
-
-    for (vcl::Window* pChild : getChildWindows(*pWindow->ImplGetWindowImpl()))
-    {
-        gatherNativeSyncTargets(pChild, rTargets);
-    }
-
-    for (vcl::Window* pOverlap : getOverlapWindows(*pWindow->ImplGetWindowImpl()))
-    {
-        gatherNativeSyncTargets(pOverlap, rTargets);
-    }
 }
 
 void accumulateParentBoundaries(vcl::Window& rWindow, const vcl::Region& rInterRegion,
@@ -519,25 +475,59 @@ ParentClipMode getParentClipMode(const vcl::Window& rWindow)
     return pWindowImpl->mpClippingState->meParentClipMode;
 }
 
-static void lcl_updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region aRegion,
-                                             const vcl::Region& rWinRectRegion)
+void updateNativeObjectClip(vcl::Window& rWindow)
 {
     WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
-    if (!pImpl || !pImpl->mpSysObj)
+    if (!pImpl)
         return;
 
-    if (aRegion == rWinRectRegion)
+    // If this window doesn't own a native system handle, recurse
+    if (!pImpl->mpSysObj)
     {
-        pImpl->mpSysObj->ResetClipRegion();
+        vcl::Window* pChild = pImpl->mpHierarchy->mpFirstChild;
+        while (pChild)
+        {
+            updateNativeObjectClip(*pChild);
+            pChild = pChild->ImplGetWindowImpl()->mpHierarchy->mpNext;
+        }
+
+        vcl::Window* pOverlap = pImpl->mpHierarchy->mpFirstOverlap;
+        while (pOverlap)
+        {
+            updateNativeObjectClip(*pOverlap);
+            pOverlap = pOverlap->ImplGetWindowImpl()->mpHierarchy->mpNextOverlap;
+        }
         return;
     }
 
-    aRegion.Move(-rWindow.GetOutDev()->GetDeviceOriginX(),
-                 -rWindow.GetOutDev()->GetDeviceOriginY());
+    auto& rManager = rWindow.GetOutDev()->GetClippingManager(rWindow);
+    const auto& rPlan = rManager.GetClipPlan(rWindow);
 
-    // Set/update system object clip region
+    // Handle visibility or total occlusion state safely
+    if (!pImpl->mbReallyVisible || rPlan.mbEmpty || rPlan.maFinalRegion.IsEmpty())
+    {
+        pImpl->mpSysObj->Show(false);
+        return;
+    }
+
+    // Reset to unclipped frame coordinates if the plan matches our baseline output rect
+    vcl::Region aTargetRegion = rPlan.maFinalRegion;
+    vcl::Region rWinRectRegion(rWindow.GetOutputRectPixel());
+
+    if (aTargetRegion == rWinRectRegion)
+    {
+        pImpl->mpSysObj->ResetClipRegion();
+        pImpl->mpSysObj->Show(true);
+        return;
+    }
+
+    // Translate VCL absolute coordinates to the system object's device space
+    aTargetRegion.Move(-rWindow.GetOutDev()->GetDeviceOriginX(),
+                       -rWindow.GetOutDev()->GetDeviceOriginY());
+
+    // Blit the rectangles to the underlying OS windowing sub-system
     RectangleVector aRectangles;
-    aRegion.GetRegionRectangles(aRectangles);
+    aTargetRegion.GetRegionRectangles(aRectangles);
     pImpl->mpSysObj->BeginSetClipRegion(aRectangles.size());
 
     for (auto const& rectangle : aRectangles)
@@ -547,155 +537,7 @@ static void lcl_updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region a
     }
 
     pImpl->mpSysObj->EndSetClipRegion();
-}
-
-bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion)
-{
-    WindowImpl* pWindowImpl = rWindow.ImplGetWindowImpl();
-    if (!pWindowImpl || !pWindowImpl->mpSysObj)
-        return true;
-
-    if (!pOldRegion && !pWindowImpl->mpClippingState->mbInitWinClipRegion)
-        return true;
-
-    vcl::Region& rWinChildClipRegion = getWinChildClipRegion(rWindow);
-    bool bUpdate = true;
-
-    if (syncNativeWindow(*pWindowImpl, rWinChildClipRegion, pOldRegion, bUpdate))
-        return bUpdate;
-
-    lcl_updateNativeObjectClipRegion(rWindow, rWinChildClipRegion,
-                                     vcl::Region(rWindow.GetOutputRectPixel()));
-
-    pWindowImpl->mpSysObj->Show(true);
-
-    return bUpdate;
-}
-
-static void lcl_invalidateNativeClipTargets(vcl::Window* pStartWindow)
-{
-    if (!pStartWindow)
-        return;
-
-    std::vector<vcl::Window*> aTargets;
-    gatherNativeSyncTargets(pStartWindow, aTargets);
-
-    for (vcl::Window* pTarget : aTargets)
-    {
-        nativeObjectClip(*pTarget, nullptr);
-    }
-}
-
-void updateNativeObjectClip(vcl::Window& rWindow)
-{
-    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
-    if (!pImpl)
-        return;
-
-    if (pImpl->mbOverlapWin)
-    {
-        lcl_invalidateNativeClipTargets(&rWindow);
-        return;
-    }
-
-    lcl_invalidateNativeClipTargets(&rWindow);
-
-    if (!pImpl->mpClippingState->mbClipSiblings)
-        return;
-
-    for (vcl::Window* pSibling : getFollowingSiblings(*pImpl))
-    {
-        lcl_invalidateNativeClipTargets(pSibling);
-    }
-}
-
-bool setClipFlagChildren(vcl::Window& rWindow, bool bSysObjOnlySmaller)
-{
-    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
-    if (!pImpl)
-        return true;
-
-    auto pOldRegion = prepareClipInvalidation(*pImpl, bSysObjOnlySmaller);
-
-    dirtyInitClipRegion(rWindow);
-    pImpl->mpClippingState->mbInitWinClipRegion = true;
-
-    bool bUpdate = true;
-    for (vcl::Window* pChild : getChildWindows(*pImpl))
-    {
-        if (!setClipFlagChildren(*pChild, bSysObjOnlySmaller))
-            bUpdate = false;
-    }
-
-    if (!pImpl->mpSysObj)
-        return bUpdate;
-
-    bool bClipSuccess = nativeObjectClip(rWindow, pOldRegion.get());
-
-    auto[bNewUpdate, bInvalidateDevice] = processClipResult(*pImpl, bClipSuccess, bUpdate);
-    bUpdate = bNewUpdate;
-
-    if (bInvalidateDevice)
-        dirtyInitClipRegion(rWindow);
-
-    return bUpdate;
-}
-
-bool setClipFlag(vcl::Window& rWindow, bool bSysObjOnlySmaller)
-{
-    WindowImpl* pWindowImpl = rWindow.ImplGetWindowImpl();
-    if (!pWindowImpl)
-        return true;
-
-    if (!rWindow.ImplIsOverlapWindow())
-    {
-        if (pWindowImpl->mpFrameWindow)
-            return setClipFlagOverlapWindows(*pWindowImpl->mpFrameWindow, bSysObjOnlySmaller);
-
-        return true;
-    }
-
-    bool bUpdate = setClipFlagChildren(rWindow, bSysObjOnlySmaller);
-
-    vcl::Window* pParent = rWindow.ImplGetParent();
-    if (pParent)
-    {
-        WindowImpl* pParentImpl = pParent->ImplGetWindowImpl();
-        // Explicit return value checking replaces hidden references
-        if (pParentImpl
-            && invalidateParentClipIfRequired(*pWindowImpl, *pParentImpl, pParent->GetStyle()))
-        {
-            dirtyInitClipRegion(*pParent);
-        }
-    }
-
-    if (pWindowImpl->mpClippingState->mbClipSiblings)
-    {
-        for (vcl::Window* pSibling : getFollowingSiblings(*pWindowImpl))
-        {
-            if (!setClipFlagChildren(*pSibling, bSysObjOnlySmaller))
-                bUpdate = false;
-        }
-    }
-
-    return bUpdate;
-}
-
-bool setClipFlagOverlapWindows(vcl::Window& rWindow, bool bSysObjOnlySmaller)
-{
-    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
-    if (!pImpl)
-        return true;
-
-    bool bUpdate = setClipFlagChildren(rWindow, bSysObjOnlySmaller);
-
-    for (vcl::Window* pWindow : getOverlapWindows(*pImpl))
-    {
-        if (!setClipFlagOverlapWindows(*pWindow, bSysObjOnlySmaller))
-            bUpdate = false;
-    }
-
-    return bUpdate;
+    pImpl->mpSysObj->Show(true);
 }
 
 void calcOverlapRegionOverlaps(const vcl::Window& rWindow, const vcl::Region& rInterRegion,

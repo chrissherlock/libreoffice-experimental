@@ -314,9 +314,23 @@ void Window::ImplToTop( ToTopFlags nFlags )
             else
                 mpWindowImpl->mpOverlapWindow->mpWindowImpl->mpHierarchy->mpFirstOverlap = this;
 
-            // recalculate ClipRegion of this and all overlapping windows
             if ( IsReallyVisible() )
-                vcl::clipping::setClipFlagOverlapWindows(*mpWindowImpl->mpOverlapWindow);
+            {
+                // Moving an overlap window to the top changes the obscuration math
+                // for all other overlap windows in this specific tier.
+                vcl::Window* pOverlap = mpWindowImpl->mpOverlapWindow->mpWindowImpl->mpHierarchy->mpFirstOverlap;
+                while (pOverlap)
+                {
+                    // Increment the version counter. The ClippingManager will lazily
+                    // recompile their exact bounds only if they are actually painted.
+                    pOverlap->InvalidateClipState();
+                    pOverlap = pOverlap->ImplGetWindowImpl()->mpHierarchy->mpNext;
+                }
+
+                // Trigger a physical repaint of the parent frame so the
+                // OS rendering engine redraws the windows in their new Z-order.
+                mpWindowImpl->mpOverlapWindow->ImplInvalidate(nullptr, InvalidateFlags::Children | InvalidateFlags::NoTransparent);
+            }
         }
     }
 }

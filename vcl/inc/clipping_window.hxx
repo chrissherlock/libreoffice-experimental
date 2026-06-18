@@ -36,10 +36,6 @@ namespace vcl::clipping
 // PUBLIC ORCHESTRATION (The "Drivers")
 // =========================================================================
 
-VCL_DLLPUBLIC bool setClipFlag(vcl::Window& rWindow, bool bSysObjOnlySmaller = false);
-VCL_DLLPUBLIC bool setClipFlagChildren(vcl::Window& rWindow, bool bSysObjOnlySmaller);
-VCL_DLLPUBLIC bool setClipFlagOverlapWindows(vcl::Window& rWindow, bool bSysObjOnlySmaller = false);
-
 VCL_DLLPUBLIC void calcOverlapRegion(vcl::Window& rWindow, const tools::Rectangle& rSourceRect,
                                      vcl::Region& rRegion, bool bChildren, bool bSiblings);
 
@@ -87,9 +83,6 @@ struct NativeSyncStatus
     bool bInvalidateDevice;
 };
 
-VCL_DLLPUBLIC bool syncNativeWindow(WindowImpl& rImpl, vcl::Region& rWinChildClipRegion,
-                                    const vcl::Region* pOldRegion, bool& rOutUpdate);
-VCL_DLLPUBLIC bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion);
 VCL_DLLPUBLIC void updateNativeObjectClip(vcl::Window& rWindow);
 
 VCL_DLLPUBLIC void setParentClipMode(vcl::Window* pWindow, ParentClipMode nMode);
@@ -100,8 +93,6 @@ VCL_DLLPUBLIC std::vector<vcl::Window*> getChildWindows(const WindowImpl& rImpl)
 VCL_DLLPUBLIC std::vector<vcl::Window*> getOverlapWindows(const WindowImpl& rImpl);
 VCL_DLLPUBLIC std::vector<vcl::Window*> getFollowingSiblings(const WindowImpl& rImpl);
 VCL_DLLPUBLIC std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow);
-VCL_DLLPUBLIC void gatherNativeSyncTargets(vcl::Window* pWindow,
-                                           std::vector<vcl::Window*>& rTargets);
 
 VCL_DLLPUBLIC bool initChildRegion(WindowImpl& rImpl);
 VCL_DLLPUBLIC std::unique_ptr<vcl::Region> prepareClipInvalidation(WindowImpl& rImpl,

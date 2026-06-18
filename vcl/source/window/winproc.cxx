@@ -1964,8 +1964,9 @@ void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long 
             pWindow->GetOutDev()->SetOutputHeightPixel(nNewHeight);
             pWindow->ImplGetWindowImpl()->mbWaitSystemResize = false;
 
+            // --- REFACTORED: The window geometry changed, invalidate the clip graph ---
             if ( pWindow->IsReallyVisible() )
-                vcl::clipping::setClipFlag(*pWindow);
+                pWindow->InvalidateClipState();
 
             if ( pWindow->IsVisible() || pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize ||
                 ( pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplGetWindowImpl()->mpClientWindow ) )   // propagate resize for system border windows
@@ -1975,7 +1976,7 @@ void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long 
                 // ownerdraw decorated windows and floating windows can be resized immediately (i.e. synchronously)
                 if( pWindow->ImplGetWindowImpl()->mbFrame && (pWindow->GetStyle() & WB_SIZEABLE)
                     && !(pWindow->GetStyle() & WB_OWNERDRAWDECORATION)  // synchronous resize for ownerdraw decorated windows (toolbars)
-                    && !pWindow->ImplGetWindowImpl()->mbFloatWin )             // synchronous resize for floating windows, #i43799#
+                    && !pWindow->ImplGetWindowImpl()->mbFloatWin )              // synchronous resize for floating windows, #i43799#
                 {
                     if( pWindow->ImplGetWindowImpl()->mpClientWindow )
                     {
@@ -1993,7 +1994,9 @@ void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long 
                     }
                 }
                 else
+                {
                     bStartTimer = false;
+                }
 
                 if( bStartTimer )
                     pWindow->ImplGetWindowImpl()->mpFrameData->maResizeIdle.Start();
@@ -2012,7 +2015,7 @@ void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long 
     }
 
     pWindow->ImplGetWindowImpl()->mpFrameData->mbNeedSysWindow = (nNewWidth < IMPL_MIN_NEEDSYSWIN) ||
-                                            (nNewHeight < IMPL_MIN_NEEDSYSWIN);
+                                                                (nNewHeight < IMPL_MIN_NEEDSYSWIN);
     bool bMinimized = (nNewWidth <= 0) || (nNewHeight <= 0);
     if( bMinimized != pWindow->ImplGetWindowImpl()->mpFrameData->mbMinimized )
         pWindow->ImplGetWindowImpl()->mpFrameWindow->ImplNotifyIconifiedState( bMinimized );
