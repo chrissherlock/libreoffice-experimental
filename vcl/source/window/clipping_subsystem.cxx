@@ -47,38 +47,6 @@ void initWinChildClipRegion(const vcl::Window& rWindow)
         clipChildren(rWindow, *pWindowImpl->mpClippingState->mpChildClipRegion);
 }
 
-std::unique_ptr<vcl::Region> prepareClipInvalidation(WindowImpl& rImpl, bool bSysObjOnlySmaller)
-{
-    if (rImpl.mpSysObj && bSysObjOnlySmaller && !rImpl.mpClippingState->mbInitWinClipRegion)
-        return std::make_unique<vcl::Region>(rImpl.mpClippingState->maWinClipRegion);
-
-    return nullptr;
-}
-
-bool invalidateParentClipIfRequired(const WindowImpl& rChildImpl, WindowImpl& rParentImpl,
-                                    WinBits nParentStyle)
-{
-    if ((nParentStyle & WB_CLIPCHILDREN)
-        || (rChildImpl.mpClippingState->meParentClipMode & ParentClipMode::Clip))
-    {
-        rParentImpl.mpClippingState->mbInitChildRegion = true;
-        return true; // Signals that parent device clip region needs invalidation
-    }
-
-    return false;
-}
-
-NativeSyncStatus processClipResult(WindowImpl& rImpl, bool bClipSuccess, bool bCurrentUpdate)
-{
-    if (!bClipSuccess)
-    {
-        rImpl.mpClippingState->mbInitWinClipRegion = true;
-        return { false, true }; // bUpdate = false, bInvalidateDevice = true
-    }
-
-    return { bCurrentUpdate, false }; // Unchanged state
-}
-
 /** Linearly traverses an intrusive linked list of window nodes following
     the sibling chain until a terminator null pointer is encountered. */
 static std::vector<vcl::Window*> lcl_gatherWindowChain(vcl::Window* pStartWindow)
@@ -290,14 +258,6 @@ void excludeWindowRegion(vcl::Window& rWindow, vcl::Region& rRegion)
         // Otherwise, simply exclude the standard bounding box
         rRegion.Exclude(rWindow.GetOutputRectPixel());
     }
-}
-
-void excludeWindowAndOverlapRegions(vcl::Window& rWindow, vcl::Region& rRegion)
-{
-    if (rWindow.ImplGetWindowImpl()->mbReallyVisible)
-        excludeWindowRegion(rWindow, rRegion);
-
-    excludeOverlapWindows(rWindow, rRegion);
 }
 
 static bool lcl_IsParentClipRequired(ParentClipMode nClipMode, WinBits nStyle)

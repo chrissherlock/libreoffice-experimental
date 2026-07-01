@@ -54,7 +54,6 @@ VCL_DLLPUBLIC void clipBoundaries(const vcl::Window& rWindow, vcl::Region& rRegi
                                   bool bOverlaps);
 
 VCL_DLLPUBLIC void excludeWindowRegion(vcl::Window& rWindow, vcl::Region& rRegion);
-VCL_DLLPUBLIC void excludeWindowAndOverlapRegions(vcl::Window& rWindow, vcl::Region& rRegion);
 VCL_DLLPUBLIC void excludeOverlapWindows(const vcl::Window& rWindow, vcl::Region& rRegion);
 VCL_DLLPUBLIC void intersectWindowRegion(vcl::Window& rWindow, vcl::Region& rRegion);
 
@@ -95,12 +94,6 @@ VCL_DLLPUBLIC std::vector<vcl::Window*> getFollowingSiblings(const WindowImpl& r
 VCL_DLLPUBLIC std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow);
 
 VCL_DLLPUBLIC bool initChildRegion(WindowImpl& rImpl);
-VCL_DLLPUBLIC std::unique_ptr<vcl::Region> prepareClipInvalidation(WindowImpl& rImpl,
-                                                                   bool bSysObjOnlySmaller);
-VCL_DLLPUBLIC bool invalidateParentClipIfRequired(const WindowImpl& rChildImpl,
-                                                  WindowImpl& rParentImpl, WinBits nParentStyle);
-VCL_DLLPUBLIC NativeSyncStatus processClipResult(WindowImpl& rImpl, bool bClipSuccess,
-                                                 bool bCurrentUpdate);
 
 void calcOverlapRegionOverlaps(const vcl::Window& rWindow, const vcl::Region& rInterRegion,
                                vcl::Region& rRegion);
