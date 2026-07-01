@@ -702,7 +702,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mbCallResize                        = true;                      // true: Resize must be called by Show
     mbWaitSystemResize                  = true;                      // true: Wait for System-Resize
     mbWinRegion                         = false;                     // true: Window Region
-    mbClipChildren                      = false;                     // true: Child-window should be clipped
     mbChildTransparent                  = false;                     // true: Child-windows are allowed to switch to transparent (incl. Parent-CLIPCHILDREN)
     mbPaintTransparent                  = false;                     // true: Paints should be executed on the Parent
     mbMouseTransparent                  = false;                     // true: Window is transparent for Mouse
