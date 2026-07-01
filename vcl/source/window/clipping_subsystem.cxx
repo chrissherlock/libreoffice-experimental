@@ -76,7 +76,8 @@ std::unique_ptr<vcl::Region> prepareClipInvalidation(WindowImpl& rImpl, bool bSy
 bool invalidateParentClipIfRequired(const WindowImpl& rChildImpl, WindowImpl& rParentImpl,
                                     WinBits nParentStyle)
 {
-    if ((nParentStyle & WB_CLIPCHILDREN) || (rChildImpl.mnParentClipMode & ParentClipMode::Clip))
+    if ((nParentStyle & WB_CLIPCHILDREN)
+        || (rChildImpl.mpClippingState->meParentClipMode & ParentClipMode::Clip))
     {
         rParentImpl.mpClippingState->mbInitChildRegion = true;
         return true; // Signals that parent device clip region needs invalidation
