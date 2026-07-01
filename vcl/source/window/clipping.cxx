@@ -95,7 +95,7 @@ void Window::SetParentClipMode(ParentClipMode nMode)
     mpWindowImpl->mnParentClipMode = nMode;
 
     if (nMode & ParentClipMode::Clip)
-        mpWindowImpl->mpParent->mpWindowImpl->mbClipChildren = true;
+        mpWindowImpl->mpParent->mpWindowImpl->mpClippingState->mbClipChildren = true;
 }
 
 ParentClipMode Window::GetParentClipMode() const
@@ -278,7 +278,7 @@ void Window::ImplInitWinClipRegion()
 
     ImplClipBoundaries(mpWindowImpl->mpClippingState->maWinClipRegion, false, true);
 
-    if ((GetStyle() & WB_CLIPCHILDREN) || mpWindowImpl->mbClipChildren)
+    if ((GetStyle() & WB_CLIPCHILDREN) || mpWindowImpl->mpClippingState->mbClipChildren)
         mpWindowImpl->mpClippingState->mbInitChildRegion = true;
 
     mpWindowImpl->mpClippingState->mbInitWinClipRegion = false;
