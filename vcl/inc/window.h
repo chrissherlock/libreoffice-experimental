@@ -219,11 +219,12 @@ namespace o3tl {
 
 struct WindowClippingState
 {
-    vcl::Region                 maWinClipRegion;
+    vcl::Region                  maWinClipRegion;
     std::unique_ptr<vcl::Region> mpChildClipRegion; // If applicable in your branch
-    bool                        mbInitWinClipRegion = true;
-    bool                        mbInitChildRegion = false;
-    bool                        mbClipSiblings = false;
+    bool                         mbInitWinClipRegion = true;
+    bool                         mbInitChildRegion = false;
+    bool                         mbClipSiblings = false;
+    bool                         mbClipChildren = false;
 };
 
 class WindowImpl
@@ -360,7 +361,6 @@ public:
                         mbCallResize:1,
                         mbWaitSystemResize:1,
                         mbWinRegion:1,
-                        mbClipChildren:1,
                         mbChildTransparent:1,
                         mbPaintTransparent:1,
                         mbMouseTransparent:1,
