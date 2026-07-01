@@ -304,7 +304,7 @@ void SalInstanceWidget::set_background(const Color& rColor)
         // and toggle mbClipChildren on instead otherwise the bg won't fill e.g.
         // deck titlebar header when its width is stretched
         WindowImpl* pImpl = m_xWidget->ImplGetWindowImpl();
-        pImpl->mbClipChildren = true;
+        pImpl->mpClippingState->mbClipChildren = true;
     }
 }
 
