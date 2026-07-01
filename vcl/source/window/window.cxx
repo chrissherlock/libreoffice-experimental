@@ -649,7 +649,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mnGetFocusFlags                     = GetFocusFlags::NONE;       // Flags for GetFocus()-Call
     mnWaitCount                         = 0;                         // Wait-Count (>1 == "wait" mouse pointer)
     mnPaintFlags                        = ImplPaintFlags::NONE;      // Flags for ImplCallPaint
-    mnParentClipMode                    = ParentClipMode::NONE;      // Flags for Parent-ClipChildren-Mode
     mnActivateMode                      = ActivateModeFlags::NONE;   // Will be converted in System/Overlap-Windows
     mnDlgCtrlFlags                      = DialogControlFlags::NONE;  // DialogControl-Flags
     meAlwaysInputMode                   = AlwaysInputNone;           // AlwaysEnableInput not called
