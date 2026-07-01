@@ -92,7 +92,7 @@ void Window::SetParentClipMode(ParentClipMode nMode)
     if (ImplIsOverlapWindow())
         return;
 
-    mpWindowImpl->mnParentClipMode = nMode;
+    mpWindowImpl->mpClippingState->meParentClipMode = nMode;
 
     if (nMode & ParentClipMode::Clip)
         mpWindowImpl->mpParent->mpWindowImpl->mpClippingState->mbClipChildren = true;
@@ -103,7 +103,7 @@ ParentClipMode Window::GetParentClipMode() const
     if (mpWindowImpl->mpBorderWindow)
         return mpWindowImpl->mpBorderWindow->GetParentClipMode();
 
-    return mpWindowImpl->mnParentClipMode;
+    return mpWindowImpl->mpClippingState->meParentClipMode;
 }
 
 void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
