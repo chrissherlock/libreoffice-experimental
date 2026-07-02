@@ -45,7 +45,6 @@
 
 #include <brdwin.hxx>
 #include <clipping/ClippingManager.hxx>
-#include <clipping/ClippingObserver.hxx>
 #include <clipping.hxx>
 #include <clipping_window.hxx>
 #include <dndeventdispatcher.hxx>
@@ -458,8 +457,11 @@ void Window::dispose()
              mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl) &&
             "vcl::Window child should have its parent disposed first" );
 
-    if (mpWindowImpl->mpClippingObserver)
-        mpWindowImpl->mpClippingObserver->OnWindowDestroyed(*this);
+    if (OutputDevice* pOutDev = GetOutDev())
+    {
+        if (auto* pManager = pOutDev->GetExistingClippingManager())
+            pManager->OnWindowDestroyed(*this);
+    }
 
     // remove Key and Mouse events issued by Application::PostKey/MouseEvent
     Application::RemoveMouseAndKeyEvents( this );

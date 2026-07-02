@@ -14,8 +14,7 @@
 
 #include <clipping/ClipCompiler.hxx>
 #include <clipping/ClipState.hxx>
-
-#include "ClippingObserver.hxx"
+#include <clipping/ClippingManager.hxx>
 
 #include <map>
 #include <memory>
@@ -28,16 +27,14 @@ namespace vcl::clipping
  * It is owned by the OutputDevice and provides cached, compiled ClipPlans
  * for windows within its hierarchy.
  */
-class VCL_DLLPUBLIC ClippingManager : public ClippingObserver
+class VCL_DLLPUBLIC ClippingManager
 {
 public:
     explicit ClippingManager(vcl::Window& rRoot);
-    virtual ~ClippingManager() override;
+    ~ClippingManager();
 
-    void AttachToHierarchy(vcl::Window* pWindow);
-
-    virtual void OnWindowGeometryChanged(vcl::Window& rWindow) override;
-    virtual void OnWindowDestroyed(vcl::Window& rWindow) override;
+    void OnWindowGeometryChanged(vcl::Window& rWindow);
+    void OnWindowDestroyed(vcl::Window& rWindow);
 
     const ClipPlan& GetClipPlan(vcl::Window& rWindow);
     void InvalidateWindow(vcl::Window& rWindow);

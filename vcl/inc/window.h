@@ -57,7 +57,6 @@ enum class DialogControlFlags;
 enum class GetFocusFlags;
 enum class ParentClipMode;
 enum class SalEvent;
-namespace vcl::clipping { class ClippingObserver; }
 
 namespace com::sun::star {
     namespace accessibility {
@@ -328,7 +327,6 @@ public:
     std::unique_ptr<WindowClippingState> mpClippingState;
     std::unique_ptr<WindowHierarchy>     mpHierarchy;
 
-    vcl::clipping::ClippingObserver* mpClippingObserver = nullptr;
     sal_uInt64 mnClipStateVersion = 0;
     vcl::Region              maInvalidateRegion;     //< region that has to be redrawn (frame coordinates)
     vcl::Region*             mpPaintRegion;          //< only set during Paint() method call (window coordinates)

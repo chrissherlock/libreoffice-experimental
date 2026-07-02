@@ -270,6 +270,7 @@ protected:
     virtual void                dispose() override;
 
 public:
+    vcl::clipping::ClippingManager* GetExistingClippingManager() const { return mpClippingManager.get(); }
 
     /** Get the graphic context that the output device uses to draw on.
 

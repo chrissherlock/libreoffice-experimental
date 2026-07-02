@@ -24,7 +24,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <clipping/ClippingObserver.hxx>
+#include <clipping/ClippingManager.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <salgeom.hxx>
@@ -37,8 +37,11 @@ void Window::InvalidateClipState()
 {
     mpWindowImpl->mnClipStateVersion++;
 
-    if (mpWindowImpl->mpClippingObserver)
-        mpWindowImpl->mpClippingObserver->OnWindowGeometryChanged(*this);
+    if (OutputDevice* pOutDev = GetOutDev())
+    {
+        if (auto* pManager = pOutDev->GetExistingClippingManager())
+            pManager->OnWindowGeometryChanged(*this);
+    }
 
     if (auto* pParent = GetParent())
         pParent->InvalidateClipState();

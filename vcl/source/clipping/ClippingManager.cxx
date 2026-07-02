@@ -20,37 +20,11 @@ ClippingManager::ClippingManager(vcl::Window& rRoot)
     : mrRoot(rRoot)
 {
     mrRoot.AddEventListener(LINK(this, ClippingManager, WindowEventHdl));
-
-    AttachToHierarchy(&mrRoot);
 }
 
 ClippingManager::~ClippingManager()
 {
     mrRoot.RemoveEventListener(LINK(this, ClippingManager, WindowEventHdl));
-}
-
-void ClippingManager::AttachToHierarchy(vcl::Window* pWindow)
-{
-    if (!pWindow)
-        return;
-
-    pWindow->ImplGetWindowImpl()->mpClippingObserver = this;
-
-    // Recurse into children
-    vcl::Window* pChild = pWindow->ImplGetWindowImpl()->mpHierarchy->mpFirstChild;
-    while (pChild)
-    {
-        AttachToHierarchy(pChild);
-        pChild = pChild->ImplGetWindowImpl()->mpHierarchy->mpNext;
-    }
-
-    // Recurse into overlapping windows (important for dialogs/floaters)
-    vcl::Window* pOverlap = pWindow->ImplGetWindowImpl()->mpHierarchy->mpFirstOverlap;
-    while (pOverlap)
-    {
-        AttachToHierarchy(pOverlap);
-        pOverlap = pOverlap->ImplGetWindowImpl()->mpHierarchy->mpNextOverlap;
-    }
 }
 
 const ClipPlan& ClippingManager::GetClipPlan(vcl::Window& rWindow)
