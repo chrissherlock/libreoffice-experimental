@@ -30,7 +30,7 @@
 #include <vcl/settings.hxx>
 #include <o3tl/deleter.hxx>
 #include <o3tl/typed_flags_set.hxx>
-#include "windowdev.hxx"
+#include "WindowOutputDevice.hxx"
 #include "salwtype.hxx"
 
 #include <optional>

@@ -26,11 +26,11 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <WindowOutputDevice.hxx>
 #include <window.h>
 #include <clipping.hxx>
 #include <clipping_window.hxx>
 #include <clipping/ClippingManager.hxx>
-#include <windowdev.hxx>
 #include <devicedispatcher.hxx>
 #include <salgdi.hxx>
 

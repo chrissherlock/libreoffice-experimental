@@ -16,7 +16,6 @@
 #include <vcl/wrkwin.hxx>
 #include <vcl/wintypes.hxx>
 
-#include <windowdev.hxx>
 #include <clipping.hxx>
 
 namespace

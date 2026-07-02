@@ -48,7 +48,7 @@
 #include <svcache.hxx>
 #include <svdata.hxx>
 #include <salsys.hxx>
-#include <windowdev.hxx>
+#include <WindowOutputDevice.hxx>
 #include <units.hrc>
 #include <print.h>
 

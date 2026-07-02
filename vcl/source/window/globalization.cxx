@@ -19,7 +19,8 @@
 
 #include <vcl/window.hxx>
 #include <vcl/outdev.hxx>
-#include <windowdev.hxx>
+
+#include <WindowOutputDevice.hxx>
 #include <window.h>
 
 namespace vcl {

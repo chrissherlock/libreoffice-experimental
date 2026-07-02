@@ -56,7 +56,7 @@
 #include <bitmap/BlendFrameCache.hxx>
 #include <debugevent.hxx>
 #include <scrwnd.hxx>
-#include <windowdev.hxx>
+#include <WindowOutputDevice.hxx>
 #include <svdata.hxx>
 
 #ifdef _WIN32
