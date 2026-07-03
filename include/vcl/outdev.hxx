@@ -167,6 +167,19 @@ VCL_DLLPUBLIC void InvertFocusRect(vcl::RenderContext& rRenderContext, const too
 struct DeviceClipState
 {
     vcl::Region maRegion = vcl::Region(true);
+    bool mbHasCustomClip = false;
+    bool mbBackendClipInstalled = false; // Was mbClipRegionSet
+    bool mbNeedsRecalc = true;           // Was mbInitClipRegion
+    bool mbOutputClipped = false;        // Was mbOutputClipped
+
+    void Invalidate()
+    {
+        mbNeedsRecalc = true;
+    }
+
+    // Quick checks for the drawing engine
+    bool IsReady() const { return !mbNeedsRecalc; }
+    bool IsClippedOut() const { return mbOutputClipped; }
 };
 
 /**
@@ -225,15 +238,11 @@ private:
     AntialiasingFlags               mnAntialiasing;
     LanguageType                    meTextLanguage;
 
-    mutable bool                    mbClipRegion : 1;
     mutable bool                    mbBackground : 1;
     mutable bool                    mbOutput : 1;
     mutable bool                    mbDevOutput : 1;
-    mutable bool                    mbOutputClipped : 1;
     mutable bool                    mbInitFont : 1;
     mutable bool                    mbInitTextColor : 1;
-    mutable bool                    mbInitClipRegion : 1;
-    mutable bool                    mbClipRegionSet : 1;
     mutable bool                    mbNewFont : 1;
     mutable bool                    mbTextLines : 1;
     mutable bool                    mbTextSpecial : 1;
@@ -536,7 +545,6 @@ public:
     void                        SetClipRegion( const vcl::Region& rRegion );
     SAL_DLLPRIVATE bool         SelectClipRegion( const vcl::Region&, SalGraphics* pGraphics = nullptr );
 
-    bool                        IsClipRegion() const { return mbClipRegion; }
 
     void                        MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove );
     void                        IntersectClipRegion( const tools::Rectangle& rRect );
@@ -545,17 +553,26 @@ public:
 
     virtual vcl::Region         GetOutputBoundsClipRegion() const;
 
-    const vcl::Region&  GetRegion() const { return maClipState.maRegion; }
+    bool                        IsClipRegion() const { return maClipState.mbHasCustomClip; }
+    const vcl::Region&          GetRegion() const { return maClipState.maRegion; }
+
+    bool                        IsClipRegionSet() const { return maClipState.mbBackendClipInstalled; }
+    void                        SetClipRegionSet(bool bSet) {
+                                    maClipState.mbBackendClipInstalled = bSet;
+                                }
+
+    void                        SetInitClipRegion(bool bInit) {
+                                    maClipState.mbNeedsRecalc = bInit;
+                                }
+    void                        SetOutputClipped(bool bClipped) {
+                                    maClipState.mbOutputClipped = bClipped;
+                                }
 
     DeviceClipState&            GetClipState()       { return maClipState; }
     const DeviceClipState&      GetClipState() const { return maClipState; }
 
-    bool                IsClipRegionSet() const { return mbClipRegionSet; }
-    void                SetClipRegionSet(bool bSet) { mbClipRegionSet = bSet; }
+    void                        ResetGraphicsClipRegion();
 
-    void                SetInitClipRegion(bool bInit) { mbInitClipRegion = bInit; }
-    void                SetOutputClipped(bool bClipped) { mbOutputClipped = bClipped; }
-    void                ResetGraphicsClipRegion();
 
     /** Perform actual rect clip against outdev dimensions, to generate
         empty clips whenever one of the values is completely off the device.

@@ -87,19 +87,15 @@ OutputDevice::OutputDevice(OutDevType eOutDevType) :
         mnTextLayoutMode            = vcl::text::ComplexTextLayoutFlags::BiDiRtl | vcl::text::ComplexTextLayoutFlags::TextOriginLeft;
 
     meOutDevViewType                = OutDevViewType::DontKnow;
-    mbClipRegion                    = false;
     mbBackground                    = false;
     mbOutput                        = true;
     mbDevOutput                     = false;
-    mbOutputClipped                 = false;
     maTextColor                     = COL_BLACK;
     maOverlineColor                 = COL_TRANSPARENT;
     mnAntialiasing                  = AntialiasingFlags::NONE;
     meTextLanguage                  = LANGUAGE_SYSTEM;  // TODO: get default from configuration?
     mbInitFont                      = true;
     mbInitTextColor                 = true;
-    mbInitClipRegion                = true;
-    mbClipRegionSet                 = false;
     mbNewFont                       = true;
     mbTextLines                     = false;
     mbTextSpecial                   = false;
@@ -428,10 +424,10 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     tools::Long nSrcWidth   = LogicWidthToDevicePixel(rSrcSize.Width());
@@ -484,10 +480,10 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     Point aSrcDevPt = rOutDev.mpMapper->LogicToDevicePixel(rSrcPt, rOutDev.GetMappingPolicy());
@@ -531,10 +527,10 @@ void OutputDevice::CopyArea( const Point& rDestPt,
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     tools::Long nSrcWidth = LogicWidthToDevicePixel(rSrcSize.Width());

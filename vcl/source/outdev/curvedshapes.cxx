@@ -47,10 +47,10 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     tools::Polygon aRectPoly( aRect.Center(), aRect.GetWidth() >> 1, aRect.GetHeight() >> 1 );
@@ -91,10 +91,10 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
@@ -130,10 +130,10 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
@@ -177,10 +177,10 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     const Point aStart(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));

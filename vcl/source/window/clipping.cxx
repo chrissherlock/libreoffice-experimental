@@ -71,7 +71,7 @@ void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
         return;
 
     mpWindowImpl->mpPaintRegion->Union(aDevPixRegion);
-    GetOutDev()->mbInitClipRegion = true;
+    GetOutDev()->GetClipState().Invalidate();
 }
 
 vcl::Region Window::GetWindowClipRegionPixel() const
