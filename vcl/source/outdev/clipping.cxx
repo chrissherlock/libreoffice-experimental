@@ -41,7 +41,7 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
 
 vcl::Region OutputDevice::GetClipRegion() const
 {
-    return convertTo<vcl::LogicRegion>(vcl::WindowRegion(maRegion));
+    return convertTo<vcl::LogicRegion>(vcl::WindowRegion(maClipState.maRegion));
 }
 
 void OutputDevice::SetClipRegion()
@@ -93,7 +93,7 @@ void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove 
         if( mpMetaFile )
             mpMetaFile->AddAction( new MetaMoveClipRegionAction( nHorzMove, nVertMove ) );
 
-        maRegion.Move(LogicWidthToDevicePixel(nHorzMove),
+        maClipState.maRegion.Move(LogicWidthToDevicePixel(nHorzMove),
                       LogicHeightToDevicePixel(nVertMove));
         mbInitClipRegion = true;
     }
@@ -105,7 +105,7 @@ void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
         mpMetaFile->AddAction( new MetaISectRectClipRegionAction( rRect ) );
 
     tools::Rectangle aRect = mpMapper->LogicToWindowUnits(rRect, GetMappingPolicy());
-    maRegion.Intersect( aRect );
+    maClipState.maRegion.Intersect( aRect );
     mbClipRegion        = true;
     mbInitClipRegion    = true;
 }
@@ -119,7 +119,7 @@ void OutputDevice::IntersectClipRegion( const vcl::Region& rRegion )
             mpMetaFile->AddAction( new MetaISectRegionClipRegionAction( rRegion ) );
 
         vcl::Region aRegion = mpMapper->LogicToWindowUnits(rRegion, GetMappingPolicy());
-        maRegion.Intersect( aRegion );
+        maClipState.maRegion.Intersect( aRegion );
         mbClipRegion        = true;
         mbInitClipRegion    = true;
     }
@@ -143,14 +143,14 @@ void OutputDevice::SetDeviceClipRegion( const vcl::Region* pRegion )
     {
         if ( mbClipRegion )
         {
-            maRegion            = vcl::Region(true);
+            maClipState.maRegion = vcl::Region(true);
             mbClipRegion        = false;
             mbInitClipRegion    = true;
         }
     }
     else
     {
-        maRegion            = *pRegion;
+        maClipState.maRegion = *pRegion;
         mbClipRegion        = true;
         mbInitClipRegion    = true;
     }
@@ -195,6 +195,9 @@ vcl::Region getActiveClipRegion(const OutputDevice& rDevice)
     return vcl::DispatchDevice(rDevice, [](const auto& rTypedDev) -> vcl::Region {
         using T = std::decay_t<decltype(rTypedDev)>;
 
+        // Get the unified state reference
+        const auto& rState = rTypedDev.GetClipState();
+
         if constexpr (std::is_same_v<T, WindowOutputDevice>)
         {
             vcl::Region aRegion(true);
@@ -209,14 +212,14 @@ vcl::Region getActiveClipRegion(const OutputDevice& rDevice)
             }
 
             if (rTypedDev.IsClipRegion())
-                aRegion.Intersect(rTypedDev.GetRegion());
+                aRegion.Intersect(rState.maRegion);
 
             return rTypedDev.template convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
         }
         else
         {
             if (rTypedDev.IsClipRegion())
-                return rTypedDev.GetClipRegion();
+                return rState.maRegion;
 
             return vcl::Region(tools::Rectangle(Point(0, 0), rTypedDev.GetOutputSizePixel()));
         }
@@ -228,6 +231,8 @@ void initDeviceClipRegion(OutputDevice& rDevice)
     vcl::DispatchDevice(rDevice, [](auto& rTypedDev) {
         using T = std::decay_t<decltype(rTypedDev)>;
         DBG_TESTSOLARMUTEX();
+
+        auto& rState = rTypedDev.GetClipState();
 
         if constexpr (std::is_same_v<T, WindowOutputDevice>)
         {
@@ -248,7 +253,7 @@ void initDeviceClipRegion(OutputDevice& rDevice)
             }
 
             if (rTypedDev.IsClipRegion())
-                aRegion.Intersect(rTypedDev.GetMapper().ViewToDevice(rTypedDev.GetRegion()));
+                aRegion.Intersect(rTypedDev.GetMapper().ViewToDevice(rState.maRegion));
 
             if (aRegion.IsEmpty())
             {
@@ -276,7 +281,7 @@ void initDeviceClipRegion(OutputDevice& rDevice)
                 {
                     rTypedDev.SetOutputClipped(false);
                     vcl::Region aRegion = rTypedDev.ClipToDeviceBounds(
-                        rTypedDev.GetMapper().ViewToDevice(rTypedDev.GetRegion()));
+                        rTypedDev.GetMapper().ViewToDevice(rState.maRegion));
 
                     if (aRegion.IsEmpty())
                         rTypedDev.SetOutputClipped(true);
