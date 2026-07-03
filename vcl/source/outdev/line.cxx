@@ -98,10 +98,10 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     const Point aStartPt(mpMapper->LogicToDevicePixel(rStartPt, GetMappingPolicy()));
@@ -140,10 +140,10 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     bool bDrawn = false;

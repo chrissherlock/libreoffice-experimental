@@ -88,15 +88,16 @@ bool OutputDevice::SelectClipRegion( const vcl::Region& rRegion, SalGraphics* pG
 
 void OutputDevice::MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove )
 {
-    if ( mbClipRegion )
-    {
-        if( mpMetaFile )
-            mpMetaFile->AddAction( new MetaMoveClipRegionAction( nHorzMove, nVertMove ) );
+    if (!maClipState.mbHasCustomClip)
+        return;
 
-        maClipState.maRegion.Move(LogicWidthToDevicePixel(nHorzMove),
-                      LogicHeightToDevicePixel(nVertMove));
-        mbInitClipRegion = true;
-    }
+    if( mpMetaFile )
+        mpMetaFile->AddAction( new MetaMoveClipRegionAction( nHorzMove, nVertMove ) );
+
+    maClipState.maRegion.Move(LogicWidthToDevicePixel(nHorzMove),
+                              LogicHeightToDevicePixel(nVertMove));
+
+    maClipState.Invalidate();
 }
 
 void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
@@ -106,53 +107,54 @@ void OutputDevice::IntersectClipRegion( const tools::Rectangle& rRect )
 
     tools::Rectangle aRect = mpMapper->LogicToWindowUnits(rRect, GetMappingPolicy());
     maClipState.maRegion.Intersect( aRect );
-    mbClipRegion        = true;
-    mbInitClipRegion    = true;
+    maClipState.mbHasCustomClip = true;
+    maClipState.Invalidate();
 }
 
-
-void OutputDevice::IntersectClipRegion( const vcl::Region& rRegion )
+void OutputDevice::IntersectClipRegion(const vcl::Region& rRegion)
 {
-    if(!rRegion.IsNull())
-    {
-        if ( mpMetaFile )
-            mpMetaFile->AddAction( new MetaISectRegionClipRegionAction( rRegion ) );
+    if (rRegion.IsNull())
+        return;
 
-        vcl::Region aRegion = mpMapper->LogicToWindowUnits(rRegion, GetMappingPolicy());
-        maClipState.maRegion.Intersect( aRegion );
-        mbClipRegion        = true;
-        mbInitClipRegion    = true;
-    }
+    if (mpMetaFile)
+        mpMetaFile->AddAction(new MetaISectRegionClipRegionAction(rRegion));
+
+    vcl::Region aRegion = mpMapper->LogicToWindowUnits(rRegion, GetMappingPolicy());
+    maClipState.maRegion.Intersect(aRegion);
+    maClipState.mbHasCustomClip = true;
+    maClipState.Invalidate();
 }
 
 vcl::Region OutputDevice::ClipToDeviceBounds(vcl::Region aRegion) const
 {
-    aRegion.Intersect(tools::Rectangle{GetDeviceOriginX(),
-                                       GetDeviceOriginY(),
-                                       GetDeviceOriginX() + GetOutputWidthPixel() - 1,
-                                       GetDeviceOriginY() + GetOutputHeightPixel() - 1
-                                      });
+    aRegion.Intersect(tools::Rectangle{
+        GetDeviceOriginX(),
+        GetDeviceOriginY(),
+        GetDeviceOriginX() + GetOutputWidthPixel() - 1,
+        GetDeviceOriginY() + GetOutputHeightPixel() - 1
+    });
+
     return aRegion;
 }
 
-void OutputDevice::SetDeviceClipRegion( const vcl::Region* pRegion )
+void OutputDevice::SetDeviceClipRegion(const vcl::Region* pRegion)
 {
     DBG_TESTSOLARMUTEX();
 
-    if ( !pRegion )
+    if (!pRegion)
     {
-        if ( mbClipRegion )
+        if (maClipState.mbHasCustomClip)
         {
             maClipState.maRegion = vcl::Region(true);
-            mbClipRegion        = false;
-            mbInitClipRegion    = true;
+            maClipState.mbHasCustomClip = false;
+            maClipState.Invalidate();
         }
     }
     else
     {
         maClipState.maRegion = *pRegion;
-        mbClipRegion        = true;
-        mbInitClipRegion    = true;
+        maClipState.mbHasCustomClip = true;
+        maClipState.Invalidate();
     }
 }
 
@@ -211,14 +213,16 @@ vcl::Region getActiveClipRegion(const OutputDevice& rDevice)
                 aRegion.Move(-rTypedDev.GetDeviceOriginX(), -rTypedDev.GetDeviceOriginY());
             }
 
-            if (rTypedDev.IsClipRegion())
+            // Check the new state machine flag
+            if (rState.mbHasCustomClip)
                 aRegion.Intersect(rState.maRegion);
 
             return rTypedDev.template convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
         }
         else
         {
-            if (rTypedDev.IsClipRegion())
+            // Standard behavior using the state struct
+            if (rState.mbHasCustomClip)
                 return rState.maRegion;
 
             return vcl::Region(tools::Rectangle(Point(0, 0), rTypedDev.GetOutputSizePixel()));
@@ -252,57 +256,62 @@ void initDeviceClipRegion(OutputDevice& rDevice)
                     rTypedDev.ReMirror(aRegion);
             }
 
-            if (rTypedDev.IsClipRegion())
+            if (rState.mbHasCustomClip)
                 aRegion.Intersect(rTypedDev.GetMapper().ViewToDevice(rState.maRegion));
 
             if (aRegion.IsEmpty())
             {
-                rTypedDev.SetOutputClipped(true); // Assuming setter exists or maps to mbOutputClipped
+                rState.mbOutputClipped = true;
             }
             else
             {
-                rTypedDev.SetOutputClipped(false);
+                rState.mbOutputClipped = false;
                 rTypedDev.SelectClipRegion(aRegion);
             }
 
-            rTypedDev.SetClipRegionSet(true);
-            rTypedDev.SetInitClipRegion(false);
+            rState.mbBackendClipInstalled = true;
+            rState.mbNeedsRecalc = false;
         }
         else
         {
             // Standard OutputDevice layout path
-            if (rTypedDev.IsClipRegion())
+            if (rState.mbHasCustomClip)
             {
-                if (rTypedDev.GetRegion().IsEmpty())
+                if (rState.maRegion.IsEmpty())
                 {
-                    rTypedDev.SetOutputClipped(true);
+                    rState.mbOutputClipped = true;
                 }
                 else
                 {
-                    rTypedDev.SetOutputClipped(false);
-                    vcl::Region aRegion = rTypedDev.ClipToDeviceBounds(
+                    rState.mbOutputClipped = false;
+                    vcl::Region aRegion = static_cast<OutputDevice&>(rTypedDev).ClipToDeviceBounds(
                         rTypedDev.GetMapper().ViewToDevice(rState.maRegion));
 
                     if (aRegion.IsEmpty())
-                        rTypedDev.SetOutputClipped(true);
+                    {
+                        rState.mbOutputClipped = true;
+                    }
                     else
+                    {
                         rTypedDev.SelectClipRegion(aRegion);
+                    }
                 }
 
-                rTypedDev.SetClipRegionSet(true);
+                rState.mbBackendClipInstalled = true;
             }
             else
             {
-                if (rTypedDev.IsClipRegionSet())
+                // If we previously pushed a valid clip to hardware, clear it.
+                if (rState.mbBackendClipInstalled)
                 {
                     rTypedDev.ResetGraphicsClipRegion();
-                    rTypedDev.SetClipRegionSet(false);
+                    rState.mbBackendClipInstalled = false;
                 }
 
-                rTypedDev.SetOutputClipped(false);
+                rState.mbOutputClipped = false;
             }
 
-            rTypedDev.SetInitClipRegion(false);
+            rState.mbNeedsRecalc = false;
         }
     });
 }

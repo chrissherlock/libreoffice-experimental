@@ -148,10 +148,10 @@ void OutputDevice::DrawBitmap( const Point& rDestPt, const Size& rDestSize,
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     if (aBmp.IsEmpty())
@@ -248,10 +248,10 @@ void OutputDevice::DrawAlphaBitmap( const Point& rDestPt, const Size& rDestSize,
 
     EnsureRenderStateSynced();
 
-    if (mbInitClipRegion)
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if (mbOutputClipped)
+    if (GetClipState().IsClippedOut())
         return;
 
     DrawDeviceBitmap(rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel, aBmp);

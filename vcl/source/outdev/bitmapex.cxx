@@ -208,7 +208,7 @@ void OutputDevice::DrawTransformedBitmapEx(
     if ( !mpGraphics && !AcquireGraphics() )
         return;
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
     /*
@@ -220,7 +220,7 @@ void OutputDevice::DrawTransformedBitmapEx(
        recording to a metafile. It's typical to record with a device of nominal
        size and play back later against something of a totally different size.
      */
-    if (mbOutputClipped && !mpMetaFile)
+    if (GetClipState().IsClippedOut() && !mpMetaFile)
         return;
 
 #ifdef DO_TIME_TEST

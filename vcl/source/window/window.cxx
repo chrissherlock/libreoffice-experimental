@@ -822,7 +822,7 @@ bool WindowOutputDevice::AcquireGraphics() const
 
     mbInitFont          = true;
     mbInitTextColor     = true;
-    mbInitClipRegion    = true;
+    maClipState.Invalidate();
 
     ImplSVData* pSVData = ImplGetSVData();
 
@@ -1276,7 +1276,7 @@ SalGraphics* Window::ImplGetFrameGraphics() const
 {
     if ( mpWindowImpl->mpFrameWindow->GetOutDev()->mpGraphics )
     {
-        mpWindowImpl->mpFrameWindow->GetOutDev()->mbInitClipRegion = true;
+        mpWindowImpl->mpFrameWindow->GetOutDev()->GetClipState().Invalidate();
     }
     else
     {

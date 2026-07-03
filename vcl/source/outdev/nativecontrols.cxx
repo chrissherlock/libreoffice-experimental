@@ -276,10 +276,10 @@ bool OutputDevice::DrawNativeControl( ControlType nType,
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return true;
 
     // Convert the coordinates from relative to Window-absolute, so we draw

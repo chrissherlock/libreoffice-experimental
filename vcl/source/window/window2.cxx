@@ -187,10 +187,10 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
                 return;
         }
 
-        if ( GetOutDev()->mbInitClipRegion )
+        if ( !GetOutDev()->GetClipState().IsReady() )
             vcl::clipping::initDeviceClipRegion(*GetOutDev());
 
-        if ( GetOutDev()->mbOutputClipped )
+        if ( GetOutDev()->GetClipState().IsClippedOut() )
             return;
 
         pGraphics = GetOutDev()->mpGraphics;
