@@ -163,6 +163,11 @@ namespace vcl
 
 VCL_DLLPUBLIC void InvertFocusRect(vcl::RenderContext& rRenderContext, const tools::Rectangle& rRect);
 
+struct DeviceClipState
+{
+    vcl::Region maRegion = vcl::Region(true);
+};
+
 /**
 * Some things multiple-inherit from VclAbstractDialog and OutputDevice,
 * so we need to use virtual inheritance to keep the referencing counting
@@ -196,6 +201,7 @@ private:
     std::vector< VCLXGraphics* >*   mpUnoGraphicsList;
     vcl::ExtOutDevData*             mpExtOutDevData;
     mutable std::unique_ptr<CoordinateMapper> mpMapper;
+    mutable DeviceClipState maClipState;
 
     // The canvas interface for this output device. Is persistent after the first GetCanvas() call
     mutable css::uno::WeakReference< css::rendering::XCanvas >    mxCanvas;
@@ -208,7 +214,6 @@ private:
     vcl::text::ComplexTextLayoutFlags mnTextLayoutMode;
     const OutDevType                meOutDevType;
     OutDevViewType                  meOutDevViewType;
-    vcl::Region                     maRegion;           // contains the clip region, see SetClipRegion(...)
     vcl::Font                       maFont;
     Color                           maTextColor;
     Color                           maTextLineColor;
@@ -539,7 +544,10 @@ public:
 
     virtual vcl::Region         GetOutputBoundsClipRegion() const;
 
-    const vcl::Region&  GetRegion() const { return maRegion; }
+    const vcl::Region&  GetRegion() const { return maClipState.maRegion; }
+
+    DeviceClipState&            GetClipState()       { return maClipState; }
+    const DeviceClipState&      GetClipState() const { return maClipState; }
 
     bool                IsClipRegionSet() const { return mbClipRegionSet; }
     void                SetClipRegionSet(bool bSet) { mbClipRegionSet = bSet; }
