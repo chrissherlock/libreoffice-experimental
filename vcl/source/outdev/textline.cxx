@@ -773,7 +773,7 @@ void OutputDevice::ImplDrawStrikeoutChar( tools::Long nBaseX, tools::Long nBaseY
     Push( vcl::PushFlags::CLIPREGION );
     IntersectClipRegion(convertTo<vcl::LogicRect>(vcl::WindowRect(aPixelRect)).get());
 
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
     pLayout->DrawText( *mpGraphics );
@@ -979,10 +979,10 @@ void OutputDevice::DrawTextLine( const Point& rPos, tools::Long nWidth,
     if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
         return;
 
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     // initialize font if needed to get text offsets
@@ -1010,10 +1010,10 @@ void OutputDevice::DrawWaveLine(const Point& rStartPos, const Point& rEndPos, to
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     if (!InitFont())
@@ -1107,10 +1107,10 @@ void OutputDevice::ImplDrawWaveLineBezier(tools::Long nStartX, tools::Long nStar
         return;
     assert(mpGraphics);
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     if (!InitFont())

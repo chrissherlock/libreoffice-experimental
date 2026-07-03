@@ -56,7 +56,7 @@ bool VirtualDevice::AcquireGraphics() const
 
     mbInitFont          = true;
     mbInitTextColor     = true;
-    mbInitClipRegion    = true;
+    maClipState.Invalidate();
 
     ImplSVData* pSVData = ImplGetSVData();
 

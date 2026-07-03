@@ -54,10 +54,10 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     // use b2dpolygon drawing if possible
@@ -162,10 +162,10 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     // use b2dpolygon drawing if possible
@@ -259,10 +259,10 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
 
     EnsureRenderStateSynced();
 
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     bool bSuccess(false);

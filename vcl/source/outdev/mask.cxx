@@ -103,10 +103,10 @@ void OutputDevice::DrawMask( const Point& rDestPt, const Size& rDestSize,
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     DrawDeviceMask( rBitmap, rMaskColor, rDestPt, rDestSize, rSrcPtPixel, rSrcSizePixel );

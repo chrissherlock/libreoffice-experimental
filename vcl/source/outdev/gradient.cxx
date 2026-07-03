@@ -52,10 +52,10 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
 {
     assert(!is_double_buffered_window());
 
-    if (mbInitClipRegion)
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    // don't return on mbOutputClipped here, as we may need to draw the clipped metafile, even if the output is clipped
+    // don't return on IsClippedOut() here, as we may need to draw the clipped metafile, even if the output is clipped
 
     if (!rPolyPoly.Count() || !rPolyPoly[0].GetSize())
         return;
@@ -107,14 +107,14 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     auto popIt = ScopedPush(vcl::PushFlags::CLIPREGION);
     IntersectClipRegion( aBoundRect );
 
-    if (mbInitClipRegion)
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
     // try to draw gradient natively
-    if (!mbOutputClipped)
+    if (!GetClipState().IsClippedOut())
         bDrawn = mpGraphics->DrawGradient( aClixPolyPoly, aGradient, *this );
 
-    if (bDrawn || mbOutputClipped)
+    if (bDrawn || GetClipState().IsClippedOut())
         return;
 
     // draw gradients without border

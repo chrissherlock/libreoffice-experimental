@@ -64,10 +64,10 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
 
     EnsureRenderStateSynced();
 
-    if (mbInitClipRegion)
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if (mbOutputClipped)
+    if (GetClipState().IsClippedOut())
          return;
 
     ImplDrawRect(vcl::LogicRect(rRect));
@@ -108,10 +108,10 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     if ( !nHorzRound && !nVertRound )
@@ -153,10 +153,10 @@ void OutputDevice::Invert( const tools::Rectangle& rRect, InvertFlags nFlags )
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     SalInvert nSalFlags = SalInvert::NONE;
@@ -187,10 +187,10 @@ void OutputDevice::Invert( const tools::Polygon& rPoly, InvertFlags nFlags )
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     SalInvert nSalFlags = SalInvert::NONE;
@@ -242,10 +242,10 @@ void OutputDevice::DrawGrid( const tools::Rectangle& rRect, const Size& rDist, D
 
     EnsureRenderStateSynced();
 
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     const tools::Long nDistX = std::max( rDist.Width(), tools::Long(1) );
@@ -336,10 +336,10 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
 
     EnsureRenderStateSynced();
 
-    if (mbInitClipRegion)
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if (mbOutputClipped)
+    if (GetClipState().IsClippedOut())
         return;
 
     if (rDrawingArea.IsEmpty())
