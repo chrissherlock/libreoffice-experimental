@@ -1453,8 +1453,8 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
                         if ( pGraphics )
                         {
                             OutputDevice *pOutDev = GetOutDev();
-                            const bool bSelectClipRegion = pOutDev->SelectClipRegion( aRegion, pGraphics );
-                            if ( bSelectClipRegion )
+                            const bool bApplyClipRegion = pOutDev->ApplyClipRegion( aRegion, pGraphics );
+                            if ( bApplyClipRegion )
                             {
                                 pGraphics->CopyArea( GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY(),
                                                      nOldOutOffX, nOldOutOffY,
@@ -3512,7 +3512,7 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
         {
             vcl::Region aRegion( GetOutputRectPixel() );
             GetOutDev()->GetClippingManager(*this).ClipBoundaries(*this, aRegion, false, false);
-            pOutDev->SelectClipRegion( aRegion, pGraphics );
+            pOutDev->ApplyClipRegion( aRegion, pGraphics );
         }
     }
 

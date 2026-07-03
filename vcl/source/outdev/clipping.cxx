@@ -80,7 +80,7 @@ void OutputDevice::SetClipRegion( const vcl::Region& rRegion )
     }
 }
 
-bool OutputDevice::SelectClipRegion( const vcl::Region& rRegion, SalGraphics* pGraphics )
+bool OutputDevice::ApplyClipRegion( const vcl::Region& rRegion, SalGraphics* pGraphics )
 {
     DBG_TESTSOLARMUTEX();
 
@@ -278,7 +278,7 @@ void initDeviceClipRegion(OutputDevice& rDevice)
             else
             {
                 rState.mbOutputClipped = false;
-                rTypedDev.SelectClipRegion(aRegion);
+                rTypedDev.ApplyClipRegion(aRegion);
             }
 
             rState.mbBackendClipInstalled = true;
@@ -305,7 +305,7 @@ void initDeviceClipRegion(OutputDevice& rDevice)
                     }
                     else
                     {
-                        rTypedDev.SelectClipRegion(aRegion);
+                        rTypedDev.ApplyClipRegion(aRegion);
                     }
                 }
 

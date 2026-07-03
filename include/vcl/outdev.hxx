@@ -552,7 +552,7 @@ public:
     vcl::Region                 GetClipRegion() const;
     void                        SetClipRegion();
     void                        SetClipRegion( const vcl::Region& rRegion );
-    SAL_DLLPRIVATE bool         SelectClipRegion( const vcl::Region&, SalGraphics* pGraphics = nullptr );
+    SAL_DLLPRIVATE bool         ApplyClipRegion( const vcl::Region&, SalGraphics* pGraphics = nullptr );
 
 
     void                        MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove );

@@ -1347,7 +1347,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
                 pOutDev->ReMirror( aRegion );
             }
 
-            pOutDev->SelectClipRegion( aRegion, pGraphics );
+            pOutDev->ApplyClipRegion( aRegion, pGraphics );
             pGraphics->CopyArea( rRect.Left()+nHorzScroll, rRect.Top()+nVertScroll,
                                  rRect.Left(), rRect.Top(),
                                  rRect.GetWidth(), rRect.GetHeight(),
