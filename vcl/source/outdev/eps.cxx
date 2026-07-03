@@ -43,7 +43,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
     if ( !IsDeviceOutputNecessary() || ImplIsRecordLayout() )
         return true;
 
-    if( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return true;
 
     tools::Rectangle aRect(mpMapper->LogicToDevicePixel(tools::Rectangle(rPoint, rSize), GetMappingPolicy()));
@@ -62,7 +62,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
 
         EnsureRenderStateSynced();
 
-        if( mbInitClipRegion )
+        if (!GetClipState().IsReady())
             vcl::clipping::initDeviceClipRegion(*this);
 
         aRect.Normalize();

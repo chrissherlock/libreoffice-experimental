@@ -336,7 +336,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
     if ( mpWindowImpl->mpCursor )
         pHelper->SetRestoreCursor(mpWindowImpl->mpCursor->ImplSuspend());
 
-    GetOutDev()->mbInitClipRegion = true;
+    GetOutDev()->GetClipState().Invalidate();
     mpWindowImpl->mbInPaint = true;
 
     // restore Paint-Region
@@ -381,7 +381,7 @@ void Window::PopPaintHelper(PaintHelper const *pHelper)
             ImplInvertFocus(*mpWindowImpl->mpWinData->mpFocusRect);
     }
     mpWindowImpl->mbInPaint = false;
-    GetOutDev()->mbInitClipRegion = true;
+    GetOutDev()->GetClipState().Invalidate();
     mpWindowImpl->mpPaintRegion = nullptr;
     if (mpWindowImpl->mpCursor)
         mpWindowImpl->mpCursor->ImplResume(pHelper->GetRestoreCursor());
@@ -1603,7 +1603,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     }
 
     const auto& rClipState = GetOutDev()->GetClipState();
-    if ( GetOutDev()->mbClipRegion && (nFlags & ScrollFlags::UseClipRegion) )
+    if (rClipState.mbHasCustomClip && (nFlags & ScrollFlags::UseClipRegion))
         aRegion.Intersect(rClipState.maRegion);
 
     if ( !aRegion.IsEmpty() )

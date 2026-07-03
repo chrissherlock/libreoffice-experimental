@@ -110,10 +110,10 @@ void OutputDevice::DrawTransparent(
 
     EnsureRenderStateSynced();
 
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     if (RasterOp::OverPaint == GetRasterOp())
@@ -203,10 +203,10 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
         )
     {
         // prepare the graphics device
-        if( mbInitClipRegion )
+        if (!GetClipState().IsReady())
             vcl::clipping::initDeviceClipRegion(*this);
 
-        if( mbOutputClipped )
+        if (GetClipState().IsClippedOut())
             return true;
 
         SyncRenderStateToBackend();
@@ -290,7 +290,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
         {
             // setup Graphics only here (other cases delegate
             // to basic OutDev methods)
-            if ( mbInitClipRegion )
+            if (!GetClipState().IsReady())
                 vcl::clipping::initDeviceClipRegion(*this);
 
             SyncRenderStateToBackend();
@@ -298,7 +298,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
             tools::Rectangle aLogicPolyRect( rPolyPoly.GetBoundRect() );
             tools::Rectangle aPixelRect(mpMapper->LogicToDevicePixel(aLogicPolyRect, GetMappingPolicy()));
 
-            if( !mbOutputClipped )
+            if (!GetClipState().IsClippedOut())
             {
                 bDrawn = mpGraphics->DrawAlphaRect( aPixelRect.Left(), aPixelRect.Top(),
                     // #i98405# use methods with small g, else one pixel too much will be painted.

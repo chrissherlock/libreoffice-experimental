@@ -450,10 +450,10 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
 
 void OutputDevice::ImplDrawText( SalLayout& rSalLayout )
 {
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     if( mbInitTextColor )
@@ -710,10 +710,11 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
     EnsureRenderStateSynced();
 
     assert(mpGraphics);
-    if (mbInitClipRegion)
+
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if (mbOutputClipped)
+    if (GetClipState().IsClippedOut())
         return;
 
     // Adding the UnclusteredGlyphs flag during layout enables per-glyph styling.
@@ -754,10 +755,10 @@ void OutputDevice::DrawTextArray( const Point& rStartPt, const OUString& rStr,
 
     EnsureRenderStateSynced();
 
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     std::unique_ptr<SalLayout> pSalLayout = ImplLayout(rStr, nIndex, nLen, rStartPt, 0, pDXAry, pKashidaAry, flags, nullptr, pSalLayoutCache);
@@ -1736,7 +1737,7 @@ void OutputDevice::AddTextRectActions( const tools::Rectangle& rRect,
 
     assert(mpGraphics);
 
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
     // temporarily swap in passed mtf for action generation, and
@@ -1770,6 +1771,7 @@ void OutputDevice::DrawText( const tools::Rectangle& rRect, const OUString& rOri
     }
 
     bool bDecomposeTextRectAction = ( _pTextLayout != nullptr ) && _pTextLayout->DecomposeTextRectAction();
+
     if ( mpMetaFile && !bDecomposeTextRectAction )
         mpMetaFile->AddAction( new MetaTextRectAction( rRect, rOrigStr, nStyle ) );
 
@@ -1777,16 +1779,18 @@ void OutputDevice::DrawText( const tools::Rectangle& rRect, const OUString& rOri
         return;
 
     // we need a graphics
-    if( !mpGraphics && !AcquireGraphics() )
+    if ( !mpGraphics && !AcquireGraphics() )
         return;
     assert(mpGraphics);
 
     EnsureRenderStateSynced();
 
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if (mbOutputClipped && !bDecomposeTextRectAction && !pDisplayText)
+    // Only early-out if the region is empty AND we aren't being asked to decompose
+    // the action or calculate the display text bounding boxes.
+    if (GetClipState().IsClippedOut() && !bDecomposeTextRectAction && !pDisplayText)
         return;
 
     // temporarily disable mtf action generation (ImplDrawText _does_
@@ -1951,10 +1955,10 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
 
     EnsureRenderStateSynced();
 
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     // nIndex and nLen must go to mpAlphaVDev->DrawCtrlText unchanged

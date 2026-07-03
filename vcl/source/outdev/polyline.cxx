@@ -50,10 +50,10 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     // use b2dpolygon drawing if possible
@@ -175,10 +175,10 @@ void OutputDevice::DrawPolyLine( const basegfx::B2DPolygon& rB2DPolygon,
 
     EnsureRenderStateSynced();
 
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     // use b2dpolygon drawing if possible
@@ -262,10 +262,10 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     const LineInfo aInfo(mpMapper->LogicToDevicePixel(rLineInfo, GetMappingPolicy()));
@@ -350,10 +350,10 @@ bool OutputDevice::DrawPolyLineDirectInternal(
 
     EnsureRenderStateSynced();
 
-    if( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return true;
 
     const bool bTryB2d(RasterOp::OverPaint == GetRasterOp() && IsLineColor());

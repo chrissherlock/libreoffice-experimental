@@ -37,10 +37,10 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
     {
         assert(mpGraphics);
 
-        if (mbInitClipRegion)
+        if (!GetClipState().IsReady())
             vcl::clipping::initDeviceClipRegion(const_cast<OutputDevice&>(*this));
 
-        if (!mbOutputClipped)
+        if (!GetClipState().IsClippedOut())
         {
             const tools::Long nX = mpMapper->LogicToDevicePixel(Point(rPoint.X(), 0), GetMappingPolicy()).X();
             const tools::Long nY = mpMapper->LogicToDevicePixel(Point(0, rPoint.Y()), GetMappingPolicy()).Y();
@@ -71,10 +71,10 @@ void OutputDevice::DrawPixel( const Point& rPt )
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     mpGraphics->DrawPixel( aPt.X(), aPt.Y(), *this );
@@ -100,10 +100,10 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
 
     EnsureRenderStateSynced();
 
-    if ( mbInitClipRegion )
+    if (!GetClipState().IsReady())
         vcl::clipping::initDeviceClipRegion(*this);
 
-    if ( mbOutputClipped )
+    if (GetClipState().IsClippedOut())
         return;
 
     mpGraphics->DrawPixel( aPt.X(), aPt.Y(), aColor, *this );
