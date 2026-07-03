@@ -94,7 +94,7 @@ void OutputDevice::LegacyPush(vcl::PushFlags nFlags)
     }
 
     if (nFlags & vcl::PushFlags::CLIPREGION && mbClipRegion)
-        rState.mpClipRegion.reset(new vcl::Region(maRegion));
+        rState.mpClipRegion.reset(new vcl::Region(maClipState.maRegion));
 
     if (nFlags & vcl::PushFlags::REFPOINT && mbRefPoint)
         rState.mpRefPoint = maRefPoint;

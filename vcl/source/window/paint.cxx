@@ -1601,8 +1601,11 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         else
             vcl::clipping::clipChildren(*this, aRegion);
     }
+
+    const auto& rClipState = GetOutDev()->GetClipState();
     if ( GetOutDev()->mbClipRegion && (nFlags & ScrollFlags::UseClipRegion) )
-        aRegion.Intersect( GetOutDev()->maRegion );
+        aRegion.Intersect(rClipState.maRegion);
+
     if ( !aRegion.IsEmpty() )
     {
         if ( mpWindowImpl->mpWinData )
