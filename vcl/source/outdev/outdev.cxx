@@ -65,7 +65,6 @@ using namespace ::com::sun::star::uno;
 OutputDevice::OutputDevice(OutDevType eOutDevType) :
     mpMapper(std::make_unique<CoordinateMapper>()),
     meOutDevType(eOutDevType),
-    maRegion(true),
     maTextLineColor( COL_TRANSPARENT ),
     moSettings( Application::GetSettings() )
 {
