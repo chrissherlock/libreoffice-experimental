@@ -12,7 +12,6 @@
 #include <vcl/outdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <clipping_window.hxx>
 #include <clipping/ClipStateBuilder.hxx>
 #include <window.h>
 
@@ -22,12 +21,6 @@ ClipState ClipStateBuilder::BuildFromWindow(const vcl::Window& rWindow)
 {
     ClipState aState;
     WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
-
-    if (pImpl->mpClippingState->mbInitWinClipRegion)
-        vcl::clipping::initWinClipRegion(const_cast<vcl::Window&>(rWindow));
-
-    if (pImpl->mpClippingState->mbInitChildRegion)
-        vcl::clipping::initWinChildClipRegion(const_cast<vcl::Window&>(rWindow));
 
     aState.bIsVisible = rWindow.IsVisible();
 

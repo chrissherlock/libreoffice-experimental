@@ -29,7 +29,6 @@
 #include <WindowOutputDevice.hxx>
 #include <window.h>
 #include <clipping.hxx>
-#include <clipping_window.hxx>
 #include <clipping/ClippingManager.hxx>
 #include <devicedispatcher.hxx>
 #include <salgdi.hxx>
@@ -263,7 +262,7 @@ void initDeviceClipRegion(OutputDevice& rDevice)
             }
             else
             {
-                aRegion = getWinChildClipRegion(*rTypedDev.GetOwnerWindow());
+                aRegion = rTypedDev.GetClippingManager(*rTypedDev.GetOwnerWindow()).GetClipPlan(*rTypedDev.GetOwnerWindow()).maFinalRegion;
 
                 if (rTypedDev.ImplIsAntiparallel())
                     rTypedDev.ReMirror(aRegion);

@@ -37,8 +37,6 @@
 #include <vcl/stdtext.hxx>
 #include <vcl/uitest/uiobject.hxx>
 
-#include <clipping_window.hxx>
-
 #include <accessibility/vclxaccessiblebutton.hxx>
 #include <accessibility/vclxaccessiblecheckbox.hxx>
 #include <accessibility/vclxaccessibleradiobutton.hxx>
@@ -57,6 +55,7 @@
 #include <tools/mapunit.hxx>
 #include <tools/stream.hxx>
 #include <vcl/TransformTypes.hxx>
+#include <clipping/ClippingManager.hxx>
 
 
 using namespace css;
@@ -659,7 +658,7 @@ void PushButton::ImplInitSettings( bool bBackground )
          (GetStyle() & WB_FLATBUTTON) != 0 )
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent( true );
 
         if ((GetStyle() & WB_FLATBUTTON) == 0)
@@ -670,7 +669,7 @@ void PushButton::ImplInitSettings( bool bBackground )
     else
     {
         EnableChildTransparentMode( false );
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NONE);
         SetPaintTransparent( false );
     }
 }
@@ -1882,7 +1881,7 @@ void RadioButton::ImplInitSettings( bool bBackground )
         (pParent->IsChildTransparentModeEnabled() || IsNativeControlSupported( ControlType::Radiobutton, ControlPart::Entire ) ) )
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent( true );
         SetBackground();
         if( IsNativeControlSupported( ControlType::Radiobutton, ControlPart::Entire ) )
@@ -1891,7 +1890,7 @@ void RadioButton::ImplInitSettings( bool bBackground )
     else
     {
         EnableChildTransparentMode( false );
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NONE);
         SetPaintTransparent( false );
 
         if ( IsControlBackground() )
@@ -2978,7 +2977,7 @@ void CheckBox::ImplInitSettings( bool bBackground )
         (pParent->IsChildTransparentModeEnabled() || IsNativeControlSupported( ControlType::Checkbox, ControlPart::Entire ) ) )
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent( true );
         SetBackground();
         if( IsNativeControlSupported( ControlType::Checkbox, ControlPart::Entire ) )
@@ -2987,7 +2986,7 @@ void CheckBox::ImplInitSettings( bool bBackground )
     else
     {
         EnableChildTransparentMode( false );
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NONE);
         SetPaintTransparent( false );
 
         if ( IsControlBackground() )

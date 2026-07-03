@@ -22,7 +22,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/syschild.hxx>
 
-#include <clipping_window.hxx>
+#include <clipping/ClippingManager.hxx>
 #include <window.h>
 #include <salframe.hxx>
 #include <salinst.hxx>
@@ -95,7 +95,7 @@ void SystemChildWindow::ImplInitSysChild( vcl::Window* pParent, WinBits nStyle, 
     if ( GetSystemData() )
     {
         mpWindowImpl->mpSysObj->SetCallback( this, ImplSysChildProc );
-        vcl::clipping::setParentClipMode(this, ParentClipMode::Clip);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::Clip);
         SetBackground();
     }
 }

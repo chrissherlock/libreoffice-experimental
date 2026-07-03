@@ -9,9 +9,11 @@
 
 #include <vcl/window.hxx>
 #include <vcl/vclevent.hxx>
+#include <vcl/CoordinateMapper.hxx>
 
 #include <clipping/ClippingManager.hxx>
 #include <clipping/ClipStateBuilder.hxx>
+#include <salobj.hxx>
 #include <window.h>
 
 namespace vcl::clipping
@@ -98,6 +100,244 @@ void ClippingManager::OnWindowGeometryChanged(vcl::Window& rWindow)
         // will trigger a fresh ClipStateBuilder::Build() pass.
         it->second.mnLastCompiledVersion = 0;
     }
+}
+
+void ClippingManager::UpdateNativeWindowClip(vcl::Window& rWindow)
+{
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl)
+        return;
+
+    if (!pImpl->mpSysObj)
+    {
+        vcl::Window* pChild = pImpl->mpHierarchy->mpFirstChild;
+        while (pChild)
+        {
+            UpdateNativeWindowClip(*pChild);
+            pChild = pChild->ImplGetWindowImpl()->mpHierarchy->mpNext;
+        }
+
+        vcl::Window* pOverlap = pImpl->mpHierarchy->mpFirstOverlap;
+        while (pOverlap)
+        {
+            UpdateNativeWindowClip(*pOverlap);
+            pOverlap = pOverlap->ImplGetWindowImpl()->mpHierarchy->mpNextOverlap;
+        }
+        return;
+    }
+
+    const auto& rPlan = GetClipPlan(rWindow);
+
+    if (!pImpl->mbReallyVisible || rPlan.mbEmpty || rPlan.maFinalRegion.IsEmpty())
+    {
+        pImpl->mpSysObj->Show(false);
+        return;
+    }
+
+    vcl::Region aTargetRegion = rPlan.maFinalRegion;
+    vcl::Region rWinRectRegion(rWindow.GetOutputRectPixel());
+
+    if (aTargetRegion == rWinRectRegion)
+    {
+        pImpl->mpSysObj->ResetClipRegion();
+        pImpl->mpSysObj->Show(true);
+        return;
+    }
+
+    aTargetRegion.Move(-rWindow.GetOutDev()->GetDeviceOriginX(),
+                       -rWindow.GetOutDev()->GetDeviceOriginY());
+
+    RectangleVector aRectangles;
+    aTargetRegion.GetRegionRectangles(aRectangles);
+    pImpl->mpSysObj->BeginSetClipRegion(aRectangles.size());
+
+    for (auto const& rectangle : aRectangles)
+    {
+        pImpl->mpSysObj->UnionClipRegion(rectangle.Left(), rectangle.Top(), rectangle.GetWidth(),
+                                         rectangle.GetHeight());
+    }
+
+    pImpl->mpSysObj->EndSetClipRegion();
+    pImpl->mpSysObj->Show(true);
+}
+
+void ClippingManager::CalcOverlapRegion(vcl::Window& rWindow, const tools::Rectangle& rSourceRect,
+                                        vcl::Region& rRegion, bool bChildren, bool bSiblings)
+{
+    ClipState aState = ClipStateBuilder::BuildFromWindow(rWindow);
+    vcl::Region aBase(rSourceRect);
+
+    if (aState.maCustomRegion)
+        rRegion.Intersect(*aState.maCustomRegion);
+
+    // maSiblings contains ALL overlaps (ancestral and lateral)
+    if (bSiblings)
+    {
+        for (const auto& rSibling : aState.maSiblings)
+        {
+            vcl::Region aTemp(aBase);
+            aTemp.Intersect(rSibling.maBounds);
+            rRegion.Union(aTemp);
+        }
+    }
+
+    if (bChildren)
+    {
+        for (const auto& rChild : aState.maChildren)
+        {
+            vcl::Region aTemp(aBase);
+            aTemp.Intersect(rChild.maBounds);
+            rRegion.Union(aTemp);
+        }
+    }
+}
+
+void ClippingManager::ClipBoundaries(vcl::Window& rWindow, vcl::Region& rRegion, bool bThis,
+                                     bool bOverlaps)
+{
+    ClipState aState = ClipStateBuilder::BuildFromWindow(rWindow);
+
+    if (bThis)
+    {
+        rRegion.Intersect(aState.maBounds);
+        if (aState.maCustomRegion)
+            rRegion.Intersect(*aState.maCustomRegion);
+
+        if (bOverlaps)
+        {
+            for (const auto& rSibling : aState.maSiblings)
+                rRegion.Exclude(rSibling.maBounds);
+        }
+        return;
+    }
+
+    if (!rWindow.ImplIsOverlapWindow())
+    {
+        vcl::Window* pParent = rWindow.ImplGetParent();
+        if (pParent)
+        {
+            ClipState aParentState = ClipStateBuilder::BuildFromWindow(*pParent);
+            rRegion.Intersect(aParentState.maBounds);
+            if (aParentState.maCustomRegion)
+                rRegion.Intersect(*aParentState.maCustomRegion);
+        }
+        return;
+    }
+
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl->mbFrame && pImpl->mpFrameWindow)
+    {
+        rRegion.Intersect(
+            tools::Rectangle(Point(0, 0), pImpl->mpFrameWindow->GetOutputSizePixel()));
+    }
+
+    if (!bOverlaps || rRegion.IsEmpty())
+        return;
+
+    for (const auto& rSibling : aState.maSiblings)
+        rRegion.Exclude(rSibling.maBounds);
+}
+
+void ClippingManager::ClipChildren(vcl::Window& rWindow, vcl::Region& rRegion, bool bAllChildren)
+{
+    ClipState aState = ClipStateBuilder::BuildFromWindow(rWindow);
+
+    if (bAllChildren)
+    {
+        // Bypass ParentClipMode filters and aggressively exclude all
+        WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+        vcl::Window* pChild = pImpl->mpHierarchy->mpFirstChild;
+        while (pChild)
+        {
+            if (pChild->ImplGetWindowImpl()->mbReallyVisible)
+                rRegion.Exclude(pChild->GetOutputRectPixel());
+            pChild = pChild->ImplGetWindowImpl()->mpHierarchy->mpNext;
+        }
+    }
+    else
+    {
+        // Use the safely filtered children array from the builder
+        for (const auto& rChild : aState.maChildren)
+            rRegion.Exclude(rChild.maBounds);
+    }
+}
+
+void ClippingManager::ClipSiblings(vcl::Window& rWindow, vcl::Region& rRegion)
+{
+    vcl::Window* pParent = rWindow.GetParent();
+
+    if (!pParent)
+        return;
+
+    bool bFound = false;
+    for (size_t i = 0; i < pParent->GetChildCount(); ++i)
+    {
+        vcl::Window* pSibling = pParent->GetChild(i);
+
+        if (pSibling == &rWindow)
+        {
+            bFound = true;
+            continue;
+        }
+
+        if (bFound && pSibling->IsReallyVisible())
+            ExcludeWindowRegion(*pSibling, rRegion);
+    }
+}
+
+void ClippingManager::ExcludeWindowRegion(vcl::Window& rWindow, vcl::Region& rRegion)
+{
+    vcl::Region aWindowRegion(rWindow.GetOutputRectPixel());
+
+    if (aWindowRegion.IsEmpty())
+        return;
+
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (pImpl && pImpl->mpClippingState->mbWinRegion)
+    {
+        aWindowRegion.Intersect(
+            rWindow.GetOutDev()->GetMapper().ViewToDevice(pImpl->mpClippingState->maWinRegion));
+    }
+
+    rRegion.Exclude(aWindowRegion);
+}
+
+void ClippingManager::SetParentClipMode(vcl::Window* pWindow, ParentClipMode nMode)
+{
+    if (!pWindow)
+        return;
+
+    WindowImpl* pImpl = pWindow->ImplGetWindowImpl();
+
+    if (pImpl->mpBorderWindow)
+    {
+        SetParentClipMode(pImpl->mpBorderWindow.get(), nMode);
+        return;
+    }
+
+    if (pImpl->mbOverlapWin)
+        return;
+
+    pImpl->mpClippingState->meParentClipMode = nMode;
+
+    if (nMode & ParentClipMode::Clip)
+    {
+        if (pImpl->mpHierarchy && pImpl->mpHierarchy->mpParent)
+        {
+            WindowImpl* pParentImpl = pImpl->mpHierarchy->mpParent->ImplGetWindowImpl();
+            pParentImpl->mpClippingState->mbClipChildren = true;
+        }
+    }
+}
+
+ParentClipMode ClippingManager::GetParentClipMode(const vcl::Window& rWindow)
+{
+    WindowImpl* pWindowImpl = rWindow.ImplGetWindowImpl();
+
+    if (pWindowImpl->mpBorderWindow)
+        return GetParentClipMode(*pWindowImpl->mpBorderWindow);
+
+    return pWindowImpl->mpClippingState->meParentClipMode;
 }
 
 } // namespace vcl::clipping

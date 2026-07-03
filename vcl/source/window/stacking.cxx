@@ -23,7 +23,7 @@
 #include <vcl/taskpanelist.hxx>
 #include <sal/log.hxx>
 
-#include <clipping_window.hxx>
+#include <clipping/ClippingManager.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
 #include <svdata.hxx>
@@ -232,7 +232,9 @@ void Window::ImplCalcToTop( ImplCalcToTopData* pPrevData )
     // calculate region, where the window overlaps with other windows
     vcl::Region  aRegion( GetOutputRectPixel() );
     vcl::Region  aInvalidateRegion;
-    vcl::clipping::calcOverlapRegionOverlaps(*this, aRegion, aInvalidateRegion);
+
+    auto& rManager = GetOutDev()->GetClippingManager(*this);
+    rManager.CalcOverlapRegion(*this, aRegion.GetBoundRect(), aInvalidateRegion, false, true);
 
     if ( !aInvalidateRegion.IsEmpty() )
     {

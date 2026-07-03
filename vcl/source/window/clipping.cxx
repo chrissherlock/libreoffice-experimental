@@ -25,7 +25,6 @@
 #include <vcl/CoordinateMapper.hxx>
 
 #include <clipping/ClippingManager.hxx>
-#include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <salgeom.hxx>
 #include <salobj.hxx>
@@ -51,12 +50,12 @@ sal_uInt64 Window::GetClipStateVersion() const { return mpWindowImpl->mnClipStat
 
 void Window::SetParentClipMode(ParentClipMode eMode)
 {
-    vcl::clipping::setParentClipMode(this, eMode);
+    vcl::clipping::ClippingManager::SetParentClipMode(this, eMode);
 }
 
 ParentClipMode Window::GetParentClipMode() const
 {
-    return vcl::clipping::getParentClipMode(*this);
+    return vcl::clipping::ClippingManager::GetParentClipMode(*this);
 }
 
 void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
@@ -67,7 +66,7 @@ void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
     WindowRegion aPixRegion(rRegion);
     vcl::Region aDevPixRegion = GetOutDev()->GetMapper().ViewToDevice(aPixRegion.get());
 
-    vcl::Region aWinChildRegion = vcl::clipping::getWinChildClipRegion(*this);
+    vcl::Region aWinChildRegion = GetOutDev()->GetClippingManager(*this).GetClipPlan(*this).maFinalRegion;
 
     // only this region is in frame coordinates, so re-mirror it
     if (GetOutDev()->ImplIsAntiparallel())
@@ -87,15 +86,11 @@ void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
 
 vcl::Region Window::GetWindowClipRegionPixel() const
 {
-    vcl::Region aWinClipRegion;
+    auto& rManager = const_cast<OutputDevice*>(GetOutDev())->GetClippingManager(const_cast<Window&>(*this));
 
-    if (mpWindowImpl->mpClippingState->mbInitWinClipRegion)
-        clipping::initWinClipRegion(*this);
-
-    aWinClipRegion = mpWindowImpl->mpClippingState->maWinClipRegion;
+    vcl::Region aWinClipRegion = rManager.GetClipPlan(const_cast<Window&>(*this)).maFinalRegion;
 
     vcl::Region aWinRegion(GetOutputRectPixel());
-
     if (aWinRegion == aWinClipRegion)
         aWinClipRegion.SetNull();
 

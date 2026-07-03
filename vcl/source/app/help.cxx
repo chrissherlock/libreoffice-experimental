@@ -31,7 +31,7 @@
 #include <vcl/help.hxx>
 #include <vcl/settings.hxx>
 
-#include <clipping_window.hxx>
+#include <clipping/ClippingManager.hxx>
 #include <helpwin.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
@@ -291,7 +291,7 @@ void HelpTextWindow::ApplySettings(vcl::RenderContext& rRenderContext)
     if (rRenderContext.IsNativeControlSupported(ControlType::Tooltip, ControlPart::Entire))
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent(true);
         rRenderContext.SetBackground();
     }

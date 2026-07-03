@@ -39,6 +39,19 @@ public:
     const ClipPlan& GetClipPlan(vcl::Window& rWindow);
     void InvalidateWindow(vcl::Window& rWindow);
 
+    void UpdateNativeWindowClip(vcl::Window& rWindow);
+
+    void CalcOverlapRegion(vcl::Window& rWindow, const tools::Rectangle& rSourceRect,
+                           vcl::Region& rRegion, bool bChildren, bool bSiblings);
+
+    void ClipBoundaries(vcl::Window& rWindow, vcl::Region& rRegion, bool bThis, bool bOverlaps);
+
+    void ClipChildren(vcl::Window& rWindow, vcl::Region& rRegion, bool bAllChildren = false);
+    void ClipSiblings(vcl::Window& rWindow, vcl::Region& rRegion);
+
+    static void SetParentClipMode(vcl::Window* pWindow, ParentClipMode nMode);
+    static ParentClipMode GetParentClipMode(const vcl::Window& rWindow);
+
 private:
     struct CacheEntry
     {
@@ -50,6 +63,13 @@ private:
     std::map<vcl::Window*, CacheEntry> maCache;
 
     DECL_LINK(WindowEventHdl, VclWindowEvent&, void);
+
+    /**
+     * Removes the area occupied by the specified window from the provided region.
+     * Handles both the window's bounding box and any custom window region set
+     * via SetWindowRegionPixel().
+     */
+    void ExcludeWindowRegion(vcl::Window& rWindow, vcl::Region& rRegion);
 };
 } // namespace vcl::clipping
 

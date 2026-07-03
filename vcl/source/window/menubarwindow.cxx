@@ -28,7 +28,7 @@
 #include <vcl/taskpanelist.hxx>
 #include <sal/log.hxx>
 
-#include <clipping_window.hxx>
+#include <clipping/ClippingManager.hxx>
 #include <salframe.hxx>
 #include <salmenu.hxx>
 #include <svdata.hxx>
@@ -132,7 +132,7 @@ MenuBarWindow::MenuBarWindow( vcl::Window* pParent ) :
 
     m_aCloseBtn->SetBackground();
     m_aCloseBtn->SetPaintTransparent(true);
-    vcl::clipping::setParentClipMode(m_aCloseBtn, ParentClipMode::NoClip);
+    vcl::clipping::ClippingManager::SetParentClipMode(m_aCloseBtn, ParentClipMode::NoClip);
 
     m_aCloseBtn->InsertItem(ToolBoxItemId(IID_DOCUMENTCLOSE), m_aCloseBtn->maImage);
     m_aCloseBtn->SetSelectHdl(LINK(this, MenuBarWindow, CloseHdl));
@@ -1053,7 +1053,7 @@ void MenuBarWindow::ApplySettings(vcl::RenderContext& rRenderContext)
         aWallpaper.SetStyle(WallpaperStyle::ApplicationGradient);
         rRenderContext.SetBackground(aWallpaper);
         SetPaintTransparent(false);
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NONE);
     }
 
     rRenderContext.SetTextColor(rStyleSettings.GetMenuBarTextColor());

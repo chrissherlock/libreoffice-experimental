@@ -23,7 +23,7 @@
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/settings.hxx>
 
-#include <clipping_window.hxx>
+#include <clipping/ClippingManager.hxx>
 
 #include "thumbpos.hxx"
 
@@ -78,7 +78,7 @@ void Slider::ImplInitSettings()
     if ( pParent->IsChildTransparentModeEnabled() && !IsControlBackground() )
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent( true );
         SetBackground();
 
@@ -86,7 +86,7 @@ void Slider::ImplInitSettings()
     }
 
     EnableChildTransparentMode( false );
-    vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+    vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NONE);
     SetPaintTransparent( false );
 
     if ( IsControlBackground() )

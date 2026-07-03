@@ -31,9 +31,9 @@
 #include <sal/types.h>
 #include <sal/log.hxx>
 
+#include <clipping/ClippingManager.hxx>
 #include <clipping/ClippingBridge.hxx>
 #include <clipping/ClipStateBuilder.hxx>
-#include <clipping_window.hxx>
 #include <window.h>
 #include <salgdi.hxx>
 #include <salframe.hxx>
@@ -994,7 +994,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
         aClipRegion.Intersect(aPaintRect);
         pDevice->SetClipRegion(aClipRegion);
 
-        if (!IsPaintTransparent() && IsBackground() && ! (vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip))
+        if (!IsPaintTransparent() && IsBackground() && !(vcl::clipping::ClippingManager::GetParentClipMode(*this) & ParentClipMode::NoClip))
             Erase(*pDevice);
 
         pDevice->SetMapMode(GetMapMode());
@@ -1104,10 +1104,9 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
     // do the actual paint
 
     // background
-    if( ! IsPaintTransparent() && IsBackground() && ! (vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip ) )
-    {
+    if (!IsPaintTransparent() && IsBackground() && !(vcl::clipping::ClippingManager::GetParentClipMode(*this) & ParentClipMode::NoClip))
         Erase(*GetOutDev());
-    }
+
     // foreground
     Paint(*GetOutDev(), aPaintRect);
     // put a pop action to metafile
@@ -1278,7 +1277,8 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     // adapt paint areas
     ImplMoveAllInvalidateRegions( aRectMirror, nHorzScroll, nVertScroll, bScrollChildren );
 
-    vcl::clipping::calcOverlapRegion(*this, aRectMirror, aInvalidateRegion, !bScrollChildren, false);
+    auto& rManager = GetOutDev()->GetClippingManager(*this);
+    rManager.CalcOverlapRegion(*this, aRectMirror, aInvalidateRegion, !bScrollChildren, false);
 
     // if the scrolling on the device is performed in the opposite direction
     // then move the overlaps in that direction to compute the invalidate region
@@ -1309,14 +1309,9 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
 
     aRegion.Exclude( aInvalidateRegion );
 
-    vcl::clipping::clipBoundaries(*this, aRegion, false, true);
-    if ( !bScrollChildren )
-    {
-        if ( nOrgFlags & ScrollFlags::NoChildren )
-            vcl::clipping::clipAllChildren(*this, aRegion);
-        else
-            vcl::clipping::clipChildren(*this, aRegion);
-    }
+    rManager.ClipBoundaries(*this, aRegion, false, true);
+    if (!bScrollChildren)
+        rManager.ClipChildren(*this, aRegion, bool(nOrgFlags & ScrollFlags::NoChildren));
 
     const auto& rClipState = GetOutDev()->GetClipState();
     if (rClipState.mbHasCustomClip && (nFlags & ScrollFlags::UseClipRegion))
@@ -1374,13 +1369,9 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         // so it has to be re-mirrored before calling the Paint-handler
         mpWindowImpl->mnPaintFlags |= ImplPaintFlags::CheckRtl;
 
-        if ( !bScrollChildren )
-        {
-            if ( nOrgFlags & ScrollFlags::NoChildren )
-                vcl::clipping::clipAllChildren(*this, aInvalidateRegion);
-            else
-                vcl::clipping::clipChildren(*this, aInvalidateRegion);
-        }
+        if (!bScrollChildren)
+            rManager.ClipChildren(*this, aInvalidateRegion, bool(nOrgFlags & ScrollFlags::NoChildren));
+
         ImplInvalidateFrameRegion( &aInvalidateRegion, InvalidateFlags::Children );
     }
 

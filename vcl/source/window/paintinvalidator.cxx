@@ -25,7 +25,6 @@
 #include <vcl/CoordinateMapper.hxx>
 
 #include <clipping/ClippingManager.hxx>
-#include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <salgeom.hxx>
 #include <salobj.hxx>

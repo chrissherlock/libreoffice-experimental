@@ -46,7 +46,6 @@
 #include <brdwin.hxx>
 #include <clipping/ClippingManager.hxx>
 #include <clipping.hxx>
-#include <clipping_window.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>
 #include <impfontcache.hxx>
@@ -1525,7 +1524,7 @@ void Window::ImplPosSizeWindow( tools::Long nX, tools::Long nY,
 
     // adapt system objects
     if ( bUpdateSysObjClip )
-        vcl::clipping::updateNativeObjectClip(*this);
+        GetOutDev()->GetClippingManager(*this).UpdateNativeWindowClip(*this);
 
     if ( bUpdateSysObjPos )
         ImplUpdateNativeObjectPos();
@@ -3512,7 +3511,7 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
         if ( nFlags & ShowTrackFlags::Clip )
         {
             vcl::Region aRegion( GetOutputRectPixel() );
-            vcl::clipping::clipBoundaries(*this, aRegion, false, false);
+            GetOutDev()->GetClippingManager(*this).ClipBoundaries(*this, aRegion, false, false);
             pOutDev->SelectClipRegion( aRegion, pGraphics );
         }
     }

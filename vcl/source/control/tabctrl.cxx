@@ -37,8 +37,8 @@
 #include <vcl/toolkit/lstbox.hxx>
 #include <vcl/uitest/uiobject.hxx>
 
+#include <clipping/ClippingManager.hxx>
 #include <clipping.hxx>
-#include <clipping_window.hxx>
 
 #include <bitmaps.hlst>
 #include <svdata.hxx>
@@ -166,12 +166,11 @@ void TabControl::ImplInitSettings( bool bBackground )
         (pParent->IsChildTransparentModeEnabled()
         || IsNativeControlSupported(ControlType::TabPane, ControlPart::Entire)
         || IsNativeControlSupported(ControlType::TabItem, ControlPart::Entire) ) )
-
     {
         // set transparent mode for NWF tabcontrols to have
         // the background always cleared properly
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent( true );
         SetBackground();
         ImplGetWindowImpl()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
@@ -180,7 +179,7 @@ void TabControl::ImplInitSettings( bool bBackground )
     }
 
     EnableChildTransparentMode( false );
-    vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+    vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NONE);
     SetPaintTransparent( false );
 
     if ( IsControlBackground() )

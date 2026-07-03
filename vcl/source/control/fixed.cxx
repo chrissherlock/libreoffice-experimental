@@ -26,14 +26,14 @@
 #include <vcl/toolkit/fixed.hxx>
 #include <vcl/settings.hxx>
 
-#include <clipping_window.hxx>
-
 #include <comphelper/base64.hxx>
 #include <comphelper/string.hxx>
 #include <sal/log.hxx>
 #include <tools/json_writer.hxx>
 #include <tools/stream.hxx>
 #include <vcl/TransformTypes.hxx>
+
+#include <clipping/ClippingManager.hxx>
 
 #define FIXEDLINE_TEXT_BORDER    4
 
@@ -182,7 +182,7 @@ void FixedText::ApplySettings(vcl::RenderContext& rRenderContext)
     if (!pParent->IsChildTransparentModeEnabled() || IsControlBackground())
     {
         EnableChildTransparentMode(false);
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NONE);
         SetPaintTransparent(false);
 
         if (IsControlBackground())
@@ -197,7 +197,7 @@ void FixedText::ApplySettings(vcl::RenderContext& rRenderContext)
     if (bEnableTransparent)
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent(true);
         rRenderContext.SetBackground();
     }
@@ -603,14 +603,14 @@ void FixedLine::ApplySettings(vcl::RenderContext& rRenderContext)
     if (pParent->IsChildTransparentModeEnabled() && !IsControlBackground())
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent(true);
         rRenderContext.SetBackground();
     }
     else
     {
         EnableChildTransparentMode(false);
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NONE);
         SetPaintTransparent(false);
 
         if (IsControlBackground())
@@ -730,14 +730,14 @@ void FixedBitmap::ApplySettings(vcl::RenderContext& rRenderContext)
     if (pParent->IsChildTransparentModeEnabled() && !IsControlBackground())
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent(true);
         rRenderContext.SetBackground();
     }
     else
     {
         EnableChildTransparentMode(false);
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NONE);
         SetPaintTransparent(false);
 
         if (IsControlBackground())
@@ -868,14 +868,14 @@ void FixedImage::ApplySettings(vcl::RenderContext& rRenderContext)
     if (pParent && pParent->IsChildTransparentModeEnabled() && !IsControlBackground())
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent(true);
         rRenderContext.SetBackground();
     }
     else
     {
         EnableChildTransparentMode(false);
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+        vcl::clipping::ClippingManager::SetParentClipMode(this, ParentClipMode::NONE);
         SetPaintTransparent(false);
 
         if (IsControlBackground())
@@ -884,7 +884,6 @@ void FixedImage::ApplySettings(vcl::RenderContext& rRenderContext)
             rRenderContext.SetBackground(pParent->GetBackground());
     }
 }
-
 
 void FixedImage::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle&)
 {
