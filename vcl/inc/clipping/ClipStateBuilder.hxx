@@ -17,18 +17,24 @@
 
 namespace vcl::clipping
 {
+enum class ClipSpace
+{
+    Local, // Used during Paint cycles (rWindow.GetOutputRectPixel)
+    AbsoluteDevice // Used during Invalidation/Scroll (pOutDev->GetDeviceOrigin)
+};
+
 class VCL_DLLPUBLIC ClipStateBuilder
 {
 public:
-    // This is the factory method that performs the conversion
-    static ClipState BuildFromWindow(const vcl::Window& rWindow);
-
-    static ClipState Build(vcl::Window& rWindow);
+    static ClipState Build(const OutputDevice& rDevice);
+    static ClipState Build(const vcl::Window& rWindow, ClipSpace eSpace = ClipSpace::Local);
 
 private:
-    // Helper to flatten linked-list pointers into ClipNode vectors
-    static void CollectSiblings(const vcl::Window& rWindow, std::vector<ClipNode>& rOut);
-    static void CollectChildren(const vcl::Window& rWindow, std::vector<ClipNode>& rOut);
+    static tools::Rectangle GetNodeBounds(const vcl::Window& rNode, ClipSpace eSpace);
+    static void CollectSiblings(const vcl::Window& rWindow, std::vector<ClipNode>& rOut,
+                                ClipSpace eSpace);
+    static void CollectChildren(const vcl::Window& rWindow, std::vector<ClipNode>& rOut,
+                                ClipSpace eSpace);
 };
 
 } // namespace vcl::clipping

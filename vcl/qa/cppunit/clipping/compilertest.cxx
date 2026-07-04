@@ -40,7 +40,7 @@ CPPUNIT_TEST_FIXTURE(test::BootstrapFixture, testBuilderHierarchyCapture)
     pChild->SetParentClipMode(ParentClipMode::NONE);
 
     // Build the state
-    ClipState aState = ClipStateBuilder::BuildFromWindow(*pParent);
+    ClipState aState = ClipStateBuilder::Build(*pParent, ClipSpace::AbsoluteDevice);
 
     // Verify capture
     CPPUNIT_ASSERT_EQUAL(size_t(1), aState.maChildren.size());

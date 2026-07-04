@@ -166,7 +166,7 @@ void ClippingManager::UpdateNativeWindowClip(vcl::Window& rWindow)
 void ClippingManager::CalcOverlapRegion(vcl::Window& rWindow, const tools::Rectangle& rSourceRect,
                                         vcl::Region& rRegion, bool bChildren, bool bSiblings)
 {
-    ClipState aState = ClipStateBuilder::BuildFromWindow(rWindow);
+    ClipState aState = ClipStateBuilder::Build(rWindow, ClipSpace::AbsoluteDevice);
     vcl::Region aBase(rSourceRect);
 
     if (aState.maCustomRegion)
@@ -197,7 +197,7 @@ void ClippingManager::CalcOverlapRegion(vcl::Window& rWindow, const tools::Recta
 void ClippingManager::ClipBoundaries(vcl::Window& rWindow, vcl::Region& rRegion, bool bThis,
                                      bool bOverlaps)
 {
-    ClipState aState = ClipStateBuilder::BuildFromWindow(rWindow);
+    ClipState aState = ClipStateBuilder::Build(rWindow, ClipSpace::AbsoluteDevice);
 
     if (bThis)
     {
@@ -218,7 +218,7 @@ void ClippingManager::ClipBoundaries(vcl::Window& rWindow, vcl::Region& rRegion,
         vcl::Window* pParent = rWindow.ImplGetParent();
         if (pParent)
         {
-            ClipState aParentState = ClipStateBuilder::BuildFromWindow(*pParent);
+            ClipState aParentState = ClipStateBuilder::Build(*pParent, ClipSpace::AbsoluteDevice);
             rRegion.Intersect(aParentState.maBounds);
             if (aParentState.maCustomRegion)
                 rRegion.Intersect(*aParentState.maCustomRegion);
@@ -242,7 +242,7 @@ void ClippingManager::ClipBoundaries(vcl::Window& rWindow, vcl::Region& rRegion,
 
 void ClippingManager::ClipChildren(vcl::Window& rWindow, vcl::Region& rRegion, bool bAllChildren)
 {
-    ClipState aState = ClipStateBuilder::BuildFromWindow(rWindow);
+    ClipState aState = ClipStateBuilder::Build(rWindow, ClipSpace::AbsoluteDevice);
 
     if (bAllChildren)
     {

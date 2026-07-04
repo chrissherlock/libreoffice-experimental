@@ -259,7 +259,7 @@ void PaintHelper::DoPaint(const vcl::Region* pRegion)
     WindowImpl* pWindowImpl = m_pWindow->ImplGetWindowImpl();
     ImplFrameData* pFrameData = m_pWindow->mpWindowImpl->mpFrameData;
 
-    auto aClipState = vcl::clipping::ClipStateBuilder::BuildFromWindow(*m_pWindow);
+    auto aClipState = vcl::clipping::ClipStateBuilder::Build(*m_pWindow, vcl::clipping::ClipSpace::AbsoluteDevice);
     auto aClipPlan = vcl::clipping::ClipCompiler::Compile(aClipState);
 
     if (pWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAll || pFrameData->mbInBufferedPaint)
@@ -563,7 +563,7 @@ void Window::PostPaint(vcl::RenderContext& /*rRenderContext*/)
 
 void Window::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& rRect)
 {
-    auto aState = vcl::clipping::ClipStateBuilder::BuildFromWindow(*this);
+    auto aState = vcl::clipping::ClipStateBuilder::Build(*this, vcl::clipping::ClipSpace::AbsoluteDevice);
     vcl::clipping::ApplyClipping(rRenderContext, aState);
 
     // VIRTUAL VERIFICATION:
