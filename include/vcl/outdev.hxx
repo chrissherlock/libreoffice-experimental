@@ -554,6 +554,7 @@ public:
     void                        SetClipRegion( const vcl::Region& rRegion );
     SAL_DLLPRIVATE bool         ApplyClipRegion( const vcl::Region&, SalGraphics* pGraphics = nullptr );
 
+    void                        SyncClipState();
 
     void                        MoveClipRegion( tools::Long nHorzMove, tools::Long nVertMove );
     void                        IntersectClipRegion( const tools::Rectangle& rRect );

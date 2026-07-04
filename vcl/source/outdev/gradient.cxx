@@ -53,7 +53,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     assert(!is_double_buffered_window());
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     // don't return on IsClippedOut() here, as we may need to draw the clipped metafile, even if the output is clipped
 
@@ -108,7 +108,7 @@ void OutputDevice::DrawGradient( const tools::PolyPolygon& rPolyPoly,
     IntersectClipRegion( aBoundRect );
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     // try to draw gradient natively
     if (!GetClipState().IsClippedOut())

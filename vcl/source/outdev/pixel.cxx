@@ -38,7 +38,7 @@ Color OutputDevice::GetPixel(const Point& rPoint) const
         assert(mpGraphics);
 
         if (!GetClipState().IsReady())
-            vcl::clipping::initDeviceClipRegion(const_cast<OutputDevice&>(*this));
+            const_cast<OutputDevice*>(this)->SyncClipState();
 
         if (!GetClipState().IsClippedOut())
         {
@@ -72,7 +72,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
@@ -101,7 +101,7 @@ void OutputDevice::DrawPixel( const Point& rPt, const Color& rColor )
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;

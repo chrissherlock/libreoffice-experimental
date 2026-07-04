@@ -3497,7 +3497,7 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
         }
 
         if ( !GetOutDev()->GetClipState().IsReady() )
-            vcl::clipping::initDeviceClipRegion(*GetOutDev());
+            GetOutDev()->SyncClipState();
 
         if ( GetOutDev()->GetClipState().IsClippedOut() )
             return;

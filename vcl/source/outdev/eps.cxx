@@ -63,7 +63,7 @@ bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,
         EnsureRenderStateSynced();
 
         if (!GetClipState().IsReady())
-            vcl::clipping::initDeviceClipRegion(*this);
+            SyncClipState();
 
         aRect.Normalize();
         bDrawn = mpGraphics->DrawEPS( aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),

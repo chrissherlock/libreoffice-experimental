@@ -62,7 +62,7 @@ bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
 
     if(IsClipRegion())
     {
-        tools::Rectangle aRegionRectangle(vcl::clipping::getActiveClipRegion(*this).GetBoundRect());
+        tools::Rectangle aRegionRectangle(GetActiveClipRegion().GetBoundRect());
 
         // caution! Range from rectangle, one too much (!)
         aRegionRectangle.AdjustRight(-1);
@@ -209,7 +209,7 @@ void OutputDevice::DrawTransformedBitmapEx(
         return;
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     /*
        tdf#135325 typically in these OutputDevice methods, for the in

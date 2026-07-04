@@ -99,7 +99,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt,
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
@@ -141,7 +141,7 @@ void OutputDevice::DrawLine( const Point& rStartPt, const Point& rEndPt )
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;

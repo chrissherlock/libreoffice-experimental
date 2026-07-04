@@ -277,7 +277,7 @@ bool OutputDevice::DrawNativeControl( ControlType nType,
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return true;

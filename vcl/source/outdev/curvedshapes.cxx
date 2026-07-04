@@ -48,7 +48,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
@@ -92,7 +92,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
@@ -131,7 +131,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
@@ -178,7 +178,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;

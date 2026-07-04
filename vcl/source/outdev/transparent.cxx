@@ -111,7 +111,7 @@ void OutputDevice::DrawTransparent(
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
@@ -204,7 +204,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
     {
         // prepare the graphics device
         if (!GetClipState().IsReady())
-            vcl::clipping::initDeviceClipRegion(*this);
+            SyncClipState();
 
         if (GetClipState().IsClippedOut())
             return true;
@@ -291,7 +291,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
             // setup Graphics only here (other cases delegate
             // to basic OutDev methods)
             if (!GetClipState().IsReady())
-                vcl::clipping::initDeviceClipRegion(*this);
+                SyncClipState();
 
             SyncRenderStateToBackend();
 

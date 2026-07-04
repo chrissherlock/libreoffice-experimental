@@ -882,7 +882,7 @@ bool SpinField::PreNotify(NotifyEvent& rNEvt)
                         !IsNativeControlSupported(ControlType::Editbox, ControlPart::Entire))
                     {
                         // paint directly
-                        vcl::Region aRgn(vcl::clipping::getActiveClipRegion(*GetOutDev()));
+                        vcl::Region aRgn(GetOutDev()->GetActiveClipRegion());
 
                         if (pLastRect)
                         {

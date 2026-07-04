@@ -175,9 +175,108 @@ void OutputDevice::ResetGraphicsClipRegion()
         mpGraphics->ResetClipRegion();
 }
 
+void OutputDevice::SyncClipState()
+{
+    DBG_TESTSOLARMUTEX();
+
+    // We delegate the implementation details to the device-specific logic,
+    // but the interface is now unified as a member of OutputDevice.
+    vcl::DispatchDevice(*this, [](auto& rTypedDev) {
+        using T = std::decay_t<decltype(rTypedDev)>;
+        auto& rState = rTypedDev.GetClipState();
+
+        if constexpr (has_hierarchical_clipping_v<T>)
+        {
+            // Hierarchical Clipping Path (Windows)
+            vcl::Region aRegion;
+            WindowImpl* pImpl = rTypedDev.GetOwnerWindow()->ImplGetWindowImpl();
+
+            if (pImpl->mbInPaint && pImpl->mpPaintRegion)
+                aRegion = *(pImpl->mpPaintRegion);
+            else
+            {
+                // The ClippingManager is the authority for hierarchical clipping
+                aRegion = rTypedDev.GetClippingManager(*rTypedDev.GetOwnerWindow())
+                                   .GetClipPlan(*rTypedDev.GetOwnerWindow()).maFinalRegion;
+
+                if (rTypedDev.ImplIsAntiparallel())
+                    rTypedDev.ReMirror(aRegion);
+            }
+
+            if (rState.mbHasCustomClip)
+                aRegion.Intersect(rTypedDev.GetMapper().ViewToDevice(rState.maRegion));
+
+            rState.mbOutputClipped = aRegion.IsEmpty();
+
+            if (!rState.mbOutputClipped)
+                rTypedDev.ApplyClipRegion(aRegion);
+
+            rState.mbBackendClipInstalled = true;
+        }
+        else
+        {
+            // Standard OutputDevice Path (Printers/VirDevs)
+            if (rState.mbHasCustomClip)
+            {
+                rState.mbOutputClipped = rState.maRegion.IsEmpty();
+                if (!rState.mbOutputClipped)
+                {
+                    vcl::Region aRegion = rTypedDev.ClipToDeviceBounds(
+                        rTypedDev.GetMapper().ViewToDevice(rState.maRegion));
+
+                    rState.mbOutputClipped = aRegion.IsEmpty();
+                    if (!rState.mbOutputClipped)
+                        rTypedDev.ApplyClipRegion(aRegion);
+                }
+                rState.mbBackendClipInstalled = true;
+            }
+            else
+            {
+                if (rState.mbBackendClipInstalled)
+                {
+                    rTypedDev.ResetGraphicsClipRegion();
+                    rState.mbBackendClipInstalled = false;
+                }
+                rState.mbOutputClipped = false;
+            }
+        }
+
+        rState.mbNeedsRecalc = false;
+    });
+}
+
 vcl::Region OutputDevice::GetActiveClipRegion() const
 {
-    return vcl::clipping::getActiveClipRegion(*this);
+    return vcl::DispatchDevice(*this, [](const auto& rTypedDev) {
+        using T = std::decay_t<decltype(rTypedDev)>;
+        const auto& rState = rTypedDev.GetClipState();
+
+        if constexpr (has_hierarchical_clipping_v<T>)
+        {
+            // Windows have complex internal paint regions
+            vcl::Region aRegion(true);
+            WindowImpl* pImpl = rTypedDev.GetOwnerWindow()->ImplGetWindowImpl();
+
+            if (pImpl->mbInPaint && pImpl->mpPaintRegion)
+            {
+                aRegion = *(pImpl->mpPaintRegion);
+                aRegion.Move(-rTypedDev.GetDeviceOriginX(), -rTypedDev.GetDeviceOriginY());
+            }
+
+            if (rState.mbHasCustomClip)
+                aRegion.Intersect(rState.maRegion);
+
+            return rTypedDev.template convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
+        }
+        else
+        {
+            // Non-hierarchical devices use simple state
+            if (rState.mbHasCustomClip)
+                return rState.maRegion;
+
+            return vcl::Region(tools::Rectangle(Point(0, 0), rTypedDev.GetOutputSizePixel()));
+        }
+    });
 }
 
 namespace vcl::clipping {
@@ -200,133 +299,6 @@ void clipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect)
             rDstRect.Intersection(aWindowRect);
         }
         // For Printer, VirtualDevice, or base OutputDevice, this does nothing (which is correct)
-    });
-}
-
-static vcl::Region lcl_getWindowActiveClip(const WindowOutputDevice& rWinDev)
-{
-    vcl::Region aRegion(true);
-    WindowImpl* pImpl = rWinDev.GetOwnerWindow()->ImplGetWindowImpl();
-
-    if (pImpl->mbInPaint && pImpl->mpPaintRegion)
-    {
-        aRegion = *(pImpl->mpPaintRegion);
-        aRegion.Move(-rWinDev.GetDeviceOriginX(), -rWinDev.GetDeviceOriginY());
-    }
-
-    const auto& rState = rWinDev.GetClipState();
-    if (rState.mbHasCustomClip)
-        aRegion.Intersect(rState.maRegion);
-
-    return rWinDev.template convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
-}
-
-static vcl::Region lcl_getDeviceActiveClip(const OutputDevice& rDev)
-{
-    const auto& rState = rDev.GetClipState();
-    if (rState.mbHasCustomClip)
-        return rState.maRegion;
-
-    // Return the device bounds instead of an "infinite" region
-    return vcl::Region(tools::Rectangle(Point(0, 0), rDev.GetOutputSizePixel()));
-}
-
-vcl::Region getActiveClipRegion(const OutputDevice& rDevice)
-{
-    return vcl::DispatchDevice(rDevice, [](const auto& rTypedDev) {
-        using T = std::decay_t<decltype(rTypedDev)>;
-
-        if constexpr (has_hierarchical_clipping_v<T>)
-            return lcl_getWindowActiveClip(rTypedDev);
-        else
-            return lcl_getDeviceActiveClip(rTypedDev);
-    });
-}
-
-void initDeviceClipRegion(OutputDevice& rDevice)
-{
-    vcl::DispatchDevice(rDevice, [](auto& rTypedDev) {
-        using T = std::decay_t<decltype(rTypedDev)>;
-        DBG_TESTSOLARMUTEX();
-
-        // Grab the unified state block
-        auto& rState = rTypedDev.GetClipState();
-
-        if constexpr (std::is_same_v<T, WindowOutputDevice>)
-        {
-            vcl::Region aRegion;
-            WindowImpl* pImpl = rTypedDev.GetOwnerWindow()->ImplGetWindowImpl();
-
-            if (pImpl->mbInPaint)
-            {
-                if (pImpl->mpPaintRegion)
-                    aRegion = *(pImpl->mpPaintRegion);
-            }
-            else
-            {
-                aRegion = rTypedDev.GetClippingManager(*rTypedDev.GetOwnerWindow()).GetClipPlan(*rTypedDev.GetOwnerWindow()).maFinalRegion;
-
-                if (rTypedDev.ImplIsAntiparallel())
-                    rTypedDev.ReMirror(aRegion);
-            }
-
-            if (rState.mbHasCustomClip)
-                aRegion.Intersect(rTypedDev.GetMapper().ViewToDevice(rState.maRegion));
-
-            if (aRegion.IsEmpty())
-            {
-                rState.mbOutputClipped = true;
-            }
-            else
-            {
-                rState.mbOutputClipped = false;
-                rTypedDev.ApplyClipRegion(aRegion);
-            }
-
-            rState.mbBackendClipInstalled = true;
-            rState.mbNeedsRecalc = false;
-        }
-        else
-        {
-            // Standard OutputDevice layout path
-            if (rState.mbHasCustomClip)
-            {
-                if (rState.maRegion.IsEmpty())
-                {
-                    rState.mbOutputClipped = true;
-                }
-                else
-                {
-                    rState.mbOutputClipped = false;
-                    vcl::Region aRegion = static_cast<OutputDevice&>(rTypedDev).ClipToDeviceBounds(
-                        rTypedDev.GetMapper().ViewToDevice(rState.maRegion));
-
-                    if (aRegion.IsEmpty())
-                    {
-                        rState.mbOutputClipped = true;
-                    }
-                    else
-                    {
-                        rTypedDev.ApplyClipRegion(aRegion);
-                    }
-                }
-
-                rState.mbBackendClipInstalled = true;
-            }
-            else
-            {
-                // If we previously pushed a valid clip to hardware, clear it.
-                if (rState.mbBackendClipInstalled)
-                {
-                    rTypedDev.ResetGraphicsClipRegion();
-                    rState.mbBackendClipInstalled = false;
-                }
-
-                rState.mbOutputClipped = false;
-            }
-
-            rState.mbNeedsRecalc = false;
-        }
     });
 }
 

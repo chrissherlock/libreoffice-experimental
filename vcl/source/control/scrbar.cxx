@@ -1340,7 +1340,7 @@ bool ScrollBar::PreNotify( NotifyEvent& rNEvt )
                 tools::Rectangle* pLastRect = ImplFindPartRect( GetLastPointerPosPixel() );
                 if( pRect != pLastRect || pMouseEvt->IsLeaveWindow() || pMouseEvt->IsEnterWindow() )
                 {
-                    vcl::Region aRgn(vcl::clipping::getActiveClipRegion(*GetOutDev()));
+                    vcl::Region aRgn(GetOutDev()->GetActiveClipRegion());
                     vcl::Region aClipRegion;
 
                     if ( pRect )

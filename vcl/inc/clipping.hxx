@@ -17,18 +17,6 @@
 namespace vcl::clipping
 {
 /**
- * Evaluates and synchronizes the active hardware/software clip region
- * for the given device.
- */
-VCL_DLLPUBLIC void initDeviceClipRegion(OutputDevice& rDevice);
-
-/**
- * Retrieves the currently active logic clip region from the device,
- * factoring in window paint bounds if applicable.
- */
-VCL_DLLPUBLIC vcl::Region getActiveClipRegion(const OutputDevice& rDevice);
-
-/**
  * Intersects the provided destination rectangle with the device's
  * active paint region bounds.
  */

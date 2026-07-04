@@ -426,7 +426,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
@@ -482,7 +482,7 @@ void OutputDevice::DrawOutDev( const Point& rDestPt, const Size& rDestSize,
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
@@ -529,7 +529,7 @@ void OutputDevice::CopyArea( const Point& rDestPt,
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;

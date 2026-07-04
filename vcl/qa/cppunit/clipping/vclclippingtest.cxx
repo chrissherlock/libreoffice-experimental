@@ -59,7 +59,7 @@ CPPUNIT_TEST_FIXTURE(test::BootstrapFixture, testClippingStateTransitions)
     CPPUNIT_ASSERT_MESSAGE("Device should start in a Dirty state",
                            !pVDev->GetClipState().IsReady());
 
-    vcl::clipping::initDeviceClipRegion(*pVDev);
+    pVDev->SyncClipState();
 
     CPPUNIT_ASSERT_MESSAGE("Device should be Ready (Valid or Empty) after init",
                            pVDev->GetClipState().IsReady());
@@ -70,7 +70,7 @@ CPPUNIT_TEST_FIXTURE(test::BootstrapFixture, testActiveClipRegionRetrieval)
     ScopedVclPtr<VirtualDevice> pVDev = VclPtr<VirtualDevice>::Create(DeviceFormat::WITHOUT_ALPHA);
     pVDev->SetOutputSizePixel(Size(100, 100));
 
-    vcl::Region aRegion = vcl::clipping::getActiveClipRegion(*pVDev);
+    vcl::Region aRegion = pVDev->GetActiveClipRegion();
 
     CPPUNIT_ASSERT_MESSAGE("Active region should not be null", !aRegion.IsNull());
 }

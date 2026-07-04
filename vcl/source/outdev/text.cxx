@@ -451,7 +451,7 @@ void OutputDevice::ImplDrawSpecialText( SalLayout& rSalLayout )
 void OutputDevice::ImplDrawText( SalLayout& rSalLayout )
 {
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
@@ -712,7 +712,7 @@ void OutputDevice::DrawPartialTextArray(const Point& rStartPt, const OUString& r
     assert(mpGraphics);
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
@@ -756,7 +756,7 @@ void OutputDevice::DrawTextArray( const Point& rStartPt, const OUString& rStr,
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
@@ -1738,7 +1738,7 @@ void OutputDevice::AddTextRectActions( const tools::Rectangle& rRect,
     assert(mpGraphics);
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     // temporarily swap in passed mtf for action generation, and
     // disable output generation.
@@ -1786,7 +1786,7 @@ void OutputDevice::DrawText( const tools::Rectangle& rRect, const OUString& rOri
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     // Only early-out if the region is empty AND we aren't being asked to decompose
     // the action or calculate the display text bounding boxes.
@@ -1956,7 +1956,7 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
     EnsureRenderStateSynced();
 
     if (!GetClipState().IsReady())
-        vcl::clipping::initDeviceClipRegion(*this);
+        SyncClipState();
 
     if (GetClipState().IsClippedOut())
         return;
