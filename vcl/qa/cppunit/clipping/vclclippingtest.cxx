@@ -16,12 +16,12 @@
 #include <vcl/wrkwin.hxx>
 #include <vcl/wintypes.hxx>
 
-#include <clipping.hxx>
+#include <clipping/ClippingManager.hxx>
 
 namespace
 {
 // A mock window to force a real paint event, which is the ONLY time
-// clipToPaintRegion actually applies its intersection logic.
+// ClipToPaintRegion actually applies its intersection logic.
 class PaintTestWindow : public WorkWindow
 {
 public:
@@ -39,14 +39,17 @@ public:
     {
         // Inside Paint(), mbInPaint is TRUE and mpPaintRegion is valid.
 
+        // Note: assume that the clipping manager has been instantiated
         // 1. Outside Case
         maOutsideRect = tools::Rectangle(200, 200, 300, 300);
-        vcl::clipping::clipToPaintRegion(rRenderContext, maOutsideRect);
+        rRenderContext.GetExistingClippingManager()->ClipToPaintRegion(rRenderContext,
+                                                                       maOutsideRect);
         maOutsideRect.Normalize();
 
         // 2. Partial Case
         maPartialRect = tools::Rectangle(50, 50, 150, 150);
-        vcl::clipping::clipToPaintRegion(rRenderContext, maPartialRect);
+        rRenderContext.GetExistingClippingManager()->ClipToPaintRegion(rRenderContext,
+                                                                       maPartialRect);
         maPartialRect.Normalize();
     }
 };
@@ -88,7 +91,7 @@ CPPUNIT_TEST_FIXTURE(test::BootstrapFixture, testClipToPaintRegion)
 
     // 3. Outside Case
     tools::Rectangle aOutsideRect(200, 200, 300, 300);
-    vcl::clipping::clipToPaintRegion(rOutDev, aOutsideRect);
+    rOutDev.GetExistingClippingManager()->ClipToPaintRegion(rOutDev, aOutsideRect);
     aOutsideRect.Normalize();
 
     // Since pImpl->mbInPaint is false outside of a Paint event, clipToPaintRegion safely returns early.
@@ -100,7 +103,7 @@ CPPUNIT_TEST_FIXTURE(test::BootstrapFixture, testClipToPaintRegion)
 
     // 4. Partial Case
     tools::Rectangle aPartialRect(50, 50, 150, 150);
-    vcl::clipping::clipToPaintRegion(rOutDev, aPartialRect);
+    rOutDev.GetExistingClippingManager()->ClipToPaintRegion(rOutDev, aPartialRect);
     aPartialRect.Normalize();
 
     // Assert it remains untouched

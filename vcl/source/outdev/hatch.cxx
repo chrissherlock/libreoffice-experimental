@@ -28,7 +28,6 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <clipping.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 

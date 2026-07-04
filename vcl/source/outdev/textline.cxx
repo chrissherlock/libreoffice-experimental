@@ -35,7 +35,6 @@
 #include <vcl/skia/SkiaHelper.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <clipping.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <impglyphitem.hxx>

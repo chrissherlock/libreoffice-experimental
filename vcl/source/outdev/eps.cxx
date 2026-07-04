@@ -24,7 +24,6 @@
 #include <vcl/MappingPolicy.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <clipping.hxx>
 #include <salgdi.hxx>
 
 bool OutputDevice::DrawEPS( const Point& rPoint, const Size& rSize,

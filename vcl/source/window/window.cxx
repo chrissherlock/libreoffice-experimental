@@ -45,7 +45,6 @@
 
 #include <brdwin.hxx>
 #include <clipping/ClippingManager.hxx>
-#include <clipping.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>
 #include <impfontcache.hxx>

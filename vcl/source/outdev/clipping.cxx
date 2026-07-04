@@ -28,7 +28,6 @@
 
 #include <WindowOutputDevice.hxx>
 #include <window.h>
-#include <clipping.hxx>
 #include <clipping/ClippingManager.hxx>
 #include <clipping/traits.hxx>
 #include <devicedispatcher.hxx>
@@ -278,30 +277,5 @@ vcl::Region OutputDevice::GetActiveClipRegion() const
         }
     });
 }
-
-namespace vcl::clipping {
-
-void clipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect)
-{
-    vcl::DispatchDevice(rDevice, [&rDstRect](auto& rTypedDev) {
-        using T = std::decay_t<decltype(rTypedDev)>;
-
-        if constexpr (std::is_same_v<T, WindowOutputDevice>)
-        {
-            // Only WindowOutputDevices have owner windows and paint regions
-            const vcl::Region aPaintRgn(rTypedDev.GetOwnerWindow()->GetPaintRegion());
-            if (aPaintRgn.IsNull())
-                return;
-
-            auto aBoundRect  = vcl::LogicRect(aPaintRgn.GetBoundRect());
-            auto aWindowRect = rTypedDev.template convertTo<vcl::WindowRect>(aBoundRect, rTypedDev.GetMapMode()).get();
-
-            rDstRect.Intersection(aWindowRect);
-        }
-        // For Printer, VirtualDevice, or base OutputDevice, this does nothing (which is correct)
-    });
-}
-
-} // namespace vcl::clipping
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

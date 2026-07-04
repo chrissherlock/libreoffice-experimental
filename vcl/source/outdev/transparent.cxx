@@ -38,7 +38,7 @@
 #include <vcl/BitmapWriteAccess.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <clipping.hxx>
+#include <clipping/ClippingManager.hxx>
 #include <pdf/pdfwriter_impl.hxx>
 #include <salgdi.hxx>
 
@@ -278,7 +278,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 
     aDstRect.Intersection( aPolyRect );
 
-    vcl::clipping::clipToPaintRegion(*this, aDstRect);
+    mpClippingManager->ClipToPaintRegion(*this, aDstRect);
 
     if( !aDstRect.IsEmpty() )
     {
@@ -506,7 +506,7 @@ void OutputDevice::DrawTransparent( const GDIMetaFile& rMtf, const Point& rPos, 
         mpMetaFile = nullptr;
         aDstRect.Intersection( aOutRect.get() );
 
-        vcl::clipping::clipToPaintRegion(*this, aDstRect);
+        mpClippingManager->ClipToPaintRegion(*this, aDstRect);
 
         if( !aDstRect.IsEmpty() )
         {

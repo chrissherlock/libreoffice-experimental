@@ -42,7 +42,6 @@
 
 #include <ImplLayoutArgs.hxx>
 #include <ImplOutDevData.hxx>
-#include <clipping.hxx>
 #include <drawmode.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>

@@ -32,7 +32,6 @@
 #include <vcl/ptrstyle.hxx>
 
 #include <clipping/ClippingManager.hxx>
-#include <clipping.hxx>
 #include <bitmaps.hlst>
 #include <toolbarvalue.hxx>
 

@@ -24,7 +24,6 @@
 #include <vcl/settings.hxx>
 #include <vcl/vclevent.hxx>
 
-#include <clipping.hxx>
 #include <spin.hxx>
 #include <vcl/TransformTypes.hxx>
 

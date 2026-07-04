@@ -38,7 +38,6 @@
 #include <vcl/uitest/uiobject.hxx>
 
 #include <clipping/ClippingManager.hxx>
-#include <clipping.hxx>
 
 #include <bitmaps.hlst>
 #include <svdata.hxx>

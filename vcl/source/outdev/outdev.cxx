@@ -37,7 +37,6 @@
 #include <vcl/CoordinateMapper.hxx>
 
 #include <clipping/ClippingManager.hxx>
-#include <clipping.hxx>
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>

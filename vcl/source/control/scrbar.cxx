@@ -27,7 +27,6 @@
 #include <vcl/toolkit/scrbar.hxx>
 #include <vcl/vclevent.hxx>
 
-#include <clipping.hxx>
 #include <sal/log.hxx>
 #include <tools/mapunit.hxx>
 #include <scrollbarvalue.hxx>

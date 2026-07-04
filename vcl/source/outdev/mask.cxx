@@ -23,7 +23,6 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/MappingPolicy.hxx>
 
-#include <clipping.hxx>
 #include <salgdi.hxx>
 #include <salbmp.hxx>
 

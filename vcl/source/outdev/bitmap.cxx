@@ -32,7 +32,7 @@
 #include <vcl/BitmapWriteAccess.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <clipping.hxx>
+#include <clipping/ClippingManager.hxx>
 #include <bitmap/bmpfast.hxx>
 #include <drawmode.hxx>
 #include <salbmp.hxx>
@@ -400,7 +400,7 @@ void OutputDevice::DrawDeviceAlphaBitmap( const Bitmap& rBmp,
     const bool bHMirr = aOutSz.Width() < 0;
     const bool bVMirr = aOutSz.Height() < 0;
 
-    vcl::clipping::clipToPaintRegion(*this, aDstRect);
+    mpClippingManager->ClipToPaintRegion(*this, aDstRect);
 
     BmpMirrorFlags mirrorFlags = BmpMirrorFlags::NONE;
     if (bHMirr)

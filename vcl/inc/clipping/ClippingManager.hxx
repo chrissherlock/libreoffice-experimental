@@ -20,6 +20,8 @@
 #include <memory>
 #include <vector>
 
+class OutputDevice;
+
 namespace vcl::clipping
 {
 /**
@@ -48,6 +50,8 @@ public:
 
     void ClipChildren(vcl::Window& rWindow, vcl::Region& rRegion, bool bAllChildren = false);
     void ClipSiblings(vcl::Window& rWindow, vcl::Region& rRegion);
+
+    void ClipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect);
 
     static void SetParentClipMode(vcl::Window* pWindow, ParentClipMode nMode);
     static ParentClipMode GetParentClipMode(const vcl::Window& rWindow);

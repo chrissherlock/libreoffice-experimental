@@ -27,7 +27,6 @@
 #include <vcl/uitest/uiobject.hxx>
 #include <sal/log.hxx>
 
-#include <clipping.hxx>
 #include <spin.hxx>
 #include <svdata.hxx>
 

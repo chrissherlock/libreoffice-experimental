@@ -25,7 +25,6 @@
 #include <vcl/window.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <clipping.hxx>
 #include <salgdi.hxx>
 #include <toolbarvalue.hxx>
 #include <menubarvalue.hxx>

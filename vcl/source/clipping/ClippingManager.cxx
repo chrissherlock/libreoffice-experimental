@@ -13,6 +13,8 @@
 
 #include <clipping/ClippingManager.hxx>
 #include <clipping/ClipStateBuilder.hxx>
+#include <clipping/traits.hxx>
+#include <devicedispatcher.hxx>
 #include <salobj.hxx>
 #include <window.h>
 
@@ -283,6 +285,28 @@ void ClippingManager::ClipSiblings(vcl::Window& rWindow, vcl::Region& rRegion)
         if (bFound && pSibling->IsReallyVisible())
             ExcludeWindowRegion(*pSibling, rRegion);
     }
+}
+
+void ClippingManager::ClipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect)
+{
+    vcl::DispatchDevice(rDevice, [&rDstRect](auto& rTypedDev) {
+        using T = std::decay_t<decltype(rTypedDev)>;
+
+        // Compile-time trait verification happens right here in the manager
+        if constexpr (has_hierarchical_clipping_v<T>)
+        {
+            const vcl::Region aPaintRgn(rTypedDev.GetOwnerWindow()->GetPaintRegion());
+            if (aPaintRgn.IsNull())
+                return;
+
+            auto aBoundRect = vcl::LogicRect(aPaintRgn.GetBoundRect());
+            auto aWindowRect
+                = rTypedDev.template convertTo<vcl::WindowRect>(aBoundRect, rTypedDev.GetMapMode())
+                      .get();
+
+            rDstRect.Intersection(aWindowRect);
+        }
+    });
 }
 
 void ClippingManager::ExcludeWindowRegion(vcl::Window& rWindow, vcl::Region& rRegion)
