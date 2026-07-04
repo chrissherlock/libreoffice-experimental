@@ -26,6 +26,8 @@ namespace vcl
 class WindowOutputDevice final : public ::OutputDevice
 {
 public:
+    static constexpr bool is_hierarchical_clipping = true;
+
     WindowOutputDevice(vcl::Window& rOwnerWindow);
     virtual ~WindowOutputDevice() override;
     virtual void dispose() override;

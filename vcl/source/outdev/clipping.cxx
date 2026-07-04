@@ -30,6 +30,7 @@
 #include <window.h>
 #include <clipping.hxx>
 #include <clipping/ClippingManager.hxx>
+#include <clipping/traits.hxx>
 #include <devicedispatcher.hxx>
 #include <salgdi.hxx>
 
@@ -234,7 +235,8 @@ vcl::Region getActiveClipRegion(const OutputDevice& rDevice)
 {
     return vcl::DispatchDevice(rDevice, [](const auto& rTypedDev) {
         using T = std::decay_t<decltype(rTypedDev)>;
-        if constexpr (std::is_same_v<T, WindowOutputDevice>)
+
+        if constexpr (has_hierarchical_clipping_v<T>)
             return lcl_getWindowActiveClip(rTypedDev);
         else
             return lcl_getDeviceActiveClip(rTypedDev);
