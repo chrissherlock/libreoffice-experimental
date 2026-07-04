@@ -935,7 +935,12 @@ public:
     void                                Invalidate( const tools::Rectangle& rRect, InvalidateFlags nFlags = InvalidateFlags::NONE );
     void                                Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags = InvalidateFlags::NONE );
 
-    void InvalidateClipState();
+    /** * Signals that the window's geometry or hierarchy has changed,
+     * invalidating the clipping cache for this window and its descendants.
+     * * @param bNotifyChildren If true, propagates the invalidation signal
+     * downward to children.
+     */
+    void InvalidateClipState(bool bNotifyChildren = true);
     sal_uInt64 GetClipStateVersion() const;
 
     /**

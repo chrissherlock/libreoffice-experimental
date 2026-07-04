@@ -30,9 +30,9 @@
 #include <salobj.hxx>
 #include <window.h>
 
-namespace vcl {
-
-void Window::InvalidateClipState()
+namespace vcl
+{
+void Window::InvalidateClipState(bool bNotifyChildren)
 {
     mpWindowImpl->mnClipStateVersion++;
 
@@ -42,8 +42,20 @@ void Window::InvalidateClipState()
             pManager->OnWindowGeometryChanged(*this);
     }
 
+    // Propagate UP
     if (auto* pParent = GetParent())
-        pParent->InvalidateClipState();
+        pParent->InvalidateClipState(false); // <--- Never notify children of parents during up-propagation
+
+    // Propagate DOWN (if allowed)
+    if (bNotifyChildren)
+    {
+        vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
+        while (pChild)
+        {
+            pChild->InvalidateClipState(true); // <--- Notify children
+            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+        }
+    }
 }
 
 sal_uInt64 Window::GetClipStateVersion() const { return mpWindowImpl->mnClipStateVersion; }
