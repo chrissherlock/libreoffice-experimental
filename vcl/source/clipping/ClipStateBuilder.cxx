@@ -59,30 +59,52 @@ ClipState ClipStateBuilder::Build(const vcl::Window& rWindow, ClipSpace eSpace)
                            || (pImpl->mpClippingState && pImpl->mpClippingState->mbClipChildren);
     aState.bClipSiblings = pImpl->mpClippingState && pImpl->mpClippingState->mbClipSiblings;
 
-    // Bounds & Custom Region extraction
-    if (eSpace == ClipSpace::AbsoluteDevice)
+    // Inherit clipping state from parent, UNLESS this is an overlap window.
+    // Overlap windows (like a detached sidebar or floating dialog) float freely
+    // and establish a new geometric clipping root.
+    vcl::Window* pParent = rWindow.ImplGetParent();
+    if (pParent && !rWindow.ImplIsOverlapWindow())
     {
+        ClipState aParentState = Build(*pParent, eSpace);
         aState.maBounds = GetNodeBounds(rWindow, eSpace);
 
-        // Intersect with parent bounds to prevent phantom out-of-bounds painting
-        if (pImpl->mpHierarchy && pImpl->mpHierarchy->mpParent)
-        {
-            tools::Rectangle aParentBounds = GetNodeBounds(*pImpl->mpHierarchy->mpParent, eSpace);
-            aState.maBounds.Intersection(aParentBounds);
-        }
+        // Safely constrain child to parent bounds
+        aState.maBounds.Intersection(aParentState.maBounds);
 
-        if (pImpl->mpClippingState && pImpl->mpClippingState->mbWinRegion)
-            aState.maCustomRegion = rWindow.GetWindowClipRegionPixel();
+        // If parent has a custom region (e.g., a shaped window), we must inherit it.
+        // Composition (P intersection C) with this child's own region happens below.
+        if (aParentState.maCustomRegion)
+            aState.maCustomRegion = aParentState.maCustomRegion;
     }
     else
     {
+        // Top-level frames and overlap windows rely purely on their own bounds
         aState.maBounds = GetNodeBounds(rWindow, eSpace);
+    }
 
-        if (pImpl->mpClippingState && pImpl->mpClippingState->mbWinRegion)
+    // Layer on this window's specific custom region
+    if (pImpl->mpClippingState && pImpl->mpClippingState->mbWinRegion)
+    {
+        vcl::Region aWinRegion;
+        if (eSpace == ClipSpace::AbsoluteDevice)
         {
-            aState.maCustomRegion = rWindow.GetOutDev()->GetMapper().ViewToDevice(
-                pImpl->mpClippingState->maWinRegion);
+            aWinRegion = rWindow.GetWindowClipRegionPixel();
         }
+        else
+        {
+            // Explicitly scale from Window units to Device space, avoiding ViewToDevice.
+            // This prevents the scroll offset (View space) from corrupting the custom region.
+            aWinRegion = pImpl->mpClippingState->maWinRegion;
+
+            float fScale = rWindow.GetOutDev()->GetMapper().GetDPIScaleFactor();
+            aWinRegion.Scale(fScale, fScale);
+        }
+
+        // P ∩ C: Intersect the inherited parent custom region with this window's region
+        if (aState.maCustomRegion)
+            aState.maCustomRegion->Intersect(aWinRegion);
+        else
+            aState.maCustomRegion = aWinRegion;
     }
 
     // Unified tree traversal
