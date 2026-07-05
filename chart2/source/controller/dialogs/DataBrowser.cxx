@@ -1053,7 +1053,7 @@ void DataBrowser::PaintCell(
     if( ! bEnabled )
         rDev.SetTextColor( aOriginalColor );
 
-    if( rDev.IsClipRegion())
+    if( rDev.HasCustomClipRegion())
         rDev.ClearClipRegion();
 }
 

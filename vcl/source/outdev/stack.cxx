@@ -93,7 +93,7 @@ void OutputDevice::LegacyPush(vcl::PushFlags nFlags)
         rState.meMapMode = GetMappingPolicy();
     }
 
-    if (nFlags & vcl::PushFlags::CLIPREGION && IsClipRegion())
+    if (nFlags & vcl::PushFlags::CLIPREGION && HasCustomClipRegion())
         rState.mpClipRegion.reset(new vcl::Region(maClipState.maRegion));
 
     if (nFlags & vcl::PushFlags::REFPOINT && mbRefPoint)

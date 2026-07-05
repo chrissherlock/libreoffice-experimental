@@ -59,7 +59,7 @@ bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
         GetOutputSizePixel().Width(),
         GetOutputSizePixel().Height());
 
-    if(IsClipRegion())
+    if (HasCustomClipRegion())
     {
         tools::Rectangle aRegionRectangle(GetActiveClipRegion().GetBoundRect());
 

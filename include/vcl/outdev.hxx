@@ -563,7 +563,7 @@ public:
 
     virtual vcl::Region         GetOutputBoundsClipRegion() const;
 
-    bool                        IsClipRegion() const { return maClipState.mbHasCustomClip; }
+    bool                        HasCustomClipRegion() const { return maClipState.mbHasCustomClip; }
     const vcl::Region&          GetRegion() const { return maClipState.maRegion; }
 
     bool                        IsClipRegionSet() const { return maClipState.mbBackendClipInstalled; }

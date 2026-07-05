@@ -36,7 +36,7 @@ class SwSaveClip final
                    sal_Int32 nEnlargeBottom );
 public:
     explicit SwSaveClip(OutputDevice* pOutDev)
-        : m_bOn(pOutDev && pOutDev->IsClipRegion())
+        : m_bOn(pOutDev && pOutDev->HasCustomClipRegion())
         , m_bChg(false)
         , m_pOut(pOutDev)
     {

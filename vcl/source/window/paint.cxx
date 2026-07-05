@@ -364,7 +364,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
 
     if ((pHelper->GetPaintFlags() & ImplPaintFlags::Erase) && rRenderContext.IsBackground())
     {
-        if (rRenderContext.IsClipRegion())
+        if (rRenderContext.HasCustomClipRegion())
         {
             vcl::Region aOldRegion = rRenderContext.GetClipRegion();
             rRenderContext.ClearClipRegion();

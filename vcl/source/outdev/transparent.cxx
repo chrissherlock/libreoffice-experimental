@@ -1184,7 +1184,7 @@ tools::Rectangle ImplCalcActionBounds( const MetaAction& rAct, const OutputDevic
     if( !aActionBounds.IsEmpty() )
     {
         // fdo#40421 limit current action's output to clipped area
-        if( rOut.IsClipRegion() )
+        if( rOut.HasCustomClipRegion() )
         {
             const auto clippedRect = vcl::LogicRect(rOut.GetClipRegion().GetBoundRect().Intersection(aActionBounds));
             return rOut.convertTo<vcl::WindowRect>(clippedRect, rOut.GetMapMode()).get();

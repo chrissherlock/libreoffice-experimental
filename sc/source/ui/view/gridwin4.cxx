@@ -162,7 +162,7 @@ static void lcl_DrawOneFrame( vcl::RenderContext* pDev, const tools::Rectangle& 
     bool bClip = ( aTextSize.Width() > aOuter.Right() - nBWidth - aInner.Left() );
     if ( bClip )
     {
-        if (pDev->IsClipRegion())
+        if (pDev->HasCustomClipRegion())
         {
             bWasClip = true;
             aOldClip = pDev->GetActiveClipRegion();

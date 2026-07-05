@@ -180,7 +180,7 @@ void SfxObjectShell::DoDraw_Impl( OutputDevice* pDev,
     auto popIt = pDev->ScopedPush();
 
     vcl::Region aRegion;
-    if( pDev->IsClipRegion() && pDev->GetOutDevType() != OUTDEV_PRINTER )
+    if( pDev->HasCustomClipRegion() && pDev->GetOutDevType() != OUTDEV_PRINTER )
     {
         aRegion = pDev->GetClipRegion();
         aRegion = pDev->convertTo<vcl::WindowRegion>(vcl::LogicRegion(aRegion)).get();
@@ -195,7 +195,7 @@ void SfxObjectShell::DoDraw_Impl( OutputDevice* pDev,
         else
             pMtf = nullptr;
     }
-    if( pDev->IsClipRegion() && pDev->GetOutDevType() != OUTDEV_PRINTER )
+    if( pDev->HasCustomClipRegion() && pDev->GetOutDevType() != OUTDEV_PRINTER )
     {
         aRegion = pDev->convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion));
         pDev->SetClipRegion( aRegion );

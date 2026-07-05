@@ -559,7 +559,7 @@ void OFieldExpressionControl::PaintCell( OutputDevice& rDev, const tools::Rectan
 
     rDev.DrawText( aPos, aText );
 
-    if( rDev.IsClipRegion() )
+    if( rDev.HasCustomClipRegion() )
         rDev.ClearClipRegion();
 }
 

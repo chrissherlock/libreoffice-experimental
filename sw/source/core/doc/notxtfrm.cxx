@@ -969,7 +969,7 @@ void paintGraphicUsingPrimitivesHelper(
     // but there is an optimization at ClipRegion creation that detects
     // a single Rectangle in a tools::PolyPolygon and forces to a simple
     // RegionBand-based implementation, so cannot use it here.
-    if(rOutputDevice.IsClipRegion())
+    if(rOutputDevice.HasCustomClipRegion())
     {
         basegfx::B2DPolyPolygon aClip(rOutputDevice.GetClipRegion().GetAsB2DPolyPolygon());
 

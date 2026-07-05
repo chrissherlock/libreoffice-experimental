@@ -1006,7 +1006,7 @@ void SvxIconChoiceCtrl_Impl::PaintEntry(SvxIconChoiceCtrlEntry* pEntry, const Po
     rRenderContext.SetFont(aNewFont);
 
     bool bResetClipRegion = false;
-    if (!rRenderContext.IsClipRegion() && (aVerSBar->IsVisible() || aHorSBar->IsVisible()))
+    if (!rRenderContext.HasCustomClipRegion() && (aVerSBar->IsVisible() || aHorSBar->IsVisible()))
     {
         tools::Rectangle aOutputArea(GetOutputRect());
         if (aOutputArea.Overlaps(aTextRect) || aOutputArea.Overlaps(aBmpRect))

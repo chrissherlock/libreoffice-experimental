@@ -348,7 +348,7 @@ namespace dbaui
 
         rDev.DrawText( aPos, aText );
 
-        if( rDev.IsClipRegion() )
+        if( rDev.HasCustomClipRegion() )
             rDev.ClearClipRegion();
     }
     void ORelationControl::fillListBox(const Reference< XPropertySet>& _xDest)
