@@ -146,14 +146,14 @@ struct ImplFrameData
     sal_Int32           mnDPIY;                 //< Original Screen Resolution
     ImplSVEvent *       mnFocusId;              //< FocusId for PostUserLink
     ImplSVEvent *       mnMouseMoveId;          //< MoveId for PostUserLink
-    tools::Long                mnLastMouseX;           //< last x mouse position
-    tools::Long                mnLastMouseY;           //< last y mouse position
-    tools::Long                mnBeforeLastMouseX;     //< last but one x mouse position
-    tools::Long                mnBeforeLastMouseY;     //< last but one y mouse position
-    tools::Long                mnFirstMouseX;          //< first x mouse position by mousebuttondown
-    tools::Long                mnFirstMouseY;          //< first y mouse position by mousebuttondown
-    tools::Long                mnLastMouseWinX;        //< last x mouse position, rel. to pMouseMoveWin
-    tools::Long                mnLastMouseWinY;        //< last y mouse position, rel. to pMouseMoveWin
+    tools::Long         mnLastMouseX;           //< last x mouse position
+    tools::Long         mnLastMouseY;           //< last y mouse position
+    tools::Long         mnBeforeLastMouseX;     //< last but one x mouse position
+    tools::Long         mnBeforeLastMouseY;     //< last but one y mouse position
+    tools::Long         mnFirstMouseX;          //< first x mouse position by mousebuttondown
+    tools::Long         mnFirstMouseY;          //< first y mouse position by mousebuttondown
+    tools::Long         mnLastMouseWinX;        //< last x mouse position, rel. to pMouseMoveWin
+    tools::Long         mnLastMouseWinY;        //< last y mouse position, rel. to pMouseMoveWin
     sal_uInt16          mnModalMode;            //< frame based modal count (app based makes no sense anymore)
     sal_uInt64          mnMouseDownTime;        //< mouse button down time for double click
     sal_uInt16          mnClickCount;           //< mouse click count
@@ -172,6 +172,7 @@ struct ImplFrameData
     bool                mbSysObjFocus;          //< does a SysChild have focus
     sal_Int32           mnTouchPanPositionX;
     sal_Int32           mnTouchPanPositionY;
+    sal_uInt64          mnClipGeometryEpoch = 1; //< the master clock for geometry changes in this frame
 
     css::uno::Reference< css::datatransfer::dnd::XDragSource > mxDragSource;
     css::uno::Reference< css::datatransfer::dnd::XDropTarget > mxDropTarget;

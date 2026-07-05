@@ -35,15 +35,20 @@ const ClipPlan& ClippingManager::GetClipPlan(vcl::Window& rWindow)
 {
     auto& rEntry = maCache[&rWindow];
 
-    // Lazy Compilation:
-    // We only compile if the version counter has advanced.
-    if (rWindow.GetClipStateVersion() > rEntry.mnLastCompiledVersion)
+    // Get the global clock for this window hierarchy
+    sal_uInt64 nCurrentEpoch = 1;
+    if (WindowImpl* pImpl = rWindow.ImplGetWindowImpl())
+    {
+        if (pImpl->mpFrameData)
+            nCurrentEpoch = pImpl->mpFrameData->mnClipGeometryEpoch;
+    }
+
+    // Lazy Compilation: Only rebuild if our cache is older than the frame's epoch
+    if (nCurrentEpoch > rEntry.mnLastCompiledEpoch)
     {
         ClipState aState = ClipStateBuilder::Build(rWindow);
-
         rEntry.maPlan = ClipCompiler::Compile(aState);
-
-        rEntry.mnLastCompiledVersion = rWindow.GetClipStateVersion();
+        rEntry.mnLastCompiledEpoch = nCurrentEpoch;
     }
 
     return rEntry.maPlan;
@@ -90,19 +95,7 @@ IMPL_LINK(ClippingManager, WindowEventHdl, VclWindowEvent&, rEvent, void)
 
 void ClippingManager::OnWindowDestroyed(vcl::Window& rWindow) { maCache.erase(&rWindow); }
 
-void ClippingManager::OnWindowGeometryChanged(vcl::Window& rWindow)
-{
-    // Find the window in our active cache
-    auto it = maCache.find(&rWindow);
-    if (it != maCache.end())
-    {
-        // Explicitly mark the cached plan as completely stale.
-        // Even though the window's internal version counter has incremented,
-        // zeroing this out guarantees the next call to GetClipPlan()
-        // will trigger a fresh ClipStateBuilder::Build() pass.
-        it->second.mnLastCompiledVersion = 0;
-    }
-}
+void ClippingManager::OnWindowGeometryChanged(vcl::Window& rWindow) { maCache.erase(&rWindow); }
 
 void ClippingManager::UpdateNativeWindowClip(vcl::Window& rWindow)
 {

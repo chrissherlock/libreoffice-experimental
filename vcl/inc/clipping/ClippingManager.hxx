@@ -60,7 +60,7 @@ private:
     struct CacheEntry
     {
         ClipPlan maPlan;
-        sal_uInt64 mnLastCompiledVersion = 0;
+        sal_uInt64 mnLastCompiledEpoch = 0;
     };
 
     vcl::Window& mrRoot;

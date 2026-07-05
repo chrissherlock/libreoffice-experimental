@@ -940,7 +940,7 @@ public:
      * * @param bNotifyChildren If true, propagates the invalidation signal
      * downward to children.
      */
-    void InvalidateClipState(bool bNotifyChildren = true);
+    void InvalidateClipState();
     sal_uInt64 GetClipStateVersion() const;
 
     /**

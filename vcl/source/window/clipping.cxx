@@ -32,29 +32,21 @@
 
 namespace vcl
 {
-void Window::InvalidateClipState(bool bNotifyChildren)
+void Window::InvalidateClipState()
 {
-    mpWindowImpl->mnClipStateVersion++;
+    // Advance the Frame's geometry clock.
+    // This instantly and atomically invalidates the ENTIRE tree logically,
+    // because no window's mnLastCompiledClipEpoch will match this new time.
+    if (mpWindowImpl->mpFrameData)
+    {
+        mpWindowImpl->mpFrameData->mnClipGeometryEpoch++;
+    }
 
+    // Drop this specific window from the manager's cache (if it exists)
     if (OutputDevice* pOutDev = GetOutDev())
     {
         if (auto* pManager = pOutDev->GetExistingClippingManager())
-            pManager->OnWindowGeometryChanged(*this);
-    }
-
-    // Propagate UP
-    if (auto* pParent = GetParent())
-        pParent->InvalidateClipState(false); // <--- Never notify children of parents during up-propagation
-
-    // Propagate DOWN (if allowed)
-    if (bNotifyChildren)
-    {
-        vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
-        while (pChild)
-        {
-            pChild->InvalidateClipState(true); // <--- Notify children
-            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
-        }
+            pManager->InvalidateWindow(*this);
     }
 }
 
