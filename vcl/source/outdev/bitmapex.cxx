@@ -61,7 +61,7 @@ bool OutputDevice::TransformAndReduceBitmapExToTargetRange(
 
     if (HasCustomClipRegion())
     {
-        tools::Rectangle aRegionRectangle(GetActiveClipRegion().GetBoundRect());
+        tools::Rectangle aRegionRectangle(CalcEffectiveClipRegion().GetBoundRect());
 
         // caution! Range from rectangle, one too much (!)
         aRegionRectangle.AdjustRight(-1);

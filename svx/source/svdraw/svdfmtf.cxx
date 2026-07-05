@@ -883,7 +883,7 @@ void ImpSdrGDIMetaFileImport::checkClip()
     if (!mpVD->HasCustomClipRegion())
         return;
 
-    maClip = mpVD->GetClipRegion().GetAsB2DPolyPolygon();
+    maClip = mpVD->GetCustomClipRegion().GetAsB2DPolyPolygon();
 
     if(isClip())
     {

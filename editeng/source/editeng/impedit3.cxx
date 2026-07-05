@@ -3370,7 +3370,7 @@ void ImpEditEngine::DrawText_ToPosition(
         // tdf#167605 if a ClipRegion is set at the OutDev we have to take care of it for the
         // primitive way of rendering. get range and ClipRegion to do checks
         const basegfx::B2DRange aContentRange(aContent.getB2DRange(aViewInformation2D));
-        const basegfx::B2DPolyPolygon aClipPolyPolygon(rOutDev.GetClipRegion().GetAsB2DPolyPolygon());
+        const basegfx::B2DPolyPolygon aClipPolyPolygon(rOutDev.GetCustomClipRegion().GetAsB2DPolyPolygon());
         const basegfx::B2DRange aClipRange(aClipPolyPolygon.getB2DRange());
 
         if (!aContentRange.overlaps(aClipRange))

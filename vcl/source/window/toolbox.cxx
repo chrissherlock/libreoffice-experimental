@@ -487,7 +487,7 @@ void ToolBox::ImplDrawBackground(vcl::RenderContext& rRenderContext, const tools
 
     // make sure we do not invalidate/erase too much
     if (IsInPaint())
-        aPaintRegion.Intersect(GetOutDev()->GetActiveClipRegion());
+        aPaintRegion.Intersect(GetOutDev()->CalcEffectiveClipRegion());
 
     auto popIt = rRenderContext.ScopedPush(vcl::PushFlags::CLIPREGION);
     rRenderContext.IntersectClipRegion( aPaintRegion );

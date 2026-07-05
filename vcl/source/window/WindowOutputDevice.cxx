@@ -371,7 +371,7 @@ void WindowOutputDevice::ImplInitMapModeObjects()
 
 vcl::Region WindowOutputDevice::GetOutputBoundsClipRegion() const
 {
-    vcl::Region aClip(GetClipRegion());
+    vcl::Region aClip(GetCustomClipRegion());
     aClip.Intersect(tools::Rectangle(Point(), GetOutputSize()));
 
     return aClip;
@@ -397,7 +397,7 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
     if (aClip.IsEmpty())
         return;
 
-    const vcl::Region aOldClip(rSaveDevice.GetClipRegion());
+    const vcl::Region aOldClip(rSaveDevice.GetCustomClipRegion());
     const vcl::MappingPolicy eOldPolicy = rSaveDevice.GetMappingPolicy();
 
     comphelper::ScopeGuard aDeviceGuard([&rSaveDevice, aOldClip, eOldPolicy]() {

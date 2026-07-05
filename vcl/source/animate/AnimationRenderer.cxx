@@ -36,7 +36,7 @@ AnimationRenderer::AnimationRenderer( Animation* pParent, OutputDevice* pOut,
         maOriginPt      ( rPt ),
         maLogicalSize   ( rSz ),
         maSizePx        ( mpRenderContext->convertTo<vcl::WindowSize>(vcl::LogicSize(maLogicalSize)).get() ),
-        maClip          ( mpRenderContext->GetClipRegion() ),
+        maClip          ( mpRenderContext->GetCustomClipRegion() ),
         mpBackground    ( VclPtr<VirtualDevice>::Create() ),
         mpRestore       ( VclPtr<VirtualDevice>::Create() ),
         mnActIndex      ( 0 ),
@@ -85,7 +85,7 @@ AnimationRenderer::AnimationRenderer( Animation* pParent, OutputDevice* pOut,
     if( pFirstFrameOutDev )
     {
         mpRenderContext = pOut;
-        maClip = mpRenderContext->GetClipRegion();
+        maClip = mpRenderContext->GetCustomClipRegion();
     }
 }
 
@@ -154,7 +154,7 @@ void AnimationRenderer::drawToIndex( sal_uLong nIndex )
     ScopedVclPtrInstance<VirtualDevice> aVDev;
     std::optional<vcl::Region> xOldClip;
     if (!maClip.IsNull())
-        xOldClip = pRenderContext->GetClipRegion();
+        xOldClip = pRenderContext->GetCustomClipRegion();
 
     aVDev->SetOutputSizePixel( maSizePx, false );
     nIndex = std::min( nIndex, static_cast<sal_uLong>(mpParent->Count()) - 1 );
@@ -287,7 +287,7 @@ void AnimationRenderer::draw( sal_uLong nIndex, VirtualDevice* pVDev )
 
     std::optional<vcl::Region> xOldClip;
     if (!maClip.IsNull())
-        xOldClip = pRenderContext->GetClipRegion();
+        xOldClip = pRenderContext->GetCustomClipRegion();
 
     if (xOldClip)
         pRenderContext->SetClipRegion( maClip );

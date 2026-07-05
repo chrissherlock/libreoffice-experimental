@@ -1079,7 +1079,7 @@ void TabControl::KeyInput( const KeyEvent& rKEvt )
 static bool lcl_canPaint(const vcl::RenderContext& rRenderContext, const tools::Rectangle& rDrawRect,
                          const tools::Rectangle& rItemRect)
 {
-    vcl::Region aClipRgn(rRenderContext.GetActiveClipRegion());
+    vcl::Region aClipRgn(rRenderContext.CalcEffectiveClipRegion());
     aClipRgn.Intersect(rItemRect);
     if (!rDrawRect.IsEmpty())
         aClipRgn.Intersect(rDrawRect);

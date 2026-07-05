@@ -568,7 +568,7 @@ void SvImpLBox::RecalcFocusRect()
         m_rView.HideFocus();
         tools::Long nY = GetEntryLine( m_pCursor );
         tools::Rectangle aRect = m_rView.GetFocusRect(m_pCursor, nY);
-        vcl::Region aOldClip(m_rView.GetOutDev()->GetClipRegion());
+        vcl::Region aOldClip(m_rView.GetOutDev()->GetCustomClipRegion());
         vcl::Region aClipRegion( GetClipRegionRect() );
         m_rView.GetOutDev()->SetClipRegion(aClipRegion);
         m_rView.ShowFocus(aRect);
@@ -650,7 +650,7 @@ void SvImpLBox::ShowCursor( bool bShow )
 {
     if (!bShow || !m_pCursor || !m_rView.HasFocus())
     {
-        vcl::Region aOldClip(m_rView.GetOutDev()->GetClipRegion());
+        vcl::Region aOldClip(m_rView.GetOutDev()->GetCustomClipRegion());
         vcl::Region aClipRegion( GetClipRegionRect() );
         m_rView.GetOutDev()->SetClipRegion(aClipRegion);
         m_rView.HideFocus();
@@ -660,7 +660,7 @@ void SvImpLBox::ShowCursor( bool bShow )
     {
         tools::Long nY = GetEntryLine( m_pCursor );
         tools::Rectangle aRect = m_rView.GetFocusRect(m_pCursor, nY);
-        vcl::Region aOldClip(m_rView.GetOutDev()->GetClipRegion());
+        vcl::Region aOldClip(m_rView.GetOutDev()->GetCustomClipRegion());
         vcl::Region aClipRegion( GetClipRegionRect() );
         m_rView.GetOutDev()->SetClipRegion(aClipRegion);
         m_rView.ShowFocus(aRect);

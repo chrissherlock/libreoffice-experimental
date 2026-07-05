@@ -89,7 +89,7 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
     nFlags |= vcl::PushFlags::TEXTLANGUAGE;
     pFrameData->mpBuffer->Push(nFlags);
     auto& rDev = *pWindow->GetOutDev();
-    pFrameData->mpBuffer->SetClipRegion(rDev.GetClipRegion());
+    pFrameData->mpBuffer->SetClipRegion(rDev.GetCustomClipRegion());
     pFrameData->mpBuffer->SetFillColor(rDev.GetFillColor());
     pFrameData->mpBuffer->SetFont(pWindow->GetFont());
     if (!rDev.HasAlpha() && rDev.GetLineColor() == COL_TRANSPARENT)
@@ -366,7 +366,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
     {
         if (rRenderContext.HasCustomClipRegion())
         {
-            vcl::Region aOldRegion = rRenderContext.GetClipRegion();
+            vcl::Region aOldRegion = rRenderContext.GetCustomClipRegion();
             rRenderContext.ClearClipRegion();
             Erase(rRenderContext);
             rRenderContext.SetClipRegion(aOldRegion);
@@ -569,7 +569,7 @@ void Window::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& r
     // VIRTUAL VERIFICATION:
     // Check if our new clipping result matches what VCL's legacy state expected.
     // If this hits, you have found a regression in your compiler logic!
-    assert(rRenderContext.GetClipRegion() == vcl::clipping::ClipCompiler::Compile(aState).maFinalRegion);
+    assert(rRenderContext.GetCustomClipRegion() == vcl::clipping::ClipCompiler::Compile(aState).maFinalRegion);
 
     CallEventListeners(VclEventId::WindowPaint, const_cast<tools::Rectangle *>(&rRect));
 }
@@ -989,7 +989,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 
         tools::Rectangle aPaintRect(Point(), GetOutputSizePixel());
 
-        vcl::Region aClipRegion(GetOutDev()->GetClipRegion());
+        vcl::Region aClipRegion(GetOutDev()->GetCustomClipRegion());
         pDevice->ClearClipRegion();
         aClipRegion.Intersect(aPaintRect);
         pDevice->SetClipRegion(aClipRegion);
@@ -1050,7 +1050,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 
     // preserve graphicsstate
     GetOutDev()->Push();
-    vcl::Region aClipRegion( GetOutDev()->GetClipRegion() );
+    vcl::Region aClipRegion( GetOutDev()->GetCustomClipRegion() );
     GetOutDev()->ClearClipRegion();
 
     GDIMetaFile* pOldMtf = GetOutDev()->GetConnectMetaFile();

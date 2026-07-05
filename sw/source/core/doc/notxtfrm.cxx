@@ -971,7 +971,7 @@ void paintGraphicUsingPrimitivesHelper(
     // RegionBand-based implementation, so cannot use it here.
     if(rOutputDevice.HasCustomClipRegion())
     {
-        basegfx::B2DPolyPolygon aClip(rOutputDevice.GetClipRegion().GetAsB2DPolyPolygon());
+        basegfx::B2DPolyPolygon aClip(rOutputDevice.GetCustomClipRegion().GetAsB2DPolyPolygon());
 
         if(0 != aClip.count())
         {

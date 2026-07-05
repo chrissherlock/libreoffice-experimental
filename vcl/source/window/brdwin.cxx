@@ -1376,7 +1376,7 @@ void ImplStdBorderWindowView::DrawWindow(vcl::RenderContext& rRenderContext, con
     aFrameColor.DecreaseContrast(sal_uInt8(0.5 * 255));
 
     // Draw Frame
-    vcl::Region oldClipRgn(rRenderContext.GetClipRegion());
+    vcl::Region oldClipRgn(rRenderContext.GetCustomClipRegion());
 
     // for popups, don't draw part of the frame
     const bool bShowJunctionToLauncher = !(pData->mnTitleType & (BorderWindowTitleType::Normal | BorderWindowTitleType::Small));

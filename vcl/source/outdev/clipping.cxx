@@ -49,7 +49,7 @@ void OutputDevice::SaveBackground(VirtualDevice& rSaveDevice,
    rSaveDevice.DrawOutDev(Point(), rBackgroundSize, rPos, rSize, *this);
 }
 
-vcl::Region OutputDevice::GetClipRegion() const
+vcl::Region OutputDevice::GetCustomClipRegion() const
 {
     return convertTo<vcl::LogicRegion>(vcl::WindowRegion(maClipState.maRegion));
 }
@@ -244,7 +244,7 @@ void OutputDevice::SyncClipState()
     });
 }
 
-vcl::Region OutputDevice::GetActiveClipRegion() const
+vcl::Region OutputDevice::CalcEffectiveClipRegion() const
 {
     return vcl::DispatchDevice(*this, [](const auto& rTypedDev) {
         using T = std::decay_t<decltype(rTypedDev)>;

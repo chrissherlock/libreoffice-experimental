@@ -531,7 +531,7 @@ void OutputDevice::SetTextAlign( TextAlign eAlign )
 
 vcl::Region OutputDevice::GetOutputBoundsClipRegion() const
 {
-    return GetClipRegion();
+    return GetCustomClipRegion();
 }
 
 const SalLayoutFlags eDefaultLayout = SalLayoutFlags::NONE;

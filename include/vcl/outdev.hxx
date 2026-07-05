@@ -549,7 +549,8 @@ private:
 
 public:
 
-    vcl::Region                 GetClipRegion() const;
+    vcl::Region                 CalcEffectiveClipRegion() const;
+    vcl::Region                 GetCustomClipRegion() const;
     void                        ClearClipRegion();
     void                        SetClipRegion( const vcl::Region& rRegion );
     SAL_DLLPRIVATE bool         ApplyClipRegion( const vcl::Region&, SalGraphics* pGraphics = nullptr );
@@ -564,8 +565,6 @@ public:
     virtual vcl::Region         GetOutputBoundsClipRegion() const;
 
     bool                        HasCustomClipRegion() const { return maClipState.mbHasCustomClip; }
-    const vcl::Region&          GetRegion() const { return maClipState.maRegion; }
-
     bool                        IsClipRegionSet() const { return maClipState.mbBackendClipInstalled; }
     void                        SetClipRegionSet(bool bSet) {
                                     maClipState.mbBackendClipInstalled = bSet;
@@ -592,7 +591,6 @@ public:
      **/
     virtual vcl::Region         ClipToDeviceBounds(vcl::Region aRegion) const;
 
-    vcl::Region                 GetActiveClipRegion() const;
     SAL_DLLPRIVATE void         SetDeviceClipRegion( const vcl::Region* pRegion );
     ///@}
 

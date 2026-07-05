@@ -107,7 +107,7 @@ bool lcl_DrawNativeSpinfield(vcl::RenderContext& rRenderContext, vcl::Window con
                 // convert from screen space to borderwin space
                 aClipRect.SetPos(pBorder->ScreenToOutputPixel(pWin->OutputToScreenPixel(aClipRect.TopLeft())));
 
-                oldRgn = pBorder->GetOutDev()->GetClipRegion();
+                oldRgn = pBorder->GetOutDev()->GetCustomClipRegion();
                 pBorder->GetOutDev()->SetClipRegion(vcl::Region(aClipRect));
 
                 pContext = pBorder->GetOutDev();
@@ -881,7 +881,7 @@ bool SpinField::PreNotify(NotifyEvent& rNEvt)
                         !IsNativeControlSupported(ControlType::Editbox, ControlPart::Entire))
                     {
                         // paint directly
-                        vcl::Region aRgn(GetOutDev()->GetActiveClipRegion());
+                        vcl::Region aRgn(GetOutDev()->CalcEffectiveClipRegion());
 
                         if (pLastRect)
                         {

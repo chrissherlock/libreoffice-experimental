@@ -73,7 +73,7 @@ CPPUNIT_TEST_FIXTURE(test::BootstrapFixture, testActiveClipRegionRetrieval)
     ScopedVclPtr<VirtualDevice> pVDev = VclPtr<VirtualDevice>::Create(DeviceFormat::WITHOUT_ALPHA);
     pVDev->SetOutputSizePixel(Size(100, 100));
 
-    vcl::Region aRegion = pVDev->GetActiveClipRegion();
+    vcl::Region aRegion = pVDev->CalcEffectiveClipRegion();
 
     CPPUNIT_ASSERT_MESSAGE("Active region should not be null", !aRegion.IsNull());
 }

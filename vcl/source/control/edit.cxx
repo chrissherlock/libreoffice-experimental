@@ -1005,7 +1005,7 @@ void Edit::ImplPaintBorder(vcl::RenderContext const & rRenderContext)
             aClipRgn.Move(aBorderOffs.X(), aBorderOffs.Y());
         }
 
-        vcl::Region oldRgn(pBorder->GetOutDev()->GetClipRegion());
+        vcl::Region oldRgn(pBorder->GetOutDev()->GetCustomClipRegion());
         pBorder->GetOutDev()->SetClipRegion(aClipRgn);
 
         pBorder->Paint(*pBorder->GetOutDev(), tools::Rectangle());

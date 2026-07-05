@@ -165,7 +165,7 @@ static void lcl_DrawOneFrame( vcl::RenderContext* pDev, const tools::Rectangle& 
         if (pDev->HasCustomClipRegion())
         {
             bWasClip = true;
-            aOldClip = pDev->GetActiveClipRegion();
+            aOldClip = pDev->CalcEffectiveClipRegion();
         }
         tools::Long nClipStartX = bLayoutRTL ? aOuter.Left() + nBWidth : aInner.Left();
         tools::Long nClipEndX = bLayoutRTL ? aInner.Right() : aOuter.Right() - nBWidth;

@@ -464,7 +464,7 @@ void SvxPosSizeStatusBarControl::Paint( const UserDrawEvent& rUsrEvt )
             GetMetricStr_Impl( pImpl->aPos.Y());
         tools::Rectangle aRect(aPnt, Point(nSizePosX, rRect.Bottom()));
         pDev->DrawRect(aRect);
-        vcl::Region aOrigRegion(pDev->GetClipRegion());
+        vcl::Region aOrigRegion(pDev->GetCustomClipRegion());
         pDev->SetClipRegion(vcl::Region(aRect));
         pDev->DrawText(aPnt, aStr);
         pDev->SetClipRegion(aOrigRegion);
@@ -482,7 +482,7 @@ void SvxPosSizeStatusBarControl::Paint( const UserDrawEvent& rUsrEvt )
                 GetMetricStr_Impl( pImpl->aSize.Height() );
             aRect = tools::Rectangle(aDrwPnt, rRect.BottomRight());
             pDev->DrawRect(aRect);
-            aOrigRegion = pDev->GetClipRegion();
+            aOrigRegion = pDev->GetCustomClipRegion();
             pDev->SetClipRegion(vcl::Region(aRect));
             pDev->DrawText(aPnt, aStr);
             pDev->SetClipRegion(aOrigRegion);

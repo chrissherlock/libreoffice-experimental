@@ -64,7 +64,7 @@ void SwSaveClip::ChgClip_( const SwRect &rRect, const SwTextFrame* pFrame,
         if ( m_pOut->GetConnectMetaFile() )
             m_pOut->Push();
         else if ( m_bOn )
-            m_aClip = m_pOut->GetClipRegion();
+            m_aClip = m_pOut->GetCustomClipRegion();
     }
 
     if ( !rRect.HasArea() )
@@ -83,7 +83,7 @@ void SwSaveClip::ChgClip_( const SwRect &rRect, const SwTextFrame* pFrame,
         // If the ClipRect is identical, nothing will happen
         if( m_pOut->HasCustomClipRegion() ) // no && because of Mac
         {
-            if ( aRect == m_pOut->GetClipRegion().GetBoundRect() )
+            if ( aRect == m_pOut->GetCustomClipRegion().GetBoundRect() )
             {
                 const_cast<SwRect&>(rRect) = aOldRect;
                 return;
