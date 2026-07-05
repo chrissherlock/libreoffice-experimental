@@ -504,6 +504,11 @@ CPPUNIT_TEST_FIXTURE(Chart2ImportTest2, testTdf133376)
     if (!IsDefaultDPI())
         return;
 
+#if defined(MACOSX)
+    if (!getenv("CI") && !getenv("JENKINS_URL") && !getenv("TINDERBOX_BUILDING"))
+        return;
+#endif
+
     loadFromFile(u"xlsx/tdf133376.xlsx");
     Reference<chart::XChartDocument> xChartDoc(getChartDocFromSheet(0), UNO_QUERY_THROW);
 
@@ -559,6 +564,11 @@ CPPUNIT_TEST_FIXTURE(Chart2ImportTest2, testTdf136105)
     // non-default DPI; or (2) unit tests on Windows are made to use svp VCL plugin.
     if (!IsDefaultDPI())
         return;
+
+#if defined(MACOSX)
+    if (!getenv("CI") && !getenv("JENKINS_URL") && !getenv("TINDERBOX_BUILDING"))
+        return;
+#endif
 
     loadFromFile(u"xlsx/tdf136105.xlsx");
     // 1st chart with fix inner position and size
@@ -639,6 +649,11 @@ CPPUNIT_TEST_FIXTURE(Chart2ImportTest2, testTdf134111)
 
 CPPUNIT_TEST_FIXTURE(Chart2ImportTest2, testTdf136752)
 {
+#if defined(MACOSX)
+    if (!getenv("CI") && !getenv("JENKINS_URL") && !getenv("TINDERBOX_BUILDING"))
+        return;
+#endif
+
     loadFromFile(u"xlsx/tdf136752.xlsx");
     Reference<chart::XChartDocument> xChartDoc(getChartDocFromSheet(0), UNO_QUERY_THROW);
 

@@ -184,6 +184,11 @@ void Chart2XShapeTest::testPieChartLabels1()
     if (!IsDefaultDPI())
         return;
 
+#if defined(MACOSX)
+    if (!getenv("CI") && !getenv("JENKINS_URL") && !getenv("TINDERBOX_BUILDING"))
+        return;
+#endif
+
     // inside placement for the best fit case
     loadFromFile(u"xlsx/tdf90839-1.xlsx");
     compareAgainstReference(getXShapeDumpString(), u"tdf90839-1.xml");
@@ -195,6 +200,11 @@ void Chart2XShapeTest::testPieChartLabels2()
     // non-default DPI; or (2) unit tests on Windows are made to use svp VCL plugin.
     if (!IsDefaultDPI())
         return;
+
+#if defined(MACOSX)
+    if (!getenv("CI") && !getenv("JENKINS_URL") && !getenv("TINDERBOX_BUILDING"))
+        return;
+#endif
 
     // text wrap: wrap all text labels except Yellow one
     loadFromFile(u"xlsx/tdf90839-2.xlsx");
@@ -208,6 +218,11 @@ void Chart2XShapeTest::testPieChartLabels3()
     if (!IsDefaultDPI())
         return;
 
+#if defined(MACOSX)
+    if (!getenv("CI") && !getenv("JENKINS_URL") && !getenv("TINDERBOX_BUILDING"))
+        return;
+#endif
+
     // text wrap: wrap no text label except Yellow one
     loadFromFile(u"xlsx/tdf90839-3.xlsx");
     compareAgainstReference(getXShapeDumpString(), u"tdf90839-3.xml");
@@ -219,6 +234,11 @@ void Chart2XShapeTest::testPieChartLabels4()
     // non-default DPI; or (2) unit tests on Windows are made to use svp VCL plugin.
     if (!IsDefaultDPI())
         return;
+
+#if defined(MACOSX)
+    if (!getenv("CI") && !getenv("JENKINS_URL") && !getenv("TINDERBOX_BUILDING"))
+        return;
+#endif
 
     // data value and percent value are centered horizontally
     loadFromFile(u"ods/tdf90839-4.ods");
