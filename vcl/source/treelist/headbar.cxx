@@ -938,7 +938,7 @@ void HeaderBar::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
         vcl::Region aRegion( aRect );
         rDev.SetClipRegion(aRegion);
         ImplDrawItem(rDev, i, false, aItemRect, &aRect);
-        rDev.SetClipRegion();
+        rDev.ClearClipRegion();
     }
 }
 

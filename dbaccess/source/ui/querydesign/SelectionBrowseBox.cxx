@@ -1248,7 +1248,7 @@ void OSelectionBrowseBox::PaintCell(OutputDevice& rDev, const tools::Rectangle& 
     else
         rDev.DrawText(rRect, GetCellText(nRow, nColumnId),DrawTextFlags::VCenter);
 
-    rDev.SetClipRegion( );
+    rDev.ClearClipRegion();
 }
 
 void OSelectionBrowseBox::PaintStatusCell(OutputDevice& rDev, const tools::Rectangle& rRect) const

@@ -180,7 +180,7 @@ static void lcl_DrawOneFrame( vcl::RenderContext* pDev, const tools::Rectangle& 
         if ( bWasClip )
             pDev->SetClipRegion(aOldClip);
         else
-            pDev->SetClipRegion();
+            pDev->ClearClipRegion();
     }
 
     pDev->SetFillColor();
@@ -939,7 +939,7 @@ void ScGridWindow::DrawContent(OutputDevice &rDevice, const ScTableInfo& rTableI
         if ( aOutputData.SetChangedClip() )
         {
             DrawPagePreview(nX1,nY1,nX2,nY2, *pContentDev);
-            pContentDev->SetClipRegion();
+            pContentDev->ClearClipRegion();
         }
     }
     if (bIsTiledRendering)
@@ -2199,7 +2199,7 @@ void ScGridWindow::DrawButtons(SCCOL nX1, SCCOL nX2, const ScTableInfo& rTabInfo
             aComboButton.SetSizePixel( aRect.GetSize() );
             pContentDev->SetClipRegion(vcl::Region(aRect));
             aComboButton.Draw();
-            pContentDev->SetClipRegion();           // always called from Draw() without clip region
+            pContentDev->ClearClipRegion();           // always called from Draw() without clip region
             aComboButton.SetPosPixel( aOldPos );    // restore old state
             aComboButton.SetSizePixel( aOldSize );  // for MouseUp/Down (AutoFilter)
         }

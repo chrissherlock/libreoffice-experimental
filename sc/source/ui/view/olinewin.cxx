@@ -558,7 +558,7 @@ void ScOutlineWindow::DrawBorderRel( size_t nLevel, size_t nEntry, bool bPressed
             SetEntryAreaClipRegion();
         GetOutDev()->DrawImage(aPos, GetImage(sId));
         if ( bClip )
-            GetOutDev()->SetClipRegion();
+            GetOutDev()->ClearClipRegion();
     }
     mbMTPressed = bPressed;
 }
@@ -584,7 +584,7 @@ void ScOutlineWindow::ShowFocus()
             SetEntryAreaClipRegion();
         InvertTracking( maFocusRect, ShowTrackFlags::Small | ShowTrackFlags::TrackWindow );
         if ( bClip )
-            GetOutDev()->SetClipRegion();
+            GetOutDev()->ClearClipRegion();
     }
 }
 
@@ -597,7 +597,7 @@ void ScOutlineWindow::HideFocus()
             SetEntryAreaClipRegion();
         InvertTracking( maFocusRect, ShowTrackFlags::Small | ShowTrackFlags::TrackWindow );
         if ( bClip )
-            GetOutDev()->SetClipRegion();
+            GetOutDev()->ClearClipRegion();
         maFocusRect.SetEmpty();
     }
 }
@@ -716,7 +716,7 @@ void ScOutlineWindow::Paint( vcl::RenderContext& /*rRenderContext*/, const tools
         }
     }
 
-    GetOutDev()->SetClipRegion();
+    GetOutDev()->ClearClipRegion();
 
     if ( !mbDontDrawFocus )
         ShowFocus();

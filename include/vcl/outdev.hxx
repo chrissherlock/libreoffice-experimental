@@ -550,7 +550,7 @@ private:
 public:
 
     vcl::Region                 GetClipRegion() const;
-    void                        SetClipRegion();
+    void                        ClearClipRegion();
     void                        SetClipRegion( const vcl::Region& rRegion );
     SAL_DLLPRIVATE bool         ApplyClipRegion( const vcl::Region&, SalGraphics* pGraphics = nullptr );
 

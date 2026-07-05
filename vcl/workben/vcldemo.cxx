@@ -458,7 +458,7 @@ public:
                 }
             }
 
-            rDev.SetClipRegion();
+            rDev.ClearClipRegion();
         }
 
         static void drawComplex (OutputDevice &rDev, tools::Rectangle r)
@@ -573,7 +573,7 @@ public:
                     break;
             }
 
-            rDev.SetClipRegion();
+            rDev.ClearClipRegion();
         }
         // render text, bbox, DX arrays etc.
         static tools::Long drawStringBox(OutputDevice &rDev, Point aPos,
@@ -677,7 +677,7 @@ public:
                     } // switch
                     rDev.SetClipRegion(aRegion);
                     rDev.DrawCheckered(aSub.TopLeft(), aSub.GetSize());
-                    rDev.SetClipRegion();
+                    rDev.ClearClipRegion();
                 }
             }
             else
@@ -1436,7 +1436,7 @@ public:
             else
                 r->RenderRegion(rDev, aRegions[i], aCtx);
 
-            rDev.SetClipRegion();
+            rDev.ClearClipRegion();
         }
     }
 

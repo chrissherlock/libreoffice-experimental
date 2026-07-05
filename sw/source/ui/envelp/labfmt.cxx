@@ -217,7 +217,7 @@ void SwLabPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
                                                     lY0 + ROUND(f * (m_aItem.m_lUpper + nRow * m_aItem.m_lVDist))),
                                               Size(ROUND(f * m_aItem.m_lWidth),
                                                    ROUND(f * m_aItem.m_lHeight))));
-    rRenderContext.SetClipRegion();
+    rRenderContext.ClearClipRegion();
 
     // annotation: left border
     if (m_aItem.m_lLeft)

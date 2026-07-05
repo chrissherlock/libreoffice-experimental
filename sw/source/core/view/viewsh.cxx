@@ -2086,7 +2086,7 @@ void SwViewShell::Paint(vcl::RenderContext& rRenderContext, const tools::Rectang
             //no one needs it anymore anyway.
             //Not when we paint a Metafile.
             if( !GetOut()->GetConnectMetaFile() && GetOut()->IsClipRegion())
-                GetOut()->SetClipRegion();
+                GetOut()->ClearClipRegion();
 
             if ( IsPreview() )
             {

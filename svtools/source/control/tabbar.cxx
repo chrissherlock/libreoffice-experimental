@@ -2441,7 +2441,7 @@ void TabBar::HideDropPos()
         vcl::Region aRegion( aRect );
         GetOutDev()->SetClipRegion( aRegion );
         Invalidate(aRect);
-        GetOutDev()->SetClipRegion();
+        GetOutDev()->ClearClipRegion();
     }
     if (mnDropPos > 0 && mnDropPos < nItemCount + 1)
     {
@@ -2452,7 +2452,7 @@ void TabBar::HideDropPos()
         vcl::Region aRegion(aRect);
         GetOutDev()->SetClipRegion(aRegion);
         Invalidate(aRect);
-        GetOutDev()->SetClipRegion();
+        GetOutDev()->ClearClipRegion();
     }
 
     mbDropPos = false;

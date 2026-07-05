@@ -274,7 +274,7 @@ namespace vclcanvas
             // flush to screen
             rOutDev.SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
             rOutDev.SetAntialiasing( AntialiasingFlags::Enable );
-            rOutDev.SetClipRegion();
+            rOutDev.ClearClipRegion();
             rOutDev.DrawOutDev( aEmptyPoint, aOutDevSize,
                                 aEmptyPoint, aOutDevSize,
                                 *maVDev );
@@ -514,7 +514,7 @@ namespace vclcanvas
         // paint background
         maVDev->SetMappingPolicy(vcl::MappingPolicy::IgnoreMapMode);
         maVDev->SetAntialiasing( AntialiasingFlags::Enable );
-        maVDev->SetClipRegion();
+        maVDev->ClearClipRegion();
         maVDev->DrawOutDev( aEmptyPoint, aOutputSize,
                             aOutputPosition, aOutputSize,
                             rBackOutDev );

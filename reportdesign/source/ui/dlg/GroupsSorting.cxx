@@ -560,7 +560,7 @@ void OFieldExpressionControl::PaintCell( OutputDevice& rDev, const tools::Rectan
     rDev.DrawText( aPos, aText );
 
     if( rDev.IsClipRegion() )
-        rDev.SetClipRegion();
+        rDev.ClearClipRegion();
 }
 
 EditBrowseBox::RowStatus OFieldExpressionControl::GetRowStatus(sal_Int32 nRow) const

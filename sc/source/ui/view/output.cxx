@@ -1796,7 +1796,7 @@ void ScOutputData::DrawRotatedFrame(vcl::RenderContext& rRenderContext)
     if (mbMetaFile)
         rRenderContext.Pop();
     else
-        rRenderContext.SetClipRegion();
+        rRenderContext.ClearClipRegion();
 }
 
 std::unique_ptr<drawinglayer::processor2d::BaseProcessor2D> ScOutputData::CreateProcessor2D( )

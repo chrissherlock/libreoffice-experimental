@@ -1565,7 +1565,7 @@ void SmDocShell::Impl_Print(OutputDevice& rOutDev, const SmPrintUIOptions& rPrin
     rOutDev.SetMapMode(OutputMapMode);
     rOutDev.SetClipRegion(vcl::Region(aOutRect));
     DrawFormula(rOutDev, aPos);
-    rOutDev.SetClipRegion();
+    rOutDev.ClearClipRegion();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

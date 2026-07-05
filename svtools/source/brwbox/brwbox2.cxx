@@ -842,7 +842,7 @@ void BrowseBox::ImplPaintData(OutputDevice& _rOut, const tools::Rectangle& _rRec
         if ( !SeekRow( nRow) ) {
             OSL_FAIL("BrowseBox::ImplPaintData: SeekRow failed");
         }
-        _rOut.SetClipRegion();
+        _rOut.ClearClipRegion();
         aPos.setX( aOverallAreaPos.X() );
 
 
@@ -891,7 +891,7 @@ void BrowseBox::ImplPaintData(OutputDevice& _rOut, const tools::Rectangle& _rRec
                                     &&  IsColumnSelected( pCol->GetId() );
             if ( bColAutoHighlight )
             {
-                _rOut.SetClipRegion();
+                _rOut.ClearClipRegion();
                 _rOut.SetTextColor( rHighlightTextColor );
                 _rOut.SetFillColor( rHighlightFillColor );
                 _rOut.SetLineColor();
@@ -928,7 +928,7 @@ void BrowseBox::ImplPaintData(OutputDevice& _rOut, const tools::Rectangle& _rRec
                 }
                 pCol->Draw( *this, _rOut, aPos );
                 if (_bForeignDevice)
-                    _rOut.SetClipRegion();
+                    _rOut.ClearClipRegion();
             }
 
             // reset Column-auto-highlight
@@ -954,7 +954,7 @@ void BrowseBox::ImplPaintData(OutputDevice& _rOut, const tools::Rectangle& _rRec
         if ( bHLines )
         {
             // draw horizontal delimitation lines
-            _rOut.SetClipRegion();
+            _rOut.ClearClipRegion();
             auto popIt = _rOut.ScopedPush(vcl::PushFlags::LINECOLOR);
             _rOut.SetLineColor( aDelimiterLineColor );
             tools::Long nY = aPos.Y() + nDataRowHeight - 1;
@@ -972,7 +972,7 @@ void BrowseBox::ImplPaintData(OutputDevice& _rOut, const tools::Rectangle& _rRec
         // needed for some of the following drawing
 
     // retouching
-    _rOut.SetClipRegion();
+    _rOut.ClearClipRegion();
     aOldLineColor = _rOut.GetLineColor();
     aOldFillColor = _rOut.GetFillColor();
     _rOut.SetFillColor( rSettings.GetFaceColor() );

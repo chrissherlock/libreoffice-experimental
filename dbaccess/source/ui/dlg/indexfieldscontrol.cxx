@@ -135,7 +135,7 @@ constexpr auto BROWSER_STANDARD_FLAGS = BrowserMode::COLUMNSELECTION | BrowserMo
             _rDev.SetTextColor(aOriginalColor);
 
         if (_rDev.IsClipRegion())
-            _rDev.SetClipRegion();
+            _rDev.ClearClipRegion();
     }
 
     void IndexFieldsControl::initializeFrom(IndexFields&& _rFields)

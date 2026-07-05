@@ -652,7 +652,7 @@ void ImpEditView::DrawSelectionXOR( EditSelection aTmpSel, vcl::Region* pRegion,
         if (bClipRegion)
             rTarget.SetClipRegion(aOldRegion);
         else
-            rTarget.SetClipRegion();
+            rTarget.ClearClipRegion();
     }
 }
 

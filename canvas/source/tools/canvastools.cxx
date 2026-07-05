@@ -1184,11 +1184,11 @@ namespace canvastools
             // setup accumulated clip region. Note that setting an
             // empty clip region denotes "clip everything" on the
             // OutputDevice (which is why we translate that into
-            // SetClipRegion() here). When both view and render clip
+            // ClearClipRegion() here). When both view and render clip
             // are empty, aClipRegion remains default-constructed,
             // i.e. empty, too.
             if( aClipRegion.IsNull() )
-                rOutDev.SetClipRegion();
+                rOutDev.ClearClipRegion();
             else
                 rOutDev.SetClipRegion( aClipRegion );
         }

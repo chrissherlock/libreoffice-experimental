@@ -436,7 +436,7 @@ void OTableGrantControl::PaintCell( OutputDevice& rDev, const tools::Rectangle& 
     }
 
     if( rDev.IsClipRegion() )
-        rDev.SetClipRegion();
+        rDev.ClearClipRegion();
 }
 
 void OTableGrantControl::CellModified()

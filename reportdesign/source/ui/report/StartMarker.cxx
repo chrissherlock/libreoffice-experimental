@@ -107,7 +107,7 @@ void OStartMarker::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
 
     if (isCollapsed())
     {
-        rRenderContext.SetClipRegion();
+        rRenderContext.ClearClipRegion();
     }
     else
     {

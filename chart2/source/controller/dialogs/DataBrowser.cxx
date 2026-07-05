@@ -1054,7 +1054,7 @@ void DataBrowser::PaintCell(
         rDev.SetTextColor( aOriginalColor );
 
     if( rDev.IsClipRegion())
-        rDev.SetClipRegion();
+        rDev.ClearClipRegion();
 }
 
 bool DataBrowser::SeekRow( sal_Int32 nRow )

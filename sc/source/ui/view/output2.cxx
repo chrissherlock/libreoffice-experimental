@@ -2278,7 +2278,7 @@ void ScOutputData::LayoutStringsImpl(bool const bPixelToLogic, RowInfo* const pT
                 if (mbMetaFile)
                     mpDev->Pop();
                 else
-                    mpDev->SetClipRegion();
+                    mpDev->ClearClipRegion();
             }
 
             // PDF: whole-cell hyperlink from formula?
@@ -2980,14 +2980,14 @@ public:
 
     ~ClearableClipRegion()
     {
-        // Pop() or SetClipRegion() must only be called in case bClip was true
+        // Pop() or ClearClipRegion() must only be called in case bClip was true
         // in the ctor, and only then mpDev is set.
         if (mpDev)
         {
             if (mbMetaFile)
                 mpDev->Pop();
             else
-                mpDev->SetClipRegion();
+                mpDev->ClearClipRegion();
         }
     }
 
@@ -5358,7 +5358,7 @@ void ScOutputData::DrawRotated(bool bPixelToLogic)
                                 if (mbMetaFile)
                                     mpDev->Pop();
                                 else
-                                    mpDev->SetClipRegion();
+                                    mpDev->ClearClipRegion();
                             }
                         }
                     }

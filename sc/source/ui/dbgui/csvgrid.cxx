@@ -1222,7 +1222,7 @@ void ScCsvGrid::ImplDrawColumnBackgr( sal_uInt32 nColIndex )
     // header
     ImplDrawColumnHeader( *mpBackgrDev, nColIndex, maHeaderBackColor );
 
-    mpBackgrDev->SetClipRegion();
+    mpBackgrDev->ClearClipRegion();
 }
 
 void ScCsvGrid::ImplDrawRowHeaders()
@@ -1307,7 +1307,7 @@ void ScCsvGrid::ImplDrawColumnSelection( sal_uInt32 nColIndex )
         ImplInvertRect( *mpGridDev, aRect );
     }
 
-    mpGridDev->SetClipRegion();
+    mpGridDev->ClearClipRegion();
     ImplInvertCursor( GetRulerCursorPos() );
 }
 
@@ -1361,10 +1361,10 @@ void ScCsvGrid::ImplDrawHorzScrolled( sal_Int32 nOldPos )
     vcl::Region aClipReg( aRectangle );
     mpBackgrDev->SetClipRegion( aClipReg );
     mpBackgrDev->CopyArea( aDest, aSrc, maWinSize );
-    mpBackgrDev->SetClipRegion();
+    mpBackgrDev->ClearClipRegion();
     mpGridDev->SetClipRegion( aClipReg );
     mpGridDev->CopyArea( aDest, aSrc, maWinSize );
-    mpGridDev->SetClipRegion();
+    mpGridDev->ClearClipRegion();
     ImplInvertCursor( GetRulerCursorPos() );
 
     for( sal_uInt32 nColIx = nFirstColIx; nColIx <= nLastColIx; ++nColIx )

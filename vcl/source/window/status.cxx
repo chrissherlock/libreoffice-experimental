@@ -455,7 +455,7 @@ void StatusBar::ImplDrawItem(vcl::RenderContext& rRenderContext, bool bOffScreen
     if (bOffScreen)
         rRenderContext.DrawOutDev(aTextRect.TopLeft(), aTextRectSize, Point(), aTextRectSize, *mpImplData->mpVirDev);
     else
-        rRenderContext.SetClipRegion();
+        rRenderContext.ClearClipRegion();
 
     if (nPos != ImplGetFirstVisiblePos())
     {

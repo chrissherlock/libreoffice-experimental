@@ -15,7 +15,7 @@ namespace vcl::clipping
 void BackendClipPolicy<OutputDevice>::Apply(OutputDevice& rDev, const ClipPlan& rPlan)
 {
     if (rPlan.mbEmpty)
-        rDev.SetClipRegion();
+        rDev.ClearClipRegion();
     else
         rDev.SetDeviceClipRegion(&rPlan.maFinalRegion);
 }

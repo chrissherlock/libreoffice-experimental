@@ -54,7 +54,7 @@ vcl::Region OutputDevice::GetClipRegion() const
     return convertTo<vcl::LogicRegion>(vcl::WindowRegion(maClipState.maRegion));
 }
 
-void OutputDevice::SetClipRegion()
+void OutputDevice::ClearClipRegion()
 {
 
     if ( mpMetaFile )

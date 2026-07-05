@@ -2018,7 +2018,7 @@ void PictReader::ReadPict( SvStream & rStreamPict, GDIMetaFile & rGDIMetaFile )
         }
     }
 
-    pVirDev->SetClipRegion();
+    pVirDev->ClearClipRegion();
     rGDIMetaFile.Stop();
     pVirDev.disposeAndClear();
 

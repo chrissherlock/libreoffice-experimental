@@ -505,7 +505,7 @@ void GridWindow::drawNew(vcl::RenderContext& rRenderContext)
                      m_pXValues[i],     m_pNewYValues[i],
                      m_pXValues[i + 1], m_pNewYValues[i + 1]);
         }
-        rRenderContext.SetClipRegion();
+        rRenderContext.ClearClipRegion();
     }
 }
 

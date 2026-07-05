@@ -209,7 +209,7 @@ void MenuFloatingWindow::InitMenuClipRegion(vcl::RenderContext& rRenderContext)
     }
     else
     {
-        rRenderContext.SetClipRegion();
+        rRenderContext.ClearClipRegion();
     }
 }
 
@@ -1218,7 +1218,7 @@ void MenuFloatingWindow::Paint(vcl::RenderContext& rRenderContext, const tools::
 
     if (rRenderContext.IsNativeControlSupported(ControlType::MenuPopup, ControlPart::Entire))
     {
-        pBuffer->SetClipRegion();
+        pBuffer->ClearClipRegion();
         tools::Long nX = 0;
         Size aPxSize(GetOutputSizePixel());
         aPxSize.AdjustWidth( -nX );
@@ -1246,7 +1246,7 @@ void MenuFloatingWindow::ImplDrawScroller(vcl::RenderContext& rRenderContext, bo
     if (!pMenu)
         return;
 
-    rRenderContext.SetClipRegion();
+    rRenderContext.ClearClipRegion();
 
     Size aOutSz(GetOutputSizePixel());
     tools::Long nY = bUp ? 0 : (aOutSz.Height() - nScrollerHeight);

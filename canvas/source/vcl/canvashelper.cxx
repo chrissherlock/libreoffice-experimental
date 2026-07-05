@@ -164,7 +164,7 @@ namespace vclcanvas
         rOutDev.SetAntialiasing( AntialiasingFlags::Enable );
         rOutDev.SetLineColor( COL_WHITE );
         rOutDev.SetFillColor( COL_WHITE );
-        rOutDev.SetClipRegion();
+        rOutDev.ClearClipRegion();
         rOutDev.DrawRect( ::tools::Rectangle( Point(),
                                      rOutDev.GetOutputSizePixel()) );
 
@@ -178,7 +178,7 @@ namespace vclcanvas
         rOutDev2.SetAntialiasing( AntialiasingFlags::Enable );
         rOutDev2.SetLineColor( COL_WHITE );
         rOutDev2.SetFillColor( COL_WHITE );
-        rOutDev2.SetClipRegion();
+        rOutDev2.ClearClipRegion();
         rOutDev2.DrawRect( ::tools::Rectangle( Point(),
                                       rOutDev2.GetOutputSizePixel()) );
         rOutDev2.SetDrawMode( DrawModeFlags::BlackLine | DrawModeFlags::BlackFill | DrawModeFlags::BlackText |

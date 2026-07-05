@@ -312,7 +312,7 @@ void SwDropCapsPict::Paint(vcl::RenderContext& rRenderContext, const tools::Rect
         // draw Text
         DrawPrev(rRenderContext, Point(BORDER, nY0));
     }
-    rRenderContext.SetClipRegion();
+    rRenderContext.ClearClipRegion();
 }
 
 void SwDropCapsPict::DrawPrev(vcl::RenderContext& rRenderContext, const Point& rPt)

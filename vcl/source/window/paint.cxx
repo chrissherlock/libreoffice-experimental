@@ -367,7 +367,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
         if (rRenderContext.IsClipRegion())
         {
             vcl::Region aOldRegion = rRenderContext.GetClipRegion();
-            rRenderContext.SetClipRegion();
+            rRenderContext.ClearClipRegion();
             Erase(rRenderContext);
             rRenderContext.SetClipRegion(aOldRegion);
         }
@@ -990,7 +990,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
         tools::Rectangle aPaintRect(Point(), GetOutputSizePixel());
 
         vcl::Region aClipRegion(GetOutDev()->GetClipRegion());
-        pDevice->SetClipRegion();
+        pDevice->ClearClipRegion();
         aClipRegion.Intersect(aPaintRect);
         pDevice->SetClipRegion(aClipRegion);
 
@@ -1051,7 +1051,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
     // preserve graphicsstate
     GetOutDev()->Push();
     vcl::Region aClipRegion( GetOutDev()->GetClipRegion() );
-    GetOutDev()->SetClipRegion();
+    GetOutDev()->ClearClipRegion();
 
     GDIMetaFile* pOldMtf = GetOutDev()->GetConnectMetaFile();
     GDIMetaFile aMtf;

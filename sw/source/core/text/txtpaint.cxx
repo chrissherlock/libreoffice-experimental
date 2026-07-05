@@ -35,7 +35,7 @@ SwSaveClip::~SwSaveClip()
         if( m_bOn )
             m_pOut->SetClipRegion( m_aClip );
         else
-            m_pOut->SetClipRegion();
+            m_pOut->ClearClipRegion();
     }
     m_bChg = false;
 }
@@ -68,7 +68,7 @@ void SwSaveClip::ChgClip_( const SwRect &rRect, const SwTextFrame* pFrame,
     }
 
     if ( !rRect.HasArea() )
-        m_pOut->SetClipRegion();
+        m_pOut->ClearClipRegion();
     else
     {
         tools::Rectangle aRect( rRect.SVRect() );
@@ -91,7 +91,7 @@ void SwSaveClip::ChgClip_( const SwRect &rRect, const SwTextFrame* pFrame,
         }
 
         if( SwRootFrame::HasSameRect( rRect ) )
-            m_pOut->SetClipRegion();
+            m_pOut->ClearClipRegion();
         else
         {
             const vcl::Region aClipRegion( aRect );

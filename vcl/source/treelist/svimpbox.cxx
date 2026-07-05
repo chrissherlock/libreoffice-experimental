@@ -260,7 +260,7 @@ void SvImpLBox::Clear()
     m_rView.Control::SetMapMode(aMapMode);
     m_aHorSBar->SetRange( aRange );
     m_aHorSBar->SetSizePixel(Size(m_aOutputSize.Width(),m_nHorSBarHeight));
-    m_rView.GetOutDev()->SetClipRegion();
+    m_rView.GetOutDev()->ClearClipRegion();
     if( GetUpdateMode() )
         m_rView.Invalidate(GetVisibleArea());
     m_nFlags |= LBoxFlags::Filling;
@@ -2858,7 +2858,7 @@ tools::Rectangle SvImpLBox::GetVisibleArea() const
     return aRect;
 }
 
-void SvImpLBox::Invalidate() { m_rView.GetOutDev()->SetClipRegion(); }
+void SvImpLBox::Invalidate() { m_rView.GetOutDev()->ClearClipRegion(); }
 
 void SvImpLBox::SetCurEntry( SvTreeListEntry* pEntry )
 {

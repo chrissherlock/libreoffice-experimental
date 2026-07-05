@@ -420,7 +420,7 @@ void SwAddressPreview::Paint(vcl::RenderContext& rRenderContext, const tools::Re
             ++nAddress;
         }
     }
-    rRenderContext.SetClipRegion();
+    rRenderContext.ClearClipRegion();
 }
 
 bool SwAddressPreview::MouseButtonDown( const MouseEvent& rMEvt )

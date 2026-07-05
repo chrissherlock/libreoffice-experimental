@@ -261,7 +261,7 @@ void WeldEditView::DoPaint(vcl::RenderContext& rRenderContext, const tools::Rect
     }
 
     auto popIt = rRenderContext.ScopedPush(vcl::PushFlags::ALL);
-    rRenderContext.SetClipRegion();
+    rRenderContext.ClearClipRegion();
 
     pEditView->DrawText_ToEditView(
         comphelper::LibreOfficeKit::isActive()

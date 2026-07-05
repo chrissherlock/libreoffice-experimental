@@ -1336,7 +1336,7 @@ void ValueSet::ImplFormatItem(vcl::RenderContext const& rRenderContext, ValueSet
             {
                 maVirDev->SetClipRegion(vcl::Region(aRect));
                 maVirDev->DrawImage(aPos, rItem.maImage, nImageStyle);
-                maVirDev->SetClipRegion();
+                maVirDev->ClearClipRegion();
             }
             else
                 maVirDev->DrawImage(aPos, rItem.maImage, nImageStyle);
@@ -1357,7 +1357,7 @@ void ValueSet::ImplFormatItem(vcl::RenderContext const& rRenderContext, ValueSet
                                    rItem.maText);
 
                 if (nTxtWidth > aRect.GetWidth())
-                    maVirDev->SetClipRegion();
+                    maVirDev->ClearClipRegion();
             }
         }
     }

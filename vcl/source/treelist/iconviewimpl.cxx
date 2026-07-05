@@ -523,7 +523,7 @@ void IconViewImpl::Paint(vcl::RenderContext& rRenderContext, const tools::Rectan
     IterateVisibleEntryAreas(PaintEntry, true);
 
     m_nFlags &= ~LBoxFlags::DeselectAll;
-    rRenderContext.SetClipRegion();
+    rRenderContext.ClearClipRegion();
     m_nFlags &= ~LBoxFlags::InPaint;
 }
 

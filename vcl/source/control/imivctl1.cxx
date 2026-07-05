@@ -1109,7 +1109,7 @@ void SvxIconChoiceCtrl_Impl::PaintEntry(SvxIconChoiceCtrlEntry* pEntry, const Po
     PaintItem(aTextRect, IcnViewFieldType::Text, pEntry, nTextPaintFlags, rRenderContext);
 
     if (bResetClipRegion)
-        rRenderContext.SetClipRegion();
+        rRenderContext.ClearClipRegion();
 }
 
 SvxIconChoiceCtrlEntry* SvxIconChoiceCtrl_Impl::GetEntry( const Point& rDocPos )

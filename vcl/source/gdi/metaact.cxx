@@ -1365,7 +1365,7 @@ void MetaClipRegionAction::Execute( OutputDevice* pOut )
         pOut->SetClipRegion( maRegion );
     }
     else
-        pOut->SetClipRegion();
+        pOut->ClearClipRegion();
 }
 
 rtl::Reference<MetaAction> MetaClipRegionAction::Clone() const

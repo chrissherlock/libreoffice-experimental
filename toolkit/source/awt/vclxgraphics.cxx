@@ -118,7 +118,7 @@ void VCLXGraphics::InitOutputDevice( InitOutDevFlags nFlags )
     if( mpClipRegion )
         mpOutputDevice->SetClipRegion( *mpClipRegion );
     else
-        mpOutputDevice->SetClipRegion();
+        mpOutputDevice->ClearClipRegion();
 }
 
 uno::Reference< awt::XDevice > VCLXGraphics::getDevice()

@@ -4287,7 +4287,7 @@ void SwFlyFrame::PaintSwFrame(vcl::RenderContext& rRenderContext, SwRect const& 
     aRect.Intersection_( getFrameArea() );
 
     rRenderContext.Push( vcl::PushFlags::CLIPREGION );
-    rRenderContext.SetClipRegion();
+    rRenderContext.ClearClipRegion();
     const SwPageFrame* pPage = FindPageFrame();
 
     const SwNoTextFrame *pNoText = Lower() && Lower()->IsNoTextFrame()

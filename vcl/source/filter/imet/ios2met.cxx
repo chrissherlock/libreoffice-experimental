@@ -1718,7 +1718,7 @@ void OS2METReader::ReadOrder(sal_uInt16 nOrderID, sal_uInt16 nOrderLen)
             if (nID==0) p=nullptr;
             while (p!=nullptr && p->nID!=nID) p=p->pSucc;
             if (p!=nullptr) pVirDev->SetClipRegion(vcl::Region(p->aPPoly));
-            else pVirDev->SetClipRegion();
+            else pVirDev->ClearClipRegion();
             break;
         }
         case GOrdNopNop:

@@ -1682,7 +1682,7 @@ void ScPrintFunc::PrintArea( SCCOL nX1, SCROW nY1, SCCOL nX2, SCROW nY2,
 
     pDev->SetClipRegion(vcl::Region(tools::Rectangle(
                 aPos, Size(aOutputData.GetScrW(), aOutputData.GetScrH()))));
-    pDev->SetClipRegion();
+    pDev->ClearClipRegion();
 
     if( aTableParam.bCellContent )
     {
@@ -1916,7 +1916,7 @@ void ScPrintFunc::PrintHF( tools::Long nPageNo, bool bHeader, tools::Long nStart
             pEditEngine->DrawText_ToPosition(*pDev, aDraw);
         }
 
-        pDev->SetClipRegion();
+        pDev->ClearClipRegion();
     }
 
     if ( pLocationData )
