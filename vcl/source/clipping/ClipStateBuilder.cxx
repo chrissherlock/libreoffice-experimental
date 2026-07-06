@@ -68,17 +68,17 @@ ClipState ClipStateBuilder::Build(const vcl::Window& rWindow, ClipSpace eSpace)
         ClipState aParentState = Build(*pParent, eSpace);
         aState.maBounds = GetNodeBounds(rWindow, eSpace);
 
-        // Safely constrain child to parent bounds
+        // Inherit parent bounds to constrain child painting
         aState.maBounds.Intersection(aParentState.maBounds);
 
         // If parent has a custom region (e.g., a shaped window), we must inherit it.
         // Composition (P intersection C) with this child's own region happens below.
-        if (aParentState.maCustomRegion)
+        if (aParentState.maCustomRegion && aParentState.bClipChildren)
             aState.maCustomRegion = aParentState.maCustomRegion;
     }
     else
     {
-        // Top-level frames and overlap windows rely purely on their own bounds
+        // Root or Floating: use own bounds
         aState.maBounds = GetNodeBounds(rWindow, eSpace);
     }
 
