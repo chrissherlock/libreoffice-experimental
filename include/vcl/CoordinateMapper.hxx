@@ -37,6 +37,7 @@ namespace vcl
 {
 struct SpaceLogic;
 struct SpaceWindow;
+struct SpaceView;
 struct SpaceDevice;
 template <typename Space, typename T> struct TypedGeom;
 }
@@ -163,18 +164,42 @@ public:
     basegfx::B2DHomMatrix GetLogicToLogicMatrix(const MapMode& rSrc, const MapMode& rDst) const;
 
     // Distance Extractors
+    /** Converts a logical dimension to device pixel units.
+        This considers the current MapMode scaling, including any applicable
+        device DPI/PPI scale factors for high-resolution displays.
+    */
     tools::Long LogicWidthToDevicePixel(tools::Long nWidth,
                                         vcl::MappingPolicy ePolicy
                                         = vcl::MappingPolicy::ApplyMapMode) const;
     tools::Long LogicHeightToDevicePixel(tools::Long nHeight,
                                          vcl::MappingPolicy ePolicy
                                          = vcl::MappingPolicy::ApplyMapMode) const;
+
+    /** Converts a physical device pixel dimension to logical units.
+        This reverses the mapping transformations, accounting for the current
+        MapMode and output device resolution.
+    */
     tools::Long DevicePixelToLogicWidth(tools::Long nWidth,
                                         vcl::MappingPolicy ePolicy
                                         = vcl::MappingPolicy::ApplyMapMode) const;
     tools::Long DevicePixelToLogicHeight(tools::Long nHeight,
                                          vcl::MappingPolicy ePolicy
                                          = vcl::MappingPolicy::ApplyMapMode) const;
+
+    /** Converts a logical dimension to window-space units.
+        Applies mapping transformations (such as zoom) but excludes device-specific
+        scaling factors and absolute device offsets.
+    */
+    tools::Long LogicWidthToWindowUnits(tools::Long nLogicWidth) const;
+    tools::Long LogicHeightToWindowUnits(tools::Long nLogicHeight) const;
+
+    /** Converts a window-space dimension to device pixel units.
+        Applies device-specific scaling factors (e.g., HiDPI/Retina backing scale)
+        to transform intermediate window coordinates into final physical pixels.
+    */
+    tools::Long WindowWidthToDevicePixel(tools::Long nWindowWidth) const;
+    tools::Long WindowHeightToDevicePixel(tools::Long nWindowHeight) const;
+
     double LogicWidthToWindowSubPixel(tools::Long nWidth, vcl::MappingPolicy ePolicy
                                                           = vcl::MappingPolicy::ApplyMapMode) const;
     double LogicHeightToWindowSubPixel(tools::Long nHeight,
@@ -380,6 +405,9 @@ public:
     vcl::TypedGeom<vcl::SpaceDevice, Geom>
     MapToDevice(const vcl::TypedGeom<vcl::SpaceLogic, Geom>& rLogicGeom,
                 const MapMode& rCustomMapMode) const;
+
+    vcl::TypedGeom<vcl::SpaceDevice, vcl::Region>
+    WindowToDevice(const vcl::TypedGeom<vcl::SpaceWindow, vcl::Region>& rRegion) const;
 
 private:
     void GetLogicToViewWeights(double& rScaleX, double& rScaleY, double& rTransX, double& rTransY,
