@@ -40,7 +40,14 @@ ClipState ClipStateBuilder::Build(const OutputDevice& rDevice)
 
             const auto& rDevState = rTypedDev.GetClipState();
             if (rDevState.mbHasCustomClip)
-                aState.maCustomRegion = rTypedDev.GetMapper().ViewToDevice(rDevState.maRegion);
+            {
+                vcl::Region aDeviceRegion = rDevState.maRegion;
+
+                float fScale = rTypedDev.GetMapper().GetDPIScaleFactor();
+                aDeviceRegion.Scale(fScale, fScale);
+
+                aState.maCustomRegion = aDeviceRegion;
+            }
 
             return aState;
         }
@@ -160,12 +167,16 @@ void ClipStateBuilder::CollectSiblings(const vcl::Window& rWindow, std::vector<C
     {
         vcl::Window* pOverlap
             = rWindow.ImplGetParent()->ImplGetWindowImpl()->mpHierarchy->mpFirstOverlap;
+
         while (pOverlap)
         {
             WindowImpl* pOverlapImpl = pOverlap->ImplGetWindowImpl();
+
             if (pOverlap != &rWindow && pOverlapImpl->mbReallyVisible
                 && !pOverlapImpl->mbPaintTransparent)
+            {
                 rOut.push_back({ GetNodeBounds(*pOverlap, eSpace) });
+            }
 
             pOverlap = pOverlapImpl->mpHierarchy->mpNextOverlap;
         }
