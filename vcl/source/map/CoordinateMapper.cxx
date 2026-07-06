@@ -303,6 +303,31 @@ T CoordinateMapper::WindowToLogicUnits(const T& rObj, const vcl::detail::MapConv
     return vcl::TransformCompiler::Compile(GetInverseViewTransformation(rConv)).apply(rObj);
 }
 
+tools::Long CoordinateMapper::LogicWidthToWindowUnits(tools::Long nLogicWidth) const
+{
+    // Use the stored scale from the resolved MapCoefficients
+    return vcl::detail::RoundToLong(static_cast<double>(nLogicWidth)
+                                    * maState.GetMapRes().mfScaleX);
+}
+
+tools::Long CoordinateMapper::LogicHeightToWindowUnits(tools::Long nLogicHeight) const
+{
+    return vcl::detail::RoundToLong(static_cast<double>(nLogicHeight)
+                                    * maState.GetMapRes().mfScaleY);
+}
+
+tools::Long CoordinateMapper::WindowWidthToDevicePixel(tools::Long nWindowWidth) const
+{
+    return vcl::detail::RoundToLong(static_cast<double>(nWindowWidth)
+                                    * maState.GetDPIScaleFactor());
+}
+
+tools::Long CoordinateMapper::WindowHeightToDevicePixel(tools::Long nWindowHeight) const
+{
+    return vcl::detail::RoundToLong(static_cast<double>(nWindowHeight)
+                                    * maState.GetDPIScaleFactor());
+}
+
 basegfx::B2DPoint CoordinateMapper::LogicToDeviceSubPixel(const Point& rPt,
                                                           vcl::MappingPolicy ePolicy) const
 {
