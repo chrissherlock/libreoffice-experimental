@@ -28,7 +28,9 @@ ClipPlan ClipCompiler::Compile(const ClipState& rState)
     {
         for (const auto& rChild : rState.maChildren)
         {
-            aExclusionMask.Union(rChild.maBounds);
+            tools::Rectangle aChildBounds = rChild.maBounds;
+            aChildBounds.Intersection(rState.maBounds);
+            aExclusionMask.Union(aChildBounds);
         }
     }
 

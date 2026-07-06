@@ -1309,9 +1309,11 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
 
     aRegion.Exclude( aInvalidateRegion );
 
-    rManager.ClipBoundaries(*this, aRegion, false, true);
-    if (!bScrollChildren)
-        rManager.ClipChildren(*this, aRegion, bool(nOrgFlags & ScrollFlags::NoChildren));
+    auto aState = vcl::clipping::ClipStateBuilder::Build(*this, vcl::clipping::ClipSpace::AbsoluteDevice);
+
+    vcl::clipping::ClipPlan aPlan = vcl::clipping::ClipCompiler::Compile(aState);
+
+    aRegion.Intersect(aPlan.maFinalRegion);
 
     const auto& rClipState = GetOutDev()->GetClipState();
     if (rClipState.mbHasCustomClip && (nFlags & ScrollFlags::UseClipRegion))
@@ -1370,7 +1372,15 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         mpWindowImpl->mnPaintFlags |= ImplPaintFlags::CheckRtl;
 
         if (!bScrollChildren)
-            rManager.ClipChildren(*this, aInvalidateRegion, bool(nOrgFlags & ScrollFlags::NoChildren));
+        {
+            auto aTopology = vcl::clipping::ClipStateBuilder::Build(*this, vcl::clipping::ClipSpace::AbsoluteDevice);
+
+            if (nOrgFlags & ScrollFlags::NoChildren)
+            {
+                vcl::clipping::ClipPlan aExclusionPlan = vcl::clipping::ClipCompiler::Compile(aTopology);
+                aInvalidateRegion.Exclude(aExclusionPlan.maFinalRegion);
+            }
+        }
 
         ImplInvalidateFrameRegion( &aInvalidateRegion, InvalidateFlags::Children );
     }

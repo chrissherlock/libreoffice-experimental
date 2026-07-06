@@ -233,53 +233,6 @@ void ClippingManager::ClipBoundaries(vcl::Window& rWindow, vcl::Region& rRegion,
         rRegion.Exclude(rSibling.maBounds);
 }
 
-void ClippingManager::ClipChildren(vcl::Window& rWindow, vcl::Region& rRegion, bool bAllChildren)
-{
-    ClipState aState = ClipStateBuilder::Build(rWindow, ClipSpace::AbsoluteDevice);
-
-    if (bAllChildren)
-    {
-        // Bypass ParentClipMode filters and aggressively exclude all
-        WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
-        vcl::Window* pChild = pImpl->mpHierarchy->mpFirstChild;
-        while (pChild)
-        {
-            if (pChild->ImplGetWindowImpl()->mbReallyVisible)
-                rRegion.Exclude(pChild->GetOutputRectPixel());
-            pChild = pChild->ImplGetWindowImpl()->mpHierarchy->mpNext;
-        }
-    }
-    else
-    {
-        // Use the safely filtered children array from the builder
-        for (const auto& rChild : aState.maChildren)
-            rRegion.Exclude(rChild.maBounds);
-    }
-}
-
-void ClippingManager::ClipSiblings(vcl::Window& rWindow, vcl::Region& rRegion)
-{
-    vcl::Window* pParent = rWindow.GetParent();
-
-    if (!pParent)
-        return;
-
-    bool bFound = false;
-    for (size_t i = 0; i < pParent->GetChildCount(); ++i)
-    {
-        vcl::Window* pSibling = pParent->GetChild(i);
-
-        if (pSibling == &rWindow)
-        {
-            bFound = true;
-            continue;
-        }
-
-        if (bFound && pSibling->IsReallyVisible())
-            ExcludeWindowRegion(*pSibling, rRegion);
-    }
-}
-
 void ClippingManager::ClipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect)
 {
     vcl::DispatchDevice(rDevice, [&rDstRect](auto& rTypedDev) {

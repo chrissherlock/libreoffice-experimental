@@ -20,6 +20,7 @@
 
 #include <window.h>
 #include <clipping/ClippingManager.hxx>
+#include <clipping/ClipStateBuilder.hxx>
 
 namespace
 {
@@ -45,53 +46,32 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testClipChildren_Comprehensive)
     ScopedVclPtr<WorkWindow> pRoot(VclPtr<WorkWindow>::Create(nullptr, WB_CLIPCHILDREN));
     ScopedVclPtr<vcl::Window> pChild(VclPtr<vcl::Window>::Create(pRoot.get()));
 
+    // Define geometric constraints to match our test space
+    pRoot->SetOutputSizePixel(Size(100, 100));
     pChild->SetPosSizePixel(Point(50, 50), Size(20, 20));
     pChild->SetParentClipMode(ParentClipMode::NONE);
 
     pRoot->Show();
     pChild->Show();
 
-    // Stateless ClippingManager does not require manual initialization calls.
-    vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
+    // The Compiler is the sole authority.
+    // We request the plan for the Root window.
+    auto aTopology
+        = vcl::clipping::ClipStateBuilder::Build(*pRoot, vcl::clipping::ClipSpace::AbsoluteDevice);
+    vcl::clipping::ClipPlan aPlan = vcl::clipping::ClipCompiler::Compile(aTopology);
 
-    pRoot->GetOutDev()->GetClippingManager(*pRoot).ClipChildren(*pRoot, aRegion, false);
+    // aPlan.maFinalRegion is now the clipping-adjusted canvas.
+    // We intersect it with our test region to verify the "hole" is present.
+    vcl::Region aTestRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
+    aTestRegion.Intersect(aPlan.maFinalRegion);
 
-    CPPUNIT_ASSERT(!aRegion.IsEmpty());
-    CPPUNIT_ASSERT(!aRegion.Contains(Point(60, 60)));
-    CPPUNIT_ASSERT(aRegion.Contains(Point(10, 10)));
-}
+    // Verify the child area is missing (punched out)
+    CPPUNIT_ASSERT_MESSAGE("Child area at (60,60) should be excluded from the paint region",
+                           !aTestRegion.Contains(Point(60, 60)));
 
-CPPUNIT_TEST_FIXTURE(TestClipping, testClipSiblings_Comprehensive)
-{
-    ScopedVclPtr<WorkWindow> pRoot(VclPtr<WorkWindow>::Create(nullptr, WB_CLIPCHILDREN));
-
-    // Sibling 1 (Back of the Z-Order)
-    ScopedVclPtr<vcl::Window> pS1(VclPtr<vcl::Window>::Create(pRoot.get()));
-    pS1->SetPosSizePixel(Point(10, 10), Size(40, 40));
-
-    // Sibling 2 (Front of the Z-Order)
-    ScopedVclPtr<vcl::Window> pS2(VclPtr<vcl::Window>::Create(pRoot.get()));
-    pS2->SetPosSizePixel(Point(30, 30), Size(40, 40));
-
-    // Force visibility flags for the headless environment so IsReallyVisible() evaluates to true
-    pRoot->ImplGetWindowImpl()->mbReallyVisible = true;
-    pS1->ImplGetWindowImpl()->mbReallyVisible = true;
-    pS2->ImplGetWindowImpl()->mbReallyVisible = true;
-
-    vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
-
-    // Use the ClippingManager to clip siblings FOR S1.
-    // This tells the manager to look for anything "on top" of S1 (which is S2) and exclude it.
-    pS1->GetOutDev()->GetClippingManager(*pS1).ClipSiblings(*pS1, aRegion);
-
-    // Test the Math: S2 (Front) should be punched out of the region
-    CPPUNIT_ASSERT_MESSAGE("S2's region should be excluded", !aRegion.Contains(Point(35, 35)));
-
-    // Test the Math: S1 (Back) should NOT be punched out, because we are clipping FOR it
-    CPPUNIT_ASSERT_MESSAGE("S1's region should remain", aRegion.Contains(Point(15, 15)));
-
-    // Test the Math: Area outside both should remain intact
-    CPPUNIT_ASSERT_MESSAGE("Outside area should remain untouched", aRegion.Contains(Point(80, 80)));
+    // Verify the parent area outside the child remains intact
+    CPPUNIT_ASSERT_MESSAGE("Parent area at (10,10) should remain for painting",
+                           aTestRegion.Contains(Point(10, 10)));
 }
 
 } // end anonymous namespace

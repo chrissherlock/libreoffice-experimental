@@ -48,9 +48,6 @@ public:
 
     void ClipBoundaries(vcl::Window& rWindow, vcl::Region& rRegion, bool bThis, bool bOverlaps);
 
-    void ClipChildren(vcl::Window& rWindow, vcl::Region& rRegion, bool bAllChildren = false);
-    void ClipSiblings(vcl::Window& rWindow, vcl::Region& rRegion);
-
     void ClipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect);
 
     static void SetParentClipMode(vcl::Window* pWindow, ParentClipMode nMode);
