@@ -187,52 +187,6 @@ void ClippingManager::CalcOverlapRegion(vcl::Window& rWindow, const tools::Recta
     }
 }
 
-void ClippingManager::ClipBoundaries(vcl::Window& rWindow, vcl::Region& rRegion, bool bThis,
-                                     bool bOverlaps)
-{
-    ClipState aState = ClipStateBuilder::Build(rWindow, ClipSpace::AbsoluteDevice);
-
-    if (bThis)
-    {
-        rRegion.Intersect(aState.maBounds);
-        if (aState.maCustomRegion)
-            rRegion.Intersect(*aState.maCustomRegion);
-
-        if (bOverlaps)
-        {
-            for (const auto& rSibling : aState.maSiblings)
-                rRegion.Exclude(rSibling.maBounds);
-        }
-        return;
-    }
-
-    if (!rWindow.ImplIsOverlapWindow())
-    {
-        vcl::Window* pParent = rWindow.ImplGetParent();
-        if (pParent)
-        {
-            ClipState aParentState = ClipStateBuilder::Build(*pParent, ClipSpace::AbsoluteDevice);
-            rRegion.Intersect(aParentState.maBounds);
-            if (aParentState.maCustomRegion)
-                rRegion.Intersect(*aParentState.maCustomRegion);
-        }
-        return;
-    }
-
-    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
-    if (!pImpl->mbFrame && pImpl->mpFrameWindow)
-    {
-        rRegion.Intersect(
-            tools::Rectangle(Point(0, 0), pImpl->mpFrameWindow->GetOutputSizePixel()));
-    }
-
-    if (!bOverlaps || rRegion.IsEmpty())
-        return;
-
-    for (const auto& rSibling : aState.maSiblings)
-        rRegion.Exclude(rSibling.maBounds);
-}
-
 void ClippingManager::ClipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect)
 {
     vcl::DispatchDevice(rDevice, [&rDstRect](auto& rTypedDev) {

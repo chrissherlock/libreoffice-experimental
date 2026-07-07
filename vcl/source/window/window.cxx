@@ -44,6 +44,7 @@
 #include <vcl/CoordinateMapper.hxx>
 
 #include <brdwin.hxx>
+#include <clipping/ClipStateBuilder.hxx>
 #include <clipping/ClippingManager.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>
@@ -3510,7 +3511,9 @@ void Window::InvertTracking( const tools::Rectangle& rRect, ShowTrackFlags nFlag
         if ( nFlags & ShowTrackFlags::Clip )
         {
             vcl::Region aRegion( GetOutputRectPixel() );
-            GetOutDev()->GetClippingManager(*this).ClipBoundaries(*this, aRegion, false, false);
+            // Restore legacy procedural behavior: clip to parent bounds
+            vcl::clipping::ClipState aState = vcl::clipping::ClipStateBuilder::Build(*this, vcl::clipping::ClipSpace::AbsoluteDevice);
+            aRegion.Intersect(aState.maBounds);
             pOutDev->ApplyClipRegion( aRegion, pGraphics );
         }
     }

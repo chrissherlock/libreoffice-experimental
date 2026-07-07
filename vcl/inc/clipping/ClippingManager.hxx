@@ -46,8 +46,6 @@ public:
     void CalcOverlapRegion(vcl::Window& rWindow, const tools::Rectangle& rSourceRect,
                            vcl::Region& rRegion, bool bChildren, bool bSiblings);
 
-    void ClipBoundaries(vcl::Window& rWindow, vcl::Region& rRegion, bool bThis, bool bOverlaps);
-
     void ClipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect);
 
     static void SetParentClipMode(vcl::Window* pWindow, ParentClipMode nMode);
