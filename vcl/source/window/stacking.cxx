@@ -113,6 +113,8 @@ void Window::ImplInsertWindow( vcl::Window* pParent )
         else
             mpWindowImpl->mpHierarchy->mpPrev->mpWindowImpl->mpHierarchy->mpNext = this;
     }
+
+    InvalidateClipState();
 }
 
 void Window::ImplRemoveWindow( bool bRemoveFrameData )
@@ -161,10 +163,12 @@ void Window::ImplRemoveWindow( bool bRemoveFrameData )
     mpWindowImpl->mpHierarchy->mpPrev = nullptr;
     mpWindowImpl->mpHierarchy->mpNext = nullptr;
 
+    // Trigger invalidation because this window's bounds
+    // are no longer an exclusion factor for its siblings.
+    InvalidateClipState();
+
     if ( bRemoveFrameData )
-    {
         GetOutDev()->ReleaseGraphics();
-    }
 }
 
 void Window::reorderWithinParent(sal_uInt16 nNewPosition)
@@ -197,6 +201,10 @@ void Window::reorderWithinParent(sal_uInt16 nNewPosition)
         mpWindowImpl->mpHierarchy->mpPrev->mpWindowImpl->mpHierarchy->mpNext = this;
     else
         mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mpHierarchy->mpFirstChild = this;
+
+    // After reordering, the sibling chains are different.
+    // Invalidate so the next ClipStateBuilder::Build() sees the new order.
+    InvalidateClipState();
 }
 
 void Window::ImplToBottomChild()
@@ -217,6 +225,8 @@ void Window::ImplToBottomChild()
     mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mpHierarchy->mpLastChild = this;
     mpWindowImpl->mpHierarchy->mpPrev->mpWindowImpl->mpHierarchy->mpNext = this;
     mpWindowImpl->mpHierarchy->mpNext = nullptr;
+
+    InvalidateClipState();
 }
 
 void Window::ImplCalcToTop( ImplCalcToTopData* pPrevData )
@@ -976,6 +986,8 @@ void Window::SetParent( vcl::Window* pNewParent )
 
     if ( bVisible )
         Show( true, ShowFlags::NoFocusChange | ShowFlags::NoActivate );
+
+    InvalidateClipState();
 }
 
 bool Window::IsAncestorOf( const vcl::Window& rWindow ) const
