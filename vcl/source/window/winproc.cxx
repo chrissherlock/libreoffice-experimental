@@ -1663,9 +1663,9 @@ vcl::Window *HandleGestureEventBase::Dispatch(vcl::Window* pMouseWindow)
                            m_pWindow->ScreenToOutputPixel( m_aMousePos ) ) ) ) );
     bool bPropagate = CallCommand(pFocusWindow, aRelMousePos);
     if (!bPropagate)
-        pDispatchedTo = pMouseWindow;
+        return pMouseWindow;
 
-    return pDispatchedTo;
+    return nullptr;
 }
 
 namespace {
