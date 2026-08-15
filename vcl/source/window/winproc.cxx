@@ -2503,16 +2503,12 @@ static void lcl_HandleSalSettings( SalEvent nEvent )
                 nType = DataChangedEventType::FONTS;
                 break;
             default:
-                nType = DataChangedEventType::NONE;
-                break;
+                return;
         }
 
-        if ( nType != DataChangedEventType::NONE )
-        {
-            DataChangedEvent aDCEvt( nType );
-            Application::ImplCallEventListenersApplicationDataChanged(&aDCEvt);
-            Application::NotifyAllWindows( aDCEvt );
-        }
+        DataChangedEvent aDCEvt( nType );
+        Application::ImplCallEventListenersApplicationDataChanged(&aDCEvt);
+        Application::NotifyAllWindows( aDCEvt );
     }
 }
 
