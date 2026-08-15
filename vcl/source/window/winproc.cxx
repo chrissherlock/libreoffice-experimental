@@ -1642,26 +1642,29 @@ vcl::Window *HandleGestureEventBase::Dispatch(vcl::Window* pMouseWindow)
     }
 
     // if the command was not handled try the focus window
-    if (!pDispatchedTo)
+    if (pDispatchedTo)
+        return pDispatchedTo;
+
+    vcl::Window* pFocusWindow = m_pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin;
+    if ( !pFocusWindow || (pFocusWindow == pMouseWindow) ||
+         (pFocusWindow != m_pSVData->mpWinData->mpFocusWin) )
     {
-        vcl::Window* pFocusWindow = m_pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin;
-        if ( pFocusWindow && (pFocusWindow != pMouseWindow) &&
-             (pFocusWindow == m_pSVData->mpWinData->mpFocusWin) )
-        {
-            // no wheel-messages to disabled windows
-            if ( pFocusWindow->IsEnabled() && pFocusWindow->IsInputEnabled() && ! pFocusWindow->IsInModalMode() )
-            {
-                // transform coordinates to focus window frame coordinates
-                Point aRelMousePos( pFocusWindow->OutputToScreenPixel(
-                                     pFocusWindow->AbsoluteScreenToOutputPixel(
-                                      m_pWindow->OutputToAbsoluteScreenPixel(
-                                       m_pWindow->ScreenToOutputPixel( m_aMousePos ) ) ) ) );
-                bool bPropagate = CallCommand(pFocusWindow, aRelMousePos);
-                if (!bPropagate)
-                    pDispatchedTo = pMouseWindow;
-            }
-        }
+        return pDispatchedTo;
     }
+
+    // no wheel-messages to disabled windows
+    if ( !pFocusWindow->IsEnabled() || !pFocusWindow->IsInputEnabled() || pFocusWindow->IsInModalMode() )
+        return pDispatchedTo;
+
+    // transform coordinates to focus window frame coordinates
+    Point aRelMousePos( pFocusWindow->OutputToScreenPixel(
+                         pFocusWindow->AbsoluteScreenToOutputPixel(
+                          m_pWindow->OutputToAbsoluteScreenPixel(
+                           m_pWindow->ScreenToOutputPixel( m_aMousePos ) ) ) ) );
+    bool bPropagate = CallCommand(pFocusWindow, aRelMousePos);
+    if (!bPropagate)
+        pDispatchedTo = pMouseWindow;
+
     return pDispatchedTo;
 }
 
