@@ -34,29 +34,6 @@ void Window::ImplAdjustNWFSizes()
         pWin->ImplAdjustNWFSizes();
 }
 
-void WindowOutputDevice::ImplClearFontData(bool bNewFontLists)
-{
-    OutputDevice::ImplClearFontData(bNewFontLists);
-    for (Window* pChild = mxOwnerWindow->mpWindowImpl->mpHierarchy->mpFirstChild; pChild;
-         pChild = pChild->mpWindowImpl->mpHierarchy->mpNext)
-        pChild->GetOutDev()->ImplClearFontData(bNewFontLists);
-}
-
-void WindowOutputDevice::ImplRefreshFontData(bool bNewFontLists)
-{
-    OutputDevice::ImplRefreshFontData(bNewFontLists);
-    for (Window* pChild = mxOwnerWindow->mpWindowImpl->mpHierarchy->mpFirstChild; pChild;
-         pChild = pChild->mpWindowImpl->mpHierarchy->mpNext)
-        pChild->GetOutDev()->ImplRefreshFontData(bNewFontLists);
-}
-
-void WindowOutputDevice::ImplInitMapModeObjects()
-{
-    OutputDevice::ImplInitMapModeObjects();
-    if (mxOwnerWindow->mpWindowImpl->mpCursor)
-        mxOwnerWindow->mpWindowImpl->mpCursor->ImplNew();
-}
-
 const Font& Window::GetFont() const { return GetOutDev()->GetFont(); }
 void Window::SetFont(Font const& font) { return GetOutDev()->SetFont(font); }
 

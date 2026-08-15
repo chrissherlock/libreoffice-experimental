@@ -24,12 +24,6 @@
 
 namespace vcl {
 
-void WindowOutputDevice::EnableRTL ( bool bEnable )
-{
-    if (mbEnableRTL != bEnable)
-        mxOwnerWindow->ImplEnableRTL(bEnable);
-}
-
 void Window::ImplEnableRTL( bool bEnable )
 {
     if (mpWindowImpl->mxOutDev->mbEnableRTL != bEnable)
