@@ -2170,14 +2170,14 @@ static void lcl_HandleGetFocus( vcl::Window* pWindow )
 
     // execute Focus-Events after a delay, such that SystemChildWindows
     // do not blink when they receive focus
-    if ( !pWindow->ImplGetWindowImpl()->mpFrameData->mnFocusId )
-    {
-        pWindow->ImplGetWindowImpl()->mpFrameData->mbStartFocusState = !pWindow->ImplGetWindowImpl()->mpFrameData->mbHasFocus;
-        pWindow->ImplGetWindowImpl()->mpFrameData->mnFocusId = Application::PostUserEvent( LINK( pWindow, vcl::Window, ImplAsyncFocusHdl ), nullptr, true);
-        vcl::Window* pFocusWin = pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin;
-        if ( pFocusWin && pFocusWin->ImplGetWindowImpl()->mpCursor )
-            pFocusWin->ImplGetWindowImpl()->mpCursor->ImplShow();
-    }
+    if (pWindow->ImplGetWindowImpl()->mpFrameData->mnFocusId)
+        return;
+
+    pWindow->ImplGetWindowImpl()->mpFrameData->mbStartFocusState = !pWindow->ImplGetWindowImpl()->mpFrameData->mbHasFocus;
+    pWindow->ImplGetWindowImpl()->mpFrameData->mnFocusId = Application::PostUserEvent( LINK( pWindow, vcl::Window, ImplAsyncFocusHdl ), nullptr, true);
+    vcl::Window* pFocusWin = pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin;
+    if ( pFocusWin && pFocusWin->ImplGetWindowImpl()->mpCursor )
+        pFocusWin->ImplGetWindowImpl()->mpCursor->ImplShow();
 }
 
 static void lcl_HandleLoseFocus( vcl::Window* pWindow )
