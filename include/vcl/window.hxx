@@ -29,6 +29,7 @@
 #include <vcl/uitest/factory.hxx>
 #include <vcl/IDialogRenderable.hxx>
 #include <rtl/ustring.hxx>
+#include <vcl/commandevent.hxx>
 #include <memory>
 
 struct ImplSVEvent;
@@ -413,6 +414,9 @@ enum class WindowExtendedStyle {
 namespace o3tl {
     template<> struct typed_flags<WindowExtendedStyle> : is_typed_flags<WindowExtendedStyle, 0x0007> {};
 };
+
+bool ImplCallCommand( const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, void const * pData = nullptr,
+                      bool bMouse = false, Point const * pPos = nullptr );
 
 namespace vcl {
 

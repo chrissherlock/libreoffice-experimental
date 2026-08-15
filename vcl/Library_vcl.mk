@@ -222,6 +222,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/mouse \
     vcl/source/window/NotebookBarAddonsMerger \
     vcl/source/window/OptionalBox \
+    vcl/source/window/mouseevent \
     vcl/source/window/printdlg \
     vcl/source/window/scrwnd \
     vcl/source/window/seleng \
