@@ -2304,15 +2304,13 @@ static void lcl_HandleClose( const vcl::Window* pWindow )
 
 static void lcl_HandleUserEvent( ImplSVEvent* pSVEvent )
 {
-    if ( pSVEvent )
-    {
-        if ( pSVEvent->mbCall )
-        {
-            pSVEvent->maLink.Call( pSVEvent->mpData );
-        }
+    if (!pSVEvent)
+        return;
 
-        delete pSVEvent;
-    }
+    if ( pSVEvent->mbCall )
+        pSVEvent->maLink.Call( pSVEvent->mpData );
+
+    delete pSVEvent;
 }
 
 MouseEventModifiers ImplGetMouseMoveMode( SalMouseEvent const * pEvent )
