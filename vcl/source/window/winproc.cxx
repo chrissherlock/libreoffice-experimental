@@ -1921,13 +1921,14 @@ static void lcl_KillOwnPopups( vcl::Window const * pWindow )
     ImplSVData* pSVData = ImplGetSVData();
     vcl::Window *pParent = pWindow->ImplGetWindowImpl()->mpFrameWindow;
     vcl::Window *pChild = pSVData->mpWinData->mpFirstFloat;
-    if ( pChild && pParent->ImplIsWindowOrChild( pChild, true ) )
-    {
-        if (!(pSVData->mpWinData->mpFirstFloat->GetPopupModeFlags()
-              & FloatWinPopupFlags::NoAppFocusClose))
-            pSVData->mpWinData->mpFirstFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel
-                                                           | FloatWinPopupEndFlags::CloseAll);
-    }
+
+    if (!pChild || !pParent->ImplIsWindowOrChild( pChild, true ) )
+        return;
+
+    if (pSVData->mpWinData->mpFirstFloat->GetPopupModeFlags() & FloatWinPopupFlags::NoAppFocusClose)
+        return;
+
+    pSVData->mpWinData->mpFirstFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel | FloatWinPopupEndFlags::CloseAll);
 }
 
 void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight )
