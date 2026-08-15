@@ -70,7 +70,7 @@
 
 #include <algorithm>
 
-#define IMPL_MIN_NEEDSYSWIN         49
+constexpr tools::Long IMPL_MIN_NEEDSYSWIN = 49;
 
 bool ImplCallPreNotify( NotifyEvent& rEvt )
 {
