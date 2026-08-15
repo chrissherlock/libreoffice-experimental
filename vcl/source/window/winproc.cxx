@@ -1309,38 +1309,38 @@ static bool lcl_HandleKey( vcl::Window* pWindow, NotifyEventType nSVEvent,
     }
 
     // #105591# send keyinput to parent if we are a floating window and the key was not processed yet
-    if( !bRet && pWindow->ImplGetWindowImpl() && pWindow->ImplGetWindowImpl()->mbFloatWin && pWindow->GetParent() && (pWindow->ImplGetWindowImpl()->mpFrame != pWindow->GetParent()->ImplGetWindowImpl()->mpFrame) )
+    if (bRet || !pWindow->ImplGetWindowImpl() || !pWindow->ImplGetWindowImpl()->mbFloatWin || !pWindow->GetParent() || (pWindow->ImplGetWindowImpl()->mpFrame == pWindow->GetParent()->ImplGetWindowImpl()->mpFrame) )
+        return bRet;
+
+    pChild = pWindow->GetParent();
+
+    // call handler
+    NotifyEvent aNEvt( nSVEvent, pChild, &aKeyEvt );
+    bool bPreNotify = ImplCallPreNotify( aNEvt );
+    if ( pChild->isDisposed() )
+        return true;
+
+    if ( !bPreNotify )
     {
-        pChild = pWindow->GetParent();
-
-        // call handler
-        NotifyEvent aNEvt( nSVEvent, pChild, &aKeyEvt );
-        bool bPreNotify = ImplCallPreNotify( aNEvt );
-        if ( pChild->isDisposed() )
-            return true;
-
-        if ( !bPreNotify )
+        if ( nSVEvent == NotifyEventType::KEYINPUT )
         {
-            if ( nSVEvent == NotifyEventType::KEYINPUT )
-            {
-                pChild->ImplGetWindowImpl()->mbKeyInput = false;
-                pChild->KeyInput( aKeyEvt );
-            }
-            else
-            {
-                pChild->ImplGetWindowImpl()->mbKeyUp = false;
-                pChild->KeyUp( aKeyEvt );
-            }
-
-            if( !pChild->isDisposed() )
-                aNEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners( aNEvt );
-            if ( pChild->isDisposed() )
-                return true;
+            pChild->ImplGetWindowImpl()->mbKeyInput = false;
+            pChild->KeyInput( aKeyEvt );
+        }
+        else
+        {
+            pChild->ImplGetWindowImpl()->mbKeyUp = false;
+            pChild->KeyUp( aKeyEvt );
         }
 
-        if( bPreNotify || !pChild->ImplGetWindowImpl()->mbKeyInput )
-            bRet = true;
+        if( !pChild->isDisposed() )
+            aNEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners( aNEvt );
+        if ( pChild->isDisposed() )
+            return true;
     }
+
+    if( bPreNotify || !pChild->ImplGetWindowImpl()->mbKeyInput )
+        return true;
 
     return bRet;
 }
