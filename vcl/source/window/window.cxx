@@ -580,16 +580,6 @@ Window::~Window()
     return mpWindowImpl ? mpWindowImpl->mxOutDev.get() : nullptr;
 }
 
-Color WindowOutputDevice::GetBackgroundColor() const
-{
-    return mxOwnerWindow->GetDisplayBackground().GetColor();
-}
-
-bool WindowOutputDevice::CanEnableNativeWidget() const
-{
-    return mxOwnerWindow->IsNativeWidgetEnabled();
-}
-
 } /* namespace vcl */
 
 WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
@@ -809,109 +799,6 @@ ImplFrameData::ImplFrameData( vcl::Window *pWindow )
 }
 
 namespace vcl {
-
-bool WindowOutputDevice::AcquireGraphics() const
-{
-    DBG_TESTSOLARMUTEX();
-
-    if (isDisposed())
-        return false;
-
-    if (mpGraphics)
-        return true;
-
-    mbInitFont          = true;
-    mbInitTextColor     = true;
-    maClipState.Invalidate();
-
-    ImplSVData* pSVData = ImplGetSVData();
-
-    mpGraphics = mxOwnerWindow->mpWindowImpl->mpFrame->AcquireGraphics();
-    // try harder if no wingraphics was available directly
-    if ( !mpGraphics )
-    {
-        // find another output device in the same frame
-        vcl::WindowOutputDevice* pReleaseOutDev = pSVData->maGDIData.mpLastWinGraphics.get();
-        while ( pReleaseOutDev )
-        {
-            if ( pReleaseOutDev->mxOwnerWindow && pReleaseOutDev->mxOwnerWindow->mpWindowImpl->mpFrame == mxOwnerWindow->mpWindowImpl->mpFrame )
-                break;
-            pReleaseOutDev = static_cast<vcl::WindowOutputDevice*>(pReleaseOutDev->mpPrevGraphics.get());
-        }
-
-        if ( pReleaseOutDev )
-        {
-            // steal the wingraphics from the other outdev
-            mpGraphics = pReleaseOutDev->mpGraphics;
-            pReleaseOutDev->ReleaseGraphics( false );
-        }
-        else
-        {
-            // if needed retry after releasing least recently used wingraphics
-            while ( !mpGraphics )
-            {
-                if ( !pSVData->maGDIData.mpLastWinGraphics )
-                    break;
-                pSVData->maGDIData.mpLastWinGraphics->ReleaseGraphics();
-                mpGraphics = mxOwnerWindow->mpWindowImpl->mpFrame->AcquireGraphics();
-            }
-        }
-    }
-
-    if ( mpGraphics )
-    {
-        // update global LRU list of wingraphics
-        mpNextGraphics = pSVData->maGDIData.mpFirstWinGraphics.get();
-        pSVData->maGDIData.mpFirstWinGraphics = const_cast<vcl::WindowOutputDevice*>(this);
-        if ( mpNextGraphics )
-            mpNextGraphics->mpPrevGraphics = const_cast<vcl::WindowOutputDevice*>(this);
-        if ( !pSVData->maGDIData.mpLastWinGraphics )
-            pSVData->maGDIData.mpLastWinGraphics = const_cast<vcl::WindowOutputDevice*>(this);
-
-        mpGraphics->SetXORMode( (RasterOp::Invert == GetRasterOp()) || (RasterOp::Xor == GetRasterOp()), RasterOp::Invert == GetRasterOp() );
-        mpGraphics->setAntiAlias(bool(mnAntialiasing & AntialiasingFlags::Enable));
-    }
-
-    // Force the pipeline to flush the window's expected state into the newly acquired (and potentially dirty) backend.
-    ResetRenderStateSync();
-    SyncRenderStateToBackend();
-
-    return mpGraphics != nullptr;
-}
-
-void WindowOutputDevice::ReleaseGraphics( bool bRelease )
-{
-    DBG_TESTSOLARMUTEX();
-
-    if ( !mpGraphics )
-        return;
-
-    // release the fonts of the physically released graphics device
-    if( bRelease )
-        ImplReleaseFonts();
-
-    ImplSVData* pSVData = ImplGetSVData();
-
-    vcl::Window* pWindow = mxOwnerWindow.get();
-    if (!pWindow)
-        return;
-
-    if ( bRelease )
-        pWindow->mpWindowImpl->mpFrame->ReleaseGraphics( mpGraphics );
-    // remove from global LRU list of window graphics
-    if ( mpPrevGraphics )
-        mpPrevGraphics->mpNextGraphics = mpNextGraphics;
-    else
-        pSVData->maGDIData.mpFirstWinGraphics = static_cast<vcl::WindowOutputDevice*>(mpNextGraphics.get());
-    if ( mpNextGraphics )
-        mpNextGraphics->mpPrevGraphics = mpPrevGraphics;
-    else
-        pSVData->maGDIData.mpLastWinGraphics = static_cast<vcl::WindowOutputDevice*>(mpPrevGraphics.get());
-
-    mpGraphics      = nullptr;
-    mpPrevGraphics  = nullptr;
-    mpNextGraphics  = nullptr;
-}
 
 static sal_Int32 CountDPIScaleFactor(sal_Int32 nDPI)
 {
@@ -1235,38 +1122,6 @@ ImplWinData* Window::ImplGetWinData() const
     }
 
     return mpWindowImpl->mpWinData.get();
-}
-
-
-void WindowOutputDevice::CopyDeviceArea( SalTwoRect& aPosAry )
-{
-    if (aPosAry.mnSrcWidth == 0 || aPosAry.mnSrcHeight == 0 || aPosAry.mnDestWidth == 0 || aPosAry.mnDestHeight == 0)
-        return;
-
-    OutputDevice::CopyDeviceArea(aPosAry);
-}
-
-const OutputDevice* WindowOutputDevice::DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const
-{
-    const OutputDevice* pSrcDevChecked;
-    if ( this == &rSrcDev )
-        pSrcDevChecked = nullptr;
-    else if (GetOutDevType() != rSrcDev.GetOutDevType())
-        pSrcDevChecked = &rSrcDev;
-    else if (mxOwnerWindow->mpWindowImpl->mpFrameWindow == static_cast<const vcl::WindowOutputDevice&>(rSrcDev).mxOwnerWindow->mpWindowImpl->mpFrameWindow)
-        pSrcDevChecked = nullptr;
-    else
-        pSrcDevChecked = &rSrcDev;
-
-    return pSrcDevChecked;
-}
-
-void WindowOutputDevice::DrawOutDevDirectProcess( const OutputDevice& rSrcDev, SalTwoRect& rPosAry, SalGraphics* pSrcGraphics )
-{
-    if (pSrcGraphics)
-        mpGraphics->CopyBits(rPosAry, *pSrcGraphics, *this, rSrcDev);
-    else
-        mpGraphics->CopyBits(rPosAry, *this);
 }
 
 SalGraphics* Window::ImplGetFrameGraphics() const
@@ -2951,12 +2806,6 @@ void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll,
         ImplScroll( aRect, nHorzScroll, nVertScroll, nFlags );
 }
 
-void WindowOutputDevice::Flush()
-{
-    if (mxOwnerWindow->mpWindowImpl)
-        mxOwnerWindow->mpWindowImpl->mpFrame->Flush( GetOutputRectPixel() );
-}
-
 void Window::SetUpdateMode( bool bUpdate )
 {
     if (mpWindowImpl)
@@ -3454,68 +3303,6 @@ bool Window::IsNativeWidgetEnabled() const
     return mpWindowImpl && ImplGetWinData()->mbEnableNativeWidget;
 }
 
-Reference< css::rendering::XCanvas > WindowOutputDevice::ImplGetCanvas( bool bSpriteCanvas ) const
-{
-    // Feed any with operating system's window handle
-
-    // common: first any is VCL pointer to window (for VCL canvas)
-    Sequence< Any > aArg{
-        Any(reinterpret_cast<sal_Int64>(this)),
-        Any(css::awt::Rectangle( GetDeviceOriginX(), GetDeviceOriginY(), GetOutputWidthPixel(), GetOutputHeightPixel() )),
-        Any(mxOwnerWindow->mpWindowImpl->mbAlwaysOnTop),
-        Any(Reference< css::awt::XWindow >(
-                             mxOwnerWindow->GetComponentInterface(),
-                             UNO_QUERY )),
-        GetSystemGfxDataAny()
-    };
-
-    const Reference< XComponentContext >& xContext = comphelper::getProcessComponentContext();
-
-    // Create canvas instance with window handle
-
-    static tools::DeleteUnoReferenceOnDeinit<XMultiComponentFactory> xStaticCanvasFactory(
-        css::rendering::CanvasFactory::create( xContext ) );
-    Reference<XMultiComponentFactory> xCanvasFactory(xStaticCanvasFactory.get());
-    Reference< css::rendering::XCanvas > xCanvas;
-
-    if(xCanvasFactory.is())
-    {
-#ifdef _WIN32
-        // see #140456# - if we're running on a multiscreen setup,
-        // request special, multi-screen safe sprite canvas
-        // implementation (not DX5 canvas, as it cannot cope with
-        // surfaces spanning multiple displays). Note: canvas
-        // (without sprite) stays the same)
-        const sal_uInt32 nDisplay = static_cast< WinSalFrame* >( mxOwnerWindow->mpWindowImpl->mpFrame )->mnDisplay;
-        if( nDisplay >= Application::GetScreenCount() )
-        {
-            xCanvas.set( xCanvasFactory->createInstanceWithArgumentsAndContext(
-                                 bSpriteCanvas ?
-                                 OUString( "com.sun.star.rendering.SpriteCanvas.MultiScreen" ) :
-                                 OUString( "com.sun.star.rendering.Canvas.MultiScreen" ),
-                                 aArg,
-                                 xContext ),
-                             UNO_QUERY );
-
-        }
-        else
-#endif
-        {
-            xCanvas.set( xCanvasFactory->createInstanceWithArgumentsAndContext(
-                             bSpriteCanvas ?
-                             u"com.sun.star.rendering.SpriteCanvas"_ustr :
-                             u"com.sun.star.rendering.Canvas"_ustr,
-                             aArg,
-                             xContext ),
-                         UNO_QUERY );
-
-        }
-    }
-
-    // no factory??? Empty reference, then.
-    return xCanvas;
-}
-
 OUString Window::GetSurroundingText() const
 {
   return OUString();
@@ -3624,11 +3411,6 @@ bool Window::DeleteSurroundingText(const Selection& rSelection)
     return false;
 }
 
-bool WindowOutputDevice::UsePolyPolygonForComplexGradient()
-{
-    return GetRasterOp() != RasterOp::OverPaint;
-}
-
 void Window::ApplySettings(vcl::RenderContext& /*rRenderContext*/)
 {
 }
@@ -3729,35 +3511,6 @@ tools::Long Window::LogicWidthToDevicePixel(tools::Long nWidth) const
 {
     return GetOutDev()->LogicWidthToDevicePixel(nWidth);
 }
-
-WindowOutputDevice::WindowOutputDevice(vcl::Window& rOwnerWindow) :
-    ::OutputDevice(OUTDEV_WINDOW),
-    mxOwnerWindow(&rOwnerWindow)
-{
-    assert(mxOwnerWindow);
-}
-
-WindowOutputDevice::~WindowOutputDevice()
-{
-    disposeOnce();
-}
-
-void WindowOutputDevice::dispose()
-{
-    assert((!mxOwnerWindow || mxOwnerWindow->isDisposed()) && "This belongs to the associated window and must be disposed after it");
-    ::OutputDevice::dispose();
-    // need to do this after OutputDevice::dispose so that the call to WindowOutputDevice::ReleaseGraphics
-    // can release the graphics properly
-    mxOwnerWindow.reset();
-}
-
-css::awt::DeviceInfo WindowOutputDevice::GetDeviceInfo() const
-{
-    css::awt::DeviceInfo aInfo = GetCommonDeviceInfo(mxOwnerWindow->GetSizePixel());
-    mxOwnerWindow->GetBorder(aInfo.LeftInset, aInfo.TopInset, aInfo.RightInset, aInfo.BottomInset);
-    return aInfo;
-}
-
 
 } /* namespace vcl */
 
