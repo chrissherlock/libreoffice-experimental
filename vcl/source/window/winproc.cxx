@@ -1006,14 +1006,14 @@ bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType
         xWindow->MouseButtonUp(aMouseEvent);
     }
 
-    if (nEvent == NotifyEventType::MOUSEBUTTONDOWN)
+    if (nEvent != NotifyEventType::MOUSEBUTTONDOWN)
+        return true;
+
+    // ContextMenu
+    if ( (nCode == MouseSettings::GetContextMenuCode()) &&
+         (nClicks == MouseSettings::GetContextMenuClicks()) )
     {
-         // ContextMenu
-         if ( (nCode == MouseSettings::GetContextMenuCode()) &&
-              (nClicks == MouseSettings::GetContextMenuClicks()) )
-         {
-            lcl_CallCommand(xWindow, CommandEventId::ContextMenu, nullptr, true, &aWinPos);
-         }
+       lcl_CallCommand(xWindow, CommandEventId::ContextMenu, nullptr, true, &aWinPos);
     }
 
     return true;
