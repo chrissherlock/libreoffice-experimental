@@ -2107,58 +2107,58 @@ IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
         }
         else
             GrabFocus();
+
+        return;
     }
-    else
+
+    vcl::Window* pFocusWin = ImplGetWindowImpl()->mpFrameData->mpFocusWin;
+    if ( pFocusWin )
     {
-        vcl::Window* pFocusWin = ImplGetWindowImpl()->mpFrameData->mpFocusWin;
-        if ( pFocusWin )
+        ImplSVData* pSVData = ImplGetSVData();
+
+        if (pSVData->mpWinData->mpFocusWin == pFocusWin)
         {
-            ImplSVData* pSVData = ImplGetSVData();
+            // transfer the FocusWindow
+            vcl::Window* pOverlapWindow = pFocusWin->ImplGetFirstOverlapWindow();
+            if ( pOverlapWindow && pOverlapWindow->ImplGetWindowImpl() )
+                pOverlapWindow->ImplGetWindowImpl()->mpLastFocusWindow = pFocusWin;
+            pSVData->mpWinData->mpFocusWin = nullptr;
 
-            if (pSVData->mpWinData->mpFocusWin == pFocusWin)
+            if ( pFocusWin->ImplGetWindowImpl() && pFocusWin->ImplGetWindowImpl()->mpCursor )
+                pFocusWin->ImplGetWindowImpl()->mpCursor->ImplHide();
+
+            // call the Deactivate
+            vcl::Window* pOldOverlapWindow = pFocusWin->ImplGetFirstOverlapWindow();
+            vcl::Window* pOldRealWindow = pOldOverlapWindow->ImplGetWindow();
+
+            if (pOldOverlapWindow && pOldOverlapWindow->ImplGetWindowImpl() &&
+                pOldRealWindow && pOldRealWindow->ImplGetWindowImpl())
             {
-                // transfer the FocusWindow
-                vcl::Window* pOverlapWindow = pFocusWin->ImplGetFirstOverlapWindow();
-                if ( pOverlapWindow && pOverlapWindow->ImplGetWindowImpl() )
-                    pOverlapWindow->ImplGetWindowImpl()->mpLastFocusWindow = pFocusWin;
-                pSVData->mpWinData->mpFocusWin = nullptr;
-
-                if ( pFocusWin->ImplGetWindowImpl() && pFocusWin->ImplGetWindowImpl()->mpCursor )
-                    pFocusWin->ImplGetWindowImpl()->mpCursor->ImplHide();
-
-                // call the Deactivate
-                vcl::Window* pOldOverlapWindow = pFocusWin->ImplGetFirstOverlapWindow();
-                vcl::Window* pOldRealWindow = pOldOverlapWindow->ImplGetWindow();
-
-                if (pOldOverlapWindow && pOldOverlapWindow->ImplGetWindowImpl() &&
-                    pOldRealWindow && pOldRealWindow->ImplGetWindowImpl())
+                pOldOverlapWindow->ImplGetWindowImpl()->mbActive = false;
+                pOldOverlapWindow->Deactivate();
+                if ( pOldRealWindow != pOldOverlapWindow )
                 {
-                    pOldOverlapWindow->ImplGetWindowImpl()->mbActive = false;
-                    pOldOverlapWindow->Deactivate();
-                    if ( pOldRealWindow != pOldOverlapWindow )
-                    {
-                        pOldRealWindow->ImplGetWindowImpl()->mbActive = false;
-                        pOldRealWindow->Deactivate();
-                    }
+                    pOldRealWindow->ImplGetWindowImpl()->mbActive = false;
+                    pOldRealWindow->Deactivate();
                 }
+            }
 
-                // TrackingMode is ended in lcl_HandleLoseFocus
+            // TrackingMode is ended in lcl_HandleLoseFocus
 #ifdef _WIN32
-                // To avoid problems with the Unix IME
-                pFocusWin->EndExtTextInput();
+            // To avoid problems with the Unix IME
+            pFocusWin->EndExtTextInput();
 #endif
 
-                NotifyEvent aNEvt(NotifyEventType::LOSEFOCUS, pFocusWin);
-                if (!ImplCallPreNotify(aNEvt))
-                    pFocusWin->CompatLoseFocus();
-                pFocusWin->ImplCallDeactivateListeners(nullptr);
-            }
+            NotifyEvent aNEvt(NotifyEventType::LOSEFOCUS, pFocusWin);
+            if (!ImplCallPreNotify(aNEvt))
+                pFocusWin->CompatLoseFocus();
+            pFocusWin->ImplCallDeactivateListeners(nullptr);
         }
-
-        // Redraw all floating window inactive
-        if ( ImplGetWindowImpl()->mpFrameData->mbStartFocusState != bHasFocus )
-            lcl_ActivateFloatingWindows( this, bHasFocus );
     }
+
+    // Redraw all floating window inactive
+    if ( ImplGetWindowImpl()->mpFrameData->mbStartFocusState != bHasFocus )
+        lcl_ActivateFloatingWindows( this, bHasFocus );
 }
 
 static void lcl_HandleGetFocus( vcl::Window* pWindow )
