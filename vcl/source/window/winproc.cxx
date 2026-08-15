@@ -234,19 +234,19 @@ static bool lcl_CallCommand( const VclPtr<vcl::Window>& pChild, CommandEventId n
     bool bPreNotify = ImplCallPreNotify( aNCmdEvt );
     if ( pChild->isDisposed() )
         return false;
-    if ( !bPreNotify )
-    {
-        pChild->ImplGetWindowImpl()->mbCommand = false;
-        pChild->Command( aCEvt );
+    if (bPreNotify)
+        return false;
 
-        if( pChild->isDisposed() )
-            return false;
-        pChild->ImplNotifyKeyMouseCommandEventListeners( aNCmdEvt );
-        if ( pChild->isDisposed() )
-            return false;
-        if ( pChild->ImplGetWindowImpl()->mbCommand )
-            return true;
-    }
+    pChild->ImplGetWindowImpl()->mbCommand = false;
+    pChild->Command( aCEvt );
+
+    if( pChild->isDisposed() )
+        return false;
+    pChild->ImplNotifyKeyMouseCommandEventListeners( aNCmdEvt );
+    if ( pChild->isDisposed() )
+        return false;
+    if ( pChild->ImplGetWindowImpl()->mbCommand )
+        return true;
 
     return false;
 }
