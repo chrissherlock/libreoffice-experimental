@@ -1906,14 +1906,14 @@ static void lcl_HandlePaint( vcl::Window* pWindow, const tools::Rectangle& rBoun
     // trigger paint for all windows that live in the new paint region
     vcl::Region aRegion( rBoundRect );
     pWindow->ImplInvalidateOverlapFrameRegion( aRegion );
-    if( bImmediateUpdate )
-    {
-        // #i87663# trigger possible pending resize notifications
-        // (GetSizePixel does that for us)
-        pWindow->GetSizePixel();
-        // force drawing immediately
-        pWindow->PaintImmediately();
-    }
+    if (!bImmediateUpdate)
+        return;
+
+    // #i87663# trigger possible pending resize notifications
+    // (GetSizePixel does that for us)
+    pWindow->GetSizePixel();
+    // force drawing immediately
+    pWindow->PaintImmediately();
 }
 
 static void lcl_KillOwnPopups( vcl::Window const * pWindow )
