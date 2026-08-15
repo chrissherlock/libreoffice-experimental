@@ -61,6 +61,9 @@
 #include <helpwin.hxx>
 #include <brdwin.hxx>
 
+#include "GenericDropTargetDropContext.hxx"
+#include "GenericDropTargetDragContext.hxx"
+
 #include <com/sun/star/datatransfer/dnd/DNDConstants.hpp>
 #include <com/sun/star/datatransfer/dnd/XDragSource.hpp>
 #include <com/sun/star/awt/MouseEvent.hpp>
@@ -68,33 +71,6 @@
 #include <algorithm>
 
 #define IMPL_MIN_NEEDSYSWIN         49
-
-namespace
-{
-
-class GenericDropTargetDropContext
-    : public ::cppu::WeakImplHelper<css::datatransfer::dnd::XDropTargetDropContext>
-{
-public:
-    GenericDropTargetDropContext() {}
-
-    // XDropTargetDropContext
-    virtual void SAL_CALL acceptDrop(sal_Int8 /*dragOperation*/) override {}
-    virtual void SAL_CALL rejectDrop() override {}
-    virtual void SAL_CALL dropComplete(sal_Bool /*success*/) override {}
-};
-
-class GenericDropTargetDragContext
-    : public ::cppu::WeakImplHelper<css::datatransfer::dnd::XDropTargetDragContext>
-{
-public:
-    GenericDropTargetDragContext() {}
-
-    // XDropTargetDragContext
-    virtual void SAL_CALL acceptDrag(sal_Int8 /*dragOperation*/) override {}
-    virtual void SAL_CALL rejectDrag() override {}
-};
-}
 
 bool ImplCallPreNotify( NotifyEvent& rEvt )
 {
