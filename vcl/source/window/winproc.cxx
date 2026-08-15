@@ -2233,7 +2233,7 @@ struct DelayedCloseEvent
 
 }
 
-static void DelayedCloseEventLink( void* pCEvent, void* )
+static void lcl_DelayedCloseEventLink( void* pCEvent, void* )
 {
     DelayedCloseEvent* pEv = static_cast<DelayedCloseEvent*>(pCEvent);
 
@@ -2298,7 +2298,7 @@ static void lcl_HandleClose( const vcl::Window* pWindow )
     {
         DelayedCloseEvent* pEv = new DelayedCloseEvent;
         pEv->pWindow = pWin;
-        Application::PostUserEvent( LINK_NONMEMBER( pEv, DelayedCloseEventLink ) );
+        Application::PostUserEvent( LINK_NONMEMBER( pEv, lcl_DelayedCloseEventLink ) );
     }
 }
 
