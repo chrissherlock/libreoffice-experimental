@@ -1546,7 +1546,7 @@ static bool lcl_IsAcceptableWheelScrollTarget(const vcl::Window *pMouseWindow)
 //widgets that respond to wheel events will continue to send the event to the
 //scrolling widget in favour of the widget that happens to end up under the
 //mouse.
-static bool shouldReusePreviousMouseWindow(const SalWheelMouseEvent& rPrevEvt, const SalWheelMouseEvent& rEvt)
+static bool lcl_ShouldReusePreviousMouseWindow(const SalWheelMouseEvent& rPrevEvt, const SalWheelMouseEvent& rEvt)
 {
     return (rEvt.mnX == rPrevEvt.mnX && rEvt.mnY == rPrevEvt.mnY && rEvt.mnTime-rPrevEvt.mnTime < 500/*ms*/);
 }
@@ -1715,7 +1715,7 @@ bool HandleWheelEvent::HandleEvent(const SalWheelMouseEvent& rEvt)
     // avoid the problem that scrolling via wheel to this point brings a widget
     // under the mouse that also accepts wheel commands, so stick with the old
     // widget if the time gap is very small
-    if (shouldReusePreviousMouseWindow(pSVData->mpWinData->maLastWheelEvent, rEvt) &&
+    if (lcl_ShouldReusePreviousMouseWindow(pSVData->mpWinData->maLastWheelEvent, rEvt) &&
         lcl_IsAcceptableWheelScrollTarget(pSVData->mpWinData->mpLastWheelWindow))
     {
         xMouseWindow = pSVData->mpWinData->mpLastWheelWindow;
