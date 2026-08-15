@@ -1518,17 +1518,20 @@ static bool lcl_CallWheelCommand( const VclPtr<vcl::Window>& pWindow, const Poin
     CommandEvent        aCEvt( aCmdMousePos, CommandEventId::Wheel, true, pWheelData );
     NotifyEvent         aNCmdEvt( NotifyEventType::COMMAND, pWindow, &aCEvt );
     bool bPreNotify = ImplCallPreNotify( aNCmdEvt );
+
     if ( pWindow->isDisposed() )
         return false;
-    if ( !bPreNotify )
-    {
-        pWindow->ImplGetWindowImpl()->mbCommand = false;
-        pWindow->Command( aCEvt );
-        if ( pWindow->isDisposed() )
-            return false;
-        if ( pWindow->ImplGetWindowImpl()->mbCommand )
-            return true;
-    }
+
+    if (bPreNotify)
+        return false;
+
+    pWindow->ImplGetWindowImpl()->mbCommand = false;
+    pWindow->Command( aCEvt );
+    if ( pWindow->isDisposed() )
+        return false;
+    if ( pWindow->ImplGetWindowImpl()->mbCommand )
+        return true;
+
     return false;
 }
 
