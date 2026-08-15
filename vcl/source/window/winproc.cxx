@@ -2386,7 +2386,6 @@ static bool lcl_HandleSalMouseButtonUp( vcl::Window* pWindow, SalMouseEvent cons
 static bool lcl_HandleMenuEvent( vcl::Window const * pWindow, SalMenuEvent* pEvent, SalEvent nEvent )
 {
     // Find SystemWindow and its Menubar and let it dispatch the command
-    bool bRet = false;
     vcl::Window *pWin = pWindow->ImplGetWindowImpl()->mpHierarchy->mpFirstChild;
     while ( pWin )
     {
@@ -2394,36 +2393,39 @@ static bool lcl_HandleMenuEvent( vcl::Window const * pWindow, SalMenuEvent* pEve
             break;
         pWin = pWin->ImplGetWindowImpl()->mpHierarchy->mpNext;
     }
-    if( pWin )
+
+    if (!pWin)
+        return false;
+
+    MenuBar *pMenuBar = static_cast<SystemWindow*>(pWin)->GetMenuBar();
+
+    if (!pMenuBar)
+        return false;
+
+    switch( nEvent )
     {
-        MenuBar *pMenuBar = static_cast<SystemWindow*>(pWin)->GetMenuBar();
-        if( pMenuBar )
-        {
-            switch( nEvent )
-            {
-                case SalEvent::MenuActivate:
-                    pMenuBar->HandleMenuActivateEvent( static_cast<Menu*>(pEvent->mpMenu) );
-                    bRet = true;
-                    break;
-                case SalEvent::MenuDeactivate:
-                    pMenuBar->HandleMenuDeActivateEvent( static_cast<Menu*>(pEvent->mpMenu) );
-                    bRet = true;
-                    break;
-                case SalEvent::MenuHighlight:
-                    bRet = pMenuBar->HandleMenuHighlightEvent( static_cast<Menu*>(pEvent->mpMenu), pEvent->mnId );
-                    break;
-                case SalEvent::MenuButtonCommand:
-                    bRet = pMenuBar->HandleMenuButtonEvent( pEvent->mnId );
-                    break;
-                case SalEvent::MenuCommand:
-                    bRet = pMenuBar->HandleMenuCommandEvent( static_cast<Menu*>(pEvent->mpMenu), pEvent->mnId );
-                    break;
-                default:
-                    break;
-            }
-        }
+        case SalEvent::MenuActivate:
+            pMenuBar->HandleMenuActivateEvent( static_cast<Menu*>(pEvent->mpMenu) );
+            return true;
+
+        case SalEvent::MenuDeactivate:
+            pMenuBar->HandleMenuDeActivateEvent( static_cast<Menu*>(pEvent->mpMenu) );
+            return true;
+
+        case SalEvent::MenuHighlight:
+            return pMenuBar->HandleMenuHighlightEvent( static_cast<Menu*>(pEvent->mpMenu), pEvent->mnId );
+
+        case SalEvent::MenuButtonCommand:
+            return pMenuBar->HandleMenuButtonEvent( pEvent->mnId );
+
+        case SalEvent::MenuCommand:
+            return pMenuBar->HandleMenuCommandEvent( static_cast<Menu*>(pEvent->mpMenu), pEvent->mnId );
+
+        default:
+            break;
     }
-    return bRet;
+
+    return false;
 }
 
 static void lcl_HandleSalKeyMod( vcl::Window* pWindow, SalKeyModEvent const * pEvent )
