@@ -1440,19 +1440,18 @@ static bool lcl_HandleEndExtTextInput()
 {
     ImplSVData* pSVData = ImplGetSVData();
     vcl::Window* pChild = pSVData->mpWinData->mpExtTextInputWin;
-    bool bRet = false;
 
-    if ( pChild )
-    {
-        pChild->ImplGetWindowImpl()->mbExtTextInput = false;
-        pSVData->mpWinData->mpExtTextInputWin = nullptr;
-        ImplWinData* pWinData = pChild->ImplGetWinData();
-        pWinData->mpExtOldText.reset();
-        pWinData->mpExtOldAttrAry.reset();
-        bRet = !lcl_CallCommand( pChild, CommandEventId::EndExtTextInput );
-    }
+    if (!pChild)
+        return false;
 
-    return bRet;
+    pChild->ImplGetWindowImpl()->mbExtTextInput = false;
+    pSVData->mpWinData->mpExtTextInputWin = nullptr;
+    ImplWinData* pWinData = pChild->ImplGetWinData();
+    pWinData->mpExtOldText.reset();
+    pWinData->mpExtOldAttrAry.reset();
+
+    return !lcl_CallCommand( pChild, CommandEventId::EndExtTextInput );
+
 }
 
 static void lcl_HandleExtTextInputPos( vcl::Window* pWindow,
