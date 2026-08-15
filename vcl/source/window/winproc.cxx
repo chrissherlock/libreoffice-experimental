@@ -1535,7 +1535,7 @@ static bool lcl_CallWheelCommand( const VclPtr<vcl::Window>& pWindow, const Poin
     return false;
 }
 
-static bool acceptableWheelScrollTarget(const vcl::Window *pMouseWindow)
+static bool lcl_IsAcceptableWheelScrollTarget(const vcl::Window *pMouseWindow)
 {
     return (pMouseWindow && !pMouseWindow->isDisposed() && pMouseWindow->IsInputEnabled() && !pMouseWindow->IsInModalMode());
 }
@@ -1614,7 +1614,7 @@ vcl::Window* HandleGestureEventBase::FindTarget()
                     m_pWindow->ScreenToOutputPixel( m_aMousePos ) ) ) ) );
     }
 
-    while (acceptableWheelScrollTarget(pMouseWindow))
+    while (lcl_IsAcceptableWheelScrollTarget(pMouseWindow))
     {
         if (pMouseWindow->IsEnabled())
             break;
@@ -1629,7 +1629,7 @@ vcl::Window *HandleGestureEventBase::Dispatch(vcl::Window* pMouseWindow)
 {
     vcl::Window *pDispatchedTo = nullptr;
 
-    if (acceptableWheelScrollTarget(pMouseWindow) && pMouseWindow->IsEnabled())
+    if (lcl_IsAcceptableWheelScrollTarget(pMouseWindow) && pMouseWindow->IsEnabled())
     {
         // transform coordinates to float window frame coordinates
         Point aRelMousePos( pMouseWindow->OutputToScreenPixel(
@@ -1716,7 +1716,7 @@ bool HandleWheelEvent::HandleEvent(const SalWheelMouseEvent& rEvt)
     // under the mouse that also accepts wheel commands, so stick with the old
     // widget if the time gap is very small
     if (shouldReusePreviousMouseWindow(pSVData->mpWinData->maLastWheelEvent, rEvt) &&
-        acceptableWheelScrollTarget(pSVData->mpWinData->mpLastWheelWindow))
+        lcl_IsAcceptableWheelScrollTarget(pSVData->mpWinData->mpLastWheelWindow))
     {
         xMouseWindow = pSVData->mpWinData->mpLastWheelWindow;
     }
