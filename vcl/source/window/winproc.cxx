@@ -63,6 +63,7 @@
 
 #include "GenericDropTargetDropContext.hxx"
 #include "GenericDropTargetDragContext.hxx"
+#include "HandleGestureEventBase.hxx"
 
 #include <com/sun/star/datatransfer/dnd/DNDConstants.hpp>
 #include <com/sun/star/datatransfer/dnd/XDragSource.hpp>
@@ -114,33 +115,6 @@ bool ImplCallCommand( const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, vo
         return true;
 
     return false;
-}
-
-namespace {
-
-class HandleGestureEventBase
-{
-protected:
-    ImplSVData* m_pSVData;
-    VclPtr<vcl::Window> m_pWindow;
-    Point m_aMousePos;
-
-public:
-    HandleGestureEventBase(vcl::Window *pWindow, const Point &rMousePos)
-        : m_pSVData(ImplGetSVData())
-        , m_pWindow(pWindow)
-        , m_aMousePos(rMousePos)
-    {
-    }
-    bool Setup();
-    vcl::Window* FindTarget();
-    vcl::Window* Dispatch(vcl::Window* pTarget);
-    virtual bool CallCommand(vcl::Window *pWindow, const Point &rMousePos) = 0;
-    virtual ~HandleGestureEventBase() {}
-
-    static bool IsAcceptableWheelScrollTarget(const vcl::Window *pMouseWindow);
-};
-
 }
 
 bool HandleGestureEventBase::Setup()
