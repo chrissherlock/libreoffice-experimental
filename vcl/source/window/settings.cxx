@@ -40,46 +40,6 @@
 
 namespace vcl {
 
-void WindowOutputDevice::SetSettings( const AllSettings& rSettings )
-{
-    SetSettings( rSettings, false );
-}
-
-void WindowOutputDevice::SetSettings( const AllSettings& rSettings, bool bChild )
-{
-
-    if ( auto pBorderWindow = mxOwnerWindow->mpWindowImpl->mpBorderWindow.get() )
-    {
-        static_cast<vcl::WindowOutputDevice*>(pBorderWindow->GetOutDev())->SetSettings( rSettings, false );
-        if ( (pBorderWindow->GetType() == WindowType::BORDERWINDOW) &&
-             static_cast<ImplBorderWindow*>(pBorderWindow)->mpMenuBarWindow )
-            static_cast<vcl::WindowOutputDevice*>(static_cast<ImplBorderWindow*>(pBorderWindow)->mpMenuBarWindow->GetOutDev())->SetSettings( rSettings, true );
-    }
-
-    AllSettings aOldSettings(*moSettings);
-    OutputDevice::SetSettings( rSettings );
-    AllSettingsFlags nChangeFlags = aOldSettings.GetChangeFlags( rSettings );
-
-    // recalculate AppFont-resolution and DPI-resolution
-    mxOwnerWindow->ImplInitResolutionSettings();
-
-    if ( bool(nChangeFlags) )
-    {
-        DataChangedEvent aDCEvt( DataChangedEventType::SETTINGS, &aOldSettings, nChangeFlags );
-        mxOwnerWindow->DataChanged( aDCEvt );
-    }
-
-    if ( bChild )
-    {
-        vcl::Window* pChild = mxOwnerWindow->mpWindowImpl->mpHierarchy->mpFirstChild;
-        while ( pChild )
-        {
-            static_cast<vcl::WindowOutputDevice*>(pChild->GetOutDev())->SetSettings( rSettings, bChild );
-            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
-        }
-    }
-}
-
 void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
 {
 
