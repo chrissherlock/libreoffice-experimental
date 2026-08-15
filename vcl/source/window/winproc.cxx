@@ -768,49 +768,52 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         // set new mouse pointer
         if ( !bMouseLeave )
             lcl_SetMousePointer( pChild );
+
+        return bRet;
     }
-    else if ( (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN) || (nSVEvent == NotifyEventType::MOUSEBUTTONUP) )
+
+    if ( (nSVEvent != NotifyEventType::MOUSEBUTTONDOWN) && (nSVEvent != NotifyEventType::MOUSEBUTTONUP) )
+        return bRet;
+
+    // Command-Events
+    if ( /*!bRet &&*/ (nClicks == 1) && (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN) &&
+         (nCode == MOUSE_MIDDLE) )
     {
-        // Command-Events
-        if ( /*!bRet &&*/ (nClicks == 1) && (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN) &&
-             (nCode == MOUSE_MIDDLE) )
-        {
-            MouseMiddleButtonAction nMiddleAction = pChild->GetSettings().GetMouseSettings().GetMiddleButtonAction();
-            if ( nMiddleAction == MouseMiddleButtonAction::AutoScroll )
-                bRet = !lcl_CallCommand( pChild, CommandEventId::StartAutoScroll, nullptr, true, &aChildPos );
-            else if ( nMiddleAction == MouseMiddleButtonAction::PasteSelection )
-                bRet = !lcl_CallCommand( pChild, CommandEventId::PasteSelection, nullptr, true, &aChildPos );
-        }
-        else
-        {
-            // ContextMenu
-            if ( (nCode == MouseSettings::GetContextMenuCode()) &&
-                 (nClicks == MouseSettings::GetContextMenuClicks()) )
-            {
-                bool bContextMenu = (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN);
-                if ( bContextMenu )
-                {
-                    if( pSVData->maAppData.mpActivePopupMenu )
-                    {
-                        /*  #i34277# there already is a context menu open
-                        *   that was probably just closed with EndPopupMode.
-                        *   We need to give the eventual corresponding
-                        *   PopupMenu::Execute a chance to end properly.
-                        *   Therefore delay context menu command and
-                        *   issue only after popping one frame of the
-                        *   Yield stack.
-                        */
-                        ContextMenuEvent* pEv = new ContextMenuEvent;
-                        pEv->pWindow = std::move(pChild);
-                        pEv->aChildPos = aChildPos;
-                        Application::PostUserEvent( LINK_NONMEMBER( pEv, lcl_ContextMenuEventLink ) );
-                    }
-                    else
-                        bRet = ! lcl_CallCommand( pChild, CommandEventId::ContextMenu, nullptr, true, &aChildPos );
-                }
-            }
-        }
+        MouseMiddleButtonAction nMiddleAction = pChild->GetSettings().GetMouseSettings().GetMiddleButtonAction();
+        if ( nMiddleAction == MouseMiddleButtonAction::AutoScroll )
+            bRet = !lcl_CallCommand( pChild, CommandEventId::StartAutoScroll, nullptr, true, &aChildPos );
+        else if ( nMiddleAction == MouseMiddleButtonAction::PasteSelection )
+            bRet = !lcl_CallCommand( pChild, CommandEventId::PasteSelection, nullptr, true, &aChildPos );
+
+        return bRet;
     }
+
+    // ContextMenu
+    if ( (nCode != MouseSettings::GetContextMenuCode()) ||
+         (nClicks != MouseSettings::GetContextMenuClicks()) )
+    {
+        return bRet;
+    }
+
+    bool bContextMenu = (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN);
+    if ( !bContextMenu )
+        return bRet;
+
+    if ( !pSVData->maAppData.mpActivePopupMenu )
+        return !lcl_CallCommand( pChild, CommandEventId::ContextMenu, nullptr, true, &aChildPos );
+
+    /*  #i34277# there already is a context menu open
+    *   that was probably just closed with EndPopupMode.
+    *   We need to give the eventual corresponding
+    *   PopupMenu::Execute a chance to end properly.
+    *   Therefore delay context menu command and
+    *   issue only after popping one frame of the
+    *   Yield stack.
+    */
+    ContextMenuEvent* pEv = new ContextMenuEvent;
+    pEv->pWindow = std::move(pChild);
+    pEv->aChildPos = aChildPos;
+    Application::PostUserEvent( LINK_NONMEMBER( pEv, lcl_ContextMenuEventLink ) );
 
     return bRet;
 }
