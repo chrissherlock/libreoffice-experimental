@@ -222,7 +222,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/mouse \
     vcl/source/window/NotebookBarAddonsMerger \
     vcl/source/window/OptionalBox \
-    vcl/source/window/mouseevent \
     vcl/source/window/printdlg \
     vcl/source/window/scrwnd \
     vcl/source/window/seleng \
@@ -242,6 +241,8 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/window3 \
     vcl/source/window/window \
     vcl/source/window/winproc \
+    vcl/source/window/mouseevent \
+    vcl/source/window/HandleGestureEventBase \
     vcl/source/window/wrkwin \
     vcl/source/window/EnumContext \
     vcl/source/control/button \
