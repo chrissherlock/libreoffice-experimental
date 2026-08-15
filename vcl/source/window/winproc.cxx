@@ -1649,12 +1649,12 @@ vcl::Window *HandleGestureEventBase::Dispatch(vcl::Window* pMouseWindow)
     if ( !pFocusWindow || (pFocusWindow == pMouseWindow) ||
          (pFocusWindow != m_pSVData->mpWinData->mpFocusWin) )
     {
-        return pDispatchedTo;
+        return nullptr;
     }
 
     // no wheel-messages to disabled windows
     if ( !pFocusWindow->IsEnabled() || !pFocusWindow->IsInputEnabled() || pFocusWindow->IsInModalMode() )
-        return pDispatchedTo;
+        return nullptr;
 
     // transform coordinates to focus window frame coordinates
     Point aRelMousePos( pFocusWindow->OutputToScreenPixel(
