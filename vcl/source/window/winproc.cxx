@@ -18,46 +18,25 @@
  */
 
 #include <sal/config.h>
-
-#include <o3tl/safeint.hxx>
 #include <tools/debug.hxx>
 #include <tools/time.hxx>
-#include <sal/log.hxx>
-
 #include <unotools/localedatawrapper.hxx>
-
-#include <dndeventdispatcher.hxx>
 #include <comphelper/lok.hxx>
-#include <vcl/QueueInfo.hxx>
-#include <vcl/dndlistenercontainer.hxx>
-#include <vcl/timer.hxx>
+
 #include <vcl/event.hxx>
-#include <vcl/GestureEventPan.hxx>
-#include <vcl/GestureEventZoom.hxx>
-#include <vcl/GestureEventRotate.hxx>
-#include <vcl/settings.hxx>
-#include <vcl/svapp.hxx>
 #include <vcl/cursor.hxx>
-#include <vcl/wrkwin.hxx>
 #include <vcl/toolkit/floatwin.hxx>
 #include <vcl/toolkit/dialog.hxx>
 #include <vcl/toolkit/edit.hxx>
 #include <vcl/help.hxx>
 #include <vcl/dockwin.hxx>
 #include <vcl/menu.hxx>
-#include <vcl/virdev.hxx>
-#include <vcl/uitest/logger.hxx>
-#include <vcl/ptrstyle.hxx>
 #include <vcl/CoordinateMapper.hxx>
-#include <vcl/MappingPolicy.hxx>
 
+#include <window.h>
 #include <clipping_window.hxx>
-#include <svdata.hxx>
-#include <salwtype.hxx>
 #include <salframe.hxx>
 #include <accmgr.hxx>
-#include <print.h>
-#include <window.h>
 #include <helpwin.hxx>
 #include <brdwin.hxx>
 
@@ -71,12 +50,6 @@
 #include "HandleGestureLongPressEvent.hxx"
 #include "HandleGestureRotateEvent.hxx"
 #include "HandleGestureZoomEvent.hxx"
-
-#include <com/sun/star/datatransfer/dnd/DNDConstants.hpp>
-#include <com/sun/star/datatransfer/dnd/XDragSource.hpp>
-#include <com/sun/star/awt/MouseEvent.hpp>
-
-#include <algorithm>
 
 constexpr tools::Long IMPL_MIN_NEEDSYSWIN = 49;
 
