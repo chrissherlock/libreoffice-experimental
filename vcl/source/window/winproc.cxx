@@ -171,17 +171,18 @@ static bool lcl_ShouldStartResizeTimer(const vcl::Window* pWindow)
     return true;
 }
 
+static bool lcl_ShouldSkipResizePropagation(const vcl::Window* pWindow)
+{
+    return !pWindow->IsVisible() && !pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize &&
+        !(pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplGetWindowImpl()->mpClientWindow);    // propagate resize for system border windows
+}
+
 static void lcl_HandleResizePropagation(vcl::Window* pWindow)
 {
-    if (!pWindow->IsVisible() && !pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize &&
-        !(pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplGetWindowImpl()->mpClientWindow))    // propagate resize for system border windows
-    {
+    if (lcl_ShouldSkipResizePropagation(pWindow))
         pWindow->ImplGetWindowImpl()->mbCallResize = true;
-    }
 
-    bool bStartTimer = lcl_ShouldStartResizeTimer(pWindow);
-
-    if( bStartTimer )
+    if (lcl_ShouldStartResizeTimer(pWindow))
         pWindow->ImplGetWindowImpl()->mpFrameData->maResizeIdle.Start();
     else
         pWindow->ImplCallResize(); // otherwise menus cannot be positioned
