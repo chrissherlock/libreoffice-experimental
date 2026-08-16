@@ -601,6 +601,7 @@ private:
     SAL_DLLPRIVATE bool                 ImplCanReceiveFocus() const;
     SAL_DLLPRIVATE bool                 ImplRestoreFocusToWindow();
     SAL_DLLPRIVATE bool                 ImplSyncDelayedFocus();
+    SAL_DLLPRIVATE bool                 ImplProcessFocusGain();
 
     SAL_DLLPRIVATE bool                 ImplIsRealParentPath( const vcl::Window* pWindow ) const;
 

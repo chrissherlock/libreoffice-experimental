@@ -358,6 +358,38 @@ bool vcl::Window::ImplSyncDelayedFocus()
     return true;
 }
 
+bool vcl::Window::ImplProcessFocusGain()
+{
+    // redraw all floating windows inactive
+    if (!ImplGetWindowImpl()->mpFrameData->mbStartFocusState)
+        lcl_ActivateFloatingWindows(this, true);
+
+    if (!ImplGetWindowImpl()->mpFrameData->mpFocusWin)
+    {
+        GrabFocus();
+        return true;
+    }
+
+    bool bHandled = false;
+
+    if (ImplCanReceiveFocus())
+        bHandled = ImplRestoreFocusToWindow();
+
+    if (bHandled)
+        return true;
+
+    ImplSVData* pSVData = ImplGetSVData();
+    vcl::Window* pTopLevelWindow = ImplGetWindowImpl()->mpFrameData->mpFocusWin->ImplGetFirstOverlapWindow();
+
+    if ((!pTopLevelWindow->IsInputEnabled() || pTopLevelWindow->IsInModalMode())
+        && !pSVData->mpWinData->mpExecuteDialogs.empty())
+        pSVData->mpWinData->mpExecuteDialogs.back()->ToTop(ToTopFlags::RestoreWhenMin | ToTopFlags::GrabFocusOnly);
+    else
+        pTopLevelWindow->GrabFocus();
+
+    return true;
+}
+
 IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
 {
     if (!ImplGetWindowImpl() || !ImplGetWindowImpl()->mpFrameData)
@@ -368,36 +400,8 @@ IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
     bool bHasFocus = ImplSyncDelayedFocus();
 
     // next execute the delayed functions
-    if ( bHasFocus )
-    {
-        // redraw all floating windows inactive
-        if ( ImplGetWindowImpl()->mpFrameData->mbStartFocusState != bHasFocus )
-            lcl_ActivateFloatingWindows( this, bHasFocus );
-
-        if ( ImplGetWindowImpl()->mpFrameData->mpFocusWin )
-        {
-            bool bHandled = false;
-
-            if (ImplCanReceiveFocus())
-                bHandled = ImplRestoreFocusToWindow();
-
-            if ( !bHandled )
-            {
-                ImplSVData* pSVData = ImplGetSVData();
-                vcl::Window*     pTopLevelWindow = ImplGetWindowImpl()->mpFrameData->mpFocusWin->ImplGetFirstOverlapWindow();
-
-                if ((!pTopLevelWindow->IsInputEnabled() || pTopLevelWindow->IsInModalMode())
-                    && !pSVData->mpWinData->mpExecuteDialogs.empty())
-                    pSVData->mpWinData->mpExecuteDialogs.back()->ToTop(ToTopFlags::RestoreWhenMin | ToTopFlags::GrabFocusOnly);
-                else
-                    pTopLevelWindow->GrabFocus();
-            }
-        }
-        else
-            GrabFocus();
-
+    if (bHasFocus && ImplProcessFocusGain())
         return;
-    }
 
     vcl::Window* pFocusWin = ImplGetWindowImpl()->mpFrameData->mpFocusWin;
     if ( pFocusWin )
