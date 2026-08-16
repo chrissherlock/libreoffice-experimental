@@ -221,6 +221,14 @@ static bool lcl_CanMoveOrSize(const vcl::Window* pWindow, tools::Long nNewWidth,
     return lcl_HasSizeChanged(pWindow, nNewWidth, nNewHeight) && (pWindow->GetStyle() & (WB_MOVEABLE | WB_SIZEABLE));
 }
 
+static void lcl_HandleMinimizedState(vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight)
+{
+    bool bMinimized = (nNewWidth <= 0) || (nNewHeight <= 0);
+    if (bMinimized != pWindow->ImplGetWindowImpl()->mpFrameData->mbMinimized)
+        pWindow->ImplGetWindowImpl()->mpFrameWindow->ImplNotifyIconifiedState(bMinimized);
+    pWindow->ImplGetWindowImpl()->mpFrameData->mbMinimized = bMinimized;
+}
+
 void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight )
 {
     if (lcl_CanMoveOrSize(pWindow, nNewWidth, nNewHeight))
@@ -235,10 +243,8 @@ void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long 
 
     pWindow->ImplGetWindowImpl()->mpFrameData->mbNeedSysWindow = (nNewWidth < IMPL_MIN_NEEDSYSWIN) ||
                                             (nNewHeight < IMPL_MIN_NEEDSYSWIN);
-    bool bMinimized = (nNewWidth <= 0) || (nNewHeight <= 0);
-    if( bMinimized != pWindow->ImplGetWindowImpl()->mpFrameData->mbMinimized )
-        pWindow->ImplGetWindowImpl()->mpFrameWindow->ImplNotifyIconifiedState( bMinimized );
-    pWindow->ImplGetWindowImpl()->mpFrameData->mbMinimized = bMinimized;
+
+    lcl_HandleMinimizedState(pWindow, nNewWidth, nNewHeight);
 }
 
 static void lcl_HandleMove( vcl::Window* pWindow )
