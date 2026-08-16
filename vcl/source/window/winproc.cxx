@@ -417,22 +417,28 @@ void vcl::Window::ImplClearFocus()
         ImplGetWindowImpl()->mpCursor->ImplHide();
 }
 
+static bool lcl_CanDeactivateWindow(const vcl::Window* pOverlapWindow, const vcl::Window* pRealWindow)
+{
+    return pOverlapWindow && pOverlapWindow->ImplGetWindowImpl() &&
+           pRealWindow && pRealWindow->ImplGetWindowImpl();
+}
+
 void vcl::Window::ImplDeactivateFocus()
 {
     vcl::Window* pOldOverlapWindow = ImplGetFirstOverlapWindow();
     vcl::Window* pOldRealWindow = pOldOverlapWindow->ImplGetWindow();
 
-    if (pOldOverlapWindow && pOldOverlapWindow->ImplGetWindowImpl() &&
-        pOldRealWindow && pOldRealWindow->ImplGetWindowImpl())
-    {
-        pOldOverlapWindow->ImplGetWindowImpl()->mbActive = false;
-        pOldOverlapWindow->Deactivate();
-        if ( pOldRealWindow != pOldOverlapWindow )
-        {
-            pOldRealWindow->ImplGetWindowImpl()->mbActive = false;
-            pOldRealWindow->Deactivate();
-        }
-    }
+    if (!lcl_CanDeactivateWindow(pOldOverlapWindow, pOldRealWindow))
+        return;
+
+    pOldOverlapWindow->ImplGetWindowImpl()->mbActive = false;
+    pOldOverlapWindow->Deactivate();
+
+    if (pOldRealWindow == pOldOverlapWindow)
+        return;
+
+    pOldRealWindow->ImplGetWindowImpl()->mbActive = false;
+    pOldRealWindow->Deactivate();
 }
 
 void vcl::Window::ImplNotifyLostFocus()
