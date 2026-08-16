@@ -58,40 +58,46 @@ bool ImplCallPreNotify( NotifyEvent& rEvt )
     return rEvt.GetWindow()->CompatPreNotify( rEvt );
 }
 
-bool ImplCallCommand( const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, void const * pData, bool bMouse, Point const * pPos )
+static Point lcl_GetCommandPosition(const VclPtr<vcl::Window>& pChild, Point const * pPos, bool bMouse)
 {
-    Point aPos;
     if ( pPos )
-        aPos = *pPos;
-    else
-    {
-        if( bMouse )
-            aPos = pChild->GetPointerPosPixel();
-        else
-        {
-            // simulate mouseposition at center of window
-            Size aSize( pChild->GetOutputSizePixel() );
-            aPos = Point( aSize.getWidth()/2, aSize.getHeight()/2 );
-        }
-    }
+        return *pPos;
 
-    CommandEvent    aCEvt( aPos, nEvt, bMouse, pData );
-    NotifyEvent     aNCmdEvt( NotifyEventType::COMMAND, pChild, &aCEvt );
-    bool bPreNotify = ImplCallPreNotify( aNCmdEvt );
-    if ( pChild->isDisposed() )
+    if ( bMouse )
+        return pChild->GetPointerPosPixel();
+
+    // simulate mouse position at center of window
+    Size aSize( pChild->GetOutputSizePixel() );
+    return Point( aSize.getWidth() / 2, aSize.getHeight() / 2 );
+}
+
+bool ImplCallCommand(const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, void const * pData, bool bMouse, Point const * pPos)
+{
+    Point aPos = lcl_GetCommandPosition(pChild, pPos, bMouse);
+
+    CommandEvent aCEvt(aPos, nEvt, bMouse, pData);
+    NotifyEvent aNCmdEvt(NotifyEventType::COMMAND, pChild, &aCEvt);
+
+    bool bPreNotify = ImplCallPreNotify(aNCmdEvt);
+
+    if (pChild->isDisposed())
         return false;
+
     if (bPreNotify)
         return false;
 
     pChild->ImplGetWindowImpl()->mbCommand = false;
     pChild->Command( aCEvt );
 
-    if( pChild->isDisposed() )
+    if (pChild->isDisposed())
         return false;
-    pChild->ImplNotifyKeyMouseCommandEventListeners( aNCmdEvt );
-    if ( pChild->isDisposed() )
+
+    pChild->ImplNotifyKeyMouseCommandEventListeners(aNCmdEvt);
+
+    if (pChild->isDisposed())
         return false;
-    if ( pChild->ImplGetWindowImpl()->mbCommand )
+
+    if (pChild->ImplGetWindowImpl()->mbCommand)
         return true;
 
     return false;
