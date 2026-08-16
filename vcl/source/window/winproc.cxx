@@ -401,6 +401,55 @@ bool vcl::Window::ImplProcessFocusGain()
     return true;
 }
 
+void vcl::Window::ImplClearFocus()
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    // transfer the FocusWindow
+    vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
+
+    if (pOverlapWindow && pOverlapWindow->ImplGetWindowImpl())
+        pOverlapWindow->ImplGetWindowImpl()->mpLastFocusWindow = this;
+
+    pSVData->mpWinData->mpFocusWin = nullptr;
+
+    if (ImplGetWindowImpl() && ImplGetWindowImpl()->mpCursor)
+        ImplGetWindowImpl()->mpCursor->ImplHide();
+}
+
+void vcl::Window::ImplDeactivateFocus()
+{
+    vcl::Window* pOldOverlapWindow = ImplGetFirstOverlapWindow();
+    vcl::Window* pOldRealWindow = pOldOverlapWindow->ImplGetWindow();
+
+    if (pOldOverlapWindow && pOldOverlapWindow->ImplGetWindowImpl() &&
+        pOldRealWindow && pOldRealWindow->ImplGetWindowImpl())
+    {
+        pOldOverlapWindow->ImplGetWindowImpl()->mbActive = false;
+        pOldOverlapWindow->Deactivate();
+        if ( pOldRealWindow != pOldOverlapWindow )
+        {
+            pOldRealWindow->ImplGetWindowImpl()->mbActive = false;
+            pOldRealWindow->Deactivate();
+        }
+    }
+}
+
+void vcl::Window::ImplNotifyLostFocus()
+{
+#ifdef _WIN32
+    // To avoid problems with the Unix IME
+    EndExtTextInput();
+#endif
+
+    NotifyEvent aNEvt(NotifyEventType::LOSEFOCUS, this);
+
+    if (!ImplCallPreNotify(aNEvt))
+        CompatLoseFocus();
+
+    ImplCallDeactivateListeners(nullptr);
+}
+
 IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
 {
     if (!ImplGetWindowImpl() || !ImplGetWindowImpl()->mpFrameData)
@@ -421,41 +470,9 @@ IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
 
         if (pSVData->mpWinData->mpFocusWin == pFocusWin)
         {
-            // transfer the FocusWindow
-            vcl::Window* pOverlapWindow = pFocusWin->ImplGetFirstOverlapWindow();
-            if ( pOverlapWindow && pOverlapWindow->ImplGetWindowImpl() )
-                pOverlapWindow->ImplGetWindowImpl()->mpLastFocusWindow = pFocusWin;
-            pSVData->mpWinData->mpFocusWin = nullptr;
-
-            if ( pFocusWin->ImplGetWindowImpl() && pFocusWin->ImplGetWindowImpl()->mpCursor )
-                pFocusWin->ImplGetWindowImpl()->mpCursor->ImplHide();
-
-            // call the Deactivate
-            vcl::Window* pOldOverlapWindow = pFocusWin->ImplGetFirstOverlapWindow();
-            vcl::Window* pOldRealWindow = pOldOverlapWindow->ImplGetWindow();
-
-            if (pOldOverlapWindow && pOldOverlapWindow->ImplGetWindowImpl() &&
-                pOldRealWindow && pOldRealWindow->ImplGetWindowImpl())
-            {
-                pOldOverlapWindow->ImplGetWindowImpl()->mbActive = false;
-                pOldOverlapWindow->Deactivate();
-                if ( pOldRealWindow != pOldOverlapWindow )
-                {
-                    pOldRealWindow->ImplGetWindowImpl()->mbActive = false;
-                    pOldRealWindow->Deactivate();
-                }
-            }
-
-            // TrackingMode is ended in lcl_HandleLoseFocus
-#ifdef _WIN32
-            // To avoid problems with the Unix IME
-            pFocusWin->EndExtTextInput();
-#endif
-
-            NotifyEvent aNEvt(NotifyEventType::LOSEFOCUS, pFocusWin);
-            if (!ImplCallPreNotify(aNEvt))
-                pFocusWin->CompatLoseFocus();
-            pFocusWin->ImplCallDeactivateListeners(nullptr);
+            pFocusWin->ImplClearFocus();
+            pFocusWin->ImplDeactivateFocus();
+            pFocusWin->ImplNotifyLostFocus();
         }
     }
 

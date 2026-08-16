@@ -585,6 +585,10 @@ protected:
     SAL_DLLPRIVATE void                 PushPaintHelper(PaintHelper* pHelper, vcl::RenderContext& rRenderContext);
     SAL_DLLPRIVATE void                 PopPaintHelper(PaintHelper const * pHelper);
 
+    SAL_DLLPRIVATE void                 ImplClearFocus();
+    SAL_DLLPRIVATE void                 ImplDeactivateFocus();
+    SAL_DLLPRIVATE void                 ImplNotifyLostFocus();
+
 private:
 
     SAL_DLLPRIVATE void                 ImplSetFrameParent( const vcl::Window* pParent );
