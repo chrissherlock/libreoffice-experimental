@@ -64,6 +64,7 @@
 #include "GenericDropTargetDropContext.hxx"
 #include "GenericDropTargetDragContext.hxx"
 #include "HandleGestureEventBase.hxx"
+#include "HandleGestureEvent.hxx"
 #include "HandleWheelEvent.hxx"
 
 #include <com/sun/star/datatransfer/dnd/DNDConstants.hpp>
@@ -116,31 +117,6 @@ bool ImplCallCommand( const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, vo
         return true;
 
     return false;
-}
-
-namespace {
-
-class HandleGestureEvent : public HandleGestureEventBase
-{
-public:
-    HandleGestureEvent(vcl::Window *pWindow, const Point &rMousePos)
-        : HandleGestureEventBase(pWindow, rMousePos)
-    {
-    }
-    bool HandleEvent();
-};
-
-}
-
-bool HandleGestureEvent::HandleEvent()
-{
-    if (!Setup())
-        return false;
-
-    vcl::Window *pTarget = FindTarget();
-
-    bool bHandled = Dispatch(pTarget) != nullptr;
-    return bHandled;
 }
 
 static bool lcl_HandleWheelEvent(vcl::Window* pWindow, const SalWheelMouseEvent& rEvt)
