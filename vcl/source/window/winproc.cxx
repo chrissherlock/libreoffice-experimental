@@ -317,16 +317,55 @@ bool vcl::Window::ImplCanReceiveFocus() const
     return IsInputEnabled() && !IsInModalMode();
 }
 
+bool vcl::Window::ImplSyncDelayedFocus()
+{
+    ImplGetWindowImpl()->mpFrameData->mnFocusId = nullptr;
+
+    bool bHasFocus = ImplGetWindowImpl()->mpFrameData->mbHasFocus || ImplGetWindowImpl()->mpFrameData->mbSysObjFocus;
+
+    // If the status has been preserved, because we got back the focus
+    // in the meantime, we do nothing
+    if (!bHasFocus)
+    {
+        GrabFocus();
+        return false;
+    }
+
+    // redraw all floating windows inactive
+    if (ImplGetWindowImpl()->mpFrameData->mbStartFocusState != bHasFocus)
+        lcl_ActivateFloatingWindows(this, bHasFocus);
+
+    if (!ImplGetWindowImpl()->mpFrameData->mpFocusWin)
+        return true;
+
+    bool bHandled = false;
+
+    if (ImplCanReceiveFocus())
+        bHandled = ImplRestoreFocusToWindow();
+
+    if (bHandled)
+        return true;
+
+    ImplSVData* pSVData = ImplGetSVData();
+    vcl::Window* pTopLevelWindow = ImplGetWindowImpl()->mpFrameData->mpFocusWin->ImplGetFirstOverlapWindow();
+
+    if ((!pTopLevelWindow->IsInputEnabled() || pTopLevelWindow->IsInModalMode())
+        && !pSVData->mpWinData->mpExecuteDialogs.empty())
+        pSVData->mpWinData->mpExecuteDialogs.back()->ToTop(ToTopFlags::RestoreWhenMin | ToTopFlags::GrabFocusOnly);
+    else
+        pTopLevelWindow->GrabFocus();
+
+    return true;
+}
+
 IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
 {
     if (!ImplGetWindowImpl() || !ImplGetWindowImpl()->mpFrameData)
         return;
 
-    ImplGetWindowImpl()->mpFrameData->mnFocusId = nullptr;
-
     // If the status has been preserved, because we got back the focus
     // in the meantime, we do nothing
-    bool bHasFocus = ImplGetWindowImpl()->mpFrameData->mbHasFocus || ImplGetWindowImpl()->mpFrameData->mbSysObjFocus;
+    bool bHasFocus = ImplSyncDelayedFocus();
 
     // next execute the delayed functions
     if ( bHasFocus )
