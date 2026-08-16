@@ -103,19 +103,35 @@ bool ImplCallCommand(const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, voi
     return false;
 }
 
-static void lcl_KillOwnPopups( vcl::Window const * pWindow )
+static bool lcl_IsValidFrameFloatPopup(const vcl::Window* pFrameWindow)
 {
     ImplSVData* pSVData = ImplGetSVData();
-    vcl::Window *pParent = pWindow->ImplGetWindowImpl()->mpFrameWindow;
-    vcl::Window *pChild = pSVData->mpWinData->mpFirstFloat;
+    const vcl::Window* pFloatWin = pSVData->mpWinData->mpFirstFloat;
 
-    if (!pChild || !pParent->ImplIsWindowOrChild( pChild, true ) )
-        return;
+    return pFloatWin && pFrameWindow->ImplIsWindowOrChild(pFloatWin, true);
+}
 
-    if (pSVData->mpWinData->mpFirstFloat->GetPopupModeFlags() & FloatWinPopupFlags::NoAppFocusClose)
-        return;
+static bool lcl_CanCloseOnAppFocus()
+{
+    ImplSVData* pSVData = ImplGetSVData();
+    return bool(pSVData->mpWinData->mpFirstFloat->GetPopupModeFlags() & FloatWinPopupFlags::NoAppFocusClose);
+}
 
+static void lcl_EndPopupMode()
+{
+    ImplSVData* pSVData = ImplGetSVData();
     pSVData->mpWinData->mpFirstFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel | FloatWinPopupEndFlags::CloseAll);
+}
+
+static void lcl_KillOwnPopups(vcl::Window const * pWindow)
+{
+    if (lcl_IsValidFrameFloatPopup(pWindow->ImplGetWindowImpl()->mpFrameWindow))
+        return;
+
+    if (lcl_CanCloseOnAppFocus())
+        return;
+
+    lcl_EndPopupMode();
 }
 
 static bool lcl_ShouldStartResizeTimer(const vcl::Window* pWindow)
