@@ -705,46 +705,51 @@ MouseEventModifiers ImplGetMouseButtonMode(SalMouseEvent const * pEvent)
     return nMode;
 }
 
-static bool lcl_HandleSalMouseLeave( vcl::Window* pWindow, SalMouseEvent const * pEvent )
+static bool lcl_HandleSalMouseMoveBase(vcl::Window* pWindow, SalMouseEvent const * pEvent, bool bLeave)
 {
-    return ImplHandleMouseEvent( pWindow, NotifyEventType::MOUSEMOVE, true,
-                                 pEvent->mnX, pEvent->mnY,
-                                 pEvent->mnTime, pEvent->mnCode,
-                                 ImplGetMouseMoveMode( pEvent ) );
+    return ImplHandleMouseEvent(pWindow, NotifyEventType::MOUSEMOVE, bLeave,
+                               pEvent->mnX, pEvent->mnY,
+                               pEvent->mnTime, pEvent->mnCode,
+                               ImplGetMouseMoveMode(pEvent));
 }
 
-static bool lcl_HandleSalMouseMove( vcl::Window* pWindow, SalMouseEvent const * pEvent )
+static bool lcl_HandleSalMouseLeave(vcl::Window* pWindow, SalMouseEvent const * pEvent)
 {
-    return ImplHandleMouseEvent( pWindow, NotifyEventType::MOUSEMOVE, false,
-                                 pEvent->mnX, pEvent->mnY,
-                                 pEvent->mnTime, pEvent->mnCode,
-                                 ImplGetMouseMoveMode( pEvent ) );
+    return lcl_HandleSalMouseMoveBase(pWindow, pEvent, true);
 }
 
-static bool lcl_HandleSalMouseButtonDown( vcl::Window* pWindow, SalMouseEvent const * pEvent )
+static bool lcl_HandleSalMouseMove(vcl::Window* pWindow, SalMouseEvent const * pEvent)
 {
-    return ImplHandleMouseEvent( pWindow, NotifyEventType::MOUSEBUTTONDOWN, false,
-                                 pEvent->mnX, pEvent->mnY,
-                                 pEvent->mnTime,
+    return lcl_HandleSalMouseMoveBase(pWindow, pEvent, false);
+}
+
+static sal_uInt16 lcl_GetMouseButtonCode(SalMouseEvent const * pEvent)
+{
 #ifdef MACOSX
-                 pEvent->mnButton | (pEvent->mnCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3)),
+    constexpr sal_uInt16 nMask = KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3;
 #else
-                                 pEvent->mnButton | (pEvent->mnCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2)),
+    constexpr sal_uInt16 nMask = KEY_SHIFT | KEY_MOD1 | KEY_MOD2;
 #endif
-                                 ImplGetMouseButtonMode( pEvent ) );
+    return pEvent->mnButton | (pEvent->mnCode & nMask);
 }
 
-static bool lcl_HandleSalMouseButtonUp( vcl::Window* pWindow, SalMouseEvent const * pEvent )
+static bool lcl_HandleSalMouseButtonBase(vcl::Window* pWindow, SalMouseEvent const * pEvent, NotifyEventType nEventType)
 {
-    return ImplHandleMouseEvent( pWindow, NotifyEventType::MOUSEBUTTONUP, false,
-                                 pEvent->mnX, pEvent->mnY,
-                                 pEvent->mnTime,
-#ifdef MACOSX
-                 pEvent->mnButton | (pEvent->mnCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3)),
-#else
-                                 pEvent->mnButton | (pEvent->mnCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2)),
-#endif
-                                 ImplGetMouseButtonMode( pEvent ) );
+    return ImplHandleMouseEvent(pWindow, nEventType, false,
+                               pEvent->mnX, pEvent->mnY,
+                               pEvent->mnTime,
+                               lcl_GetMouseButtonCode(pEvent),
+                               ImplGetMouseButtonMode(pEvent));
+}
+
+static bool lcl_HandleSalMouseButtonDown(vcl::Window* pWindow, SalMouseEvent const * pEvent)
+{
+    return lcl_HandleSalMouseButtonBase(pWindow, pEvent, NotifyEventType::MOUSEBUTTONDOWN);
+}
+
+static bool lcl_HandleSalMouseButtonUp(vcl::Window* pWindow, SalMouseEvent const * pEvent)
+{
+    return lcl_HandleSalMouseButtonBase(pWindow, pEvent, NotifyEventType::MOUSEBUTTONUP);
 }
 
 static bool lcl_HandleMenuEvent( vcl::Window const * pWindow, SalMenuEvent* pEvent, SalEvent nEvent )
