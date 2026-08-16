@@ -52,6 +52,11 @@
 #include "HandleGestureZoomEvent.hxx"
 
 constexpr tools::Long IMPL_MIN_NEEDSYSWIN = 49;
+#ifdef MACOSX
+constexpr sal_uInt16 MOUSE_MODIFIER_MASK = KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3;
+#else
+constexpr sal_uInt16 MOUSE_MODIFIER_MASK = KEY_SHIFT | KEY_MOD1 | KEY_MOD2;
+#endif
 
 bool ImplCallPreNotify( NotifyEvent& rEvt )
 {
@@ -725,12 +730,7 @@ static bool lcl_HandleSalMouseMove(vcl::Window* pWindow, SalMouseEvent const * p
 
 static sal_uInt16 lcl_GetMouseButtonCode(SalMouseEvent const * pEvent)
 {
-#ifdef MACOSX
-    constexpr sal_uInt16 nMask = KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3;
-#else
-    constexpr sal_uInt16 nMask = KEY_SHIFT | KEY_MOD1 | KEY_MOD2;
-#endif
-    return pEvent->mnButton | (pEvent->mnCode & nMask);
+    return pEvent->mnButton | (pEvent->mnCode & MOUSE_MODIFIER_MASK);
 }
 
 static bool lcl_HandleSalMouseButtonBase(vcl::Window* pWindow, SalMouseEvent const * pEvent, NotifyEventType nEventType)
@@ -867,20 +867,14 @@ static void lcl_HandleSalKeyMod( vcl::Window* pWindow, SalKeyModEvent const * pE
     vcl::Window* pTrackWin = pSVData->mpWinData->mpTrackWin;
     if ( pTrackWin )
         pWindow = pTrackWin;
-#ifdef MACOSX
-    sal_uInt16 nOldCode = pWindow->ImplGetWindowImpl()->mpFrameData->mnMouseCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3);
-#else
-    sal_uInt16 nOldCode = pWindow->ImplGetWindowImpl()->mpFrameData->mnMouseCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2);
-#endif
+
+    sal_uInt16 nOldCode = pWindow->ImplGetWindowImpl()->mpFrameData->mnMouseCode & MOUSE_MODIFIER_MASK;
     sal_uInt16 nNewCode = pEvent->mnCode;
-    if ( nOldCode != nNewCode )
+
+    if (nOldCode != nNewCode)
     {
-#ifdef MACOSX
-        nNewCode |= pWindow->ImplGetWindowImpl()->mpFrameData->mnMouseCode & ~(KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3);
-#else
-        nNewCode |= pWindow->ImplGetWindowImpl()->mpFrameData->mnMouseCode & ~(KEY_SHIFT | KEY_MOD1 | KEY_MOD2);
-#endif
-        pWindow->ImplGetWindowImpl()->mpFrameWindow->ImplCallMouseMove( nNewCode, true );
+        nNewCode |= pWindow->ImplGetWindowImpl()->mpFrameData->mnMouseCode & ~MOUSE_MODIFIER_MASK;
+        pWindow->ImplGetWindowImpl()->mpFrameWindow->ImplCallMouseMove(nNewCode, true);
     }
 
     // #105224# send commandevent to allow special treatment of Ctrl-LeftShift/Ctrl-RightShift etc.
