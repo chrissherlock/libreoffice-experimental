@@ -1075,25 +1075,11 @@ static void lcl_HandleSalSurroundingTextRequest(vcl::Window* pWindow,
     }
 
     pEvt->maText = pChild->GetSurroundingText();
-    Selection aSelRange = pChild->GetSurroundingTextSelection();
+    const Selection aSelRange = pChild->GetSurroundingTextSelection();
+    const sal_Int32 nTextLen = pEvt->maText.getLength();
 
-    sal_uLong nSelectionAnchorPos = 0;
-
-    if (aSelRange.Min() < 0)
-        nSelectionAnchorPos = 0;
-    else if (aSelRange.Min() > pEvt->maText.getLength())
-        nSelectionAnchorPos = pEvt->maText.getLength();
-    else
-        nSelectionAnchorPos = aSelRange.Min();
-
-    sal_uLong nCursorPos = 0;
-
-    if (aSelRange.Max() < 0)
-        nCursorPos = 0;
-    else if (aSelRange.Max() > pEvt->maText.getLength())
-        nCursorPos = pEvt->maText.getLength();
-    else
-        nCursorPos = aSelRange.Max();
+    const sal_uLong nSelectionAnchorPos = std::clamp<sal_Int32>(aSelRange.Min(), 0, nTextLen);
+    const sal_uLong nCursorPos = std::clamp<sal_Int32>(aSelRange.Max(), 0, nTextLen);
 
     pEvt->mnCursorPos = nCursorPos;
     pEvt->mnStart = std::min(nSelectionAnchorPos, nCursorPos);
