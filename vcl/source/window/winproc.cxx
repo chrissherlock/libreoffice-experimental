@@ -508,6 +508,19 @@ static void lcl_HandleGetFocus( vcl::Window* pWindow )
         pFocusWin->ImplGetWindowImpl()->mpCursor->ImplShow();
 }
 
+static bool lcl_HasActiveTrackerForFrame(const vcl::Window* pWindow)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    if (!pSVData->mpWinData->mpTrackWin)
+        return false;
+
+    const Window& pTrackWin = pSVData->mpWinData->mpTrackWin;
+
+    return pTrackWin->ImplGetWindowImpl() &&
+           pTrackWin->ImplGetWindowImpl()->mpFrameWindow == pWindow;
+}
+
 static void lcl_HandleLoseFocus( vcl::Window* pWindow )
 {
     if (!pWindow)
@@ -520,12 +533,8 @@ static void lcl_HandleLoseFocus( vcl::Window* pWindow )
         pSVData->mpWinData->mpAutoScrollWin->EndAutoScroll();
 
     // Abort tracking if the frame loses focus
-    if (pSVData->mpWinData->mpTrackWin)
-    {
-        if (pSVData->mpWinData->mpTrackWin->ImplGetWindowImpl() &&
-            pSVData->mpWinData->mpTrackWin->ImplGetWindowImpl()->mpFrameWindow == pWindow)
-            pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Cancel);
-    }
+    if (lcl_HasActiveTrackerForFrame(pWindow))
+        pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Cancel);
 
     if (pWindow->ImplGetWindowImpl() && pWindow->ImplGetWindowImpl()->mpFrameData)
     {
@@ -546,10 +555,9 @@ static void lcl_HandleLoseFocus( vcl::Window* pWindow )
 
     // Make sure that no menu is visible when a toplevel window loses focus.
     VclPtr<FloatingWindow> pFirstFloat = pSVData->mpWinData->mpFirstFloat;
+
     if (pFirstFloat && pFirstFloat->IsMenuFloatingWindow() && !pWindow->GetParent())
-    {
         pFirstFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel | FloatWinPopupEndFlags::CloseAll);
-    }
 }
 
 namespace {
