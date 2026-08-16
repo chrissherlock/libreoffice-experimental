@@ -989,39 +989,42 @@ static tools::Rectangle lcl_GetChildCursorRect(const vcl::Window* pChild, const 
     return tools::Rectangle(aPos.get(), aSize.get());
 }
 
+static vcl::Window* lcl_GetExtTextInputWindow(vcl::Window* pWindow)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+    vcl::Window* pExtTextInputWin = pSVData->mpWinData->mpExtTextInputWin;
+
+    if (!pExtTextInputWin)
+        return lcl_GetKeyInputWindow(pWindow);
+
+    // Test, if the Window is related to the frame
+    if (!pWindow->ImplIsWindowOrChild(pExtTextInputWin))
+        return lcl_GetKeyInputWindow(pWindow);
+
+    return pExtTextInputWin;
+}
+
 static void lcl_HandleExtTextInputPos( vcl::Window* pWindow,
                                        tools::Rectangle& rRect, tools::Long& rInputWidth,
                                        bool * pVertical )
 {
-    ImplSVData* pSVData = ImplGetSVData();
-    vcl::Window* pChild = pSVData->mpWinData->mpExtTextInputWin;
+    vcl::Window* pExtTextInputWin = lcl_GetExtTextInputWindow(pWindow);
 
-    if (!pChild)
+    if (pExtTextInputWin)
     {
-        pChild = lcl_GetKeyInputWindow(pWindow);
-    }
-    else
-    {
-        // Test, if the Window is related to the frame
-        if (!pWindow->ImplIsWindowOrChild(pChild))
-            pChild = lcl_GetKeyInputWindow(pWindow);
-    }
+        const OutputDevice *pExtTextInputOutDev = pExtTextInputWin->GetOutDev();
+        ImplCallCommand(pExtTextInputWin, CommandEventId::CursorPos);
 
-    if (pChild)
-    {
-        const OutputDevice *pChildOutDev = pChild->GetOutDev();
-        ImplCallCommand( pChild, CommandEventId::CursorPos );
+        rRect = lcl_GetChildCursorRect(pExtTextInputWin, pExtTextInputOutDev);
 
-        rRect = lcl_GetChildCursorRect(pChild, pChildOutDev);
-
-        rInputWidth = pChild->LogicWidthToDevicePixel(pChild->GetCursorExtTextInputWidth());
+        rInputWidth = pExtTextInputWin->LogicWidthToDevicePixel(pExtTextInputWin->GetCursorExtTextInputWidth());
 
         if (!rInputWidth)
             rInputWidth = rRect.GetWidth();
     }
 
     if (pVertical)
-        *pVertical = pChild != nullptr && pChild->GetInputContext().GetFont().IsVertical();
+        *pVertical = pExtTextInputWin != nullptr && pExtTextInputWin->GetInputContext().GetFont().IsVertical();
 }
 
 static void lcl_HandleSalExtTextInputPos( vcl::Window* pWindow, SalExtTextInputPosEvent* pEvt )
