@@ -64,6 +64,7 @@
 #include "GenericDropTargetDropContext.hxx"
 #include "GenericDropTargetDragContext.hxx"
 #include "HandleGestureEventBase.hxx"
+#include "HandleWheelEvent.hxx"
 
 #include <com/sun/star/datatransfer/dnd/DNDConstants.hpp>
 #include <com/sun/star/datatransfer/dnd/XDragSource.hpp>
@@ -115,104 +116,6 @@ bool ImplCallCommand( const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, vo
         return true;
 
     return false;
-}
-
-static bool lcl_CallWheelCommand( const VclPtr<vcl::Window>& pWindow, const Point& rPos,
-                                  const CommandWheelData* pWheelData )
-{
-    Point               aCmdMousePos = pWindow->ScreenToOutputPixel( rPos );
-    CommandEvent        aCEvt( aCmdMousePos, CommandEventId::Wheel, true, pWheelData );
-    NotifyEvent         aNCmdEvt( NotifyEventType::COMMAND, pWindow, &aCEvt );
-    bool bPreNotify = ImplCallPreNotify( aNCmdEvt );
-
-    if ( pWindow->isDisposed() )
-        return false;
-
-    if (bPreNotify)
-        return false;
-
-    pWindow->ImplGetWindowImpl()->mbCommand = false;
-    pWindow->Command( aCEvt );
-    if ( pWindow->isDisposed() )
-        return false;
-    if ( pWindow->ImplGetWindowImpl()->mbCommand )
-        return true;
-
-    return false;
-}
-
-namespace {
-
-class HandleWheelEvent : public HandleGestureEventBase
-{
-private:
-    CommandWheelData m_aWheelData;
-public:
-    HandleWheelEvent(vcl::Window *pWindow, const SalWheelMouseEvent& rEvt)
-        : HandleGestureEventBase(pWindow, Point(rEvt.mnX, rEvt.mnY))
-    {
-        CommandWheelMode nMode;
-        sal_uInt16 nCode = rEvt.mnCode;
-        bool bHorz = rEvt.mbHorz;
-        bool bPixel = rEvt.mbDeltaIsPixel;
-        if ( nCode & KEY_MOD1 )
-            nMode = CommandWheelMode::ZOOM;
-        else if ( nCode & KEY_MOD2 )
-            nMode = CommandWheelMode::DATAZOOM;
-        else
-        {
-            nMode = CommandWheelMode::SCROLL;
-            // #i85450# interpret shift-wheel as horizontal wheel action
-            if( (nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3)) == KEY_SHIFT )
-                bHorz = true;
-        }
-
-        m_aWheelData = CommandWheelData(rEvt.mnDelta, rEvt.mnNotchDelta, rEvt.mnScrollLines, nMode, nCode, bHorz, bPixel);
-
-    }
-    virtual bool CallCommand(vcl::Window *pWindow, const Point &rMousePos) override
-    {
-        return lcl_CallWheelCommand(pWindow, rMousePos, &m_aWheelData);
-    }
-    bool HandleEvent(const SalWheelMouseEvent& rEvt);
-};
-
-}
-
-// If the last event at the same absolute screen position was handled by a
-// different window then reuse that window if the event occurs within 1/2 a
-// second, i.e. so scrolling down something like the calc sidebar that contains
-// widgets that respond to wheel events will continue to send the event to the
-// scrolling widget in favour of the widget that happens to end up under the
-// mouse.
-static bool lcl_ShouldReusePreviousMouseWindow(const SalWheelMouseEvent& rPrevEvt, const SalWheelMouseEvent& rEvt)
-{
-    return (rEvt.mnX == rPrevEvt.mnX && rEvt.mnY == rPrevEvt.mnY && rEvt.mnTime-rPrevEvt.mnTime < 500/*ms*/);
-}
-
-bool HandleWheelEvent::HandleEvent(const SalWheelMouseEvent& rEvt)
-{
-    if (!Setup())
-        return false;
-
-    VclPtr<vcl::Window> xMouseWindow = FindTarget();
-
-    ImplSVData* pSVData = ImplGetSVData();
-
-    // avoid the problem that scrolling via wheel to this point brings a widget
-    // under the mouse that also accepts wheel commands, so stick with the old
-    // widget if the time gap is very small
-    if (lcl_ShouldReusePreviousMouseWindow(pSVData->mpWinData->maLastWheelEvent, rEvt) &&
-        IsAcceptableWheelScrollTarget(pSVData->mpWinData->mpLastWheelWindow))
-    {
-        xMouseWindow = pSVData->mpWinData->mpLastWheelWindow;
-    }
-
-    pSVData->mpWinData->maLastWheelEvent = rEvt;
-
-    pSVData->mpWinData->mpLastWheelWindow = Dispatch(xMouseWindow);
-
-    return pSVData->mpWinData->mpLastWheelWindow;
 }
 
 namespace {

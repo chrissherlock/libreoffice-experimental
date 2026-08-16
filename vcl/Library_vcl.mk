@@ -243,6 +243,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/winproc \
     vcl/source/window/mouseevent \
     vcl/source/window/HandleGestureEventBase \
+    vcl/source/window/HandleWheelEvent \
     vcl/source/window/wrkwin \
     vcl/source/window/EnumContext \
     vcl/source/control/button \
