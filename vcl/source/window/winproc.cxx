@@ -401,6 +401,17 @@ bool vcl::Window::ImplProcessFocusGain()
     return true;
 }
 
+void vcl::Window::ImplProcessFocusLoss()
+{
+    ImplSVData* pSVData = ImplGetSVData();
+    if (pSVData->mpWinData->mpFocusWin == this)
+    {
+        ImplClearFocus();
+        ImplDeactivateFocus();
+        ImplNotifyLostFocus();
+    }
+}
+
 void vcl::Window::ImplClearFocus()
 {
     ImplSVData* pSVData = ImplGetSVData();
@@ -470,17 +481,8 @@ IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
         return;
 
     vcl::Window* pFocusWin = ImplGetWindowImpl()->mpFrameData->mpFocusWin;
-    if ( pFocusWin )
-    {
-        ImplSVData* pSVData = ImplGetSVData();
-
-        if (pSVData->mpWinData->mpFocusWin == pFocusWin)
-        {
-            pFocusWin->ImplClearFocus();
-            pFocusWin->ImplDeactivateFocus();
-            pFocusWin->ImplNotifyLostFocus();
-        }
-    }
+    if (pFocusWin)
+        pFocusWin->ImplProcessFocusLoss();
 
     // Redraw all floating window inactive
     if ( ImplGetWindowImpl()->mpFrameData->mbStartFocusState != bHasFocus )
