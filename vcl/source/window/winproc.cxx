@@ -158,20 +158,14 @@ static bool lcl_ShouldStartResizeTimer(const vcl::Window* pWindow)
     if (!lcl_ShouldBufferResize(pWindow))
         return false;
 
-    if (pWindow->ImplGetWindowImpl()->mpClientWindow)
-    {
-        // #i42750# presentation wants to be informed about resize
-        // as early as possible
-        WorkWindow* pWorkWindow = dynamic_cast<WorkWindow*>(pWindow->ImplGetWindowImpl()->mpClientWindow.get());
-        if (!pWorkWindow || pWorkWindow->IsPresentationMode())
-            return false;
-    }
-    else
-    {
-        WorkWindow* pWorkWindow = dynamic_cast<WorkWindow*>(const_cast<vcl::Window*>(pWindow));
-        if (!pWorkWindow || pWorkWindow->IsPresentationMode())
-            return false;
-    }
+    vcl::Window* pTarget = pWindow->ImplGetWindowImpl()->mpClientWindow
+                         ? pWindow->ImplGetWindowImpl()->mpClientWindow.get()
+                         : const_cast<vcl::Window*>(pWindow);
+
+    WorkWindow* pWorkWindow = dynamic_cast<WorkWindow*>(pTarget);
+
+    if (!pWorkWindow || pWorkWindow->IsPresentationMode())
+        return false;
 
     return true;
 }
@@ -187,10 +181,13 @@ static void lcl_HandleResizePropagation(vcl::Window* pWindow)
     if (lcl_ShouldSkipResizePropagation(pWindow))
         pWindow->ImplGetWindowImpl()->mbCallResize = true;
 
-    if (lcl_ShouldStartResizeTimer(pWindow))
-        pWindow->ImplGetWindowImpl()->mpFrameData->maResizeIdle.Start();
-    else
+    if (!lcl_ShouldStartResizeTimer(pWindow))
+    {
         pWindow->ImplCallResize(); // otherwise menus cannot be positioned
+        return;
+    }
+
+    pWindow->ImplGetWindowImpl()->mpFrameData->maResizeIdle.Start();
 }
 
 static bool lcl_HasSizeChanged(const vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight)
@@ -247,7 +244,7 @@ void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long 
     lcl_HandleResizeDimensions(pWindow, nNewWidth, nNewHeight);
 
     pWindow->ImplGetWindowImpl()->mpFrameData->mbNeedSysWindow = (nNewWidth < IMPL_MIN_NEEDSYSWIN) ||
-                                            (nNewHeight < IMPL_MIN_NEEDSYSWIN);
+                                                                (nNewHeight < IMPL_MIN_NEEDSYSWIN);
 
     lcl_HandleMinimizedState(pWindow, nNewWidth, nNewHeight);
 }
@@ -356,10 +353,12 @@ bool vcl::Window::ImplSyncDelayedFocus()
 
     if ((!pTopLevelWindow->IsInputEnabled() || pTopLevelWindow->IsInModalMode())
         && !pSVData->mpWinData->mpExecuteDialogs.empty())
+    {
         pSVData->mpWinData->mpExecuteDialogs.back()->ToTop(ToTopFlags::RestoreWhenMin | ToTopFlags::GrabFocusOnly);
-    else
-        pTopLevelWindow->GrabFocus();
+        return true;
+    }
 
+    pTopLevelWindow->GrabFocus();
     return true;
 }
 
@@ -399,10 +398,12 @@ bool vcl::Window::ImplProcessFocusGain()
     vcl::Window* pTopLevelWindow = ImplGetWindowImpl()->mpFrameData->mpFocusWin->ImplGetFirstOverlapWindow();
 
     if (lcl_ShouldBringDialogToTop(pTopLevelWindow))
+    {
         lcl_BringExecutingDialogToTop();
-    else
-        pTopLevelWindow->GrabFocus();
+        return true;
+    }
 
+    pTopLevelWindow->GrabFocus();
     return true;
 }
 
@@ -1031,20 +1032,20 @@ static void lcl_HandleSalExtTextInputPos( vcl::Window* pWindow, SalExtTextInputP
 {
     tools::Rectangle aCursorRect;
     lcl_HandleExtTextInputPos( pWindow, aCursorRect, pEvt->mnExtWidth, &pEvt->mbVertical );
+
     if ( aCursorRect.IsEmpty() )
     {
         pEvt->mnX       = -1;
         pEvt->mnY       = -1;
         pEvt->mnWidth   = -1;
         pEvt->mnHeight  = -1;
+        return;
     }
-    else
-    {
-        pEvt->mnX       = aCursorRect.Left();
-        pEvt->mnY       = aCursorRect.Top();
-        pEvt->mnWidth   = aCursorRect.GetWidth();
-        pEvt->mnHeight  = aCursorRect.GetHeight();
-    }
+
+    pEvt->mnX       = aCursorRect.Left();
+    pEvt->mnY       = aCursorRect.Top();
+    pEvt->mnWidth   = aCursorRect.GetWidth();
+    pEvt->mnHeight  = aCursorRect.GetHeight();
 }
 
 static bool lcl_HandleShowDialog( vcl::Window* pWindow, ShowDialogId nDialogId )
@@ -1103,17 +1104,16 @@ static void lcl_HandleSalDeleteSurroundingTextRequest( vcl::Window *pWindow,
                          SalSurroundingTextSelectionChangeEvent *pEvt )
 {
     vcl::Window* pChild = lcl_GetKeyInputWindow( pWindow );
-
     Selection aSelection(pEvt->mnStart, pEvt->mnEnd);
-    if (pChild && pChild->DeleteSurroundingText(aSelection))
-    {
-        pEvt->mnStart = aSelection.Min();
-        pEvt->mnEnd = aSelection.Max();
-    }
-    else
+
+    if (!pChild || !pChild->DeleteSurroundingText(aSelection))
     {
         pEvt->mnStart = pEvt->mnEnd = SAL_MAX_UINT32;
+        return;
     }
+
+    pEvt->mnStart = aSelection.Min();
+    pEvt->mnEnd = aSelection.Max();
 }
 
 static void lcl_HandleSurroundingTextSelectionChange( vcl::Window *pWindow,
@@ -1547,7 +1547,6 @@ static bool lcl_HandleEndExtTextInput()
     pWinData->mpExtOldAttrAry.reset();
 
     return !ImplCallCommand( pChild, CommandEventId::EndExtTextInput );
-
 }
 
 static bool lcl_HandleWheelEvent(vcl::Window* pWindow, const SalWheelMouseEvent& rEvt)
@@ -1786,22 +1785,21 @@ bool ImplWindowFrameProc( vcl::Window* _pWindow, SalEvent nEvent, const void* pE
         case SalEvent::Shutdown:
             {
                 static bool bInQueryExit = false;
-                if( !bInQueryExit )
+
+                if ( bInQueryExit )
+                    return false;
+
+                bInQueryExit = true;
+
+                if ( GetpApp()->QueryExit() )
                 {
-                    bInQueryExit = true;
-                    if ( GetpApp()->QueryExit() )
-                    {
-                        // end the message loop
-                        Application::Quit();
-                        return false;
-                    }
-                    else
-                    {
-                        bInQueryExit = false;
-                        return true;
-                    }
+                    // end the message loop
+                    Application::Quit();
+                    return false;
                 }
-                return false;
+
+                bInQueryExit = false;
+                return true;
             }
 
         case SalEvent::SettingsChanged:
@@ -1849,8 +1847,8 @@ bool ImplWindowFrameProc( vcl::Window* _pWindow, SalEvent nEvent, const void* pE
             SalSurroundingTextSelectionChangeEvent const * pEvt
              = static_cast<SalSurroundingTextSelectionChangeEvent const *>(pEvent);
             lcl_HandleSurroundingTextSelectionChange( pWindow,
-                              pEvt->mnStart,
-                              pEvt->mnEnd );
+                                      pEvt->mnStart,
+                                      pEvt->mnEnd );
             [[fallthrough]]; // TODO: Fallthrough really intended?
         }
         case SalEvent::StartReconversion:
@@ -1909,4 +1907,5 @@ bool ImplWindowFrameProc( vcl::Window* _pWindow, SalEvent nEvent, const void* pE
     return bRet;
 }
 
-/* vim:set shiftwidth=4 softtabstop=4 expandtab: */
+/* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
+
