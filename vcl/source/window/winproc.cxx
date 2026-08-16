@@ -134,7 +134,7 @@ static void lcl_KillOwnPopups(vcl::Window const * pWindow)
     lcl_EndPopupMode();
 }
 
-static bool lcl_ShouldStartResizeTimer(const vcl::Window* pWindow)
+static bool lcl_ShouldBufferResize(const vcl::Window* pWindow)
 {
     // use resize buffering for user resizes
     // ownerdraw decorated windows and floating windows can be resized immediately (i.e. synchronously)
@@ -144,6 +144,14 @@ static bool lcl_ShouldStartResizeTimer(const vcl::Window* pWindow)
     {
         return false;
     }
+
+    return true;
+}
+
+static bool lcl_ShouldStartResizeTimer(const vcl::Window* pWindow)
+{
+    if (!lcl_ShouldBufferResize(pWindow))
+        return false;
 
     if (pWindow->ImplGetWindowImpl()->mpClientWindow)
     {
