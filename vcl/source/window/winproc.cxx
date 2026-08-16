@@ -118,6 +118,61 @@ static void lcl_KillOwnPopups( vcl::Window const * pWindow )
     pSVData->mpWinData->mpFirstFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel | FloatWinPopupEndFlags::CloseAll);
 }
 
+static void lcl_HandleResizeDimensions(vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight, bool bChanged)
+{
+    if (!((nNewWidth > 0 && nNewHeight > 0) || (pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize && bChanged)))
+        return;
+
+    pWindow->GetOutDev()->SetOutputWidthPixel(nNewWidth);
+    pWindow->GetOutDev()->SetOutputHeightPixel(nNewHeight);
+    pWindow->ImplGetWindowImpl()->mbWaitSystemResize = false;
+
+    if ( pWindow->IsReallyVisible() )
+        vcl::clipping::setClipFlag(*pWindow);
+
+    if ( pWindow->IsVisible() || pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize ||
+        ( pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplGetWindowImpl()->mpClientWindow ) )    // propagate resize for system border windows
+    {
+        bool bStartTimer = true;
+        // use resize buffering for user resizes
+        // ownerdraw decorated windows and floating windows can be resized immediately (i.e. synchronously)
+        if( pWindow->ImplGetWindowImpl()->mbFrame && (pWindow->GetStyle() & WB_SIZEABLE)
+            && !(pWindow->GetStyle() & WB_OWNERDRAWDECORATION)  // synchronous resize for ownerdraw decorated windows (toolbars)
+            && !pWindow->ImplGetWindowImpl()->mbFloatWin )             // synchronous resize for floating windows, #i43799#
+        {
+            if( pWindow->ImplGetWindowImpl()->mpClientWindow )
+            {
+                // #i42750# presentation wants to be informed about resize
+                // as early as possible
+                WorkWindow* pWorkWindow = dynamic_cast<WorkWindow*>(pWindow->ImplGetWindowImpl()->mpClientWindow.get());
+                if( ! pWorkWindow || pWorkWindow->IsPresentationMode() )
+                    bStartTimer = false;
+            }
+            else
+            {
+                WorkWindow* pWorkWindow = dynamic_cast<WorkWindow*>(pWindow);
+                if( ! pWorkWindow || pWorkWindow->IsPresentationMode() )
+                    bStartTimer = false;
+            }
+        }
+        else
+            bStartTimer = false;
+
+        if( bStartTimer )
+            pWindow->ImplGetWindowImpl()->mpFrameData->maResizeIdle.Start();
+        else
+            pWindow->ImplCallResize(); // otherwise menus cannot be positioned
+    }
+    else
+        pWindow->ImplGetWindowImpl()->mbCallResize = true;
+
+    if (pWindow->SupportsDoubleBuffering() && pWindow->ImplGetWindowImpl()->mbFrame)
+    {
+        // Propagate resize for the frame's buffer.
+        pWindow->ImplGetWindowImpl()->mpFrameData->mpBuffer->SetOutputSizePixel(pWindow->GetOutputSizePixel());
+    }
+}
+
 void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight )
 {
     const bool bChanged = (nNewWidth != pWindow->GetOutputSizePixel().Width()) || (nNewHeight != pWindow->GetOutDev()->GetOutputHeightPixel());
@@ -128,63 +183,7 @@ void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long 
             ImplDestroyHelpWindow( true );
     }
 
-    if (
-         (nNewWidth > 0 && nNewHeight > 0) ||
-         pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize
-       )
-    {
-        if (bChanged)
-        {
-            pWindow->GetOutDev()->SetOutputWidthPixel(nNewWidth);
-            pWindow->GetOutDev()->SetOutputHeightPixel(nNewHeight);
-            pWindow->ImplGetWindowImpl()->mbWaitSystemResize = false;
-
-            if ( pWindow->IsReallyVisible() )
-                vcl::clipping::setClipFlag(*pWindow);
-
-            if ( pWindow->IsVisible() || pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize ||
-                ( pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplGetWindowImpl()->mpClientWindow ) )   // propagate resize for system border windows
-            {
-                bool bStartTimer = true;
-                // use resize buffering for user resizes
-                // ownerdraw decorated windows and floating windows can be resized immediately (i.e. synchronously)
-                if( pWindow->ImplGetWindowImpl()->mbFrame && (pWindow->GetStyle() & WB_SIZEABLE)
-                    && !(pWindow->GetStyle() & WB_OWNERDRAWDECORATION)  // synchronous resize for ownerdraw decorated windows (toolbars)
-                    && !pWindow->ImplGetWindowImpl()->mbFloatWin )             // synchronous resize for floating windows, #i43799#
-                {
-                    if( pWindow->ImplGetWindowImpl()->mpClientWindow )
-                    {
-                        // #i42750# presentation wants to be informed about resize
-                        // as early as possible
-                        WorkWindow* pWorkWindow = dynamic_cast<WorkWindow*>(pWindow->ImplGetWindowImpl()->mpClientWindow.get());
-                        if( ! pWorkWindow || pWorkWindow->IsPresentationMode() )
-                            bStartTimer = false;
-                    }
-                    else
-                    {
-                        WorkWindow* pWorkWindow = dynamic_cast<WorkWindow*>(pWindow);
-                        if( ! pWorkWindow || pWorkWindow->IsPresentationMode() )
-                            bStartTimer = false;
-                    }
-                }
-                else
-                    bStartTimer = false;
-
-                if( bStartTimer )
-                    pWindow->ImplGetWindowImpl()->mpFrameData->maResizeIdle.Start();
-                else
-                    pWindow->ImplCallResize(); // otherwise menus cannot be positioned
-            }
-            else
-                pWindow->ImplGetWindowImpl()->mbCallResize = true;
-
-            if (pWindow->SupportsDoubleBuffering() && pWindow->ImplGetWindowImpl()->mbFrame)
-            {
-                // Propagate resize for the frame's buffer.
-                pWindow->ImplGetWindowImpl()->mpFrameData->mpBuffer->SetOutputSizePixel(pWindow->GetOutputSizePixel());
-            }
-        }
-    }
+    lcl_HandleResizeDimensions(pWindow, nNewWidth, nNewHeight, bChanged);
 
     pWindow->ImplGetWindowImpl()->mpFrameData->mbNeedSysWindow = (nNewWidth < IMPL_MIN_NEEDSYSWIN) ||
                                             (nNewHeight < IMPL_MIN_NEEDSYSWIN);
