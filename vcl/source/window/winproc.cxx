@@ -515,7 +515,7 @@ static bool lcl_HasActiveTrackerForFrame(const vcl::Window* pWindow)
     if (!pSVData->mpWinData->mpTrackWin)
         return false;
 
-    const Window& pTrackWin = pSVData->mpWinData->mpTrackWin;
+    const vcl::Window* pTrackWin = pSVData->mpWinData->mpTrackWin.get();
 
     return pTrackWin->ImplGetWindowImpl() &&
            pTrackWin->ImplGetWindowImpl()->mpFrameWindow == pWindow;
@@ -569,19 +569,18 @@ struct DelayedCloseEvent
 
 }
 
-static void lcl_DelayedCloseEventLink( void* pCEvent, void* )
+static void lcl_DelayedCloseEventLink(void* pCEvent, void*)
 {
-    DelayedCloseEvent* pEv = static_cast<DelayedCloseEvent*>(pCEvent);
+    std::unique_ptr<DelayedCloseEvent> pEv(static_cast<DelayedCloseEvent*>(pCEvent));
 
-    if( ! pEv->pWindow->isDisposed() )
-    {
-        // dispatch to correct window type
-        if( pEv->pWindow->IsSystemWindow() )
-            static_cast<SystemWindow*>(pEv->pWindow.get())->Close();
-        else if( pEv->pWindow->IsDockingWindow() )
-            static_cast<DockingWindow*>(pEv->pWindow.get())->Close();
-    }
-    delete pEv;
+    if (pEv->pWindow->isDisposed())
+        return;
+
+    // dispatch to correct window type
+    if (pEv->pWindow->IsSystemWindow())
+        static_cast<SystemWindow*>(pEv->pWindow.get())->Close();
+    else if (pEv->pWindow->IsDockingWindow())
+        static_cast<DockingWindow*>(pEv->pWindow.get())->Close();
 }
 
 static void lcl_HandleClose( const vcl::Window* pWindow )
