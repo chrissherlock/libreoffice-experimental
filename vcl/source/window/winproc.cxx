@@ -51,6 +51,9 @@
 #include "HandleGestureRotateEvent.hxx"
 #include "HandleGestureZoomEvent.hxx"
 
+#include <algorithm>
+#include <memory>
+
 constexpr tools::Long IMPL_MIN_NEEDSYSWIN = 49;
 #ifdef MACOSX
 constexpr sal_uInt16 MOUSE_MODIFIER_MASK = KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3;
@@ -70,19 +73,18 @@ static Point lcl_GetCommandPosition(const VclPtr<vcl::Window>& pChild, Point con
         return pChild->GetPointerPosPixel();
 
     // simulate mouse position at center of window
-    Size aSize(pChild->GetOutputSizePixel());
+    const Size aSize(pChild->GetOutputSizePixel());
     return Point(aSize.getWidth() / 2, aSize.getHeight() / 2);
 }
 
 bool ImplCallCommand(const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, void const* pData,
                      bool bMouse, Point const* pPos)
 {
-    Point aPos = lcl_GetCommandPosition(pChild, pPos, bMouse);
-
-    CommandEvent aCEvt(aPos, nEvt, bMouse, pData);
+    const Point aPos = lcl_GetCommandPosition(pChild, pPos, bMouse);
+    const CommandEvent aCEvt(aPos, nEvt, bMouse, pData);
     NotifyEvent aNCmdEvt(NotifyEventType::COMMAND, pChild, &aCEvt);
 
-    if (bool bPreNotify = ImplCallPreNotify(aNCmdEvt); pChild->isDisposed() || bPreNotify)
+    if (const bool bPreNotify = ImplCallPreNotify(aNCmdEvt); pChild->isDisposed() || bPreNotify)
         return false;
 
     pChild->ImplGetWindowImpl()->mbCommand = false;
@@ -96,15 +98,12 @@ bool ImplCallCommand(const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, voi
     if (pChild->isDisposed())
         return false;
 
-    if (pChild->ImplGetWindowImpl()->mbCommand)
-        return true;
-
-    return false;
+    return pChild->ImplGetWindowImpl()->mbCommand;
 }
 
 static bool lcl_IsValidFrameFloatPopup(const vcl::Window* pFrameWindow)
 {
-    ImplSVData* pSVData = ImplGetSVData();
+    const ImplSVData* pSVData = ImplGetSVData();
     if (const vcl::Window* pFloatWin = pSVData->mpWinData->mpFirstFloat)
         return pFrameWindow->ImplIsWindowOrChild(pFloatWin, true);
 
@@ -113,7 +112,7 @@ static bool lcl_IsValidFrameFloatPopup(const vcl::Window* pFrameWindow)
 
 static bool lcl_CanCloseOnAppFocus()
 {
-    ImplSVData* pSVData = ImplGetSVData();
+    const ImplSVData* pSVData = ImplGetSVData();
     return bool(pSVData->mpWinData->mpFirstFloat->GetPopupModeFlags()
                 & FloatWinPopupFlags::NoAppFocusClose);
 }
@@ -127,10 +126,8 @@ static void lcl_EndPopupMode()
 
 static void lcl_KillOwnPopups(vcl::Window const* pWindow)
 {
-    if (lcl_IsValidFrameFloatPopup(pWindow->ImplGetWindowImpl()->mpFrameWindow))
-        return;
-
-    if (lcl_CanCloseOnAppFocus())
+    if (lcl_IsValidFrameFloatPopup(pWindow->ImplGetWindowImpl()->mpFrameWindow)
+        || lcl_CanCloseOnAppFocus())
         return;
 
     lcl_EndPopupMode();
@@ -157,11 +154,11 @@ static bool lcl_ShouldStartResizeTimer(const vcl::Window* pWindow)
     if (!lcl_ShouldBufferResize(pWindow))
         return false;
 
-    vcl::Window* pTarget = pWindow->ImplGetWindowImpl()->mpClientWindow
-                               ? pWindow->ImplGetWindowImpl()->mpClientWindow.get()
-                               : const_cast<vcl::Window*>(pWindow);
+    const vcl::Window* pTarget = pWindow->ImplGetWindowImpl()->mpClientWindow
+                                     ? pWindow->ImplGetWindowImpl()->mpClientWindow.get()
+                                     : pWindow;
 
-    if (WorkWindow* pWorkWindow = dynamic_cast<WorkWindow*>(pTarget);
+    if (const auto* pWorkWindow = dynamic_cast<const WorkWindow*>(pTarget);
         !pWorkWindow || pWorkWindow->IsPresentationMode())
         return false;
 
@@ -200,7 +197,7 @@ static bool lcl_HasSizeChanged(const vcl::Window* pWindow, tools::Long nNewWidth
 static void lcl_HandleResizeDimensions(vcl::Window* pWindow, tools::Long nNewWidth,
                                        tools::Long nNewHeight)
 {
-    if (bool bChanged = lcl_HasSizeChanged(pWindow, nNewWidth, nNewHeight);
+    if (const bool bChanged = lcl_HasSizeChanged(pWindow, nNewWidth, nNewHeight);
         !((nNewWidth > 0 && nNewHeight > 0)
           || (pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize && bChanged)))
         return;
@@ -232,7 +229,7 @@ static bool lcl_CanMoveOrSize(const vcl::Window* pWindow, tools::Long nNewWidth,
 static void lcl_HandleMinimizedState(vcl::Window* pWindow, tools::Long nNewWidth,
                                      tools::Long nNewHeight)
 {
-    if (bool bMinimized = (nNewWidth <= 0) || (nNewHeight <= 0);
+    if (const bool bMinimized = (nNewWidth <= 0) || (nNewHeight <= 0);
         bMinimized != pWindow->ImplGetWindowImpl()->mpFrameData->mbMinimized)
     {
         pWindow->ImplGetWindowImpl()->mpFrameWindow->ImplNotifyIconifiedState(bMinimized);
@@ -287,7 +284,6 @@ static void lcl_HandleMove(vcl::Window* pWindow)
 
 static void lcl_ActivateFloatingWindows(vcl::Window const* pWindow, bool bActive)
 {
-    // First check all overlapping windows
     for (vcl::Window* pTempWindow = pWindow->ImplGetWindowImpl()->mpHierarchy->mpFirstOverlap;
          pTempWindow; pTempWindow = pTempWindow->ImplGetWindowImpl()->mpHierarchy->mpNext)
     {
@@ -326,12 +322,26 @@ bool vcl::Window::ImplRestoreFocusToWindow()
 
 bool vcl::Window::ImplCanReceiveFocus() const { return IsInputEnabled() && !IsInModalMode(); }
 
+static bool lcl_ShouldBringDialogToTop(const vcl::Window* pTopLevelWindow)
+{
+    const ImplSVData* pSVData = ImplGetSVData();
+    return (!pTopLevelWindow->IsInputEnabled() || pTopLevelWindow->IsInModalMode())
+           && !pSVData->mpWinData->mpExecuteDialogs.empty();
+}
+
+static void lcl_BringExecutingDialogToTop()
+{
+    const ImplSVData* pSVData = ImplGetSVData();
+    pSVData->mpWinData->mpExecuteDialogs.back()->ToTop(ToTopFlags::RestoreWhenMin
+                                                       | ToTopFlags::GrabFocusOnly);
+}
+
 bool vcl::Window::ImplSyncDelayedFocus()
 {
     ImplGetWindowImpl()->mpFrameData->mnFocusId = nullptr;
 
-    bool bHasFocus = ImplGetWindowImpl()->mpFrameData->mbHasFocus
-                     || ImplGetWindowImpl()->mpFrameData->mbSysObjFocus;
+    const bool bHasFocus = ImplGetWindowImpl()->mpFrameData->mbHasFocus
+                           || ImplGetWindowImpl()->mpFrameData->mbSysObjFocus;
 
     // If the status has been preserved, because we got back the focus
     // in the meantime, we do nothing
@@ -351,34 +361,17 @@ bool vcl::Window::ImplSyncDelayedFocus()
     if (ImplCanReceiveFocus() && ImplRestoreFocusToWindow())
         return true;
 
-    ImplSVData* pSVData = ImplGetSVData();
     vcl::Window* pTopLevelWindow
         = ImplGetWindowImpl()->mpFrameData->mpFocusWin->ImplGetFirstOverlapWindow();
 
-    if ((!pTopLevelWindow->IsInputEnabled() || pTopLevelWindow->IsInModalMode())
-        && !pSVData->mpWinData->mpExecuteDialogs.empty())
+    if (lcl_ShouldBringDialogToTop(pTopLevelWindow))
     {
-        pSVData->mpWinData->mpExecuteDialogs.back()->ToTop(ToTopFlags::RestoreWhenMin
-                                                           | ToTopFlags::GrabFocusOnly);
+        lcl_BringExecutingDialogToTop();
         return true;
     }
 
     pTopLevelWindow->GrabFocus();
     return true;
-}
-
-static bool lcl_ShouldBringDialogToTop(const vcl::Window* pTopLevelWindow)
-{
-    const ImplSVData* pSVData = ImplGetSVData();
-    return (!pTopLevelWindow->IsInputEnabled() || pTopLevelWindow->IsInModalMode())
-           && !pSVData->mpWinData->mpExecuteDialogs.empty();
-}
-
-static void lcl_BringExecutingDialogToTop()
-{
-    const ImplSVData* pSVData = ImplGetSVData();
-    pSVData->mpWinData->mpExecuteDialogs.back()->ToTop(ToTopFlags::RestoreWhenMin
-                                                       | ToTopFlags::GrabFocusOnly);
 }
 
 bool vcl::Window::ImplProcessFocusGain()
@@ -411,7 +404,7 @@ bool vcl::Window::ImplProcessFocusGain()
 
 void vcl::Window::ImplProcessFocusLoss()
 {
-    ImplSVData* pSVData = ImplGetSVData();
+    const ImplSVData* pSVData = ImplGetSVData();
     if (pSVData->mpWinData->mpFocusWin == this)
     {
         ImplClearFocus();
@@ -469,9 +462,9 @@ void vcl::Window::ImplNotifyLostFocus()
     EndExtTextInput();
 #endif
 
-    NotifyEvent aNEvt(NotifyEventType::LOSEFOCUS, this);
+    const NotifyEvent aNEvt(NotifyEventType::LOSEFOCUS, this);
 
-    if (!ImplCallPreNotify(aNEvt))
+    if (!ImplCallPreNotify(const_cast<NotifyEvent&>(aNEvt)))
         CompatLoseFocus();
 
     ImplCallDeactivateListeners(nullptr);
@@ -484,7 +477,7 @@ IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
 
     // If the status has been preserved, because we got back the focus
     // in the meantime, we do nothing
-    bool bHasFocus = ImplSyncDelayedFocus();
+    const bool bHasFocus = ImplSyncDelayedFocus();
 
     // next execute the delayed functions
     if (bHasFocus && ImplProcessFocusGain())
@@ -522,7 +515,7 @@ static void lcl_HandleGetFocus(vcl::Window* pWindow)
 
 static bool lcl_HasActiveTrackerForFrame(const vcl::Window* pWindow)
 {
-    ImplSVData* pSVData = ImplGetSVData();
+    const ImplSVData* pSVData = ImplGetSVData();
 
     if (!pSVData->mpWinData->mpTrackWin)
         return false;
@@ -605,7 +598,7 @@ static void lcl_HandleClose(const vcl::Window* pWindow)
 {
     ImplSVData* pSVData = ImplGetSVData();
 
-    bool bWasPopup = lcl_IsInPrivatePopupMode(pWindow);
+    const bool bWasPopup = lcl_IsInPrivatePopupMode(pWindow);
 
     // on Close stop all floating modes and end popups
     if (pSVData->mpWinData->mpFirstFloat)
@@ -635,7 +628,7 @@ static void lcl_HandleClose(const vcl::Window* pWindow)
 
     vcl::Window* pWin = pWindow->ImplGetWindow();
 
-    if (SystemWindow* pSysWin = dynamic_cast<SystemWindow*>(pWin))
+    if (auto* pSysWin = dynamic_cast<SystemWindow*>(pWin))
     {
         // See if the custom close handler is set.
         if (const Link<SystemWindow&, void>& rLink = pSysWin->GetCloseHdl(); rLink.IsSet())
@@ -648,8 +641,7 @@ static void lcl_HandleClose(const vcl::Window* pWindow)
     // check whether close is allowed
     if (pWin->IsEnabled() && pWin->IsInputEnabled() && !pWin->IsInModalMode())
     {
-        DelayedCloseEvent* pEv = new DelayedCloseEvent;
-        pEv->pWindow = pWin;
+        auto* pEv = new DelayedCloseEvent{ .pWindow = pWin };
         Application::PostUserEvent(LINK_NONMEMBER(pEv, lcl_DelayedCloseEventLink));
     }
 }
@@ -890,7 +882,7 @@ static vcl::Window* lcl_GetKeyInputWindow(vcl::Window* pWindow)
 static bool lcl_HandleInputContextChange(vcl::Window* pWindow)
 {
     vcl::Window* pChild = lcl_GetKeyInputWindow(pWindow);
-    CommandInputContextData aData;
+    const CommandInputContextData aData;
     return !ImplCallCommand(pChild, CommandEventId::InputContextChange, &aData);
 }
 
@@ -918,7 +910,7 @@ static void lcl_HandleSalKeyMod(vcl::Window* pWindow, SalKeyModEvent const* pEve
     if (!pChild)
         pChild = pWindow;
 
-    CommandModKeyData data(pEvent->mnModKeyCode, pEvent->mbDown);
+    const CommandModKeyData data(pEvent->mnModKeyCode, pEvent->mbDown);
     ImplCallCommand(pChild, CommandEventId::ModKeyChange, &data);
 }
 
@@ -979,8 +971,8 @@ static tools::Rectangle lcl_GetChildCursorRect(const vcl::Window* pChild,
 
     if (vcl::Cursor* pCursor = pChild->GetCursor())
     {
-        auto aPos = pChildOutDev->convertTo<vcl::DevicePoint>(vcl::LogicPoint(pCursor->GetPos()),
-                                                              pChildOutDev->GetMapMode());
+        const auto aPos = pChildOutDev->convertTo<vcl::DevicePoint>(
+            vcl::LogicPoint(pCursor->GetPos()), pChildOutDev->GetMapMode());
         auto aSize = pChild->convertTo<vcl::WindowSize>(vcl::LogicSize(pCursor->GetSize()),
                                                         pChild->GetMapMode());
 
@@ -995,7 +987,7 @@ static tools::Rectangle lcl_GetChildCursorRect(const vcl::Window* pChild,
 
 static vcl::Window* lcl_GetExtTextInputWindow(vcl::Window* pWindow)
 {
-    ImplSVData* pSVData = ImplGetSVData();
+    const ImplSVData* pSVData = ImplGetSVData();
     if (vcl::Window* pExtTextInputWin = pSVData->mpWinData->mpExtTextInputWin;
         pExtTextInputWin && pWindow->ImplIsWindowOrChild(pExtTextInputWin))
         return pExtTextInputWin;
@@ -1058,7 +1050,7 @@ static bool lcl_HandleShowDialog(vcl::Window* pWindow, ShowDialogId nDialogId)
         if (vcl::Window* pWrkWin = pWindow->GetWindow(GetWindowType::Client))
             pWindow = pWrkWin;
     }
-    CommandDialogData aCmdData(nDialogId);
+    const CommandDialogData aCmdData(nDialogId);
     return ImplCallCommand(pWindow, CommandEventId::ShowDialog, &aCmdData);
 }
 
@@ -1090,7 +1082,7 @@ static void lcl_HandleSalDeleteSurroundingTextRequest(vcl::Window* pWindow,
                                                       SalSurroundingTextSelectionChangeEvent* pEvt)
 {
     vcl::Window* pChild = lcl_GetKeyInputWindow(pWindow);
-    Selection aSelection(pEvt->mnStart, pEvt->mnEnd);
+    const Selection aSelection(pEvt->mnStart, pEvt->mnEnd);
 
     if (!pChild || !pChild->DeleteSurroundingText(aSelection))
     {
@@ -1107,7 +1099,7 @@ static void lcl_HandleSurroundingTextSelectionChange(vcl::Window* pWindow, sal_u
 {
     if (vcl::Window* pChild = lcl_GetKeyInputWindow(pWindow))
     {
-        CommandSelectionChangeData data(nStart, nEnd);
+        const CommandSelectionChangeData data(nStart, nEnd);
         ImplCallCommand(pChild, CommandEventId::SelectionChange, &data);
     }
 }
@@ -1124,7 +1116,7 @@ static void lcl_HandleSalQueryCharPosition(vcl::Window* pWindow, SalQueryCharPos
     pEvt->mbVertical = false;
     pEvt->maCursorBound = AbsoluteScreenPixelRectangle();
 
-    ImplSVData* pSVData = ImplGetSVData();
+    const ImplSVData* pSVData = ImplGetSVData();
     vcl::Window* pChild = pSVData->mpWinData->mpExtTextInputWin;
 
     if (!pChild || !pWindow->ImplIsWindowOrChild(pChild))
@@ -1135,15 +1127,15 @@ static void lcl_HandleSalQueryCharPosition(vcl::Window* pWindow, SalQueryCharPos
 
     ImplCallCommand(pChild, CommandEventId::QueryCharPosition);
 
-    if (ImplWinData* pWinData = pChild->ImplGetWinData();
+    if (const ImplWinData* pWinData = pChild->ImplGetWinData();
         pWinData->mpCompositionCharRects
         && pEvt->mnCharPos < o3tl::make_unsigned(pWinData->mnCompositionCharRects))
     {
         const OutputDevice* pChildOutDev = pChild->GetOutDev();
         const tools::Rectangle& aRect = pWinData->mpCompositionCharRects[pEvt->mnCharPos];
-        tools::Rectangle aDeviceRect
+        const tools::Rectangle aDeviceRect
             = pChildOutDev->GetMapper().LogicToDevicePixel(aRect, pChildOutDev->GetMappingPolicy());
-        AbsoluteScreenPixelPoint aAbsScreenPos = pChild->OutputToAbsoluteScreenPixel(
+        const AbsoluteScreenPixelPoint aAbsScreenPos = pChild->OutputToAbsoluteScreenPixel(
             pChild->ScreenToOutputPixel(aDeviceRect.TopLeft()));
 
         pEvt->maCursorBound = AbsoluteScreenPixelRectangle(aAbsScreenPos, aDeviceRect.GetSize());
@@ -1152,19 +1144,155 @@ static void lcl_HandleSalQueryCharPosition(vcl::Window* pWindow, SalQueryCharPos
     }
 }
 
+static bool lcl_ProcessHelpAndMenuKeys(vcl::Window* pChild, vcl::Window* pWindow, sal_uInt16 nCode,
+                                       const vcl::KeyCode& aKeyCode)
+{
+    bool bToolboxFocus = false;
+    if ((nCode == KEY_F1) && aKeyCode.IsShift())
+    {
+        for (vcl::Window* pWin = pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin; pWin;
+             pWin = pWin->GetParent())
+        {
+            if (pWin->ImplGetWindowImpl()->mbToolBox)
+            {
+                bToolboxFocus = true;
+                break;
+            }
+        }
+    }
+
+    if ((nCode == KEY_CONTEXTMENU)
+        || ((nCode == KEY_F10) && aKeyCode.IsShift() && !aKeyCode.IsMod1() && !aKeyCode.IsMod2()))
+        return !ImplCallCommand(pChild, CommandEventId::ContextMenu);
+
+    if (((nCode == KEY_F2) && aKeyCode.IsShift()) || ((nCode == KEY_F1) && aKeyCode.IsMod1())
+        || ((nCode == KEY_F1) && aKeyCode.IsShift() && bToolboxFocus))
+    {
+        const Size aSize = pChild->GetOutDev()->GetOutputSize();
+        Point aPos(aSize.getWidth() / 2, aSize.getHeight() / 2);
+        aPos = pChild->OutputToScreenPixel(aPos);
+
+        HelpEvent aHelpEvent(aPos, HelpEventMode::BALLOON);
+        aHelpEvent.SetKeyboardActivated(true);
+        ImplGetSVHelpData().mbSetKeyboardHelp = true;
+        pChild->RequestHelp(aHelpEvent);
+        ImplGetSVHelpData().mbSetKeyboardHelp = false;
+        return true;
+    }
+
+    if ((nCode == KEY_F1) || (nCode == KEY_HELP))
+    {
+        if (!aKeyCode.GetModifier())
+        {
+            if (ImplGetSVHelpData().mbContextHelp)
+            {
+                const Point aMousePos = pChild->OutputToScreenPixel(pChild->GetPointerPosPixel());
+                const HelpEvent aHelpEvent(aMousePos, HelpEventMode::CONTEXT);
+                pChild->RequestHelp(aHelpEvent);
+                return true;
+            }
+            return false;
+        }
+
+        if (aKeyCode.IsShift())
+        {
+            if (ImplGetSVHelpData().mbExtHelp)
+            {
+                Help::StartExtHelp();
+                return true;
+            }
+            return false;
+        }
+    }
+
+    return false;
+}
+
+static FloatingWindow* lcl_GetCloseableFloatWindow(vcl::Window* pFirstFloat)
+{
+    if (!pFirstFloat)
+        return nullptr;
+
+    FloatingWindow* pLastLevelFloat
+        = static_cast<FloatingWindow*>(pFirstFloat)->ImplFindLastLevelFloat();
+
+    if (pLastLevelFloat->GetPopupModeFlags() & FloatWinPopupFlags::NoKeyClose)
+        return nullptr;
+
+    return pLastLevelFloat;
+}
+
+static bool lcl_HandleKeyInputPreProcessing(const vcl::KeyCode& aKeyCode, sal_uInt16 nEvCode,
+                                            bool bCtrlF6)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    if (ImplGetSVHelpData().mbExtHelpMode)
+    {
+        Help::EndExtHelp();
+        if (nEvCode == KEY_ESCAPE)
+            return true;
+    }
+
+    if (ImplGetSVHelpData().mpHelpWin)
+        ImplDestroyHelpWindow(false);
+
+    if (pSVData->mpWinData->mpAutoScrollWin)
+    {
+        pSVData->mpWinData->mpAutoScrollWin->EndAutoScroll();
+        if (nEvCode == KEY_ESCAPE)
+            return true;
+    }
+
+    if (pSVData->mpWinData->mpTrackWin)
+    {
+        if (const sal_uInt16 nOrigCode = aKeyCode.GetCode(); nOrigCode == KEY_ESCAPE)
+        {
+            pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Cancel
+                                                        | TrackingEventFlags::Key);
+            if (FloatingWindow* pCloseableFloat
+                = lcl_GetCloseableFloatWindow(pSVData->mpWinData->mpFirstFloat))
+            {
+                pCloseableFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel
+                                              | FloatWinPopupEndFlags::CloseAll);
+            }
+            return true;
+        }
+        else if (nOrigCode == KEY_RETURN)
+        {
+            pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Key);
+            return true;
+        }
+        return true;
+    }
+
+    if (FloatingWindow* pCloseableFloat
+        = lcl_GetCloseableFloatWindow(pSVData->mpWinData->mpFirstFloat))
+    {
+        if (const sal_uInt16 nCode = aKeyCode.GetCode(); (nCode == KEY_ESCAPE) || bCtrlF6)
+        {
+            pCloseableFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel
+                                          | FloatWinPopupEndFlags::CloseAll);
+            if (!bCtrlF6)
+                return true;
+        }
+    }
+
+    if (pSVData->maAppData.mpAccelMgr && pSVData->maAppData.mpAccelMgr->IsAccelKey(aKeyCode))
+        return true;
+
+    return false;
+}
+
 static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uInt16 nKeyCode,
                           sal_uInt16 nCharCode, sal_uInt16 nRepeat, bool bForward)
 {
-    ImplSVData* pSVData = ImplGetSVData();
-    vcl::KeyCode aKeyCode(nKeyCode, nKeyCode);
-    sal_uInt16 nEvCode = aKeyCode.GetCode();
+    const vcl::KeyCode aKeyCode(nKeyCode, nKeyCode);
+    const sal_uInt16 nEvCode = aKeyCode.GetCode();
 
-    // allow application key listeners to remove the key event
-    // but make sure we're not forwarding external KeyEvents, (ie where bForward is false)
-    // because those are coming back from the listener itself and MUST be processed
     if (bForward)
     {
-        VclEventId nVCLEvent;
+        VclEventId nVCLEvent = VclEventId::NONE;
         switch (nSVEvent)
         {
             case NotifyEventType::KEYINPUT:
@@ -1174,120 +1302,52 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
                 nVCLEvent = VclEventId::WindowKeyUp;
                 break;
             default:
-                nVCLEvent = VclEventId::NONE;
                 break;
         }
+
         KeyEvent aKeyEvent(static_cast<sal_Unicode>(nCharCode), aKeyCode, nRepeat);
         if (nVCLEvent != VclEventId::NONE && Application::HandleKey(nVCLEvent, pWindow, &aKeyEvent))
             return true;
     }
 
-    bool bCtrlF6 = (aKeyCode.GetCode() == KEY_F6) && aKeyCode.IsMod1();
+    const bool bCtrlF6 = (aKeyCode.GetCode() == KEY_F6) && aKeyCode.IsMod1();
 
-    // determine last input time
-    pSVData->maAppData.mnLastInputTime = tools::Time::GetSystemTicks();
+    ImplGetSVData()->maAppData.mnLastInputTime = tools::Time::GetSystemTicks();
 
-    // handle tracking window
-    if (nSVEvent == NotifyEventType::KEYINPUT)
-    {
-        if (ImplGetSVHelpData().mbExtHelpMode)
-        {
-            Help::EndExtHelp();
-            if (nEvCode == KEY_ESCAPE)
-                return true;
-        }
-        if (ImplGetSVHelpData().mpHelpWin)
-            ImplDestroyHelpWindow(false);
+    if (nSVEvent == NotifyEventType::KEYINPUT
+        && lcl_HandleKeyInputPreProcessing(aKeyCode, nEvCode, bCtrlF6))
+        return true;
 
-        // AutoScrollMode
-        if (pSVData->mpWinData->mpAutoScrollWin)
-        {
-            pSVData->mpWinData->mpAutoScrollWin->EndAutoScroll();
-            if (nEvCode == KEY_ESCAPE)
-                return true;
-        }
-
-        if (pSVData->mpWinData->mpTrackWin)
-        {
-            if (sal_uInt16 nOrigCode = aKeyCode.GetCode(); nOrigCode == KEY_ESCAPE)
-            {
-                pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Cancel
-                                                            | TrackingEventFlags::Key);
-                if (pSVData->mpWinData->mpFirstFloat)
-                {
-                    if (FloatingWindow* pLastLevelFloat
-                        = pSVData->mpWinData->mpFirstFloat->ImplFindLastLevelFloat();
-                        !(pLastLevelFloat->GetPopupModeFlags() & FloatWinPopupFlags::NoKeyClose))
-                    {
-                        if (sal_uInt16 nEscCode = aKeyCode.GetCode(); nEscCode == KEY_ESCAPE)
-                            pLastLevelFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel
-                                                          | FloatWinPopupEndFlags::CloseAll);
-                    }
-                }
-                return true;
-            }
-            else if (nOrigCode == KEY_RETURN)
-            {
-                pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Key);
-                return true;
-            }
-            else
-                return true;
-        }
-
-        // handle FloatingMode
-        if (pSVData->mpWinData->mpFirstFloat)
-        {
-            if (FloatingWindow* pLastLevelFloat
-                = pSVData->mpWinData->mpFirstFloat->ImplFindLastLevelFloat();
-                !(pLastLevelFloat->GetPopupModeFlags() & FloatWinPopupFlags::NoKeyClose))
-            {
-                if (sal_uInt16 nCode = aKeyCode.GetCode(); (nCode == KEY_ESCAPE) || bCtrlF6)
-                {
-                    pLastLevelFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel
-                                                  | FloatWinPopupEndFlags::CloseAll);
-                    if (!bCtrlF6)
-                        return true;
-                }
-            }
-        }
-
-        // test for accel
-        if (pSVData->maAppData.mpAccelMgr)
-        {
-            if (pSVData->maAppData.mpAccelMgr->IsAccelKey(aKeyCode))
-                return true;
-        }
-    }
-
-    // find window
     VclPtr<vcl::Window> pChild = lcl_GetKeyInputWindow(pWindow);
     if (!pChild)
         return false;
 
-    // #i1820# use locale specific decimal separator
+    sal_uInt16 nLocalCharCode = nCharCode;
     if (nEvCode == KEY_DECIMAL)
     {
-        // tdf#138932: don't modify the meaning of the key for password box
-        if (auto pEdit = dynamic_cast<Edit*>(pChild.get()); !(pEdit && pEdit->IsPassword()))
+        if (const auto* pEdit = dynamic_cast<const Edit*>(pChild.get());
+            !(pEdit && pEdit->IsPassword()))
         {
             if (Application::GetSettings().GetMiscSettings().GetEnableLocalizedDecimalSep())
             {
-                OUString aSep(pWindow->GetSettings().GetLocaleDataWrapper().getNumDecimalSep());
-                nCharCode = static_cast<sal_uInt16>(aSep[0]);
+                const OUString aSep(
+                    pWindow->GetSettings().GetLocaleDataWrapper().getNumDecimalSep());
+                nLocalCharCode = static_cast<sal_uInt16>(aSep[0]);
             }
         }
     }
 
-    // RTL: mirror cursor keys
+    vcl::KeyCode aLocalKeyCode = aKeyCode;
     if ((aKeyCode.GetCode() == KEY_LEFT || aKeyCode.GetCode() == KEY_RIGHT)
         && pChild->IsRTLEnabled() && pChild->GetOutDev()->HasMirroredGraphics())
-        aKeyCode = vcl::KeyCode(aKeyCode.GetCode() == KEY_LEFT ? KEY_RIGHT : KEY_LEFT,
-                                aKeyCode.GetModifier());
+    {
+        aLocalKeyCode = vcl::KeyCode(aKeyCode.GetCode() == KEY_LEFT ? KEY_RIGHT : KEY_LEFT,
+                                     aKeyCode.GetModifier());
+    }
 
-    KeyEvent aKeyEvt(static_cast<sal_Unicode>(nCharCode), aKeyCode, nRepeat);
+    const KeyEvent aKeyEvt(static_cast<sal_Unicode>(nLocalCharCode), aLocalKeyCode, nRepeat);
     NotifyEvent aNotifyEvt(nSVEvent, pChild, &aKeyEvt);
-    bool bKeyPreNotify = ImplCallPreNotify(aNotifyEvt);
+    const bool bKeyPreNotify = ImplCallPreNotify(const_cast<NotifyEvent&>(aNotifyEvt));
     bool bRet = true;
 
     if (!bKeyPreNotify && !pChild->isDisposed())
@@ -1296,12 +1356,12 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
         {
             UITestLogger::getInstance().logKeyInput(pChild, aKeyEvt);
             pChild->ImplGetWindowImpl()->mbKeyInput = false;
-            pChild->KeyInput(aKeyEvt);
+            pChild->KeyInput(const_cast<KeyEvent&>(aKeyEvt));
         }
         else
         {
             pChild->ImplGetWindowImpl()->mbKeyUp = false;
-            pChild->KeyUp(aKeyEvt);
+            pChild->KeyUp(const_cast<KeyEvent&>(aKeyEvt));
         }
         if (!pChild->isDisposed())
             aNotifyEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners(aNotifyEvt);
@@ -1313,83 +1373,14 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     if (nSVEvent == NotifyEventType::KEYINPUT)
     {
         if (!bKeyPreNotify && pChild->ImplGetWindowImpl()->mbKeyInput)
-        {
-            sal_uInt16 nCode = aKeyCode.GetCode();
-
-            // ContextMenu
-            if ((nCode == KEY_CONTEXTMENU)
-                || ((nCode == KEY_F10) && aKeyCode.IsShift() && !aKeyCode.IsMod1()
-                    && !aKeyCode.IsMod2()))
-                bRet = !ImplCallCommand(pChild, CommandEventId::ContextMenu);
-            else
-            {
-                // #101999# is focus in or below toolbox
-                bool bToolboxFocus = false;
-                if ((nCode == KEY_F1) && aKeyCode.IsShift())
-                {
-                    for (vcl::Window* pWin = pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin;
-                         pWin; pWin = pWin->GetParent())
-                    {
-                        if (pWin->ImplGetWindowImpl()->mbToolBox)
-                        {
-                            bToolboxFocus = true;
-                            break;
-                        }
-                    }
-                }
-
-                if (((nCode == KEY_F2) && aKeyCode.IsShift())
-                    || ((nCode == KEY_F1) && aKeyCode.IsMod1()) ||
-                    // #101999# no active help when focus in toolbox, simulate BalloonHelp instead
-                    ((nCode == KEY_F1) && aKeyCode.IsShift() && bToolboxFocus))
-                {
-                    // TipHelp via Keyboard (Shift-F2 or Ctrl-F1)
-                    // simulate mouseposition at center of window
-
-                    Size aSize = pChild->GetOutDev()->GetOutputSize();
-                    Point aPos(aSize.getWidth() / 2, aSize.getHeight() / 2);
-                    aPos = pChild->OutputToScreenPixel(aPos);
-
-                    HelpEvent aHelpEvent(aPos, HelpEventMode::BALLOON);
-                    aHelpEvent.SetKeyboardActivated(true);
-                    ImplGetSVHelpData().mbSetKeyboardHelp = true;
-                    pChild->RequestHelp(aHelpEvent);
-                    ImplGetSVHelpData().mbSetKeyboardHelp = false;
-                }
-                else if ((nCode == KEY_F1) || (nCode == KEY_HELP))
-                {
-                    if (!aKeyCode.GetModifier())
-                    {
-                        if (ImplGetSVHelpData().mbContextHelp)
-                        {
-                            Point aMousePos
-                                = pChild->OutputToScreenPixel(pChild->GetPointerPosPixel());
-                            HelpEvent aHelpEvent(aMousePos, HelpEventMode::CONTEXT);
-                            pChild->RequestHelp(aHelpEvent);
-                        }
-                        else
-                            bRet = false;
-                    }
-                    else if (aKeyCode.IsShift())
-                    {
-                        if (ImplGetSVHelpData().mbExtHelp)
-                            Help::StartExtHelp();
-                        else
-                            bRet = false;
-                    }
-                }
-                else
-                    bRet = false;
-            }
-        }
+            bRet = lcl_ProcessHelpAndMenuKeys(pChild.get(), pWindow, aLocalKeyCode.GetCode(),
+                                              aLocalKeyCode);
     }
-    else
+    else if (!bKeyPreNotify && pChild->ImplGetWindowImpl()->mbKeyUp)
     {
-        if (!bKeyPreNotify && pChild->ImplGetWindowImpl()->mbKeyUp)
-            bRet = false;
+        bRet = false;
     }
 
-    // #105591# send keyinput to parent if we are a floating window and the key was not processed yet
     if (bRet || !pWindow->ImplGetWindowImpl() || !pWindow->ImplGetWindowImpl()->mbFloatWin
         || !pWindow->GetParent()
         || (pWindow->ImplGetWindowImpl()->mpFrame
@@ -1398,20 +1389,20 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
 
     pChild = pWindow->GetParent();
 
-    // call handler
     NotifyEvent aNEvt(nSVEvent, pChild, &aKeyEvt);
-    if (bool bPreNotify = ImplCallPreNotify(aNEvt); pChild->isDisposed() || bPreNotify)
+    if (const bool bPreNotify = ImplCallPreNotify(const_cast<NotifyEvent&>(aNEvt));
+        pChild->isDisposed() || bPreNotify)
         return true;
 
     if (nSVEvent == NotifyEventType::KEYINPUT)
     {
         pChild->ImplGetWindowImpl()->mbKeyInput = false;
-        pChild->KeyInput(aKeyEvt);
+        pChild->KeyInput(const_cast<KeyEvent&>(aKeyEvt));
     }
     else
     {
         pChild->ImplGetWindowImpl()->mbKeyUp = false;
-        pChild->KeyUp(aKeyEvt);
+        pChild->KeyUp(const_cast<KeyEvent&>(aKeyEvt));
     }
 
     if (!pChild->isDisposed())
@@ -1427,7 +1418,7 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
                                    const ExtTextInputAttr* pTextAttr, sal_Int32 nCursorPos,
                                    sal_uInt16 nCursorFlags)
 {
-    ImplSVData* pSVData = ImplGetSVData();
+    const ImplSVData* pSVData = ImplGetSVData();
     vcl::Window* pChild = nullptr;
 
     int nTries = 200;
@@ -1451,25 +1442,21 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
         Application::Yield();
     }
 
-    // If it is the first ExtTextInput call, we inform the information
-    // and allocate the data, which we must store in this mode
     ImplWinData* pWinData = pChild->ImplGetWinData();
     if (!pChild->ImplGetWindowImpl()->mbExtTextInput)
     {
         pChild->ImplGetWindowImpl()->mbExtTextInput = true;
         pWinData->mpExtOldText = OUString();
         pWinData->mpExtOldAttrAry.reset();
-        pSVData->mpWinData->mpExtTextInputWin = pChild;
+        ImplGetSVData()->mpWinData->mpExtTextInputWin = pChild;
         ImplCallCommand(pChild, CommandEventId::StartExtTextInput);
     }
 
-    // be aware of being recursively called in StartExtTextInput
     if (!pChild->ImplGetWindowImpl()->mbExtTextInput)
         return false;
 
-    // Test for changes
     bool bOnlyCursor = false;
-    sal_Int32 nMinLen = std::min(pWinData->mpExtOldText->getLength(), rText.getLength());
+    const sal_Int32 nMinLen = std::min(pWinData->mpExtOldText->getLength(), rText.getLength());
     sal_Int32 nDeltaStart = 0;
     while (nDeltaStart < nMinLen)
     {
@@ -1498,8 +1485,7 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
     if ((nDeltaStart >= nMinLen) && (pWinData->mpExtOldText->getLength() == rText.getLength()))
         bOnlyCursor = true;
 
-    // Call Event and store the information
-    CommandExtTextInputData aData(rText, pTextAttr, nCursorPos, nCursorFlags, bOnlyCursor);
+    const CommandExtTextInputData aData(rText, pTextAttr, nCursorPos, nCursorFlags, bOnlyCursor);
     *pWinData->mpExtOldText = rText;
     pWinData->mpExtOldAttrAry.reset();
     if (pTextAttr)
@@ -1513,7 +1499,6 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
 static bool lcl_HandleEndExtTextInput()
 {
     ImplSVData* pSVData = ImplGetSVData();
-
     if (vcl::Window* pChild = pSVData->mpWinData->mpExtTextInputWin)
     {
         pChild->ImplGetWindowImpl()->mbExtTextInput = false;
@@ -1524,7 +1509,6 @@ static bool lcl_HandleEndExtTextInput()
 
         return !ImplCallCommand(pChild, CommandEventId::EndExtTextInput);
     }
-
     return false;
 }
 
@@ -1567,19 +1551,14 @@ static bool lcl_HandleGestureRotateEvent(vcl::Window* pWindow, const SalGestureR
 static void lcl_HandlePaint(vcl::Window* pWindow, const tools::Rectangle& rBoundRect,
                             bool bImmediateUpdate)
 {
-    // system paint events must be checked for re-mirroring
     pWindow->ImplGetWindowImpl()->mnPaintFlags |= ImplPaintFlags::CheckRtl;
 
-    // trigger paint for all windows that live in the new paint region
-    vcl::Region aRegion(rBoundRect);
+    const vcl::Region aRegion(rBoundRect);
     pWindow->ImplInvalidateOverlapFrameRegion(aRegion);
     if (!bImmediateUpdate)
         return;
 
-    // #i87663# trigger possible pending resize notifications
-    // (GetSizePixel does that for us)
     pWindow->GetSizePixel();
-    // force drawing immediately
     pWindow->PaintImmediately();
 }
 
@@ -1590,315 +1569,283 @@ static void lcl_HandleMoveResize(vcl::Window* pWindow, tools::Long nNewWidth,
     ImplHandleResize(pWindow, nNewWidth, nNewHeight);
 }
 
+static bool lcl_DispatchExternalMouseMove(vcl::Window* pWindow, const void* pEvent)
+{
+    auto const* pMouseEvt = static_cast<MouseEvent const*>(pEvent);
+    SalMouseEvent aSalMouseEvent;
+    aSalMouseEvent.mnTime = tools::Time::GetSystemTicks();
+    aSalMouseEvent.mnX = pMouseEvt->GetPosPixel().X();
+    aSalMouseEvent.mnY = pMouseEvt->GetPosPixel().Y();
+    aSalMouseEvent.mnButton = 0;
+    aSalMouseEvent.mnCode
+        = static_cast<sal_uInt16>(pMouseEvt->GetButtons() | pMouseEvt->GetModifier());
+    return lcl_HandleSalMouseMove(pWindow, &aSalMouseEvent);
+}
+
+static bool lcl_DispatchExternalMouseButtonDown(vcl::Window* pWindow, const void* pEvent)
+{
+    auto const* pMouseEvt = static_cast<MouseEvent const*>(pEvent);
+    SalMouseEvent aSalMouseEvent;
+    aSalMouseEvent.mnTime = tools::Time::GetSystemTicks();
+    aSalMouseEvent.mnX = pMouseEvt->GetPosPixel().X();
+    aSalMouseEvent.mnY = pMouseEvt->GetPosPixel().Y();
+    aSalMouseEvent.mnButton = pMouseEvt->GetButtons();
+    aSalMouseEvent.mnCode
+        = static_cast<sal_uInt16>(pMouseEvt->GetButtons() | pMouseEvt->GetModifier());
+    return lcl_HandleSalMouseButtonDown(pWindow, &aSalMouseEvent);
+}
+
+static bool lcl_DispatchExternalMouseButtonUp(vcl::Window* pWindow, const void* pEvent)
+{
+    auto const* pMouseEvt = static_cast<MouseEvent const*>(pEvent);
+    SalMouseEvent aSalMouseEvent;
+    aSalMouseEvent.mnTime = tools::Time::GetSystemTicks();
+    aSalMouseEvent.mnX = pMouseEvt->GetPosPixel().X();
+    aSalMouseEvent.mnY = pMouseEvt->GetPosPixel().Y();
+    aSalMouseEvent.mnButton = pMouseEvt->GetButtons();
+    aSalMouseEvent.mnCode
+        = static_cast<sal_uInt16>(pMouseEvt->GetButtons() | pMouseEvt->GetModifier());
+    return lcl_HandleSalMouseButtonUp(pWindow, &aSalMouseEvent);
+}
+
+static void lcl_DispatchPaintEvent(vcl::Window* pWindow, const void* pEvent)
+{
+    auto const* pPaintEvt = static_cast<SalPaintEvent const*>(pEvent);
+    tools::Long nBoundX = pPaintEvt->mnBoundX;
+
+    if (AllSettings::GetLayoutRTL())
+    {
+        SalFrame* pSalFrame = pWindow->ImplGetWindowImpl()->mpFrame;
+        nBoundX = pSalFrame->GetWidth() - pPaintEvt->mnBoundWidth - nBoundX;
+    }
+
+    const tools::Rectangle aBoundRect(Point(nBoundX, pPaintEvt->mnBoundY),
+                                      Size(pPaintEvt->mnBoundWidth, pPaintEvt->mnBoundHeight));
+    lcl_HandlePaint(pWindow, aBoundRect, pPaintEvt->mbImmediateUpdate);
+}
+
+static bool lcl_DispatchShutdown()
+{
+    static bool bInQueryExit = false;
+    if (bInQueryExit)
+        return false;
+
+    bInQueryExit = true;
+    if (GetpApp()->QueryExit())
+    {
+        Application::Quit();
+        return false;
+    }
+
+    bInQueryExit = false;
+    return true;
+}
+
 bool ImplWindowFrameProc(vcl::Window* _pWindow, SalEvent nEvent, const void* pEvent)
 {
     DBG_TESTSOLARMUTEX();
 
-    // Ensure the window survives during this method.
-    VclPtr<vcl::Window> pWindow(_pWindow);
+    const VclPtr<vcl::Window> pWindow(_pWindow);
 
-    bool bRet = false;
-
-    // #119709# for some unknown reason it is possible to receive events (in this case key events)
-    // although the corresponding VCL window must have been destroyed already
-    // at least ImplGetWindowImpl() was NULL in these cases, so check this here
     if (pWindow->ImplGetWindowImpl() == nullptr)
         return false;
 
     switch (nEvent)
     {
         case SalEvent::MouseMove:
-            bRet = lcl_HandleSalMouseMove(pWindow, static_cast<SalMouseEvent const*>(pEvent));
-            break;
+            return lcl_HandleSalMouseMove(pWindow, static_cast<SalMouseEvent const*>(pEvent));
         case SalEvent::ExternalMouseMove:
-        {
-            MouseEvent const* pMouseEvt = static_cast<MouseEvent const*>(pEvent);
-            SalMouseEvent aSalMouseEvent;
-
-            aSalMouseEvent.mnTime = tools::Time::GetSystemTicks();
-            aSalMouseEvent.mnX = pMouseEvt->GetPosPixel().X();
-            aSalMouseEvent.mnY = pMouseEvt->GetPosPixel().Y();
-            aSalMouseEvent.mnButton = 0;
-            aSalMouseEvent.mnCode = pMouseEvt->GetButtons() | pMouseEvt->GetModifier();
-
-            bRet = lcl_HandleSalMouseMove(pWindow, &aSalMouseEvent);
-        }
-        break;
+            return lcl_DispatchExternalMouseMove(pWindow, pEvent);
         case SalEvent::MouseLeave:
-            bRet = lcl_HandleSalMouseLeave(pWindow, static_cast<SalMouseEvent const*>(pEvent));
-            break;
+            return lcl_HandleSalMouseLeave(pWindow, static_cast<SalMouseEvent const*>(pEvent));
         case SalEvent::MouseButtonDown:
-            bRet = lcl_HandleSalMouseButtonDown(pWindow, static_cast<SalMouseEvent const*>(pEvent));
-            break;
+            return lcl_HandleSalMouseButtonDown(pWindow, static_cast<SalMouseEvent const*>(pEvent));
         case SalEvent::ExternalMouseButtonDown:
-        {
-            MouseEvent const* pMouseEvt = static_cast<MouseEvent const*>(pEvent);
-            SalMouseEvent aSalMouseEvent;
-
-            aSalMouseEvent.mnTime = tools::Time::GetSystemTicks();
-            aSalMouseEvent.mnX = pMouseEvt->GetPosPixel().X();
-            aSalMouseEvent.mnY = pMouseEvt->GetPosPixel().Y();
-            aSalMouseEvent.mnButton = pMouseEvt->GetButtons();
-            aSalMouseEvent.mnCode = pMouseEvt->GetButtons() | pMouseEvt->GetModifier();
-
-            bRet = lcl_HandleSalMouseButtonDown(pWindow, &aSalMouseEvent);
-        }
-        break;
+            return lcl_DispatchExternalMouseButtonDown(pWindow, pEvent);
         case SalEvent::MouseButtonUp:
-            bRet = lcl_HandleSalMouseButtonUp(pWindow, static_cast<SalMouseEvent const*>(pEvent));
-            break;
+            return lcl_HandleSalMouseButtonUp(pWindow, static_cast<SalMouseEvent const*>(pEvent));
         case SalEvent::ExternalMouseButtonUp:
-        {
-            MouseEvent const* pMouseEvt = static_cast<MouseEvent const*>(pEvent);
-            SalMouseEvent aSalMouseEvent;
-
-            aSalMouseEvent.mnTime = tools::Time::GetSystemTicks();
-            aSalMouseEvent.mnX = pMouseEvt->GetPosPixel().X();
-            aSalMouseEvent.mnY = pMouseEvt->GetPosPixel().Y();
-            aSalMouseEvent.mnButton = pMouseEvt->GetButtons();
-            aSalMouseEvent.mnCode = pMouseEvt->GetButtons() | pMouseEvt->GetModifier();
-
-            bRet = lcl_HandleSalMouseButtonUp(pWindow, &aSalMouseEvent);
-        }
-        break;
+            return lcl_DispatchExternalMouseButtonUp(pWindow, pEvent);
         case SalEvent::MouseActivate:
-            bRet = false;
-            break;
+            return false;
         case SalEvent::KeyInput:
         {
-            SalKeyEvent const* pKeyEvt = static_cast<SalKeyEvent const*>(pEvent);
-            bRet = lcl_HandleKey(pWindow, NotifyEventType::KEYINPUT, pKeyEvt->mnCode,
+            auto const* pKeyEvt = static_cast<SalKeyEvent const*>(pEvent);
+            return lcl_HandleKey(pWindow, NotifyEventType::KEYINPUT, pKeyEvt->mnCode,
                                  pKeyEvt->mnCharCode, pKeyEvt->mnRepeat, true);
         }
-        break;
         case SalEvent::ExternalKeyInput:
         {
-            KeyEvent const* pKeyEvt = static_cast<KeyEvent const*>(pEvent);
-            bRet = lcl_HandleKey(pWindow, NotifyEventType::KEYINPUT,
+            auto const* pKeyEvt = static_cast<KeyEvent const*>(pEvent);
+            return lcl_HandleKey(pWindow, NotifyEventType::KEYINPUT,
                                  pKeyEvt->GetKeyCode().GetFullCode(), pKeyEvt->GetCharCode(),
                                  pKeyEvt->GetRepeat(), false);
         }
-        break;
         case SalEvent::KeyUp:
         {
-            SalKeyEvent const* pKeyEvt = static_cast<SalKeyEvent const*>(pEvent);
-            bRet = lcl_HandleKey(pWindow, NotifyEventType::KEYUP, pKeyEvt->mnCode,
+            auto const* pKeyEvt = static_cast<SalKeyEvent const*>(pEvent);
+            return lcl_HandleKey(pWindow, NotifyEventType::KEYUP, pKeyEvt->mnCode,
                                  pKeyEvt->mnCharCode, pKeyEvt->mnRepeat, true);
         }
-        break;
         case SalEvent::ExternalKeyUp:
         {
-            KeyEvent const* pKeyEvt = static_cast<KeyEvent const*>(pEvent);
-            bRet = lcl_HandleKey(pWindow, NotifyEventType::KEYUP,
+            auto const* pKeyEvt = static_cast<KeyEvent const*>(pEvent);
+            return lcl_HandleKey(pWindow, NotifyEventType::KEYUP,
                                  pKeyEvt->GetKeyCode().GetFullCode(), pKeyEvt->GetCharCode(),
                                  pKeyEvt->GetRepeat(), false);
         }
-        break;
         case SalEvent::KeyModChange:
             lcl_HandleSalKeyMod(pWindow, static_cast<SalKeyModEvent const*>(pEvent));
-            break;
+            return true;
 
         case SalEvent::InputLanguageChange:
             lcl_HandleInputLanguageChange(pWindow);
-            break;
+            return true;
 
         case SalEvent::MenuActivate:
         case SalEvent::MenuDeactivate:
         case SalEvent::MenuHighlight:
         case SalEvent::MenuCommand:
         case SalEvent::MenuButtonCommand:
-            bRet = lcl_HandleMenuEvent(
+            return lcl_HandleMenuEvent(
                 pWindow, const_cast<SalMenuEvent*>(static_cast<SalMenuEvent const*>(pEvent)),
                 nEvent);
-            break;
 
         case SalEvent::WheelMouse:
-            bRet = lcl_HandleWheelEvent(pWindow, *static_cast<const SalWheelMouseEvent*>(pEvent));
-            break;
+            return lcl_HandleWheelEvent(pWindow, *static_cast<const SalWheelMouseEvent*>(pEvent));
 
         case SalEvent::Paint:
-        {
-            SalPaintEvent const* pPaintEvt = static_cast<SalPaintEvent const*>(pEvent);
-
-            if (AllSettings::GetLayoutRTL())
-            {
-                SalFrame* pSalFrame = pWindow->ImplGetWindowImpl()->mpFrame;
-                const_cast<SalPaintEvent*>(pPaintEvt)->mnBoundX
-                    = pSalFrame->GetWidth() - pPaintEvt->mnBoundWidth - pPaintEvt->mnBoundX;
-            }
-
-            tools::Rectangle aBoundRect(Point(pPaintEvt->mnBoundX, pPaintEvt->mnBoundY),
-                                        Size(pPaintEvt->mnBoundWidth, pPaintEvt->mnBoundHeight));
-            lcl_HandlePaint(pWindow, aBoundRect, pPaintEvt->mbImmediateUpdate);
-        }
-        break;
+            lcl_DispatchPaintEvent(pWindow, pEvent);
+            return true;
 
         case SalEvent::Move:
             lcl_HandleMove(pWindow);
-            break;
+            return true;
 
         case SalEvent::Resize:
         {
             const Size aNewSize = pWindow->ImplGetWindowImpl()->mpFrame->GetClientSize();
             ImplHandleResize(pWindow, aNewSize.Width(), aNewSize.Height());
+            return true;
         }
-        break;
-
         case SalEvent::MoveResize:
         {
-            SalFrameGeometry g = pWindow->ImplGetWindowImpl()->mpFrame->GetGeometry();
+            const SalFrameGeometry g = pWindow->ImplGetWindowImpl()->mpFrame->GetGeometry();
             lcl_HandleMoveResize(pWindow, g.width(), g.height());
+            return true;
         }
-        break;
-
         case SalEvent::ClosePopups:
-        {
             lcl_KillOwnPopups(pWindow);
-        }
-        break;
+            return true;
 
         case SalEvent::GetFocus:
             lcl_HandleGetFocus(pWindow);
-            break;
+            return true;
         case SalEvent::LoseFocus:
             lcl_HandleLoseFocus(pWindow);
-            break;
+            return true;
 
         case SalEvent::Close:
             lcl_HandleClose(pWindow);
-            break;
+            return true;
 
         case SalEvent::Shutdown:
-        {
-            static bool bInQueryExit = false;
-
-            if (bInQueryExit)
-                return false;
-
-            bInQueryExit = true;
-
-            if (GetpApp()->QueryExit())
-            {
-                // end the message loop
-                Application::Quit();
-                return false;
-            }
-
-            bInQueryExit = false;
-            return true;
-        }
+            return lcl_DispatchShutdown();
 
         case SalEvent::SettingsChanged:
         case SalEvent::PrinterChanged:
         case SalEvent::DisplayChanged:
         case SalEvent::FontChanged:
             lcl_HandleSalSettings(nEvent);
-            break;
+            return true;
 
         case SalEvent::UserEvent:
             lcl_HandleUserEvent(const_cast<ImplSVEvent*>(static_cast<ImplSVEvent const*>(pEvent)));
-            break;
+            return true;
 
         case SalEvent::ExtTextInput:
         {
-            SalExtTextInputEvent const* pEvt = static_cast<SalExtTextInputEvent const*>(pEvent);
-            bRet = lcl_HandleExtTextInput(pWindow, pEvt->maText, pEvt->mpTextAttr,
+            auto const* pEvt = static_cast<SalExtTextInputEvent const*>(pEvent);
+            return lcl_HandleExtTextInput(pWindow, pEvt->maText, pEvt->mpTextAttr,
                                           pEvt->mnCursorPos, pEvt->mnCursorFlags);
         }
-        break;
         case SalEvent::EndExtTextInput:
-            bRet = lcl_HandleEndExtTextInput();
-            break;
+            return lcl_HandleEndExtTextInput();
         case SalEvent::ExtTextInputPos:
             lcl_HandleSalExtTextInputPos(pWindow,
                                          const_cast<SalExtTextInputPosEvent*>(
                                              static_cast<SalExtTextInputPosEvent const*>(pEvent)));
-            break;
+            return true;
         case SalEvent::InputContextChange:
-            bRet = lcl_HandleInputContextChange(pWindow);
-            break;
+            return lcl_HandleInputContextChange(pWindow);
         case SalEvent::ShowDialog:
         {
-            ShowDialogId nLOKWindowId
+            const auto nLOKWindowId
                 = static_cast<ShowDialogId>(reinterpret_cast<sal_IntPtr>(pEvent));
-            bRet = lcl_HandleShowDialog(pWindow, nLOKWindowId);
+            return lcl_HandleShowDialog(pWindow, nLOKWindowId);
         }
-        break;
         case SalEvent::SurroundingTextRequest:
             lcl_HandleSalSurroundingTextRequest(
                 pWindow, const_cast<SalSurroundingTextRequestEvent*>(
                              static_cast<SalSurroundingTextRequestEvent const*>(pEvent)));
-            break;
+            return true;
         case SalEvent::DeleteSurroundingTextRequest:
             lcl_HandleSalDeleteSurroundingTextRequest(
                 pWindow, const_cast<SalSurroundingTextSelectionChangeEvent*>(
                              static_cast<SalSurroundingTextSelectionChangeEvent const*>(pEvent)));
-            break;
+            return true;
         case SalEvent::SurroundingTextSelectionChange:
         {
-            SalSurroundingTextSelectionChangeEvent const* pEvt
-                = static_cast<SalSurroundingTextSelectionChangeEvent const*>(pEvent);
+            auto const* pEvt = static_cast<SalSurroundingTextSelectionChangeEvent const*>(pEvent);
             lcl_HandleSurroundingTextSelectionChange(pWindow, pEvt->mnStart, pEvt->mnEnd);
-            [[fallthrough]]; // TODO: Fallthrough really intended?
+            [[fallthrough]];
         }
         case SalEvent::StartReconversion:
             lcl_HandleStartReconversion(pWindow);
-            break;
+            return true;
 
         case SalEvent::QueryCharPosition:
             lcl_HandleSalQueryCharPosition(
                 pWindow, const_cast<SalQueryCharPositionEvent*>(
                              static_cast<SalQueryCharPositionEvent const*>(pEvent)));
-            break;
+            return true;
 
         case SalEvent::GestureSwipe:
-            bRet = lcl_HandleSwipe(pWindow, *static_cast<const SalGestureSwipeEvent*>(pEvent));
-            break;
+            return lcl_HandleSwipe(pWindow, *static_cast<const SalGestureSwipeEvent*>(pEvent));
 
         case SalEvent::GestureLongPress:
-            bRet = lcl_HandleLongPress(pWindow,
+            return lcl_HandleLongPress(pWindow,
                                        *static_cast<const SalGestureLongPressEvent*>(pEvent));
-            break;
 
         case SalEvent::ExternalGesture:
         {
             auto const* pGestureEvent = static_cast<GestureEventPan const*>(pEvent);
-
             SalGestureEvent aSalGestureEvent;
-            aSalGestureEvent.mfOffset = pGestureEvent->mnOffset;
             aSalGestureEvent.mnX = pGestureEvent->mnX;
             aSalGestureEvent.mnY = pGestureEvent->mnY;
+            aSalGestureEvent.mfOffset = pGestureEvent->mnOffset;
             aSalGestureEvent.meEventType = pGestureEvent->meEventType;
             aSalGestureEvent.meOrientation = pGestureEvent->meOrientation;
-
-            bRet = lcl_HandleGestureEvent(pWindow, aSalGestureEvent);
+            return lcl_HandleGestureEvent(pWindow, aSalGestureEvent);
         }
-        break;
         case SalEvent::GesturePan:
-        {
-            auto const* aSalGestureEvent = static_cast<SalGestureEvent const*>(pEvent);
-            bRet = lcl_HandleGestureEvent(pWindow, *aSalGestureEvent);
-        }
-        break;
+            return lcl_HandleGestureEvent(pWindow, *static_cast<SalGestureEvent const*>(pEvent));
+
         case SalEvent::GestureZoom:
-        {
-            const auto* pGestureEvent = static_cast<SalGestureZoomEvent const*>(pEvent);
-            bRet = lcl_HandleGestureZoomEvent(pWindow, *pGestureEvent);
-        }
-        break;
+            return lcl_HandleGestureZoomEvent(pWindow,
+                                              *static_cast<SalGestureZoomEvent const*>(pEvent));
+
         case SalEvent::GestureRotate:
-        {
-            const auto* pGestureEvent = static_cast<SalGestureRotateEvent const*>(pEvent);
-            bRet = lcl_HandleGestureRotateEvent(pWindow, *pGestureEvent);
-        }
-        break;
+            return lcl_HandleGestureRotateEvent(pWindow,
+                                                *static_cast<SalGestureRotateEvent const*>(pEvent));
+
         default:
             SAL_WARN("vcl.layout",
                      "ImplWindowFrameProc(): unknown event (" << static_cast<int>(nEvent) << ")");
             break;
     }
 
-    return bRet;
+    return false;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
