@@ -602,22 +602,26 @@ static void lcl_HandleClose( const vcl::Window* pWindow )
         pLastLevelFloat = pSVData->mpWinData->mpFirstFloat->ImplFindLastLevelFloat();
         pLastLevelFloat->EndPopupMode( FloatWinPopupEndFlags::Cancel | FloatWinPopupEndFlags::CloseAll );
     }
-    if ( ImplGetSVHelpData().mbExtHelpMode )
+
+    if (ImplGetSVHelpData().mbExtHelpMode)
         Help::EndExtHelp();
-    if ( ImplGetSVHelpData().mpHelpWin )
-        ImplDestroyHelpWindow( false );
+
+    if (ImplGetSVHelpData().mpHelpWin)
+        ImplDestroyHelpWindow(false);
+
     // AutoScrollMode
     if (pSVData->mpWinData->mpAutoScrollWin)
         pSVData->mpWinData->mpAutoScrollWin->EndAutoScroll();
 
     if (pSVData->mpWinData->mpTrackWin)
-        pSVData->mpWinData->mpTrackWin->EndTracking( TrackingEventFlags::Cancel | TrackingEventFlags::Key );
+        pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Cancel | TrackingEventFlags::Key);
 
     if (bWasPopup)
         return;
 
     vcl::Window *pWin = pWindow->ImplGetWindow();
     SystemWindow* pSysWin = dynamic_cast<SystemWindow*>(pWin);
+
     if (pSysWin)
     {
         // See if the custom close handler is set.
@@ -630,50 +634,74 @@ static void lcl_HandleClose( const vcl::Window* pWindow )
     }
 
     // check whether close is allowed
-    if ( pWin->IsEnabled() && pWin->IsInputEnabled() && !pWin->IsInModalMode() )
+    if (pWin->IsEnabled() && pWin->IsInputEnabled() && !pWin->IsInModalMode())
     {
         DelayedCloseEvent* pEv = new DelayedCloseEvent;
         pEv->pWindow = pWin;
-        Application::PostUserEvent( LINK_NONMEMBER( pEv, lcl_DelayedCloseEventLink ) );
+        Application::PostUserEvent(LINK_NONMEMBER(pEv, lcl_DelayedCloseEventLink));
     }
 }
 
-static void lcl_HandleUserEvent( ImplSVEvent* pSVEvent )
+static void lcl_HandleUserEvent(ImplSVEvent* pSVEvent)
 {
     if (!pSVEvent)
         return;
 
-    if ( pSVEvent->mbCall )
-        pSVEvent->maLink.Call( pSVEvent->mpData );
+    if (pSVEvent->mbCall)
+        pSVEvent->maLink.Call(pSVEvent->mpData);
 
     delete pSVEvent;
 }
 
-MouseEventModifiers ImplGetMouseMoveMode( SalMouseEvent const * pEvent )
+MouseEventModifiers ImplGetMouseMoveMode(SalMouseEvent const * pEvent)
 {
     MouseEventModifiers nMode = MouseEventModifiers::NONE;
-    if ( !pEvent->mnCode )
+
+    if (!pEvent->mnCode)
         nMode |= MouseEventModifiers::SIMPLEMOVE;
-    if ( (pEvent->mnCode & MOUSE_LEFT) && !(pEvent->mnCode & KEY_MOD1) )
+
+    if ((pEvent->mnCode & MOUSE_LEFT) && !(pEvent->mnCode & KEY_MOD1))
         nMode |= MouseEventModifiers::DRAGMOVE;
-    if ( (pEvent->mnCode & MOUSE_LEFT) && (pEvent->mnCode & KEY_MOD1) )
+
+    if ((pEvent->mnCode & MOUSE_LEFT) && (pEvent->mnCode & KEY_MOD1))
         nMode |= MouseEventModifiers::DRAGCOPY;
+
     return nMode;
 }
 
-MouseEventModifiers ImplGetMouseButtonMode( SalMouseEvent const * pEvent )
+static bool lcl_IsSingleLeftButton(SalMouseEvent const * pEvent)
+{
+    return (pEvent->mnButton == MOUSE_LEFT) && !(pEvent->mnCode & (MOUSE_MIDDLE | MOUSE_RIGHT));
+}
+
+static bool lcl_IsMultiSelectButton(SalMouseEvent const * pEvent)
+{
+    return (pEvent->mnButton == MOUSE_LEFT) && (pEvent->mnCode & KEY_MOD1) &&
+           !(pEvent->mnCode & (MOUSE_MIDDLE | MOUSE_RIGHT | KEY_SHIFT));
+}
+
+static bool lcl_IsRangeSelectButton(SalMouseEvent const * pEvent)
+{
+    return (pEvent->mnButton == MOUSE_LEFT) && (pEvent->mnCode & KEY_SHIFT) &&
+           !(pEvent->mnCode & (MOUSE_MIDDLE | MOUSE_RIGHT | KEY_MOD1));
+}
+
+MouseEventModifiers ImplGetMouseButtonMode(SalMouseEvent const * pEvent)
 {
     MouseEventModifiers nMode = MouseEventModifiers::NONE;
-    if ( pEvent->mnButton == MOUSE_LEFT )
+
+    if (pEvent->mnButton == MOUSE_LEFT)
         nMode |= MouseEventModifiers::SIMPLECLICK;
-    if ( (pEvent->mnButton == MOUSE_LEFT) && !(pEvent->mnCode & (MOUSE_MIDDLE | MOUSE_RIGHT)) )
+
+    if (lcl_IsSingleLeftButton(pEvent))
         nMode |= MouseEventModifiers::SELECT;
-    if ( (pEvent->mnButton == MOUSE_LEFT) && (pEvent->mnCode & KEY_MOD1) &&
-         !(pEvent->mnCode & (MOUSE_MIDDLE | MOUSE_RIGHT | KEY_SHIFT)) )
+
+    if (lcl_IsMultiSelectButton(pEvent))
         nMode |= MouseEventModifiers::MULTISELECT;
-    if ( (pEvent->mnButton == MOUSE_LEFT) && (pEvent->mnCode & KEY_SHIFT) &&
-         !(pEvent->mnCode & (MOUSE_MIDDLE | MOUSE_RIGHT | KEY_MOD1)) )
+
+    if (lcl_IsRangeSelectButton(pEvent))
         nMode |= MouseEventModifiers::RANGESELECT;
+
     return nMode;
 }
 
