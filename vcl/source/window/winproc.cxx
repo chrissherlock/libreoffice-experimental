@@ -119,12 +119,6 @@ bool ImplCallCommand( const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, vo
     return false;
 }
 
-static bool lcl_HandleWheelEvent(vcl::Window* pWindow, const SalWheelMouseEvent& rEvt)
-{
-    HandleWheelEvent aHandler(pWindow, rEvt);
-    return aHandler.HandleEvent(rEvt);
-}
-
 namespace {
 
 class HandleGestureSwipeEvent : public HandleGestureEvent
@@ -143,16 +137,6 @@ public:
     }
 };
 
-}
-
-static bool lcl_HandleSwipe(vcl::Window *pWindow, const SalGestureSwipeEvent& rEvt)
-{
-    HandleGestureSwipeEvent aHandler(pWindow, rEvt);
-    return aHandler.HandleEvent();
-}
-
-namespace {
-
 class HandleGestureLongPressEvent : public HandleGestureEvent
 {
 private:
@@ -168,16 +152,6 @@ public:
         return ImplCallCommand(pWindow, CommandEventId::GestureLongPress, &m_aLongPressData);
     }
 };
-
-}
-
-static bool lcl_HandleLongPress(vcl::Window *pWindow, const SalGestureLongPressEvent& rEvt)
-{
-    HandleGestureLongPressEvent aHandler(pWindow, rEvt);
-    return aHandler.HandleEvent();
-}
-
-namespace {
 
 class HandleGesturePanEvent : public HandleGestureEvent
 {
@@ -197,16 +171,6 @@ public:
     }
 };
 
-}
-
-static bool lcl_HandleGestureEvent(vcl::Window* pWindow, const SalGestureEvent& rEvent)
-{
-    HandleGesturePanEvent aHandler(pWindow, rEvent);
-    return aHandler.HandleEvent();
-}
-
-namespace {
-
 class HandleGestureZoomEvent : public HandleGestureEvent
 {
 private:
@@ -224,16 +188,6 @@ public:
         return ImplCallCommand(pWindow, CommandEventId::GestureZoom, &m_aGestureData);
     }
 };
-
-}
-
-static bool lcl_HandleGestureZoomEvent(vcl::Window* pWindow, const SalGestureZoomEvent& rEvent)
-{
-    HandleGestureZoomEvent aHandler(pWindow, rEvent);
-    return aHandler.HandleEvent();
-}
-
-namespace {
 
 class HandleGestureRotateEvent : public HandleGestureEvent
 {
@@ -253,30 +207,6 @@ public:
     }
 };
 
-}
-
-static bool lcl_HandleGestureRotateEvent(vcl::Window* pWindow, const SalGestureRotateEvent& rEvent)
-{
-    HandleGestureRotateEvent aHandler(pWindow, rEvent);
-    return aHandler.HandleEvent();
-}
-
-static void lcl_HandlePaint( vcl::Window* pWindow, const tools::Rectangle& rBoundRect, bool bImmediateUpdate )
-{
-    // system paint events must be checked for re-mirroring
-    pWindow->ImplGetWindowImpl()->mnPaintFlags |= ImplPaintFlags::CheckRtl;
-
-    // trigger paint for all windows that live in the new paint region
-    vcl::Region aRegion( rBoundRect );
-    pWindow->ImplInvalidateOverlapFrameRegion( aRegion );
-    if (!bImmediateUpdate)
-        return;
-
-    // #i87663# trigger possible pending resize notifications
-    // (GetSizePixel does that for us)
-    pWindow->GetSizePixel();
-    // force drawing immediately
-    pWindow->PaintImmediately();
 }
 
 static void lcl_KillOwnPopups( vcl::Window const * pWindow )
@@ -393,12 +323,6 @@ static void lcl_HandleMove( vcl::Window* pWindow )
     if ( pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplGetWindowImpl()->mpClientWindow )
         pWindow->ImplGetWindowImpl()->mpClientWindow->ImplCallMove();   // notify client to update geometry
 
-}
-
-static void lcl_HandleMoveResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight )
-{
-    lcl_HandleMove( pWindow );
-    ImplHandleResize( pWindow, nNewWidth, nNewHeight );
 }
 
 static void lcl_ActivateFloatingWindows( vcl::Window const * pWindow, bool bActive )
@@ -1510,6 +1434,66 @@ static bool lcl_HandleEndExtTextInput()
 
     return !ImplCallCommand( pChild, CommandEventId::EndExtTextInput );
 
+}
+
+static bool lcl_HandleWheelEvent(vcl::Window* pWindow, const SalWheelMouseEvent& rEvt)
+{
+    HandleWheelEvent aHandler(pWindow, rEvt);
+    return aHandler.HandleEvent(rEvt);
+}
+
+static bool lcl_HandleSwipe(vcl::Window *pWindow, const SalGestureSwipeEvent& rEvt)
+{
+    HandleGestureSwipeEvent aHandler(pWindow, rEvt);
+    return aHandler.HandleEvent();
+}
+
+static bool lcl_HandleLongPress(vcl::Window *pWindow, const SalGestureLongPressEvent& rEvt)
+{
+    HandleGestureLongPressEvent aHandler(pWindow, rEvt);
+    return aHandler.HandleEvent();
+}
+
+static bool lcl_HandleGestureEvent(vcl::Window* pWindow, const SalGestureEvent& rEvent)
+{
+    HandleGesturePanEvent aHandler(pWindow, rEvent);
+    return aHandler.HandleEvent();
+}
+
+static bool lcl_HandleGestureZoomEvent(vcl::Window* pWindow, const SalGestureZoomEvent& rEvent)
+{
+    HandleGestureZoomEvent aHandler(pWindow, rEvent);
+    return aHandler.HandleEvent();
+}
+
+static bool lcl_HandleGestureRotateEvent(vcl::Window* pWindow, const SalGestureRotateEvent& rEvent)
+{
+    HandleGestureRotateEvent aHandler(pWindow, rEvent);
+    return aHandler.HandleEvent();
+}
+
+static void lcl_HandlePaint( vcl::Window* pWindow, const tools::Rectangle& rBoundRect, bool bImmediateUpdate )
+{
+    // system paint events must be checked for re-mirroring
+    pWindow->ImplGetWindowImpl()->mnPaintFlags |= ImplPaintFlags::CheckRtl;
+
+    // trigger paint for all windows that live in the new paint region
+    vcl::Region aRegion( rBoundRect );
+    pWindow->ImplInvalidateOverlapFrameRegion( aRegion );
+    if (!bImmediateUpdate)
+        return;
+
+    // #i87663# trigger possible pending resize notifications
+    // (GetSizePixel does that for us)
+    pWindow->GetSizePixel();
+    // force drawing immediately
+    pWindow->PaintImmediately();
+}
+
+static void lcl_HandleMoveResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight )
+{
+    lcl_HandleMove( pWindow );
+    ImplHandleResize( pWindow, nNewWidth, nNewHeight );
 }
 
 bool ImplWindowFrameProc( vcl::Window* _pWindow, SalEvent nEvent, const void* pEvent )
