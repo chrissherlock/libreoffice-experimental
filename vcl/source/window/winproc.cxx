@@ -797,49 +797,59 @@ static bool lcl_HandleMenuEvent( vcl::Window const * pWindow, SalMenuEvent* pEve
     return false;
 }
 
-static vcl::Window* lcl_GetKeyInputWindow( vcl::Window* pWindow )
+static bool lcl_IsFloatingWindow(const vcl::Window* pWindow)
 {
-    ImplSVData* pSVData = ImplGetSVData();
+    return pWindow->ImplGetWindowImpl() && pWindow->ImplGetWindowImpl()->mbFloatWin;
+}
 
-    // determine last input time
-    pSVData->maAppData.mnLastInputTime = tools::Time::GetSystemTicks();
+static bool lcl_IsDockingWindow(const vcl::Window* pWindow)
+{
+    return pWindow->ImplGetWindowImpl() && pWindow->ImplGetWindowImpl()->mbDockWin;
+}
 
-    // #127104# workaround for destroyed windows
-    if( pWindow->ImplGetWindowImpl() == nullptr )
-        return nullptr;
+static bool lcl_ParentGrabsFocus(const vcl::Window* pChild)
+{
+    vcl::Window* pParent = pChild->GetWindow(GetWindowType::RealParent);
+    return pParent && lcl_IsFloatingWindow(pParent) &&
+           static_cast<const FloatingWindow *>(pParent)->GrabsFocus();
+}
 
-    // find window - is every time the window which has currently the
-    // focus or the last time the focus.
+static bool lcl_GrabsFocusFloatingWindow(const vcl::Window* pChild)
+{
+    return lcl_IsFloatingWindow(pChild) && static_cast<const FloatingWindow *>(pChild)->GrabsFocus();
+}
 
-    // the first floating window always has the focus, try it, or any parent floating windows, first
+static bool lcl_GrabsFocusDockingWindow(const vcl::Window* pChild)
+{
+    return lcl_IsDockingWindow(pChild) && lcl_ParentGrabsFocus(pChild);
+}
+
+static bool lcl_GrabsFocusWindow(const vcl::Window* pChild)
+{
+    return lcl_GrabsFocusFloatingWindow(pChild) || lcl_GrabsFocusDockingWindow(pChild);
+}
+
+static vcl::Window* lcl_FindFocusWindow(vcl::Window* pWindow, ImplSVData* pSVData)
+{
     vcl::Window* pChild = pSVData->mpWinData->mpFirstFloat;
-    while (pChild)
+    while (pChild && !lcl_GrabsFocusWindow(pChild))
     {
-        if (pChild->ImplGetWindowImpl())
-        {
-            if (pChild->ImplGetWindowImpl()->mbFloatWin)
-            {
-                if (static_cast<FloatingWindow *>(pChild)->GrabsFocus())
-                    break;
-            }
-            else if (pChild->ImplGetWindowImpl()->mbDockWin)
-            {
-                vcl::Window* pParent = pChild->GetWindow(GetWindowType::RealParent);
-                if (pParent && pParent->ImplGetWindowImpl()->mbFloatWin &&
-                    static_cast<FloatingWindow *>(pParent)->GrabsFocus())
-                    break;
-            }
-        }
         pChild = pChild->GetParent();
     }
 
     if (!pChild)
         pChild = pWindow;
 
-    pChild = pChild->ImplGetWindowImpl() && pChild->ImplGetWindowImpl()->mpFrameData ? pChild->ImplGetWindowImpl()->mpFrameData->mpFocusWin.get() : nullptr;
+    auto pWinImpl = pChild->ImplGetWindowImpl();
+    return pWinImpl && pWinImpl->mpFrameData ? pWinImpl->mpFrameData->mpFocusWin.get() : nullptr;
+}
+
+static vcl::Window* lcl_GetValidInputWindow(vcl::Window* pWindow, ImplSVData* pSVData)
+{
+    vcl::Window* pChild = lcl_FindFocusWindow(pWindow, pSVData);
 
     // no child - then no input
-    if ( !pChild )
+    if (!pChild)
         return nullptr;
 
     // We call also KeyInput if we haven't the focus, because on Unix
@@ -848,10 +858,24 @@ static vcl::Window* lcl_GetKeyInputWindow( vcl::Window* pWindow )
     // the window without resetting the focus
 
     // no keyinput to disabled windows
-    if ( !pChild->IsEnabled() || !pChild->IsInputEnabled() || pChild->IsInModalMode() )
+    if (!pChild->IsEnabled() || !pChild->IsInputEnabled() || pChild->IsInModalMode())
         return nullptr;
 
     return pChild;
+}
+
+static vcl::Window* lcl_GetKeyInputWindow( vcl::Window* pWindow )
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    // determine last input time
+    pSVData->maAppData.mnLastInputTime = tools::Time::GetSystemTicks();
+
+    // #127104# workaround for destroyed windows
+    if (!pWindow->ImplGetWindowImpl())
+        return nullptr;
+
+    return lcl_GetValidInputWindow(pWindow, pSVData);
 }
 
 static bool lcl_HandleInputContextChange( vcl::Window* pWindow )
