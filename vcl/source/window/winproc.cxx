@@ -188,8 +188,15 @@ static void lcl_HandleResizePropagation(vcl::Window* pWindow)
         pWindow->ImplCallResize(); // otherwise menus cannot be positioned
 }
 
-static void lcl_HandleResizeDimensions(vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight, bool bChanged)
+static bool lcl_HasSizeChanged(const vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight)
 {
+    return (nNewWidth != pWindow->GetOutputSizePixel().Width()) || (nNewHeight != pWindow->GetOutDev()->GetOutputHeightPixel());
+}
+
+static void lcl_HandleResizeDimensions(vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight)
+{
+    bool bChanged = lcl_HasSizeChanged(pWindow, nNewWidth, nNewHeight);
+
     if (!((nNewWidth > 0 && nNewHeight > 0) || (pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize && bChanged)))
         return;
 
@@ -209,17 +216,22 @@ static void lcl_HandleResizeDimensions(vcl::Window* pWindow, tools::Long nNewWid
     }
 }
 
+static bool lcl_CanMoveOrSize(const vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight)
+{
+    return lcl_HasSizeChanged(pWindow, nNewWidth, nNewHeight) && (pWindow->GetStyle() & (WB_MOVEABLE | WB_SIZEABLE));
+}
+
 void ImplHandleResize( vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight )
 {
-    const bool bChanged = (nNewWidth != pWindow->GetOutputSizePixel().Width()) || (nNewHeight != pWindow->GetOutDev()->GetOutputHeightPixel());
-    if (bChanged && pWindow->GetStyle() & (WB_MOVEABLE|WB_SIZEABLE))
+    if (lcl_CanMoveOrSize(pWindow, nNewWidth, nNewHeight))
     {
-        lcl_KillOwnPopups( pWindow );
-        if( pWindow->ImplGetWindow() != ImplGetSVHelpData().mpHelpWin )
-            ImplDestroyHelpWindow( true );
+        lcl_KillOwnPopups(pWindow);
+
+        if (pWindow->ImplGetWindow() != ImplGetSVHelpData().mpHelpWin)
+            ImplDestroyHelpWindow(true);
     }
 
-    lcl_HandleResizeDimensions(pWindow, nNewWidth, nNewHeight, bChanged);
+    lcl_HandleResizeDimensions(pWindow, nNewWidth, nNewHeight);
 
     pWindow->ImplGetWindowImpl()->mpFrameData->mbNeedSysWindow = (nNewWidth < IMPL_MIN_NEEDSYSWIN) ||
                                             (nNewHeight < IMPL_MIN_NEEDSYSWIN);
