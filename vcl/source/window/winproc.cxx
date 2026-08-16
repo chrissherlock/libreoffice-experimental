@@ -358,6 +358,19 @@ bool vcl::Window::ImplSyncDelayedFocus()
     return true;
 }
 
+static bool lcl_ShouldBringDialogToTop(const vcl::Window* pTopLevelWindow)
+{
+    const ImplSVData* pSVData = ImplGetSVData();
+    return (!pTopLevelWindow->IsInputEnabled() || pTopLevelWindow->IsInModalMode())
+        && !pSVData->mpWinData->mpExecuteDialogs.empty();
+}
+
+static void lcl_BringExecutingDialogToTop()
+{
+    const ImplSVData* pSVData = ImplGetSVData();
+    pSVData->mpWinData->mpExecuteDialogs.back()->ToTop(ToTopFlags::RestoreWhenMin | ToTopFlags::GrabFocusOnly);
+}
+
 bool vcl::Window::ImplProcessFocusGain()
 {
     // redraw all floating windows inactive
@@ -378,12 +391,10 @@ bool vcl::Window::ImplProcessFocusGain()
     if (bHandled)
         return true;
 
-    ImplSVData* pSVData = ImplGetSVData();
     vcl::Window* pTopLevelWindow = ImplGetWindowImpl()->mpFrameData->mpFocusWin->ImplGetFirstOverlapWindow();
 
-    if ((!pTopLevelWindow->IsInputEnabled() || pTopLevelWindow->IsInModalMode())
-        && !pSVData->mpWinData->mpExecuteDialogs.empty())
-        pSVData->mpWinData->mpExecuteDialogs.back()->ToTop(ToTopFlags::RestoreWhenMin | ToTopFlags::GrabFocusOnly);
+    if (lcl_ShouldBringDialogToTop(pTopLevelWindow))
+        lcl_BringExecutingDialogToTop();
     else
         pTopLevelWindow->GrabFocus();
 
