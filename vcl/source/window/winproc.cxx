@@ -66,6 +66,11 @@
 #include "HandleGestureEventBase.hxx"
 #include "HandleGestureEvent.hxx"
 #include "HandleWheelEvent.hxx"
+#include "HandleGesturePanEvent.hxx"
+#include "HandleGestureSwipeEvent.hxx"
+#include "HandleGestureLongPressEvent.hxx"
+#include "HandleGestureRotateEvent.hxx"
+#include "HandleGestureZoomEvent.hxx"
 
 #include <com/sun/star/datatransfer/dnd/DNDConstants.hpp>
 #include <com/sun/star/datatransfer/dnd/XDragSource.hpp>
@@ -117,96 +122,6 @@ bool ImplCallCommand( const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, vo
         return true;
 
     return false;
-}
-
-namespace {
-
-class HandleGestureSwipeEvent : public HandleGestureEvent
-{
-private:
-    CommandGestureSwipeData m_aSwipeData;
-public:
-    HandleGestureSwipeEvent(vcl::Window *pWindow, const SalGestureSwipeEvent& rEvt)
-        : HandleGestureEvent(pWindow, Point(rEvt.mnX, rEvt.mnY)),
-          m_aSwipeData(rEvt.mnVelocityX)
-    {
-    }
-    virtual bool CallCommand(vcl::Window *pWindow, const Point &/*rMousePos*/) override
-    {
-        return ImplCallCommand(pWindow, CommandEventId::GestureSwipe, &m_aSwipeData);
-    }
-};
-
-class HandleGestureLongPressEvent : public HandleGestureEvent
-{
-private:
-    CommandGestureLongPressData m_aLongPressData;
-public:
-    HandleGestureLongPressEvent(vcl::Window *pWindow, const SalGestureLongPressEvent& rEvt)
-        : HandleGestureEvent(pWindow, Point(rEvt.mnX, rEvt.mnY)),
-          m_aLongPressData(rEvt.mnX, rEvt.mnY)
-    {
-    }
-    virtual bool CallCommand(vcl::Window *pWindow, const Point &/*rMousePos*/) override
-    {
-        return ImplCallCommand(pWindow, CommandEventId::GestureLongPress, &m_aLongPressData);
-    }
-};
-
-class HandleGesturePanEvent : public HandleGestureEvent
-{
-private:
-    CommandGesturePanData m_aGestureData;
-
-public:
-    HandleGesturePanEvent(vcl::Window* pWindow, const SalGestureEvent& rEvent)
-        : HandleGestureEvent(pWindow, Point(rEvent.mnX, rEvent.mnY))
-        , m_aGestureData(rEvent.mnX, rEvent.mnY, rEvent.meEventType, rEvent.mfOffset, rEvent.meOrientation)
-    {
-    }
-
-    virtual bool CallCommand(vcl::Window* pWindow, const Point& /*rMousePos*/) override
-    {
-        return ImplCallCommand(pWindow, CommandEventId::GesturePan, &m_aGestureData);
-    }
-};
-
-class HandleGestureZoomEvent : public HandleGestureEvent
-{
-private:
-    CommandGestureZoomData m_aGestureData;
-
-public:
-    HandleGestureZoomEvent(vcl::Window* pWindow, const SalGestureZoomEvent& rEvent)
-        : HandleGestureEvent(pWindow, Point(rEvent.mnX, rEvent.mnY))
-        , m_aGestureData(rEvent.mnX, rEvent.mnY, rEvent.meEventType, rEvent.mfScaleDelta)
-    {
-    }
-
-    virtual bool CallCommand(vcl::Window* pWindow, const Point& /*rMousePos*/) override
-    {
-        return ImplCallCommand(pWindow, CommandEventId::GestureZoom, &m_aGestureData);
-    }
-};
-
-class HandleGestureRotateEvent : public HandleGestureEvent
-{
-private:
-    CommandGestureRotateData m_aGestureData;
-
-public:
-    HandleGestureRotateEvent(vcl::Window* pWindow, const SalGestureRotateEvent& rEvent)
-        : HandleGestureEvent(pWindow, Point(rEvent.mnX, rEvent.mnY))
-        , m_aGestureData(rEvent.mnX, rEvent.mnY, rEvent.meEventType, rEvent.mfAngleDelta)
-    {
-    }
-
-    virtual bool CallCommand(vcl::Window* pWindow, const Point& /*rMousePos*/) override
-    {
-        return ImplCallCommand(pWindow, CommandEventId::GestureRotate, &m_aGestureData);
-    }
-};
-
 }
 
 static void lcl_KillOwnPopups( vcl::Window const * pWindow )

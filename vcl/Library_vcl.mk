@@ -244,6 +244,11 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/mouseevent \
     vcl/source/window/HandleGestureEventBase \
     vcl/source/window/HandleGestureEvent \
+    vcl/source/window/HandleGestureSwipeEvent \
+    vcl/source/window/HandleGestureLongPressEvent \
+    vcl/source/window/HandleGesturePanEvent \
+    vcl/source/window/HandleGestureRotateEvent \
+    vcl/source/window/HandleGestureZoomEvent \
     vcl/source/window/HandleWheelEvent \
     vcl/source/window/wrkwin \
     vcl/source/window/EnumContext \
