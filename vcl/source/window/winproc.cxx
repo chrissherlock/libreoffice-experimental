@@ -924,43 +924,48 @@ static void lcl_HandleInputLanguageChange( vcl::Window* pWindow )
     ImplCallCommand( pChild, CommandEventId::InputLanguageChange );
 }
 
-static void lcl_HandleSalSettings( SalEvent nEvent )
+static void lcl_HandleSalSettings(SalEvent nEvent)
 {
     Application* pApp = GetpApp();
-    if ( !pApp )
+
+    if (!pApp)
         return;
 
-    if ( nEvent == SalEvent::SettingsChanged )
+    if (nEvent == SalEvent::SettingsChanged)
     {
         AllSettings aSettings = Application::GetSettings();
-        Application::MergeSystemSettings( aSettings );
-        pApp->OverrideSystemSettings( aSettings );
-        Application::SetSettings( aSettings );
-    }
-    else
-    {
-        DataChangedEventType nType;
-        switch ( nEvent )
-        {
-            case SalEvent::PrinterChanged:
-                ImplDeletePrnQueueList();
-                nType = DataChangedEventType::PRINTER;
-                break;
-            case SalEvent::DisplayChanged:
-                nType = DataChangedEventType::DISPLAY;
-                break;
-            case SalEvent::FontChanged:
-                OutputDevice::ImplUpdateAllFontData( true );
-                nType = DataChangedEventType::FONTS;
-                break;
-            default:
-                return;
-        }
+        Application::MergeSystemSettings(aSettings);
+        pApp->OverrideSystemSettings(aSettings);
+        Application::SetSettings(aSettings);
 
-        DataChangedEvent aDCEvt( nType );
-        Application::ImplCallEventListenersApplicationDataChanged(&aDCEvt);
-        Application::NotifyAllWindows( aDCEvt );
+        return;
     }
+
+    DataChangedEventType nType;
+
+    switch (nEvent)
+    {
+        case SalEvent::PrinterChanged:
+            ImplDeletePrnQueueList();
+            nType = DataChangedEventType::PRINTER;
+            break;
+
+        case SalEvent::DisplayChanged:
+            nType = DataChangedEventType::DISPLAY;
+            break;
+
+        case SalEvent::FontChanged:
+            OutputDevice::ImplUpdateAllFontData(true);
+            nType = DataChangedEventType::FONTS;
+            break;
+
+        default:
+            return;
+    }
+
+    DataChangedEvent aDCEvt(nType);
+    Application::ImplCallEventListenersApplicationDataChanged(&aDCEvt);
+    Application::NotifyAllWindows(aDCEvt);
 }
 
 static void lcl_HandleExtTextInputPos( vcl::Window* pWindow,
