@@ -583,16 +583,17 @@ static void lcl_DelayedCloseEventLink(void* pCEvent, void*)
         static_cast<DockingWindow*>(pEv->pWindow.get())->Close();
 }
 
+static bool lcl_IsInPrivatePopupMode(const vcl::Window* pWindow)
+{
+    return pWindow->ImplIsFloatingWindow() &&
+           static_cast<const FloatingWindow*>(pWindow)->ImplIsInPrivatePopupMode();
+}
+
 static void lcl_HandleClose( const vcl::Window* pWindow )
 {
     ImplSVData* pSVData = ImplGetSVData();
 
-    bool bWasPopup = false;
-    if( pWindow->ImplIsFloatingWindow() &&
-        static_cast<const FloatingWindow*>(pWindow)->ImplIsInPrivatePopupMode() )
-    {
-        bWasPopup = true;
-    }
+    bool bWasPopup = lcl_IsInPrivatePopupMode(pWindow);
 
     // on Close stop all floating modes and end popups
     if (pSVData->mpWinData->mpFirstFloat)
