@@ -290,6 +290,33 @@ static void lcl_ActivateFloatingWindows( vcl::Window const * pWindow, bool bActi
     }
 }
 
+bool vcl::Window::ImplRestoreFocusToWindow()
+{
+    if (!IsInputEnabled() || IsInModalMode())
+        return false;
+
+    if (IsEnabled())
+    {
+        GrabFocus();
+        return true;
+    }
+
+    if (ImplHasDlgCtrl())
+    {
+        // #109094# if the focus is restored to a disabled dialog control (was disabled meanwhile)
+        // try to move it to the next control
+        ImplDlgCtrlNextWindow();
+        return true;
+    }
+
+    return false;
+}
+
+bool vcl::Window::ImplCanReceiveFocus() const
+{
+    return IsInputEnabled() && !IsInModalMode();
+}
+
 IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
 {
     if (!ImplGetWindowImpl() || !ImplGetWindowImpl()->mpFrameData)
@@ -311,22 +338,10 @@ IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
         if ( ImplGetWindowImpl()->mpFrameData->mpFocusWin )
         {
             bool bHandled = false;
-            if ( ImplGetWindowImpl()->mpFrameData->mpFocusWin->IsInputEnabled() &&
-                 ! ImplGetWindowImpl()->mpFrameData->mpFocusWin->IsInModalMode() )
-            {
-                if ( ImplGetWindowImpl()->mpFrameData->mpFocusWin->IsEnabled() )
-                {
-                    ImplGetWindowImpl()->mpFrameData->mpFocusWin->GrabFocus();
-                    bHandled = true;
-                }
-                else if( ImplGetWindowImpl()->mpFrameData->mpFocusWin->ImplHasDlgCtrl() )
-                {
-                // #109094# if the focus is restored to a disabled dialog control (was disabled meanwhile)
-                // try to move it to the next control
-                    ImplGetWindowImpl()->mpFrameData->mpFocusWin->ImplDlgCtrlNextWindow();
-                    bHandled = true;
-                }
-            }
+
+            if (ImplCanReceiveFocus())
+                bHandled = ImplRestoreFocusToWindow();
+
             if ( !bHandled )
             {
                 ImplSVData* pSVData = ImplGetSVData();

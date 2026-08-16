@@ -598,6 +598,9 @@ private:
     SAL_DLLPRIVATE vcl::Window*         ImplGetFirstOverlapWindow();
     SAL_DLLPRIVATE const vcl::Window*   ImplGetFirstOverlapWindow() const;
 
+    SAL_DLLPRIVATE bool                 ImplCanReceiveFocus() const;
+    SAL_DLLPRIVATE bool                 ImplRestoreFocusToWindow();
+
     SAL_DLLPRIVATE bool                 ImplIsRealParentPath( const vcl::Window* pWindow ) const;
 
     SAL_DLLPRIVATE bool                 ImplTestMousePointerSet();
