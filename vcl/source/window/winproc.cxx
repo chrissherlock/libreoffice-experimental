@@ -1250,6 +1250,36 @@ static FloatingWindow* lcl_GetCloseableFloatWindow(vcl::Window* pFirstFloat)
     return pLastLevelFloat;
 }
 
+static bool lcl_InterceptTrackingKey(sal_uInt16 nCode)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    if (!pSVData->mpWinData->mpTrackWin)
+        return false;
+
+    if (nCode == KEY_ESCAPE)
+    {
+        pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Cancel
+                                                    | TrackingEventFlags::Key);
+
+        if (FloatingWindow* pCloseableFloat = lcl_GetCloseableFloatWindow(pSVData->mpWinData->mpFirstFloat))
+        {
+            pCloseableFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel
+                                          | FloatWinPopupEndFlags::CloseAll);
+        }
+        return true;
+    }
+
+    if (nCode == KEY_RETURN)
+    {
+        pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Key);
+        return true;
+    }
+
+    // Swallow all other keys to prevent interference with the active tracking operation
+    return true;
+}
+
 static bool lcl_HandleKeyInputPreProcessing(const vcl::KeyCode& aKeyCode, sal_uInt16 nEvCode,
                                             bool bCtrlF6)
 {
@@ -1272,27 +1302,8 @@ static bool lcl_HandleKeyInputPreProcessing(const vcl::KeyCode& aKeyCode, sal_uI
             return true;
     }
 
-    if (pSVData->mpWinData->mpTrackWin)
-    {
-        if (const sal_uInt16 nOrigCode = aKeyCode.GetCode(); nOrigCode == KEY_ESCAPE)
-        {
-            pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Cancel
-                                                        | TrackingEventFlags::Key);
-            if (FloatingWindow* pCloseableFloat
-                = lcl_GetCloseableFloatWindow(pSVData->mpWinData->mpFirstFloat))
-            {
-                pCloseableFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel
-                                              | FloatWinPopupEndFlags::CloseAll);
-            }
-            return true;
-        }
-        else if (nOrigCode == KEY_RETURN)
-        {
-            pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Key);
-            return true;
-        }
+    if (lcl_InterceptTrackingKey(nEvCode))
         return true;
-    }
 
     if (FloatingWindow* pCloseableFloat
         = lcl_GetCloseableFloatWindow(pSVData->mpWinData->mpFirstFloat))
