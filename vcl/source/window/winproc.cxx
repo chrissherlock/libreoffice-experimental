@@ -53,6 +53,9 @@
 
 #include <algorithm>
 #include <memory>
+#include <ranges>
+#include <span>
+#include <string_view>
 
 constexpr tools::Long IMPL_MIN_NEEDSYSWIN = 49;
 #ifdef MACOSX
@@ -336,6 +339,12 @@ static void lcl_BringExecutingDialogToTop()
                                                        | ToTopFlags::GrabFocusOnly);
 }
 
+static bool lcl_ResolveFocusLocally(vcl::Window* pWindow)
+{
+    return !pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin ||
+           (pWindow->ImplCanReceiveFocus() && pWindow->ImplRestoreFocusToWindow());
+}
+
 bool vcl::Window::ImplSyncDelayedFocus()
 {
     ImplGetWindowImpl()->mpFrameData->mnFocusId = nullptr;
@@ -355,10 +364,7 @@ bool vcl::Window::ImplSyncDelayedFocus()
     if (ImplGetWindowImpl()->mpFrameData->mbStartFocusState != bHasFocus)
         lcl_ActivateFloatingWindows(this, bHasFocus);
 
-    if (!ImplGetWindowImpl()->mpFrameData->mpFocusWin)
-        return true;
-
-    if (ImplCanReceiveFocus() && ImplRestoreFocusToWindow())
+    if (lcl_ResolveFocusLocally(this))
         return true;
 
     vcl::Window* pTopLevelWindow
@@ -1457,31 +1463,29 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
 
     bool bOnlyCursor = false;
     const sal_Int32 nMinLen = std::min(pWinData->mpExtOldText->getLength(), rText.getLength());
-    sal_Int32 nDeltaStart = 0;
-    while (nDeltaStart < nMinLen)
-    {
-        if ((*pWinData->mpExtOldText)[nDeltaStart] != rText[nDeltaStart])
-            break;
-        nDeltaStart++;
-    }
+
+    // Find the common prefix of the strings declaratively
+    std::basic_string_view<sal_Unicode> aOldView(pWinData->mpExtOldText->getStr(), nMinLen);
+    std::basic_string_view<sal_Unicode> aNewView(rText.getStr(), nMinLen);
+
+    auto [itOldStr, itNewStr] = std::ranges::mismatch(aOldView, aNewView);
+    sal_Int32 nDeltaStart = std::distance(aOldView.begin(), itOldStr);
+
     if (pWinData->mpExtOldAttrAry || pTextAttr)
     {
         if (!pWinData->mpExtOldAttrAry || !pTextAttr)
             nDeltaStart = 0;
         else
         {
-            sal_Int32 i = 0;
-            while (i < nDeltaStart)
-            {
-                if (pWinData->mpExtOldAttrAry[i] != pTextAttr[i])
-                {
-                    nDeltaStart = i;
-                    break;
-                }
-                i++;
-            }
+            // Find the common prefix of the attributes declaratively
+            std::span<const ExtTextInputAttr> aOldAttrs(pWinData->mpExtOldAttrAry.get(), nDeltaStart);
+            std::span<const ExtTextInputAttr> aNewAttrs(pTextAttr, nDeltaStart);
+
+            auto [itOldAttr, itNewAttr] = std::ranges::mismatch(aOldAttrs, aNewAttrs);
+            nDeltaStart = std::distance(aOldAttrs.begin(), itOldAttr);
         }
     }
+
     if ((nDeltaStart >= nMinLen) && (pWinData->mpExtOldText->getLength() == rText.getLength()))
         bOnlyCursor = true;
 
@@ -1499,6 +1503,7 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
 static bool lcl_HandleEndExtTextInput()
 {
     ImplSVData* pSVData = ImplGetSVData();
+
     if (vcl::Window* pChild = pSVData->mpWinData->mpExtTextInputWin)
     {
         pChild->ImplGetWindowImpl()->mbExtTextInput = false;
@@ -1509,6 +1514,7 @@ static bool lcl_HandleEndExtTextInput()
 
         return !ImplCallCommand(pChild, CommandEventId::EndExtTextInput);
     }
+
     return false;
 }
 
