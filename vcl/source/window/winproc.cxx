@@ -1335,6 +1335,14 @@ static bool lcl_ShouldUseLocalizedDecimalSeparator(const vcl::Window* pChild)
     return Application::GetSettings().GetMiscSettings().GetEnableLocalizedDecimalSep();
 }
 
+static bool lcl_ShouldSwapHorizontalArrows(sal_uInt16 nCode, const vcl::Window* pChild)
+{
+    if (nCode != KEY_LEFT && nCode != KEY_RIGHT)
+        return false;
+
+    return pChild->IsRTLEnabled() && pChild->GetOutDev()->HasMirroredGraphics();
+}
+
 static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uInt16 nKeyCode,
                           sal_uInt16 nCharCode, sal_uInt16 nRepeat, bool bForward)
 {
@@ -1382,12 +1390,9 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     }
 
     vcl::KeyCode aLocalKeyCode = aKeyCode;
-    if ((aKeyCode.GetCode() == KEY_LEFT || aKeyCode.GetCode() == KEY_RIGHT)
-        && pChild->IsRTLEnabled() && pChild->GetOutDev()->HasMirroredGraphics())
-    {
+    if (lcl_ShouldSwapHorizontalArrows(aKeyCode.GetCode(), pChild.get()))
         aLocalKeyCode = vcl::KeyCode(aKeyCode.GetCode() == KEY_LEFT ? KEY_RIGHT : KEY_LEFT,
                                      aKeyCode.GetModifier());
-    }
 
     const KeyEvent aKeyEvt(static_cast<sal_Unicode>(nLocalCharCode), aLocalKeyCode, nRepeat);
     NotifyEvent aNotifyEvt(nSVEvent, pChild, &aKeyEvt);
