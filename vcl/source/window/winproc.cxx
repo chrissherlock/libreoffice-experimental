@@ -339,10 +339,10 @@ static void lcl_BringExecutingDialogToTop()
                                                        | ToTopFlags::GrabFocusOnly);
 }
 
-static bool lcl_ResolveFocusLocally(vcl::Window* pWindow)
+bool vcl::Window::ImplResolveFocusLocally()
 {
-    return !pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin ||
-           (pWindow->ImplCanReceiveFocus() && pWindow->ImplRestoreFocusToWindow());
+    return !ImplGetWindowImpl()->mpFrameData->mpFocusWin ||
+           (ImplCanReceiveFocus() && ImplRestoreFocusToWindow());
 }
 
 bool vcl::Window::ImplSyncDelayedFocus()
@@ -364,7 +364,7 @@ bool vcl::Window::ImplSyncDelayedFocus()
     if (ImplGetWindowImpl()->mpFrameData->mbStartFocusState != bHasFocus)
         lcl_ActivateFloatingWindows(this, bHasFocus);
 
-    if (lcl_ResolveFocusLocally(this))
+    if (ImplResolveFocusLocally())
         return true;
 
     vcl::Window* pTopLevelWindow
@@ -444,21 +444,19 @@ static bool lcl_CanDeactivateWindow(const vcl::Window* pOverlapWindow,
 void vcl::Window::ImplDeactivateFocus()
 {
     vcl::Window* pOldOverlapWindow = ImplGetFirstOverlapWindow();
+    vcl::Window* pOldRealWindow = pOldOverlapWindow->ImplGetWindow();
 
-    if (vcl::Window* pOldRealWindow = pOldOverlapWindow->ImplGetWindow();
-        !lcl_CanDeactivateWindow(pOldOverlapWindow, pOldRealWindow))
+    if (!lcl_CanDeactivateWindow(pOldOverlapWindow, pOldRealWindow))
         return;
-    else
-    {
-        pOldOverlapWindow->ImplGetWindowImpl()->mbActive = false;
-        pOldOverlapWindow->Deactivate();
 
-        if (pOldRealWindow == pOldOverlapWindow)
-            return;
+    pOldOverlapWindow->ImplGetWindowImpl()->mbActive = false;
+    pOldOverlapWindow->Deactivate();
 
-        pOldRealWindow->ImplGetWindowImpl()->mbActive = false;
-        pOldRealWindow->Deactivate();
-    }
+    if (pOldRealWindow == pOldOverlapWindow)
+        return;
+
+    pOldRealWindow->ImplGetWindowImpl()->mbActive = false;
+    pOldRealWindow->Deactivate();
 }
 
 void vcl::Window::ImplNotifyLostFocus()
