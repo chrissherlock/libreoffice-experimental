@@ -1323,6 +1323,18 @@ static bool lcl_HandleKeyInputPreProcessing(const vcl::KeyCode& aKeyCode, sal_uI
     return false;
 }
 
+static bool lcl_ShouldUseLocalizedDecimalSeparator(const vcl::Window* pChild)
+{
+    // Do not replace the decimal separator if typing in a password field
+    if (const auto* pEdit = dynamic_cast<const Edit*>(pChild))
+    {
+        if (pEdit->IsPassword())
+            return false;
+    }
+
+    return Application::GetSettings().GetMiscSettings().GetEnableLocalizedDecimalSep();
+}
+
 static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uInt16 nKeyCode,
                           sal_uInt16 nCharCode, sal_uInt16 nRepeat, bool bForward)
 {
@@ -1362,18 +1374,11 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
         return false;
 
     sal_uInt16 nLocalCharCode = nCharCode;
-    if (nEvCode == KEY_DECIMAL)
+    if ((nEvCode == KEY_DECIMAL) && lcl_ShouldUseLocalizedDecimalSeparator(pChild.get()))
     {
-        if (const auto* pEdit = dynamic_cast<const Edit*>(pChild.get());
-            !(pEdit && pEdit->IsPassword()))
-        {
-            if (Application::GetSettings().GetMiscSettings().GetEnableLocalizedDecimalSep())
-            {
-                const OUString aSep(
-                    pWindow->GetSettings().GetLocaleDataWrapper().getNumDecimalSep());
-                nLocalCharCode = static_cast<sal_uInt16>(aSep[0]);
-            }
-        }
+        const OUString aSep(
+            pWindow->GetSettings().GetLocaleDataWrapper().getNumDecimalSep());
+        nLocalCharCode = static_cast<sal_uInt16>(aSep[0]);
     }
 
     vcl::KeyCode aLocalKeyCode = aKeyCode;
