@@ -926,44 +926,46 @@ static void lcl_HandleInputLanguageChange(vcl::Window* pWindow)
 
 static void lcl_HandleSalSettings(SalEvent nEvent)
 {
-    if (Application* pApp = GetpApp())
+    Application* pApp = GetpApp();
+
+    if (!pApp)
+        return;
+
+    if (nEvent == SalEvent::SettingsChanged)
     {
-        if (nEvent == SalEvent::SettingsChanged)
-        {
-            AllSettings aSettings = Application::GetSettings();
-            Application::MergeSystemSettings(aSettings);
-            pApp->OverrideSystemSettings(aSettings);
-            Application::SetSettings(aSettings);
+        AllSettings aSettings = Application::GetSettings();
+        Application::MergeSystemSettings(aSettings);
+        pApp->OverrideSystemSettings(aSettings);
+        Application::SetSettings(aSettings);
 
-            return;
-        }
-
-        DataChangedEventType nType;
-
-        switch (nEvent)
-        {
-            case SalEvent::PrinterChanged:
-                ImplDeletePrnQueueList();
-                nType = DataChangedEventType::PRINTER;
-                break;
-
-            case SalEvent::DisplayChanged:
-                nType = DataChangedEventType::DISPLAY;
-                break;
-
-            case SalEvent::FontChanged:
-                OutputDevice::ImplUpdateAllFontData(true);
-                nType = DataChangedEventType::FONTS;
-                break;
-
-            default:
-                return;
-        }
-
-        DataChangedEvent aDCEvt(nType);
-        Application::ImplCallEventListenersApplicationDataChanged(&aDCEvt);
-        Application::NotifyAllWindows(aDCEvt);
+        return;
     }
+
+    DataChangedEventType nType;
+
+    switch (nEvent)
+    {
+        case SalEvent::PrinterChanged:
+            ImplDeletePrnQueueList();
+            nType = DataChangedEventType::PRINTER;
+            break;
+
+        case SalEvent::DisplayChanged:
+            nType = DataChangedEventType::DISPLAY;
+            break;
+
+        case SalEvent::FontChanged:
+            OutputDevice::ImplUpdateAllFontData(true);
+            nType = DataChangedEventType::FONTS;
+            break;
+
+        default:
+            return;
+    }
+
+    DataChangedEvent aDCEvt(nType);
+    Application::ImplCallEventListenersApplicationDataChanged(&aDCEvt);
+    Application::NotifyAllWindows(aDCEvt);
 }
 
 static tools::Rectangle lcl_GetChildCursorRect(const vcl::Window* pChild,
@@ -973,20 +975,20 @@ static tools::Rectangle lcl_GetChildCursorRect(const vcl::Window* pChild,
         return pChildOutDev->GetMapper().LogicToDevicePixel(*pRect,
                                                             pChildOutDev->GetMappingPolicy());
 
-    if (vcl::Cursor* pCursor = pChild->GetCursor())
-    {
-        const auto aPos = pChildOutDev->convertTo<vcl::DevicePoint>(
-            vcl::LogicPoint(pCursor->GetPos()), pChildOutDev->GetMapMode());
-        auto aSize = pChild->convertTo<vcl::WindowSize>(vcl::LogicSize(pCursor->GetSize()),
-                                                        pChild->GetMapMode());
+    vcl::Cursor* pCursor = pChild->GetCursor();
 
-        if (!aSize->Width())
-            aSize->setWidth(pChild->GetSettings().GetStyleSettings().GetCursorSize());
+    if (!pCursor)
+        return tools::Rectangle(Point(pChild->GetDeviceOriginX(), pChild->GetDeviceOriginY()), Size());
 
-        return tools::Rectangle(aPos.get(), aSize.get());
-    }
+    const auto aPos = pChildOutDev->convertTo<vcl::DevicePoint>(
+        vcl::LogicPoint(pCursor->GetPos()), pChildOutDev->GetMapMode());
+    auto aSize = pChild->convertTo<vcl::WindowSize>(vcl::LogicSize(pCursor->GetSize()),
+                                                    pChild->GetMapMode());
 
-    return tools::Rectangle(Point(pChild->GetDeviceOriginX(), pChild->GetDeviceOriginY()), Size());
+    if (!aSize->Width())
+        aSize->setWidth(pChild->GetSettings().GetStyleSettings().GetCursorSize());
+
+    return tools::Rectangle(aPos.get(), aSize.get());
 }
 
 static vcl::Window* lcl_GetExtTextInputWindow(vcl::Window* pWindow)
@@ -1148,65 +1150,87 @@ static void lcl_HandleSalQueryCharPosition(vcl::Window* pWindow, SalQueryCharPos
     }
 }
 
-static bool lcl_ProcessHelpAndMenuKeys(vcl::Window* pChild, vcl::Window* pWindow, sal_uInt16 nCode,
-                                       const vcl::KeyCode& aKeyCode)
+static bool lcl_HasToolboxFocus(vcl::Window* pFocusWin)
 {
-    bool bToolboxFocus = false;
-    if ((nCode == KEY_F1) && aKeyCode.IsShift())
+    for (vcl::Window* pWin = pFocusWin; pWin; pWin = pWin->GetParent())
     {
-        for (vcl::Window* pWin = pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin; pWin;
-             pWin = pWin->GetParent())
+        if (auto pImpl = pWin->ImplGetWindowImpl())
         {
-            if (pWin->ImplGetWindowImpl()->mbToolBox)
-            {
-                bToolboxFocus = true;
-                break;
-            }
+            if (pImpl->mbToolBox)
+                return true;
         }
     }
 
-    if ((nCode == KEY_CONTEXTMENU)
-        || ((nCode == KEY_F10) && aKeyCode.IsShift() && !aKeyCode.IsMod1() && !aKeyCode.IsMod2()))
+    return false;
+}
+
+static bool lcl_IsContextMenuShortcut(sal_uInt16 nCode, const vcl::KeyCode& rKeyCode)
+{
+    return (nCode == KEY_CONTEXTMENU) ||
+           ((nCode == KEY_F10) && rKeyCode.IsShift() && !rKeyCode.IsMod1() && !rKeyCode.IsMod2());
+}
+
+static bool lcl_IsTipHelpShortcut(sal_uInt16 nCode, const vcl::KeyCode& rKeyCode)
+{
+    return ((nCode == KEY_F2) && rKeyCode.IsShift()) ||
+           ((nCode == KEY_F1) && rKeyCode.IsMod1());
+}
+
+static bool lcl_IsBalloonHelpRequested(sal_uInt16 nCode, const vcl::KeyCode& rKeyCode, vcl::Window* pFocusWin)
+{
+    // Check for the Shift+F1 toolbox override edge case
+    const bool bToolboxFocus = (nCode == KEY_F1) && rKeyCode.IsShift() &&
+                               lcl_HasToolboxFocus(pFocusWin);
+
+    // Return true if it's a standard tip shortcut OR the toolbox override
+    return lcl_IsTipHelpShortcut(nCode, rKeyCode) || bToolboxFocus;
+}
+
+static bool lcl_TriggerBalloonHelp(vcl::Window* pChild)
+{
+    // TipHelp via Keyboard: simulate mouse position at center of window
+    const Size aSize = pChild->GetOutDev()->GetOutputSize();
+    Point aPos(aSize.getWidth() / 2, aSize.getHeight() / 2);
+    aPos = pChild->OutputToScreenPixel(aPos);
+
+    HelpEvent aHelpEvent(aPos, HelpEventMode::BALLOON);
+    aHelpEvent.SetKeyboardActivated(true);
+
+    ImplGetSVHelpData().mbSetKeyboardHelp = true;
+    pChild->RequestHelp(aHelpEvent);
+    ImplGetSVHelpData().mbSetKeyboardHelp = false;
+
+    return true;
+}
+
+static bool lcl_ProcessHelpAndMenuKeys(vcl::Window* pChild, vcl::Window* pWindow, sal_uInt16 nCode,
+                                       const vcl::KeyCode& rKeyCode)
+{
+    if (lcl_IsContextMenuShortcut(nCode, rKeyCode))
         return !ImplCallCommand(pChild, CommandEventId::ContextMenu);
 
-    if (((nCode == KEY_F2) && aKeyCode.IsShift()) || ((nCode == KEY_F1) && aKeyCode.IsMod1())
-        || ((nCode == KEY_F1) && aKeyCode.IsShift() && bToolboxFocus))
-    {
-        const Size aSize = pChild->GetOutDev()->GetOutputSize();
-        Point aPos(aSize.getWidth() / 2, aSize.getHeight() / 2);
-        aPos = pChild->OutputToScreenPixel(aPos);
+    if (lcl_IsBalloonHelpRequested(nCode, rKeyCode, pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin))
+        return lcl_TriggerBalloonHelp(pChild);
 
-        HelpEvent aHelpEvent(aPos, HelpEventMode::BALLOON);
-        aHelpEvent.SetKeyboardActivated(true);
-        ImplGetSVHelpData().mbSetKeyboardHelp = true;
-        pChild->RequestHelp(aHelpEvent);
-        ImplGetSVHelpData().mbSetKeyboardHelp = false;
-        return true;
+    if ((nCode != KEY_F1) && (nCode != KEY_HELP))
+        return false;
+
+    if (!rKeyCode.GetModifier())
+    {
+        if (ImplGetSVHelpData().mbContextHelp)
+        {
+            const Point aMousePos = pChild->OutputToScreenPixel(pChild->GetPointerPosPixel());
+            const HelpEvent aHelpEvent(aMousePos, HelpEventMode::CONTEXT);
+            pChild->RequestHelp(aHelpEvent);
+            return true;
+        }
+        return false;
     }
 
-    if ((nCode == KEY_F1) || (nCode == KEY_HELP))
+    if (rKeyCode.IsShift() && ImplGetSVHelpData().mbExtHelp)
     {
-        if (!aKeyCode.GetModifier())
-        {
-            if (ImplGetSVHelpData().mbContextHelp)
-            {
-                const Point aMousePos = pChild->OutputToScreenPixel(pChild->GetPointerPosPixel());
-                const HelpEvent aHelpEvent(aMousePos, HelpEventMode::CONTEXT);
-                pChild->RequestHelp(aHelpEvent);
-                return true;
-            }
-            return false;
-        }
-
-        if (aKeyCode.IsShift())
-        {
-            if (ImplGetSVHelpData().mbExtHelp)
-            {
-                Help::StartExtHelp();
-                return true;
-            }
-            return false;
-        }
+        Help::StartExtHelp();
+        return true;
     }
 
     return false;
