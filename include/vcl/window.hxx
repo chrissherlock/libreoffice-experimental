@@ -607,6 +607,7 @@ private:
     SAL_DLLPRIVATE void                 ImplClearFocus();
     SAL_DLLPRIVATE void                 ImplDeactivateFocus();
     SAL_DLLPRIVATE void                 ImplNotifyLostFocus();
+    SAL_DLLPRIVATE bool                 ImplResolveFocusLocally();
 
     SAL_DLLPRIVATE bool                 ImplIsRealParentPath( const vcl::Window* pWindow ) const;
 
