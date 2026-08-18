@@ -1578,6 +1578,37 @@ static void lcl_InitExtTextInput(vcl::Window* pChild)
     ImplCallCommand(pChild, CommandEventId::StartExtTextInput);
 }
 
+static sal_Int32 lcl_CalculateTextDeltaStart(const sal_Unicode* pOldStr,
+                                             const sal_Unicode* pNewStr,
+                                             sal_Int32 nMinLen)
+{
+    std::basic_string_view<sal_Unicode> aOldView(pOldStr, nMinLen);
+    std::basic_string_view<sal_Unicode> aNewView(pNewStr, nMinLen);
+
+    auto [itOldStr, itNewStr] = std::ranges::mismatch(aOldView, aNewView);
+    return std::distance(aOldView.begin(), itOldStr);
+}
+
+static sal_Int32 lcl_CalculateAttributeDeltaStart(const ExtTextInputAttr* pOldAttr,
+                                                  const ExtTextInputAttr* pNewAttr,
+                                                  sal_Int32 nTextDeltaStart)
+{
+    // If neither has attributes, the text delta remains unchanged
+    if (!pOldAttr && !pNewAttr)
+        return nTextDeltaStart;
+
+    // If only one has attributes, everything is different from index 0
+    if (!pOldAttr || !pNewAttr)
+        return 0;
+
+    // If both have attributes, find where they diverge
+    std::span<const ExtTextInputAttr> aOldAttrs(pOldAttr, nTextDeltaStart);
+    std::span<const ExtTextInputAttr> aNewAttrs(pNewAttr, nTextDeltaStart);
+
+    auto [itOldAttr, itNewAttr] = std::ranges::mismatch(aOldAttrs, aNewAttrs);
+    return std::distance(aOldAttrs.begin(), itOldAttr);
+}
+
 static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
                                    const ExtTextInputAttr* pTextAttr, sal_Int32 nCursorPos,
                                    sal_uInt16 nCursorFlags)
@@ -1598,27 +1629,11 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
     bool bOnlyCursor = false;
     const sal_Int32 nMinLen = std::min(pWinData->mpExtOldText->getLength(), rText.getLength());
 
-    // Find the common prefix of the strings declaratively
-    std::basic_string_view<sal_Unicode> aOldView(pWinData->mpExtOldText->getStr(), nMinLen);
-    std::basic_string_view<sal_Unicode> aNewView(rText.getStr(), nMinLen);
+    sal_Int32 nDeltaStart = lcl_CalculateTextDeltaStart(
+        pWinData->mpExtOldText->getStr(), rText.getStr(), nMinLen);
 
-    auto [itOldStr, itNewStr] = std::ranges::mismatch(aOldView, aNewView);
-    sal_Int32 nDeltaStart = std::distance(aOldView.begin(), itOldStr);
-
-    if (pWinData->mpExtOldAttrAry || pTextAttr)
-    {
-        if (!pWinData->mpExtOldAttrAry || !pTextAttr)
-            nDeltaStart = 0;
-        else
-        {
-            // Find the common prefix of the attributes declaratively
-            std::span<const ExtTextInputAttr> aOldAttrs(pWinData->mpExtOldAttrAry.get(), nDeltaStart);
-            std::span<const ExtTextInputAttr> aNewAttrs(pTextAttr, nDeltaStart);
-
-            auto [itOldAttr, itNewAttr] = std::ranges::mismatch(aOldAttrs, aNewAttrs);
-            nDeltaStart = std::distance(aOldAttrs.begin(), itOldAttr);
-        }
-    }
+    nDeltaStart = lcl_CalculateAttributeDeltaStart(
+        pWinData->mpExtOldAttrAry.get(), pTextAttr, nDeltaStart);
 
     if ((nDeltaStart >= nMinLen) && (pWinData->mpExtOldText->getLength() == rText.getLength()))
         bOnlyCursor = true;
