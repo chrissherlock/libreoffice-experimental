@@ -1434,6 +1434,38 @@ static bool lcl_IsSystemFloatingWindow(const vcl::Window* pWindow)
     return pImpl->mpFrame != pParent->ImplGetWindowImpl()->mpFrame;
 }
 
+static bool lcl_ForwardKeyEventToParent(NotifyEventType nSVEvent, vcl::Window* pWindow,
+                                        const KeyEvent& rKeyEvt)
+{
+    vcl::Window* pParent = pWindow->GetParent();
+
+    NotifyEvent aNEvt(nSVEvent, pParent, &rKeyEvt);
+
+    const bool bPreNotify = ImplCallPreNotify(const_cast<NotifyEvent&>(aNEvt));
+
+    if (bPreNotify || pParent->isDisposed())
+        return true;
+
+    if (nSVEvent == NotifyEventType::KEYINPUT)
+    {
+        pParent->ImplGetWindowImpl()->mbKeyInput = false;
+        pParent->KeyInput(const_cast<KeyEvent&>(rKeyEvt));
+    }
+    else
+    {
+        pParent->ImplGetWindowImpl()->mbKeyUp = false;
+        pParent->KeyUp(const_cast<KeyEvent&>(rKeyEvt));
+    }
+
+    if (!pParent->isDisposed())
+        aNEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners(aNEvt);
+
+    if (pParent->isDisposed() || !pParent->ImplGetWindowImpl()->mbKeyInput)
+        return true;
+
+    return false;
+}
+
 static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uInt16 nKeyCode,
                           sal_uInt16 nCharCode, sal_uInt16 nRepeat, bool bForward)
 {
@@ -1484,33 +1516,7 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     if (!lcl_IsSystemFloatingWindow(pWindow))
         return false;
 
-    pChild = pWindow->GetParent();
-
-    NotifyEvent aNEvt(nSVEvent, pChild, &aKeyEvt);
-
-    const bool bPreNotify = ImplCallPreNotify(const_cast<NotifyEvent&>(aNEvt));
-
-    if (bPreNotify || pChild->isDisposed())
-        return true;
-
-    if (nSVEvent == NotifyEventType::KEYINPUT)
-    {
-        pChild->ImplGetWindowImpl()->mbKeyInput = false;
-        pChild->KeyInput(const_cast<KeyEvent&>(aKeyEvt));
-    }
-    else
-    {
-        pChild->ImplGetWindowImpl()->mbKeyUp = false;
-        pChild->KeyUp(const_cast<KeyEvent&>(aKeyEvt));
-    }
-
-    if (!pChild->isDisposed())
-        aNEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners(aNEvt);
-
-    if (pChild->isDisposed() || !pChild->ImplGetWindowImpl()->mbKeyInput)
-        return true;
-
-    return false;
+    return lcl_ForwardKeyEventToParent(nSVEvent, pWindow, aKeyEvt);
 }
 
 static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
