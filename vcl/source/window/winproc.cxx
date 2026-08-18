@@ -1479,13 +1479,13 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     const vcl::KeyCode aKeyCode(nKeyCode, nKeyCode);
     const sal_uInt16 nEvCode = aKeyCode.GetCode();
 
-    const bool bCtrlF6 = (aKeyCode.GetCode() == KEY_F6) && aKeyCode.IsMod1();
-
     ImplGetSVData()->maAppData.mnLastInputTime = tools::Time::GetSystemTicks();
 
     if (nSVEvent == NotifyEventType::KEYINPUT
-        && lcl_HandleKeyInputPreProcessing(aKeyCode, nEvCode, bCtrlF6))
+        && lcl_HandleKeyInputPreProcessing(aKeyCode, nEvCode, (nEvCode == KEY_F6) && aKeyCode.IsMod1()))
+    {
         return true;
+    }
 
     VclPtr<vcl::Window> pChild = lcl_GetKeyInputWindow(pWindow);
     if (!pChild)
@@ -1494,15 +1494,19 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     sal_uInt16 nLocalCharCode = nCharCode;
     if ((nEvCode == KEY_DECIMAL) && lcl_ShouldUseLocalizedDecimalSeparator(pChild.get()))
     {
-        const OUString aSep(
-            pWindow->GetSettings().GetLocaleDataWrapper().getNumDecimalSep());
+        const OUString aSep(pWindow->GetSettings().GetLocaleDataWrapper().getNumDecimalSep());
         nLocalCharCode = static_cast<sal_uInt16>(aSep[0]);
     }
 
     vcl::KeyCode aLocalKeyCode = aKeyCode;
-    if (lcl_ShouldSwapHorizontalArrows(aKeyCode.GetCode(), pChild.get()))
-        aLocalKeyCode = vcl::KeyCode(aKeyCode.GetCode() == KEY_LEFT ? KEY_RIGHT : KEY_LEFT,
-                                     aKeyCode.GetModifier());
+
+    if (lcl_ShouldSwapHorizontalArrows(nEvCode, pChild.get()))
+    {
+        if (nEvCode == KEY_LEFT)
+            aLocalKeyCode = vcl::KeyCode(KEY_RIGHT, aKeyCode.GetModifier());
+        else
+            aLocalKeyCode = vcl::KeyCode(KEY_LEFT, aKeyCode.GetModifier());
+    }
 
     const KeyEvent aKeyEvt(static_cast<sal_Unicode>(nLocalCharCode), aLocalKeyCode, nRepeat);
     NotifyEvent aNotifyEvt(nSVEvent, pChild, &aKeyEvt);
