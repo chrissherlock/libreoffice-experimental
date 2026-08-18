@@ -1527,14 +1527,13 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     return lcl_ForwardKeyEventToParent(nSVEvent, pWindow, aKeyEvt);
 }
 
-static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
-                                   const ExtTextInputAttr* pTextAttr, sal_Int32 nCursorPos,
-                                   sal_uInt16 nCursorFlags)
+static VclPtr<vcl::Window> lcl_WaitForExtTextInputWindow(vcl::Window* pWindow)
 {
     const ImplSVData* pSVData = ImplGetSVData();
-    vcl::Window* pChild = nullptr;
 
+    VclPtr<vcl::Window> pChild;
     int nTries = 200;
+
     while (nTries--)
     {
         pChild = pSVData->mpWinData->mpExtTextInputWin;
@@ -1542,8 +1541,10 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
         {
             pChild = lcl_GetKeyInputWindow(pWindow);
             if (!pChild)
-                return false;
+                return nullptr; // Signals the caller to return false
         }
+
+        // Target state achieved
         if (!pChild->ImplGetWindowImpl()->mpFrameData->mnFocusId)
             break;
 
@@ -1552,8 +1553,20 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
             SAL_WARN("vcl", "Failed to get ext text input context");
             break;
         }
+
         Application::Yield();
     }
+
+    return pChild;
+}
+
+static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
+                                   const ExtTextInputAttr* pTextAttr, sal_Int32 nCursorPos,
+                                   sal_uInt16 nCursorFlags)
+{
+    VclPtr<vcl::Window> pChild = lcl_WaitForExtTextInputWindow(pWindow);
+    if (!pChild)
+        return false;
 
     ImplWinData* pWinData = pChild->ImplGetWinData();
     if (!pChild->ImplGetWindowImpl()->mbExtTextInput)
