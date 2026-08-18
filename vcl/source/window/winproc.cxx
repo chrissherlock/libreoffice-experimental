@@ -1460,6 +1460,10 @@ static bool lcl_ForwardKeyEventToParent(NotifyEventType nSVEvent, vcl::Window* p
     if (!pParent->isDisposed())
         aNEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners(aNEvt);
 
+    // If the parent was destroyed during the event handler, or if it consumed the event,
+    // we stop propagating and return true.
+    // FIXME: This explicitly checks mbKeyInput even for NotifyEventType::KEYUP events.
+    // This preserves legacy behavior, but should likely be checking mbKeyUp instead.
     if (pParent->isDisposed() || !pParent->ImplGetWindowImpl()->mbKeyInput)
         return true;
 
