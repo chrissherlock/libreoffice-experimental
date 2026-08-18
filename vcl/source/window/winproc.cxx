@@ -1393,6 +1393,34 @@ static void lcl_DispatchKeyToChild(NotifyEventType nSVEvent, vcl::Window* pChild
         rNotifyEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners(rNotifyEvt);
 }
 
+static bool lcl_AcceptsKeyInput(NotifyEventType nSVEvent, const vcl::Window* pChild)
+{
+    return nSVEvent == NotifyEventType::KEYINPUT && pChild->ImplGetWindowImpl()->mbKeyInput;
+}
+
+static bool lcl_AcceptsKeyUp(const vcl::Window* pChild)
+{
+    return pChild->ImplGetWindowImpl()->mbKeyUp;
+}
+
+static bool lcl_DispatchHelpAndMenuKeys(NotifyEventType nSVEvent, bool bKeyPreNotify,
+                                        vcl::Window* pChild, vcl::Window* pWindow,
+                                        const vcl::KeyCode& rLocalKeyCode)
+{
+    // Early return cleanly eliminates the duplicate !bKeyPreNotify checks
+    if (bKeyPreNotify)
+        return true;
+
+    if (lcl_AcceptsKeyInput(nSVEvent, pChild))
+        return lcl_ProcessHelpAndMenuKeys(pChild, pWindow, rLocalKeyCode.GetCode(),
+                                          rLocalKeyCode);
+
+    if (lcl_AcceptsKeyUp(pChild))
+        return false;
+
+    return true;
+}
+
 static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uInt16 nKeyCode,
                           sal_uInt16 nCharCode, sal_uInt16 nRepeat, bool bForward)
 {
@@ -1437,18 +1465,8 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     if (pChild->isDisposed())
         return true;
 
-    bool bRet = true;
-
-    if (nSVEvent == NotifyEventType::KEYINPUT)
-    {
-        if (!bKeyPreNotify && pChild->ImplGetWindowImpl()->mbKeyInput)
-            bRet = lcl_ProcessHelpAndMenuKeys(pChild.get(), pWindow, aLocalKeyCode.GetCode(),
-                                              aLocalKeyCode);
-    }
-    else if (!bKeyPreNotify && pChild->ImplGetWindowImpl()->mbKeyUp)
-    {
-        bRet = false;
-    }
+    bool bRet = lcl_DispatchHelpAndMenuKeys(nSVEvent, bKeyPreNotify, pChild.get(),
+                                            pWindow, aLocalKeyCode);
 
     if (bRet || !pWindow->ImplGetWindowImpl() || !pWindow->ImplGetWindowImpl()->mbFloatWin
         || !pWindow->GetParent()
