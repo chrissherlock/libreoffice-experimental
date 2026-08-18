@@ -1609,6 +1609,19 @@ static sal_Int32 lcl_CalculateAttributeDeltaStart(const ExtTextInputAttr* pOldAt
     return std::distance(aOldAttrs.begin(), itOldAttr);
 }
 
+static void lcl_UpdateExtTextInputState(ImplWinData* pWinData, const OUString& rText,
+                                        const ExtTextInputAttr* pTextAttr)
+{
+    *pWinData->mpExtOldText = rText;
+    pWinData->mpExtOldAttrAry.reset();
+
+    if (pTextAttr)
+    {
+        pWinData->mpExtOldAttrAry.reset(new ExtTextInputAttr[rText.getLength()]);
+        std::copy_n(pTextAttr, rText.getLength(), pWinData->mpExtOldAttrAry.get());
+    }
+}
+
 static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
                                    const ExtTextInputAttr* pTextAttr, sal_Int32 nCursorPos,
                                    sal_uInt16 nCursorFlags)
@@ -1637,14 +1650,11 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
     const bool bOnlyCursorMoved = (nDeltaStart >= nMinLen) &&
                                   (pWinData->mpExtOldText->getLength() == rText.getLength());
 
+    // Cache the current text and attributes for the next event
+    lcl_UpdateExtTextInputState(pWinData, rText, pTextAttr);
+
+    // Fire the event
     const CommandExtTextInputData aData(rText, pTextAttr, nCursorPos, nCursorFlags, bOnlyCursorMoved);
-    *pWinData->mpExtOldText = rText;
-    pWinData->mpExtOldAttrAry.reset();
-    if (pTextAttr)
-    {
-        pWinData->mpExtOldAttrAry.reset(new ExtTextInputAttr[rText.getLength()]);
-        std::copy_n(pTextAttr, rText.getLength(), pWinData->mpExtOldAttrAry.get());
-    }
     return !ImplCallCommand(pChild, CommandEventId::ExtTextInput, &aData);
 }
 
