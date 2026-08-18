@@ -1397,7 +1397,6 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     const KeyEvent aKeyEvt(static_cast<sal_Unicode>(nLocalCharCode), aLocalKeyCode, nRepeat);
     NotifyEvent aNotifyEvt(nSVEvent, pChild, &aKeyEvt);
     const bool bKeyPreNotify = ImplCallPreNotify(const_cast<NotifyEvent&>(aNotifyEvt));
-    bool bRet = true;
 
     if (!bKeyPreNotify && !pChild->isDisposed())
     {
@@ -1418,6 +1417,8 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
 
     if (pChild->isDisposed())
         return true;
+
+    bool bRet = true;
 
     if (nSVEvent == NotifyEventType::KEYINPUT)
     {
