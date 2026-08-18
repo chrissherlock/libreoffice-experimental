@@ -1421,6 +1421,19 @@ static bool lcl_DispatchHelpAndMenuKeys(NotifyEventType nSVEvent, bool bKeyPreNo
     return true;
 }
 
+static bool lcl_IsSystemFloatingWindow(const vcl::Window* pWindow)
+{
+    const auto* pImpl = pWindow->ImplGetWindowImpl();
+    if (!pImpl || !pImpl->mbFloatWin)
+        return false;
+
+    const vcl::Window* pParent = pWindow->GetParent();
+    if (!pParent)
+        return false;
+
+    return pImpl->mpFrame != pParent->ImplGetWindowImpl()->mpFrame;
+}
+
 static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uInt16 nKeyCode,
                           sal_uInt16 nCharCode, sal_uInt16 nRepeat, bool bForward)
 {
@@ -1465,14 +1478,11 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     if (pChild->isDisposed())
         return true;
 
-    bool bRet = lcl_DispatchHelpAndMenuKeys(nSVEvent, bKeyPreNotify, pChild.get(),
-                                            pWindow, aLocalKeyCode);
+    if (lcl_DispatchHelpAndMenuKeys(nSVEvent, bKeyPreNotify, pChild.get(), pWindow, aLocalKeyCode))
+        return true;
 
-    if (bRet || !pWindow->ImplGetWindowImpl() || !pWindow->ImplGetWindowImpl()->mbFloatWin
-        || !pWindow->GetParent()
-        || (pWindow->ImplGetWindowImpl()->mpFrame
-            == pWindow->GetParent()->ImplGetWindowImpl()->mpFrame))
-        return bRet;
+    if (!lcl_IsSystemFloatingWindow(pWindow))
+        return false;
 
     pChild = pWindow->GetParent();
 
@@ -1498,7 +1508,7 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     if (pChild->isDisposed() || !pChild->ImplGetWindowImpl()->mbKeyInput)
         return true;
 
-    return bRet;
+    return false;
 }
 
 static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
