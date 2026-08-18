@@ -1343,31 +1343,42 @@ static bool lcl_ShouldSwapHorizontalArrows(sal_uInt16 nCode, const vcl::Window* 
     return pChild->IsRTLEnabled() && pChild->GetOutDev()->HasMirroredGraphics();
 }
 
+static bool lcl_HandleApplicationKey(NotifyEventType nSVEvent, sal_uInt16 nKeyCode,
+                                      sal_uInt16 nCharCode, sal_uInt16 nRepeat,
+                                      bool bForward, vcl::Window* pWindow)
+{
+    if (!bForward)
+        return false;
+
+    VclEventId nVCLEvent = VclEventId::NONE;
+    switch (nSVEvent)
+    {
+        case NotifyEventType::KEYINPUT:
+            nVCLEvent = VclEventId::WindowKeyInput;
+            break;
+        case NotifyEventType::KEYUP:
+            nVCLEvent = VclEventId::WindowKeyUp;
+            break;
+        default:
+            break;
+    }
+
+    if (nVCLEvent == VclEventId::NONE)
+        return false;
+
+    const vcl::KeyCode aKeyCode(nKeyCode, nKeyCode);
+    KeyEvent aKeyEvent(static_cast<sal_Unicode>(nCharCode), aKeyCode, nRepeat);
+    return Application::HandleKey(nVCLEvent, pWindow, &aKeyEvent);
+}
+
 static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uInt16 nKeyCode,
                           sal_uInt16 nCharCode, sal_uInt16 nRepeat, bool bForward)
 {
+    if (lcl_HandleApplicationKey(nSVEvent, nKeyCode, nCharCode, nRepeat, bForward, pWindow))
+        return true;
+
     const vcl::KeyCode aKeyCode(nKeyCode, nKeyCode);
     const sal_uInt16 nEvCode = aKeyCode.GetCode();
-
-    if (bForward)
-    {
-        VclEventId nVCLEvent = VclEventId::NONE;
-        switch (nSVEvent)
-        {
-            case NotifyEventType::KEYINPUT:
-                nVCLEvent = VclEventId::WindowKeyInput;
-                break;
-            case NotifyEventType::KEYUP:
-                nVCLEvent = VclEventId::WindowKeyUp;
-                break;
-            default:
-                break;
-        }
-
-        KeyEvent aKeyEvent(static_cast<sal_Unicode>(nCharCode), aKeyCode, nRepeat);
-        if (nVCLEvent != VclEventId::NONE && Application::HandleKey(nVCLEvent, pWindow, &aKeyEvent))
-            return true;
-    }
 
     const bool bCtrlF6 = (aKeyCode.GetCode() == KEY_F6) && aKeyCode.IsMod1();
 
