@@ -1626,7 +1626,6 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
     if (!pChild->ImplGetWindowImpl()->mbExtTextInput)
         return false;
 
-    bool bOnlyCursor = false;
     const sal_Int32 nMinLen = std::min(pWinData->mpExtOldText->getLength(), rText.getLength());
 
     sal_Int32 nDeltaStart = lcl_CalculateTextDeltaStart(
@@ -1635,10 +1634,10 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
     nDeltaStart = lcl_CalculateAttributeDeltaStart(
         pWinData->mpExtOldAttrAry.get(), pTextAttr, nDeltaStart);
 
-    if ((nDeltaStart >= nMinLen) && (pWinData->mpExtOldText->getLength() == rText.getLength()))
-        bOnlyCursor = true;
+    const bool bOnlyCursorMoved = (nDeltaStart >= nMinLen) &&
+                                  (pWinData->mpExtOldText->getLength() == rText.getLength());
 
-    const CommandExtTextInputData aData(rText, pTextAttr, nCursorPos, nCursorFlags, bOnlyCursor);
+    const CommandExtTextInputData aData(rText, pTextAttr, nCursorPos, nCursorFlags, bOnlyCursorMoved);
     *pWinData->mpExtOldText = rText;
     pWinData->mpExtOldAttrAry.reset();
     if (pTextAttr)
