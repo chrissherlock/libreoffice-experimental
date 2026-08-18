@@ -1371,6 +1371,28 @@ static bool lcl_HandleApplicationKey(NotifyEventType nSVEvent, sal_uInt16 nKeyCo
     return Application::HandleKey(nVCLEvent, pWindow, &aKeyEvent);
 }
 
+static void lcl_DispatchKeyToChild(NotifyEventType nSVEvent, vcl::Window* pChild,
+                                   const KeyEvent& rKeyEvt, NotifyEvent& rNotifyEvt)
+{
+    if (pChild->isDisposed())
+        return;
+
+    if (nSVEvent == NotifyEventType::KEYINPUT)
+    {
+        UITestLogger::getInstance().logKeyInput(pChild, rKeyEvt);
+        pChild->ImplGetWindowImpl()->mbKeyInput = false;
+        pChild->KeyInput(const_cast<KeyEvent&>(rKeyEvt));
+    }
+    else
+    {
+        pChild->ImplGetWindowImpl()->mbKeyUp = false;
+        pChild->KeyUp(const_cast<KeyEvent&>(rKeyEvt));
+    }
+
+    if (!pChild->isDisposed())
+        rNotifyEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners(rNotifyEvt);
+}
+
 static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uInt16 nKeyCode,
                           sal_uInt16 nCharCode, sal_uInt16 nRepeat, bool bForward)
 {
@@ -1409,22 +1431,8 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     NotifyEvent aNotifyEvt(nSVEvent, pChild, &aKeyEvt);
     const bool bKeyPreNotify = ImplCallPreNotify(const_cast<NotifyEvent&>(aNotifyEvt));
 
-    if (!bKeyPreNotify && !pChild->isDisposed())
-    {
-        if (nSVEvent == NotifyEventType::KEYINPUT)
-        {
-            UITestLogger::getInstance().logKeyInput(pChild, aKeyEvt);
-            pChild->ImplGetWindowImpl()->mbKeyInput = false;
-            pChild->KeyInput(const_cast<KeyEvent&>(aKeyEvt));
-        }
-        else
-        {
-            pChild->ImplGetWindowImpl()->mbKeyUp = false;
-            pChild->KeyUp(const_cast<KeyEvent&>(aKeyEvt));
-        }
-        if (!pChild->isDisposed())
-            aNotifyEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners(aNotifyEvt);
-    }
+    if (!bKeyPreNotify)
+        lcl_DispatchKeyToChild(nSVEvent, pChild.get(), aKeyEvt, aNotifyEvt);
 
     if (pChild->isDisposed())
         return true;
