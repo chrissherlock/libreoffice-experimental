@@ -1560,6 +1560,24 @@ static VclPtr<vcl::Window> lcl_WaitForExtTextInputWindow(vcl::Window* pWindow)
     return pChild;
 }
 
+static void lcl_InitExtTextInput(vcl::Window* pChild)
+{
+    auto* pImpl = pChild->ImplGetWindowImpl();
+
+    // If we are already in extended text input mode, do nothing.
+    if (pImpl->mbExtTextInput)
+        return;
+
+    pImpl->mbExtTextInput = true;
+
+    ImplWinData* pWinData = pChild->ImplGetWinData();
+    pWinData->mpExtOldText = OUString();
+    pWinData->mpExtOldAttrAry.reset();
+
+    ImplGetSVData()->mpWinData->mpExtTextInputWin = pChild;
+    ImplCallCommand(pChild, CommandEventId::StartExtTextInput);
+}
+
 static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
                                    const ExtTextInputAttr* pTextAttr, sal_Int32 nCursorPos,
                                    sal_uInt16 nCursorFlags)
@@ -1568,16 +1586,12 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
     if (!pChild)
         return false;
 
-    ImplWinData* pWinData = pChild->ImplGetWinData();
-    if (!pChild->ImplGetWindowImpl()->mbExtTextInput)
-    {
-        pChild->ImplGetWindowImpl()->mbExtTextInput = true;
-        pWinData->mpExtOldText = OUString();
-        pWinData->mpExtOldAttrAry.reset();
-        ImplGetSVData()->mpWinData->mpExtTextInputWin = pChild;
-        ImplCallCommand(pChild, CommandEventId::StartExtTextInput);
-    }
+    lcl_InitExtTextInput(pChild.get());
 
+    ImplWinData* pWinData = pChild->ImplGetWinData();
+
+    // Re-check the flag. lcl_InitExtTextInput fires StartExtTextInput,
+    // which can trigger user code that synchronously aborts the input mode.
     if (!pChild->ImplGetWindowImpl()->mbExtTextInput)
         return false;
 
