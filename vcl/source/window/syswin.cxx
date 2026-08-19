@@ -683,7 +683,7 @@ void SystemWindow::SetWindowState(const vcl::WindowData& rData)
                 bool bWrapped = false;
                 while( pWin )
                 {
-                    if( !pWin->ImplIsRealParentPath( this ) && ( pWin != this ) &&
+                    if( !pWin->IsAncestorOf( *this ) && ( pWin != this ) &&
                         pWin->ImplGetWindow()->IsTopWindow() && pWin->mpWindowImpl->mbReallyVisible )
                     {
                         SalFrameGeometry g = pWin->mpWindowImpl->mpFrame->GetGeometry();

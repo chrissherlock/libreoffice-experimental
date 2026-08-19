@@ -678,13 +678,15 @@ vcl::Window* Window::ImplFindWindow( const Point& rFramePos )
     return nullptr;
 }
 
-bool Window::ImplIsRealParentPath( const vcl::Window* pWindow ) const
+bool Window::IsAncestorOf(const vcl::Window& rWindow) const
 {
-    pWindow = pWindow->GetParent();
-    while ( pWindow )
+    vcl::Window* pWindow = rWindow.GetParent();
+
+    while (pWindow)
     {
-        if ( pWindow == this )
+        if (pWindow == this)
             return true;
+
         pWindow = pWindow->GetParent();
     }
 
@@ -968,7 +970,7 @@ void Window::SetParent( vcl::Window* pNewParent )
         while ( pOverlapWindow )
         {
             vcl::Window* pNextOverlapWindow = pOverlapWindow->mpWindowImpl->mpHierarchy->mpNext;
-            if ( ImplIsRealParentPath( pOverlapWindow->ImplGetWindow() ) )
+            if ( IsAncestorOf( *pOverlapWindow->ImplGetWindow() ) )
                 pOverlapWindow->ImplUpdateOverlapWindowPtr( bNewFrame );
             pOverlapWindow = pNextOverlapWindow;
         }
@@ -1011,11 +1013,6 @@ void Window::SetParent( vcl::Window* pNewParent )
 
     if ( bVisible )
         Show( true, ShowFlags::NoFocusChange | ShowFlags::NoActivate );
-}
-
-bool Window::IsAncestorOf( const vcl::Window& rWindow ) const
-{
-    return ImplIsRealParentPath(&rWindow);
 }
 
 sal_uInt16 Window::GetChildCount() const
@@ -1155,7 +1152,7 @@ void Window::ImplSetFrameParent( const vcl::Window* pParent )
     {
         // search all frames that are children of this window
         // and reparent them
-        if( ImplIsRealParentPath( pFrameWindow ) )
+        if( IsAncestorOf( *pFrameWindow ) )
         {
             SAL_WARN_IF( mpWindowImpl->mpFrame == pFrameWindow->mpWindowImpl->mpFrame, "vcl", "SetFrameParent to own" );
             SAL_WARN_IF( !mpWindowImpl->mpFrame, "vcl", "no frame" );

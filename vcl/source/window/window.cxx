@@ -285,7 +285,7 @@ void Window::dispose()
             pTempWin = mpWindowImpl->mpFrameData->mpFirstOverlap;
             while ( pTempWin )
             {
-                if ( ImplIsRealParentPath( pTempWin ) )
+                if ( IsAncestorOf( *pTempWin ) )
                 {
                     bError = true;
                     aErrorStr.append(lcl_createWindowInfo(pTempWin));
@@ -308,7 +308,7 @@ void Window::dispose()
         pTempWin = pSVData->maFrameData.mpFirstFrame;
         while ( pTempWin )
         {
-            if ( ImplIsRealParentPath( pTempWin ) )
+            if ( IsAncestorOf( *pTempWin ) )
             {
                 bError = true;
                 aErrorStr.append(lcl_createWindowInfo(pTempWin));
@@ -408,7 +408,7 @@ void Window::dispose()
 
     // check if the focus window is our child
     bool bHasFocusedChild = false;
-    if (pSVData->mpWinData->mpFocusWin && ImplIsRealParentPath(pSVData->mpWinData->mpFocusWin))
+    if (pSVData->mpWinData->mpFocusWin && IsAncestorOf(*pSVData->mpWinData->mpFocusWin))
     {
         // #122232#, this must not happen and is an application bug ! but we try some cleanup to hopefully avoid crashes, see below
         bHasFocusedChild = true;
