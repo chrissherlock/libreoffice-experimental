@@ -186,6 +186,22 @@ void Window::ImplDeInitDND()
     }
 }
 
+void Window::ImplDeInitAccessibility()
+{
+    UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper(false);
+    if (pWrapper)
+        pWrapper->WindowDestroyed(this);
+
+    if (mpWindowImpl->mpAccessible.is())
+    {
+        mpWindowImpl->mpAccessible->dispose();
+        mpWindowImpl->mpAccessible.clear();
+    }
+
+    if (mpWindowImpl->mpAccessibleInfos)
+        mpWindowImpl->mpAccessibleInfos->pAccessibleParent.clear();
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -223,19 +239,7 @@ void Window::dispose()
     }
 
     ImplDeInitDND();
-
-    UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper( false );
-    if ( pWrapper )
-        pWrapper->WindowDestroyed( this );
-
-    if (mpWindowImpl->mpAccessible.is())
-    {
-        mpWindowImpl->mpAccessible->dispose();
-        mpWindowImpl->mpAccessible.clear();
-    }
-
-    if (mpWindowImpl->mpAccessibleInfos)
-        mpWindowImpl->mpAccessibleInfos->pAccessibleParent.clear();
+    ImplDeInitAccessibility();
 
     ImplSVData* pSVData = ImplGetSVData();
 
@@ -250,6 +254,7 @@ void Window::dispose()
     // due to old compatibility
     if (pSVData->mpWinData->mpTrackWin == this)
         EndTracking();
+
     if (IsMouseCaptured())
         ReleaseMouse();
 

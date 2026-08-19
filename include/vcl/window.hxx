@@ -1528,8 +1528,10 @@ protected:
     SAL_DLLPRIVATE float        approximate_char_width() const;
 private:
     SAL_DLLPRIVATE void         ImplEnableRTL(bool bEnable);
-};
 
+    SAL_DLLPRIVATE void         ImplDeInitDND();
+    SAL_DLLPRIVATE void         ImplDeInitAccessibility();
+};
 }
 
 #endif // INCLUDED_VCL_WINDOW_HXX
