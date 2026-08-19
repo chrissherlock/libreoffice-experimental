@@ -1530,6 +1530,9 @@ private:
 
     SAL_DLLPRIVATE void         ImplDeInitDND();
     SAL_DLLPRIVATE void         ImplDeInitAccessibility();
+#if OSL_DEBUG_LEVEL > 0
+    SAL_DLLPRIVATE void         ImplCheckLiveChildrenOnDestroy();
+#endif
 };
 }
 
