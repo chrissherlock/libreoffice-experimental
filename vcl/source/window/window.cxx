@@ -119,31 +119,30 @@ Window::Window( vcl::Window* pParent, WinBits nStyle )
 }
 
 #if OSL_DEBUG_LEVEL > 0
-namespace
+OString lcl_createWindowInfo(const vcl::Window* pWindow)
 {
-     OString lcl_createWindowInfo(const vcl::Window* pWindow)
-     {
-         // skip border windows, they do not carry information that
-         // would help with diagnosing the problem
-         const vcl::Window* pTempWin( pWindow );
-         while ( pTempWin && pTempWin->GetType() == WindowType::BORDERWINDOW ) {
-             pTempWin = pTempWin->GetWindow( GetWindowType::FirstChild );
-         }
-         // check if pTempWin is not null, otherwise use the
-         // original address
-         if ( pTempWin ) {
-             pWindow = pTempWin;
-         }
+    // skip border windows, they do not carry information that
+    // would help with diagnosing the problem
+    const vcl::Window* pTempWin(pWindow);
 
-         return OString::Concat(" ") +
-            typeid( *pWindow ).name() +
-            "(" +
-             OUStringToOString(
-                 pWindow->GetText(),
-                 RTL_TEXTENCODING_UTF8
-                 ) +
-            ")";
-     }
+    while (pTempWin && pTempWin->GetType() == WindowType::BORDERWINDOW)
+    {
+        pTempWin = pTempWin->GetWindow( GetWindowType::FirstChild);
+    }
+
+    // check if pTempWin is not null, otherwise use the
+    // original address
+    if (pTempWin)
+        pWindow = pTempWin;
+
+    return OString::Concat(" ") +
+       typeid( *pWindow ).name() +
+       "(" +
+        OUStringToOString(
+            pWindow->GetText(),
+            RTL_TEXTENCODING_UTF8
+            ) +
+       ")";
 }
 #endif
 
