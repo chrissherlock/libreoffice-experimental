@@ -305,6 +305,25 @@ void Window::ImplCheckLiveChildrenOnDestroy()
 }
 #endif
 
+void Window::ImplRemoveFromTaskPaneList()
+{
+    vcl::Window* pMyParent = GetParent();
+    SystemWindow* pMySysWin = nullptr;
+
+    while (pMyParent)
+    {
+        if (pMyParent->IsSystemWindow())
+            pMySysWin = dynamic_cast<SystemWindow *>(pMyParent);
+
+        pMyParent = pMyParent->GetParent();
+    }
+
+    if (pMySysWin && pMySysWin->ImplIsInTaskPaneList(this))
+        pMySysWin->GetTaskPaneList()->RemoveWindow(this);
+    else
+        SAL_WARN("vcl", "Window (" << GetText() << ") not found in TaskPanelList");
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -348,10 +367,10 @@ void Window::dispose()
     ImplCheckLiveChildrenOnDestroy();
     #endif
 
-    ImplSVData* pSVData = ImplGetSVData();
-
     if ( ImplGetSVHelpData().mpHelpWin && (ImplGetSVHelpData().mpHelpWin->GetParent() == this) )
         ImplDestroyHelpWindow( true );
+
+    ImplSVData* pSVData = ImplGetSVData();
 
     SAL_WARN_IF(pSVData->mpWinData->mpTrackWin.get() == this, "vcl.window",
                 "Window::~Window(): Window is in TrackingMode");
@@ -365,28 +384,8 @@ void Window::dispose()
     if (IsMouseCaptured())
         ReleaseMouse();
 
-    if( mpWindowImpl->mbIsInTaskPaneList )
-    {
-        vcl::Window* pMyParent = GetParent();
-        SystemWindow* pMySysWin = nullptr;
-
-        while ( pMyParent )
-        {
-            if ( pMyParent->IsSystemWindow() )
-            {
-                pMySysWin = dynamic_cast<SystemWindow *>(pMyParent);
-            }
-            pMyParent = pMyParent->GetParent();
-        }
-        if ( pMySysWin && pMySysWin->ImplIsInTaskPaneList( this ) )
-        {
-            pMySysWin->GetTaskPaneList()->RemoveWindow( this );
-        }
-        else
-        {
-            SAL_WARN( "vcl", "Window (" << GetText() << ") not found in TaskPanelList");
-        }
-    }
+    if (mpWindowImpl->mbIsInTaskPaneList)
+        ImplRemoveFromTaskPaneList();
 
     // remove from size-group if necessary
     remove_from_all_size_groups();
