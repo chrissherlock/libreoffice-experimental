@@ -177,6 +177,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/printer/PrinterOptionsHelper \
     vcl/source/printer/QueueInfo \
     vcl/source/printer/SalPrinterQueueInfo \
+    vcl/source/window/ImplWinData \
     vcl/source/window/bubblewindow \
     vcl/source/window/clipping_subsystem \
     vcl/source/window/errinf \
