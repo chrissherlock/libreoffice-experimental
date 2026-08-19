@@ -1534,6 +1534,7 @@ private:
 #if OSL_DEBUG_LEVEL > 0
     SAL_DLLPRIVATE void         ImplCheckLiveChildrenOnDestroy();
 #endif
+    SAL_DLLPRIVATE void         ImplRemoveFromTaskPaneList();
 };
 }
 
