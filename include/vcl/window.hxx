@@ -1536,6 +1536,7 @@ private:
 #endif
     SAL_DLLPRIVATE void         ImplRemoveFromTaskPaneList();
     SAL_DLLPRIVATE void         ImplRemoveOwnerDrawDecoratedFrame();
+    SAL_DLLPRIVATE bool         ImplHasFocusedChild() const;
 };
 }
 
