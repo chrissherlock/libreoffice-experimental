@@ -324,6 +324,17 @@ void Window::ImplRemoveFromTaskPaneList()
         SAL_WARN("vcl", "Window (" << GetText() << ") not found in TaskPanelList");
 }
 
+void Window::ImplRemoveOwnerDrawDecoratedFrame()
+{
+    if (!(GetStyle() & WB_OWNERDRAWDECORATION) || !mpWindowImpl->mbFrame)
+        return;
+
+    auto& rList = ImplGetOwnerDrawList();
+    auto p = std::find(rList.begin(), rList.end(), VclPtr<vcl::Window>(this));
+    if (p != rList.end())
+        rList.erase(p);
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -352,13 +363,7 @@ void Window::dispose()
     ImplGetDockingManager()->RemoveWindow( this );
 
     // remove ownerdraw decorated windows from list in the top-most frame window
-    if( (GetStyle() & WB_OWNERDRAWDECORATION) && mpWindowImpl->mbFrame )
-    {
-        ::std::vector< VclPtr<vcl::Window> >& rList = ImplGetOwnerDrawList();
-        auto p = ::std::find( rList.begin(), rList.end(), VclPtr<vcl::Window>(this) );
-        if( p != rList.end() )
-            rList.erase( p );
-    }
+    ImplRemoveOwnerDrawDecoratedFrame();
 
     ImplDeInitDND();
     ImplDeInitAccessibility();
