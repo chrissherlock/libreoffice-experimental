@@ -1548,7 +1548,7 @@ private:
     SAL_DLLPRIVATE WinBits      ImplApplyBorderAnd3DStyle(WinBits nStyle, const vcl::Window* pParent) const;
     SAL_DLLPRIVATE BorderWindowStyle ImplGetBorderWindowStyle(WinBits nStyle) const;
     SAL_DLLPRIVATE bool         ImplNeedsSystemChildBorder(WinBits nStyle) const;
-
+    SAL_DLLPRIVATE vcl::Window* ImplInitBorderWindow(vcl::Window* pParent, WinBits nStyle, BorderWindowStyle nBorderTypeStyle);
 };
 }
 
