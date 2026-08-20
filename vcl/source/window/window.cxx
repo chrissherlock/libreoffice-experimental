@@ -830,6 +830,24 @@ SalFrame* Window::ImplCreateFrame(vcl::Window* pParent, SystemParentData* pSyste
     return pFrame;
 }
 
+void Window::ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInitialParent)
+{
+    // set window frame data
+    mpWindowImpl->mpFrameData     = new ImplFrameData(this);
+    mpWindowImpl->mpFrame         = pFrame;
+    mpWindowImpl->mpFrameWindow   = this;
+    mpWindowImpl->mpOverlapWindow = this;
+
+    if (!(nStyle & WB_DEFAULTWIN) && mpWindowImpl->mbDoubleBufferingRequested)
+        RequestDoubleBuffering(true);
+
+    if (pInitialParent && IsTopWindow())
+    {
+        ImplWinData* pParentWinData = pInitialParent->ImplGetWinData();
+        pParentWinData->maTopWindowChildren.emplace_back(this);
+    }
+}
+
 void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* pSystemParentData )
 {
     SAL_WARN_IF( !mpWindowImpl->mbFrame && !pParent && GetType() != WindowType::FIXEDIMAGE, "vcl.window",
@@ -850,26 +868,11 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
         mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
 
     // test for frame creation
-    if ( mpWindowImpl->mbFrame )
+    if (mpWindowImpl->mbFrame)
     {
         SalFrameStyleFlags nFrameStyle = ImplGetFrameStyle(nStyle);
-
         SalFrame* pFrame = ImplCreateFrame(pParent, pSystemParentData, nFrameStyle);
-
-        // set window frame data
-        mpWindowImpl->mpFrameData     = new ImplFrameData( this );
-        mpWindowImpl->mpFrame         = pFrame;
-        mpWindowImpl->mpFrameWindow   = this;
-        mpWindowImpl->mpOverlapWindow = this;
-
-        if (!(nStyle & WB_DEFAULTWIN) && mpWindowImpl->mbDoubleBufferingRequested)
-            RequestDoubleBuffering(true);
-
-        if ( pRealParent && IsTopWindow() )
-        {
-            ImplWinData* pParentWinData = pRealParent->ImplGetWinData();
-            pParentWinData->maTopWindowChildren.emplace_back(this );
-        }
+        ImplSetupFrame(pFrame, nStyle, pRealParent);
     }
 
     // init data

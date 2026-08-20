@@ -1552,6 +1552,7 @@ private:
     SAL_DLLPRIVATE vcl::Window* ImplInitBorderWindow(vcl::Window* pParent, WinBits nStyle, BorderWindowStyle nBorderTypeStyle);
     SAL_DLLPRIVATE SalFrameStyleFlags ImplGetFrameStyle(WinBits nStyle) const;
     SAL_DLLPRIVATE SalFrame* ImplCreateFrame(vcl::Window* pParent, SystemParentData* pSystemParentData, SalFrameStyleFlags nFrameStyle);
+    SAL_DLLPRIVATE void ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInitialParent);
 };
 }
 
