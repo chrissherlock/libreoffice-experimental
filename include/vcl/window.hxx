@@ -1538,6 +1538,8 @@ private:
     SAL_DLLPRIVATE bool         ImplHasFocusedChild() const;
     SAL_DLLPRIVATE bool         ImplContainsFocus() const;
     SAL_DLLPRIVATE vcl::Window* ImplTransferFocus();
+    SAL_DLLPRIVATE void         ImplResetGlobalWindowPointers();
+    SAL_DLLPRIVATE void         ImplResetFrameDataPointers();
 };
 }
 

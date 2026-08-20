@@ -405,6 +405,49 @@ vcl::Window* Window::ImplTransferFocus()
     return pOverlapWindow;
 }
 
+void Window::ImplResetGlobalWindowPointers()
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    // reset hint for DefModalDialogParent
+    if (pSVData->maFrameData.mpActiveApplicationFrame == this)
+        pSVData->maFrameData.mpActiveApplicationFrame = nullptr;
+
+    // reset hint of what was the last wheeled window
+    if (pSVData->mpWinData->mpLastWheelWindow == this)
+        pSVData->mpWinData->mpLastWheelWindow = nullptr;
+
+    // reset Deactivate-Window
+    if (pSVData->mpWinData->mpLastDeacWin == this)
+        pSVData->mpWinData->mpLastDeacWin = nullptr;
+}
+
+void Window::ImplResetFrameDataPointers()
+{
+    if (mpWindowImpl->mpFrameData == nullptr)
+        return;
+
+    // reset marked windows
+    if (mpWindowImpl->mpFrameData->mpFocusWin == this)
+        mpWindowImpl->mpFrameData->mpFocusWin = nullptr;
+    if (mpWindowImpl->mpFrameData->mpMouseMoveWin == this)
+        mpWindowImpl->mpFrameData->mpMouseMoveWin = nullptr;
+    if (mpWindowImpl->mpFrameData->mpMouseDownWin == this)
+        mpWindowImpl->mpFrameData->mpMouseDownWin = nullptr;
+
+    // remove pending user events
+    if (mpWindowImpl->mbFrame)
+    {
+        if (mpWindowImpl->mpFrameData->mnFocusId)
+            Application::RemoveUserEvent(mpWindowImpl->mpFrameData->mnFocusId);
+        mpWindowImpl->mpFrameData->mnFocusId = nullptr;
+
+        if (mpWindowImpl->mpFrameData->mnMouseMoveId)
+            Application::RemoveUserEvent(mpWindowImpl->mpFrameData->mnMouseMoveId);
+        mpWindowImpl->mpFrameData->mnMouseMoveId = nullptr;
+    }
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -482,44 +525,13 @@ void Window::dispose()
             pSVData->mpWinData->mpExtTextInputWin = nullptr;
     }
 
-    Window* pOverlapWindow = ImplTransferFocus();
+    vcl::Window* pOverlapWindow = ImplTransferFocus();
 
-    if ( pOverlapWindow != nullptr &&
-         pOverlapWindow->mpWindowImpl->mpLastFocusWindow == this )
+    if (pOverlapWindow != nullptr && pOverlapWindow->mpWindowImpl->mpLastFocusWindow == this)
         pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
 
-    // reset hint for DefModalDialogParent
-    if( pSVData->maFrameData.mpActiveApplicationFrame == this )
-        pSVData->maFrameData.mpActiveApplicationFrame = nullptr;
-
-    // reset hint of what was the last wheeled window
-    if (pSVData->mpWinData->mpLastWheelWindow == this)
-        pSVData->mpWinData->mpLastWheelWindow = nullptr;
-
-    // reset marked windows
-    if ( mpWindowImpl->mpFrameData != nullptr )
-    {
-        if ( mpWindowImpl->mpFrameData->mpFocusWin == this )
-            mpWindowImpl->mpFrameData->mpFocusWin = nullptr;
-        if ( mpWindowImpl->mpFrameData->mpMouseMoveWin == this )
-            mpWindowImpl->mpFrameData->mpMouseMoveWin = nullptr;
-        if ( mpWindowImpl->mpFrameData->mpMouseDownWin == this )
-            mpWindowImpl->mpFrameData->mpMouseDownWin = nullptr;
-    }
-
-    // reset Deactivate-Window
-    if (pSVData->mpWinData->mpLastDeacWin == this)
-        pSVData->mpWinData->mpLastDeacWin = nullptr;
-
-    if ( mpWindowImpl->mbFrame && mpWindowImpl->mpFrameData )
-    {
-        if ( mpWindowImpl->mpFrameData->mnFocusId )
-            Application::RemoveUserEvent( mpWindowImpl->mpFrameData->mnFocusId );
-        mpWindowImpl->mpFrameData->mnFocusId = nullptr;
-        if ( mpWindowImpl->mpFrameData->mnMouseMoveId )
-            Application::RemoveUserEvent( mpWindowImpl->mpFrameData->mnMouseMoveId );
-        mpWindowImpl->mpFrameData->mnMouseMoveId = nullptr;
-    }
+    ImplResetGlobalWindowPointers();
+    ImplResetFrameDataPointers();
 
     // release SalGraphics
     VclPtr<OutputDevice> pOutDev = GetOutDev();
