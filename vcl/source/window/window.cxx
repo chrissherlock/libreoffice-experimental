@@ -396,8 +396,7 @@ void Window::dispose()
     remove_from_all_size_groups();
 
     // clear mnemonic labels
-    std::vector<VclPtr<FixedText> > aMnemonicLabels(list_mnemonic_labels());
-    for (auto const& mnemonicLabel : aMnemonicLabels)
+    for (auto const& mnemonicLabel : list_mnemonic_labels())
     {
         remove_mnemonic_label(mnemonicLabel);
     }
