@@ -681,6 +681,41 @@ static constexpr sal_Int32 lcl_CountDPIScaleFactor(sal_Int32 nDPI)
     return 100;
 }
 
+WinBits Window::ImplApplyBorderAnd3DStyle(WinBits nStyle, const vcl::Window* pParent) const
+{
+    // Inherit 3D look from parent if applicable
+    if (!mpWindowImpl->mbOverlapWin && pParent && (pParent->GetStyle() & WB_3DLOOK))
+        nStyle |= WB_3DLOOK;
+
+    // A system child window acts as a top-level frame and strictly requires a border
+    if (!mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpWindowImpl->mpBorderWindow
+        && (nStyle & WB_SYSTEMCHILDWINDOW))
+    {
+        nStyle |= WB_BORDER;
+    }
+
+    return nStyle;
+}
+
+BorderWindowStyle Window::ImplGetBorderWindowStyle(WinBits nStyle) const
+{
+    BorderWindowStyle nBorderTypeStyle = BorderWindowStyle::NONE;
+
+    if (!mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpWindowImpl->mpBorderWindow)
+    {
+        if (nStyle & WB_SYSTEMCHILDWINDOW)
+        {
+            // handle WB_SYSTEMCHILDWINDOW
+            // these should be analogous to a top level frame; meaning they
+            // should have a border window with style BorderWindowStyle::Frame
+            // which controls their size
+            nBorderTypeStyle = BorderWindowStyle::Frame;
+        }
+    }
+
+    return nBorderTypeStyle;
+}
+
 void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* pSystemParentData )
 {
     SAL_WARN_IF( !mpWindowImpl->mbFrame && !pParent && GetType() != WindowType::FIXEDIMAGE, "vcl.window",
@@ -689,24 +724,13 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     ImplSVData* pSVData = ImplGetSVData();
     vcl::Window*     pRealParent = pParent;
 
-    // inherit 3D look
-    if ( !mpWindowImpl->mbOverlapWin && pParent && (pParent->GetStyle() & WB_3DLOOK) )
-        nStyle |= WB_3DLOOK;
+    nStyle = ImplApplyBorderAnd3DStyle(nStyle, pParent);
+    BorderWindowStyle nBorderTypeStyle = ImplGetBorderWindowStyle(nStyle);
 
     // create border window if necessary
     if ( !mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpWindowImpl->mpBorderWindow
-         && (nStyle & (WB_BORDER | WB_SYSTEMCHILDWINDOW) ) )
+         && (nStyle & WB_BORDER) )
     {
-        BorderWindowStyle nBorderTypeStyle = BorderWindowStyle::NONE;
-        if( nStyle & WB_SYSTEMCHILDWINDOW )
-        {
-            // handle WB_SYSTEMCHILDWINDOW
-            // these should be analogous to a top level frame; meaning they
-            // should have a border window with style BorderWindowStyle::Frame
-            // which controls their size
-            nBorderTypeStyle |= BorderWindowStyle::Frame;
-            nStyle |= WB_BORDER;
-        }
         VclPtrInstance<ImplBorderWindow> pBorderWin( pParent, nStyle & (WB_BORDER | WB_DIALOGCONTROL | WB_NODIALOGCONTROL), nBorderTypeStyle );
         static_cast<vcl::Window*>(pBorderWin)->mpWindowImpl->mpClientWindow = this;
         pBorderWin->GetBorder( mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder, mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder );
