@@ -838,7 +838,11 @@ void Window::ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInit
     mpWindowImpl->mpFrameWindow   = this;
     mpWindowImpl->mpOverlapWindow = this;
 
-    if (!(nStyle & WB_DEFAULTWIN) && mpWindowImpl->mbDoubleBufferingRequested)
+    auto shouldDoubleBuffer = [nStyle, this]() {
+        return !(nStyle & WB_DEFAULTWIN) && mpWindowImpl->mbDoubleBufferingRequested;
+    };
+
+    if (shouldDoubleBuffer())
         RequestDoubleBuffering(true);
 
     if (pInitialParent && IsTopWindow())
@@ -901,6 +905,12 @@ void Window::ImplInitResolution(vcl::Window* pParent, WinBits nStyle)
         ImplInitFromParentState(pParent);
 }
 
+static bool lcl_ShouldInitAppSettings(const ImplSVData* pSVData, WinBits nStyle)
+{
+    return !pSVData->maAppData.mbSettingsInit &&
+           !(nStyle & (WB_INTROWIN | WB_DEFAULTWIN));
+}
+
 void Window::ImplInitSettings(WinBits nStyle)
 {
     if (!mpWindowImpl->mbFrame)
@@ -913,16 +923,13 @@ void Window::ImplInitSettings(WinBits nStyle)
 
     ImplSVData* pSVData = ImplGetSVData();
 
-    // delay settings initialization until first "real" frame
-    // this relies on the IntroWindow not needing any system settings
-    if (!pSVData->maAppData.mbSettingsInit &&
-        !(nStyle & (WB_INTROWIN | WB_DEFAULTWIN)))
-    {
-        // side effect: ImplUpdateGlobalSettings does an ImplGetFrame()->UpdateSettings
-        ImplUpdateGlobalSettings(*pSVData->maAppData.mxSettings);
-        mpWindowImpl->mxOutDev->SetSettings(*pSVData->maAppData.mxSettings);
-        pSVData->maAppData.mbSettingsInit = true;
-    }
+    if (!lcl_ShouldInitAppSettings(pSVData, nStyle))
+        return;
+
+    // side effect: ImplUpdateGlobalSettings does an ImplGetFrame()->UpdateSettings
+    ImplUpdateGlobalSettings(*pSVData->maAppData.mxSettings);
+    mpWindowImpl->mxOutDev->SetSettings(*pSVData->maAppData.mxSettings);
+    pSVData->maAppData.mbSettingsInit = true;
 }
 
 void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* pSystemParentData )
