@@ -848,54 +848,57 @@ void Window::ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInit
     }
 }
 
+void Window::ImplInitFrameResolution(vcl::Window* pParent, WinBits nStyle)
+{
+    if (pParent)
+    {
+        mpWindowImpl->mpFrameData->mnDPIX = pParent->mpWindowImpl->mpFrameData->mnDPIX;
+        mpWindowImpl->mpFrameData->mnDPIY = pParent->mpWindowImpl->mpFrameData->mnDPIY;
+    }
+    else if (auto* pGraphics = GetOutDev()->GetGraphics())
+    {
+        pGraphics->GetResolution(mpWindowImpl->mpFrameData->mnDPIX,
+                                 mpWindowImpl->mpFrameData->mnDPIY);
+    }
+
+    // If we create a Window with default size, query this
+    // size directly, because we want resize all Controls to
+    // the correct size before we display the window
+    if (nStyle & (WB_MOVEABLE | WB_SIZEABLE | WB_APP))
+    {
+        const Size aSize = mpWindowImpl->mpFrame->GetClientSize();
+
+        mpWindowImpl->mxOutDev->SetOutputWidthPixel(aSize.Width());
+        mpWindowImpl->mxOutDev->SetOutputHeightPixel(aSize.Height());
+    }
+}
+
+void Window::ImplInitFromParentState(vcl::Window* pParent)
+{
+    if (!pParent)
+        return;
+
+    if (!ImplIsOverlapWindow())
+    {
+        mpWindowImpl->mbDisabled      = pParent->mpWindowImpl->mbDisabled;
+        mpWindowImpl->mbInputDisabled = pParent->mpWindowImpl->mbInputDisabled;
+        mpWindowImpl->meAlwaysInputMode = pParent->mpWindowImpl->meAlwaysInputMode;
+    }
+
+    if (!comphelper::IsFuzzing())
+    {
+        // we don't want to call the WindowOutputDevice override of this because
+        // it calls back into us.
+        mpWindowImpl->mxOutDev->OutputDevice::SetSettings(pParent->GetSettings());
+    }
+}
+
 void Window::ImplInitResolution(vcl::Window* pParent, WinBits nStyle)
 {
     if (mpWindowImpl->mbFrame)
-    {
-        if (pParent)
-        {
-            mpWindowImpl->mpFrameData->mnDPIX = pParent->mpWindowImpl->mpFrameData->mnDPIX;
-            mpWindowImpl->mpFrameData->mnDPIY = pParent->mpWindowImpl->mpFrameData->mnDPIY;
-        }
-        else
-        {
-            if (auto* pGraphics = GetOutDev()->GetGraphics())
-            {
-                pGraphics->GetResolution(mpWindowImpl->mpFrameData->mnDPIX,
-                                         mpWindowImpl->mpFrameData->mnDPIY);
-            }
-        }
-
-        // If we create a Window with default size, query this
-        // size directly, because we want resize all Controls to
-        // the correct size before we display the window
-        if (nStyle & (WB_MOVEABLE | WB_SIZEABLE | WB_APP))
-        {
-            const Size aSize = mpWindowImpl->mpFrame->GetClientSize();
-
-            mpWindowImpl->mxOutDev->SetOutputWidthPixel(aSize.Width());
-            mpWindowImpl->mxOutDev->SetOutputHeightPixel(aSize.Height());
-        }
-    }
+        ImplInitFrameResolution(pParent, nStyle);
     else
-    {
-        if (pParent)
-        {
-            if (!ImplIsOverlapWindow())
-            {
-                mpWindowImpl->mbDisabled      = pParent->mpWindowImpl->mbDisabled;
-                mpWindowImpl->mbInputDisabled = pParent->mpWindowImpl->mbInputDisabled;
-                mpWindowImpl->meAlwaysInputMode = pParent->mpWindowImpl->meAlwaysInputMode;
-            }
-
-            if (!comphelper::IsFuzzing())
-            {
-                // we don't want to call the WindowOutputDevice override of this because
-                // it calls back into us.
-                mpWindowImpl->mxOutDev->OutputDevice::SetSettings(pParent->GetSettings());
-            }
-        }
-    }
+        ImplInitFromParentState(pParent);
 }
 
 void Window::ImplInitSettings(WinBits nStyle)

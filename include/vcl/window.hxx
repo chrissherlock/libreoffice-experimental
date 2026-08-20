@@ -1554,7 +1554,10 @@ private:
     SAL_DLLPRIVATE SalFrame* ImplCreateFrame(vcl::Window* pParent, SystemParentData* pSystemParentData, SalFrameStyleFlags nFrameStyle);
     SAL_DLLPRIVATE void ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInitialParent);
     SAL_DLLPRIVATE void ImplInitResolution(vcl::Window* pParent, WinBits nStyle);
+    SAL_DLLPRIVATE void ImplInitFrameResolution(vcl::Window* pParent, WinBits nStyle);
     SAL_DLLPRIVATE void ImplInitSettings(WinBits nStyle);
+    SAL_DLLPRIVATE void ImplInitFromParentState(vcl::Window* pParent);
+
 };
 }
 
