@@ -1534,6 +1534,7 @@ private:
     SAL_DLLPRIVATE void         ImplCheckLiveChildrenOnDestroy();
 #endif
     SAL_DLLPRIVATE void         ImplRemoveFromTaskPaneList();
+    SAL_DLLPRIVATE void         ImplRemoveOwnerDrawDecoratedFrame();
 };
 }
 
