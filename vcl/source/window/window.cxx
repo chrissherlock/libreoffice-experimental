@@ -648,21 +648,33 @@ Window::~Window()
     return mpWindowImpl ? mpWindowImpl->mxOutDev.get() : nullptr;
 }
 
-static sal_Int32 lcl_CountDPIScaleFactor(sal_Int32 nDPI)
+static constexpr sal_Int32 lcl_CountDPIScaleFactor(sal_Int32 nDPI)
 {
 #ifndef MACOSX
-    // Setting of HiDPI is unfortunately all only a heuristic; and to add
-    // insult to an injury, the system is constantly lying to us about
-    // the DPI and whatnot
-    // eg. fdo#77059 - set the value from which we do consider the
-    // screen HiDPI to greater than 168
-    if (nDPI > 216)      // 96 * 2   + 96 / 4
+    // Base DPI for a standard 100% scale display is 96.
+    constexpr sal_Int32 nBaseDPI = 96;
+
+    // We use a 25% scale increment (24 DPI) to establish mid-point thresholds
+    // between the standard scaling tiers (100%, 150%, 200%, 250%).
+    constexpr sal_Int32 nQuarterDPI = nBaseDPI / 4;
+
+    // Calculate the threshold values for snapping to higher scales.
+    constexpr sal_Int32 nSnap250 = (nBaseDPI * 2) + nQuarterDPI; // 216
+    constexpr sal_Int32 nSnap200 = (nBaseDPI * 2) - nQuarterDPI; // 168 (fdo#77059)
+    constexpr sal_Int32 nSnap150 = nBaseDPI + nQuarterDPI;       // 120
+
+    // Operating systems often report inaccurate or skewed physical DPI values.
+    // Therefore, we use this heuristic to "snap" to the nearest logical UI
+    // scaling percentage rather than calculating a raw, continuous ratio.
+    if (nDPI > nSnap250)
         return 250;
-    else if (nDPI > 168) // 96 * 2   - 96 / 4
+    if (nDPI > nSnap200)
         return 200;
-    else if (nDPI > 120) // 96 * 1.5 - 96 / 4
+    if (nDPI > nSnap150)
         return 150;
 #else
+    // macOS handles high-DPI (Retina) scaling natively via the OS abstraction
+    // layer, so we always default to the standard 100% baseline here.
     (void)nDPI;
 #endif
 
