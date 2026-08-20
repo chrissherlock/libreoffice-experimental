@@ -1542,6 +1542,7 @@ private:
     SAL_DLLPRIVATE void         ImplResetGlobalWindowPointers();
     SAL_DLLPRIVATE void         ImplResetFrameDataPointers();
     SAL_DLLPRIVATE void         ImplDeregisterTopWindowChild();
+    SAL_DLLPRIVATE void         ImplDisposeFrameData();
 };
 }
 
