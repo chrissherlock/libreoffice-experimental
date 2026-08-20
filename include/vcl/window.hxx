@@ -30,8 +30,10 @@
 #include <vcl/IDialogRenderable.hxx>
 #include <rtl/ustring.hxx>
 #include <vcl/commandevent.hxx>
+
 #include <memory>
 
+enum class BorderWindowStyle;
 struct ImplSVEvent;
 struct ImplWinData;
 struct ImplFrameData;
@@ -1542,6 +1544,10 @@ private:
     SAL_DLLPRIVATE void         ImplResetFrameDataPointers();
     SAL_DLLPRIVATE void         ImplDeregisterTopWindowChild();
     SAL_DLLPRIVATE void         ImplDisposeFrameData();
+
+    SAL_DLLPRIVATE WinBits      ImplApplyBorderAnd3DStyle(WinBits nStyle, const vcl::Window* pParent) const;
+    SAL_DLLPRIVATE BorderWindowStyle ImplGetBorderWindowStyle(WinBits nStyle) const;
+
 };
 }
 
