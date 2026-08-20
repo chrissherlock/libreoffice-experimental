@@ -804,6 +804,32 @@ SalFrameStyleFlags Window::ImplGetFrameStyle(WinBits nStyle) const
     return nFrameStyle;
 }
 
+SalFrame* Window::ImplCreateFrame(vcl::Window* pParent, SystemParentData* pSystemParentData, SalFrameStyleFlags nFrameStyle)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    SalFrame* pParentFrame = nullptr;
+    if (pParent)
+        pParentFrame = pParent->mpWindowImpl->mpFrame;
+
+    SalFrame* pFrame;
+    if (pSystemParentData)
+        pFrame = pSVData->mpDefInst->CreateChildFrame(pSystemParentData, nFrameStyle | SalFrameStyleFlags::PLUG);
+    else
+        pFrame = pSVData->mpDefInst->CreateFrame(pParentFrame, nFrameStyle);
+
+    if (!pFrame)
+    {
+        // do not abort but throw an exception, may be the current thread terminates anyway (plugin-scenario)
+        throw RuntimeException(
+            u"Could not create system window!"_ustr,
+            Reference<XInterface>());
+    }
+
+    pFrame->SetCallback(this, ImplWindowFrameProc);
+    return pFrame;
+}
+
 void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* pSystemParentData )
 {
     SAL_WARN_IF( !mpWindowImpl->mbFrame && !pParent && GetType() != WindowType::FIXEDIMAGE, "vcl.window",
@@ -829,23 +855,7 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     {
         SalFrameStyleFlags nFrameStyle = ImplGetFrameStyle(nStyle);
 
-        SalFrame* pParentFrame = nullptr;
-        if ( pParent )
-            pParentFrame = pParent->mpWindowImpl->mpFrame;
-        SalFrame* pFrame;
-        if ( pSystemParentData )
-            pFrame = pSVData->mpDefInst->CreateChildFrame( pSystemParentData, nFrameStyle | SalFrameStyleFlags::PLUG );
-        else
-            pFrame = pSVData->mpDefInst->CreateFrame( pParentFrame, nFrameStyle );
-        if ( !pFrame )
-        {
-            // do not abort but throw an exception, may be the current thread terminates anyway (plugin-scenario)
-            throw RuntimeException(
-                u"Could not create system window!"_ustr,
-                Reference< XInterface >() );
-        }
-
-        pFrame->SetCallback( this, ImplWindowFrameProc );
+        SalFrame* pFrame = ImplCreateFrame(pParent, pSystemParentData, nFrameStyle);
 
         // set window frame data
         mpWindowImpl->mpFrameData     = new ImplFrameData( this );
