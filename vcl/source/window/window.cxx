@@ -717,6 +717,31 @@ BorderWindowStyle Window::ImplGetBorderWindowStyle(WinBits nStyle) const
     return BorderWindowStyle::Frame;
 }
 
+vcl::Window* Window::ImplInitBorderWindow(vcl::Window* pParent, WinBits nStyle, BorderWindowStyle nBorderTypeStyle)
+{
+    // create border window if necessary
+    if (!mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpWindowImpl->mpBorderWindow
+        && (nStyle & WB_BORDER))
+    {
+        VclPtrInstance<ImplBorderWindow> pBorderWin(pParent, nStyle & (WB_BORDER | WB_DIALOGCONTROL | WB_NODIALOGCONTROL), nBorderTypeStyle);
+        static_cast<vcl::Window*>(pBorderWin)->mpWindowImpl->mpClientWindow = this;
+        pBorderWin->GetBorder(mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder, mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder);
+        mpWindowImpl->mpBorderWindow = pBorderWin;
+
+        // Return the newly created border window to act as the new parent
+        return mpWindowImpl->mpBorderWindow;
+    }
+
+    // fallback for frameless windows with no parent
+    if (!mpWindowImpl->mbFrame && !pParent)
+    {
+        mpWindowImpl->mbOverlapWin = true;
+        mpWindowImpl->mbFrame = true;
+    }
+
+    return pParent;
+}
+
 void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* pSystemParentData )
 {
     SAL_WARN_IF( !mpWindowImpl->mbFrame && !pParent && GetType() != WindowType::FIXEDIMAGE, "vcl.window",
@@ -728,21 +753,7 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     nStyle = ImplApplyBorderAnd3DStyle(nStyle, pParent);
     BorderWindowStyle nBorderTypeStyle = ImplGetBorderWindowStyle(nStyle);
 
-    // create border window if necessary
-    if ( !mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpWindowImpl->mpBorderWindow
-         && (nStyle & WB_BORDER) )
-    {
-        VclPtrInstance<ImplBorderWindow> pBorderWin( pParent, nStyle & (WB_BORDER | WB_DIALOGCONTROL | WB_NODIALOGCONTROL), nBorderTypeStyle );
-        static_cast<vcl::Window*>(pBorderWin)->mpWindowImpl->mpClientWindow = this;
-        pBorderWin->GetBorder( mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder, mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder );
-        mpWindowImpl->mpBorderWindow  = pBorderWin;
-        pParent = mpWindowImpl->mpBorderWindow;
-    }
-    else if( !mpWindowImpl->mbFrame && ! pParent )
-    {
-        mpWindowImpl->mbOverlapWin  = true;
-        mpWindowImpl->mbFrame = true;
-    }
+    pParent = ImplInitBorderWindow(pParent, nStyle, nBorderTypeStyle);
 
     // insert window in list
     ImplInsertWindow( pParent );
