@@ -1541,6 +1541,7 @@ private:
     SAL_DLLPRIVATE vcl::Window* ImplTransferFocus();
     SAL_DLLPRIVATE void         ImplResetGlobalWindowPointers();
     SAL_DLLPRIVATE void         ImplResetFrameDataPointers();
+    SAL_DLLPRIVATE void         ImplDeregisterTopWindowChild();
 };
 }
 
