@@ -448,6 +448,26 @@ void Window::ImplResetFrameDataPointers()
     }
 }
 
+void Window::ImplDeregisterTopWindowChild()
+{
+    if (!mpWindowImpl->mbFrame)
+        return;
+
+    bool bIsTopWindow = mpWindowImpl->mpWinData && (mpWindowImpl->mpWinData->mnIsTopWindow == 1);
+    if (!bIsTopWindow || !mpWindowImpl->mpHierarchy->mpRealParent)
+        return;
+
+    ImplWinData* pParentWinData = mpWindowImpl->mpHierarchy->mpRealParent->ImplGetWinData();
+
+    auto myPos = std::find(pParentWinData->maTopWindowChildren.begin(),
+                           pParentWinData->maTopWindowChildren.end(), VclPtr<vcl::Window>(this));
+
+    SAL_WARN_IF(myPos == pParentWinData->maTopWindowChildren.end(), "vcl.window", "Window::~Window: inconsistency in top window chain!");
+
+    if (myPos != pParentWinData->maTopWindowChildren.end())
+        pParentWinData->maTopWindowChildren.erase(myPos);
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -540,22 +560,7 @@ void Window::dispose()
     // remove window from the lists
     ImplRemoveWindow( true );
 
-    // de-register as "top window child" at our parent, if necessary
-    if ( mpWindowImpl->mbFrame )
-    {
-        bool bIsTopWindow
-            = mpWindowImpl->mpWinData && (mpWindowImpl->mpWinData->mnIsTopWindow == 1);
-        if ( mpWindowImpl->mpHierarchy->mpRealParent && bIsTopWindow )
-        {
-            ImplWinData* pParentWinData = mpWindowImpl->mpHierarchy->mpRealParent->ImplGetWinData();
-
-            auto myPos = ::std::find( pParentWinData->maTopWindowChildren.begin(),
-                pParentWinData->maTopWindowChildren.end(), VclPtr<vcl::Window>(this) );
-            SAL_WARN_IF( myPos == pParentWinData->maTopWindowChildren.end(), "vcl.window", "Window::~Window: inconsistency in top window chain!" );
-            if ( myPos != pParentWinData->maTopWindowChildren.end() )
-                pParentWinData->maTopWindowChildren.erase( myPos );
-        }
-    }
+    ImplDeregisterTopWindowChild();
 
     mpWindowImpl->mpWinData.reset();
 
