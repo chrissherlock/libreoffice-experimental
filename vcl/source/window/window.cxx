@@ -352,6 +352,12 @@ bool Window::ImplHasFocusedChild() const
     return true;
 }
 
+bool Window::ImplContainsFocus() const
+{
+    ImplSVData* pSVData = ImplGetSVData();
+    return (pSVData->mpWinData->mpFocusWin == this) || ImplHasFocusedChild();
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -431,8 +437,7 @@ void Window::dispose()
 
     // if we get focus pass focus to another window
     vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
-    if (pSVData->mpWinData->mpFocusWin == this
-        || ImplHasFocusedChild()) // #122232#, see above, try some cleanup
+    if (ImplContainsFocus())
     {
         if ( mpWindowImpl->mbFrame )
         {
