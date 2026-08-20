@@ -848,6 +848,80 @@ void Window::ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInit
     }
 }
 
+void Window::ImplInitResolution(vcl::Window* pParent, WinBits nStyle)
+{
+    if (mpWindowImpl->mbFrame)
+    {
+        if (pParent)
+        {
+            mpWindowImpl->mpFrameData->mnDPIX = pParent->mpWindowImpl->mpFrameData->mnDPIX;
+            mpWindowImpl->mpFrameData->mnDPIY = pParent->mpWindowImpl->mpFrameData->mnDPIY;
+        }
+        else
+        {
+            if (auto* pGraphics = GetOutDev()->GetGraphics())
+            {
+                pGraphics->GetResolution(mpWindowImpl->mpFrameData->mnDPIX,
+                                         mpWindowImpl->mpFrameData->mnDPIY);
+            }
+        }
+
+        // If we create a Window with default size, query this
+        // size directly, because we want resize all Controls to
+        // the correct size before we display the window
+        if (nStyle & (WB_MOVEABLE | WB_SIZEABLE | WB_APP))
+        {
+            const Size aSize = mpWindowImpl->mpFrame->GetClientSize();
+
+            mpWindowImpl->mxOutDev->SetOutputWidthPixel(aSize.Width());
+            mpWindowImpl->mxOutDev->SetOutputHeightPixel(aSize.Height());
+        }
+    }
+    else
+    {
+        if (pParent)
+        {
+            if (!ImplIsOverlapWindow())
+            {
+                mpWindowImpl->mbDisabled      = pParent->mpWindowImpl->mbDisabled;
+                mpWindowImpl->mbInputDisabled = pParent->mpWindowImpl->mbInputDisabled;
+                mpWindowImpl->meAlwaysInputMode = pParent->mpWindowImpl->meAlwaysInputMode;
+            }
+
+            if (!comphelper::IsFuzzing())
+            {
+                // we don't want to call the WindowOutputDevice override of this because
+                // it calls back into us.
+                mpWindowImpl->mxOutDev->OutputDevice::SetSettings(pParent->GetSettings());
+            }
+        }
+    }
+}
+
+void Window::ImplInitSettings(WinBits nStyle)
+{
+    if (!mpWindowImpl->mbFrame)
+        return;
+
+    // add ownerdraw decorated frame windows to list in the top-most frame window
+    // so they can be hidden on lose focus
+    if (nStyle & WB_OWNERDRAWDECORATION)
+        ImplGetOwnerDrawList().emplace_back(this);
+
+    ImplSVData* pSVData = ImplGetSVData();
+
+    // delay settings initialization until first "real" frame
+    // this relies on the IntroWindow not needing any system settings
+    if (!pSVData->maAppData.mbSettingsInit &&
+        !(nStyle & (WB_INTROWIN | WB_DEFAULTWIN)))
+    {
+        // side effect: ImplUpdateGlobalSettings does an ImplGetFrame()->UpdateSettings
+        ImplUpdateGlobalSettings(*pSVData->maAppData.mxSettings);
+        mpWindowImpl->mxOutDev->SetSettings(*pSVData->maAppData.mxSettings);
+        pSVData->maAppData.mbSettingsInit = true;
+    }
+}
+
 void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* pSystemParentData )
 {
     SAL_WARN_IF( !mpWindowImpl->mbFrame && !pParent && GetType() != WindowType::FIXEDIMAGE, "vcl.window",
@@ -882,72 +956,8 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     mpWindowImpl->mxOutDev->mxFontCollection = mpWindowImpl->mpFrameData->mxFontCollection;
     mpWindowImpl->mxOutDev->mxFontCache = mpWindowImpl->mpFrameData->mxFontCache;
 
-    if ( mpWindowImpl->mbFrame )
-    {
-        if ( pParent )
-        {
-            mpWindowImpl->mpFrameData->mnDPIX     = pParent->mpWindowImpl->mpFrameData->mnDPIX;
-            mpWindowImpl->mpFrameData->mnDPIY     = pParent->mpWindowImpl->mpFrameData->mnDPIY;
-        }
-        else
-        {
-            if (auto* pGraphics = GetOutDev()->GetGraphics())
-            {
-                pGraphics->GetResolution(mpWindowImpl->mpFrameData->mnDPIX,
-                                         mpWindowImpl->mpFrameData->mnDPIY);
-            }
-        }
-
-        // add ownerdraw decorated frame windows to list in the top-most frame window
-        // so they can be hidden on lose focus
-        if( nStyle & WB_OWNERDRAWDECORATION )
-            ImplGetOwnerDrawList().emplace_back(this );
-
-        ImplSVData* pSVData = ImplGetSVData();
-
-        // delay settings initialization until first "real" frame
-        // this relies on the IntroWindow not needing any system settings
-        if ( !pSVData->maAppData.mbSettingsInit &&
-             ! (nStyle & (WB_INTROWIN|WB_DEFAULTWIN))
-             )
-        {
-            // side effect: ImplUpdateGlobalSettings does an ImplGetFrame()->UpdateSettings
-            ImplUpdateGlobalSettings( *pSVData->maAppData.mxSettings );
-            mpWindowImpl->mxOutDev->SetSettings( *pSVData->maAppData.mxSettings );
-            pSVData->maAppData.mbSettingsInit = true;
-        }
-
-        // If we create a Window with default size, query this
-        // size directly, because we want resize all Controls to
-        // the correct size before we display the window
-        if ( nStyle & (WB_MOVEABLE | WB_SIZEABLE | WB_APP) )
-        {
-            const Size aSize = mpWindowImpl->mpFrame->GetClientSize();
-
-            mpWindowImpl->mxOutDev->SetOutputWidthPixel(aSize.Width());
-            mpWindowImpl->mxOutDev->SetOutputHeightPixel(aSize.Height());
-        }
-    }
-    else
-    {
-        if ( pParent )
-        {
-            if ( !ImplIsOverlapWindow() )
-            {
-                mpWindowImpl->mbDisabled          = pParent->mpWindowImpl->mbDisabled;
-                mpWindowImpl->mbInputDisabled     = pParent->mpWindowImpl->mbInputDisabled;
-                mpWindowImpl->meAlwaysInputMode   = pParent->mpWindowImpl->meAlwaysInputMode;
-            }
-
-            if (!comphelper::IsFuzzing())
-            {
-                // we don't want to call the WindowOutputDevice override of this because
-                // it calls back into us.
-                mpWindowImpl->mxOutDev->OutputDevice::SetSettings( pParent->GetSettings() );
-            }
-        }
-
-    }
+    ImplInitResolution(pParent, nStyle);
+    ImplInitSettings(nStyle);
 
     // setup the scale factor for HiDPI displays
     mpWindowImpl->mxOutDev->SetDPIScalePercentage(lcl_CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
