@@ -648,7 +648,7 @@ Window::~Window()
     return mpWindowImpl ? mpWindowImpl->mxOutDev.get() : nullptr;
 }
 
-static sal_Int32 CountDPIScaleFactor(sal_Int32 nDPI)
+static sal_Int32 lcl_CountDPIScaleFactor(sal_Int32 nDPI)
 {
 #ifndef MACOSX
     // Setting of HiDPI is unfortunately all only a heuristic; and to add
@@ -883,7 +883,7 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     }
 
     // setup the scale factor for HiDPI displays
-    mpWindowImpl->mxOutDev->SetDPIScalePercentage(CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
+    mpWindowImpl->mxOutDev->SetDPIScalePercentage(lcl_CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
     mpWindowImpl->mxOutDev->SetDPIX(mpWindowImpl->mpFrameData->mnDPIX);
     mpWindowImpl->mxOutDev->SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
 
@@ -1039,7 +1039,7 @@ void Window::ImplInitResolutionSettings()
         GetOutDev()->SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
 
         // setup the scale factor for HiDPI displays
-        GetOutDev()->SetDPIScalePercentage(CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
+        GetOutDev()->SetDPIScalePercentage(lcl_CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
         const StyleSettings& rStyleSettings = GetOutDev()->moSettings->GetStyleSettings();
         SetPointFont(*GetOutDev(), rStyleSettings.GetAppFont());
     }
