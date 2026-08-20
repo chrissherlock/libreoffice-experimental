@@ -742,6 +742,68 @@ vcl::Window* Window::ImplInitBorderWindow(vcl::Window* pParent, WinBits nStyle, 
     return pParent;
 }
 
+SalFrameStyleFlags Window::ImplGetFrameStyle(WinBits nStyle) const
+{
+    SalFrameStyleFlags nFrameStyle = SalFrameStyleFlags::NONE;
+
+    if (nStyle & WB_MOVEABLE)
+        nFrameStyle |= SalFrameStyleFlags::MOVEABLE;
+    if (nStyle & WB_SIZEABLE)
+        nFrameStyle |= SalFrameStyleFlags::SIZEABLE;
+    if (nStyle & WB_CLOSEABLE)
+        nFrameStyle |= SalFrameStyleFlags::CLOSEABLE;
+    if (nStyle & WB_APP)
+        nFrameStyle |= SalFrameStyleFlags::DEFAULT;
+
+    // check for undecorated floating window
+    if ((!(nFrameStyle & ~SalFrameStyleFlags::CLOSEABLE) &&
+        (mpWindowImpl->mbFloatWin || ((GetType() == WindowType::BORDERWINDOW) && static_cast<const ImplBorderWindow*>(this)->mbFloatWindow) || (nStyle & WB_SYSTEMFLOATWIN))) ||
+        ((GetType() == WindowType::BORDERWINDOW) && static_cast<const ImplBorderWindow*>(this)->mbFloatWindow && (nStyle & WB_OWNERDRAWDECORATION)))
+    {
+        nFrameStyle = SalFrameStyleFlags::FLOAT;
+        if (nStyle & WB_OWNERDRAWDECORATION)
+            nFrameStyle |= SalFrameStyleFlags::OWNERDRAWDECORATION | SalFrameStyleFlags::NOSHADOW;
+    }
+    else if (mpWindowImpl->mbFloatWin)
+        nFrameStyle |= SalFrameStyleFlags::TOOLWINDOW;
+
+    if (nStyle & WB_INTROWIN)
+        nFrameStyle |= SalFrameStyleFlags::INTRO;
+    if (nStyle & WB_TOOLTIPWIN)
+        nFrameStyle |= SalFrameStyleFlags::TOOLTIP;
+
+    if (nStyle & WB_NOSHADOW)
+        nFrameStyle |= SalFrameStyleFlags::NOSHADOW;
+
+    if (nStyle & WB_SYSTEMCHILDWINDOW)
+        nFrameStyle |= SalFrameStyleFlags::SYSTEMCHILD;
+
+    switch (mpWindowImpl->meType)
+    {
+        case WindowType::DIALOG:
+        case WindowType::TABDIALOG:
+        case WindowType::MODELESSDIALOG:
+        case WindowType::MESSBOX:
+        case WindowType::INFOBOX:
+        case WindowType::WARNINGBOX:
+        case WindowType::ERRORBOX:
+        case WindowType::QUERYBOX:
+            nFrameStyle |= SalFrameStyleFlags::DIALOG;
+            break;
+        default:
+            break;
+    }
+
+    // tdf#144624 for the DefaultWindow, which is never visible, don't
+    // create an icon for it so construction of a DefaultWindow cannot
+    // trigger creation of a VirtualDevice which itself requires a
+    // DefaultWindow to exist
+    if (nStyle & WB_DEFAULTWIN)
+        nFrameStyle |= SalFrameStyleFlags::NOICON;
+
+    return nFrameStyle;
+}
+
 void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* pSystemParentData )
 {
     SAL_WARN_IF( !mpWindowImpl->mbFrame && !pParent && GetType() != WindowType::FIXEDIMAGE, "vcl.window",
@@ -765,64 +827,7 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     // test for frame creation
     if ( mpWindowImpl->mbFrame )
     {
-        // create frame
-        SalFrameStyleFlags nFrameStyle = SalFrameStyleFlags::NONE;
-
-        if ( nStyle & WB_MOVEABLE )
-            nFrameStyle |= SalFrameStyleFlags::MOVEABLE;
-        if ( nStyle & WB_SIZEABLE )
-            nFrameStyle |= SalFrameStyleFlags::SIZEABLE;
-        if ( nStyle & WB_CLOSEABLE )
-            nFrameStyle |= SalFrameStyleFlags::CLOSEABLE;
-        if ( nStyle & WB_APP )
-            nFrameStyle |= SalFrameStyleFlags::DEFAULT;
-        // check for undecorated floating window
-        if( // 1. floating windows that are not moveable/sizeable (only closeable allowed)
-            ( !(nFrameStyle & ~SalFrameStyleFlags::CLOSEABLE) &&
-            ( mpWindowImpl->mbFloatWin || ((GetType() == WindowType::BORDERWINDOW) && static_cast<ImplBorderWindow*>(this)->mbFloatWindow) || (nStyle & WB_SYSTEMFLOATWIN) ) ) ||
-            // 2. borderwindows of floaters with ownerdraw decoration
-            ((GetType() == WindowType::BORDERWINDOW) && static_cast<ImplBorderWindow*>(this)->mbFloatWindow && (nStyle & WB_OWNERDRAWDECORATION) ) )
-        {
-            nFrameStyle = SalFrameStyleFlags::FLOAT;
-            if( nStyle & WB_OWNERDRAWDECORATION )
-                nFrameStyle |= SalFrameStyleFlags::OWNERDRAWDECORATION | SalFrameStyleFlags::NOSHADOW;
-        }
-        else if( mpWindowImpl->mbFloatWin )
-            nFrameStyle |= SalFrameStyleFlags::TOOLWINDOW;
-
-        if( nStyle & WB_INTROWIN )
-            nFrameStyle |= SalFrameStyleFlags::INTRO;
-        if( nStyle & WB_TOOLTIPWIN )
-            nFrameStyle |= SalFrameStyleFlags::TOOLTIP;
-
-        if( nStyle & WB_NOSHADOW )
-            nFrameStyle |= SalFrameStyleFlags::NOSHADOW;
-
-        if( nStyle & WB_SYSTEMCHILDWINDOW )
-            nFrameStyle |= SalFrameStyleFlags::SYSTEMCHILD;
-
-        switch (mpWindowImpl->meType)
-        {
-            case WindowType::DIALOG:
-            case WindowType::TABDIALOG:
-            case WindowType::MODELESSDIALOG:
-            case WindowType::MESSBOX:
-            case WindowType::INFOBOX:
-            case WindowType::WARNINGBOX:
-            case WindowType::ERRORBOX:
-            case WindowType::QUERYBOX:
-                nFrameStyle |= SalFrameStyleFlags::DIALOG;
-                break;
-            default:
-                break;
-        }
-
-        // tdf#144624 for the DefaultWindow, which is never visible, don't
-        // create an icon for it so construction of a DefaultWindow cannot
-        // trigger creation of a VirtualDevice which itself requires a
-        // DefaultWindow to exist
-        if( nStyle & WB_DEFAULTWIN )
-            nFrameStyle |= SalFrameStyleFlags::NOICON;
+        SalFrameStyleFlags nFrameStyle = ImplGetFrameStyle(nStyle);
 
         SalFrame* pParentFrame = nullptr;
         if ( pParent )
