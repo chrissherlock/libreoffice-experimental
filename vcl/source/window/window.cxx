@@ -697,23 +697,24 @@ WinBits Window::ImplApplyBorderAnd3DStyle(WinBits nStyle, const vcl::Window* pPa
     return nStyle;
 }
 
+bool Window::ImplNeedsSystemChildBorder(WinBits nStyle) const
+{
+    return !mpWindowImpl->mbFrame
+        && !mpWindowImpl->mbBorderWin
+        && !mpWindowImpl->mpBorderWindow
+        && (nStyle & WB_SYSTEMCHILDWINDOW);
+}
+
 BorderWindowStyle Window::ImplGetBorderWindowStyle(WinBits nStyle) const
 {
-    BorderWindowStyle nBorderTypeStyle = BorderWindowStyle::NONE;
+    if (!ImplNeedsSystemChildBorder(nStyle))
+        return BorderWindowStyle::NONE;
 
-    if (!mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpWindowImpl->mpBorderWindow)
-    {
-        if (nStyle & WB_SYSTEMCHILDWINDOW)
-        {
-            // handle WB_SYSTEMCHILDWINDOW
-            // these should be analogous to a top level frame; meaning they
-            // should have a border window with style BorderWindowStyle::Frame
-            // which controls their size
-            nBorderTypeStyle = BorderWindowStyle::Frame;
-        }
-    }
-
-    return nBorderTypeStyle;
+    // handle WB_SYSTEMCHILDWINDOW
+    // these should be analogous to a top level frame; meaning they
+    // should have a border window with style BorderWindowStyle::Frame
+    // which controls their size
+    return BorderWindowStyle::Frame;
 }
 
 void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* pSystemParentData )
