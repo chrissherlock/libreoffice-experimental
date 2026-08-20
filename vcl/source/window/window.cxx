@@ -835,7 +835,6 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     SAL_WARN_IF( !mpWindowImpl->mbFrame && !pParent && GetType() != WindowType::FIXEDIMAGE, "vcl.window",
         "Window::Window(): pParent == NULL" );
 
-    ImplSVData* pSVData = ImplGetSVData();
     vcl::Window*     pRealParent = pParent;
 
     nStyle = ImplApplyBorderAnd3DStyle(nStyle, pParent);
@@ -900,6 +899,8 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
         // so they can be hidden on lose focus
         if( nStyle & WB_OWNERDRAWDECORATION )
             ImplGetOwnerDrawList().emplace_back(this );
+
+        ImplSVData* pSVData = ImplGetSVData();
 
         // delay settings initialization until first "real" frame
         // this relies on the IntroWindow not needing any system settings
@@ -974,6 +975,8 @@ void Window::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* p
     ImplPointToLogic(*GetOutDev(), mpWindowImpl->mxOutDev->maFont);
 
     (void)ImplUpdatePos();
+
+    ImplSVData* pSVData = ImplGetSVData();
 
     // calculate app font res (except for the Intro Window or the default window)
     if ( mpWindowImpl->mbFrame && !pSVData->maGDIData.mnAppFontX && ! (nStyle & (WB_INTROWIN|WB_DEFAULTWIN)) )
