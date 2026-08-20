@@ -1553,6 +1553,8 @@ private:
     SAL_DLLPRIVATE SalFrameStyleFlags ImplGetFrameStyle(WinBits nStyle) const;
     SAL_DLLPRIVATE SalFrame* ImplCreateFrame(vcl::Window* pParent, SystemParentData* pSystemParentData, SalFrameStyleFlags nFrameStyle);
     SAL_DLLPRIVATE void ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInitialParent);
+    SAL_DLLPRIVATE void ImplInitResolution(vcl::Window* pParent, WinBits nStyle);
+    SAL_DLLPRIVATE void ImplInitSettings(WinBits nStyle);
 };
 }
 
