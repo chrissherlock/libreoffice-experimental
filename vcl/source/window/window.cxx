@@ -468,6 +468,56 @@ void Window::ImplDeregisterTopWindowChild()
         pParentWinData->maTopWindowChildren.erase(myPos);
 }
 
+void Window::ImplDisposeFrameData()
+{
+    // remove BorderWindow or Frame window data
+    mpWindowImpl->mpBorderWindow.disposeAndClear();
+
+    if (!mpWindowImpl->mbFrame)
+        return;
+
+    ImplSVData* pSVData = ImplGetSVData();
+
+    if (pSVData->maFrameData.mpFirstFrame == this)
+    {
+        pSVData->maFrameData.mpFirstFrame = mpWindowImpl->mpFrameData->mpNextFrame;
+    }
+    else
+    {
+        sal_Int32 nWindows = 0;
+        vcl::Window* pSysWin = pSVData->maFrameData.mpFirstFrame;
+        while (pSysWin && pSysWin->mpWindowImpl->mpFrameData->mpNextFrame.get() != this)
+        {
+            pSysWin = pSysWin->mpWindowImpl->mpFrameData->mpNextFrame;
+            nWindows++;
+        }
+
+        if (pSysWin)
+        {
+            assert(mpWindowImpl->mpFrameData->mpNextFrame.get() != pSysWin);
+            pSysWin->mpWindowImpl->mpFrameData->mpNextFrame = mpWindowImpl->mpFrameData->mpNextFrame;
+        }
+        else // if it is not in the list, we can't remove it.
+        {
+            SAL_WARN("vcl.window", "Window " << this << " marked as frame window, "
+                     "is missing from list of " << nWindows << " frames");
+        }
+    }
+
+    if (mpWindowImpl->mpFrame) // otherwise exception during init
+    {
+        mpWindowImpl->mpFrame->SetCallback(nullptr, nullptr);
+        pSVData->mpDefInst->DestroyFrame(mpWindowImpl->mpFrame);
+    }
+
+    assert(mpWindowImpl->mpFrameData->mnFocusId == nullptr);
+    assert(mpWindowImpl->mpFrameData->mnMouseMoveId == nullptr);
+
+    mpWindowImpl->mpFrameData->mpBuffer.disposeAndClear();
+    delete mpWindowImpl->mpFrameData;
+    mpWindowImpl->mpFrameData = nullptr;
+}
+
 void Window::dispose()
 {
     assert( mpWindowImpl );
@@ -564,43 +614,7 @@ void Window::dispose()
 
     mpWindowImpl->mpWinData.reset();
 
-    // remove BorderWindow or Frame window data
-    mpWindowImpl->mpBorderWindow.disposeAndClear();
-    if ( mpWindowImpl->mbFrame )
-    {
-        if ( pSVData->maFrameData.mpFirstFrame == this )
-            pSVData->maFrameData.mpFirstFrame = mpWindowImpl->mpFrameData->mpNextFrame;
-        else
-        {
-            sal_Int32 nWindows = 0;
-            vcl::Window* pSysWin = pSVData->maFrameData.mpFirstFrame;
-            while ( pSysWin && pSysWin->mpWindowImpl->mpFrameData->mpNextFrame.get() != this )
-            {
-                pSysWin = pSysWin->mpWindowImpl->mpFrameData->mpNextFrame;
-                nWindows++;
-            }
-
-            if ( pSysWin )
-            {
-                assert (mpWindowImpl->mpFrameData->mpNextFrame.get() != pSysWin);
-                pSysWin->mpWindowImpl->mpFrameData->mpNextFrame = mpWindowImpl->mpFrameData->mpNextFrame;
-            }
-            else // if it is not in the list, we can't remove it.
-                SAL_WARN("vcl.window", "Window " << this << " marked as frame window, "
-                         "is missing from list of " << nWindows << " frames");
-        }
-        if (mpWindowImpl->mpFrame) // otherwise exception during init
-        {
-            mpWindowImpl->mpFrame->SetCallback( nullptr, nullptr );
-            pSVData->mpDefInst->DestroyFrame( mpWindowImpl->mpFrame );
-        }
-        assert (mpWindowImpl->mpFrameData->mnFocusId == nullptr);
-        assert (mpWindowImpl->mpFrameData->mnMouseMoveId == nullptr);
-
-        mpWindowImpl->mpFrameData->mpBuffer.disposeAndClear();
-        delete mpWindowImpl->mpFrameData;
-        mpWindowImpl->mpFrameData = nullptr;
-    }
+    ImplDisposeFrameData();
 
     if (mpWindowImpl->mxWindowPeer)
         mpWindowImpl->mxWindowPeer->dispose();
