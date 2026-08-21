@@ -453,17 +453,11 @@ static bool queue_ungrouped_resize(vcl::Window const* pOrigWindow)
 {
     bool bSomeoneCares = false;
 
-    vcl::Window* pWindow = pOrigWindow->GetParent();
-    if (pWindow)
+    if (vcl::Window* pWindow = pOrigWindow->GetParent(); pWindow)
     {
-        if (isContainerWindow(*pWindow))
-        {
+        if (isContainerWindow(*pWindow) || pWindow->GetType() == WindowType::TABCONTROL)
             bSomeoneCares = true;
-        }
-        else if (pWindow->GetType() == WindowType::TABCONTROL)
-        {
-            bSomeoneCares = true;
-        }
+
         pWindow->queue_resize();
     }
 
