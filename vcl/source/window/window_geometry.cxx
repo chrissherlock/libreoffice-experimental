@@ -586,28 +586,33 @@ Size Window::get_preferred_size() const
     WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
                                   ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
                                   : mpWindowImpl.get();
-    if (pWindowImpl->m_xSizeGroup)
+
+    if (!pWindowImpl->m_xSizeGroup)
+        return aPreferredSize;
+
+    const VclSizeGroupMode eMode = pWindowImpl->m_xSizeGroup->get_mode();
+
+    if (eMode == VclSizeGroupMode::NONE)
+        return aPreferredSize;
+
+    const bool bIgnoreInHidden = pWindowImpl->m_xSizeGroup->get_ignore_hidden();
+    const std::set<VclPtr<vcl::Window>>& rWindows = pWindowImpl->m_xSizeGroup->get_widgets();
+
+    for (const vcl::Window* pOther : rWindows)
     {
-        const VclSizeGroupMode eMode = pWindowImpl->m_xSizeGroup->get_mode();
-        if (eMode != VclSizeGroupMode::NONE)
-        {
-            const bool bIgnoreInHidden = pWindowImpl->m_xSizeGroup->get_ignore_hidden();
-            const std::set<VclPtr<vcl::Window>>& rWindows
-                = pWindowImpl->m_xSizeGroup->get_widgets();
-            for (const vcl::Window* pOther : rWindows)
-            {
-                if (pOther == this)
-                    continue;
-                if (bIgnoreInHidden && !pOther->IsVisible())
-                    continue;
-                Size aOtherSize = pOther->get_ungrouped_preferred_size();
-                if (eMode == VclSizeGroupMode::Both || eMode == VclSizeGroupMode::Horizontal)
-                    aPreferredSize.setWidth(std::max(aPreferredSize.Width(), aOtherSize.Width()));
-                if (eMode == VclSizeGroupMode::Both || eMode == VclSizeGroupMode::Vertical)
-                    aPreferredSize.setHeight(
-                        std::max(aPreferredSize.Height(), aOtherSize.Height()));
-            }
-        }
+        if (pOther == this)
+            continue;
+
+        if (bIgnoreInHidden && !pOther->IsVisible())
+            continue;
+
+        Size aOtherSize = pOther->get_ungrouped_preferred_size();
+
+        if (eMode == VclSizeGroupMode::Both || eMode == VclSizeGroupMode::Horizontal)
+            aPreferredSize.setWidth(std::max(aPreferredSize.Width(), aOtherSize.Width()));
+
+        if (eMode == VclSizeGroupMode::Both || eMode == VclSizeGroupMode::Vertical)
+            aPreferredSize.setHeight(std::max(aPreferredSize.Height(), aOtherSize.Height()));
     }
 
     return aPreferredSize;
