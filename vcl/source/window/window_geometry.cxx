@@ -33,6 +33,18 @@
 
 namespace vcl
 {
+static VclPtr<vcl::Window> lcl_GetTopmostBorderWindow(vcl::Window* pStartWindow)
+{
+    vcl::Window* pWindow = pStartWindow;
+
+    while (pWindow->ImplGetWindowImpl()->mpBorderWindow)
+    {
+        pWindow = pWindow->ImplGetWindowImpl()->mpBorderWindow.get();
+    }
+
+    return pWindow; // Implicitly converts back to VclPtr
+}
+
 void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
                              tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -40,13 +52,12 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
 
     if (nFlags & PosSizeFlags::Pos)
         mpWindowImpl->mbDefPos = false;
+
     if (nFlags & PosSizeFlags::Size)
         mpWindowImpl->mbDefSize = false;
 
     // The top BorderWindow is the window which is to be positioned
-    VclPtr<vcl::Window> pWindow = this;
-    while (pWindow->mpWindowImpl->mpBorderWindow)
-        pWindow = pWindow->mpWindowImpl->mpBorderWindow;
+    VclPtr<vcl::Window> pWindow = lcl_GetTopmostBorderWindow(this);
 
     if (pWindow->mpWindowImpl->mbFrame)
     {
