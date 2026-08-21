@@ -250,6 +250,14 @@ void Window::SetPosPixel(const Point& rNewPos)
     setPosSizePixel(rNewPos.X(), rNewPos.Y(), 0, 0, PosSizeFlags::Pos);
 }
 
+Size Window::ImplGetWindowSizeWithBorders() const
+{
+    return Size(GetOutDev()->GetOutputWidthPixel() + mpWindowImpl->mnLeftBorder
+                    + mpWindowImpl->mnRightBorder,
+                GetOutDev()->GetOutputHeightPixel() + mpWindowImpl->mnTopBorder
+                    + mpWindowImpl->mnBottomBorder);
+}
+
 Size Window::GetSizePixel() const
 {
     if (!mpWindowImpl)
@@ -268,10 +276,7 @@ Size Window::GetSizePixel() const
             return Size(0, 0);
     }
 
-    return Size(GetOutDev()->GetOutputWidthPixel() + mpWindowImpl->mnLeftBorder
-                    + mpWindowImpl->mnRightBorder,
-                GetOutDev()->GetOutputHeightPixel() + mpWindowImpl->mnTopBorder
-                    + mpWindowImpl->mnBottomBorder);
+    return ImplGetWindowSizeWithBorders();
 }
 
 void Window::SetSizePixel(const Size& rNewSize)
