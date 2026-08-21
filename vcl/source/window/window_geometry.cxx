@@ -120,11 +120,24 @@ static tools::Long lcl_CalculatePositionX(vcl::Window* pWindow, vcl::Window* pBo
     return nX;
 }
 
+static bool lcl_ShouldPreserveRTLPosition(PosSizeFlags nFlags, bool bHasValidSize,
+                                          tools::Long nWidth)
+{
+    if (comphelper::LibreOfficeKit::isActive())
+        return false;
+
+    if (nFlags & PosSizeFlags::X)
+        return false;
+
+    if (!bHasValidSize)
+        return false;
+
+    return nWidth != 0;
+}
+
 void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
                              tools::Long nHeight, PosSizeFlags nFlags)
 {
-    bool bHasValidSize = !mpWindowImpl->mbDefSize;
-
     if (nFlags & PosSizeFlags::Pos)
         mpWindowImpl->mbDefPos = false;
 
@@ -140,8 +153,6 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
     // Note: if we're positioning a frame, the coordinates are interpreted
     // as being the top-left corner of the window's client area and NOT
     // as the position of the border ! (due to limitations of several UNIX window managers)
-    const tools::Long nOldWidth = pBorderWindow->GetOutDev()->GetOutputWidthPixel();
-
     std::tie(nWidth, nHeight)
         = lcl_CalcMissingDimensions(pBorderWindow.get(), nWidth, nHeight, nFlags);
 
@@ -155,31 +166,33 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
     if (pWinParent && (pBorderWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
         nX += pWinParent->GetOutDev()->GetDeviceOriginX();
 
-    if (!comphelper::LibreOfficeKit::isActive() && !(nFlags & PosSizeFlags::X) && bHasValidSize
-        && pBorderWindow->mpWindowImpl->mpFrame->GetWidth())
+    // RTL: make sure the old right aligned position is not changed
+    // system windows will always grow to the right
+
+    const bool bHasValidSize = !mpWindowImpl->mbDefSize;
+
+    if (pWinParent && pWinParent->GetOutDev()->HasMirroredGraphics()
+        && lcl_ShouldPreserveRTLPosition(nFlags, bHasValidSize,
+                                         pBorderWindow->mpWindowImpl->mpFrame->GetWidth()))
     {
-        // RTL: make sure the old right aligned position is not changed
-        // system windows will always grow to the right
-        if (pWinParent)
-        {
-            OutputDevice* pParentOutDev = pWinParent->GetOutDev();
-            if (pParentOutDev->HasMirroredGraphics())
-            {
-                const SalFrameGeometry aSysGeometry
-                    = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
-                const SalFrameGeometry aParentSysGeometry
-                    = pWinParent->mpWindowImpl->mpFrame->GetUnmirroredGeometry();
-                tools::Long myWidth = nOldWidth;
-                if (!myWidth)
-                    myWidth = aSysGeometry.width();
-                if (!myWidth)
-                    myWidth = nWidth;
-                nFlags |= PosSizeFlags::X;
-                nSysFlags |= SAL_FRAME_POSSIZE_X;
-                nX = aParentSysGeometry.x() - aSysGeometry.leftDecoration()
-                     + aParentSysGeometry.width() - myWidth - 1 - aSysGeometry.x();
-            }
-        }
+        nFlags |= PosSizeFlags::X;
+        nSysFlags |= SAL_FRAME_POSSIZE_X;
+
+        const tools::Long nOldWidth = pBorderWindow->GetOutDev()->GetOutputWidthPixel();
+        const SalFrameGeometry aSysGeometry = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
+        const SalFrameGeometry aParentSysGeometry
+            = pWinParent->mpWindowImpl->mpFrame->GetUnmirroredGeometry();
+
+        tools::Long myWidth = nOldWidth;
+
+        if (!myWidth)
+            myWidth = aSysGeometry.width();
+
+        if (!myWidth)
+            myWidth = nWidth;
+
+        nX = aParentSysGeometry.x() - aSysGeometry.leftDecoration() + aParentSysGeometry.width()
+             - myWidth - 1 - aSysGeometry.x();
     }
 
     if (nFlags & PosSizeFlags::Y)
