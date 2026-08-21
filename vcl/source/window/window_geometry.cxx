@@ -183,9 +183,7 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
 
     const bool bHasValidSize = !mpWindowImpl->mbDefSize;
 
-    VclPtr<vcl::Window> pWinParent = pBorderWindow->GetParent();
-
-    if (pWinParent)
+    if (VclPtr<vcl::Window> pWinParent = pBorderWindow->GetParent(); pWinParent)
     {
         const bool bIsSystemChild = (pBorderWindow->GetStyle() & WB_SYSTEMCHILDWINDOW);
 
