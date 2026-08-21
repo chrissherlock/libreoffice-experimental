@@ -250,14 +250,6 @@ void Window::SetPosPixel(const Point& rNewPos)
     setPosSizePixel(rNewPos.X(), rNewPos.Y(), 0, 0, PosSizeFlags::Pos);
 }
 
-Size Window::ImplGetWindowSizeWithBorders() const
-{
-    return Size(GetOutDev()->GetOutputWidthPixel() + mpWindowImpl->mnLeftBorder
-                    + mpWindowImpl->mnRightBorder,
-                GetOutDev()->GetOutputHeightPixel() + mpWindowImpl->mnTopBorder
-                    + mpWindowImpl->mnBottomBorder);
-}
-
 Size Window::GetSizePixel() const
 {
     if (!mpWindowImpl)
@@ -276,7 +268,7 @@ Size Window::GetSizePixel() const
             return Size(0, 0);
     }
 
-    return ImplGetWindowSizeWithBorders();
+    return CalcWindowSize(GetOutDev()->GetOutputSizePixel());
 }
 
 void Window::SetSizePixel(const Size& rNewSize)
@@ -289,12 +281,7 @@ void Window::SetPosSizePixel(const Point& rNewPos, const Size& rNewSize)
     setPosSizePixel(rNewPos.X(), rNewPos.Y(), rNewSize.Width(), rNewSize.Height());
 }
 
-void Window::SetOutputSizePixel(const Size& rNewSize)
-{
-    SetSizePixel(
-        Size(rNewSize.Width() + mpWindowImpl->mnLeftBorder + mpWindowImpl->mnRightBorder,
-             rNewSize.Height() + mpWindowImpl->mnTopBorder + mpWindowImpl->mnBottomBorder));
-}
+void Window::SetOutputSizePixel(const Size& rNewSize) { SetSizePixel(CalcWindowSize(rNewSize)); }
 
 bool Window::IsDefaultPos() const { return mpWindowImpl->mbDefPos; }
 
@@ -406,12 +393,10 @@ Size Window::GetOutputSizePixel() const
 
 tools::Rectangle Window::GetOutputRectPixel() const { return GetOutDev()->GetOutputRectPixel(); }
 
-Size Window::CalcWindowSize(const Size& rOutSz) const
+Size Window::CalcWindowSize(const Size& rOutputSize) const
 {
-    Size aSz = rOutSz;
-    aSz.AdjustWidth(mpWindowImpl->mnLeftBorder + mpWindowImpl->mnRightBorder);
-    aSz.AdjustHeight(mpWindowImpl->mnTopBorder + mpWindowImpl->mnBottomBorder);
-    return aSz;
+    return Size(rOutputSize.Width() + mpWindowImpl->mnLeftBorder + mpWindowImpl->mnRightBorder,
+                rOutputSize.Height() + mpWindowImpl->mnTopBorder + mpWindowImpl->mnBottomBorder);
 }
 
 tools::Long Window::CalcTitleWidth() const
