@@ -421,26 +421,29 @@ tools::Long Window::CalcTitleWidth() const
         if (mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
             return static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())
                 ->CalcTitleWidth();
-        else
-            return mpWindowImpl->mpBorderWindow->CalcTitleWidth();
-    }
-    else if (mpWindowImpl->mbFrame && (mpWindowImpl->mnStyle & WB_MOVEABLE))
-    {
-        // we guess the width for frame windows as we do not know the
-        // border of external dialogs
-        const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
-        vcl::Font aFont = GetFont();
-        const_cast<vcl::Window*>(this)->SetPointFont(const_cast<::OutputDevice&>(*GetOutDev()),
-                                                     rStyleSettings.GetTitleFont());
-        tools::Long nTitleWidth = GetTextWidth(GetText());
-        const_cast<vcl::Window*>(this)->SetFont(aFont);
-        nTitleWidth += rStyleSettings.GetTitleHeight() * 3;
-        nTitleWidth += StyleSettings::GetBorderSize() * 2;
-        nTitleWidth += 10;
-        return nTitleWidth;
+
+        return mpWindowImpl->mpBorderWindow->CalcTitleWidth();
     }
 
-    return 0;
+    if (!mpWindowImpl->mbFrame || !(mpWindowImpl->mnStyle & WB_MOVEABLE))
+        return 0;
+
+    // we guess the width for frame windows as we do not know the
+    // border of external dialogs
+    const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
+
+    vcl::Font aFont = GetFont();
+    const_cast<vcl::Window*>(this)->SetPointFont(const_cast<::OutputDevice&>(*GetOutDev()),
+                                                 rStyleSettings.GetTitleFont());
+
+    tools::Long nTitleWidth = GetTextWidth(GetText());
+    const_cast<vcl::Window*>(this)->SetFont(aFont);
+
+    nTitleWidth += rStyleSettings.GetTitleHeight() * 3;
+    nTitleWidth += StyleSettings::GetBorderSize() * 2;
+    nTitleWidth += 10;
+
+    return nTitleWidth;
 }
 
 // When a widget wants to renegotiate layout, get toplevel parent dialog and call
