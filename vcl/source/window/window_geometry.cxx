@@ -395,8 +395,8 @@ tools::Rectangle Window::GetOutputRectPixel() const { return GetOutDev()->GetOut
 
 Size Window::CalcWindowSize(const Size& rOutputSize) const
 {
-    return Size(rOutputSize.Width() + mpWindowImpl->mnLeftBorder + mpWindowImpl->mnRightBorder,
-                rOutputSize.Height() + mpWindowImpl->mnTopBorder + mpWindowImpl->mnBottomBorder);
+    return Size(rOutputSize.Width() + ImplGetBorderWidth(),
+                rOutputSize.Height() + ImplGetBorderHeight());
 }
 
 tools::Long Window::CalcTitleWidth() const
@@ -1400,8 +1400,8 @@ Window::ImplUnmirroredAbsoluteScreenToOutputPixel(const AbsoluteScreenPixelRecta
 Size Window::CalcOutputSize(const Size& rWinSz) const
 {
     Size aSz = rWinSz;
-    aSz.AdjustWidth(-(mpWindowImpl->mnLeftBorder + mpWindowImpl->mnRightBorder));
-    aSz.AdjustHeight(-(mpWindowImpl->mnTopBorder + mpWindowImpl->mnBottomBorder));
+    aSz.AdjustWidth(-ImplGetBorderWidth());
+    aSz.AdjustHeight(-ImplGetBorderHeight());
     return aSz;
 }
 
@@ -1412,6 +1412,16 @@ void Window::InvalidateSizeCache()
                                   : mpWindowImpl.get();
     pWindowImpl->mnOptimalWidthCache = -1;
     pWindowImpl->mnOptimalHeightCache = -1;
+}
+
+tools::Long Window::ImplGetBorderWidth() const
+{
+    return mpWindowImpl->mnLeftBorder + mpWindowImpl->mnRightBorder;
+}
+
+tools::Long Window::ImplGetBorderHeight() const
+{
+    return mpWindowImpl->mnTopBorder + mpWindowImpl->mnBottomBorder;
 }
 
 } // end namespace vcl
