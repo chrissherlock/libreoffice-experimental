@@ -59,117 +59,122 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
     // The top BorderWindow is the window which is to be positioned
     VclPtr<vcl::Window> pWindow = lcl_GetTopmostBorderWindow(this);
 
-    if (pWindow->mpWindowImpl->mbFrame)
-    {
-        // Note: if we're positioning a frame, the coordinates are interpreted
-        // as being the top-left corner of the window's client area and NOT
-        // as the position of the border ! (due to limitations of several UNIX window managers)
-        tools::Long nOldWidth = pWindow->GetOutDev()->GetOutputWidthPixel();
-
-        if (!(nFlags & PosSizeFlags::Width))
-            nWidth = pWindow->GetOutDev()->GetOutputWidthPixel();
-        if (!(nFlags & PosSizeFlags::Height))
-            nHeight = pWindow->GetOutDev()->GetOutputHeightPixel();
-
-        sal_uInt16 nSysFlags = 0;
-        VclPtr<vcl::Window> pParent = GetParent();
-        VclPtr<vcl::Window> pWinParent = pWindow->GetParent();
-
-        if (nFlags & PosSizeFlags::Width)
-            nSysFlags |= SAL_FRAME_POSSIZE_WIDTH;
-        if (nFlags & PosSizeFlags::Height)
-            nSysFlags |= SAL_FRAME_POSSIZE_HEIGHT;
-        if (nFlags & PosSizeFlags::X)
-        {
-            nSysFlags |= SAL_FRAME_POSSIZE_X;
-            if (pWinParent && (pWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
-            {
-                nX += pWinParent->GetOutDev()->GetDeviceOriginX();
-            }
-            if (pParent && pParent->GetOutDev()->ImplIsAntiparallel())
-            {
-                tools::Rectangle aRect(Point(nX, nY), Size(nWidth, nHeight));
-                const OutputDevice* pParentOutDev = pParent->GetOutDev();
-                if (!comphelper::LibreOfficeKit::isActive())
-                    pParentOutDev->ReMirror(aRect);
-                nX = aRect.Left();
-            }
-        }
-        if (!comphelper::LibreOfficeKit::isActive() && !(nFlags & PosSizeFlags::X) && bHasValidSize
-            && pWindow->mpWindowImpl->mpFrame->GetWidth())
-        {
-            // RTL: make sure the old right aligned position is not changed
-            // system windows will always grow to the right
-            if (pWinParent)
-            {
-                OutputDevice* pParentOutDev = pWinParent->GetOutDev();
-                if (pParentOutDev->HasMirroredGraphics())
-                {
-                    const SalFrameGeometry aSysGeometry
-                        = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
-                    const SalFrameGeometry aParentSysGeometry
-                        = pWinParent->mpWindowImpl->mpFrame->GetUnmirroredGeometry();
-                    tools::Long myWidth = nOldWidth;
-                    if (!myWidth)
-                        myWidth = aSysGeometry.width();
-                    if (!myWidth)
-                        myWidth = nWidth;
-                    nFlags |= PosSizeFlags::X;
-                    nSysFlags |= SAL_FRAME_POSSIZE_X;
-                    nX = aParentSysGeometry.x() - aSysGeometry.leftDecoration()
-                         + aParentSysGeometry.width() - myWidth - 1 - aSysGeometry.x();
-                }
-            }
-        }
-        if (nFlags & PosSizeFlags::Y)
-        {
-            nSysFlags |= SAL_FRAME_POSSIZE_Y;
-            if (pWinParent && (pWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
-            {
-                nY += pWinParent->GetOutDev()->GetDeviceOriginY();
-            }
-        }
-
-        if (nSysFlags & (SAL_FRAME_POSSIZE_WIDTH | SAL_FRAME_POSSIZE_HEIGHT))
-        {
-            // check for min/max client size and adjust size accordingly
-            // otherwise it may happen that the resize event is ignored, i.e. the old size remains
-            // unchanged but ImplHandleResize() is called with the wrong size
-            SystemWindow* pSystemWindow = dynamic_cast<SystemWindow*>(pWindow.get());
-            if (pSystemWindow)
-            {
-                Size aMinSize = pSystemWindow->GetMinOutputSizePixel();
-                Size aMaxSize = pSystemWindow->GetMaxOutputSizePixel();
-                if (nWidth < aMinSize.Width())
-                    nWidth = aMinSize.Width();
-                if (nHeight < aMinSize.Height())
-                    nHeight = aMinSize.Height();
-
-                if (nWidth > aMaxSize.Width())
-                    nWidth = aMaxSize.Width();
-                if (nHeight > aMaxSize.Height())
-                    nHeight = aMaxSize.Height();
-            }
-        }
-
-        pWindow->mpWindowImpl->mpFrame->SetPosSize(nX, nY, nWidth, nHeight, nSysFlags);
-
-        // Adjust resize with the hack of different client size and frame geometries to fix
-        // native menu bars. Eventually this should be replaced by proper mnTopBorder usage.
-        const Size aClientSize = pWindow->mpWindowImpl->mpFrame->GetClientSize();
-
-        // Resize should be called directly. If we haven't
-        // set the correct size, we get a second resize from
-        // the system with the correct size. This can be happened
-        // if the size is too small or too large.
-        ImplHandleResize(pWindow, aClientSize.getWidth(), aClientSize.Height());
-    }
-    else
+    if (!pWindow->mpWindowImpl->mbFrame)
     {
         pWindow->ImplPosSizeWindow(nX, nY, nWidth, nHeight, nFlags);
+
         if (IsReallyVisible())
             ImplGenerateMouseMove();
+
+        return;
     }
+
+    // Note: if we're positioning a frame, the coordinates are interpreted
+    // as being the top-left corner of the window's client area and NOT
+    // as the position of the border ! (due to limitations of several UNIX window managers)
+    tools::Long nOldWidth = pWindow->GetOutDev()->GetOutputWidthPixel();
+
+    if (!(nFlags & PosSizeFlags::Width))
+        nWidth = pWindow->GetOutDev()->GetOutputWidthPixel();
+
+    if (!(nFlags & PosSizeFlags::Height))
+        nHeight = pWindow->GetOutDev()->GetOutputHeightPixel();
+
+    sal_uInt16 nSysFlags = 0;
+    VclPtr<vcl::Window> pParent = GetParent();
+    VclPtr<vcl::Window> pWinParent = pWindow->GetParent();
+
+    if (nFlags & PosSizeFlags::Width)
+        nSysFlags |= SAL_FRAME_POSSIZE_WIDTH;
+
+    if (nFlags & PosSizeFlags::Height)
+        nSysFlags |= SAL_FRAME_POSSIZE_HEIGHT;
+
+    if (nFlags & PosSizeFlags::X)
+    {
+        nSysFlags |= SAL_FRAME_POSSIZE_X;
+        if (pWinParent && (pWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
+        {
+            nX += pWinParent->GetOutDev()->GetDeviceOriginX();
+        }
+        if (pParent && pParent->GetOutDev()->ImplIsAntiparallel())
+        {
+            tools::Rectangle aRect(Point(nX, nY), Size(nWidth, nHeight));
+            const OutputDevice* pParentOutDev = pParent->GetOutDev();
+            if (!comphelper::LibreOfficeKit::isActive())
+                pParentOutDev->ReMirror(aRect);
+            nX = aRect.Left();
+        }
+    }
+
+    if (!comphelper::LibreOfficeKit::isActive() && !(nFlags & PosSizeFlags::X) && bHasValidSize
+        && pWindow->mpWindowImpl->mpFrame->GetWidth())
+    {
+        // RTL: make sure the old right aligned position is not changed
+        // system windows will always grow to the right
+        if (pWinParent)
+        {
+            OutputDevice* pParentOutDev = pWinParent->GetOutDev();
+            if (pParentOutDev->HasMirroredGraphics())
+            {
+                const SalFrameGeometry aSysGeometry
+                    = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
+                const SalFrameGeometry aParentSysGeometry
+                    = pWinParent->mpWindowImpl->mpFrame->GetUnmirroredGeometry();
+                tools::Long myWidth = nOldWidth;
+                if (!myWidth)
+                    myWidth = aSysGeometry.width();
+                if (!myWidth)
+                    myWidth = nWidth;
+                nFlags |= PosSizeFlags::X;
+                nSysFlags |= SAL_FRAME_POSSIZE_X;
+                nX = aParentSysGeometry.x() - aSysGeometry.leftDecoration()
+                     + aParentSysGeometry.width() - myWidth - 1 - aSysGeometry.x();
+            }
+        }
+    }
+    if (nFlags & PosSizeFlags::Y)
+    {
+        nSysFlags |= SAL_FRAME_POSSIZE_Y;
+        if (pWinParent && (pWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
+        {
+            nY += pWinParent->GetOutDev()->GetDeviceOriginY();
+        }
+    }
+
+    if (nSysFlags & (SAL_FRAME_POSSIZE_WIDTH | SAL_FRAME_POSSIZE_HEIGHT))
+    {
+        // check for min/max client size and adjust size accordingly
+        // otherwise it may happen that the resize event is ignored, i.e. the old size remains
+        // unchanged but ImplHandleResize() is called with the wrong size
+        SystemWindow* pSystemWindow = dynamic_cast<SystemWindow*>(pWindow.get());
+        if (pSystemWindow)
+        {
+            Size aMinSize = pSystemWindow->GetMinOutputSizePixel();
+            Size aMaxSize = pSystemWindow->GetMaxOutputSizePixel();
+            if (nWidth < aMinSize.Width())
+                nWidth = aMinSize.Width();
+            if (nHeight < aMinSize.Height())
+                nHeight = aMinSize.Height();
+
+            if (nWidth > aMaxSize.Width())
+                nWidth = aMaxSize.Width();
+            if (nHeight > aMaxSize.Height())
+                nHeight = aMaxSize.Height();
+        }
+    }
+
+    pWindow->mpWindowImpl->mpFrame->SetPosSize(nX, nY, nWidth, nHeight, nSysFlags);
+
+    // Adjust resize with the hack of different client size and frame geometries to fix
+    // native menu bars. Eventually this should be replaced by proper mnTopBorder usage.
+    const Size aClientSize = pWindow->mpWindowImpl->mpFrame->GetClientSize();
+
+    // Resize should be called directly. If we haven't
+    // set the correct size, we get a second resize from
+    // the system with the correct size. This can be happened
+    // if the size is too small or too large.
+    ImplHandleResize(pWindow, aClientSize.getWidth(), aClientSize.Height());
 }
 
 Point Window::GetPosPixel() const { return mpWindowImpl->maPos; }
