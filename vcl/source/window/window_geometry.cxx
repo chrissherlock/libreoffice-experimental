@@ -554,31 +554,34 @@ void Window::set_width_request(sal_Int32 nWidthRequest)
 
 Size Window::get_ungrouped_preferred_size() const
 {
-    Size aRet(get_width_request(), get_height_request());
-    if (aRet.Width() == -1 || aRet.Height() == -1)
-    {
-        //cache gets blown away by queue_resize
-        WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                      ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                      : mpWindowImpl.get();
-        if (pWindowImpl->mnOptimalWidthCache == -1 || pWindowImpl->mnOptimalHeightCache == -1)
-        {
-            Size aOptimal(GetOptimalSize());
-            pWindowImpl->mnOptimalWidthCache = aOptimal.Width();
-            pWindowImpl->mnOptimalHeightCache = aOptimal.Height();
-        }
+    Size aPreferredSize(get_width_request(), get_height_request());
 
-        if (aRet.Width() == -1)
-            aRet.setWidth(pWindowImpl->mnOptimalWidthCache);
-        if (aRet.Height() == -1)
-            aRet.setHeight(pWindowImpl->mnOptimalHeightCache);
+    if (aPreferredSize.Width() != -1 && aPreferredSize.Height() != -1)
+        return aPreferredSize;
+
+    // cache gets blown away by queue_resize
+    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
+                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
+                                  : mpWindowImpl.get();
+    if (pWindowImpl->mnOptimalWidthCache == -1 || pWindowImpl->mnOptimalHeightCache == -1)
+    {
+        Size aOptimal(GetOptimalSize());
+        pWindowImpl->mnOptimalWidthCache = aOptimal.Width();
+        pWindowImpl->mnOptimalHeightCache = aOptimal.Height();
     }
-    return aRet;
+
+    if (aPreferredSize.Width() == -1)
+        aPreferredSize.setWidth(pWindowImpl->mnOptimalWidthCache);
+
+    if (aPreferredSize.Height() == -1)
+        aPreferredSize.setHeight(pWindowImpl->mnOptimalHeightCache);
+
+    return aPreferredSize;
 }
 
 Size Window::get_preferred_size() const
 {
-    Size aRet(get_ungrouped_preferred_size());
+    Size aPreferredSize(get_ungrouped_preferred_size());
 
     WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
                                   ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
@@ -599,14 +602,15 @@ Size Window::get_preferred_size() const
                     continue;
                 Size aOtherSize = pOther->get_ungrouped_preferred_size();
                 if (eMode == VclSizeGroupMode::Both || eMode == VclSizeGroupMode::Horizontal)
-                    aRet.setWidth(std::max(aRet.Width(), aOtherSize.Width()));
+                    aPreferredSize.setWidth(std::max(aPreferredSize.Width(), aOtherSize.Width()));
                 if (eMode == VclSizeGroupMode::Both || eMode == VclSizeGroupMode::Vertical)
-                    aRet.setHeight(std::max(aRet.Height(), aOtherSize.Height()));
+                    aPreferredSize.setHeight(
+                        std::max(aPreferredSize.Height(), aOtherSize.Height()));
             }
         }
     }
 
-    return aRet;
+    return aPreferredSize;
 }
 
 VclAlign Window::get_halign() const
