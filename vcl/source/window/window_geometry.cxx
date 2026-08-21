@@ -508,15 +508,13 @@ void Window::queue_resize(StateChangedType eReason)
     {
         //fdo#57090 force a resync of the borders of the borderwindow onto this
         //window in case they have changed
-        vcl::Window* pBorderWindow = ImplGetBorderWindow();
-        if (pBorderWindow)
+        if (vcl::Window* pBorderWindow = ImplGetBorderWindow(); pBorderWindow)
             pBorderWindow->Resize();
     }
 
     if (VclPtr<vcl::Window> pParent = GetParentWithLOKNotifier())
     {
-        Size aSize = GetSizePixel();
-        if (!aSize.IsEmpty() && !pParent->IsInInitShow()
+        if (!GetSizePixel().IsEmpty() && !pParent->IsInInitShow()
             && (GetParentDialog() || HasParentDockingWindow(this)))
             LogicInvalidate(nullptr);
     }
