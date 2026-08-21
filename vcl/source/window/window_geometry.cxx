@@ -178,21 +178,20 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
         nFlags |= PosSizeFlags::X;
         nSysFlags |= SAL_FRAME_POSSIZE_X;
 
-        const tools::Long nOldWidth = pBorderWindow->GetOutDev()->GetOutputWidthPixel();
         const SalFrameGeometry aSysGeometry = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
         const SalFrameGeometry aParentSysGeometry
             = pWinParent->mpWindowImpl->mpFrame->GetUnmirroredGeometry();
 
-        tools::Long myWidth = nOldWidth;
+        tools::Long nBorderWinWidth = pBorderWindow->GetOutDev()->GetOutputWidthPixel();
 
-        if (!myWidth)
-            myWidth = aSysGeometry.width();
+        if (!nBorderWinWidth)
+            nBorderWinWidth = aSysGeometry.width();
 
-        if (!myWidth)
-            myWidth = nWidth;
+        if (!nBorderWinWidth)
+            nBorderWinWidth = nWidth;
 
         nX = aParentSysGeometry.x() - aSysGeometry.leftDecoration() + aParentSysGeometry.width()
-             - myWidth - 1 - aSysGeometry.x();
+             - nBorderWinWidth - 1 - aSysGeometry.x();
     }
 
     if (nFlags & PosSizeFlags::Y)
