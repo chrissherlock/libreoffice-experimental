@@ -135,6 +135,27 @@ static bool lcl_ShouldPreserveRTLPosition(PosSizeFlags nFlags, bool bHasValidSiz
     return nWidth != 0;
 }
 
+static Size lcl_ClampSizeToWindowLimits(SystemWindow& rSystemWindow, tools::Long nWidth,
+                                        tools::Long nHeight)
+{
+    Size aMinSize = rSystemWindow.GetMinOutputSizePixel();
+    Size aMaxSize = rSystemWindow.GetMaxOutputSizePixel();
+
+    if (nWidth < aMinSize.Width())
+        nWidth = aMinSize.Width();
+
+    if (nWidth > aMaxSize.Width())
+        nWidth = aMaxSize.Width();
+
+    if (nHeight < aMinSize.Height())
+        nHeight = aMinSize.Height();
+
+    if (nHeight > aMaxSize.Height())
+        nHeight = aMaxSize.Height();
+
+    return Size(nWidth, nHeight);
+}
+
 void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
                              tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -201,26 +222,15 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
             nY += pWinParent->GetOutDev()->GetDeviceOriginY();
     }
 
-    if (nSysFlags & (SAL_FRAME_POSSIZE_WIDTH | SAL_FRAME_POSSIZE_HEIGHT))
+    if (SystemWindow* pSystemWindow = dynamic_cast<SystemWindow*>(pBorderWindow.get());
+        pSystemWindow && nSysFlags & (SAL_FRAME_POSSIZE_WIDTH | SAL_FRAME_POSSIZE_HEIGHT))
     {
         // check for min/max client size and adjust size accordingly
         // otherwise it may happen that the resize event is ignored, i.e. the old size remains
         // unchanged but ImplHandleResize() is called with the wrong size
-        SystemWindow* pSystemWindow = dynamic_cast<SystemWindow*>(pBorderWindow.get());
-        if (pSystemWindow)
-        {
-            Size aMinSize = pSystemWindow->GetMinOutputSizePixel();
-            Size aMaxSize = pSystemWindow->GetMaxOutputSizePixel();
-            if (nWidth < aMinSize.Width())
-                nWidth = aMinSize.Width();
-            if (nHeight < aMinSize.Height())
-                nHeight = aMinSize.Height();
-
-            if (nWidth > aMaxSize.Width())
-                nWidth = aMaxSize.Width();
-            if (nHeight > aMaxSize.Height())
-                nHeight = aMaxSize.Height();
-        }
+        const Size aClampedSize = lcl_ClampSizeToWindowLimits(*pSystemWindow, nWidth, nHeight);
+        nWidth = aClampedSize.Width();
+        nHeight = aClampedSize.Height();
     }
 
     pBorderWindow->mpWindowImpl->mpFrame->SetPosSize(nX, nY, nWidth, nHeight, nSysFlags);
