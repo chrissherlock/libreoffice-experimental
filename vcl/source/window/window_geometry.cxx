@@ -183,7 +183,6 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
 
     const bool bHasValidSize = !mpWindowImpl->mbDefSize;
 
-    VclPtr<vcl::Window> pParent = GetParent();
     VclPtr<vcl::Window> pWinParent = pBorderWindow->GetParent();
 
     if (pWinParent)
@@ -513,6 +512,7 @@ void Window::queue_resize(StateChangedType eReason)
         if (pBorderWindow)
             pBorderWindow->Resize();
     }
+
     if (VclPtr<vcl::Window> pParent = GetParentWithLOKNotifier())
     {
         Size aSize = GetSizePixel();
