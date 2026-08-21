@@ -1526,6 +1526,23 @@ void Window::Erase(vcl::RenderContext& rRenderContext)
     }
 }
 
+void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll, ScrollFlags nFlags )
+{
+
+    ImplScroll( GetOutputRectPixel(),
+                nHorzScroll, nVertScroll, nFlags & ~ScrollFlags::Clip );
+}
+
+void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll,
+                     const tools::Rectangle& rRect, ScrollFlags nFlags )
+{
+    OutputDevice *pOutDev = GetOutDev();
+    tools::Rectangle aRect = pOutDev->GetMapper().LogicToDevicePixel(rRect, pOutDev->GetMappingPolicy());
+    aRect.Intersection( GetOutputRectPixel() );
+    if ( !aRect.IsEmpty() )
+        ImplScroll( aRect, nHorzScroll, nVertScroll, nFlags );
+}
+
 void Window::ImplScroll( const tools::Rectangle& rRect,
                          tools::Long nHorzScroll, tools::Long nVertScroll, ScrollFlags nFlags )
 {
