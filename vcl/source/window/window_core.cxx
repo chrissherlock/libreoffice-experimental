@@ -19,14 +19,18 @@
 
 #include <osl/diagnose.h>
 #include <comphelper/configuration.hxx>
+#include <comphelper/OAccessible.hxx>
 #include <unotools/fontdefs.hxx>
 
 #include <vcl/dockwin.hxx>
+#include <vcl/dndlistenercontainer.hxx>
 #include <vcl/rendercontext/GetDefaultFontFlags.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/taskpanelist.hxx>
 #include <vcl/vclevent.hxx>
 #include <vcl/window.hxx>
 #include <vcl/uitest/uiobject.hxx>
+#include <vcl/toolkit/unowrap.hxx>
 
 #include <window.h>
 #include <dndeventdispatcher.hxx>
@@ -38,6 +42,7 @@
 #include <vector>
 
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
+#include <com/sun/star/datatransfer/dnd/XDragGestureRecognizer.hpp>
 
 namespace vcl
 {
@@ -647,6 +652,95 @@ void Window::ImplResetFrameDataPointers()
 bool Window::ImplIsSplitter() const { return mpWindowImpl && mpWindowImpl->mbSplitter; }
 
 bool Window::ImplIsPushButton() const { return mpWindowImpl && mpWindowImpl->mbPushButton; }
+
+void Window::ImplRemoveOwnerDrawDecoratedFrame()
+{
+    if (!(GetStyle() & WB_OWNERDRAWDECORATION) || !mpWindowImpl->mbFrame)
+        return;
+
+    auto& rList = ImplGetOwnerDrawList();
+    auto p = std::find(rList.begin(), rList.end(), VclPtr<vcl::Window>(this));
+    if (p != rList.end())
+        rList.erase(p);
+}
+
+void Window::ImplDeInitDND()
+{
+    // shutdown drag and drop listener container
+    if (mpWindowImpl->mxDNDListenerContainer.is())
+        mpWindowImpl->mxDNDListenerContainer->dispose();
+
+    if (!mpWindowImpl->mbFrame || !mpWindowImpl->mpFrameData)
+        return;
+
+    try
+    {
+        // deregister drop target listener
+        if (mpWindowImpl->mpFrameData->mxDropTargetListener.is())
+        {
+            css::uno::Reference<css::datatransfer::dnd::XDragGestureRecognizer>
+                xDragGestureRecognizer(mpWindowImpl->mpFrameData->mxDragSource,
+                                       css::uno::UNO_QUERY);
+            if (xDragGestureRecognizer.is())
+            {
+                xDragGestureRecognizer->removeDragGestureListener(
+                    mpWindowImpl->mpFrameData->mxDropTargetListener);
+            }
+
+            mpWindowImpl->mpFrameData->mxDropTarget->removeDropTargetListener(
+                mpWindowImpl->mpFrameData->mxDropTargetListener);
+            mpWindowImpl->mpFrameData->mxDropTargetListener.clear();
+        }
+
+        // shutdown drag and drop for this frame window
+        css::uno::Reference<css::lang::XComponent> xComponent(
+            mpWindowImpl->mpFrameData->mxDropTarget, css::uno::UNO_QUERY);
+
+        // DNDEventDispatcher does not hold a reference of the DropTarget,
+        // so it's ok if it does not support XComponent
+        if (xComponent.is())
+            xComponent->dispose();
+    }
+    catch (const css::uno::Exception&)
+    {
+        // can be safely ignored here.
+    }
+}
+
+void Window::ImplDeInitAccessibility()
+{
+    UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper(false);
+    if (pWrapper)
+        pWrapper->WindowDestroyed(this);
+
+    if (mpWindowImpl->mpAccessible.is())
+    {
+        mpWindowImpl->mpAccessible->dispose();
+        mpWindowImpl->mpAccessible.clear();
+    }
+
+    if (mpWindowImpl->mpAccessibleInfos)
+        mpWindowImpl->mpAccessibleInfos->pAccessibleParent.clear();
+}
+
+void Window::ImplRemoveFromTaskPaneList()
+{
+    vcl::Window* pMyParent = GetParent();
+    SystemWindow* pMySysWin = nullptr;
+
+    while (pMyParent)
+    {
+        if (pMyParent->IsSystemWindow())
+            pMySysWin = dynamic_cast<SystemWindow*>(pMyParent);
+
+        pMyParent = pMyParent->GetParent();
+    }
+
+    if (pMySysWin && pMySysWin->ImplIsInTaskPaneList(this))
+        pMySysWin->GetTaskPaneList()->RemoveWindow(this);
+    else
+        SAL_WARN("vcl", "Window (" << GetText() << ") not found in TaskPanelList");
+}
 } /* namespace vcl */
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
