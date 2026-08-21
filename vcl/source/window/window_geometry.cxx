@@ -158,45 +158,46 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
 
     sal_uInt16 nSysFlags = lcl_ConvertPosSizeToSysFlags(nFlags);
 
-    VclPtr<vcl::Window> pParent = GetParent();
-    VclPtr<vcl::Window> pWinParent = pBorderWindow->GetParent();
-
     nX = lcl_CalculatePositionX(this, pBorderWindow.get(), nX, nY, nWidth, nHeight, nFlags);
-
-    if (pWinParent && (pBorderWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
-        nX += pWinParent->GetOutDev()->GetDeviceOriginX();
-
-    // RTL: make sure the old right aligned position is not changed
-    // system windows will always grow to the right
 
     const bool bHasValidSize = !mpWindowImpl->mbDefSize;
 
-    if (pWinParent && pWinParent->GetOutDev()->HasMirroredGraphics()
-        && lcl_ShouldPreserveRTLPosition(nFlags, bHasValidSize,
-                                         pBorderWindow->mpWindowImpl->mpFrame->GetWidth()))
+    VclPtr<vcl::Window> pParent = GetParent();
+    VclPtr<vcl::Window> pWinParent = pBorderWindow->GetParent();
+
+    if (pWinParent)
     {
-        nFlags |= PosSizeFlags::X;
-        nSysFlags |= SAL_FRAME_POSSIZE_X;
+        const bool bIsSystemChild = (pBorderWindow->GetStyle() & WB_SYSTEMCHILDWINDOW);
 
-        const SalFrameGeometry aSysGeometry = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
-        const SalFrameGeometry aParentSysGeometry
-            = pWinParent->mpWindowImpl->mpFrame->GetUnmirroredGeometry();
+        if (bIsSystemChild)
+            nX += pWinParent->GetOutDev()->GetDeviceOriginX();
 
-        tools::Long nBorderWinWidth = pBorderWindow->GetOutDev()->GetOutputWidthPixel();
+        // RTL: make sure the old right aligned position is not changed
+        // system windows will always grow to the right
+        if (pWinParent->GetOutDev()->HasMirroredGraphics()
+            && lcl_ShouldPreserveRTLPosition(nFlags, bHasValidSize,
+                                             pBorderWindow->mpWindowImpl->mpFrame->GetWidth()))
+        {
+            nFlags |= PosSizeFlags::X;
+            nSysFlags |= SAL_FRAME_POSSIZE_X;
 
-        if (!nBorderWinWidth)
-            nBorderWinWidth = aSysGeometry.width();
+            const SalFrameGeometry aSysGeometry = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
+            const SalFrameGeometry aParentSysGeometry
+                = pWinParent->mpWindowImpl->mpFrame->GetUnmirroredGeometry();
 
-        if (!nBorderWinWidth)
-            nBorderWinWidth = nWidth;
+            tools::Long nBorderWinWidth = pBorderWindow->GetOutDev()->GetOutputWidthPixel();
 
-        nX = aParentSysGeometry.x() - aSysGeometry.leftDecoration() + aParentSysGeometry.width()
-             - nBorderWinWidth - 1 - aSysGeometry.x();
-    }
+            if (!nBorderWinWidth)
+                nBorderWinWidth = aSysGeometry.width();
 
-    if (nFlags & PosSizeFlags::Y)
-    {
-        if (pWinParent && (pBorderWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
+            if (!nBorderWinWidth)
+                nBorderWinWidth = nWidth;
+
+            nX = aParentSysGeometry.x() - aSysGeometry.leftDecoration() + aParentSysGeometry.width()
+                 - nBorderWinWidth - 1 - aSysGeometry.x();
+        }
+
+        if (nFlags & PosSizeFlags::Y && bIsSystemChild)
             nY += pWinParent->GetOutDev()->GetDeviceOriginY();
     }
 
