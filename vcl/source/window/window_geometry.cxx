@@ -60,6 +60,39 @@ static bool lcl_SetChildWindowPosSize(vcl::Window* pOriginalWindow, vcl::Window*
     return true;
 }
 
+static std::pair<tools::Long, tools::Long> lcl_CalcMissingDimensions(vcl::Window* pBorderWindow,
+                                                                     tools::Long nWidth,
+                                                                     tools::Long nHeight,
+                                                                     PosSizeFlags nFlags)
+{
+    if (!(nFlags & PosSizeFlags::Width))
+        nWidth = pBorderWindow->GetOutDev()->GetOutputWidthPixel();
+
+    if (!(nFlags & PosSizeFlags::Height))
+        nHeight = pBorderWindow->GetOutDev()->GetOutputHeightPixel();
+
+    return std::make_pair(nWidth, nHeight);
+}
+
+static sal_uInt16 lcl_ConvertPosSizeToSysFlags(PosSizeFlags nFlags)
+{
+    sal_uInt16 nSysFlags = 0;
+
+    if (nFlags & PosSizeFlags::X)
+        nSysFlags |= SAL_FRAME_POSSIZE_X;
+
+    if (nFlags & PosSizeFlags::Y)
+        nSysFlags |= SAL_FRAME_POSSIZE_Y;
+
+    if (nFlags & PosSizeFlags::Width)
+        nSysFlags |= SAL_FRAME_POSSIZE_WIDTH;
+
+    if (nFlags & PosSizeFlags::Height)
+        nSysFlags |= SAL_FRAME_POSSIZE_HEIGHT;
+
+    return nSysFlags;
+}
+
 void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
                              tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -80,27 +113,18 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
     // Note: if we're positioning a frame, the coordinates are interpreted
     // as being the top-left corner of the window's client area and NOT
     // as the position of the border ! (due to limitations of several UNIX window managers)
-    tools::Long nOldWidth = pBorderWindow->GetOutDev()->GetOutputWidthPixel();
+    const tools::Long nOldWidth = pBorderWindow->GetOutDev()->GetOutputWidthPixel();
 
-    if (!(nFlags & PosSizeFlags::Width))
-        nWidth = pBorderWindow->GetOutDev()->GetOutputWidthPixel();
+    std::tie(nWidth, nHeight)
+        = lcl_CalcMissingDimensions(pBorderWindow.get(), nWidth, nHeight, nFlags);
 
-    if (!(nFlags & PosSizeFlags::Height))
-        nHeight = pBorderWindow->GetOutDev()->GetOutputHeightPixel();
+    sal_uInt16 nSysFlags = lcl_ConvertPosSizeToSysFlags(nFlags);
 
-    sal_uInt16 nSysFlags = 0;
     VclPtr<vcl::Window> pParent = GetParent();
     VclPtr<vcl::Window> pWinParent = pBorderWindow->GetParent();
 
-    if (nFlags & PosSizeFlags::Width)
-        nSysFlags |= SAL_FRAME_POSSIZE_WIDTH;
-
-    if (nFlags & PosSizeFlags::Height)
-        nSysFlags |= SAL_FRAME_POSSIZE_HEIGHT;
-
     if (nFlags & PosSizeFlags::X)
     {
-        nSysFlags |= SAL_FRAME_POSSIZE_X;
         if (pWinParent && (pBorderWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
         {
             nX += pWinParent->GetOutDev()->GetDeviceOriginX();
@@ -143,7 +167,6 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
     }
     if (nFlags & PosSizeFlags::Y)
     {
-        nSysFlags |= SAL_FRAME_POSSIZE_Y;
         if (pWinParent && (pBorderWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
             nY += pWinParent->GetOutDev()->GetDeviceOriginY();
     }
