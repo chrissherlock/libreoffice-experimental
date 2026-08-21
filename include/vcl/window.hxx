@@ -1546,6 +1546,7 @@ private:
     SAL_DLLPRIVATE void         ImplDeregisterTopWindowChild();
     SAL_DLLPRIVATE void         ImplDisposeFrameData();
 
+    SAL_DLLPRIVATE Size ImplGetWindowSizeWithBorders() const;
     SAL_DLLPRIVATE WinBits      ImplApplyBorderAnd3DStyle(WinBits nStyle, const vcl::Window* pParent) const;
     SAL_DLLPRIVATE BorderWindowStyle ImplGetBorderWindowStyle(WinBits nStyle) const;
     SAL_DLLPRIVATE bool         ImplNeedsSystemChildBorder(WinBits nStyle) const;
