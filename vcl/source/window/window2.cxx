@@ -904,80 +904,9 @@ const OUString& Window::GetHelpId() const
 
 // --------- old inline methods ---------------
 
-vcl::Window* Window::ImplGetWindow() const
-{
-    if ( mpWindowImpl->mpClientWindow )
-        return mpWindowImpl->mpClientWindow;
-    else
-        return const_cast<vcl::Window*>(this);
-}
-
-ImplFrameData* Window::ImplGetFrameData()
-{
-    return mpWindowImpl ? mpWindowImpl->mpFrameData : nullptr;
-}
-
-SalFrame* Window::ImplGetFrame() const
-{
-    return mpWindowImpl ? mpWindowImpl->mpFrame : nullptr;
-}
-
-weld::Window* Window::GetFrameWeld() const
-{
-    SalFrame* pFrame = ImplGetFrame();
-    return pFrame ? pFrame->GetFrameWeld() : nullptr;
-}
-
-vcl::Window* Window::GetFrameWindow() const
-{
-    SalFrame* pFrame = ImplGetFrame();
-    return pFrame ? pFrame->GetWindow() : nullptr;
-}
-
-vcl::Window* Window::ImplGetParent() const
-{
-    return mpWindowImpl ? mpWindowImpl->mpHierarchy->mpParent.get() : nullptr;
-}
-
-vcl::Window* Window::ImplGetClientWindow() const
-{
-    return mpWindowImpl ? mpWindowImpl->mpClientWindow.get() : nullptr;
-}
-
 vcl::Window* Window::ImplGetBorderWindow() const
 {
     return mpWindowImpl ? mpWindowImpl->mpBorderWindow.get() : nullptr;
-}
-
-vcl::Window* Window::ImplGetFirstOverlapWindow()
-{
-    if (!mpWindowImpl)
-    {
-        return nullptr;
-    }
-
-    if ( mpWindowImpl->mbOverlapWin )
-        return this;
-    else
-        return mpWindowImpl->mpOverlapWindow;
-}
-
-const vcl::Window* Window::ImplGetFirstOverlapWindow() const
-{
-    if (!mpWindowImpl)
-    {
-        return nullptr;
-    }
-
-    if ( mpWindowImpl->mbOverlapWin )
-        return this;
-    else
-        return mpWindowImpl->mpOverlapWindow;
-}
-
-vcl::Window* Window::ImplGetFrameWindow() const
-{
-    return mpWindowImpl ? mpWindowImpl->mpFrameWindow.get() : nullptr;
 }
 
 bool Window::IsDockingWindow() const
@@ -985,36 +914,10 @@ bool Window::IsDockingWindow() const
     return mpWindowImpl && mpWindowImpl->mbDockWin;
 }
 
-bool Window::ImplIsFloatingWindow() const
-{
-    return mpWindowImpl && mpWindowImpl->mbFloatWin;
-}
-
-bool Window::ImplIsSplitter() const
-{
-    return mpWindowImpl && mpWindowImpl->mbSplitter;
-}
-
-bool Window::ImplIsPushButton() const
-{
-    return mpWindowImpl && mpWindowImpl->mbPushButton;
-}
-
-bool Window::ImplIsOverlapWindow() const
-{
-    return mpWindowImpl && mpWindowImpl->mbOverlapWin;
-}
-
 void Window::ImplSetMouseTransparent( bool bTransparent )
 {
     if (mpWindowImpl)
         mpWindowImpl->mbMouseTransparent = bTransparent;
-}
-
-void Window::SetCompoundControl( bool bCompound )
-{
-    if (mpWindowImpl)
-        mpWindowImpl->mbCompoundControl = bCompound;
 }
 
 WinBits Window::GetStyle() const
@@ -1030,20 +933,6 @@ WinBits Window::GetPrevStyle() const
 WindowExtendedStyle Window::GetExtendedStyle() const
 {
     return mpWindowImpl ? mpWindowImpl->mnExtendedStyle : WindowExtendedStyle::NONE;
-}
-
-void Window::SetType( WindowType eType )
-{
-    if (mpWindowImpl)
-        mpWindowImpl->meType = eType;
-}
-
-WindowType Window::GetType() const
-{
-    if (mpWindowImpl)
-        return mpWindowImpl->meType;
-    else
-        return WindowType::NONE;
 }
 
 bool Window::IsFormControl() const
@@ -1070,16 +959,6 @@ Dialog* Window::GetParentDialog() const
     }
 
     return const_cast<Dialog *>(dynamic_cast<const Dialog*>(pWindow));
-}
-
-bool Window::IsSystemWindow() const
-{
-    return mpWindowImpl && mpWindowImpl->mbSysWin;
-}
-
-bool Window::IsDialog() const
-{
-    return mpWindowImpl && mpWindowImpl->mbDialog;
 }
 
 bool Window::IsMenuFloatingWindow() const
@@ -1177,11 +1056,6 @@ bool Window::IsControlBackground() const
 bool Window::IsInPaint() const
 {
     return mpWindowImpl && mpWindowImpl->mbInPaint;
-}
-
-vcl::Window* Window::GetParent() const
-{
-    return mpWindowImpl ? mpWindowImpl->mpHierarchy->mpRealParent.get() : nullptr;
 }
 
 bool Window::IsVisible() const
