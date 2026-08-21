@@ -25,15 +25,6 @@
 
 namespace vcl
 {
-Size Window::GetOptimalSize() const { return Size(); }
-
-void Window::ImplAdjustNWFSizes()
-{
-    for (Window* pWin = GetWindow(GetWindowType::FirstChild); pWin;
-         pWin = pWin->GetWindow(GetWindowType::Next))
-        pWin->ImplAdjustNWFSizes();
-}
-
 const Font& Window::GetFont() const { return GetOutDev()->GetFont(); }
 void Window::SetFont(Font const& font) { return GetOutDev()->SetFont(font); }
 
@@ -64,18 +55,6 @@ bool Window::GetNativeControlRegion(ControlType nType, ControlPart nPart,
     return GetOutDev()->GetNativeControlRegion(nType, nPart, rControlRegion, nState, aValue,
                                                rNativeBoundingRegion, rNativeContentRegion);
 }
-
-Size Window::GetOutputSizePixel() const
-{
-    if (!mpWindowImpl)
-    {
-        return Size();
-    }
-
-    return GetOutDev()->GetOutputSizePixel();
-}
-
-tools::Rectangle Window::GetOutputRectPixel() const { return GetOutDev()->GetOutputRectPixel(); }
 
 void Window::SetTextLineColor() { GetOutDev()->SetTextLineColor(); }
 void Window::SetTextLineColor(const Color& rColor) { GetOutDev()->SetTextLineColor(rColor); }
