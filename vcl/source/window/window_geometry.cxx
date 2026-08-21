@@ -45,6 +45,21 @@ static VclPtr<vcl::Window> lcl_GetTopmostBorderWindow(vcl::Window* pStartWindow)
     return pWindow; // Implicitly converts back to VclPtr
 }
 
+static bool lcl_SetChildWindowPosSize(vcl::Window* pOriginalWindow, vcl::Window* pBorderWindow,
+                                      tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                      tools::Long nHeight, PosSizeFlags nFlags)
+{
+    if (pBorderWindow->ImplGetWindowImpl()->mbFrame)
+        return false;
+
+    pBorderWindow->ImplPosSizeWindow(nX, nY, nWidth, nHeight, nFlags);
+
+    if (pOriginalWindow->IsReallyVisible())
+        pOriginalWindow->ImplGenerateMouseMove();
+
+    return true;
+}
+
 void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
                              tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -59,15 +74,8 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
     // The top BorderWindow is the window which is to be positioned
     VclPtr<vcl::Window> pBorderWindow = lcl_GetTopmostBorderWindow(this);
 
-    if (!pBorderWindow->mpWindowImpl->mbFrame)
-    {
-        pBorderWindow->ImplPosSizeWindow(nX, nY, nWidth, nHeight, nFlags);
-
-        if (IsReallyVisible())
-            ImplGenerateMouseMove();
-
+    if (lcl_SetChildWindowPosSize(this, pBorderWindow.get(), nX, nY, nWidth, nHeight, nFlags))
         return;
-    }
 
     // Note: if we're positioning a frame, the coordinates are interpreted
     // as being the top-left corner of the window's client area and NOT
