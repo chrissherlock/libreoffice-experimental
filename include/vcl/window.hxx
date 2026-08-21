@@ -780,7 +780,7 @@ public:
                                                    sal_Int32& rRightBorder, sal_Int32& rBottomBorder ) const;
     Size                                CalcWindowSize( const Size& rOutSz ) const;
     SAL_DLLPRIVATE Size                 CalcOutputSize( const Size& rWinSz ) const;
-    tools::Long                                CalcTitleWidth() const;
+    tools::Long                         CalcTitleWidth() const;
 
     void                                EnableClipSiblings( bool bClipSiblings = true );
 
@@ -1546,7 +1546,6 @@ private:
     SAL_DLLPRIVATE void         ImplDeregisterTopWindowChild();
     SAL_DLLPRIVATE void         ImplDisposeFrameData();
 
-    SAL_DLLPRIVATE Size ImplGetWindowSizeWithBorders() const;
     SAL_DLLPRIVATE WinBits      ImplApplyBorderAnd3DStyle(WinBits nStyle, const vcl::Window* pParent) const;
     SAL_DLLPRIVATE BorderWindowStyle ImplGetBorderWindowStyle(WinBits nStyle) const;
     SAL_DLLPRIVATE bool         ImplNeedsSystemChildBorder(WinBits nStyle) const;
