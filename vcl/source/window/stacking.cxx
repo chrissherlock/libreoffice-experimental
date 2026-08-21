@@ -842,6 +842,11 @@ static SystemWindow *ImplGetLastSystemWindow( vcl::Window *pWin )
     return pSysWin;
 }
 
+vcl::Window* Window::GetParent() const
+{
+    return mpWindowImpl ? mpWindowImpl->mpHierarchy->mpRealParent.get() : nullptr;
+}
+
 void Window::SetParent( vcl::Window* pNewParent )
 {
     SAL_WARN_IF( !pNewParent, "vcl", "Window::SetParent(): pParent == NULL" );
@@ -1161,6 +1166,38 @@ void Window::ImplSetFrameParent( const vcl::Window* pParent )
         }
         pFrameWindow = pFrameWindow->mpWindowImpl->mpFrameData->mpNextFrame;
     }
+}
+
+vcl::Window* Window::ImplGetParent() const
+{
+    return mpWindowImpl ? mpWindowImpl->mpHierarchy->mpParent.get() : nullptr;
+}
+
+bool Window::ImplIsOverlapWindow() const
+{
+    return mpWindowImpl && mpWindowImpl->mbOverlapWin;
+}
+
+vcl::Window* Window::ImplGetFirstOverlapWindow()
+{
+    if (!mpWindowImpl)
+        return nullptr;
+
+    if ( mpWindowImpl->mbOverlapWin )
+        return this;
+    else
+        return mpWindowImpl->mpOverlapWindow;
+}
+
+const vcl::Window* Window::ImplGetFirstOverlapWindow() const
+{
+    if (!mpWindowImpl)
+        return nullptr;
+
+    if ( mpWindowImpl->mbOverlapWin )
+        return this;
+    else
+        return mpWindowImpl->mpOverlapWindow;
 }
 
 } /* namespace vcl */
