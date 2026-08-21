@@ -93,6 +93,33 @@ static sal_uInt16 lcl_ConvertPosSizeToSysFlags(PosSizeFlags nFlags)
     return nSysFlags;
 }
 
+static tools::Long lcl_CalculatePositionX(vcl::Window* pWindow, vcl::Window* pBorderWindow,
+                                          tools::Long nX, tools::Long nY, tools::Long nWidth,
+                                          tools::Long nHeight, PosSizeFlags nFlags)
+{
+    if (!(nFlags & PosSizeFlags::X))
+        return nX;
+
+    VclPtr<vcl::Window> pParent = pWindow->GetParent();
+    VclPtr<vcl::Window> pWinParent = pBorderWindow->GetParent();
+
+    if (pWinParent && (pBorderWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
+    {
+        nX += pWinParent->GetOutDev()->GetDeviceOriginX();
+    }
+
+    if (pParent && pParent->GetOutDev()->ImplIsAntiparallel())
+    {
+        tools::Rectangle aRect(Point(nX, nY), Size(nWidth, nHeight));
+        const OutputDevice* pParentOutDev = pParent->GetOutDev();
+        if (!comphelper::LibreOfficeKit::isActive())
+            pParentOutDev->ReMirror(aRect);
+        nX = aRect.Left();
+    }
+
+    return nX;
+}
+
 void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
                              tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -123,21 +150,10 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
     VclPtr<vcl::Window> pParent = GetParent();
     VclPtr<vcl::Window> pWinParent = pBorderWindow->GetParent();
 
-    if (nFlags & PosSizeFlags::X)
-    {
-        if (pWinParent && (pBorderWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
-        {
-            nX += pWinParent->GetOutDev()->GetDeviceOriginX();
-        }
-        if (pParent && pParent->GetOutDev()->ImplIsAntiparallel())
-        {
-            tools::Rectangle aRect(Point(nX, nY), Size(nWidth, nHeight));
-            const OutputDevice* pParentOutDev = pParent->GetOutDev();
-            if (!comphelper::LibreOfficeKit::isActive())
-                pParentOutDev->ReMirror(aRect);
-            nX = aRect.Left();
-        }
-    }
+    nX = lcl_CalculatePositionX(this, pBorderWindow.get(), nX, nY, nWidth, nHeight, nFlags);
+
+    if (pWinParent && (pBorderWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
+        nX += pWinParent->GetOutDev()->GetDeviceOriginX();
 
     if (!comphelper::LibreOfficeKit::isActive() && !(nFlags & PosSizeFlags::X) && bHasValidSize
         && pBorderWindow->mpWindowImpl->mpFrame->GetWidth())
@@ -165,6 +181,7 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
             }
         }
     }
+
     if (nFlags & PosSizeFlags::Y)
     {
         if (pWinParent && (pBorderWindow->GetStyle() & WB_SYSTEMCHILDWINDOW))
