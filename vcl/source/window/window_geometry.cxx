@@ -1237,6 +1237,18 @@ void Window::ImplInvalidateWindowContent(bool bNewPos, bool bCopyBits,
         ImplInvalidateGrownWindow(rInitialRegion);
 }
 
+void Window::ImplInvalidateParentOrOverlaps(const vcl::Region& rInitialRegion)
+{
+    vcl::Region aRegion(rInitialRegion);
+    if (!mpWindowImpl->mbPaintTransparent)
+        vcl::clipping::excludeWindowRegion(*this, aRegion);
+
+    vcl::clipping::clipBoundaries(*this, aRegion, false, true);
+
+    if (!aRegion.IsEmpty() && !mpWindowImpl->mpBorderWindow)
+        ImplInvalidateParentFrameRegion(aRegion);
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -1318,19 +1330,13 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
         ImplInvalidateWindowContent(bNewPos, bCopyBits, aInitialWinRect, pOverlapRegion,
                                     *pInitialRegion);
 
-        // invalidate Parent or Overlaps
-        if (bNewPos || (GetOutDev()->GetOutputWidthPixel() < nInitialOutWidth)
-            || (GetOutDev()->GetOutputHeightPixel() < nInitialOutHeight))
-        {
-            vcl::Region aRegion(*pInitialRegion);
-            if (!mpWindowImpl->mbPaintTransparent)
-                vcl::clipping::excludeWindowRegion(*this, aRegion);
+        auto HasOutputShrunk = [](const OutputDevice* pOutDev, const Size& rInitialSize) {
+            return pOutDev->GetOutputWidthPixel() < rInitialSize.Width()
+                   || pOutDev->GetOutputHeightPixel() < rInitialSize.Height();
+        };
 
-            vcl::clipping::clipBoundaries(*this, aRegion, false, true);
-
-            if (!aRegion.IsEmpty() && !mpWindowImpl->mpBorderWindow)
-                ImplInvalidateParentFrameRegion(aRegion);
-        }
+        if (bNewPos || HasOutputShrunk(GetOutDev(), Size(nInitialOutWidth, nInitialOutHeight)))
+            ImplInvalidateParentOrOverlaps(*pInitialRegion);
     }
 
     // adapt system objects

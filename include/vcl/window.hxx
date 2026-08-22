@@ -1582,6 +1582,7 @@ private:
     SAL_DLLPRIVATE void ImplInvalidateGrownWindow(const vcl::Region& rInitialRegion);
     SAL_DLLPRIVATE void ImplInvalidateWindowContent(bool bNewPos, bool bCopyBits, const tools::Rectangle& rInitialWinRect,
                                                     std::unique_ptr<vcl::Region>& rpOverlapRegion, const vcl::Region& rInitialRegion);
+    SAL_DLLPRIVATE void ImplInvalidateParentOrOverlaps(const vcl::Region& rInitialRegion);
 };
 }
 
