@@ -1587,6 +1587,8 @@ private:
                                                      const tools::Rectangle& rInitialWinRect,
                                                      std::unique_ptr<vcl::Region>& rpOverlapRegion,
                                                      const vcl::Region& rInitialRegion);
+
+    SAL_DLLPRIVATE bool ImplHasAntiparallelParent() const;
 };
 }
 
