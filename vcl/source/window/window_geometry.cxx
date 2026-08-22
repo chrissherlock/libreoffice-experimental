@@ -1217,9 +1217,13 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
             bUpdateSysObjClip = !vcl::clipping::setClipFlag(*this, true);
         }
 
+        auto bHasOutputGrown = [](const OutputDevice* pOutDev, const Size& rInitialSize) {
+            return pOutDev->GetOutputWidthPixel() > rInitialSize.Width()
+                   || pOutDev->GetOutputHeightPixel() > rInitialSize.Height();
+        };
+
         // invalidate window content ?
-        if (bNewPos || (GetOutDev()->GetOutputWidthPixel() > nInitialOutWidth)
-            || (GetOutDev()->GetOutputHeightPixel() > nInitialOutHeight))
+        if (bNewPos || bHasOutputGrown)
         {
             if (bNewPos)
             {
