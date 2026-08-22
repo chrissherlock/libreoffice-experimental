@@ -1015,6 +1015,24 @@ void Window::ImplAdjustPosForRTL(tools::Long& rX, tools::Long& rOrgX, Point& rPt
     }
 }
 
+bool Window::ImplUpdatePos(PosSizeFlags nFlags, tools::Long nX, tools::Long nY,
+                           bool bXAlreadyMirrored, bool bCopyBits,
+                           std::unique_ptr<vcl::Region>& rpOverlapRegion)
+{
+    bool bNewPos = false;
+
+    if ((nFlags & PosSizeFlags::X)
+        && ImplUpdatePosX(nX, bXAlreadyMirrored, bCopyBits, rpOverlapRegion))
+    {
+        bNewPos = true;
+    }
+
+    if ((nFlags & PosSizeFlags::Y) && ImplUpdatePosY(nY, bCopyBits, rpOverlapRegion))
+        bNewPos = true;
+
+    return bNewPos;
+}
+
 bool Window::ImplUpdatePosX(tools::Long nX, bool bXAlreadyMirrored, bool bCopyBits,
                             std::unique_ptr<vcl::Region>& rpOverlapRegion)
 {
@@ -1134,18 +1152,8 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     if (bNewSize)
         bCopyBits = false;
 
-    bool bNewPos = false;
-
     std::unique_ptr<vcl::Region> pOverlapRegion;
-
-    if ((nFlags & PosSizeFlags::X)
-        && ImplUpdatePosX(nX, bXAlreadyMirrored, bCopyBits, pOverlapRegion))
-    {
-        bNewPos = true;
-    }
-
-    if ((nFlags & PosSizeFlags::Y) && ImplUpdatePosY(nY, bCopyBits, pOverlapRegion))
-        bNewPos = true;
+    bool bNewPos = ImplUpdatePos(nFlags, nX, nY, bXAlreadyMirrored, bCopyBits, pOverlapRegion);
 
     if (!(bNewPos || bNewSize))
         return;

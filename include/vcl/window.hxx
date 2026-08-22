@@ -1569,6 +1569,7 @@ private:
     SAL_DLLPRIVATE bool ImplUpdateOutputSize(PosSizeFlags nFlags, tools::Long nWidth, tools::Long nHeight);
     SAL_DLLPRIVATE Size ImplGetClientAvailableSize() const;
     SAL_DLLPRIVATE void ImplAdjustPosForRTL(tools::Long& rX, tools::Long& rOrgX, Point& rPtDev, bool bXAlreadyMirrored);
+    SAL_DLLPRIVATE bool ImplUpdatePos(PosSizeFlags nFlags, tools::Long nX, tools::Long nY, bool bXAlreadyMirrored, bool bCopyBits, std::unique_ptr<vcl::Region>& rpOverlapRegion);
     SAL_DLLPRIVATE bool ImplUpdatePosX(tools::Long nX, bool bXAlreadyMirrored, bool bCopyBits, std::unique_ptr<vcl::Region>& rpOverlapRegion);
     SAL_DLLPRIVATE bool ImplUpdatePosY(tools::Long nY, bool bCopyBits, std::unique_ptr<vcl::Region>& rpOverlapRegion);
     SAL_DLLPRIVATE void ImplUpdateClientWindow(bool bNewPos);
