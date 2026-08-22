@@ -1062,6 +1062,32 @@ bool Window::ImplUpdatePosY(tools::Long nY, bool bCopyBits,
     return true;
 }
 
+void Window::ImplUpdateClientWindow(bool bNewPos)
+{
+    if (!mpWindowImpl->mpClientWindow)
+        return;
+
+    const Point aClientOrigin(mpWindowImpl->mpClientWindow->mpWindowImpl->mnLeftBorder,
+                              mpWindowImpl->mpClientWindow->mpWindowImpl->mnTopBorder);
+    const Size aClientSize = ImplGetClientAvailableSize();
+
+    mpWindowImpl->mpClientWindow->ImplPosSizeWindow(
+        aClientOrigin.X(), aClientOrigin.Y(), aClientSize.Width(), aClientSize.Height(),
+        PosSizeFlags::X | PosSizeFlags::Y | PosSizeFlags::Width | PosSizeFlags::Height);
+
+    // If we have a client window, then this is the position
+    // of the Application's floating windows
+    mpWindowImpl->mpClientWindow->mpWindowImpl->maPos = mpWindowImpl->maPos;
+
+    if (!bNewPos)
+        return;
+
+    if (mpWindowImpl->mpClientWindow->IsVisible())
+        mpWindowImpl->mpClientWindow->ImplCallMove();
+    else
+        mpWindowImpl->mpClientWindow->mpWindowImpl->mbCallMove = true;
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -1132,27 +1158,7 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     if (mpWindowImpl->mpBorderWindow)
         mpWindowImpl->maPos = mpWindowImpl->mpBorderWindow->mpWindowImpl->maPos;
 
-    if (mpWindowImpl->mpClientWindow)
-    {
-        Size aClientSize = ImplGetClientAvailableSize();
-
-        mpWindowImpl->mpClientWindow->ImplPosSizeWindow(
-            mpWindowImpl->mpClientWindow->mpWindowImpl->mnLeftBorder,
-            mpWindowImpl->mpClientWindow->mpWindowImpl->mnTopBorder, aClientSize.Width(),
-            aClientSize.Height(),
-            PosSizeFlags::X | PosSizeFlags::Y | PosSizeFlags::Width | PosSizeFlags::Height);
-
-        // If we have a client window, then this is the position
-        // of the Application's floating windows
-        mpWindowImpl->mpClientWindow->mpWindowImpl->maPos = mpWindowImpl->maPos;
-        if (bNewPos)
-        {
-            if (mpWindowImpl->mpClientWindow->IsVisible())
-                mpWindowImpl->mpClientWindow->ImplCallMove();
-            else
-                mpWindowImpl->mpClientWindow->mpWindowImpl->mbCallMove = true;
-        }
-    }
+    ImplUpdateClientWindow(bNewPos);
 
     // Move()/Resize() will be called only for Show(), such that
     // at least one is called before Show()
