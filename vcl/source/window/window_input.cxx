@@ -240,11 +240,14 @@ void Window::SetCompositionCharRect(const tools::Rectangle* pRect, tools::Long n
     pWinData->mbVertical = bVertical;
     pWinData->mnCompositionCharRects = nCompositionLength;
 
-    if (pRect && (nCompositionLength > 0))
+    if (!pRect || (nCompositionLength <= 0))
+        return;
+
+    pWinData->mpCompositionCharRects.reset(new tools::Rectangle[nCompositionLength]);
+
+    for (tools::Long i = 0; i < nCompositionLength; ++i)
     {
-        pWinData->mpCompositionCharRects.reset(new tools::Rectangle[nCompositionLength]);
-        for (tools::Long i = 0; i < nCompositionLength; ++i)
-            pWinData->mpCompositionCharRects[i] = pRect[i];
+        pWinData->mpCompositionCharRects[i] = pRect[i];
     }
 }
 
