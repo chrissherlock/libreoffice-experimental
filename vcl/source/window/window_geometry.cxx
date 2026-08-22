@@ -998,13 +998,13 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
                 GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
     }
 
-    bool bnXRecycled = false; // avoid duplicate mirroring in RTL case
+    bool bXAlreadyMirrored = false;
 
     if ((nFlags & PosSizeFlags::Width) && !(nFlags & PosSizeFlags::X))
     {
         nX = mpWindowImpl->mnX;
         nFlags |= PosSizeFlags::X;
-        bnXRecycled = true; // we're using a mnX which was already mirrored in RTL case
+        bXAlreadyMirrored = true;
     }
 
     bool bCopyBits = false;
@@ -1029,7 +1029,7 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
             // #106948# always mirror our pos if our parent is not mirroring, even
             // if we are also not mirroring
             // RTL: check if parent is in different coordinates
-            if (!bnXRecycled && mpWindowImpl->mpHierarchy->mpParent
+            if (!bXAlreadyMirrored && mpWindowImpl->mpHierarchy->mpParent
                 && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame
                 && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel())
             {
@@ -1039,7 +1039,7 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
             /* #i99166# An LTR window in RTL UI that gets sized only would be
                expected to not moved its upper left point
             */
-            if (bnXRecycled)
+            if (bXAlreadyMirrored)
             {
                 if (GetOutDev()->ImplIsAntiparallel())
                 {
@@ -1048,7 +1048,7 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
                 }
             }
         }
-        else if (!bnXRecycled && mpWindowImpl->mpHierarchy->mpParent
+        else if (!bXAlreadyMirrored && mpWindowImpl->mpHierarchy->mpParent
                  && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame
                  && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel())
         {
