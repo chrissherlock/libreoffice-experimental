@@ -1182,6 +1182,41 @@ void Window::ImplDeferMoveResize(bool bNewPos, bool bNewSize)
         mpWindowImpl->mbCallResize = true;
 }
 
+void Window::ImplInvalidateMovedWindow(bool bCopyBits, const tools::Rectangle& rInitialWinRect,
+                                       std::unique_ptr<vcl::Region>& rpOverlapRegion)
+{
+    bool bInvalidate = false;
+    bool bParentPaint = true;
+
+    if (!ImplIsOverlapWindow())
+        bParentPaint = mpWindowImpl->mpHierarchy->mpParent->IsPaintEnabled();
+
+    if (bCopyBits && bParentPaint && !HasPaintEvent())
+        bInvalidate = ImplCopyBitsRegion(rpOverlapRegion, rInitialWinRect);
+    else
+        bInvalidate = true;
+
+    if (bInvalidate)
+        ImplInvalidateFrameRegion(nullptr, InvalidateFlags::Children);
+}
+
+void Window::ImplInvalidateGrownWindow(const vcl::Region& rInitialRegion)
+{
+    vcl::Region aRegion(GetOutputRectPixel());
+    aRegion.Exclude(rInitialRegion);
+
+    if (mpWindowImpl->mpClippingState->mbWinRegion)
+    {
+        aRegion.Intersect(
+            GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
+    }
+
+    vcl::clipping::clipBoundaries(*this, aRegion, false, true);
+
+    if (!aRegion.IsEmpty())
+        ImplInvalidateFrameRegion(&aRegion, InvalidateFlags::Children);
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -1268,33 +1303,14 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
         // invalidate window content ?
         if (bNewPos)
         {
-            bool bInvalidate = false;
-            bool bParentPaint = true;
-
-            if (!ImplIsOverlapWindow())
-                bParentPaint = mpWindowImpl->mpHierarchy->mpParent->IsPaintEnabled();
-
             const tools::Rectangle aInitialWinRect(Point(nInitialOutOffX, nInitialOutOffY),
                                                    Size(nInitialOutWidth, nInitialOutHeight));
 
-            if (bCopyBits && bParentPaint && !HasPaintEvent())
-                bInvalidate = ImplCopyBitsRegion(pOverlapRegion, aInitialWinRect);
-            else
-                bInvalidate = true;
-
-            if (bInvalidate)
-                ImplInvalidateFrameRegion(nullptr, InvalidateFlags::Children);
+            ImplInvalidateMovedWindow(bCopyBits, aInitialWinRect, pOverlapRegion);
         }
         else if (HasOutputGrown(GetOutDev(), Size(nInitialOutWidth, nInitialOutHeight)))
         {
-            vcl::Region aRegion(GetOutputRectPixel());
-            aRegion.Exclude(*pInitialRegion);
-            if (mpWindowImpl->mpClippingState->mbWinRegion)
-                aRegion.Intersect(GetOutDev()->GetMapper().ViewToDevice(
-                    mpWindowImpl->mpClippingState->maWinRegion));
-            vcl::clipping::clipBoundaries(*this, aRegion, false, true);
-            if (!aRegion.IsEmpty())
-                ImplInvalidateFrameRegion(&aRegion, InvalidateFlags::Children);
+            ImplInvalidateGrownWindow(*pInitialRegion);
         }
 
         // invalidate Parent or Overlaps
