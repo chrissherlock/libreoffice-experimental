@@ -211,18 +211,10 @@ void Window::SetCursorRect(const tools::Rectangle* pRect, tools::Long nExtTextIn
 {
     ImplWinData* pWinData = ImplGetWinData();
 
-    if (pWinData->mpCursorRect)
-    {
-        if (pRect)
-            pWinData->mpCursorRect = *pRect;
-        else
-            pWinData->mpCursorRect.reset();
-    }
+    if (pRect)
+        pWinData->mpCursorRect = *pRect;
     else
-    {
-        if (pRect)
-            pWinData->mpCursorRect = *pRect;
-    }
+        pWinData->mpCursorRect.reset();
 
     pWinData->mnCursorExtWidth = nExtTextInputWidth;
 }
