@@ -1284,26 +1284,20 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     if ((nFlags & PosSizeFlags::Height) && nHeight < 0)
         nHeight = 0;
 
-    const tools::Long nInitialOutOffX = GetOutDev()->GetDeviceOriginX();
-    const tools::Long nInitialOutOffY = GetOutDev()->GetDeviceOriginY();
-    const tools::Long nInitialOutWidth = GetOutDev()->GetOutputWidthPixel();
-    const tools::Long nInitialOutHeight = GetOutDev()->GetOutputHeightPixel();
+    const tools::Rectangle aInitialWinRect(
+        Point(GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY()),
+        Size(GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel()));
 
     std::unique_ptr<vcl::Region> pInitialRegion;
-
     if (IsReallyVisible())
     {
-        tools::Rectangle aInitialWinRect(Point(nInitialOutOffX, nInitialOutOffY),
-                                         Size(nInitialOutWidth, nInitialOutHeight));
         pInitialRegion.reset(new vcl::Region(aInitialWinRect));
-
         if (mpWindowImpl->mpClippingState->mbWinRegion)
             pInitialRegion->Intersect(
                 GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
     }
 
     bool bXAlreadyMirrored = false;
-
     if ((nFlags & PosSizeFlags::Width) && !(nFlags & PosSizeFlags::X))
     {
         nX = mpWindowImpl->mnX;
@@ -1311,25 +1305,17 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
         bXAlreadyMirrored = true;
     }
 
-    bool bCopyBits = false;
-
-    if (IsReallyVisible() && ImplShouldPaintImmediately())
-        bCopyBits = true;
-
-    bool bNewSize = ImplUpdateOutputSize(nFlags, nWidth, nHeight);
-
-    if (bNewSize)
-        bCopyBits = false;
+    const bool bNewSize = ImplUpdateOutputSize(nFlags, nWidth, nHeight);
+    const bool bCopyBits = !bNewSize && IsReallyVisible() && ImplShouldPaintImmediately();
 
     std::unique_ptr<vcl::Region> pOverlapRegion;
-    bool bNewPos = ImplUpdatePos(nFlags, nX, nY, bXAlreadyMirrored, bCopyBits, pOverlapRegion);
+    const bool bNewPos
+        = ImplUpdatePos(nFlags, nX, nY, bXAlreadyMirrored, bCopyBits, pOverlapRegion);
 
     if (!(bNewPos || bNewSize))
         return;
 
-    bool bNeedsNativePosUpdate = false;
-    if (bNewPos)
-        bNeedsNativePosUpdate = ImplUpdatePos();
+    const bool bNeedsNativePosUpdate = bNewPos && ImplUpdatePos();
 
     // the borderwindow always specifies the position for its client window
     if (mpWindowImpl->mpBorderWindow)
@@ -1344,13 +1330,15 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     else
         ImplDeferMoveResize(bNewPos, bNewSize);
 
-    const tools::Rectangle aInitialWinRect(Point(nInitialOutOffX, nInitialOutOffY),
-                                           Size(nInitialOutWidth, nInitialOutHeight));
+    // Fix potential null pointer dereference on pInitialRegion
+    bool bNeedsNativeClipUpdate = false;
+    if (pInitialRegion)
+    {
+        bNeedsNativeClipUpdate = ImplInvalidateVisibleRegions(
+            bNewPos, bNewSize, bCopyBits, aInitialWinRect, pOverlapRegion, *pInitialRegion);
+    }
 
-    bool bNeedsNativeClipUpdate = ImplInvalidateVisibleRegions(
-        bNewPos, bNewSize, bCopyBits, aInitialWinRect, pOverlapRegion, *pInitialRegion);
-
-    // adapt system objects
+    // Adapt system objects
     if (bNeedsNativeClipUpdate)
         vcl::clipping::updateNativeObjectClip(*this);
 
@@ -1358,9 +1346,11 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
         ImplUpdateNativeObjectPos();
 
     if (bNewSize && mpWindowImpl->mpSysObj)
+    {
         mpWindowImpl->mpSysObj->SetPosSize(
             GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY(),
             GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel());
+    }
 }
 
 bool Window::ImplUpdatePos()
