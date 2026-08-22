@@ -987,6 +987,13 @@ Size Window::ImplGetClientAvailableSize() const
     return Size(nWidth, nHeight);
 }
 
+bool Window::ImplHasAntiparallelParent() const
+{
+    return mpWindowImpl->mpHierarchy->mpParent
+           && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame
+           && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel();
+}
+
 void Window::ImplAdjustPosForRTL(tools::Long& rX, tools::Long& rOrgX, Point& rPtDev,
                                  bool bXAlreadyMirrored)
 {
@@ -1003,10 +1010,7 @@ void Window::ImplAdjustPosForRTL(tools::Long& rX, tools::Long& rOrgX, Point& rPt
         }
     }
 
-    bool bParentIsAntiparallel
-        = !bXAlreadyMirrored && mpWindowImpl->mpHierarchy->mpParent
-          && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame
-          && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel();
+    const bool bParentIsAntiparallel = !bXAlreadyMirrored && ImplHasAntiparallelParent();
 
     if (bParentIsAntiparallel)
     {
@@ -1404,22 +1408,19 @@ tools::Long Window::ImplGetUnmirroredOutOffX() const
     // revert GetDeviceOriginX() changes that were potentially made in ImplPosSizeWindow
     tools::Long offx = GetOutDev()->GetDeviceOriginX();
     const OutputDevice* pOutDev = GetOutDev();
-    if (pOutDev->HasMirroredGraphics())
-    {
-        if (mpWindowImpl->mpHierarchy->mpParent
-            && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame
-            && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel())
-        {
-            if (!ImplIsOverlapWindow())
-                offx -= mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDeviceOriginX();
 
-            offx = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel()
-                   - GetOutDev()->GetOutputWidthPixel() - offx;
+    if (!pOutDev->HasMirroredGraphics() || !ImplHasAntiparallelParent())
+        return offx;
 
-            if (!ImplIsOverlapWindow())
-                offx += mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDeviceOriginX();
-        }
-    }
+    if (!ImplIsOverlapWindow())
+        offx -= mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDeviceOriginX();
+
+    offx = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel()
+           - GetOutDev()->GetOutputWidthPixel() - offx;
+
+    if (!ImplIsOverlapWindow())
+        offx += mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDeviceOriginX();
+
     return offx;
 }
 
