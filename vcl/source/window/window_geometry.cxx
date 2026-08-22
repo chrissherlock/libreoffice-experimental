@@ -1127,6 +1127,43 @@ bool Window::ImplCopyArea(vcl::Region& rRegion, const tools::Rectangle& rInitial
     return false;
 }
 
+bool Window::ImplCopyBitsRegion(std::unique_ptr<vcl::Region>& rpOverlapRegion,
+                                const tools::Rectangle& rInitialWinRect)
+{
+    vcl::Region aRegion(GetOutputRectPixel());
+
+    if (mpWindowImpl->mpClippingState->mbWinRegion)
+        aRegion.Intersect(
+            GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
+
+    vcl::clipping::clipBoundaries(*this, aRegion, false, true);
+
+    if (!rpOverlapRegion->IsEmpty())
+    {
+        rpOverlapRegion->Move(GetOutDev()->GetDeviceOriginX() - rInitialWinRect.Left(),
+                              GetOutDev()->GetDeviceOriginY() - rInitialWinRect.Top());
+        aRegion.Exclude(*rpOverlapRegion);
+    }
+
+    if (aRegion.IsEmpty())
+        return true; // bInvalidate = true
+
+    // adapt Paint areas
+    ImplMoveAllInvalidateRegions(rInitialWinRect,
+                                 GetOutDev()->GetDeviceOriginX() - rInitialWinRect.Left(),
+                                 GetOutDev()->GetDeviceOriginY() - rInitialWinRect.Top(), true);
+
+    bool bInvalidate = ImplCopyArea(aRegion, rInitialWinRect);
+
+    if (!bInvalidate)
+    {
+        if (!rpOverlapRegion->IsEmpty())
+            ImplInvalidateFrameRegion(rpOverlapRegion.get(), InvalidateFlags::Children);
+    }
+
+    return bInvalidate;
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -1217,7 +1254,7 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
             bUpdateSysObjClip = !vcl::clipping::setClipFlag(*this, true);
         }
 
-        auto bHasOutputGrown = [](const OutputDevice* pOutDev, const Size& rInitialSize) {
+        auto HasOutputGrown = [](const OutputDevice* pOutDev, const Size& rInitialSize) {
             return pOutDev->GetOutputWidthPixel() > rInitialSize.Width()
                    || pOutDev->GetOutputHeightPixel() > rInitialSize.Height();
         };
@@ -1227,59 +1264,22 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
         {
             bool bInvalidate = false;
             bool bParentPaint = true;
+
             if (!ImplIsOverlapWindow())
                 bParentPaint = mpWindowImpl->mpHierarchy->mpParent->IsPaintEnabled();
+
+            const tools::Rectangle aInitialWinRect(Point(nInitialOutOffX, nInitialOutOffY),
+                                                   Size(nInitialOutWidth, nInitialOutHeight));
+
             if (bCopyBits && bParentPaint && !HasPaintEvent())
-            {
-                vcl::Region aRegion(GetOutputRectPixel());
-
-                if (mpWindowImpl->mpClippingState->mbWinRegion)
-                    aRegion.Intersect(GetOutDev()->GetMapper().ViewToDevice(
-                        mpWindowImpl->mpClippingState->maWinRegion));
-
-                vcl::clipping::clipBoundaries(*this, aRegion, false, true);
-
-                if (!pOverlapRegion->IsEmpty())
-                {
-                    pOverlapRegion->Move(GetOutDev()->GetDeviceOriginX() - nInitialOutOffX,
-                                         GetOutDev()->GetDeviceOriginY() - nInitialOutOffY);
-                    aRegion.Exclude(*pOverlapRegion);
-                }
-
-                if (!aRegion.IsEmpty())
-                {
-                    const tools::Rectangle aInitialWinRect(
-                        Point(nInitialOutOffX, nInitialOutOffY),
-                        Size(nInitialOutWidth, nInitialOutHeight));
-
-                    // adapt Paint areas
-                    ImplMoveAllInvalidateRegions(
-                        aInitialWinRect, GetOutDev()->GetDeviceOriginX() - nInitialOutOffX,
-                        GetOutDev()->GetDeviceOriginY() - nInitialOutOffY, true);
-
-                    bInvalidate = ImplCopyArea(aRegion, aInitialWinRect);
-
-                    if (!bInvalidate)
-                    {
-                        if (!pOverlapRegion->IsEmpty())
-                            ImplInvalidateFrameRegion(pOverlapRegion.get(),
-                                                      InvalidateFlags::Children);
-                    }
-                }
-                else
-                {
-                    bInvalidate = true;
-                }
-            }
+                bInvalidate = ImplCopyBitsRegion(pOverlapRegion, aInitialWinRect);
             else
-            {
                 bInvalidate = true;
-            }
 
             if (bInvalidate)
                 ImplInvalidateFrameRegion(nullptr, InvalidateFlags::Children);
         }
-        else if (bHasOutputGrown)
+        else if (HasOutputGrown(GetOutDev(), Size(nInitialOutWidth, nInitialOutHeight)))
         {
             vcl::Region aRegion(GetOutputRectPixel());
             aRegion.Exclude(*pInitialRegion);
