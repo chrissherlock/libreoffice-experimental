@@ -1041,23 +1041,26 @@ bool Window::ImplUpdatePosX(tools::Long nX, bool bXAlreadyMirrored, bool bCopyBi
 
     ImplAdjustPosForRTL(nX, nOrgX, aPtDev, bXAlreadyMirrored);
 
-    if (mpWindowImpl->mnAbsScreenX != aPtDev.X() || nX != mpWindowImpl->mnX
-        || nOrgX != mpWindowImpl->maPos.X())
-    {
-        if (bCopyBits && !rpOverlapRegion)
-        {
-            rpOverlapRegion.reset(new vcl::Region());
-            vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *rpOverlapRegion, false,
-                                             true);
-        }
+    const bool bPositionUnchanged = [&]() {
+        return mpWindowImpl->mnAbsScreenX == aPtDev.X() && nX == mpWindowImpl->mnX
+               && nOrgX == mpWindowImpl->maPos.X();
+    }();
 
-        mpWindowImpl->mnX = nX;
-        mpWindowImpl->maPos.setX(nOrgX);
-        mpWindowImpl->mnAbsScreenX = aPtDev.X();
-        return true;
+    if (bPositionUnchanged)
+        return false;
+
+    if (bCopyBits && !rpOverlapRegion)
+    {
+        rpOverlapRegion.reset(new vcl::Region());
+        vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *rpOverlapRegion, false,
+                                         true);
     }
 
-    return false;
+    mpWindowImpl->mnX = nX;
+    mpWindowImpl->maPos.setX(nOrgX);
+    mpWindowImpl->mnAbsScreenX = aPtDev.X();
+
+    return true;
 }
 
 bool Window::ImplUpdatePosY(tools::Long nY, bool bCopyBits,
