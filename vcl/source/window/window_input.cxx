@@ -34,34 +34,18 @@
 #include <com/sun/star/accessibility/XAccessibleContext.hpp>
 #include <com/sun/star/accessibility/AccessibleStateType.hpp>
 
+// Forward declaration required due to mutual recursion
 static css::uno::Reference<css::accessibility::XAccessibleEditableText> lcl_FindFocusedEditableText(
-    css::uno::Reference<css::accessibility::XAccessibleContext> const& xContext)
+    css::uno::Reference<css::accessibility::XAccessibleContext> const& xContext);
+
+static css::uno::Reference<css::accessibility::XAccessibleEditableText>
+lcl_SearchChildrenForEditableText(
+    const css::uno::Reference<css::accessibility::XAccessibleContext>& xContext, sal_Int64 nCount)
 {
-    if (!xContext.is())
-        return css::uno::Reference<css::accessibility::XAccessibleEditableText>();
-
-    sal_Int64 nState = xContext->getAccessibleStateSet();
-
-    if (nState & css::accessibility::AccessibleStateType::FOCUSED)
-    {
-        css::uno::Reference<css::accessibility::XAccessibleEditableText> xText(xContext,
-                                                                               css::uno::UNO_QUERY);
-        if (xText.is())
-            return xText;
-
-        if (nState & css::accessibility::AccessibleStateType::MANAGES_DESCENDANTS)
-            return css::uno::Reference<css::accessibility::XAccessibleEditableText>();
-    }
-
-    const sal_Int64 nCount = xContext->getAccessibleChildCount();
-
-    if (nCount < 0 || nCount > SAL_MAX_UINT16 /* slow enough for anyone */)
-        return css::uno::Reference<css::accessibility::XAccessibleEditableText>();
-
-    for (sal_Int64 i = 0; i < nCount; ++i)
+    for (sal_Int64 nChildIndex = 0; nChildIndex < nCount; ++nChildIndex)
     {
         css::uno::Reference<css::accessibility::XAccessible> xChild
-            = xContext->getAccessibleChild(i);
+            = xContext->getAccessibleChild(nChildIndex);
 
         if (!xChild.is())
             continue;
@@ -80,6 +64,33 @@ static css::uno::Reference<css::accessibility::XAccessibleEditableText> lcl_Find
     }
 
     return css::uno::Reference<css::accessibility::XAccessibleEditableText>();
+}
+
+static css::uno::Reference<css::accessibility::XAccessibleEditableText> lcl_FindFocusedEditableText(
+    css::uno::Reference<css::accessibility::XAccessibleContext> const& xContext)
+{
+    if (!xContext.is())
+        return css::uno::Reference<css::accessibility::XAccessibleEditableText>();
+
+    const sal_Int64 nState = xContext->getAccessibleStateSet();
+
+    if (nState & css::accessibility::AccessibleStateType::FOCUSED)
+    {
+        css::uno::Reference<css::accessibility::XAccessibleEditableText> xText(xContext,
+                                                                               css::uno::UNO_QUERY);
+        if (xText.is())
+            return xText;
+
+        if (nState & css::accessibility::AccessibleStateType::MANAGES_DESCENDANTS)
+            return css::uno::Reference<css::accessibility::XAccessibleEditableText>();
+    }
+
+    const sal_Int64 nCount = xContext->getAccessibleChildCount();
+
+    if (nCount < 0 || nCount > SAL_MAX_UINT16 /* slow enough for anyone */)
+        return css::uno::Reference<css::accessibility::XAccessibleEditableText>();
+
+    return lcl_SearchChildrenForEditableText(xContext, nCount);
 }
 
 static css::uno::Reference<css::accessibility::XAccessibleEditableText>
