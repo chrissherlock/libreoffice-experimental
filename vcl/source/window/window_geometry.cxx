@@ -462,6 +462,37 @@ static bool HasParentDockingWindow(const vcl::Window* pWindow)
     return false;
 }
 
+WindowImpl* Window::ImplGetEffectiveWindowImpl() const
+{
+    return mpWindowImpl->mpBorderWindow ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
+                                        : mpWindowImpl.get();
+}
+
+void Window::ImplQueueResizeOnGroup() const
+{
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
+    if (!pWindowImpl->m_xSizeGroup
+        || pWindowImpl->m_xSizeGroup->get_mode() == VclSizeGroupMode::NONE)
+        return;
+
+    const std::set<VclPtr<vcl::Window>>& rWindows = pWindowImpl->m_xSizeGroup->get_widgets();
+
+    for (VclPtr<vcl::Window> const& pOther : rWindows)
+    {
+        if (pOther == this)
+            continue;
+
+        queue_ungrouped_resize(pOther);
+    }
+}
+
+bool Window::ImplRequiresParentLayoutUpdate(const vcl::Window* pParent) const
+{
+    return !GetSizePixel().IsEmpty() && !pParent->IsInInitShow()
+           && (GetParentDialog() || HasParentDockingWindow(this));
+}
+
 void Window::queue_resize(StateChangedType eReason)
 {
     if (isDisposed())
@@ -470,38 +501,22 @@ void Window::queue_resize(StateChangedType eReason)
     bool bSomeoneCares = queue_ungrouped_resize(this);
 
     if (eReason != StateChangedType::Visible)
-    {
         InvalidateSizeCache();
-    }
 
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
-    if (pWindowImpl->m_xSizeGroup
-        && pWindowImpl->m_xSizeGroup->get_mode() != VclSizeGroupMode::NONE)
-    {
-        std::set<VclPtr<vcl::Window>>& rWindows = pWindowImpl->m_xSizeGroup->get_widgets();
-        for (VclPtr<vcl::Window> const& pOther : rWindows)
-        {
-            if (pOther == this)
-                continue;
-            queue_ungrouped_resize(pOther);
-        }
-    }
+    ImplQueueResizeOnGroup();
 
     if (bSomeoneCares && !isDisposed())
     {
-        //fdo#57090 force a resync of the borders of the borderwindow onto this
-        //window in case they have changed
+        // fdo#57090 force a resync of the borders of the borderwindow onto this
+        // window in case they have changed
         if (vcl::Window* pBorderWindow = ImplGetBorderWindow(); pBorderWindow)
             pBorderWindow->Resize();
     }
 
-    if (VclPtr<vcl::Window> pParent = GetParentWithLOKNotifier())
+    if (VclPtr<vcl::Window> pParent = GetParentWithLOKNotifier();
+        pParent && ImplRequiresParentLayoutUpdate(pParent))
     {
-        if (!GetSizePixel().IsEmpty() && !pParent->IsInInitShow()
-            && (GetParentDialog() || HasParentDockingWindow(this)))
-            LogicInvalidate(nullptr);
+        LogicInvalidate(nullptr);
     }
 }
 
