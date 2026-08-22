@@ -1579,6 +1579,8 @@ private:
     SAL_DLLPRIVATE void ImplDeferMoveResize(bool bNewPos, bool bNewSize);
     SAL_DLLPRIVATE void ImplInvalidateMovedWindow(bool bCopyBits, const tools::Rectangle& rInitialWinRect, std::unique_ptr<vcl::Region>& rpOverlapRegion);
     SAL_DLLPRIVATE void ImplInvalidateGrownWindow(const vcl::Region& rInitialRegion);
+    SAL_DLLPRIVATE void ImplInvalidateWindowContent(bool bNewPos, bool bCopyBits, const tools::Rectangle& rInitialWinRect,
+                                                    std::unique_ptr<vcl::Region>& rpOverlapRegion, const vcl::Region& rInitialRegion);
 };
 }
 

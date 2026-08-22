@@ -1217,6 +1217,26 @@ void Window::ImplInvalidateGrownWindow(const vcl::Region& rInitialRegion)
         ImplInvalidateFrameRegion(&aRegion, InvalidateFlags::Children);
 }
 
+void Window::ImplInvalidateWindowContent(bool bNewPos, bool bCopyBits,
+                                         const tools::Rectangle& rInitialWinRect,
+                                         std::unique_ptr<vcl::Region>& rpOverlapRegion,
+                                         const vcl::Region& rInitialRegion)
+{
+    if (bNewPos)
+    {
+        ImplInvalidateMovedWindow(bCopyBits, rInitialWinRect, rpOverlapRegion);
+        return;
+    }
+
+    auto HasOutputGrown = [](const OutputDevice* pOutDev, const Size& rInitialSize) {
+        return pOutDev->GetOutputWidthPixel() > rInitialSize.Width()
+               || pOutDev->GetOutputHeightPixel() > rInitialSize.Height();
+    };
+
+    if (HasOutputGrown(GetOutDev(), rInitialWinRect.GetSize()))
+        ImplInvalidateGrownWindow(rInitialRegion);
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -1290,28 +1310,13 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     if (IsReallyVisible())
     {
         if (bNewPos || bNewSize)
-        {
-            // set Clip-Flag
             bUpdateSysObjClip = !vcl::clipping::setClipFlag(*this, true);
-        }
 
-        auto HasOutputGrown = [](const OutputDevice* pOutDev, const Size& rInitialSize) {
-            return pOutDev->GetOutputWidthPixel() > rInitialSize.Width()
-                   || pOutDev->GetOutputHeightPixel() > rInitialSize.Height();
-        };
+        const tools::Rectangle aInitialWinRect(Point(nInitialOutOffX, nInitialOutOffY),
+                                               Size(nInitialOutWidth, nInitialOutHeight));
 
-        // invalidate window content ?
-        if (bNewPos)
-        {
-            const tools::Rectangle aInitialWinRect(Point(nInitialOutOffX, nInitialOutOffY),
-                                                   Size(nInitialOutWidth, nInitialOutHeight));
-
-            ImplInvalidateMovedWindow(bCopyBits, aInitialWinRect, pOverlapRegion);
-        }
-        else if (HasOutputGrown(GetOutDev(), Size(nInitialOutWidth, nInitialOutHeight)))
-        {
-            ImplInvalidateGrownWindow(*pInitialRegion);
-        }
+        ImplInvalidateWindowContent(bNewPos, bCopyBits, aInitialWinRect, pOverlapRegion,
+                                    *pInitialRegion);
 
         // invalidate Parent or Overlaps
         if (bNewPos || (GetOutDev()->GetOutputWidthPixel() < nInitialOutWidth)
