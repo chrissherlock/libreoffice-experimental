@@ -1566,6 +1566,7 @@ private:
     SAL_DLLPRIVATE void ImplQueueResizeOnGroup() const;
     SAL_DLLPRIVATE bool ImplHasValidClippingRegion() const;
     SAL_DLLPRIVATE bool ImplShouldPaintImmediately() const;
+    SAL_DLLPRIVATE bool ImplUpdateOutputSize(PosSizeFlags nFlags, tools::Long nWidth, tools::Long nHeight);
 };
 }
 
