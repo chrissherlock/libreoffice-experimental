@@ -146,9 +146,16 @@ void Window::ImplNewInputContext()
             // only set default sizes if the font height in logical
             // coordinates equals 0
             if (rFont.GetFontSize().Height())
+            {
                 aSize.setHeight(1);
+            }
             else
-                aSize.setHeight((12 * pFocusWin->GetOutDev()->GetDPIY()) / 72);
+            {
+                constexpr tools::Long nDefaultPointHeight = 12;
+                constexpr tools::Long nPointsPerInch = 72;
+                aSize.setHeight((nDefaultPointHeight * pFocusWin->GetOutDev()->GetDPIY())
+                                / nPointsPerInch);
+            }
         }
 
         aNewContext.mpFont = pFocusWin->GetOutDev()->mxFontCache->GetFontInstance(
