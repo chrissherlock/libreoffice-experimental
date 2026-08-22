@@ -1301,9 +1301,9 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     if (!(bNewPos || bNewSize))
         return;
 
-    bool bUpdateSysObjPos = false;
+    bool bNeedsNativePosUpdate = false;
     if (bNewPos)
-        bUpdateSysObjPos = ImplUpdatePos();
+        bNeedsNativePosUpdate = ImplUpdatePos();
 
     // the borderwindow always specifies the position for its client window
     if (mpWindowImpl->mpBorderWindow)
@@ -1318,11 +1318,11 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     else
         ImplDeferMoveResize(bNewPos, bNewSize);
 
-    bool bUpdateSysObjClip = false;
+    bool bNeedsNativeClipUpdate = false;
     if (IsReallyVisible())
     {
         if (bNewPos || bNewSize)
-            bUpdateSysObjClip = !vcl::clipping::setClipFlag(*this, true);
+            bNeedsNativeClipUpdate = !vcl::clipping::setClipFlag(*this, true);
 
         const tools::Rectangle aInitialWinRect(Point(nInitialOutOffX, nInitialOutOffY),
                                                Size(nInitialOutWidth, nInitialOutHeight));
@@ -1340,10 +1340,10 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     }
 
     // adapt system objects
-    if (bUpdateSysObjClip)
+    if (bNeedsNativeClipUpdate)
         vcl::clipping::updateNativeObjectClip(*this);
 
-    if (bUpdateSysObjPos)
+    if (bNeedsNativePosUpdate)
         ImplUpdateNativeObjectPos();
 
     if (bNewSize && mpWindowImpl->mpSysObj)
