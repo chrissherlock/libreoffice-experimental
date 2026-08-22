@@ -987,6 +987,61 @@ Size Window::ImplGetClientAvailableSize() const
     return Size(nWidth, nHeight);
 }
 
+void Window::ImplAdjustPosForRTL(tools::Long& rX, tools::Long& rOrgX, Point& rPtDev,
+                                 bool bXAlreadyMirrored)
+{
+    OutputDevice* pOutDev = GetOutDev();
+
+    if (pOutDev->HasMirroredGraphics())
+    {
+        rPtDev.setX(pOutDev->mpGraphics->mirror2(rPtDev.X(), *pOutDev));
+
+        if (bXAlreadyMirrored && pOutDev->ImplIsAntiparallel())
+        {
+            rPtDev.setX(mpWindowImpl->mnAbsScreenX);
+            rOrgX = mpWindowImpl->maPos.X();
+        }
+    }
+
+    bool bParentIsAntiparallel
+        = !bXAlreadyMirrored && mpWindowImpl->mpHierarchy->mpParent
+          && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame
+          && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel();
+
+    if (bParentIsAntiparallel)
+    {
+        rX = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel()
+             - pOutDev->GetOutputWidthPixel() - rX;
+    }
+}
+
+bool Window::ImplUpdatePosX(tools::Long nX, bool bXAlreadyMirrored, bool bCopyBits,
+                            std::unique_ptr<vcl::Region>& rpOverlapRegion)
+{
+    tools::Long nOrgX = nX;
+    Point aPtDev(nX + GetOutDev()->GetDeviceOriginX(), 0);
+
+    ImplAdjustPosForRTL(nX, nOrgX, aPtDev, bXAlreadyMirrored);
+
+    if (mpWindowImpl->mnAbsScreenX != aPtDev.X() || nX != mpWindowImpl->mnX
+        || nOrgX != mpWindowImpl->maPos.X())
+    {
+        if (bCopyBits && !rpOverlapRegion)
+        {
+            rpOverlapRegion.reset(new vcl::Region());
+            vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *rpOverlapRegion, false,
+                                             true);
+        }
+
+        mpWindowImpl->mnX = nX;
+        mpWindowImpl->maPos.setX(nOrgX);
+        mpWindowImpl->mnAbsScreenX = aPtDev.X();
+        return true;
+    }
+
+    return false;
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -1039,61 +1094,10 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
 
     if (nFlags & PosSizeFlags::X)
     {
-        tools::Long nOrgX = nX;
-        Point aPtDev(nX + GetOutDev()->GetDeviceOriginX(), 0);
-        OutputDevice* pOutDev = GetOutDev();
-        if (pOutDev->HasMirroredGraphics())
-        {
-            aPtDev.setX(GetOutDev()->mpGraphics->mirror2(aPtDev.X(), *GetOutDev()));
-
-            // #106948# always mirror our pos if our parent is not mirroring, even
-            // if we are also not mirroring
-            // RTL: check if parent is in different coordinates
-            if (!bXAlreadyMirrored && mpWindowImpl->mpHierarchy->mpParent
-                && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame
-                && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel())
-            {
-                nX = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel()
-                     - GetOutDev()->GetOutputWidthPixel() - nX;
-            }
-            /* #i99166# An LTR window in RTL UI that gets sized only would be
-               expected to not moved its upper left point
-            */
-            if (bXAlreadyMirrored)
-            {
-                if (GetOutDev()->ImplIsAntiparallel())
-                {
-                    aPtDev.setX(mpWindowImpl->mnAbsScreenX);
-                    nOrgX = mpWindowImpl->maPos.X();
-                }
-            }
-        }
-        else if (!bXAlreadyMirrored && mpWindowImpl->mpHierarchy->mpParent
-                 && !mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl->mbFrame
-                 && mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel())
-        {
-            // mirrored window in LTR UI
-            nX = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel()
-                 - GetOutDev()->GetOutputWidthPixel() - nX;
-        }
-
-        // check maPos as well, as it could have been changed for client windows (ImplCallMove())
-        if (mpWindowImpl->mnAbsScreenX != aPtDev.X() || nX != mpWindowImpl->mnX
-            || nOrgX != mpWindowImpl->maPos.X())
-        {
-            if (bCopyBits && !pOverlapRegion)
-            {
-                pOverlapRegion.reset(new vcl::Region());
-                vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *pOverlapRegion,
-                                                 false, true);
-            }
-
-            mpWindowImpl->mnX = nX;
-            mpWindowImpl->maPos.setX(nOrgX);
-            mpWindowImpl->mnAbsScreenX = aPtDev.X();
+        if (ImplUpdatePosX(nX, bXAlreadyMirrored, bCopyBits, pOverlapRegion))
             bNewPos = true;
-        }
     }
+
     if (nFlags & PosSizeFlags::Y)
     {
         // check maPos as well, as it could have been changed for client windows (ImplCallMove())
