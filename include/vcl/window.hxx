@@ -1568,6 +1568,8 @@ private:
     SAL_DLLPRIVATE bool ImplShouldPaintImmediately() const;
     SAL_DLLPRIVATE bool ImplUpdateOutputSize(PosSizeFlags nFlags, tools::Long nWidth, tools::Long nHeight);
     SAL_DLLPRIVATE Size ImplGetClientAvailableSize() const;
+    SAL_DLLPRIVATE void ImplAdjustPosForRTL(tools::Long& rX, tools::Long& rOrgX, Point& rPtDev, bool bXAlreadyMirrored);
+    SAL_DLLPRIVATE bool ImplUpdatePosX(tools::Long nX, bool bXAlreadyMirrored, bool bCopyBits, std::unique_ptr<vcl::Region>& rpOverlapRegion);
 };
 }
 
