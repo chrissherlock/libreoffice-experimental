@@ -939,6 +939,18 @@ void Window::ImplAdjustNWFSizes()
     }
 }
 
+bool Window::ImplHasValidClippingRegion() const
+{
+    return !mpWindowImpl->mbPaintTransparent && !mpWindowImpl->mpClippingState->mbInitWinClipRegion
+           && !mpWindowImpl->mpClippingState->maWinClipRegion.IsEmpty();
+}
+
+bool Window::ImplShouldPaintImmediately() const
+{
+    return GetOutDev()->GetOutputWidthPixel() && GetOutDev()->GetOutputHeightPixel()
+           && ImplHasValidClippingRegion() && !HasPaintEvent();
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -957,14 +969,12 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
         tools::Rectangle aOldWinRect(Point(nOldOutOffX, nOldOutOffY),
                                      Size(nOldOutWidth, nOldOutHeight));
         pOldRegion.reset(new vcl::Region(aOldWinRect));
+
         if (mpWindowImpl->mpClippingState->mbWinRegion)
             pOldRegion->Intersect(
                 GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
 
-        if (GetOutDev()->GetOutputWidthPixel() && GetOutDev()->GetOutputHeightPixel()
-            && !mpWindowImpl->mbPaintTransparent
-            && !mpWindowImpl->mpClippingState->mbInitWinClipRegion
-            && !mpWindowImpl->mpClippingState->maWinClipRegion.IsEmpty() && !HasPaintEvent())
+        if (ImplShouldPaintImmediately())
             bCopyBits = true;
     }
 
