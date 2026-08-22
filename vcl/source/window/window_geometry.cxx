@@ -990,19 +990,18 @@ Size Window::ImplGetClientAvailableSize() const
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
-    bool bNewPos = false;
-    tools::Long nOldOutOffX = GetOutDev()->GetDeviceOriginX();
-    tools::Long nOldOutOffY = GetOutDev()->GetDeviceOriginY();
-    tools::Long nOldOutWidth = GetOutDev()->GetOutputWidthPixel();
-    tools::Long nOldOutHeight = GetOutDev()->GetOutputHeightPixel();
-    std::unique_ptr<vcl::Region> pOverlapRegion;
-    std::unique_ptr<vcl::Region> pOldRegion;
-
     if ((nFlags & PosSizeFlags::Width) && nWidth < 0)
         nWidth = 0;
 
     if ((nFlags & PosSizeFlags::Height) && nHeight < 0)
         nHeight = 0;
+
+    tools::Long nOldOutOffX = GetOutDev()->GetDeviceOriginX();
+    tools::Long nOldOutOffY = GetOutDev()->GetDeviceOriginY();
+    tools::Long nOldOutWidth = GetOutDev()->GetOutputWidthPixel();
+    tools::Long nOldOutHeight = GetOutDev()->GetOutputHeightPixel();
+
+    std::unique_ptr<vcl::Region> pOldRegion;
 
     if (IsReallyVisible())
     {
@@ -1033,6 +1032,10 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
 
     if (bNewSize)
         bCopyBits = false;
+
+    bool bNewPos = false;
+
+    std::unique_ptr<vcl::Region> pOverlapRegion;
 
     if (nFlags & PosSizeFlags::X)
     {
