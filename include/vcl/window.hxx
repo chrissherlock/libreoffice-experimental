@@ -1562,6 +1562,9 @@ private:
     SAL_DLLPRIVATE void ImplInitSettings(WinBits nStyle);
     SAL_DLLPRIVATE void ImplInitFromParentState(vcl::Window* pParent);
 
+    SAL_DLLPRIVATE WindowImpl* ImplGetEffectiveWindowImpl() const;
+    SAL_DLLPRIVATE bool ImplRequiresParentLayoutUpdate(const vcl::Window* pParent) const;
+    SAL_DLLPRIVATE void ImplQueueResizeOnGroup() const;
 };
 }
 
