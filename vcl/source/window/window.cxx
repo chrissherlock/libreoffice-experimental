@@ -578,45 +578,6 @@ void Window::ImplLogicToPoint(vcl::RenderContext const & rRenderContext, vcl::Fo
     rFont.SetFontSize(aSize.get());
 }
 
-void Window::ImplNewInputContext()
-{
-    ImplSVData* pSVData = ImplGetSVData();
-    vcl::Window* pFocusWin = pSVData->mpWinData->mpFocusWin;
-    if ( !pFocusWin || !pFocusWin->mpWindowImpl || pFocusWin->isDisposed() )
-        return;
-
-    // Is InputContext changed?
-    const InputContext& rInputContext = pFocusWin->GetInputContext();
-    if ( rInputContext == pFocusWin->mpWindowImpl->mpFrameData->maOldInputContext )
-        return;
-
-    pFocusWin->mpWindowImpl->mpFrameData->maOldInputContext = rInputContext;
-
-    SalInputContext         aNewContext;
-    const vcl::Font&        rFont = rInputContext.GetFont();
-    const OUString&         rFontName = rFont.GetFamilyName();
-    if (!rFontName.isEmpty())
-    {
-        OutputDevice *pFocusWinOutDev = pFocusWin->GetOutDev();
-        Size aSize = pFocusWinOutDev->GetMapper().LogicToViewDistance( rFont.GetFontSize(), pFocusWinOutDev->GetMappingPolicy() );
-        if ( !aSize.Height() )
-        {
-            // only set default sizes if the font height in logical
-            // coordinates equals 0
-            if ( rFont.GetFontSize().Height() )
-                aSize.setHeight( 1 );
-            else
-                aSize.setHeight( (12*pFocusWin->GetOutDev()->GetDPIY())/72 );
-        }
-        aNewContext.mpFont =
-                        pFocusWin->GetOutDev()->mxFontCache->GetFontInstance(
-                            pFocusWin->GetOutDev()->mxFontCollection.get(),
-                            rFont, aSize, static_cast<float>(aSize.Height()) );
-    }
-    aNewContext.mnOptions   = rInputContext.GetOptions();
-    pFocusWin->ImplGetFrame()->SetInputContext( &aNewContext );
-}
-
 void Window::SetModalHierarchyHdl(const Link<bool, void>& rLink)
 {
     ImplGetFrame()->SetModalHierarchyHdl(rLink);
@@ -882,91 +843,6 @@ WindowBorderStyle Window::GetBorderStyle() const
     }
 
     return WindowBorderStyle::NONE;
-}
-
-void Window::SetInputContext( const InputContext& rInputContext )
-{
-
-    mpWindowImpl->maInputContext = rInputContext;
-    if ( !mpWindowImpl->mbInFocusHdl && HasFocus() )
-        ImplNewInputContext();
-}
-
-void Window::PostExtTextInputEvent(VclEventId nType, const OUString& rText)
-{
-    switch (nType)
-    {
-    case VclEventId::ExtTextInput:
-    {
-        std::unique_ptr<ExtTextInputAttr[]> pAttr(new ExtTextInputAttr[rText.getLength()]);
-        for (int i = 0; i < rText.getLength(); ++i) {
-            pAttr[i] = ExtTextInputAttr::Underline;
-        }
-        SalExtTextInputEvent aEvent { rText, pAttr.get(), rText.getLength(), EXTTEXTINPUT_CURSOR_OVERWRITE };
-        ImplWindowFrameProc(this, SalEvent::ExtTextInput, &aEvent);
-    }
-    break;
-    case VclEventId::EndExtTextInput:
-        ImplWindowFrameProc(this, SalEvent::EndExtTextInput, nullptr);
-        break;
-    default:
-        assert(false);
-    }
-}
-
-void Window::EndExtTextInput()
-{
-    if ( mpWindowImpl->mbExtTextInput )
-        ImplGetFrame()->EndExtTextInput( EndExtTextInputFlags::Complete );
-}
-
-void Window::SetCursorRect( const tools::Rectangle* pRect, tools::Long nExtTextInputWidth )
-{
-
-    ImplWinData* pWinData = ImplGetWinData();
-    if ( pWinData->mpCursorRect )
-    {
-        if ( pRect )
-            pWinData->mpCursorRect = *pRect;
-        else
-            pWinData->mpCursorRect.reset();
-    }
-    else
-    {
-        if ( pRect )
-            pWinData->mpCursorRect = *pRect;
-    }
-
-    pWinData->mnCursorExtWidth = nExtTextInputWidth;
-
-}
-
-const tools::Rectangle* Window::GetCursorRect() const
-{
-
-    ImplWinData* pWinData = ImplGetWinData();
-    return pWinData->mpCursorRect ? &*pWinData->mpCursorRect : nullptr;
-}
-
-tools::Long Window::GetCursorExtTextInputWidth() const
-{
-
-    ImplWinData* pWinData = ImplGetWinData();
-    return pWinData->mnCursorExtWidth;
-}
-
-void Window::SetCompositionCharRect( const tools::Rectangle* pRect, tools::Long nCompositionLength, bool bVertical ) {
-
-    ImplWinData* pWinData = ImplGetWinData();
-    pWinData->mpCompositionCharRects.reset();
-    pWinData->mbVertical = bVertical;
-    pWinData->mnCompositionCharRects = nCompositionLength;
-    if ( pRect && (nCompositionLength > 0) )
-    {
-        pWinData->mpCompositionCharRects.reset( new tools::Rectangle[nCompositionLength] );
-        for (tools::Long i = 0; i < nCompositionLength; ++i)
-            pWinData->mpCompositionCharRects[i] = pRect[i];
-    }
 }
 
 void Window::SetPointFont(vcl::RenderContext& rRenderContext, const vcl::Font& rFont,
@@ -1791,11 +1667,6 @@ bool Window::HasActiveChildFrame() const
     return bRet;
 }
 
-LanguageType Window::GetInputLanguage() const
-{
-    return mpWindowImpl->mpFrame->GetInputLanguage();
-}
-
 void Window::EnableNativeWidget( bool bEnable )
 {
     static const char* pNoNWF = getenv( "SAL_NO_NWF" );
@@ -1828,114 +1699,6 @@ void Window::EnableNativeWidget( bool bEnable )
 bool Window::IsNativeWidgetEnabled() const
 {
     return mpWindowImpl && ImplGetWinData()->mbEnableNativeWidget;
-}
-
-OUString Window::GetSurroundingText() const
-{
-  return OUString();
-}
-
-Selection Window::GetSurroundingTextSelection() const
-{
-  return Selection( 0, 0 );
-}
-
-namespace
-{
-    using namespace com::sun::star;
-
-    uno::Reference<accessibility::XAccessibleEditableText>
-    lcl_FindFocusedEditableText(uno::Reference<accessibility::XAccessibleContext> const& xContext)
-    {
-        if (!xContext.is())
-            return uno::Reference<accessibility::XAccessibleEditableText>();
-
-        sal_Int64 nState = xContext->getAccessibleStateSet();
-        if (nState & accessibility::AccessibleStateType::FOCUSED)
-        {
-            uno::Reference<accessibility::XAccessibleEditableText> xText(xContext, uno::UNO_QUERY);
-            if (xText.is())
-                return xText;
-            if (nState & accessibility::AccessibleStateType::MANAGES_DESCENDANTS)
-                return uno::Reference<accessibility::XAccessibleEditableText>();
-        }
-
-        bool bSafeToIterate = true;
-        sal_Int64 nCount = xContext->getAccessibleChildCount();
-        if (nCount < 0 || nCount > SAL_MAX_UINT16 /* slow enough for anyone */)
-            bSafeToIterate = false;
-        if (!bSafeToIterate)
-            return uno::Reference<accessibility::XAccessibleEditableText>();
-
-        for (sal_Int64 i = 0; i < xContext->getAccessibleChildCount(); ++i)
-        {
-            uno::Reference<accessibility::XAccessible> xChild = xContext->getAccessibleChild(i);
-            if (!xChild.is())
-                continue;
-            uno::Reference<accessibility::XAccessibleContext> xChildContext
-                = xChild->getAccessibleContext();
-            if (!xChildContext.is())
-                continue;
-            uno::Reference<accessibility::XAccessibleEditableText> xText
-                = lcl_FindFocusedEditableText(xChildContext);
-            if (xText.is())
-                return xText;
-        }
-        return uno::Reference<accessibility::XAccessibleEditableText>();
-    }
-
-    uno::Reference<accessibility::XAccessibleEditableText> lcl_GetxText(vcl::Window *pFocusWin)
-    {
-        uno::Reference<accessibility::XAccessibleEditableText> xText;
-        try
-        {
-            rtl::Reference<comphelper::OAccessible> pAccessible = pFocusWin->GetAccessible();
-            if (pAccessible.is())
-                xText = lcl_FindFocusedEditableText(pAccessible);
-        }
-        catch(const uno::Exception&)
-        {
-            TOOLS_WARN_EXCEPTION( "vcl.gtk3", "Exception in getting input method surrounding text");
-        }
-        return xText;
-    }
-}
-
-// this is a rubbish implementation using a11y, ideally all subclasses implementing
-// GetSurroundingText/GetSurroundingTextSelection should implement this and then this
-// should be removed in favor of a stub that returns false
-bool Window::DeleteSurroundingText(const Selection& rSelection)
-{
-    uno::Reference<accessibility::XAccessibleEditableText> xText = lcl_GetxText(this);
-    if (xText.is())
-    {
-        sal_Int32 nPosition = xText->getCaretPosition();
-        // #i111768# range checking
-        sal_Int32 nDeletePos = rSelection.Min();
-        sal_Int32 nDeleteEnd = rSelection.Max();
-        if (nDeletePos < 0)
-            nDeletePos = 0;
-        if (nDeleteEnd < 0)
-            nDeleteEnd = 0;
-        if (nDeleteEnd > xText->getCharacterCount())
-            nDeleteEnd = xText->getCharacterCount();
-
-        xText->deleteText(nDeletePos, nDeleteEnd);
-        //tdf91641 adjust cursor if deleted chars shift it forward (normal case)
-        if (nDeletePos < nPosition)
-        {
-            if (nDeleteEnd <= nPosition)
-                nPosition = nPosition - (nDeleteEnd - nDeletePos);
-            else
-                nPosition = nDeletePos;
-
-            if (xText->getCharacterCount() >= nPosition)
-                xText->setCaretPosition( nPosition );
-        }
-        return true;
-    }
-
-    return false;
 }
 
 void Window::ApplySettings(vcl::RenderContext& /*rRenderContext*/)
