@@ -264,40 +264,38 @@ bool Window::DeleteSurroundingText(const Selection& rSelection)
 {
     css::uno::Reference<css::accessibility::XAccessibleEditableText> xText = lcl_GetxText(this);
 
-    if (xText.is())
-    {
-        sal_Int32 nPosition = xText->getCaretPosition();
-        // #i111768# range checking
-        sal_Int32 nDeletePos = rSelection.Min();
-        sal_Int32 nDeleteEnd = rSelection.Max();
+    if (!xText.is())
+        return false;
 
-        if (nDeletePos < 0)
-            nDeletePos = 0;
+    sal_Int32 nPosition = xText->getCaretPosition();
+    // #i111768# range checking
+    sal_Int32 nDeletePos = rSelection.Min();
+    sal_Int32 nDeleteEnd = rSelection.Max();
 
-        if (nDeleteEnd < 0)
-            nDeleteEnd = 0;
+    if (nDeletePos < 0)
+        nDeletePos = 0;
 
-        if (nDeleteEnd > xText->getCharacterCount())
-            nDeleteEnd = xText->getCharacterCount();
+    if (nDeleteEnd < 0)
+        nDeleteEnd = 0;
 
-        xText->deleteText(nDeletePos, nDeleteEnd);
+    if (nDeleteEnd > xText->getCharacterCount())
+        nDeleteEnd = xText->getCharacterCount();
 
-        // tdf91641 adjust cursor if deleted chars shift it forward (normal case)
-        if (nDeletePos < nPosition)
-        {
-            if (nDeleteEnd <= nPosition)
-                nPosition = nPosition - (nDeleteEnd - nDeletePos);
-            else
-                nPosition = nDeletePos;
+    xText->deleteText(nDeletePos, nDeleteEnd);
 
-            if (xText->getCharacterCount() >= nPosition)
-                xText->setCaretPosition(nPosition);
-        }
-
+    // tdf91641 adjust cursor if deleted chars shift it forward (normal case)
+    if (nDeletePos >= nPosition)
         return true;
-    }
 
-    return false;
+    if (nDeleteEnd <= nPosition)
+        nPosition = nPosition - (nDeleteEnd - nDeletePos);
+    else
+        nPosition = nDeletePos;
+
+    if (xText->getCharacterCount() >= nPosition)
+        xText->setCaretPosition(nPosition);
+
+    return true;
 }
 
 } // end vcl namespace
