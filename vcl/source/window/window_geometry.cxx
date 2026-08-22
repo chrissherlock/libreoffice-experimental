@@ -1403,6 +1403,28 @@ void Window::ImplUpdateNativeObjectPos()
     }
 }
 
+tools::Long Window::ImplGetParentDeviceOriginX() const
+{
+    if (mpWindowImpl->mpHierarchy->mpParent)
+        return mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDeviceOriginX();
+
+    return 0;
+}
+
+/**
+ * Let W_p be the parent's width, W_c be the child's width, and X_m be the
+ * current mirrored offset. The unmirrored offset X_u is calculated as:
+ * X_u = W_p - W_c - X_m
+ */
+tools::Long Window::ImplUnmirrorXOffset(tools::Long nMirroredOffset) const
+{
+    const tools::Long nParentWidth
+        = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel();
+    const tools::Long nChildWidth = GetOutDev()->GetOutputWidthPixel();
+
+    return nParentWidth - nChildWidth - nMirroredOffset;
+}
+
 tools::Long Window::ImplGetUnmirroredOutOffX() const
 {
     // revert GetDeviceOriginX() changes that were potentially made in ImplPosSizeWindow
@@ -1413,13 +1435,12 @@ tools::Long Window::ImplGetUnmirroredOutOffX() const
         return offx;
 
     if (!ImplIsOverlapWindow())
-        offx -= mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDeviceOriginX();
+        offx -= ImplGetParentDeviceOriginX();
 
-    offx = mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel()
-           - GetOutDev()->GetOutputWidthPixel() - offx;
+    offx = ImplUnmirrorXOffset(offx);
 
     if (!ImplIsOverlapWindow())
-        offx += mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDeviceOriginX();
+        offx += ImplGetParentDeviceOriginX();
 
     return offx;
 }

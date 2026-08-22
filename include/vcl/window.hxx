@@ -1589,6 +1589,8 @@ private:
                                                      const vcl::Region& rInitialRegion);
 
     SAL_DLLPRIVATE bool ImplHasAntiparallelParent() const;
+    SAL_DLLPRIVATE tools::Long ImplGetParentDeviceOriginX() const;
+    SAL_DLLPRIVATE tools::Long ImplUnmirrorXOffset(tools::Long nMirroredOffset) const;
 };
 }
 
