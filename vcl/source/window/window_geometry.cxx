@@ -951,6 +951,25 @@ bool Window::ImplShouldPaintImmediately() const
            && ImplHasValidClippingRegion() && !HasPaintEvent();
 }
 
+bool Window::ImplUpdateOutputSize(PosSizeFlags nFlags, tools::Long nWidth, tools::Long nHeight)
+{
+    bool bNewSize = false;
+
+    if ((nFlags & PosSizeFlags::Width) && nWidth != GetOutDev()->GetOutputWidthPixel())
+    {
+        GetOutDev()->SetOutputWidthPixel(nWidth);
+        bNewSize = true;
+    }
+
+    if ((nFlags & PosSizeFlags::Height) && nHeight != GetOutDev()->GetOutputHeightPixel())
+    {
+        GetOutDev()->SetOutputHeightPixel(nHeight);
+        bNewSize = true;
+    }
+
+    return bNewSize;
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -993,19 +1012,7 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     if (IsReallyVisible() && ImplShouldPaintImmediately())
         bCopyBits = true;
 
-    bool bNewSize = false;
-
-    if ((nFlags & PosSizeFlags::Width) && nWidth != GetOutDev()->GetOutputWidthPixel())
-    {
-        GetOutDev()->SetOutputWidthPixel(nWidth);
-        bNewSize = true;
-    }
-
-    if ((nFlags & PosSizeFlags::Height) && nHeight != GetOutDev()->GetOutputHeightPixel())
-    {
-        GetOutDev()->SetOutputHeightPixel(nHeight);
-        bNewSize = true;
-    }
+    bool bNewSize = ImplUpdateOutputSize(nFlags, nWidth, nHeight);
 
     if (bNewSize)
         bCopyBits = false;
