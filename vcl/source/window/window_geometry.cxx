@@ -1092,10 +1092,10 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
 
     std::unique_ptr<vcl::Region> pOverlapRegion;
 
-    if (nFlags & PosSizeFlags::X)
+    if ((nFlags & PosSizeFlags::X)
+        && ImplUpdatePosX(nX, bXAlreadyMirrored, bCopyBits, pOverlapRegion))
     {
-        if (ImplUpdatePosX(nX, bXAlreadyMirrored, bCopyBits, pOverlapRegion))
-            bNewPos = true;
+        bNewPos = true;
     }
 
     if (nFlags & PosSizeFlags::Y)
