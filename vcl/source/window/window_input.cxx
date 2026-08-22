@@ -53,16 +53,12 @@ static css::uno::Reference<css::accessibility::XAccessibleEditableText> lcl_Find
             return css::uno::Reference<css::accessibility::XAccessibleEditableText>();
     }
 
-    bool bSafeToIterate = true;
-    sal_Int64 nCount = xContext->getAccessibleChildCount();
+    const sal_Int64 nCount = xContext->getAccessibleChildCount();
 
     if (nCount < 0 || nCount > SAL_MAX_UINT16 /* slow enough for anyone */)
-        bSafeToIterate = false;
-
-    if (!bSafeToIterate)
         return css::uno::Reference<css::accessibility::XAccessibleEditableText>();
 
-    for (sal_Int64 i = 0; i < xContext->getAccessibleChildCount(); ++i)
+    for (sal_Int64 i = 0; i < nCount; ++i)
     {
         css::uno::Reference<css::accessibility::XAccessible> xChild
             = xContext->getAccessibleChild(i);
