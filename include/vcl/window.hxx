@@ -1567,6 +1567,7 @@ private:
     SAL_DLLPRIVATE bool ImplHasValidClippingRegion() const;
     SAL_DLLPRIVATE bool ImplShouldPaintImmediately() const;
     SAL_DLLPRIVATE bool ImplUpdateOutputSize(PosSizeFlags nFlags, tools::Long nWidth, tools::Long nHeight);
+    SAL_DLLPRIVATE Size ImplGetClientAvailableSize() const;
 };
 }
 

@@ -970,6 +970,23 @@ bool Window::ImplUpdateOutputSize(PosSizeFlags nFlags, tools::Long nWidth, tools
     return bNewSize;
 }
 
+Size Window::ImplGetClientAvailableSize() const
+{
+    tools::Long nWidth = GetOutDev()->GetOutputWidthPixel();
+    tools::Long nHeight = GetOutDev()->GetOutputHeightPixel();
+
+    if (mpWindowImpl->mpClientWindow)
+    {
+        nWidth -= mpWindowImpl->mpClientWindow->mpWindowImpl->mnLeftBorder;
+        nWidth -= mpWindowImpl->mpClientWindow->mpWindowImpl->mnRightBorder;
+
+        nHeight -= mpWindowImpl->mpClientWindow->mpWindowImpl->mnTopBorder;
+        nHeight -= mpWindowImpl->mpClientWindow->mpWindowImpl->mnBottomBorder;
+    }
+
+    return Size(nWidth, nHeight);
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -1104,29 +1121,23 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
 
     if (mpWindowImpl->mpClientWindow)
     {
+        Size aClientSize = ImplGetClientAvailableSize();
+
         mpWindowImpl->mpClientWindow->ImplPosSizeWindow(
             mpWindowImpl->mpClientWindow->mpWindowImpl->mnLeftBorder,
-            mpWindowImpl->mpClientWindow->mpWindowImpl->mnTopBorder,
-            GetOutDev()->GetOutputWidthPixel()
-                - mpWindowImpl->mpClientWindow->mpWindowImpl->mnLeftBorder
-                - mpWindowImpl->mpClientWindow->mpWindowImpl->mnRightBorder,
-            GetOutDev()->GetOutputHeightPixel()
-                - mpWindowImpl->mpClientWindow->mpWindowImpl->mnTopBorder
-                - mpWindowImpl->mpClientWindow->mpWindowImpl->mnBottomBorder,
+            mpWindowImpl->mpClientWindow->mpWindowImpl->mnTopBorder, aClientSize.Width(),
+            aClientSize.Height(),
             PosSizeFlags::X | PosSizeFlags::Y | PosSizeFlags::Width | PosSizeFlags::Height);
+
         // If we have a client window, then this is the position
         // of the Application's floating windows
         mpWindowImpl->mpClientWindow->mpWindowImpl->maPos = mpWindowImpl->maPos;
         if (bNewPos)
         {
             if (mpWindowImpl->mpClientWindow->IsVisible())
-            {
                 mpWindowImpl->mpClientWindow->ImplCallMove();
-            }
             else
-            {
                 mpWindowImpl->mpClientWindow->mpWindowImpl->mbCallMove = true;
-            }
         }
     }
 
