@@ -1164,6 +1164,24 @@ bool Window::ImplCopyBitsRegion(std::unique_ptr<vcl::Region>& rpOverlapRegion,
     return bInvalidate;
 }
 
+void Window::ImplCallMoveResize(bool bNewPos, bool bNewSize)
+{
+    if (bNewPos)
+        ImplCallMove();
+
+    if (bNewSize)
+        ImplCallResize();
+}
+
+void Window::ImplDeferMoveResize(bool bNewPos, bool bNewSize)
+{
+    if (bNewPos)
+        mpWindowImpl->mbCallMove = true;
+
+    if (bNewSize)
+        mpWindowImpl->mbCallResize = true;
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -1229,21 +1247,9 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     // Move()/Resize() will be called only for Show(), such that
     // at least one is called before Show()
     if (IsVisible())
-    {
-        if (bNewPos)
-            ImplCallMove();
-
-        if (bNewSize)
-            ImplCallResize();
-    }
+        ImplCallMoveResize(bNewPos, bNewSize);
     else
-    {
-        if (bNewPos)
-            mpWindowImpl->mbCallMove = true;
-
-        if (bNewSize)
-            mpWindowImpl->mbCallResize = true;
-    }
+        ImplDeferMoveResize(bNewPos, bNewSize);
 
     bool bUpdateSysObjClip = false;
     if (IsReallyVisible())
