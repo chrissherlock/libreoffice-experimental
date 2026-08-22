@@ -955,14 +955,18 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
     bool bNewPos = false;
-    bool bNewSize = false;
-    bool bCopyBits = false;
     tools::Long nOldOutOffX = GetOutDev()->GetDeviceOriginX();
     tools::Long nOldOutOffY = GetOutDev()->GetDeviceOriginY();
     tools::Long nOldOutWidth = GetOutDev()->GetOutputWidthPixel();
     tools::Long nOldOutHeight = GetOutDev()->GetOutputHeightPixel();
     std::unique_ptr<vcl::Region> pOverlapRegion;
     std::unique_ptr<vcl::Region> pOldRegion;
+
+    if ((nFlags & PosSizeFlags::Width) && nWidth < 0)
+        nWidth = 0;
+
+    if ((nFlags & PosSizeFlags::Height) && nHeight < 0)
+        nHeight = 0;
 
     if (IsReallyVisible())
     {
@@ -973,41 +977,38 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
         if (mpWindowImpl->mpClippingState->mbWinRegion)
             pOldRegion->Intersect(
                 GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
-
-        if (ImplShouldPaintImmediately())
-            bCopyBits = true;
     }
 
     bool bnXRecycled = false; // avoid duplicate mirroring in RTL case
-    if (nFlags & PosSizeFlags::Width)
-    {
-        if (!(nFlags & PosSizeFlags::X))
-        {
-            nX = mpWindowImpl->mnX;
-            nFlags |= PosSizeFlags::X;
-            bnXRecycled = true; // we're using a mnX which was already mirrored in RTL case
-        }
 
-        if (nWidth < 0)
-            nWidth = 0;
-        if (nWidth != GetOutDev()->GetOutputWidthPixel())
-        {
-            GetOutDev()->SetOutputWidthPixel(nWidth);
-            bNewSize = true;
-            bCopyBits = false;
-        }
-    }
-    if (nFlags & PosSizeFlags::Height)
+    if ((nFlags & PosSizeFlags::Width) && !(nFlags & PosSizeFlags::X))
     {
-        if (nHeight < 0)
-            nHeight = 0;
-        if (nHeight != GetOutDev()->GetOutputHeightPixel())
-        {
-            GetOutDev()->SetOutputHeightPixel(nHeight);
-            bNewSize = true;
-            bCopyBits = false;
-        }
+        nX = mpWindowImpl->mnX;
+        nFlags |= PosSizeFlags::X;
+        bnXRecycled = true; // we're using a mnX which was already mirrored in RTL case
     }
+
+    bool bCopyBits = false;
+
+    if (IsReallyVisible() && ImplShouldPaintImmediately())
+        bCopyBits = true;
+
+    bool bNewSize = false;
+
+    if ((nFlags & PosSizeFlags::Width) && nWidth != GetOutDev()->GetOutputWidthPixel())
+    {
+        GetOutDev()->SetOutputWidthPixel(nWidth);
+        bNewSize = true;
+    }
+
+    if ((nFlags & PosSizeFlags::Height) && nHeight != GetOutDev()->GetOutputHeightPixel())
+    {
+        GetOutDev()->SetOutputHeightPixel(nHeight);
+        bNewSize = true;
+    }
+
+    if (bNewSize)
+        bCopyBits = false;
 
     if (nFlags & PosSizeFlags::X)
     {
