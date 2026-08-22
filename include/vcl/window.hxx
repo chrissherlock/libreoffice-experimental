@@ -1574,6 +1574,7 @@ private:
     SAL_DLLPRIVATE bool ImplUpdatePosX(tools::Long nX, bool bXAlreadyMirrored, bool bCopyBits, std::unique_ptr<vcl::Region>& rpOverlapRegion);
     SAL_DLLPRIVATE bool ImplUpdatePosY(tools::Long nY, bool bCopyBits, std::unique_ptr<vcl::Region>& rpOverlapRegion);
     SAL_DLLPRIVATE void ImplUpdateClientWindow(bool bNewPos);
+    SAL_DLLPRIVATE bool ImplCopyArea(vcl::Region& rRegion, const tools::Rectangle& rInitialWinRect);
 };
 }
 
