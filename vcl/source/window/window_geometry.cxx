@@ -1249,6 +1249,32 @@ void Window::ImplInvalidateParentOrOverlaps(const vcl::Region& rInitialRegion)
         ImplInvalidateParentFrameRegion(aRegion);
 }
 
+bool Window::ImplInvalidateVisibleRegions(bool bNewPos, bool bNewSize, bool bCopyBits,
+                                          const tools::Rectangle& rInitialWinRect,
+                                          std::unique_ptr<vcl::Region>& rpOverlapRegion,
+                                          const vcl::Region& rInitialRegion)
+{
+    if (!IsReallyVisible())
+        return false;
+
+    bool bNeedsNativeClipUpdate = false;
+    if (bNewPos || bNewSize)
+        bNeedsNativeClipUpdate = !vcl::clipping::setClipFlag(*this, true);
+
+    ImplInvalidateWindowContent(bNewPos, bCopyBits, rInitialWinRect, rpOverlapRegion,
+                                rInitialRegion);
+
+    auto HasOutputShrunk = [](const OutputDevice* pOutDev, const Size& rInitialSize) {
+        return pOutDev->GetOutputWidthPixel() < rInitialSize.Width()
+               || pOutDev->GetOutputHeightPixel() < rInitialSize.Height();
+    };
+
+    if (bNewPos || HasOutputShrunk(GetOutDev(), rInitialWinRect.GetSize()))
+        ImplInvalidateParentOrOverlaps(rInitialRegion);
+
+    return bNeedsNativeClipUpdate;
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -1318,26 +1344,11 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     else
         ImplDeferMoveResize(bNewPos, bNewSize);
 
-    bool bNeedsNativeClipUpdate = false;
-    if (IsReallyVisible())
-    {
-        if (bNewPos || bNewSize)
-            bNeedsNativeClipUpdate = !vcl::clipping::setClipFlag(*this, true);
+    const tools::Rectangle aInitialWinRect(Point(nInitialOutOffX, nInitialOutOffY),
+                                           Size(nInitialOutWidth, nInitialOutHeight));
 
-        const tools::Rectangle aInitialWinRect(Point(nInitialOutOffX, nInitialOutOffY),
-                                               Size(nInitialOutWidth, nInitialOutHeight));
-
-        ImplInvalidateWindowContent(bNewPos, bCopyBits, aInitialWinRect, pOverlapRegion,
-                                    *pInitialRegion);
-
-        auto HasOutputShrunk = [](const OutputDevice* pOutDev, const Size& rInitialSize) {
-            return pOutDev->GetOutputWidthPixel() < rInitialSize.Width()
-                   || pOutDev->GetOutputHeightPixel() < rInitialSize.Height();
-        };
-
-        if (bNewPos || HasOutputShrunk(GetOutDev(), Size(nInitialOutWidth, nInitialOutHeight)))
-            ImplInvalidateParentOrOverlaps(*pInitialRegion);
-    }
+    bool bNeedsNativeClipUpdate = ImplInvalidateVisibleRegions(
+        bNewPos, bNewSize, bCopyBits, aInitialWinRect, pOverlapRegion, *pInitialRegion);
 
     // adapt system objects
     if (bNeedsNativeClipUpdate)
