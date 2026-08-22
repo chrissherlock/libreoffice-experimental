@@ -525,11 +525,8 @@ void Window::set_height_request(sal_Int32 nHeightRequest)
     if (!mpWindowImpl)
         return;
 
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
-
-    if (pWindowImpl->mnHeightRequest != nHeightRequest)
+    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+        pWindowImpl->mnHeightRequest != nHeightRequest)
     {
         pWindowImpl->mnHeightRequest = nHeightRequest;
         queue_resize();
@@ -541,11 +538,8 @@ void Window::set_width_request(sal_Int32 nWidthRequest)
     if (!mpWindowImpl)
         return;
 
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
-
-    if (pWindowImpl->mnWidthRequest != nWidthRequest)
+    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+        pWindowImpl->mnWidthRequest != nWidthRequest)
     {
         pWindowImpl->mnWidthRequest = nWidthRequest;
         queue_resize();
@@ -560,9 +554,8 @@ Size Window::get_ungrouped_preferred_size() const
         return aPreferredSize;
 
     // cache gets blown away by queue_resize
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     if (pWindowImpl->mnOptimalWidthCache == -1 || pWindowImpl->mnOptimalHeightCache == -1)
     {
         Size aOptimal(GetOptimalSize());
@@ -583,9 +576,7 @@ Size Window::get_preferred_size() const
 {
     Size aPreferredSize(get_ungrouped_preferred_size());
 
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
 
     if (!pWindowImpl->m_xSizeGroup)
         return aPreferredSize;
@@ -620,218 +611,189 @@ Size Window::get_preferred_size() const
 
 VclAlign Window::get_halign() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->meHalign;
 }
 
 void Window::set_halign(VclAlign eAlign)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->meHalign = eAlign;
 }
 
 VclAlign Window::get_valign() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->meValign;
 }
 
 void Window::set_valign(VclAlign eAlign)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->meValign = eAlign;
 }
 
 bool Window::get_hexpand() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mbHexpand;
 }
 
 void Window::set_hexpand(bool bExpand)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mbHexpand = bExpand;
 }
 
 bool Window::get_vexpand() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mbVexpand;
 }
 
 void Window::set_vexpand(bool bExpand)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mbVexpand = bExpand;
 }
 
 bool Window::get_expand() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mbExpand;
 }
 
 void Window::set_expand(bool bExpand)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mbExpand = bExpand;
 }
 
 VclPackType Window::get_pack_type() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mePackType;
 }
 
 void Window::set_pack_type(VclPackType ePackType)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mePackType = ePackType;
 }
 
 sal_Int32 Window::get_padding() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnPadding;
 }
 
 void Window::set_padding(sal_Int32 nPadding)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mnPadding = nPadding;
 }
 
 bool Window::get_fill() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mbFill;
 }
 
 void Window::set_fill(bool bFill)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mbFill = bFill;
 }
 
 sal_Int32 Window::get_grid_width() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnGridWidth;
 }
 
 void Window::set_grid_width(sal_Int32 nCols)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mnGridWidth = nCols;
 }
 
 sal_Int32 Window::get_grid_left_attach() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnGridLeftAttach;
 }
 
 void Window::set_grid_left_attach(sal_Int32 nAttach)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mnGridLeftAttach = nAttach;
 }
 
 sal_Int32 Window::get_grid_height() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnGridHeight;
 }
 
 void Window::set_grid_height(sal_Int32 nRows)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mnGridHeight = nRows;
 }
 
 sal_Int32 Window::get_grid_top_attach() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnGridTopAttach;
 }
 
 void Window::set_grid_top_attach(sal_Int32 nAttach)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mnGridTopAttach = nAttach;
 }
 
 void Window::set_border_width(sal_Int32 nBorderWidth)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mnBorderWidth = nBorderWidth;
 }
 
 sal_Int32 Window::get_border_width() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnBorderWidth;
 }
 
 void Window::set_margin_start(sal_Int32 nWidth)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
-    if (pWindowImpl->mnMarginLeft != nWidth)
+    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl(); pWindowImpl->mnMarginLeft != nWidth)
     {
         pWindowImpl->mnMarginLeft = nWidth;
         queue_resize();
@@ -840,18 +802,15 @@ void Window::set_margin_start(sal_Int32 nWidth)
 
 sal_Int32 Window::get_margin_start() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnMarginLeft;
 }
 
 void Window::set_margin_end(sal_Int32 nWidth)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
-    if (pWindowImpl->mnMarginRight != nWidth)
+    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+        pWindowImpl->mnMarginRight != nWidth)
     {
         pWindowImpl->mnMarginRight = nWidth;
         queue_resize();
@@ -860,18 +819,14 @@ void Window::set_margin_end(sal_Int32 nWidth)
 
 sal_Int32 Window::get_margin_end() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnMarginRight;
 }
 
 void Window::set_margin_top(sal_Int32 nWidth)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
-    if (pWindowImpl->mnMarginTop != nWidth)
+    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl(); pWindowImpl->mnMarginTop != nWidth)
     {
         pWindowImpl->mnMarginTop = nWidth;
         queue_resize();
@@ -880,18 +835,15 @@ void Window::set_margin_top(sal_Int32 nWidth)
 
 sal_Int32 Window::get_margin_top() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnMarginTop;
 }
 
 void Window::set_margin_bottom(sal_Int32 nWidth)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
-    if (pWindowImpl->mnMarginBottom != nWidth)
+    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+        pWindowImpl->mnMarginBottom != nWidth)
     {
         pWindowImpl->mnMarginBottom = nWidth;
         queue_resize();
@@ -900,79 +852,69 @@ void Window::set_margin_bottom(sal_Int32 nWidth)
 
 sal_Int32 Window::get_margin_bottom() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnMarginBottom;
 }
 
 sal_Int32 Window::get_height_request() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnHeightRequest;
 }
 
 sal_Int32 Window::get_width_request() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mnWidthRequest;
 }
 
 bool Window::get_secondary() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mbSecondary;
 }
 
 void Window::set_secondary(bool bSecondary)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mbSecondary = bSecondary;
 }
 
 bool Window::get_non_homogeneous() const
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     return pWindowImpl->mbNonHomogeneous;
 }
 
 void Window::set_non_homogeneous(bool bNonHomogeneous)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
     pWindowImpl->mbNonHomogeneous = bNonHomogeneous;
 }
 
 void Window::add_to_size_group(const std::shared_ptr<VclSizeGroup>& xGroup)
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
-    //To-Do, multiple groups
+    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+
+    // TODO multiple groups
     pWindowImpl->m_xSizeGroup = xGroup;
     pWindowImpl->m_xSizeGroup->insert(this);
+
     if (VclSizeGroupMode::NONE != pWindowImpl->m_xSizeGroup->get_mode())
         queue_resize();
 }
 
 void Window::remove_from_all_size_groups()
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
-    //To-Do, multiple groups
-    if (pWindowImpl->m_xSizeGroup)
+    // TODO multiple groups
+    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl(); pWindowImpl->m_xSizeGroup)
     {
         if (VclSizeGroupMode::NONE != pWindowImpl->m_xSizeGroup->get_mode())
             queue_resize();
@@ -992,7 +934,9 @@ void Window::ImplAdjustNWFSizes()
 {
     for (Window* pWin = GetWindow(GetWindowType::FirstChild); pWin;
          pWin = pWin->GetWindow(GetWindowType::Next))
+    {
         pWin->ImplAdjustNWFSizes();
+    }
 }
 
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
