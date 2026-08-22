@@ -1042,6 +1042,26 @@ bool Window::ImplUpdatePosX(tools::Long nX, bool bXAlreadyMirrored, bool bCopyBi
     return false;
 }
 
+bool Window::ImplUpdatePosY(tools::Long nY, bool bCopyBits,
+                            std::unique_ptr<vcl::Region>& rpOverlapRegion)
+{
+    // check maPos as well, as it could have been changed for client windows (ImplCallMove())
+    if (nY == mpWindowImpl->mnY && nY == mpWindowImpl->maPos.Y())
+        return false;
+
+    if (bCopyBits && !rpOverlapRegion)
+    {
+        rpOverlapRegion.reset(new vcl::Region());
+        vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *rpOverlapRegion, false,
+                                         true);
+    }
+
+    mpWindowImpl->mnY = nY;
+    mpWindowImpl->maPos.setY(nY);
+
+    return true;
+}
+
 void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidth,
                                tools::Long nHeight, PosSizeFlags nFlags)
 {
@@ -1098,22 +1118,8 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
         bNewPos = true;
     }
 
-    if (nFlags & PosSizeFlags::Y)
-    {
-        // check maPos as well, as it could have been changed for client windows (ImplCallMove())
-        if (nY != mpWindowImpl->mnY || nY != mpWindowImpl->maPos.Y())
-        {
-            if (bCopyBits && !pOverlapRegion)
-            {
-                pOverlapRegion.reset(new vcl::Region());
-                vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *pOverlapRegion,
-                                                 false, true);
-            }
-            mpWindowImpl->mnY = nY;
-            mpWindowImpl->maPos.setY(nY);
-            bNewPos = true;
-        }
-    }
+    if ((nFlags & PosSizeFlags::Y) && ImplUpdatePosY(nY, bCopyBits, pOverlapRegion))
+        bNewPos = true;
 
     if (!(bNewPos || bNewSize))
         return;
