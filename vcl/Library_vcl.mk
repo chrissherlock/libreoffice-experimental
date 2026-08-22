@@ -237,6 +237,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/taskpanelist \
     vcl/source/window/toolbox2 \
     vcl/source/window/toolbox \
+    vcl/source/window/lokwindow \
     vcl/source/window/WindowOutputDevice \
     vcl/source/window/WindowImpl \
     vcl/source/window/window_core \
