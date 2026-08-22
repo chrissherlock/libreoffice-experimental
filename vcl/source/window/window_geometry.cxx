@@ -996,21 +996,21 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     if ((nFlags & PosSizeFlags::Height) && nHeight < 0)
         nHeight = 0;
 
-    tools::Long nOldOutOffX = GetOutDev()->GetDeviceOriginX();
-    tools::Long nOldOutOffY = GetOutDev()->GetDeviceOriginY();
-    tools::Long nOldOutWidth = GetOutDev()->GetOutputWidthPixel();
-    tools::Long nOldOutHeight = GetOutDev()->GetOutputHeightPixel();
+    const tools::Long nInitialOutOffX = GetOutDev()->GetDeviceOriginX();
+    const tools::Long nInitialOutOffY = GetOutDev()->GetDeviceOriginY();
+    const tools::Long nInitialOutWidth = GetOutDev()->GetOutputWidthPixel();
+    const tools::Long nInitialOutHeight = GetOutDev()->GetOutputHeightPixel();
 
-    std::unique_ptr<vcl::Region> pOldRegion;
+    std::unique_ptr<vcl::Region> pInitialRegion;
 
     if (IsReallyVisible())
     {
-        tools::Rectangle aOldWinRect(Point(nOldOutOffX, nOldOutOffY),
-                                     Size(nOldOutWidth, nOldOutHeight));
-        pOldRegion.reset(new vcl::Region(aOldWinRect));
+        tools::Rectangle aInitialWinRect(Point(nInitialOutOffX, nInitialOutOffY),
+                                         Size(nInitialOutWidth, nInitialOutHeight));
+        pInitialRegion.reset(new vcl::Region(aInitialWinRect));
 
         if (mpWindowImpl->mpClippingState->mbWinRegion)
-            pOldRegion->Intersect(
+            pInitialRegion->Intersect(
                 GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
     }
 
@@ -1175,8 +1175,8 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
         }
 
         // invalidate window content ?
-        if (bNewPos || (GetOutDev()->GetOutputWidthPixel() > nOldOutWidth)
-            || (GetOutDev()->GetOutputHeightPixel() > nOldOutHeight))
+        if (bNewPos || (GetOutDev()->GetOutputWidthPixel() > nInitialOutWidth)
+            || (GetOutDev()->GetOutputHeightPixel() > nInitialOutHeight))
         {
             if (bNewPos)
             {
@@ -1193,18 +1193,18 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
                     vcl::clipping::clipBoundaries(*this, aRegion, false, true);
                     if (!pOverlapRegion->IsEmpty())
                     {
-                        pOverlapRegion->Move(GetOutDev()->GetDeviceOriginX() - nOldOutOffX,
-                                             GetOutDev()->GetDeviceOriginY() - nOldOutOffY);
+                        pOverlapRegion->Move(GetOutDev()->GetDeviceOriginX() - nInitialOutOffX,
+                                             GetOutDev()->GetDeviceOriginY() - nInitialOutOffY);
                         aRegion.Exclude(*pOverlapRegion);
                     }
                     if (!aRegion.IsEmpty())
                     {
                         // adapt Paint areas
                         ImplMoveAllInvalidateRegions(
-                            tools::Rectangle(Point(nOldOutOffX, nOldOutOffY),
-                                             Size(nOldOutWidth, nOldOutHeight)),
-                            GetOutDev()->GetDeviceOriginX() - nOldOutOffX,
-                            GetOutDev()->GetDeviceOriginY() - nOldOutOffY, true);
+                            tools::Rectangle(Point(nInitialOutOffX, nInitialOutOffY),
+                                             Size(nInitialOutWidth, nInitialOutHeight)),
+                            GetOutDev()->GetDeviceOriginX() - nInitialOutOffX,
+                            GetOutDev()->GetDeviceOriginY() - nInitialOutOffY, true);
                         SalGraphics* pGraphics = ImplGetFrameGraphics();
                         if (pGraphics)
                         {
@@ -1214,8 +1214,9 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
                             if (bSelectClipRegion)
                             {
                                 pGraphics->CopyArea(GetOutDev()->GetDeviceOriginX(),
-                                                    GetOutDev()->GetDeviceOriginY(), nOldOutOffX,
-                                                    nOldOutOffY, nOldOutWidth, nOldOutHeight,
+                                                    GetOutDev()->GetDeviceOriginY(),
+                                                    nInitialOutOffX, nInitialOutOffY,
+                                                    nInitialOutWidth, nInitialOutHeight,
                                                     *GetOutDev());
                             }
                             else
@@ -1241,7 +1242,7 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
             else
             {
                 vcl::Region aRegion(GetOutputRectPixel());
-                aRegion.Exclude(*pOldRegion);
+                aRegion.Exclude(*pInitialRegion);
                 if (mpWindowImpl->mpClippingState->mbWinRegion)
                     aRegion.Intersect(GetOutDev()->GetMapper().ViewToDevice(
                         mpWindowImpl->mpClippingState->maWinRegion));
@@ -1252,10 +1253,10 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
         }
 
         // invalidate Parent or Overlaps
-        if (bNewPos || (GetOutDev()->GetOutputWidthPixel() < nOldOutWidth)
-            || (GetOutDev()->GetOutputHeightPixel() < nOldOutHeight))
+        if (bNewPos || (GetOutDev()->GetOutputWidthPixel() < nInitialOutWidth)
+            || (GetOutDev()->GetOutputHeightPixel() < nInitialOutHeight))
         {
-            vcl::Region aRegion(*pOldRegion);
+            vcl::Region aRegion(*pInitialRegion);
             if (!mpWindowImpl->mbPaintTransparent)
                 vcl::clipping::excludeWindowRegion(*this, aRegion);
 
