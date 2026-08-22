@@ -1564,6 +1564,8 @@ private:
     SAL_DLLPRIVATE WindowImpl* ImplGetEffectiveWindowImpl() const;
     SAL_DLLPRIVATE bool ImplRequiresParentLayoutUpdate(const vcl::Window* pParent) const;
     SAL_DLLPRIVATE void ImplQueueResizeOnGroup() const;
+    SAL_DLLPRIVATE bool ImplHasValidClippingRegion() const;
+    SAL_DLLPRIVATE bool ImplShouldPaintImmediately() const;
 };
 }
 
