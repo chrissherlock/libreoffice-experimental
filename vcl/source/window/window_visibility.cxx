@@ -75,13 +75,13 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
     if (!mpWindowImpl || mpWindowImpl->mbVisible == bVisible)
         return;
 
-    VclPtr<vcl::Window> xWindow(this);
-
     bool bRealVisibilityChanged = false;
     mpWindowImpl->mbVisible = bVisible;
 
     if (!bVisible)
     {
+        VclPtr<vcl::Window> xWindow(this);
+
         ImplHideAllOverlaps();
         if (!xWindow->mpWindowImpl)
             return;
@@ -122,6 +122,9 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
             if (!mpWindowImpl->mbFrame)
                 ImplInvalidateParentOnHide(aInvRegion);
         }
+
+        if (!xWindow->mpWindowImpl)
+            return;
     }
     else
     {
@@ -193,8 +196,12 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
             }
         }
 
+        VclPtr<vcl::Window> xWindow(this);
+
         if (mpWindowImpl->mpBorderWindow)
+        {
             mpWindowImpl->mpBorderWindow->Show(true, nFlags);
+        }
         else if (mpWindowImpl->mbFrame)
         {
             // #106431#, hide SplashScreen
@@ -222,6 +229,7 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
                 bool bNoActivate(nFlags & (ShowFlags::NoActivate | ShowFlags::NoFocusChange));
                 mpWindowImpl->mpFrame->Show(true, bNoActivate);
             }
+
             if (!xWindow->mpWindowImpl)
                 return;
 
@@ -245,9 +253,6 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
 
         ImplShowAllOverlaps();
     }
-
-    if (!xWindow->mpWindowImpl)
-        return;
 
     // the SHOW/HIDE events also serve as indicators to send child creation/destroy events to the access bridge
     // However, the access bridge only uses this event if the data member is not NULL (it's kind of a hack that
