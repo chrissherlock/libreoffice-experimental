@@ -96,13 +96,20 @@ vcl::Window* Window::ImplTransferFocus()
     return pOverlapWindow;
 }
 
+bool Window::ImplShouldPassFocusToLastWindow() const
+{
+    return HasFocus() && mpWindowImpl->mpLastFocusWindow
+           && !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus);
+}
+
 void Window::GetFocus()
 {
-    if (HasFocus() && mpWindowImpl->mpLastFocusWindow
-        && !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus))
+    if (ImplShouldPassFocusToLastWindow())
     {
         VclPtr<vcl::Window> xWindow(this);
+
         mpWindowImpl->mpLastFocusWindow->GrabFocus();
+
         if (xWindow->isDisposed())
             return;
     }
