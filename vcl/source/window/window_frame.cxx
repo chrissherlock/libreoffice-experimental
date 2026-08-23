@@ -339,41 +339,67 @@ void Window::ImplInitSettings(WinBits nStyle)
 void Window::ImplInitAppFontData(vcl::Window const* pWindow)
 {
     ImplSVData* pSVData = ImplGetSVData();
-    tools::Long nTextHeight = pWindow->GetTextHeight();
-    tools::Long nTextWidth = pWindow->approximate_char_width() * 8;
-    tools::Long nSymHeight = nTextHeight * 4;
+
+    // VCL dialog units (AppFonts) are historically based on an 8-character
+    // width average and scaled by 10 internally for mathematical precision.
+    constexpr tools::Long nCharWidthMultiplier = 8;
+    constexpr tools::Long nSymmetryHeightMultiplier = 4;
+    constexpr tools::Long nSymmetryPadding = 5;
+    constexpr tools::Long nAppFontPrecision = 10;
+    constexpr tools::Long nAppFontXDivisor = 8;
+
+    const tools::Long nTextHeight = pWindow->GetTextHeight();
+    const tools::Long nSymHeight = nTextHeight * nSymmetryHeightMultiplier;
+
+    tools::Long nTextWidth = pWindow->approximate_char_width() * nCharWidthMultiplier;
+
     // Make the basis wider if the font is too narrow
     // such that the dialog looks symmetrical and does not become too narrow.
     // Add some extra space when the dialog has the same width,
     // as a little more space is better.
     if (nSymHeight > nTextWidth)
         nTextWidth = nSymHeight;
-    else if (nSymHeight + 5 > nTextWidth)
-        nTextWidth = nSymHeight + 5;
-    pSVData->maGDIData.mnAppFontX = nTextWidth * 10 / 8;
-    pSVData->maGDIData.mnAppFontY = nTextHeight * 10;
+    else if (nSymHeight + nSymmetryPadding > nTextWidth)
+        nTextWidth = nSymHeight + nSymmetryPadding;
+
+    pSVData->maGDIData.mnAppFontX = (nTextWidth * nAppFontPrecision) / nAppFontXDivisor;
+    pSVData->maGDIData.mnAppFontY = nTextHeight * nAppFontPrecision;
 
 #ifdef MACOSX
     // FIXME: this is currently only on macOS, check with other
     // platforms
-    if (pSVData->maNWFData.mbNoFocusRects)
+    if (!pSVData->maNWFData.mbNoFocusRects)
+        return;
+
+    constexpr tools::Long nMinMacControlSize = 10;
+    constexpr tools::Long nMacBorderPadding = 4;
+    constexpr tools::Long nMacBorderDivisor = 4;
+
+    // try to find out whether there is a large correction
+    // of control sizes, if yes, make app font scalings larger
+    // so dialog positioning is not completely off
+    ImplControlValue aControlValue;
+
+    const tools::Long nRegionWidth
+        = nTextWidth < nMinMacControlSize ? nMinMacControlSize : nTextWidth;
+    const tools::Long nRegionHeight
+        = nTextHeight < nMinMacControlSize ? nMinMacControlSize : nTextHeight;
+
+    tools::Rectangle aCtrlRegion(Point(), Size(nRegionWidth, nRegionHeight));
+    tools::Rectangle aBoundingRgn(aCtrlRegion);
+    tools::Rectangle aContentRgn(aCtrlRegion);
+
+    if (pWindow->GetNativeControlRegion(ControlType::Editbox, ControlPart::Entire, aCtrlRegion,
+                                        ControlState::ENABLED, aControlValue, aBoundingRgn,
+                                        aContentRgn))
     {
-        // try to find out whether there is a large correction
-        // of control sizes, if yes, make app font scalings larger
-        // so dialog positioning is not completely off
-        ImplControlValue aControlValue;
-        tools::Rectangle aCtrlRegion(
-            Point(), Size(nTextWidth < 10 ? 10 : nTextWidth, nTextHeight < 10 ? 10 : nTextHeight));
-        tools::Rectangle aBoundingRgn(aCtrlRegion);
-        tools::Rectangle aContentRgn(aCtrlRegion);
-        if (pWindow->GetNativeControlRegion(ControlType::Editbox, ControlPart::Entire, aCtrlRegion,
-                                            ControlState::ENABLED, aControlValue, aBoundingRgn,
-                                            aContentRgn))
+        // comment: the magical +6 is for the extra border in bordered
+        // (which is the standard) edit fields
+        if (aContentRgn.GetHeight() - nTextHeight
+            > (nTextHeight + nMacBorderPadding) / nMacBorderDivisor)
         {
-            // comment: the magical +6 is for the extra border in bordered
-            // (which is the standard) edit fields
-            if (aContentRgn.GetHeight() - nTextHeight > (nTextHeight + 4) / 4)
-                pSVData->maGDIData.mnAppFontY = (aContentRgn.GetHeight() - 4) * 10;
+            pSVData->maGDIData.mnAppFontY
+                = (aContentRgn.GetHeight() - nMacBorderPadding) * nAppFontPrecision;
         }
     }
 #endif
