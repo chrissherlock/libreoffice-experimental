@@ -1605,6 +1605,7 @@ private:
 
     // focus
     SAL_DLLPRIVATE vcl::Window* ImplResetOverlapFocusState(vcl::Window* pOverlapWindow);
+    SAL_DLLPRIVATE void ImplTransferFocusToParent();
 };
 }
 
