@@ -173,6 +173,103 @@ void Window::ImplRaiseOverlapWindow(ShowFlags nFlags)
         FlashWindow(); // Inform user about window if we did not popup it at foreground
 }
 
+bool Window::ImplUpdateRealVisibility(ShowFlags nFlags)
+{
+    vcl::Window* pVisibilityParent = ImplGetVisibilityParent();
+
+    // If it's not a frame and the parent isn't actually on screen,
+    // we don't need to do any real visibility rendering yet.
+    if (!mpWindowImpl->mbFrame && !pVisibilityParent->mpWindowImpl->mbReallyVisible)
+        return false;
+
+    // if a window becomes visible, send all child windows a StateChange,
+    // such that these can initialise themselves
+    ImplCallInitShow();
+    ImplRaiseOverlapWindow(nFlags);
+
+    // adjust mpWindowImpl->mbReallyVisible
+    bool bRealVisibilityChanged = !mpWindowImpl->mbReallyVisible;
+    ImplSetReallyVisible();
+
+    // assure clip rectangles will be recalculated
+    vcl::clipping::setClipFlag(*this);
+
+    if (!mpWindowImpl->mbFrame)
+    {
+        InvalidateFlags nInvalidateFlags = InvalidateFlags::Children;
+
+        if (!IsPaintTransparent())
+            nInvalidateFlags |= InvalidateFlags::NoTransparent;
+
+        ImplInvalidate(nullptr, nInvalidateFlags);
+        ImplGenerateMouseMove();
+    }
+
+    return bRealVisibilityChanged;
+}
+
+bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
+{
+    if (mpWindowImpl->mpBorderWindow)
+    {
+        mpWindowImpl->mpBorderWindow->Show(true, nFlags);
+        return true;
+    }
+
+    if (!mpWindowImpl->mbFrame)
+        return true;
+
+    // #106431#, hide SplashScreen
+    ImplSVData* pSVData = ImplGetSVData();
+    if (!pSVData->mpIntroWindow)
+    {
+        // The right way would be just to call this (not even in the 'if')
+        auto pApp = GetpApp();
+        if (pApp)
+            pApp->InitFinished();
+    }
+    else if (!ImplIsWindowOrChild(pSVData->mpIntroWindow))
+    {
+        // ... but the VCL splash is broken, and it needs this
+        // (for ./soffice .uno:NewDoc)
+        pSVData->mpIntroWindow->Hide();
+    }
+
+    //SAL_WARN_IF( mpWindowImpl->mbSuppressAccessibilityEvents, "vcl", "Window::Show() - Frame reactivated");
+    mpWindowImpl->mbSuppressAccessibilityEvents = false;
+
+    mpWindowImpl->mbPaintFrame = true;
+
+    VclPtr<vcl::Window> xWindow(this);
+
+    if (!Application::IsHeadlessModeEnabled())
+    {
+        bool bNoActivate(nFlags & (ShowFlags::NoActivate | ShowFlags::NoFocusChange));
+        mpWindowImpl->mpFrame->Show(true, bNoActivate);
+    }
+
+    // Check if the window was destroyed during the system Show() call
+    if (!xWindow->mpWindowImpl)
+        return false;
+
+    // Query the correct size of the window, if we are waiting for
+    // a system resize
+    if (mpWindowImpl->mbWaitSystemResize)
+    {
+        const Size aOutSize = mpWindowImpl->mpFrame->GetClientSize();
+        ImplHandleResize(this, aOutSize.Width(), aOutSize.Height());
+    }
+
+    if (mpWindowImpl->mpFrameData->mpBuffer
+        && mpWindowImpl->mpFrameData->mpBuffer->GetOutputSizePixel() != GetOutputSizePixel())
+    {
+        // Make sure that the buffer size matches the window size, even if no resize was needed.
+        mpWindowImpl->mpFrameData->mpBuffer->SetOutputSizePixel(GetOutputSizePixel());
+    }
+
+    return true; // Window is still alive
+}
+
 void Window::Show(bool bVisible, ShowFlags nFlags)
 {
     if (!mpWindowImpl || mpWindowImpl->mbVisible == bVisible)
@@ -205,87 +302,9 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
 
         CompatStateChanged(StateChangedType::Visible);
 
-        vcl::Window* pVisibilityParent = ImplGetVisibilityParent();
+        bRealVisibilityChanged = ImplUpdateRealVisibility(nFlags);
 
-        if (mpWindowImpl->mbFrame || pVisibilityParent->mpWindowImpl->mbReallyVisible)
-        {
-            // if a window becomes visible, send all child windows a StateChange,
-            // such that these can initialise themselves
-            ImplCallInitShow();
-            ImplRaiseOverlapWindow(nFlags);
-
-            // adjust mpWindowImpl->mbReallyVisible
-            bRealVisibilityChanged = !mpWindowImpl->mbReallyVisible;
-            ImplSetReallyVisible();
-
-            // assure clip rectangles will be recalculated
-            vcl::clipping::setClipFlag(*this);
-
-            if (!mpWindowImpl->mbFrame)
-            {
-                InvalidateFlags nInvalidateFlags = InvalidateFlags::Children;
-
-                if (!IsPaintTransparent())
-                    nInvalidateFlags |= InvalidateFlags::NoTransparent;
-
-                ImplInvalidate(nullptr, nInvalidateFlags);
-                ImplGenerateMouseMove();
-            }
-        }
-
-        VclPtr<vcl::Window> xWindow(this);
-
-        if (mpWindowImpl->mpBorderWindow)
-        {
-            mpWindowImpl->mpBorderWindow->Show(true, nFlags);
-        }
-        else if (mpWindowImpl->mbFrame)
-        {
-            // #106431#, hide SplashScreen
-            ImplSVData* pSVData = ImplGetSVData();
-            if (!pSVData->mpIntroWindow)
-            {
-                // The right way would be just to call this (not even in the 'if')
-                auto pApp = GetpApp();
-                if (pApp)
-                    pApp->InitFinished();
-            }
-            else if (!ImplIsWindowOrChild(pSVData->mpIntroWindow))
-            {
-                // ... but the VCL splash is broken, and it needs this
-                // (for ./soffice .uno:NewDoc)
-                pSVData->mpIntroWindow->Hide();
-            }
-
-            //SAL_WARN_IF( mpWindowImpl->mbSuppressAccessibilityEvents, "vcl", "Window::Show() - Frame reactivated");
-            mpWindowImpl->mbSuppressAccessibilityEvents = false;
-
-            mpWindowImpl->mbPaintFrame = true;
-            if (!Application::IsHeadlessModeEnabled())
-            {
-                bool bNoActivate(nFlags & (ShowFlags::NoActivate | ShowFlags::NoFocusChange));
-                mpWindowImpl->mpFrame->Show(true, bNoActivate);
-            }
-
-            if (!xWindow->mpWindowImpl)
-                return;
-
-            // Query the correct size of the window, if we are waiting for
-            // a system resize
-            if (mpWindowImpl->mbWaitSystemResize)
-            {
-                const Size aOutSize = mpWindowImpl->mpFrame->GetClientSize();
-                ImplHandleResize(this, aOutSize.Width(), aOutSize.Height());
-            }
-
-            if (mpWindowImpl->mpFrameData->mpBuffer
-                && mpWindowImpl->mpFrameData->mpBuffer->GetOutputSizePixel()
-                       != GetOutputSizePixel())
-                // Make sure that the buffer size matches the window size, even if no resize was needed.
-                mpWindowImpl->mpFrameData->mpBuffer->SetOutputSizePixel(GetOutputSizePixel());
-        }
-
-        if (!xWindow->mpWindowImpl)
+        if (!ImplShowBorderOrFrame(nFlags))
             return;
 
         ImplShowAllOverlaps();
