@@ -407,20 +407,15 @@ void Window::ImplInitAppFontData(vcl::Window const* pWindow)
 
 SalGraphics* Window::ImplGetFrameGraphics() const
 {
-    if (mpWindowImpl->mpFrameWindow->GetOutDev()->mpGraphics)
-    {
-        mpWindowImpl->mpFrameWindow->GetOutDev()->GetClipState().Invalidate();
-    }
-    else
-    {
-        OutputDevice* pFrameWinOutDev = mpWindowImpl->mpFrameWindow->GetOutDev();
-        if (!pFrameWinOutDev->AcquireGraphics())
-        {
-            return nullptr;
-        }
-    }
-    mpWindowImpl->mpFrameWindow->GetOutDev()->mpGraphics->ResetClipRegion();
-    return mpWindowImpl->mpFrameWindow->GetOutDev()->mpGraphics;
+    OutputDevice* pFrameWinOutDev = mpWindowImpl->mpFrameWindow->GetOutDev();
+
+    if (pFrameWinOutDev->mpGraphics)
+        pFrameWinOutDev->GetClipState().Invalidate();
+    else if (!pFrameWinOutDev->AcquireGraphics())
+        return nullptr;
+
+    pFrameWinOutDev->mpGraphics->ResetClipRegion();
+    return pFrameWinOutDev->mpGraphics;
 }
 
 } // end vcl namespace
