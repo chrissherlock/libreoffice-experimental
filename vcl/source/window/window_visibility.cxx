@@ -70,6 +70,32 @@ void Window::ImplInvalidateParentOnHide(vcl::Region& rInvRegion)
     ImplGenerateMouseMove();
 }
 
+vcl::Region Window::ImplGetWinClipRegion()
+{
+    if (mpWindowImpl->mpClippingState->mbInitWinClipRegion)
+        clipping::initWinClipRegion(*this);
+
+    return mpWindowImpl->mpClippingState->maWinClipRegion;
+}
+
+bool Window::ImplHideWindow(vcl::Region& rInvRegion, ShowFlags nFlags)
+{
+    if (!mpWindowImpl->mbReallyVisible)
+        return false;
+
+    bool bRealVisibilityChanged = mpWindowImpl->mbReallyVisible;
+    ImplResetReallyVisible();
+    vcl::clipping::setClipFlag(*this);
+
+    if (ImplShouldTransferFocusOnHide(nFlags))
+        mpWindowImpl->mpOverlapWindow->GrabFocus();
+
+    if (!mpWindowImpl->mbFrame)
+        ImplInvalidateParentOnHide(rInvRegion);
+
+    return bRealVisibilityChanged;
+}
+
 void Window::Show(bool bVisible, ShowFlags nFlags)
 {
     if (!mpWindowImpl || mpWindowImpl->mbVisible == bVisible)
@@ -104,23 +130,13 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
 
         if (mpWindowImpl->mbReallyVisible)
         {
-            if (mpWindowImpl->mpClippingState->mbInitWinClipRegion)
-                clipping::initWinClipRegion(*this);
+            vcl::Region aInvRegion = ImplGetWinClipRegion();
 
-            vcl::Region aInvRegion = mpWindowImpl->mpClippingState->maWinClipRegion;
-
+            // initWinClipRegion can trigger re-entrant events or disposal
             if (!xWindow->mpWindowImpl)
                 return;
 
-            bRealVisibilityChanged = mpWindowImpl->mbReallyVisible;
-            ImplResetReallyVisible();
-            vcl::clipping::setClipFlag(*this);
-
-            if (ImplShouldTransferFocusOnHide(nFlags))
-                mpWindowImpl->mpOverlapWindow->GrabFocus();
-
-            if (!mpWindowImpl->mbFrame)
-                ImplInvalidateParentOnHide(aInvRegion);
+            bRealVisibilityChanged = ImplHideWindow(aInvRegion, nFlags);
         }
 
         if (!xWindow->mpWindowImpl)

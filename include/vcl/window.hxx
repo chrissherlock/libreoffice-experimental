@@ -1612,6 +1612,8 @@ private:
     SAL_DLLPRIVATE void ImplExpandInvalidationForNativeWidget(vcl::Region& rInvRegion) const;
     SAL_DLLPRIVATE void ImplInvalidateParentOnHide(vcl::Region& rInvRegion);
     SAL_DLLPRIVATE bool ImplShouldTransferFocusOnHide(ShowFlags nFlags) const;
+    SAL_DLLPRIVATE vcl::Region ImplGetWinClipRegion();
+    SAL_DLLPRIVATE bool ImplHideWindow(vcl::Region& rInvRegion, ShowFlags nFlags);
 };
 }
 
