@@ -26,6 +26,19 @@
 
 namespace vcl
 {
+bool Window::ImplShouldTransferFocusOnHide(ShowFlags nFlags) const
+{
+    const bool bIsOverlapWindowAvailable = !mpWindowImpl->mbFrame
+                                           && mpWindowImpl->mpOverlapWindow->IsEnabled()
+                                           && mpWindowImpl->mpOverlapWindow->IsInputEnabled()
+                                           && !mpWindowImpl->mpOverlapWindow->IsInModalMode();
+
+    const bool bCanYieldFocus
+        = ImplIsOverlapWindow() && !(nFlags & ShowFlags::NoFocusChange) && HasChildPathFocus();
+
+    return bCanYieldFocus && bIsOverlapWindowAvailable;
+}
+
 void Window::Show(bool bVisible, ShowFlags nFlags)
 {
     if (!mpWindowImpl || mpWindowImpl->mbVisible == bVisible)
@@ -72,17 +85,8 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
             ImplResetReallyVisible();
             vcl::clipping::setClipFlag(*this);
 
-            if (ImplIsOverlapWindow() && !mpWindowImpl->mbFrame)
-            {
-                // convert focus
-                if (!(nFlags & ShowFlags::NoFocusChange) && HasChildPathFocus())
-                {
-                    if (mpWindowImpl->mpOverlapWindow->IsEnabled()
-                        && mpWindowImpl->mpOverlapWindow->IsInputEnabled()
-                        && !mpWindowImpl->mpOverlapWindow->IsInModalMode())
-                        mpWindowImpl->mpOverlapWindow->GrabFocus();
-                }
-            }
+            if (ImplShouldTransferFocusOnHide(nFlags))
+                mpWindowImpl->mpOverlapWindow->GrabFocus();
 
             if (!mpWindowImpl->mbFrame)
             {
