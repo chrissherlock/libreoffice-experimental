@@ -102,76 +102,6 @@ using namespace ::com::sun::star::datatransfer::dnd;
 
 namespace vcl {
 
-bool Window::ImplHasFocusedChild() const
-{
-    ImplSVData* pSVData = ImplGetSVData();
-    if (!pSVData->mpWinData->mpFocusWin || !IsAncestorOf(*pSVData->mpWinData->mpFocusWin))
-        return false;
-
-    // #122232#, this must not happen and is an application bug ! but we try some cleanup to hopefully avoid crashes, see below
-#if OSL_DEBUG_LEVEL > 0
-    OUString aTempStr = "Window (" + GetText() +
-            ") with focused child window destroyed ! THIS WILL LEAD TO CRASHES AND MUST BE FIXED !";
-    SAL_WARN("vcl", aTempStr);
-    Application::Abort(aTempStr);
-#endif
-
-    return true;
-}
-
-bool Window::ImplContainsFocus() const
-{
-    ImplSVData* pSVData = ImplGetSVData();
-    return (pSVData->mpWinData->mpFocusWin == this) || ImplHasFocusedChild();
-}
-
-vcl::Window* Window::ImplTransferFocus()
-{
-    vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
-
-    if (!ImplContainsFocus())
-        return pOverlapWindow;
-
-    ImplSVData* pSVData = ImplGetSVData();
-
-    if (mpWindowImpl->mbFrame)
-    {
-        pSVData->mpWinData->mpFocusWin = nullptr;
-        pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
-
-        return pOverlapWindow;
-    }
-
-    vcl::Window* pParent = GetParent();
-    vcl::Window* pBorderWindow = mpWindowImpl->mpBorderWindow;
-
-    // when windows overlap, give focus to the parent
-    // of the next FrameWindow
-    if (pBorderWindow)
-    {
-        if (pBorderWindow->ImplIsOverlapWindow())
-            pParent = pBorderWindow->mpWindowImpl->mpOverlapWindow;
-    }
-    else if (ImplIsOverlapWindow())
-    {
-        pParent = mpWindowImpl->mpOverlapWindow;
-    }
-
-    if (pParent && pParent->IsEnabled() && pParent->IsInputEnabled() && !pParent->IsInModalMode())
-        pParent->GrabFocus();
-    else
-        mpWindowImpl->mpFrameWindow->GrabFocus();
-
-    // If the focus was set back to 'this' set it to nothing
-    if (pSVData->mpWinData->mpFocusWin == this)
-    {
-        pSVData->mpWinData->mpFocusWin = nullptr;
-        pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
-    }
-
-    return pOverlapWindow;
-}
-
 // We will eventually being removing the inheritance of OutputDevice
 // from Window. It will be replaced with a transient relationship such
 // that the OutputDevice is only live for the scope of the Paint method.
@@ -317,26 +247,6 @@ void Window::Resize() {}
 void Window::Activate() {}
 
 void Window::Deactivate() {}
-
-void Window::GetFocus()
-{
-    if ( HasFocus() && mpWindowImpl->mpLastFocusWindow && !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus) )
-    {
-        VclPtr<vcl::Window> xWindow(this);
-        mpWindowImpl->mpLastFocusWindow->GrabFocus();
-        if( xWindow->isDisposed() )
-            return;
-    }
-
-    NotifyEvent aNEvt( NotifyEventType::GETFOCUS, this );
-    CompatNotify( aNEvt );
-}
-
-void Window::LoseFocus()
-{
-    NotifyEvent aNEvt( NotifyEventType::LOSEFOCUS, this );
-    CompatNotify( aNEvt );
-}
 
 void Window::SetCommandHdl(const Link<const CommandEvent&, bool>& rLink)
 {
@@ -1020,43 +930,6 @@ void Window::SetUpdateMode( bool bUpdate )
     }
 }
 
-void Window::GrabFocus()
-{
-    ImplGrabFocus( GetFocusFlags::NONE );
-}
-
-bool Window::HasFocus() const
-{
-    return (this == ImplGetSVData()->mpWinData->mpFocusWin);
-}
-
-void Window::GrabFocusToDocument()
-{
-    ImplGrabFocusToDocument(GetFocusFlags::NONE);
-}
-
-VclPtr<vcl::Window> Window::GetFocusedWindow() const
-{
-    if (mpWindowImpl && mpWindowImpl->mpFrameData)
-        return mpWindowImpl->mpFrameData->mpFocusWin;
-    else
-        return VclPtr<vcl::Window>();
-}
-
-void Window::SetFakeFocus( bool bFocus )
-{
-    ImplGetWindowImpl()->mbFakeFocusSet = bFocus;
-}
-
-bool Window::HasChildPathFocus( bool bSystemWindow ) const
-{
-
-    vcl::Window* pFocusWin = ImplGetSVData()->mpWinData->mpFocusWin;
-    if ( pFocusWin )
-        return ImplIsWindowOrChild( pFocusWin, bSystemWindow );
-    return false;
-}
-
 void Window::SetCursor( vcl::Cursor* pCursor )
 {
 
@@ -1415,27 +1288,6 @@ void Window::RequestDoubleBuffering(bool bRequest)
     }
     else
         mpWindowImpl->mpFrameData->mpBuffer.reset();
-}
-
-/*
- * The rationale here is that we moved destructors to
- * dispose and this altered a lot of code paths, that
- * are better left unchanged for now.
- */
-void Window::CompatGetFocus()
-{
-    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
-        Window::GetFocus();
-    else
-        GetFocus();
-}
-
-void Window::CompatLoseFocus()
-{
-    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
-        Window::LoseFocus();
-    else
-        LoseFocus();
 }
 
 void Window::CompatStateChanged( StateChangedType nStateChange )
