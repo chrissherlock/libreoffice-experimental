@@ -78,10 +78,18 @@ vcl::Region Window::ImplGetWinClipRegion()
     return mpWindowImpl->mpClippingState->maWinClipRegion;
 }
 
-bool Window::ImplHideWindow(vcl::Region& rInvRegion, ShowFlags nFlags)
+std::optional<bool> Window::ImplHideWindow(ShowFlags nFlags)
 {
     if (!mpWindowImpl->mbReallyVisible)
         return false;
+
+    VclPtr<vcl::Window> xWindow(this);
+
+    vcl::Region aInvRegion = ImplGetWinClipRegion();
+
+    // initWinClipRegion can trigger re-entrant events or disposal
+    if (!xWindow->mpWindowImpl)
+        return std::nullopt;
 
     bool bRealVisibilityChanged = mpWindowImpl->mbReallyVisible;
     ImplResetReallyVisible();
@@ -91,7 +99,47 @@ bool Window::ImplHideWindow(vcl::Region& rInvRegion, ShowFlags nFlags)
         mpWindowImpl->mpOverlapWindow->GrabFocus();
 
     if (!mpWindowImpl->mbFrame)
-        ImplInvalidateParentOnHide(rInvRegion);
+        ImplInvalidateParentOnHide(aInvRegion);
+
+    return bRealVisibilityChanged;
+}
+
+std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
+{
+    VclPtr<vcl::Window> xWindow(this);
+
+    ImplHideAllOverlaps();
+    if (!xWindow->mpWindowImpl)
+        return std::nullopt;
+
+    if (mpWindowImpl->mpBorderWindow)
+    {
+        bool bOldUpdate = mpWindowImpl->mpBorderWindow->mpWindowImpl->mbNoParentUpdate;
+        if (mpWindowImpl->mbNoParentUpdate)
+            mpWindowImpl->mpBorderWindow->mpWindowImpl->mbNoParentUpdate = true;
+        mpWindowImpl->mpBorderWindow->Show(false, nFlags);
+        mpWindowImpl->mpBorderWindow->mpWindowImpl->mbNoParentUpdate = bOldUpdate;
+    }
+    else if (mpWindowImpl->mbFrame)
+    {
+        mpWindowImpl->mbSuppressAccessibilityEvents = true;
+        mpWindowImpl->mpFrame->Show(false);
+    }
+
+    CompatStateChanged(StateChangedType::Visible);
+
+    bool bRealVisibilityChanged = false;
+    if (mpWindowImpl->mbReallyVisible)
+    {
+        std::optional<bool> bResult = ImplHideWindow(nFlags);
+        if (!bResult)
+            return std::nullopt;
+
+        bRealVisibilityChanged = *bResult;
+    }
+
+    if (!xWindow->mpWindowImpl)
+        return std::nullopt;
 
     return bRealVisibilityChanged;
 }
@@ -106,41 +154,11 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
 
     if (!bVisible)
     {
-        VclPtr<vcl::Window> xWindow(this);
-
-        ImplHideAllOverlaps();
-        if (!xWindow->mpWindowImpl)
+        std::optional<bool> bResult = ImplHideCascade(nFlags);
+        if (!bResult)
             return;
 
-        if (mpWindowImpl->mpBorderWindow)
-        {
-            bool bOldUpdate = mpWindowImpl->mpBorderWindow->mpWindowImpl->mbNoParentUpdate;
-            if (mpWindowImpl->mbNoParentUpdate)
-                mpWindowImpl->mpBorderWindow->mpWindowImpl->mbNoParentUpdate = true;
-            mpWindowImpl->mpBorderWindow->Show(false, nFlags);
-            mpWindowImpl->mpBorderWindow->mpWindowImpl->mbNoParentUpdate = bOldUpdate;
-        }
-        else if (mpWindowImpl->mbFrame)
-        {
-            mpWindowImpl->mbSuppressAccessibilityEvents = true;
-            mpWindowImpl->mpFrame->Show(false);
-        }
-
-        CompatStateChanged(StateChangedType::Visible);
-
-        if (mpWindowImpl->mbReallyVisible)
-        {
-            vcl::Region aInvRegion = ImplGetWinClipRegion();
-
-            // initWinClipRegion can trigger re-entrant events or disposal
-            if (!xWindow->mpWindowImpl)
-                return;
-
-            bRealVisibilityChanged = ImplHideWindow(aInvRegion, nFlags);
-        }
-
-        if (!xWindow->mpWindowImpl)
-            return;
+        bRealVisibilityChanged = *bResult;
     }
     else
     {
