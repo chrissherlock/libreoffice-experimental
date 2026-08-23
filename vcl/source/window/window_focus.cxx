@@ -48,6 +48,15 @@ bool Window::ImplContainsFocus() const
     return (pSVData->mpWinData->mpFocusWin == this) || ImplHasFocusedChild();
 }
 
+vcl::Window* Window::ImplResetOverlapFocusState(vcl::Window* pOverlapWindow)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    pSVData->mpWinData->mpFocusWin = nullptr;
+    pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
+    return pOverlapWindow;
+}
+
 vcl::Window* Window::ImplTransferFocus()
 {
     vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
@@ -58,12 +67,7 @@ vcl::Window* Window::ImplTransferFocus()
     ImplSVData* pSVData = ImplGetSVData();
 
     if (mpWindowImpl->mbFrame)
-    {
-        pSVData->mpWinData->mpFocusWin = nullptr;
-        pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
-
-        return pOverlapWindow;
-    }
+        return ImplResetOverlapFocusState(pOverlapWindow);
 
     vcl::Window* pParent = GetParent();
     vcl::Window* pBorderWindow = mpWindowImpl->mpBorderWindow;
@@ -86,10 +90,7 @@ vcl::Window* Window::ImplTransferFocus()
 
     // If the focus was set back to 'this' set it to nothing
     if (pSVData->mpWinData->mpFocusWin == this)
-    {
-        pSVData->mpWinData->mpFocusWin = nullptr;
-        pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
-    }
+        return ImplResetOverlapFocusState(pOverlapWindow);
 
     return pOverlapWindow;
 }
