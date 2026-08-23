@@ -157,6 +157,22 @@ vcl::Window* Window::ImplGetVisibilityParent() const
     return ImplIsOverlapWindow() ? mpWindowImpl->mpOverlapWindow.get() : ImplGetParent();
 }
 
+void Window::ImplRaiseOverlapWindow(ShowFlags nFlags)
+{
+    // If it is a SystemWindow it automatically pops up on top of
+    // all other windows if needed.
+    if (!ImplIsOverlapWindow() || (nFlags & ShowFlags::NoActivate))
+        return;
+
+    ToTopFlags nToTopFlags
+        = (nFlags & ShowFlags::ForegroundTask) ? ToTopFlags::ForegroundTask : ToTopFlags::NONE;
+    ImplStartToTop(nToTopFlags);
+    ImplFocusToTop(ToTopFlags::NONE, false);
+
+    if (!(nFlags & ShowFlags::ForegroundTask))
+        FlashWindow(); // Inform user about window if we did not popup it at foreground
+}
+
 void Window::Show(bool bVisible, ShowFlags nFlags)
 {
     if (!mpWindowImpl || mpWindowImpl->mbVisible == bVisible)
@@ -196,21 +212,7 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
             // if a window becomes visible, send all child windows a StateChange,
             // such that these can initialise themselves
             ImplCallInitShow();
-
-            // If it is a SystemWindow it automatically pops up on top of
-            // all other windows if needed.
-            if (ImplIsOverlapWindow())
-            {
-                if (!(nFlags & ShowFlags::NoActivate))
-                {
-                    ImplStartToTop((nFlags & ShowFlags::ForegroundTask) ? ToTopFlags::ForegroundTask
-                                                                        : ToTopFlags::NONE);
-                    ImplFocusToTop(ToTopFlags::NONE, false);
-
-                    if (!(nFlags & ShowFlags::ForegroundTask))
-                        FlashWindow(); // Inform user about window if we did not popup it at foreground
-                }
-            }
+            ImplRaiseOverlapWindow(nFlags);
 
             // adjust mpWindowImpl->mbReallyVisible
             bRealVisibilityChanged = !mpWindowImpl->mbReallyVisible;
