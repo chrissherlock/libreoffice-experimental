@@ -64,14 +64,11 @@ bool Window::ImplNeedsBorderWindow(WinBits nStyle) const
 
 BorderWindowStyle Window::ImplGetBorderWindowStyle(WinBits nStyle) const
 {
-    if (!ImplNeedsSystemChildBorder(nStyle))
-        return BorderWindowStyle::NONE;
-
     // handle WB_SYSTEMCHILDWINDOW
     // these should be analogous to a top level frame; meaning they
     // should have a border window with style BorderWindowStyle::Frame
     // which controls their size
-    return BorderWindowStyle::Frame;
+    return ImplNeedsSystemChildBorder(nStyle) ? BorderWindowStyle::Frame : BorderWindowStyle::NONE;
 }
 
 vcl::Window* Window::ImplCreateBorderWindow(vcl::Window* pParent, WinBits nStyle,
