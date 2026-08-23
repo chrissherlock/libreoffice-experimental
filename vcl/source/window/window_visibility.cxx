@@ -269,54 +269,49 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
     return true; // Window is still alive
 }
 
+std::optional<bool> Window::ImplShowWindow(ShowFlags nFlags)
+{
+    // inherit native widget flag for form controls
+    if (ImplIsMismatchedSubControl())
+        EnableNativeWidget(GetParent()->IsNativeWidgetEnabled());
+
+    if (mpWindowImpl->mbCallMove)
+        ImplCallMove();
+
+    if (mpWindowImpl->mbCallResize)
+        ImplCallResize();
+
+    CompatStateChanged(StateChangedType::Visible);
+
+    bool bRealVisibilityChanged = ImplUpdateRealVisibility(nFlags);
+
+    if (!ImplShowBorderOrFrame(nFlags))
+        return std::nullopt; // Window was destroyed
+
+    ImplShowAllOverlaps();
+
+    return bRealVisibilityChanged;
+}
+
 void Window::Show(bool bVisible, ShowFlags nFlags)
 {
     if (!mpWindowImpl || mpWindowImpl->mbVisible == bVisible)
         return;
 
-    bool bRealVisibilityChanged = false;
     mpWindowImpl->mbVisible = bVisible;
 
-    if (!bVisible)
-    {
-        std::optional<bool> bResult = ImplHideCascade(nFlags);
-        if (!bResult)
-            return;
+    // Dispatch to the appropriate symmetric handler
+    std::optional<bool> oRealVisChanged
+        = bVisible ? ImplShowWindow(nFlags) : ImplHideCascade(nFlags);
 
-        bRealVisibilityChanged = *bResult;
-    }
-    else
-    {
-        // inherit native widget flag for form controls
-        // required here, because frames never show up in the child hierarchy - which should be fixed...
-        // eg, the drop down of a combobox which is a system floating window
-        if (ImplIsMismatchedSubControl())
-            EnableNativeWidget(GetParent()->IsNativeWidgetEnabled());
+    if (!oRealVisChanged)
+        return; // Window was destroyed during the operation
 
-        if (mpWindowImpl->mbCallMove)
-            ImplCallMove();
-
-        if (mpWindowImpl->mbCallResize)
-            ImplCallResize();
-
-        CompatStateChanged(StateChangedType::Visible);
-
-        bRealVisibilityChanged = ImplUpdateRealVisibility(nFlags);
-
-        if (!ImplShowBorderOrFrame(nFlags))
-            return;
-
-        ImplShowAllOverlaps();
-    }
-
-    // the SHOW/HIDE events also serve as indicators to send child creation/destroy events to the access bridge
-    // However, the access bridge only uses this event if the data member is not NULL (it's kind of a hack that
-    // we re-use the SHOW/HIDE events this way, with this particular semantics).
-    // Since #104887#, the notifications for the access bridge are done in Impl(Set|Reset)ReallyVisible. Here, we
-    // now only notify with a NULL data pointer, for all other clients except the access bridge.
-    if (!bRealVisibilityChanged)
-        CallEventListeners(mpWindowImpl->mbVisible ? VclEventId::WindowShow
-                                                   : VclEventId::WindowHide);
+    // Notify listeners if the real visibility didn't actually change.
+    // Note: Per #104887#, we only notify with a NULL data pointer here for
+    // standard clients. Accessibility bridge notifications happen in ImplSetReallyVisible.
+    if (!*oRealVisChanged)
+        CallEventListeners(bVisible ? VclEventId::WindowShow : VclEventId::WindowHide);
 }
 
 void Window::ImplSetReallyVisible()

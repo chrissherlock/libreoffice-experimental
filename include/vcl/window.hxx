@@ -1620,6 +1620,7 @@ private:
     SAL_DLLPRIVATE void ImplRaiseOverlapWindow(ShowFlags nFlags);
     SAL_DLLPRIVATE bool ImplUpdateRealVisibility(ShowFlags nFlags);
     SAL_DLLPRIVATE bool ImplShowBorderOrFrame(ShowFlags nFlags);
+    SAL_DLLPRIVATE std::optional<bool> ImplShowWindow(ShowFlags nFlags);
 };
 }
 
