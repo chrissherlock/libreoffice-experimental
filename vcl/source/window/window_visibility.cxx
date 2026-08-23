@@ -39,6 +39,27 @@ bool Window::ImplShouldTransferFocusOnHide(ShowFlags nFlags) const
     return bCanYieldFocus && bIsOverlapWindowAvailable;
 }
 
+void Window::ImplExpandInvalidationForNativeWidget(vcl::Region& rInvRegion) const
+{
+    if (mpWindowImpl->mpWinData && mpWindowImpl->mpWinData->mbEnableNativeWidget)
+    {
+        /*
+         * #i48371# native theming: some themes draw outside the control
+         * area we tell them to (bad thing, but we cannot do much about it ).
+         * On hiding these controls they get invalidated with their window rectangle
+         * which leads to the parts outside the control area being left and not
+         * invalidated. Workaround: invalidate an area on the parent, too
+         */
+        const int workaround_border = 5;
+        tools::Rectangle aBounds(rInvRegion.GetBoundRect());
+        aBounds.AdjustLeft(-workaround_border);
+        aBounds.AdjustTop(-workaround_border);
+        aBounds.AdjustRight(workaround_border);
+        aBounds.AdjustBottom(workaround_border);
+        rInvRegion = aBounds;
+    }
+}
+
 void Window::Show(bool bVisible, ShowFlags nFlags)
 {
     if (!mpWindowImpl || mpWindowImpl->mbVisible == bVisible)
@@ -90,28 +111,11 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
 
             if (!mpWindowImpl->mbFrame)
             {
-                if (mpWindowImpl->mpWinData && mpWindowImpl->mpWinData->mbEnableNativeWidget)
-                {
-                    /*
-                    * #i48371# native theming: some themes draw outside the control
-                    * area we tell them to (bad thing, but we cannot do much about it ).
-                    * On hiding these controls they get invalidated with their window rectangle
-                    * which leads to the parts outside the control area being left and not
-                    * invalidated. Workaround: invalidate an area on the parent, too
-                    */
-                    const int workaround_border = 5;
-                    tools::Rectangle aBounds(aInvRegion.GetBoundRect());
-                    aBounds.AdjustLeft(-workaround_border);
-                    aBounds.AdjustTop(-workaround_border);
-                    aBounds.AdjustRight(workaround_border);
-                    aBounds.AdjustBottom(workaround_border);
-                    aInvRegion = aBounds;
-                }
-                if (!mpWindowImpl->mbNoParentUpdate)
-                {
-                    if (!aInvRegion.IsEmpty())
-                        ImplInvalidateParentFrameRegion(aInvRegion);
-                }
+                ImplExpandInvalidationForNativeWidget(aInvRegion);
+
+                if (!mpWindowImpl->mbNoParentUpdate && !aInvRegion.IsEmpty())
+                    ImplInvalidateParentFrameRegion(aInvRegion);
+
                 ImplGenerateMouseMove();
             }
         }
