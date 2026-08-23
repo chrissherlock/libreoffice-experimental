@@ -144,6 +144,14 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
     return bRealVisibilityChanged;
 }
 
+bool Window::ImplIsMismatchedSubControl() const
+{
+    return mpWindowImpl->mbFrame && GetParent() && !GetParent()->isDisposed()
+           && GetParent()->IsCompoundControl()
+           && GetParent()->IsNativeWidgetEnabled() != IsNativeWidgetEnabled()
+           && !(GetStyle() & WB_TOOLTIPWIN);
+}
+
 void Window::Show(bool bVisible, ShowFlags nFlags)
 {
     if (!mpWindowImpl || mpWindowImpl->mbVisible == bVisible)
@@ -165,10 +173,7 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
         // inherit native widget flag for form controls
         // required here, because frames never show up in the child hierarchy - which should be fixed...
         // eg, the drop down of a combobox which is a system floating window
-        if (mpWindowImpl->mbFrame && GetParent() && !GetParent()->isDisposed()
-            && GetParent()->IsCompoundControl()
-            && GetParent()->IsNativeWidgetEnabled() != IsNativeWidgetEnabled()
-            && !(GetStyle() & WB_TOOLTIPWIN))
+        if (ImplIsMismatchedSubControl())
         {
             EnableNativeWidget(GetParent()->IsNativeWidgetEnabled());
         }
