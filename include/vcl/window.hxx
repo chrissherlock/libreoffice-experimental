@@ -1590,6 +1590,9 @@ private:
     SAL_DLLPRIVATE bool ImplHasAntiparallelParent() const;
     SAL_DLLPRIVATE tools::Long ImplGetParentDeviceOriginX() const;
     SAL_DLLPRIVATE tools::Long ImplUnmirrorXOffset(tools::Long nMirroredOffset) const;
+
+    // frames
+    SAL_DLLPRIVATE bool ImplShouldInherit3DLook(const vcl::Window* pParent) const;
 };
 }
 

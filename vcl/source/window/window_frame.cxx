@@ -34,18 +34,18 @@
 
 namespace vcl
 {
+bool Window::ImplShouldInherit3DLook(const vcl::Window* pParent) const
+{
+    return !mpWindowImpl->mbOverlapWin && pParent && (pParent->GetStyle() & WB_3DLOOK);
+}
+
 WinBits Window::ImplApplyBorderAnd3DStyle(WinBits nStyle, const vcl::Window* pParent) const
 {
-    // Inherit 3D look from parent if applicable
-    if (!mpWindowImpl->mbOverlapWin && pParent && (pParent->GetStyle() & WB_3DLOOK))
+    if (ImplShouldInherit3DLook(pParent))
         nStyle |= WB_3DLOOK;
 
-    // A system child window acts as a top-level frame and strictly requires a border
-    if (!mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpWindowImpl->mpBorderWindow
-        && (nStyle & WB_SYSTEMCHILDWINDOW))
-    {
+    if (ImplNeedsSystemChildBorder(nStyle))
         nStyle |= WB_BORDER;
-    }
 
     return nStyle;
 }
