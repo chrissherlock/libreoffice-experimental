@@ -1618,6 +1618,8 @@ private:
     SAL_DLLPRIVATE bool ImplIsMismatchedSubControl() const;
     SAL_DLLPRIVATE vcl::Window* ImplGetVisibilityParent() const;
     SAL_DLLPRIVATE void ImplRaiseOverlapWindow(ShowFlags nFlags);
+    SAL_DLLPRIVATE bool ImplUpdateRealVisibility(ShowFlags nFlags);
+    SAL_DLLPRIVATE bool ImplShowBorderOrFrame(ShowFlags nFlags);
 };
 }
 
