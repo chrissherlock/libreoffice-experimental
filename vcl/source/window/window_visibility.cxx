@@ -337,21 +337,17 @@ void Window::ImplSetReallyVisible()
     // TODO. It's kind of a hack that we're re-using the VclEventId::WindowShow. Normally, we should
     // introduce another event which explicitly triggers the Accessibility implementations.
 
-    vcl::Window* pWindow = mpWindowImpl->mpHierarchy->mpFirstOverlap;
-    while (pWindow)
-    {
-        if (pWindow->mpWindowImpl->mbVisible)
-            pWindow->ImplSetReallyVisible();
-        pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
-    }
+    // Helper to propagate visibility down the intrusive linked lists
+    auto propagateToVisible = [](vcl::Window* pStart) {
+        for (vcl::Window* pWin = pStart; pWin; pWin = pWin->mpWindowImpl->mpHierarchy->mpNext)
+        {
+            if (pWin->mpWindowImpl->mbVisible)
+                pWin->ImplSetReallyVisible();
+        }
+    };
 
-    pWindow = mpWindowImpl->mpHierarchy->mpFirstChild;
-    while (pWindow)
-    {
-        if (pWindow->mpWindowImpl->mbVisible)
-            pWindow->ImplSetReallyVisible();
-        pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
-    }
+    propagateToVisible(mpWindowImpl->mpHierarchy->mpFirstOverlap);
+    propagateToVisible(mpWindowImpl->mpHierarchy->mpFirstChild);
 }
 
 } // end vcl namespace
