@@ -235,7 +235,6 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
         pSVData->mpIntroWindow->Hide();
     }
 
-    //SAL_WARN_IF( mpWindowImpl->mbSuppressAccessibilityEvents, "vcl", "Window::Show() - Frame reactivated");
     mpWindowImpl->mbSuppressAccessibilityEvents = false;
 
     mpWindowImpl->mbPaintFrame = true;
