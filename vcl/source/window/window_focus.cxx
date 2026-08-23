@@ -106,8 +106,11 @@ void Window::GetFocus()
 {
     if (ImplShouldPassFocusToLastWindow())
     {
+        // Calling GrabFocus() triggers synchronous events. We must hold a reference
+        // to 'this' because an event handler (like a macro or user script) might
+        // destroy this parent window during the focus transfer. If that happens,
+        // we must bail out immediately to avoid a use-after-free crash.
         VclPtr<vcl::Window> xWindow(this);
-
         mpWindowImpl->mpLastFocusWindow->GrabFocus();
 
         if (xWindow->isDisposed())
