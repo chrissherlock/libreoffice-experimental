@@ -244,6 +244,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/window_frame \
     vcl/source/window/window_geometry \
     vcl/source/window/window_input \
+    vcl/source/window/window_focus \
     vcl/source/window/window2 \
     vcl/source/window/window3 \
     vcl/source/window/window \
