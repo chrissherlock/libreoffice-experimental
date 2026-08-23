@@ -56,6 +56,12 @@ bool Window::ImplNeedsSystemChildBorder(WinBits nStyle) const
            && (nStyle & WB_SYSTEMCHILDWINDOW);
 }
 
+bool Window::ImplNeedsBorderWindow(WinBits nStyle) const
+{
+    return !mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpWindowImpl->mpBorderWindow
+           && (nStyle & WB_BORDER);
+}
+
 BorderWindowStyle Window::ImplGetBorderWindowStyle(WinBits nStyle) const
 {
     if (!ImplNeedsSystemChildBorder(nStyle))
@@ -68,24 +74,27 @@ BorderWindowStyle Window::ImplGetBorderWindowStyle(WinBits nStyle) const
     return BorderWindowStyle::Frame;
 }
 
+vcl::Window* Window::ImplCreateBorderWindow(vcl::Window* pParent, WinBits nStyle,
+                                            BorderWindowStyle nBorderTypeStyle)
+{
+    constexpr WinBits nBorderWinMask = WB_BORDER | WB_DIALOGCONTROL | WB_NODIALOGCONTROL;
+
+    VclPtrInstance<ImplBorderWindow> pBorderWin(pParent, nStyle & nBorderWinMask, nBorderTypeStyle);
+
+    static_cast<vcl::Window*>(pBorderWin)->mpWindowImpl->mpClientWindow = this;
+    pBorderWin->GetBorder(mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder,
+                          mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder);
+    mpWindowImpl->mpBorderWindow = pBorderWin;
+
+    // Return the newly created border window to act as the new parent
+    return mpWindowImpl->mpBorderWindow;
+}
+
 vcl::Window* Window::ImplInitBorderWindow(vcl::Window* pParent, WinBits nStyle,
                                           BorderWindowStyle nBorderTypeStyle)
 {
-    // create border window if necessary
-    if (!mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpWindowImpl->mpBorderWindow
-        && (nStyle & WB_BORDER))
-    {
-        VclPtrInstance<ImplBorderWindow> pBorderWin(
-            pParent, nStyle & (WB_BORDER | WB_DIALOGCONTROL | WB_NODIALOGCONTROL),
-            nBorderTypeStyle);
-        static_cast<vcl::Window*>(pBorderWin)->mpWindowImpl->mpClientWindow = this;
-        pBorderWin->GetBorder(mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder,
-                              mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder);
-        mpWindowImpl->mpBorderWindow = pBorderWin;
-
-        // Return the newly created border window to act as the new parent
-        return mpWindowImpl->mpBorderWindow;
-    }
+    if (ImplNeedsBorderWindow(nStyle))
+        return ImplCreateBorderWindow(pParent, nStyle, nBorderTypeStyle);
 
     // fallback for frameless windows with no parent
     if (!mpWindowImpl->mbFrame && !pParent)
