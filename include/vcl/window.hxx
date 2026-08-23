@@ -1602,6 +1602,9 @@ private:
     SAL_DLLPRIVATE SalFrameStyleFlags ImplGetBaseFrameStyle(WinBits nStyle) const;
     SAL_DLLPRIVATE SalFrameStyleFlags ImplGetExtendedFrameStyle(WinBits nStyle) const;
     SAL_DLLPRIVATE SalFrameStyleFlags ImplGetDialogFrameStyle() const;
+
+    // focus
+    SAL_DLLPRIVATE vcl::Window* ImplResetOverlapFocusState(vcl::Window* pOverlapWindow);
 };
 }
 
