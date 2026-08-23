@@ -108,14 +108,18 @@ vcl::Window* Window::ImplInitBorderWindow(vcl::Window* pParent, WinBits nStyle,
 
 bool Window::ImplIsUndecoratedFloatingWindow(WinBits nStyle, SalFrameStyleFlags nFrameStyle) const
 {
-    return (!(nFrameStyle & ~SalFrameStyleFlags::CLOSEABLE)
-            && (mpWindowImpl->mbFloatWin
-                || ((GetType() == WindowType::BORDERWINDOW)
-                    && static_cast<const ImplBorderWindow*>(this)->mbFloatWindow)
-                || (nStyle & WB_SYSTEMFLOATWIN)))
-           || ((GetType() == WindowType::BORDERWINDOW)
-               && static_cast<const ImplBorderWindow*>(this)->mbFloatWindow
-               && (nStyle & WB_OWNERDRAWDECORATION));
+    const bool bIsBorderFloatWin = (GetType() == WindowType::BORDERWINDOW)
+                                   && static_cast<const ImplBorderWindow*>(this)->mbFloatWindow;
+
+    const bool bIsFloatWin
+        = mpWindowImpl->mbFloatWin || bIsBorderFloatWin || (nStyle & WB_SYSTEMFLOATWIN);
+
+    const bool bIsUndecoratedFloatWin
+        = !(nFrameStyle & ~SalFrameStyleFlags::CLOSEABLE) && bIsFloatWin;
+
+    const bool bIsOwnerDrawnBorderFloatWin = bIsBorderFloatWin && (nStyle & WB_OWNERDRAWDECORATION);
+
+    return (bIsUndecoratedFloatWin || bIsOwnerDrawnBorderFloatWin);
 }
 
 SalFrameStyleFlags Window::ImplApplyFloatWindowStyle(WinBits nStyle,
