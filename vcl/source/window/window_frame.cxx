@@ -379,10 +379,8 @@ void Window::ImplInitAppFontData(vcl::Window const* pWindow)
     // so dialog positioning is not completely off
     ImplControlValue aControlValue;
 
-    const tools::Long nRegionWidth
-        = nTextWidth < nMinMacControlSize ? nMinMacControlSize : nTextWidth;
-    const tools::Long nRegionHeight
-        = nTextHeight < nMinMacControlSize ? nMinMacControlSize : nTextHeight;
+    const tools::Long nRegionWidth = std::max(nTextWidth, nMinMacControlSize);
+    const tools::Long nRegionHeight = std::max(nTextHeight, nMinMacControlSize);
 
     tools::Rectangle aCtrlRegion(Point(), Size(nRegionWidth, nRegionHeight));
     tools::Rectangle aBoundingRgn(aCtrlRegion);
