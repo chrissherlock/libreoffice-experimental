@@ -214,17 +214,12 @@ SalFrame* Window::ImplCreateFrame(vcl::Window* pParent, SystemParentData* pSyste
                                   SalFrameStyleFlags nFrameStyle)
 {
     ImplSVData* pSVData = ImplGetSVData();
+    SalFrame* pParentFrame = pParent ? pParent->mpWindowImpl->mpFrame : nullptr;
 
-    SalFrame* pParentFrame = nullptr;
-    if (pParent)
-        pParentFrame = pParent->mpWindowImpl->mpFrame;
-
-    SalFrame* pFrame;
-    if (pSystemParentData)
-        pFrame = pSVData->mpDefInst->CreateChildFrame(pSystemParentData,
-                                                      nFrameStyle | SalFrameStyleFlags::PLUG);
-    else
-        pFrame = pSVData->mpDefInst->CreateFrame(pParentFrame, nFrameStyle);
+    SalFrame* pFrame = pSystemParentData
+                           ? pSVData->mpDefInst->CreateChildFrame(
+                                 pSystemParentData, nFrameStyle | SalFrameStyleFlags::PLUG)
+                           : pSVData->mpDefInst->CreateFrame(pParentFrame, nFrameStyle);
 
     if (!pFrame)
     {
