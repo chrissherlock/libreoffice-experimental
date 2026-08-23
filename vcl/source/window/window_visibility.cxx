@@ -174,18 +174,13 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
         // required here, because frames never show up in the child hierarchy - which should be fixed...
         // eg, the drop down of a combobox which is a system floating window
         if (ImplIsMismatchedSubControl())
-        {
             EnableNativeWidget(GetParent()->IsNativeWidgetEnabled());
-        }
 
         if (mpWindowImpl->mbCallMove)
-        {
             ImplCallMove();
-        }
+
         if (mpWindowImpl->mbCallResize)
-        {
             ImplCallResize();
-        }
 
         CompatStateChanged(StateChangedType::Visible);
 
@@ -194,6 +189,7 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
             pTestParent = mpWindowImpl->mpOverlapWindow;
         else
             pTestParent = ImplGetParent();
+
         if (mpWindowImpl->mbFrame || pTestParent->mpWindowImpl->mbReallyVisible)
         {
             // if a window becomes visible, send all child windows a StateChange,
@@ -211,10 +207,7 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
                     ImplFocusToTop(ToTopFlags::NONE, false);
 
                     if (!(nFlags & ShowFlags::ForegroundTask))
-                    {
-                        // Inform user about window if we did not popup it at foreground
-                        FlashWindow();
-                    }
+                        FlashWindow(); // Inform user about window if we did not popup it at foreground
                 }
             }
 
@@ -228,8 +221,10 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
             if (!mpWindowImpl->mbFrame)
             {
                 InvalidateFlags nInvalidateFlags = InvalidateFlags::Children;
+
                 if (!IsPaintTransparent())
                     nInvalidateFlags |= InvalidateFlags::NoTransparent;
+
                 ImplInvalidate(nullptr, nInvalidateFlags);
                 ImplGenerateMouseMove();
             }
