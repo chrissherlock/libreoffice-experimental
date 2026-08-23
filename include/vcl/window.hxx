@@ -1594,6 +1594,9 @@ private:
 
     // frames
     SAL_DLLPRIVATE bool ImplShouldInherit3DLook(const vcl::Window* pParent) const;
+    SAL_DLLPRIVATE bool ImplNeedsBorderWindow(WinBits nStyle) const;
+    SAL_DLLPRIVATE vcl::Window* ImplCreateBorderWindow(vcl::Window* pParent, WinBits nStyle,
+                                                       BorderWindowStyle nBorderTypeStyle);
 };
 }
 
