@@ -1616,6 +1616,7 @@ private:
     SAL_DLLPRIVATE std::optional<bool> ImplHideWindow(ShowFlags nFlags);
     SAL_DLLPRIVATE std::optional<bool> ImplHideCascade(ShowFlags nFlags);
     SAL_DLLPRIVATE bool ImplIsMismatchedSubControl() const;
+    SAL_DLLPRIVATE vcl::Window* ImplGetVisibilityParent() const;
 };
 }
 

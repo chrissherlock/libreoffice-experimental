@@ -152,6 +152,11 @@ bool Window::ImplIsMismatchedSubControl() const
            && !(GetStyle() & WB_TOOLTIPWIN);
 }
 
+vcl::Window* Window::ImplGetVisibilityParent() const
+{
+    return ImplIsOverlapWindow() ? mpWindowImpl->mpOverlapWindow.get() : ImplGetParent();
+}
+
 void Window::Show(bool bVisible, ShowFlags nFlags)
 {
     if (!mpWindowImpl || mpWindowImpl->mbVisible == bVisible)
@@ -184,13 +189,9 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
 
         CompatStateChanged(StateChangedType::Visible);
 
-        vcl::Window* pTestParent;
-        if (ImplIsOverlapWindow())
-            pTestParent = mpWindowImpl->mpOverlapWindow;
-        else
-            pTestParent = ImplGetParent();
+        vcl::Window* pVisibilityParent = ImplGetVisibilityParent();
 
-        if (mpWindowImpl->mbFrame || pTestParent->mpWindowImpl->mbReallyVisible)
+        if (mpWindowImpl->mbFrame || pVisibilityParent->mpWindowImpl->mbReallyVisible)
         {
             // if a window becomes visible, send all child windows a StateChange,
             // such that these can initialise themselves
