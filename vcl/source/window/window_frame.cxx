@@ -106,7 +106,37 @@ vcl::Window* Window::ImplInitBorderWindow(vcl::Window* pParent, WinBits nStyle,
     return pParent;
 }
 
-SalFrameStyleFlags Window::ImplGetFrameStyle(WinBits nStyle) const
+bool Window::ImplIsUndecoratedFloatingWindow(WinBits nStyle, SalFrameStyleFlags nFrameStyle) const
+{
+    return (!(nFrameStyle & ~SalFrameStyleFlags::CLOSEABLE)
+            && (mpWindowImpl->mbFloatWin
+                || ((GetType() == WindowType::BORDERWINDOW)
+                    && static_cast<const ImplBorderWindow*>(this)->mbFloatWindow)
+                || (nStyle & WB_SYSTEMFLOATWIN)))
+           || ((GetType() == WindowType::BORDERWINDOW)
+               && static_cast<const ImplBorderWindow*>(this)->mbFloatWindow
+               && (nStyle & WB_OWNERDRAWDECORATION));
+}
+
+SalFrameStyleFlags Window::ImplApplyFloatWindowStyle(WinBits nStyle,
+                                                     SalFrameStyleFlags nFrameStyle) const
+{
+    if (ImplIsUndecoratedFloatingWindow(nStyle, nFrameStyle))
+    {
+        nFrameStyle = SalFrameStyleFlags::FLOAT;
+
+        if (nStyle & WB_OWNERDRAWDECORATION)
+            nFrameStyle |= SalFrameStyleFlags::OWNERDRAWDECORATION | SalFrameStyleFlags::NOSHADOW;
+    }
+    else if (mpWindowImpl->mbFloatWin)
+    {
+        nFrameStyle |= SalFrameStyleFlags::TOOLWINDOW;
+    }
+
+    return nFrameStyle;
+}
+
+SalFrameStyleFlags Window::ImplGetBaseFrameStyle(WinBits nStyle) const
 {
     SalFrameStyleFlags nFrameStyle = SalFrameStyleFlags::NONE;
 
@@ -119,34 +149,34 @@ SalFrameStyleFlags Window::ImplGetFrameStyle(WinBits nStyle) const
     if (nStyle & WB_APP)
         nFrameStyle |= SalFrameStyleFlags::DEFAULT;
 
-    // check for undecorated floating window
-    if ((!(nFrameStyle & ~SalFrameStyleFlags::CLOSEABLE)
-         && (mpWindowImpl->mbFloatWin
-             || ((GetType() == WindowType::BORDERWINDOW)
-                 && static_cast<const ImplBorderWindow*>(this)->mbFloatWindow)
-             || (nStyle & WB_SYSTEMFLOATWIN)))
-        || ((GetType() == WindowType::BORDERWINDOW)
-            && static_cast<const ImplBorderWindow*>(this)->mbFloatWindow
-            && (nStyle & WB_OWNERDRAWDECORATION)))
-    {
-        nFrameStyle = SalFrameStyleFlags::FLOAT;
-        if (nStyle & WB_OWNERDRAWDECORATION)
-            nFrameStyle |= SalFrameStyleFlags::OWNERDRAWDECORATION | SalFrameStyleFlags::NOSHADOW;
-    }
-    else if (mpWindowImpl->mbFloatWin)
-        nFrameStyle |= SalFrameStyleFlags::TOOLWINDOW;
+    return nFrameStyle;
+}
+
+SalFrameStyleFlags Window::ImplGetExtendedFrameStyle(WinBits nStyle) const
+{
+    SalFrameStyleFlags nFrameStyle = SalFrameStyleFlags::NONE;
 
     if (nStyle & WB_INTROWIN)
         nFrameStyle |= SalFrameStyleFlags::INTRO;
     if (nStyle & WB_TOOLTIPWIN)
         nFrameStyle |= SalFrameStyleFlags::TOOLTIP;
-
     if (nStyle & WB_NOSHADOW)
         nFrameStyle |= SalFrameStyleFlags::NOSHADOW;
-
     if (nStyle & WB_SYSTEMCHILDWINDOW)
         nFrameStyle |= SalFrameStyleFlags::SYSTEMCHILD;
 
+    // tdf#144624 for the DefaultWindow, which is never visible, don't
+    // create an icon for it so construction of a DefaultWindow cannot
+    // trigger creation of a VirtualDevice which itself requires a
+    // DefaultWindow to exist
+    if (nStyle & WB_DEFAULTWIN)
+        nFrameStyle |= SalFrameStyleFlags::NOICON;
+
+    return nFrameStyle;
+}
+
+SalFrameStyleFlags Window::ImplGetDialogFrameStyle() const
+{
     switch (mpWindowImpl->meType)
     {
         case WindowType::DIALOG:
@@ -157,18 +187,21 @@ SalFrameStyleFlags Window::ImplGetFrameStyle(WinBits nStyle) const
         case WindowType::WARNINGBOX:
         case WindowType::ERRORBOX:
         case WindowType::QUERYBOX:
-            nFrameStyle |= SalFrameStyleFlags::DIALOG;
-            break;
+            return SalFrameStyleFlags::DIALOG;
         default:
-            break;
+            return SalFrameStyleFlags::NONE;
     }
+}
 
-    // tdf#144624 for the DefaultWindow, which is never visible, don't
-    // create an icon for it so construction of a DefaultWindow cannot
-    // trigger creation of a VirtualDevice which itself requires a
-    // DefaultWindow to exist
-    if (nStyle & WB_DEFAULTWIN)
-        nFrameStyle |= SalFrameStyleFlags::NOICON;
+SalFrameStyleFlags Window::ImplGetFrameStyle(WinBits nStyle) const
+{
+    SalFrameStyleFlags nFrameStyle = ImplGetBaseFrameStyle(nStyle);
+
+    // Float window logic depends on the CLOSEABLE flag from the base style
+    nFrameStyle = ImplApplyFloatWindowStyle(nStyle, nFrameStyle);
+
+    nFrameStyle |= ImplGetExtendedFrameStyle(nStyle);
+    nFrameStyle |= ImplGetDialogFrameStyle();
 
     return nFrameStyle;
 }
@@ -238,7 +271,9 @@ void Window::ImplInitFrameResolution(vcl::Window* pParent, WinBits nStyle)
     // If we create a Window with default size, query this
     // size directly, because we want resize all Controls to
     // the correct size before we display the window
-    if (nStyle & (WB_MOVEABLE | WB_SIZEABLE | WB_APP))
+    constexpr WinBits nDefaultSizeMask = WB_MOVEABLE | WB_SIZEABLE | WB_APP;
+
+    if (nStyle & nDefaultSizeMask)
     {
         const Size aSize = mpWindowImpl->mpFrame->GetClientSize();
 
