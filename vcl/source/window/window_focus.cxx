@@ -85,15 +85,12 @@ vcl::Window* Window::ImplTransferFocus()
     if (!ImplContainsFocus())
         return pOverlapWindow;
 
-    ImplSVData* pSVData = ImplGetSVData();
-
     if (mpWindowImpl->mbFrame)
         return ImplResetOverlapFocusState(pOverlapWindow);
 
     ImplTransferFocusToParent();
 
-    // If the focus was set back to 'this' set it to nothing
-    if (pSVData->mpWinData->mpFocusWin == this)
+    if (HasFocus())
         return ImplResetOverlapFocusState(pOverlapWindow);
 
     return pOverlapWindow;
