@@ -1596,6 +1596,12 @@ private:
     SAL_DLLPRIVATE bool ImplNeedsBorderWindow(WinBits nStyle) const;
     SAL_DLLPRIVATE vcl::Window* ImplCreateBorderWindow(vcl::Window* pParent, WinBits nStyle,
                                                        BorderWindowStyle nBorderTypeStyle);
+
+    SAL_DLLPRIVATE bool ImplIsUndecoratedFloatingWindow(WinBits nStyle, SalFrameStyleFlags nFrameStyle) const;
+    SAL_DLLPRIVATE SalFrameStyleFlags ImplApplyFloatWindowStyle(WinBits nStyle, SalFrameStyleFlags nFrameStyle) const;
+    SAL_DLLPRIVATE SalFrameStyleFlags ImplGetBaseFrameStyle(WinBits nStyle) const;
+    SAL_DLLPRIVATE SalFrameStyleFlags ImplGetExtendedFrameStyle(WinBits nStyle) const;
+    SAL_DLLPRIVATE SalFrameStyleFlags ImplGetDialogFrameStyle() const;
 };
 }
 
