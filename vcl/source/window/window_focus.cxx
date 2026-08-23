@@ -57,6 +57,27 @@ vcl::Window* Window::ImplResetOverlapFocusState(vcl::Window* pOverlapWindow)
     return pOverlapWindow;
 }
 
+void Window::ImplTransferFocusToParent()
+{
+    vcl::Window* pTarget = GetParent();
+
+    // When windows overlap, give focus to the parent of the next FrameWindow
+    if (mpWindowImpl->mpBorderWindow)
+    {
+        if (mpWindowImpl->mpBorderWindow->ImplIsOverlapWindow())
+            pTarget = mpWindowImpl->mpBorderWindow->mpWindowImpl->mpOverlapWindow;
+    }
+    else if (ImplIsOverlapWindow())
+    {
+        pTarget = mpWindowImpl->mpOverlapWindow;
+    }
+
+    if (pTarget && pTarget->IsEnabled() && pTarget->IsInputEnabled() && !pTarget->IsInModalMode())
+        pTarget->GrabFocus();
+    else
+        mpWindowImpl->mpFrameWindow->GrabFocus();
+}
+
 vcl::Window* Window::ImplTransferFocus()
 {
     vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
@@ -69,24 +90,7 @@ vcl::Window* Window::ImplTransferFocus()
     if (mpWindowImpl->mbFrame)
         return ImplResetOverlapFocusState(pOverlapWindow);
 
-    vcl::Window* pParent = GetParent();
-    vcl::Window* pBorderWindow = mpWindowImpl->mpBorderWindow;
-
-    // when windows overlap, give focus to the parent of the next FrameWindow
-    if (pBorderWindow)
-    {
-        if (pBorderWindow->ImplIsOverlapWindow())
-            pParent = pBorderWindow->mpWindowImpl->mpOverlapWindow;
-    }
-    else if (ImplIsOverlapWindow())
-    {
-        pParent = mpWindowImpl->mpOverlapWindow;
-    }
-
-    if (pParent && pParent->IsEnabled() && pParent->IsInputEnabled() && !pParent->IsInModalMode())
-        pParent->GrabFocus();
-    else
-        mpWindowImpl->mpFrameWindow->GrabFocus();
+    ImplTransferFocusToParent();
 
     // If the focus was set back to 'this' set it to nothing
     if (pSVData->mpWinData->mpFocusWin == this)
