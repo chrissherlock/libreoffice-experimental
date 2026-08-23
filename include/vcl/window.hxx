@@ -1611,6 +1611,8 @@ private:
 
     // visibility
     SAL_DLLPRIVATE void ImplExpandInvalidationForNativeWidget(vcl::Region& rInvRegion) const;
+    SAL_DLLPRIVATE void ImplInvalidateParentOnHide(vcl::Region& rInvRegion);
+    SAL_DLLPRIVATE bool ImplShouldTransferFocusOnHide(ShowFlags nFlags) const;
 };
 }
 

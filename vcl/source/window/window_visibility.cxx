@@ -41,23 +41,33 @@ bool Window::ImplShouldTransferFocusOnHide(ShowFlags nFlags) const
 
 void Window::ImplExpandInvalidationForNativeWidget(vcl::Region& rInvRegion) const
 {
-    if (mpWindowImpl->mpWinData && mpWindowImpl->mpWinData->mbEnableNativeWidget)
-    {
-        /*
-         * #i48371# native theming: some themes draw outside the control
-         * area we tell them to (bad thing, but we cannot do much about it ).
-         * On hiding these controls they get invalidated with their window rectangle
-         * which leads to the parts outside the control area being left and not
-         * invalidated. Workaround: invalidate an area on the parent, too
-         */
-        const int workaround_border = 5;
-        tools::Rectangle aBounds(rInvRegion.GetBoundRect());
-        aBounds.AdjustLeft(-workaround_border);
-        aBounds.AdjustTop(-workaround_border);
-        aBounds.AdjustRight(workaround_border);
-        aBounds.AdjustBottom(workaround_border);
-        rInvRegion = aBounds;
-    }
+    if (!mpWindowImpl->mpWinData || !mpWindowImpl->mpWinData->mbEnableNativeWidget)
+        return;
+
+    /*
+     * #i48371# native theming: some themes draw outside the control
+     * area we tell them to (bad thing, but we cannot do much about it ).
+     * On hiding these controls they get invalidated with their window rectangle
+     * which leads to the parts outside the control area being left and not
+     * invalidated. Workaround: invalidate an area on the parent, too
+     */
+    const int workaround_border = 5;
+    tools::Rectangle aBounds(rInvRegion.GetBoundRect());
+    aBounds.AdjustLeft(-workaround_border);
+    aBounds.AdjustTop(-workaround_border);
+    aBounds.AdjustRight(workaround_border);
+    aBounds.AdjustBottom(workaround_border);
+    rInvRegion = aBounds;
+}
+
+void Window::ImplInvalidateParentOnHide(vcl::Region& rInvRegion)
+{
+    ImplExpandInvalidationForNativeWidget(rInvRegion);
+
+    if (!mpWindowImpl->mbNoParentUpdate && !rInvRegion.IsEmpty())
+        ImplInvalidateParentFrameRegion(rInvRegion);
+
+    ImplGenerateMouseMove();
 }
 
 void Window::Show(bool bVisible, ShowFlags nFlags)
@@ -110,14 +120,7 @@ void Window::Show(bool bVisible, ShowFlags nFlags)
                 mpWindowImpl->mpOverlapWindow->GrabFocus();
 
             if (!mpWindowImpl->mbFrame)
-            {
-                ImplExpandInvalidationForNativeWidget(aInvRegion);
-
-                if (!mpWindowImpl->mbNoParentUpdate && !aInvRegion.IsEmpty())
-                    ImplInvalidateParentFrameRegion(aInvRegion);
-
-                ImplGenerateMouseMove();
-            }
+                ImplInvalidateParentOnHide(aInvRegion);
         }
     }
     else
