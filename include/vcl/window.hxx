@@ -1628,6 +1628,7 @@ private:
     SAL_DLLPRIVATE void ImplShowBalloonHelp(const HelpEvent& rHEvt);
     SAL_DLLPRIVATE void ImplShowQuickHelp(const HelpEvent& rHEvt);
     SAL_DLLPRIVATE void ImplStartHelp(const HelpEvent& rHEvt);
+    SAL_DLLPRIVATE bool ImplDelegatePreNotifyToParent(NotifyEvent& rNEvt);
 };
 }
 
