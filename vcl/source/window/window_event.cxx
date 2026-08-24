@@ -367,6 +367,22 @@ bool Window::ImplDispatchDialogControlKeyEvent(NotifyEvent& rNEvt, bool bIsFloat
     return false;
 }
 
+bool Window::ImplDispatchDialogControlFocusEvent(NotifyEvent& rNEvt)
+{
+    if (!lcl_IsFocusEvent(rNEvt))
+        return false;
+
+    ImplDlgCtrlFocusChanged(rNEvt.GetWindow(), rNEvt.GetType() == NotifyEventType::GETFOCUS);
+
+    if (ImplShouldForwardFocusToChild(rNEvt))
+    {
+        if (vcl::Window* pFirstChild = ImplGetDlgWindow(0, GetDlgWindowType::First); pFirstChild)
+            pFirstChild->ImplControlFocus();
+    }
+
+    return false;
+}
+
 bool Window::ImplDispatchDialogControlEvent(NotifyEvent& rNEvt, bool bIsFloatingMode)
 {
     if ((GetStyle() & (WB_DIALOGCONTROL | WB_NODIALOGCONTROL)) != WB_DIALOGCONTROL)
@@ -375,18 +391,7 @@ bool Window::ImplDispatchDialogControlEvent(NotifyEvent& rNEvt, bool bIsFloating
     if (lcl_IsKeyEvent(rNEvt))
         return ImplDispatchDialogControlKeyEvent(rNEvt, bIsFloatingMode);
 
-    if (!lcl_IsFocusEvent(rNEvt))
-        return false;
-
-    ImplDlgCtrlFocusChanged(rNEvt.GetWindow(), rNEvt.GetType() == NotifyEventType::GETFOCUS);
-
-    if (!ImplShouldForwardFocusToChild(rNEvt))
-        return false;
-
-    if (vcl::Window* pFirstChild = ImplGetDlgWindow(0, GetDlgWindowType::First); pFirstChild)
-        pFirstChild->ImplControlFocus();
-
-    return false;
+    return ImplDispatchDialogControlFocusEvent(rNEvt);
 }
 
 bool Window::EventNotify(NotifyEvent& rNEvt)
