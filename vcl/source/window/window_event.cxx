@@ -333,8 +333,6 @@ static bool lcl_ParentNotDialogControl(Window* pWindow)
 
 bool Window::EventNotify(NotifyEvent& rNEvt)
 {
-    bool bRet = false;
-
     if (isDisposed())
         return false;
 
@@ -409,6 +407,8 @@ bool Window::EventNotify(NotifyEvent& rNEvt)
         }
     }
 
+    bool bRet = false;
+
     // manage the dialogs
     if ((GetStyle() & (WB_DIALOGCONTROL | WB_NODIALOGCONTROL)) == WB_DIALOGCONTROL)
     {
@@ -443,13 +443,13 @@ bool Window::EventNotify(NotifyEvent& rNEvt)
         }
     }
 
-    if (!bRet)
-    {
-        if (mpWindowImpl->mpHierarchy->mpParent && !ImplIsOverlapWindow())
-            bRet = mpWindowImpl->mpHierarchy->mpParent->CompatNotify(rNEvt);
-    }
+    if (bRet)
+        return true;
 
-    return bRet;
+    if (!mpWindowImpl->mpHierarchy->mpParent || ImplIsOverlapWindow())
+        return false;
+
+    return mpWindowImpl->mpHierarchy->mpParent->CompatNotify(rNEvt);
 }
 
 void Window::CallEventListeners(VclEventId nEvent, void* pData)
