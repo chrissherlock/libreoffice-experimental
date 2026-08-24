@@ -420,25 +420,23 @@ bool Window::ImplDispatchDockingMouseEvent(const NotifyEvent& rNEvt,
 {
     const bool bDockingSupportCrippled = !StyleSettings::GetDockingFloatsSupported();
     const MouseEvent* pMEvt = rNEvt.GetMouseEvent();
-    bool bHit = pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel());
 
-    if (pMEvt->IsLeft())
+    if (!pMEvt->IsLeft())
+        return false;
+
+    if (!bDockingSupportCrippled && pMEvt->IsMod1() && (pMEvt->GetClicks() == 2))
     {
-        if (!bDockingSupportCrippled && pMEvt->IsMod1() && (pMEvt->GetClicks() == 2))
-        {
-            // ctrl double click toggles floating mode
-            pWrapper->SetFloatingMode(!pWrapper->IsFloatingMode());
-            return true;
-        }
-        else if (pMEvt->GetClicks() == 1 && bHit)
-        {
-            // allow start docking during mouse move
-            pWrapper->ImplEnableStartDocking();
-            return true;
-        }
+        // ctrl double click toggles floating mode
+        pWrapper->SetFloatingMode(!pWrapper->IsFloatingMode());
+        return true;
     }
 
-    return false;
+    if (pMEvt->GetClicks() != 1 || !pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel()))
+        return false;
+
+    // allow start docking during mouse move
+    pWrapper->ImplEnableStartDocking();
+    return true;
 }
 
 bool Window::ImplAttemptDockingSequence(const NotifyEvent& rNEvt,
