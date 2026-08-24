@@ -1621,6 +1621,11 @@ private:
     SAL_DLLPRIVATE bool ImplUpdateRealVisibility(ShowFlags nFlags);
     SAL_DLLPRIVATE bool ImplShowBorderOrFrame(ShowFlags nFlags);
     SAL_DLLPRIVATE std::optional<bool> ImplShowWindow(ShowFlags nFlags);
+
+    // event
+    SAL_DLLPRIVATE void ImplShowBalloonHelp(const HelpEvent& rHEvt);
+    SAL_DLLPRIVATE void ImplShowQuickHelp(const HelpEvent& rHEvt);
+    SAL_DLLPRIVATE void ImplStartHelp(const HelpEvent& rHEvt);
 };
 }
 
