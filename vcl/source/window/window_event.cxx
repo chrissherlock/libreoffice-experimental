@@ -356,21 +356,24 @@ bool Window::ImplShouldForwardFocusToChild(const NotifyEvent& rNEvt) const
            && !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus);
 }
 
+bool Window::ImplDispatchDialogControlKeyEvent(NotifyEvent& rNEvt, bool bIsFloatingMode)
+{
+    // ScGridWindow has WB_DIALOGCONTROL set, so pressing tab in ScCheckListMenuControl won't
+    // get processed here by the toplevel DockingWindow of ScCheckListMenuControl by
+    // just checking if lcl_ParentNotDialogControl is true
+    if (lcl_IsTopLevelDialogControl(this, bIsFloatingMode))
+        return ImplDlgCtrl(*rNEvt.GetKeyEvent(), rNEvt.GetType() == NotifyEventType::KEYINPUT);
+
+    return false;
+}
+
 bool Window::ImplDispatchDialogControlEvent(NotifyEvent& rNEvt, bool bIsFloatingMode)
 {
     if ((GetStyle() & (WB_DIALOGCONTROL | WB_NODIALOGCONTROL)) != WB_DIALOGCONTROL)
         return false;
 
     if (lcl_IsKeyEvent(rNEvt))
-    {
-        // ScGridWindow has WB_DIALOGCONTROL set, so pressing tab in ScCheckListMenuControl won't
-        // get processed here by the toplevel DockingWindow of ScCheckListMenuControl by
-        // just checking if lcl_ParentNotDialogControl is true
-        if (lcl_IsTopLevelDialogControl(this, bIsFloatingMode))
-            return ImplDlgCtrl(*rNEvt.GetKeyEvent(), rNEvt.GetType() == NotifyEventType::KEYINPUT);
-
-        return false;
-    }
+        return ImplDispatchDialogControlKeyEvent(rNEvt, bIsFloatingMode);
 
     if (!lcl_IsFocusEvent(rNEvt))
         return false;
