@@ -262,37 +262,60 @@ bool Window::ImplDelegatePreNotifyToParent(NotifyEvent& rNEvt)
     return false;
 }
 
+bool Window::ImplIsCompoundControlGainingFocus() const
+{
+    return mpWindowImpl->mbCompoundControl && !mpWindowImpl->mbCompoundControlHasFocus
+           && HasChildPathFocus();
+}
+
+bool Window::ImplIsCompoundControlLosingFocus() const
+{
+    return mpWindowImpl->mbCompoundControl && mpWindowImpl->mbCompoundControlHasFocus
+           && !HasChildPathFocus();
+}
+
+bool Window::ImplUpdateCompoundControlFocusGain()
+{
+    if (ImplIsCompoundControlGainingFocus())
+    {
+        mpWindowImpl->mbCompoundControlHasFocus = true;
+        return true;
+    }
+
+    return false;
+}
+
+bool Window::ImplUpdateCompoundControlFocusLoss()
+{
+    if (ImplIsCompoundControlLosingFocus())
+    {
+        mpWindowImpl->mbCompoundControlHasFocus = false;
+        return true;
+    }
+
+    return false;
+}
+
+void Window::ImplNotifyFocusListeners(NotifyEvent& rNEvt)
+{
+    if (rNEvt.GetType() == NotifyEventType::GETFOCUS)
+    {
+        if (ImplUpdateCompoundControlFocusGain() || (rNEvt.GetWindow() == this))
+            CallEventListeners(VclEventId::WindowGetFocus);
+    }
+    else if (rNEvt.GetType() == NotifyEventType::LOSEFOCUS)
+    {
+        if (ImplUpdateCompoundControlFocusLoss() || (rNEvt.GetWindow() == this))
+            CallEventListeners(VclEventId::WindowLoseFocus);
+    }
+}
+
 bool Window::PreNotify(NotifyEvent& rNEvt)
 {
     if (ImplDelegatePreNotifyToParent(rNEvt))
         return true;
 
-    if (rNEvt.GetType() == NotifyEventType::GETFOCUS)
-    {
-        bool bCompoundFocusChanged = false;
-        if (mpWindowImpl->mbCompoundControl && !mpWindowImpl->mbCompoundControlHasFocus
-            && HasChildPathFocus())
-        {
-            mpWindowImpl->mbCompoundControlHasFocus = true;
-            bCompoundFocusChanged = true;
-        }
-
-        if (bCompoundFocusChanged || (rNEvt.GetWindow() == this))
-            CallEventListeners(VclEventId::WindowGetFocus);
-    }
-    else if (rNEvt.GetType() == NotifyEventType::LOSEFOCUS)
-    {
-        bool bCompoundFocusChanged = false;
-        if (mpWindowImpl->mbCompoundControl && mpWindowImpl->mbCompoundControlHasFocus
-            && !HasChildPathFocus())
-        {
-            mpWindowImpl->mbCompoundControlHasFocus = false;
-            bCompoundFocusChanged = true;
-        }
-
-        if (bCompoundFocusChanged || (rNEvt.GetWindow() == this))
-            CallEventListeners(VclEventId::WindowLoseFocus);
-    }
+    ImplNotifyFocusListeners(rNEvt);
 
     // #82968# mouse and key events will be notified after processing ( in ImplNotifyKeyMouseCommandEventListeners() )!
     //    see also ImplHandleMouseEvent(), ImplHandleKey()
