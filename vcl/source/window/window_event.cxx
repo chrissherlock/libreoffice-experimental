@@ -84,9 +84,20 @@ void Window::SetHelpHdl(const Link<vcl::Window&, bool>& rLink)
         mpWindowImpl->maHelpRequestHdl = rLink;
 }
 
+tools::Rectangle Window::ImplGetHelpScreenRect() const
+{
+    Point aPos = GetPosPixel();
+
+    if (ImplGetParent() && !ImplIsOverlapWindow())
+        aPos = OutputToScreenPixel(Point(0, 0));
+
+    return tools::Rectangle(aPos, GetSizePixel());
+}
+
 void Window::ImplShowBalloonHelp(const HelpEvent& rHEvt)
 {
     OUString rStr = GetHelpText();
+
     if (rStr.isEmpty())
         rStr = GetQuickHelpText();
 
@@ -96,12 +107,7 @@ void Window::ImplShowBalloonHelp(const HelpEvent& rHEvt)
         return;
     }
 
-    Point aPos = GetPosPixel();
-    if (ImplGetParent() && !ImplIsOverlapWindow())
-        aPos = OutputToScreenPixel(Point(0, 0));
-
-    tools::Rectangle aRect(aPos, GetSizePixel());
-    Help::ShowBalloon(this, rHEvt.GetMousePosPixel(), aRect, rStr);
+    Help::ShowBalloon(this, rHEvt.GetMousePosPixel(), ImplGetHelpScreenRect(), rStr);
 }
 
 void Window::ImplShowQuickHelp(const HelpEvent& rHEvt)
@@ -114,12 +120,7 @@ void Window::ImplShowQuickHelp(const HelpEvent& rHEvt)
         return;
     }
 
-    Point aPos = GetPosPixel();
-    if (ImplGetParent() && !ImplIsOverlapWindow())
-        aPos = OutputToScreenPixel(Point(0, 0));
-
-    tools::Rectangle aRect(aPos, GetSizePixel());
-    Help::ShowQuickHelp(this, aRect, rStr, QuickHelpFlags::CtrlText);
+    Help::ShowQuickHelp(this, ImplGetHelpScreenRect(), rStr, QuickHelpFlags::CtrlText);
 }
 
 void Window::ImplStartHelp(const HelpEvent& rHEvt)
