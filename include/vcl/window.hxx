@@ -1628,6 +1628,11 @@ private:
     SAL_DLLPRIVATE void ImplShowQuickHelp(const HelpEvent& rHEvt);
     SAL_DLLPRIVATE void ImplStartHelp(const HelpEvent& rHEvt);
     SAL_DLLPRIVATE bool ImplDelegatePreNotifyToParent(NotifyEvent& rNEvt);
+    SAL_DLLPRIVATE bool ImplIsCompoundControlGainingFocus() const;
+    SAL_DLLPRIVATE bool ImplIsCompoundControlLosingFocus() const;
+    SAL_DLLPRIVATE bool ImplUpdateCompoundControlFocusGain();
+    SAL_DLLPRIVATE bool ImplUpdateCompoundControlFocusLoss();
+    SAL_DLLPRIVATE void ImplNotifyFocusListeners(NotifyEvent& rNEvt);
 };
 }
 
