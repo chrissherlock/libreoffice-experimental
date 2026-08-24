@@ -394,6 +394,12 @@ bool Window::ImplDispatchDialogControlEvent(NotifyEvent& rNEvt, bool bIsFloating
     return ImplDispatchDialogControlFocusEvent(rNEvt);
 }
 
+static bool lcl_CanToggleFloatingMode(Window* pWindow, const ImplDockingWindowWrapper* pWrapper)
+{
+    return (pWindow->GetStyle() & WB_DOCKABLE) && pWrapper
+           && (pWrapper->IsFloatingMode() || !pWrapper->IsLocked());
+}
+
 static bool lcl_IsFloatingToggleKey(const NotifyEvent& rNEvt)
 {
     if (rNEvt.GetType() != NotifyEventType::KEYINPUT)
@@ -417,8 +423,8 @@ bool Window::EventNotify(NotifyEvent& rNEvt)
     // check for docking window
     // but do nothing if window is docked and locked
     ImplDockingWindowWrapper* pWrapper = ImplGetDockingManager()->GetDockingWindowWrapper(this);
-    if ((GetStyle() & WB_DOCKABLE) && pWrapper
-        && (pWrapper->IsFloatingMode() || !pWrapper->IsLocked()))
+
+    if (lcl_CanToggleFloatingMode(this, pWrapper))
     {
         const bool bDockingSupportCrippled = !StyleSettings::GetDockingFloatsSupported();
 
