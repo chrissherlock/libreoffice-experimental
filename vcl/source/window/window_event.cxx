@@ -46,7 +46,7 @@ void Window::KeyInput(const KeyEvent& rKEvt)
     KeyCode cod = rKEvt.GetKeyCode();
 
     // do not respond to accelerators unless Alt or Ctrl is held
-    if (cod.GetCode() >= 0x200 && cod.GetCode() <= 0x219)
+    if (cod.GetCode() >= KEY_A && cod.GetCode() <= KEY_Z)
     {
         bool autoacc = ImplGetSVData()->maNWFData.mbAutoAccel;
         if (autoacc && cod.GetModifier() != KEY_MOD2 && !(cod.GetModifier() & KEY_MOD1))
