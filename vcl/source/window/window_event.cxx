@@ -474,6 +474,37 @@ bool Window::ImplAttemptDockingSequence(const NotifyEvent& rNEvt,
     return true;
 }
 
+bool Window::ImplDispatchDockingEvent(const NotifyEvent& rNEvt, ImplDockingWindowWrapper* pWrapper)
+{
+    if (rNEvt.GetType() == NotifyEventType::MOUSEBUTTONDOWN)
+    {
+        if (ImplDispatchDockingMouseEvent(rNEvt, pWrapper))
+            return true;
+    }
+    else if (rNEvt.GetType() == NotifyEventType::MOUSEMOVE)
+    {
+        if (ImplAttemptDockingSequence(rNEvt, pWrapper))
+            return true;
+    }
+    else if (lcl_IsFloatingToggleKeyEvent(rNEvt) && StyleSettings::GetDockingFloatsSupported())
+    {
+        pWrapper->SetFloatingMode(!pWrapper->IsFloatingMode());
+
+        /* At this point the floating toolbar frame does not have the
+         * input focus since these frames don't get the focus per default
+         * To enable keyboard handling of this toolbar set the input focus
+         * to the frame. This needs to be done with ToTop since GrabFocus
+         * would not notice any change since "this" already has the focus.
+         */
+        if (pWrapper->IsFloatingMode())
+            ToTop(ToTopFlags::GrabFocusOnly);
+
+        return true;
+    }
+
+    return false;
+}
+
 bool Window::EventNotify(NotifyEvent& rNEvt)
 {
     if (isDisposed())
@@ -483,36 +514,8 @@ bool Window::EventNotify(NotifyEvent& rNEvt)
     // but do nothing if window is docked and locked
     ImplDockingWindowWrapper* pWrapper = ImplGetDockingManager()->GetDockingWindowWrapper(this);
 
-    if (lcl_CanToggleFloatingMode(this, pWrapper))
-    {
-        const bool bDockingSupportCrippled = !StyleSettings::GetDockingFloatsSupported();
-
-        if (rNEvt.GetType() == NotifyEventType::MOUSEBUTTONDOWN)
-        {
-            if (ImplDispatchDockingMouseEvent(rNEvt, pWrapper))
-                return true;
-        }
-        else if (rNEvt.GetType() == NotifyEventType::MOUSEMOVE)
-        {
-            if (ImplAttemptDockingSequence(rNEvt, pWrapper))
-                return true;
-        }
-        else if (lcl_IsFloatingToggleKeyEvent(rNEvt) && !bDockingSupportCrippled)
-        {
-            pWrapper->SetFloatingMode(!pWrapper->IsFloatingMode());
-
-            /* At this point the floating toolbar frame does not have the
-             * input focus since these frames don't get the focus per default
-             * To enable keyboard handling of this toolbar set the input focus
-             * to the frame. This needs to be done with ToTop since GrabFocus
-             * would not notice any change since "this" already has the focus.
-             */
-            if (pWrapper->IsFloatingMode())
-                ToTop(ToTopFlags::GrabFocusOnly);
-
-            return true;
-        }
-    }
+    if (lcl_CanToggleFloatingMode(this, pWrapper) && ImplDispatchDockingEvent(rNEvt, pWrapper))
+        return true;
 
     const bool bIsFloatingMode = (pWrapper && pWrapper->IsFloatingMode());
 
