@@ -81,63 +81,85 @@ void Window::SetCommandHdl(const Link<const CommandEvent&, bool>& rLink)
 void Window::SetHelpHdl(const Link<vcl::Window&, bool>& rLink)
 {
     if (mpWindowImpl) // may be called after dispose
-    {
         mpWindowImpl->maHelpRequestHdl = rLink;
+}
+
+void Window::ImplShowBalloonHelp(const HelpEvent& rHEvt)
+{
+    OUString rStr = GetHelpText();
+    if (rStr.isEmpty())
+        rStr = GetQuickHelpText();
+
+    if (rStr.isEmpty() && ImplGetParent() && !ImplIsOverlapWindow())
+    {
+        ImplGetParent()->RequestHelp(rHEvt);
+        return;
     }
+
+    Point aPos = GetPosPixel();
+    if (ImplGetParent() && !ImplIsOverlapWindow())
+        aPos = OutputToScreenPixel(Point(0, 0));
+
+    tools::Rectangle aRect(aPos, GetSizePixel());
+    Help::ShowBalloon(this, rHEvt.GetMousePosPixel(), aRect, rStr);
+}
+
+void Window::ImplShowQuickHelp(const HelpEvent& rHEvt)
+{
+    const OUString& rStr = GetQuickHelpText();
+
+    if (rStr.isEmpty() && ImplGetParent() && !ImplIsOverlapWindow())
+    {
+        ImplGetParent()->RequestHelp(rHEvt);
+        return;
+    }
+
+    Point aPos = GetPosPixel();
+    if (ImplGetParent() && !ImplIsOverlapWindow())
+        aPos = OutputToScreenPixel(Point(0, 0));
+
+    tools::Rectangle aRect(aPos, GetSizePixel());
+    Help::ShowQuickHelp(this, aRect, rStr, QuickHelpFlags::CtrlText);
+}
+
+void Window::ImplStartHelp(const HelpEvent& rHEvt)
+{
+    OUString aStrHelpId(GetHelpId());
+
+    if (aStrHelpId.isEmpty() && ImplGetParent())
+    {
+        ImplGetParent()->RequestHelp(rHEvt);
+        return;
+    }
+
+    Help* pHelp = Application::GetHelp();
+
+    if (!pHelp)
+        return;
+
+    if (!aStrHelpId.isEmpty())
+        pHelp->Start(aStrHelpId, this);
+    else
+        pHelp->Start(u"" OOO_HELP_INDEX ""_ustr, this);
 }
 
 void Window::RequestHelp(const HelpEvent& rHEvt)
 {
-    // if Balloon-Help is requested, show the balloon
-    // with help text set
+    // if Balloon-Help is requested, show the balloon with help text set
     if (rHEvt.GetMode() & HelpEventMode::BALLOON)
     {
-        OUString rStr = GetHelpText();
-        if (rStr.isEmpty())
-            rStr = GetQuickHelpText();
-        if (rStr.isEmpty() && ImplGetParent() && !ImplIsOverlapWindow())
-            ImplGetParent()->RequestHelp(rHEvt);
-        else
-        {
-            Point aPos = GetPosPixel();
-            if (ImplGetParent() && !ImplIsOverlapWindow())
-                aPos = OutputToScreenPixel(Point(0, 0));
-            tools::Rectangle aRect(aPos, GetSizePixel());
+        ImplShowBalloonHelp(rHEvt);
+        return;
+    }
 
-            Help::ShowBalloon(this, rHEvt.GetMousePosPixel(), aRect, rStr);
-        }
-    }
-    else if (rHEvt.GetMode() & HelpEventMode::QUICK)
+    if (rHEvt.GetMode() & HelpEventMode::QUICK)
     {
-        const OUString& rStr = GetQuickHelpText();
-        if (rStr.isEmpty() && ImplGetParent() && !ImplIsOverlapWindow())
-            ImplGetParent()->RequestHelp(rHEvt);
-        else
-        {
-            Point aPos = GetPosPixel();
-            if (ImplGetParent() && !ImplIsOverlapWindow())
-                aPos = OutputToScreenPixel(Point(0, 0));
-            tools::Rectangle aRect(aPos, GetSizePixel());
-            Help::ShowQuickHelp(this, aRect, rStr, QuickHelpFlags::CtrlText);
-        }
+        ImplShowQuickHelp(rHEvt);
+        return;
     }
-    else if (!mpWindowImpl->maHelpRequestHdl.IsSet() || mpWindowImpl->maHelpRequestHdl.Call(*this))
-    {
-        OUString aStrHelpId(GetHelpId());
-        if (aStrHelpId.isEmpty() && ImplGetParent())
-            ImplGetParent()->RequestHelp(rHEvt);
-        else
-        {
-            Help* pHelp = Application::GetHelp();
-            if (pHelp)
-            {
-                if (!aStrHelpId.isEmpty())
-                    pHelp->Start(aStrHelpId, this);
-                else
-                    pHelp->Start(u"" OOO_HELP_INDEX ""_ustr, this);
-            }
-        }
-    }
+
+    if (!mpWindowImpl->maHelpRequestHdl.IsSet() || mpWindowImpl->maHelpRequestHdl.Call(*this))
+        ImplStartHelp(rHEvt);
 }
 
 void Window::Command(const CommandEvent& rCEvt)
