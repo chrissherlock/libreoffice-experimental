@@ -418,7 +418,7 @@ static bool lcl_IsFloatingToggleKeyEvent(const NotifyEvent& rNEvt)
 static bool lcl_IsSingleClickInDragArea(const MouseEvent* pMEvt,
                                         const ImplDockingWindowWrapper* pWrapper)
 {
-    return pMEvt->GetClicks() == 1 && pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel());
+    return pMEvt->GetClicks() == 1 && pWrapper->IsMouseInDragArea(pMEvt->GetPosPixel());
 }
 
 static bool lcl_IsMod1DoubleClick(const MouseEvent* pMEvt)
@@ -452,7 +452,7 @@ bool Window::ImplCanStartDocking(const MouseEvent* pMEvt,
                                  const ImplDockingWindowWrapper* pWrapper) const
 {
     return pWrapper->ImplStartDockingEnabled() && !pWrapper->IsFloatingMode()
-           && !pWrapper->IsDocking() && pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel());
+           && !pWrapper->IsDocking() && pWrapper->IsMouseInDragArea(pMEvt->GetPosPixel());
 }
 
 bool Window::ImplAttemptDockingSequence(const NotifyEvent& rNEvt,

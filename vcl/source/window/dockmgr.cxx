@@ -1076,4 +1076,9 @@ SystemWindow* ImplDockingWindowWrapper::GetFloatingWindow() const
     return mpFloatWin;
 }
 
+bool ImplDockingWindowWrapper::IsMouseInDragArea(const Point& rPos) const
+{
+    return maDragArea.Contains(rPos);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
