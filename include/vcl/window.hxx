@@ -1636,6 +1636,7 @@ private:
     SAL_DLLPRIVATE void ImplNotifyFocusListeners(NotifyEvent& rNEvt);
     SAL_DLLPRIVATE bool ImplShouldForwardFocusToChild(const NotifyEvent& rNEvt) const;
     SAL_DLLPRIVATE bool ImplDispatchDialogControlEvent(NotifyEvent& rNEvt, bool bIsFloatingMode);
+    SAL_DLLPRIVATE bool ImplDispatchDialogControlKeyEvent(NotifyEvent& rNEvt, bool bIsFloatingMode);
 };
 }
 
