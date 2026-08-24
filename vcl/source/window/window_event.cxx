@@ -331,6 +331,18 @@ static bool lcl_ParentNotDialogControl(Window* pWindow)
     return ((pParent->GetStyle() & (WB_DIALOGCONTROL | WB_NODIALOGCONTROL)) != WB_DIALOGCONTROL);
 }
 
+static bool lcl_IsKeyEvent(const NotifyEvent& rNEvt)
+{
+    return rNEvt.GetType() == NotifyEventType::KEYINPUT
+           || rNEvt.GetType() == NotifyEventType::KEYUP;
+}
+
+static bool lcl_IsFocusEvent(const NotifyEvent& rNEvt)
+{
+    return rNEvt.GetType() == NotifyEventType::GETFOCUS
+           || rNEvt.GetType() == NotifyEventType::LOSEFOCUS;
+}
+
 bool Window::EventNotify(NotifyEvent& rNEvt)
 {
     if (isDisposed())
@@ -413,8 +425,7 @@ bool Window::EventNotify(NotifyEvent& rNEvt)
     if ((GetStyle() & (WB_DIALOGCONTROL | WB_NODIALOGCONTROL)) == WB_DIALOGCONTROL)
     {
         // if the parent also has dialog control activated, the parent takes over control
-        if ((rNEvt.GetType() == NotifyEventType::KEYINPUT)
-            || (rNEvt.GetType() == NotifyEventType::KEYUP))
+        if (lcl_IsKeyEvent(rNEvt))
         {
             // ScGridWindow has WB_DIALOGCONTROL set, so pressing tab in ScCheckListMenuControl won't
             // get processed here by the toplevel DockingWindow of ScCheckListMenuControl by
@@ -427,8 +438,7 @@ bool Window::EventNotify(NotifyEvent& rNEvt)
                                    rNEvt.GetType() == NotifyEventType::KEYINPUT);
             }
         }
-        else if ((rNEvt.GetType() == NotifyEventType::GETFOCUS)
-                 || (rNEvt.GetType() == NotifyEventType::LOSEFOCUS))
+        else if (lcl_IsFocusEvent(rNEvt))
         {
             ImplDlgCtrlFocusChanged(rNEvt.GetWindow(),
                                     rNEvt.GetType() == NotifyEventType::GETFOCUS);
