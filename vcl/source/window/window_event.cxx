@@ -439,13 +439,11 @@ bool Window::ImplDispatchDockingMouseEvent(const NotifyEvent& rNEvt,
         return true;
     }
 
-    if (lcl_IsSingleClickInDragArea(pMEvt, pWrapper))
-    {
-        pWrapper->ImplEnableStartDocking();
-        return true;
-    }
+    if (!lcl_IsSingleClickInDragArea(pMEvt, pWrapper))
+        return false;
 
-    return false;
+    pWrapper->ImplEnableStartDocking();
+    return true;
 }
 
 bool Window::ImplCanStartDocking(const MouseEvent* pMEvt,
