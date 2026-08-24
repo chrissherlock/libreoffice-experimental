@@ -367,21 +367,21 @@ bool Window::ImplDispatchDialogControlEvent(NotifyEvent& rNEvt, bool bIsFloating
         // get processed here by the toplevel DockingWindow of ScCheckListMenuControl by
         // just checking if lcl_ParentNotDialogControl is true
         if (lcl_IsTopLevelDialogControl(this, bIsFloatingMode))
-        {
             return ImplDlgCtrl(*rNEvt.GetKeyEvent(), rNEvt.GetType() == NotifyEventType::KEYINPUT);
-        }
-    }
-    else if (lcl_IsFocusEvent(rNEvt))
-    {
-        ImplDlgCtrlFocusChanged(rNEvt.GetWindow(), rNEvt.GetType() == NotifyEventType::GETFOCUS);
 
-        if (ImplShouldForwardFocusToChild(rNEvt))
-        {
-            if (vcl::Window* pFirstChild = ImplGetDlgWindow(0, GetDlgWindowType::First);
-                pFirstChild)
-                pFirstChild->ImplControlFocus();
-        }
+        return false;
     }
+
+    if (!lcl_IsFocusEvent(rNEvt))
+        return false;
+
+    ImplDlgCtrlFocusChanged(rNEvt.GetWindow(), rNEvt.GetType() == NotifyEventType::GETFOCUS);
+
+    if (!ImplShouldForwardFocusToChild(rNEvt))
+        return false;
+
+    if (vcl::Window* pFirstChild = ImplGetDlgWindow(0, GetDlgWindowType::First); pFirstChild)
+        pFirstChild->ImplControlFocus();
 
     return false;
 }
