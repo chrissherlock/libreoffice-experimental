@@ -1635,6 +1635,7 @@ private:
     SAL_DLLPRIVATE bool ImplUpdateCompoundControlFocusLoss();
     SAL_DLLPRIVATE void ImplNotifyFocusListeners(NotifyEvent& rNEvt);
     SAL_DLLPRIVATE bool ImplShouldForwardFocusToChild(const NotifyEvent& rNEvt) const;
+    SAL_DLLPRIVATE bool ImplDispatchDialogControlEvent(NotifyEvent& rNEvt, bool bIsFloatingMode);
 };
 }
 
