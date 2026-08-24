@@ -394,6 +394,21 @@ bool Window::ImplDispatchDialogControlEvent(NotifyEvent& rNEvt, bool bIsFloating
     return ImplDispatchDialogControlFocusEvent(rNEvt);
 }
 
+static bool lcl_IsFloatingToggleKey(const NotifyEvent& rNEvt)
+{
+    if (rNEvt.GetType() != NotifyEventType::KEYINPUT)
+        return false;
+
+    const vcl::KeyCode& rKey = rNEvt.GetKeyEvent()->GetKeyCode();
+
+    return rKey.GetCode() == KEY_F10 && rKey.GetModifier() && rKey.IsShift() && rKey.IsMod1();
+}
+
+static bool lcl_IsFloatingToggleKeyEvent(const NotifyEvent& rNEvt)
+{
+    return rNEvt.GetType() == NotifyEventType::KEYINPUT && lcl_IsFloatingToggleKey(rNEvt);
+}
+
 bool Window::EventNotify(NotifyEvent& rNEvt)
 {
     if (isDisposed())
@@ -450,23 +465,20 @@ bool Window::EventNotify(NotifyEvent& rNEvt)
                 return true;
             }
         }
-        else if (rNEvt.GetType() == NotifyEventType::KEYINPUT)
+        else if (lcl_IsFloatingToggleKeyEvent(rNEvt) && !bDockingSupportCrippled)
         {
-            const vcl::KeyCode& rKey = rNEvt.GetKeyEvent()->GetKeyCode();
-            if (rKey.GetCode() == KEY_F10 && rKey.GetModifier() && rKey.IsShift() && rKey.IsMod1()
-                && !bDockingSupportCrippled)
-            {
-                pWrapper->SetFloatingMode(!pWrapper->IsFloatingMode());
-                /* At this point the floating toolbar frame does not have the
-                 * input focus since these frames don't get the focus per default
-                 * To enable keyboard handling of this toolbar set the input focus
-                 * to the frame. This needs to be done with ToTop since GrabFocus
-                 * would not notice any change since "this" already has the focus.
-                 */
-                if (pWrapper->IsFloatingMode())
-                    ToTop(ToTopFlags::GrabFocusOnly);
-                return true;
-            }
+            pWrapper->SetFloatingMode(!pWrapper->IsFloatingMode());
+
+            /* At this point the floating toolbar frame does not have the
+             * input focus since these frames don't get the focus per default
+             * To enable keyboard handling of this toolbar set the input focus
+             * to the frame. This needs to be done with ToTop since GrabFocus
+             * would not notice any change since "this" already has the focus.
+             */
+            if (pWrapper->IsFloatingMode())
+                ToTop(ToTopFlags::GrabFocusOnly);
+
+            return true;
         }
     }
 
