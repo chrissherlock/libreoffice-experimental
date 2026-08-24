@@ -429,25 +429,23 @@ static bool lcl_IsMod1DoubleClick(const MouseEvent* pMEvt)
 bool Window::ImplDispatchDockingMouseEvent(const NotifyEvent& rNEvt,
                                            ImplDockingWindowWrapper* pWrapper)
 {
-    const bool bDockingSupportCrippled = !StyleSettings::GetDockingFloatsSupported();
     const MouseEvent* pMEvt = rNEvt.GetMouseEvent();
-
     if (!pMEvt->IsLeft())
         return false;
 
-    if (!bDockingSupportCrippled && lcl_IsMod1DoubleClick(pMEvt))
+    if (StyleSettings::GetDockingFloatsSupported() && lcl_IsMod1DoubleClick(pMEvt))
     {
-        // ctrl double click toggles floating mode
         pWrapper->SetFloatingMode(!pWrapper->IsFloatingMode());
         return true;
     }
 
-    if (!lcl_IsSingleClickInDragArea(pMEvt, pWrapper))
-        return false;
+    if (lcl_IsSingleClickInDragArea(pMEvt, pWrapper))
+    {
+        pWrapper->ImplEnableStartDocking();
+        return true;
+    }
 
-    // allow start docking during mouse move
-    pWrapper->ImplEnableStartDocking();
-    return true;
+    return false;
 }
 
 bool Window::ImplAttemptDockingSequence(const NotifyEvent& rNEvt,
