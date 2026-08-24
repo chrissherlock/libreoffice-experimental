@@ -448,32 +448,32 @@ bool Window::ImplDispatchDockingMouseEvent(const NotifyEvent& rNEvt,
     return false;
 }
 
+bool Window::ImplCanStartDocking(const MouseEvent* pMEvt,
+                                 const ImplDockingWindowWrapper* pWrapper) const
+{
+    return pWrapper->ImplStartDockingEnabled() && !pWrapper->IsFloatingMode()
+           && !pWrapper->IsDocking() && pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel());
+}
+
 bool Window::ImplAttemptDockingSequence(const NotifyEvent& rNEvt,
                                         ImplDockingWindowWrapper* pWrapper)
 {
     const MouseEvent* pMEvt = rNEvt.GetMouseEvent();
-    if (!pMEvt->IsLeft())
+
+    if (!pMEvt->IsLeft() || !ImplCanStartDocking(pMEvt, pWrapper))
         return false;
 
-    bool bHit = pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel());
+    Point aPos = pMEvt->GetPosPixel();
 
-    // check if a single click initiated this sequence ( ImplStartDockingEnabled() )
-    // check if window is docked and
-    if (pWrapper->ImplStartDockingEnabled() && !pWrapper->IsFloatingMode() && !pWrapper->IsDocking()
-        && bHit)
+    if (vcl::Window* pWindow = rNEvt.GetWindow(); pWindow != this)
     {
-        Point aPos = pMEvt->GetPosPixel();
-        vcl::Window* pWindow = rNEvt.GetWindow();
-        if (pWindow != this)
-        {
-            aPos = pWindow->OutputToScreenPixel(aPos);
-            aPos = ScreenToOutputPixel(aPos);
-        }
-        pWrapper->ImplStartDocking(aPos);
-        return true;
+        aPos = pWindow->OutputToScreenPixel(aPos);
+        aPos = ScreenToOutputPixel(aPos);
     }
 
-    return false;
+    pWrapper->ImplStartDocking(aPos);
+
+    return true;
 }
 
 bool Window::EventNotify(NotifyEvent& rNEvt)
