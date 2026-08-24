@@ -126,6 +126,8 @@ public:
                                      PosSizeFlags nFlags );
     Point           GetPosPixel() const;
     Size            GetSizePixel() const;
+
+    bool            IsMouseInDragArea(const Point& rPos) const;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
