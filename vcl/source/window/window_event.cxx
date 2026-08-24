@@ -452,25 +452,27 @@ bool Window::ImplAttemptDockingSequence(const NotifyEvent& rNEvt,
                                         ImplDockingWindowWrapper* pWrapper)
 {
     const MouseEvent* pMEvt = rNEvt.GetMouseEvent();
+    if (!pMEvt->IsLeft())
+        return false;
+
     bool bHit = pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel());
-    if (pMEvt->IsLeft())
+
+    // check if a single click initiated this sequence ( ImplStartDockingEnabled() )
+    // check if window is docked and
+    if (pWrapper->ImplStartDockingEnabled() && !pWrapper->IsFloatingMode() && !pWrapper->IsDocking()
+        && bHit)
     {
-        // check if a single click initiated this sequence ( ImplStartDockingEnabled() )
-        // check if window is docked and
-        if (pWrapper->ImplStartDockingEnabled() && !pWrapper->IsFloatingMode()
-            && !pWrapper->IsDocking() && bHit)
+        Point aPos = pMEvt->GetPosPixel();
+        vcl::Window* pWindow = rNEvt.GetWindow();
+        if (pWindow != this)
         {
-            Point aPos = pMEvt->GetPosPixel();
-            vcl::Window* pWindow = rNEvt.GetWindow();
-            if (pWindow != this)
-            {
-                aPos = pWindow->OutputToScreenPixel(aPos);
-                aPos = ScreenToOutputPixel(aPos);
-            }
-            pWrapper->ImplStartDocking(aPos);
+            aPos = pWindow->OutputToScreenPixel(aPos);
+            aPos = ScreenToOutputPixel(aPos);
         }
+        pWrapper->ImplStartDocking(aPos);
         return true;
     }
+
     return false;
 }
 
