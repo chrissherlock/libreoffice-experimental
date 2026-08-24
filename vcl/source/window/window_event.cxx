@@ -254,13 +254,18 @@ void Window::NotifyAllChildren(DataChangedEvent& rDCEvt)
     }
 }
 
+bool Window::ImplDelegatePreNotifyToParent(NotifyEvent& rNEvt)
+{
+    if (mpWindowImpl->mpHierarchy->mpParent && !ImplIsOverlapWindow())
+        return mpWindowImpl->mpHierarchy->mpParent->CompatPreNotify(rNEvt);
+
+    return false;
+}
+
 bool Window::PreNotify(NotifyEvent& rNEvt)
 {
-    if (mpWindowImpl->mpHierarchy->mpParent && !ImplIsOverlapWindow()
-        && mpWindowImpl->mpHierarchy->mpParent->CompatPreNotify(rNEvt))
-    {
+    if (ImplDelegatePreNotifyToParent(rNEvt))
         return true;
-    }
 
     if (rNEvt.GetType() == NotifyEventType::GETFOCUS)
     {
