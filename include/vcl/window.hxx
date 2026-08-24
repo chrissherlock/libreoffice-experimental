@@ -1624,6 +1624,7 @@ private:
     SAL_DLLPRIVATE std::optional<bool> ImplShowWindow(ShowFlags nFlags);
 
     // event
+    SAL_DLLPRIVATE tools::Rectangle ImplGetHelpScreenRect() const;
     SAL_DLLPRIVATE void ImplShowBalloonHelp(const HelpEvent& rHEvt);
     SAL_DLLPRIVATE void ImplShowQuickHelp(const HelpEvent& rHEvt);
     SAL_DLLPRIVATE void ImplStartHelp(const HelpEvent& rHEvt);
