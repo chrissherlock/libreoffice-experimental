@@ -1637,6 +1637,9 @@ private:
     SAL_DLLPRIVATE bool ImplDispatchDialogControlEvent(NotifyEvent& rNEvt, bool bIsFloatingMode);
     SAL_DLLPRIVATE bool ImplDispatchDialogControlKeyEvent(NotifyEvent& rNEvt, bool bIsFloatingMode);
     SAL_DLLPRIVATE bool ImplDispatchDialogControlFocusEvent(NotifyEvent& rNEvt);
+    SAL_DLLPRIVATE bool ImplDispatchDockingMouseEvent(const NotifyEvent& rNEvt, ImplDockingWindowWrapper* pWrapper);
+    SAL_DLLPRIVATE bool ImplAttemptDockingSequence(const NotifyEvent& rNEvt, ImplDockingWindowWrapper* pWrapper);
+
 };
 }
 
