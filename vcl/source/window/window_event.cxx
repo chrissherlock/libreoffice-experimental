@@ -415,6 +415,17 @@ static bool lcl_IsFloatingToggleKeyEvent(const NotifyEvent& rNEvt)
     return rNEvt.GetType() == NotifyEventType::KEYINPUT && lcl_IsFloatingToggleKey(rNEvt);
 }
 
+static bool lcl_IsSingleClickInDragArea(const MouseEvent* pMEvt,
+                                        const ImplDockingWindowWrapper* pWrapper)
+{
+    return pMEvt->GetClicks() == 1 && pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel());
+}
+
+static bool lcl_IsMod1DoubleClick(const MouseEvent* pMEvt)
+{
+    return pMEvt->IsMod1() && (pMEvt->GetClicks() == 2);
+}
+
 bool Window::ImplDispatchDockingMouseEvent(const NotifyEvent& rNEvt,
                                            ImplDockingWindowWrapper* pWrapper)
 {
@@ -424,14 +435,14 @@ bool Window::ImplDispatchDockingMouseEvent(const NotifyEvent& rNEvt,
     if (!pMEvt->IsLeft())
         return false;
 
-    if (!bDockingSupportCrippled && pMEvt->IsMod1() && (pMEvt->GetClicks() == 2))
+    if (!bDockingSupportCrippled && lcl_IsMod1DoubleClick(pMEvt))
     {
         // ctrl double click toggles floating mode
         pWrapper->SetFloatingMode(!pWrapper->IsFloatingMode());
         return true;
     }
 
-    if (pMEvt->GetClicks() != 1 || !pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel()))
+    if (!lcl_IsSingleClickInDragArea(pMEvt, pWrapper))
         return false;
 
     // allow start docking during mouse move
