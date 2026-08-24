@@ -415,6 +415,58 @@ static bool lcl_IsFloatingToggleKeyEvent(const NotifyEvent& rNEvt)
     return rNEvt.GetType() == NotifyEventType::KEYINPUT && lcl_IsFloatingToggleKey(rNEvt);
 }
 
+bool Window::ImplDispatchDockingMouseEvent(const NotifyEvent& rNEvt,
+                                           ImplDockingWindowWrapper* pWrapper)
+{
+    const bool bDockingSupportCrippled = !StyleSettings::GetDockingFloatsSupported();
+    const MouseEvent* pMEvt = rNEvt.GetMouseEvent();
+    bool bHit = pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel());
+
+    if (pMEvt->IsLeft())
+    {
+        if (!bDockingSupportCrippled && pMEvt->IsMod1() && (pMEvt->GetClicks() == 2))
+        {
+            // ctrl double click toggles floating mode
+            pWrapper->SetFloatingMode(!pWrapper->IsFloatingMode());
+            return true;
+        }
+        else if (pMEvt->GetClicks() == 1 && bHit)
+        {
+            // allow start docking during mouse move
+            pWrapper->ImplEnableStartDocking();
+            return true;
+        }
+    }
+
+    return false;
+}
+
+bool Window::ImplAttemptDockingSequence(const NotifyEvent& rNEvt,
+                                        ImplDockingWindowWrapper* pWrapper)
+{
+    const MouseEvent* pMEvt = rNEvt.GetMouseEvent();
+    bool bHit = pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel());
+    if (pMEvt->IsLeft())
+    {
+        // check if a single click initiated this sequence ( ImplStartDockingEnabled() )
+        // check if window is docked and
+        if (pWrapper->ImplStartDockingEnabled() && !pWrapper->IsFloatingMode()
+            && !pWrapper->IsDocking() && bHit)
+        {
+            Point aPos = pMEvt->GetPosPixel();
+            vcl::Window* pWindow = rNEvt.GetWindow();
+            if (pWindow != this)
+            {
+                aPos = pWindow->OutputToScreenPixel(aPos);
+                aPos = ScreenToOutputPixel(aPos);
+            }
+            pWrapper->ImplStartDocking(aPos);
+        }
+        return true;
+    }
+    return false;
+}
+
 bool Window::EventNotify(NotifyEvent& rNEvt)
 {
     if (isDisposed())
@@ -430,46 +482,13 @@ bool Window::EventNotify(NotifyEvent& rNEvt)
 
         if (rNEvt.GetType() == NotifyEventType::MOUSEBUTTONDOWN)
         {
-            const MouseEvent* pMEvt = rNEvt.GetMouseEvent();
-            bool bHit = pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel());
-            if (pMEvt->IsLeft())
-            {
-                if (!bDockingSupportCrippled && pMEvt->IsMod1() && (pMEvt->GetClicks() == 2))
-                {
-                    // ctrl double click toggles floating mode
-                    pWrapper->SetFloatingMode(!pWrapper->IsFloatingMode());
-                    return true;
-                }
-                else if (pMEvt->GetClicks() == 1 && bHit)
-                {
-                    // allow start docking during mouse move
-                    pWrapper->ImplEnableStartDocking();
-                    return true;
-                }
-            }
+            if (ImplDispatchDockingMouseEvent(rNEvt, pWrapper))
+                return true;
         }
         else if (rNEvt.GetType() == NotifyEventType::MOUSEMOVE)
         {
-            const MouseEvent* pMEvt = rNEvt.GetMouseEvent();
-            bool bHit = pWrapper->GetDragArea().Contains(pMEvt->GetPosPixel());
-            if (pMEvt->IsLeft())
-            {
-                // check if a single click initiated this sequence ( ImplStartDockingEnabled() )
-                // check if window is docked and
-                if (pWrapper->ImplStartDockingEnabled() && !pWrapper->IsFloatingMode()
-                    && !pWrapper->IsDocking() && bHit)
-                {
-                    Point aPos = pMEvt->GetPosPixel();
-                    vcl::Window* pWindow = rNEvt.GetWindow();
-                    if (pWindow != this)
-                    {
-                        aPos = pWindow->OutputToScreenPixel(aPos);
-                        aPos = ScreenToOutputPixel(aPos);
-                    }
-                    pWrapper->ImplStartDocking(aPos);
-                }
+            if (ImplAttemptDockingSequence(rNEvt, pWrapper))
                 return true;
-            }
         }
         else if (lcl_IsFloatingToggleKeyEvent(rNEvt) && !bDockingSupportCrippled)
         {
