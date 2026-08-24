@@ -256,44 +256,43 @@ void Window::NotifyAllChildren(DataChangedEvent& rDCEvt)
 
 bool Window::PreNotify(NotifyEvent& rNEvt)
 {
-    bool bDone = false;
-    if (mpWindowImpl->mpHierarchy->mpParent && !ImplIsOverlapWindow())
-        bDone = mpWindowImpl->mpHierarchy->mpParent->CompatPreNotify(rNEvt);
-
-    if (!bDone)
+    if (mpWindowImpl->mpHierarchy->mpParent && !ImplIsOverlapWindow()
+        && mpWindowImpl->mpHierarchy->mpParent->CompatPreNotify(rNEvt))
     {
-        if (rNEvt.GetType() == NotifyEventType::GETFOCUS)
-        {
-            bool bCompoundFocusChanged = false;
-            if (mpWindowImpl->mbCompoundControl && !mpWindowImpl->mbCompoundControlHasFocus
-                && HasChildPathFocus())
-            {
-                mpWindowImpl->mbCompoundControlHasFocus = true;
-                bCompoundFocusChanged = true;
-            }
-
-            if (bCompoundFocusChanged || (rNEvt.GetWindow() == this))
-                CallEventListeners(VclEventId::WindowGetFocus);
-        }
-        else if (rNEvt.GetType() == NotifyEventType::LOSEFOCUS)
-        {
-            bool bCompoundFocusChanged = false;
-            if (mpWindowImpl->mbCompoundControl && mpWindowImpl->mbCompoundControlHasFocus
-                && !HasChildPathFocus())
-            {
-                mpWindowImpl->mbCompoundControlHasFocus = false;
-                bCompoundFocusChanged = true;
-            }
-
-            if (bCompoundFocusChanged || (rNEvt.GetWindow() == this))
-                CallEventListeners(VclEventId::WindowLoseFocus);
-        }
-
-        // #82968# mouse and key events will be notified after processing ( in ImplNotifyKeyMouseCommandEventListeners() )!
-        //    see also ImplHandleMouseEvent(), ImplHandleKey()
+        return true;
     }
 
-    return bDone;
+    if (rNEvt.GetType() == NotifyEventType::GETFOCUS)
+    {
+        bool bCompoundFocusChanged = false;
+        if (mpWindowImpl->mbCompoundControl && !mpWindowImpl->mbCompoundControlHasFocus
+            && HasChildPathFocus())
+        {
+            mpWindowImpl->mbCompoundControlHasFocus = true;
+            bCompoundFocusChanged = true;
+        }
+
+        if (bCompoundFocusChanged || (rNEvt.GetWindow() == this))
+            CallEventListeners(VclEventId::WindowGetFocus);
+    }
+    else if (rNEvt.GetType() == NotifyEventType::LOSEFOCUS)
+    {
+        bool bCompoundFocusChanged = false;
+        if (mpWindowImpl->mbCompoundControl && mpWindowImpl->mbCompoundControlHasFocus
+            && !HasChildPathFocus())
+        {
+            mpWindowImpl->mbCompoundControlHasFocus = false;
+            bCompoundFocusChanged = true;
+        }
+
+        if (bCompoundFocusChanged || (rNEvt.GetWindow() == this))
+            CallEventListeners(VclEventId::WindowLoseFocus);
+    }
+
+    // #82968# mouse and key events will be notified after processing ( in ImplNotifyKeyMouseCommandEventListeners() )!
+    //    see also ImplHandleMouseEvent(), ImplHandleKey()
+
+    return false;
 }
 
 static bool lcl_ParentNotDialogControl(Window* pWindow)
