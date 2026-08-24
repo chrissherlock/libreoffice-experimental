@@ -343,6 +343,21 @@ static bool lcl_IsFocusEvent(const NotifyEvent& rNEvt)
            || rNEvt.GetType() == NotifyEventType::LOSEFOCUS;
 }
 
+static bool lcl_IsTopLevelDialogControl(Window* pWindow, const ImplDockingWindowWrapper* pWrapper)
+{
+    bool bTopLevelFloatingWindow = (pWrapper && pWrapper->IsFloatingMode());
+
+    return pWindow->ImplIsOverlapWindow() || lcl_ParentNotDialogControl(pWindow)
+           || bTopLevelFloatingWindow;
+}
+
+bool Window::ImplShouldForwardFocusToChild(const NotifyEvent& rNEvt) const
+{
+    return (rNEvt.GetWindow() == this) && (rNEvt.GetType() == NotifyEventType::GETFOCUS)
+           && !(GetStyle() & WB_TABSTOP)
+           && !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus);
+}
+
 bool Window::EventNotify(NotifyEvent& rNEvt)
 {
     if (isDisposed())
@@ -430,24 +445,19 @@ bool Window::EventNotify(NotifyEvent& rNEvt)
             // ScGridWindow has WB_DIALOGCONTROL set, so pressing tab in ScCheckListMenuControl won't
             // get processed here by the toplevel DockingWindow of ScCheckListMenuControl by
             // just checking if lcl_ParentNotDialogControl is true
-            bool bTopLevelFloatingWindow = (pWrapper && pWrapper->IsFloatingMode());
-            if (ImplIsOverlapWindow() || lcl_ParentNotDialogControl(this)
-                || bTopLevelFloatingWindow)
-            {
+            if (lcl_IsTopLevelDialogControl(this, pWrapper))
                 bRet = ImplDlgCtrl(*rNEvt.GetKeyEvent(),
                                    rNEvt.GetType() == NotifyEventType::KEYINPUT);
-            }
         }
         else if (lcl_IsFocusEvent(rNEvt))
         {
             ImplDlgCtrlFocusChanged(rNEvt.GetWindow(),
                                     rNEvt.GetType() == NotifyEventType::GETFOCUS);
-            if ((rNEvt.GetWindow() == this) && (rNEvt.GetType() == NotifyEventType::GETFOCUS)
-                && !(GetStyle() & WB_TABSTOP)
-                && !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus))
+
+            if (ImplShouldForwardFocusToChild(rNEvt))
             {
-                vcl::Window* pFirstChild = ImplGetDlgWindow(0, GetDlgWindowType::First);
-                if (pFirstChild)
+                if (vcl::Window* pFirstChild = ImplGetDlgWindow(0, GetDlgWindowType::First);
+                    pFirstChild)
                     pFirstChild->ImplControlFocus();
             }
         }
