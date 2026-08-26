@@ -691,42 +691,44 @@ static MouseEvent ImplTranslateMouseEvent(const MouseEvent& rE, vcl::Window cons
                       rE.GetButtons(), rE.GetModifier());
 }
 
+void Window::ImplDispatchCompoundControlCommand(const NotifyEvent& rNEvt, const CommandEvent* pCEvt)
+{
+    if (!mpWindowImpl->mbCompoundControl || rNEvt.GetWindow() == this)
+        return;
+
+    CommandEvent aCommandEvent;
+
+    if (!pCEvt->IsMouseEvent())
+    {
+        aCommandEvent = *pCEvt;
+    }
+    else
+    {
+        // the mouse event occurred in a different window, we need to translate the coordinates of
+        // the mouse cursor within that window to the coordinates the mouse cursor would be in the
+        // current window
+        vcl::Window* pSource = rNEvt.GetWindow();
+        Point aPos = pSource->OutputToScreenPixel(pCEvt->GetMousePosPixel());
+        aCommandEvent = CommandEvent(ScreenToOutputPixel(aPos), pCEvt->GetCommand(),
+                                     pCEvt->IsMouseEvent(), pCEvt->GetEventData());
+    }
+
+    CallEventListeners(VclEventId::WindowCommand, &aCommandEvent);
+}
+
 void Window::ImplNotifyKeyMouseCommandEventListeners(NotifyEvent& rNEvt)
 {
     if (rNEvt.GetType() == NotifyEventType::COMMAND)
     {
         const CommandEvent* pCEvt = rNEvt.GetCommandEvent();
         if (pCEvt->GetCommand() != CommandEventId::ContextMenu)
+        {
             // non context menu events are not to be notified up the chain
             // so we return immediately
             return;
-
-        if (mpWindowImpl->mbCompoundControl || (rNEvt.GetWindow() == this))
-        {
-            // not interested: The event listeners are already called in ::Command,
-            // and calling them here a second time doesn't make sense
-            if (rNEvt.GetWindow() != this)
-            {
-                CommandEvent aCommandEvent;
-
-                if (!pCEvt->IsMouseEvent())
-                {
-                    aCommandEvent = *pCEvt;
-                }
-                else
-                {
-                    // the mouse event occurred in a different window, we need to translate the coordinates of
-                    // the mouse cursor within that window to the coordinates the mouse cursor would be in the
-                    // current window
-                    vcl::Window* pSource = rNEvt.GetWindow();
-                    Point aPos = pSource->OutputToScreenPixel(pCEvt->GetMousePosPixel());
-                    aCommandEvent = CommandEvent(ScreenToOutputPixel(aPos), pCEvt->GetCommand(),
-                                                 pCEvt->IsMouseEvent(), pCEvt->GetEventData());
-                }
-
-                CallEventListeners(VclEventId::WindowCommand, &aCommandEvent);
-            }
         }
+
+        ImplDispatchCompoundControlCommand(rNEvt, pCEvt);
     }
 
     // #82968# notify event listeners for mouse and key events separately and
