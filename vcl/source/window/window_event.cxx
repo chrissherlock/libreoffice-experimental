@@ -655,14 +655,15 @@ ImplSVEvent* Window::PostUserEvent(const Link<void*, void>& rLink, void* pCaller
     pSVEvent->maLink = rLink;
     pSVEvent->mpWindow = this;
     pSVEvent->mbCall = true;
+
     if (bReferenceLink)
-    {
         pSVEvent->mpInstanceRef = static_cast<vcl::Window*>(rLink.GetInstance());
-    }
 
     auto pTmpEvent = pSVEvent.get();
+
     if (!mpWindowImpl->mpFrame->PostEvent(std::move(pSVEvent)))
         return nullptr;
+
     return pTmpEvent;
 }
 
@@ -674,9 +675,7 @@ void Window::RemoveUserEvent(ImplSVEvent* nUserEvent)
     SAL_WARN_IF(!nUserEvent->mbCall, "vcl", "Window::RemoveUserEvent(): Event is already removed");
 
     if (nUserEvent->mpWindow)
-    {
         nUserEvent->mpWindow = nullptr;
-    }
 
     nUserEvent->mbCall = false;
 }
