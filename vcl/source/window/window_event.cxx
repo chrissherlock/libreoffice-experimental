@@ -716,20 +716,24 @@ void Window::ImplDispatchCompoundControlCommand(const NotifyEvent& rNEvt, const 
     CallEventListeners(VclEventId::WindowCommand, &aCommandEvent);
 }
 
+bool Window::ImplDispatchCommandEvent(const NotifyEvent& rNEvt)
+{
+    if (const CommandEvent* pCEvt = rNEvt.GetCommandEvent();
+        pCEvt->GetCommand() == CommandEventId::ContextMenu)
+    {
+        ImplDispatchCompoundControlCommand(rNEvt, pCEvt);
+        return true;
+    }
+
+    // non context menu events are not to be notified up the chain
+    // so we return immediately
+    return false;
+}
+
 void Window::ImplNotifyKeyMouseCommandEventListeners(NotifyEvent& rNEvt)
 {
-    if (rNEvt.GetType() == NotifyEventType::COMMAND)
-    {
-        const CommandEvent* pCEvt = rNEvt.GetCommandEvent();
-        if (pCEvt->GetCommand() != CommandEventId::ContextMenu)
-        {
-            // non context menu events are not to be notified up the chain
-            // so we return immediately
-            return;
-        }
-
-        ImplDispatchCompoundControlCommand(rNEvt, pCEvt);
-    }
+    if (rNEvt.GetType() == NotifyEventType::COMMAND && !ImplDispatchCommandEvent(rNEvt))
+        return;
 
     // #82968# notify event listeners for mouse and key events separately and
     // not in PreNotify ( as for focus listeners )
