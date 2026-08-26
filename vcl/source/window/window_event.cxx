@@ -854,42 +854,48 @@ void Window::ImplCallResize()
     CallEventListeners(VclEventId::WindowResize);
 }
 
+void Window::ImplUpdateFramePosition()
+{
+    if (!mpWindowImpl->mbFrame)
+        return;
+
+    // update frame position
+    SalFrame* pParentFrame = nullptr;
+    vcl::Window* pParent = ImplGetParent();
+    while (pParent)
+    {
+        if (pParent->mpWindowImpl && pParent->mpWindowImpl->mpFrame != mpWindowImpl->mpFrame)
+        {
+            pParentFrame = pParent->mpWindowImpl->mpFrame;
+            break;
+        }
+        pParent = pParent->GetParent();
+    }
+
+    SalFrameGeometry g = mpWindowImpl->mpFrame->GetGeometry();
+    mpWindowImpl->maPos = Point(g.x(), g.y());
+    if (pParentFrame)
+    {
+        g = pParentFrame->GetGeometry();
+        mpWindowImpl->maPos -= Point(g.x(), g.y());
+    }
+
+    // the client window and all its subclients have the same position as the borderframe
+    // this is important for floating toolbars where the borderwindow is a floating window
+    // which has another borderwindow (ie the system floating window)
+    vcl::Window* pClientWin = mpWindowImpl->mpClientWindow;
+    while (pClientWin)
+    {
+        pClientWin->mpWindowImpl->maPos = mpWindowImpl->maPos;
+        pClientWin = pClientWin->mpWindowImpl->mpClientWindow;
+    }
+}
+
 void Window::ImplCallMove()
 {
     mpWindowImpl->mbCallMove = false;
 
-    if (mpWindowImpl->mbFrame)
-    {
-        // update frame position
-        SalFrame* pParentFrame = nullptr;
-        vcl::Window* pParent = ImplGetParent();
-        while (pParent)
-        {
-            if (pParent->mpWindowImpl && pParent->mpWindowImpl->mpFrame != mpWindowImpl->mpFrame)
-            {
-                pParentFrame = pParent->mpWindowImpl->mpFrame;
-                break;
-            }
-            pParent = pParent->GetParent();
-        }
-
-        SalFrameGeometry g = mpWindowImpl->mpFrame->GetGeometry();
-        mpWindowImpl->maPos = Point(g.x(), g.y());
-        if (pParentFrame)
-        {
-            g = pParentFrame->GetGeometry();
-            mpWindowImpl->maPos -= Point(g.x(), g.y());
-        }
-        // the client window and all its subclients have the same position as the borderframe
-        // this is important for floating toolbars where the borderwindow is a floating window
-        // which has another borderwindow (ie the system floating window)
-        vcl::Window* pClientWin = mpWindowImpl->mpClientWindow;
-        while (pClientWin)
-        {
-            pClientWin->mpWindowImpl->maPos = mpWindowImpl->maPos;
-            pClientWin = pClientWin->mpWindowImpl->mpClientWindow;
-        }
-    }
+    ImplUpdateFramePosition();
 
     Move();
 
