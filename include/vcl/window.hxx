@@ -1643,6 +1643,7 @@ private:
     SAL_DLLPRIVATE bool ImplDispatchDockingEvent(const NotifyEvent& rNEvt, ImplDockingWindowWrapper* pWrapper);
     SAL_DLLPRIVATE void ImplDispatchCompoundControlCommand(const NotifyEvent& rNEvt, const CommandEvent* pCEvt);
     SAL_DLLPRIVATE bool ImplDispatchCommandEvent(const NotifyEvent& rNEvt);
+    SAL_DLLPRIVATE bool ImplDispatchKeyMouseEvent(const NotifyEvent& rNEvt);
 };
 }
 
