@@ -743,16 +743,8 @@ static VclEventId lcl_MapMouseEventId(NotifyEventType eType)
     }
 }
 
-void Window::ImplNotifyKeyMouseCommandEventListeners(NotifyEvent& rNEvt)
+bool Window::ImplDispatchKeyMouseEvent(const NotifyEvent& rNEvt)
 {
-    if (rNEvt.GetType() == NotifyEventType::COMMAND && !ImplDispatchCommandEvent(rNEvt))
-        return;
-
-    // #82968# notify event listeners for mouse and key events separately and
-    // not in PreNotify ( as for focus listeners )
-    // this allows for processing those events internally first and pass it to
-    // the toolkit later
-
     VclPtr<vcl::Window> xWindow = this;
 
     if (mpWindowImpl->mbCompoundControl || (rNEvt.GetWindow() == this))
@@ -794,7 +786,20 @@ void Window::ImplNotifyKeyMouseCommandEventListeners(NotifyEvent& rNEvt)
         }
     }
 
-    if (xWindow->isDisposed())
+    // Return true if the window is still alive, false if we should abort
+    return !xWindow->isDisposed();
+}
+
+void Window::ImplNotifyKeyMouseCommandEventListeners(NotifyEvent& rNEvt)
+{
+    if (rNEvt.GetType() == NotifyEventType::COMMAND && !ImplDispatchCommandEvent(rNEvt))
+        return;
+
+    // #82968# notify event listeners for mouse and key events separately and
+    // not in PreNotify ( as for focus listeners )
+    // this allows for processing those events internally first and pass it to
+    // the toolkit later
+    if (!ImplDispatchKeyMouseEvent(rNEvt))
         return;
 
     // #106721# check if we're part of a compound control and notify
