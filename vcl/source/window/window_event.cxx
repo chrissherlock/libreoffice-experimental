@@ -730,6 +730,19 @@ bool Window::ImplDispatchCommandEvent(const NotifyEvent& rNEvt)
     return false;
 }
 
+static VclEventId lcl_MapMouseEventId(NotifyEventType eType)
+{
+    switch (eType)
+    {
+        case NotifyEventType::MOUSEMOVE:
+            return VclEventId::WindowMouseMove;
+        case NotifyEventType::MOUSEBUTTONUP:
+            return VclEventId::WindowMouseButtonUp;
+        default:
+            return VclEventId::WindowMouseButtonDown;
+    }
+}
+
 void Window::ImplNotifyKeyMouseCommandEventListeners(NotifyEvent& rNEvt)
 {
     if (rNEvt.GetType() == NotifyEventType::COMMAND && !ImplDispatchCommandEvent(rNEvt))
@@ -742,61 +755,43 @@ void Window::ImplNotifyKeyMouseCommandEventListeners(NotifyEvent& rNEvt)
 
     VclPtr<vcl::Window> xWindow = this;
 
-    if (rNEvt.GetType() == NotifyEventType::MOUSEMOVE)
+    if (mpWindowImpl->mbCompoundControl || (rNEvt.GetWindow() == this))
     {
-        if (mpWindowImpl->mbCompoundControl || (rNEvt.GetWindow() == this))
+        switch (rNEvt.GetType())
         {
-            if (rNEvt.GetWindow() == this)
-                CallEventListeners(VclEventId::WindowMouseMove,
-                                   const_cast<MouseEvent*>(rNEvt.GetMouseEvent()));
-            else
+            case NotifyEventType::MOUSEMOVE:
+            case NotifyEventType::MOUSEBUTTONUP:
+            case NotifyEventType::MOUSEBUTTONDOWN:
             {
-                MouseEvent aMouseEvent
-                    = ImplTranslateMouseEvent(*rNEvt.GetMouseEvent(), rNEvt.GetWindow(), this);
-                CallEventListeners(VclEventId::WindowMouseMove, &aMouseEvent);
+                VclEventId nEventId = lcl_MapMouseEventId(rNEvt.GetType());
+
+                if (rNEvt.GetWindow() == this)
+                {
+                    CallEventListeners(nEventId, const_cast<MouseEvent*>(rNEvt.GetMouseEvent()));
+                }
+                else
+                {
+                    MouseEvent aMouseEvent
+                        = ImplTranslateMouseEvent(*rNEvt.GetMouseEvent(), rNEvt.GetWindow(), this);
+                    CallEventListeners(nEventId, &aMouseEvent);
+                }
+
+                break;
             }
+
+            case NotifyEventType::KEYINPUT:
+                CallEventListeners(VclEventId::WindowKeyInput,
+                                   const_cast<KeyEvent*>(rNEvt.GetKeyEvent()));
+                break;
+
+            case NotifyEventType::KEYUP:
+                CallEventListeners(VclEventId::WindowKeyUp,
+                                   const_cast<KeyEvent*>(rNEvt.GetKeyEvent()));
+                break;
+
+            default:
+                break;
         }
-    }
-    else if (rNEvt.GetType() == NotifyEventType::MOUSEBUTTONUP)
-    {
-        if (mpWindowImpl->mbCompoundControl || (rNEvt.GetWindow() == this))
-        {
-            if (rNEvt.GetWindow() == this)
-                CallEventListeners(VclEventId::WindowMouseButtonUp,
-                                   const_cast<MouseEvent*>(rNEvt.GetMouseEvent()));
-            else
-            {
-                MouseEvent aMouseEvent
-                    = ImplTranslateMouseEvent(*rNEvt.GetMouseEvent(), rNEvt.GetWindow(), this);
-                CallEventListeners(VclEventId::WindowMouseButtonUp, &aMouseEvent);
-            }
-        }
-    }
-    else if (rNEvt.GetType() == NotifyEventType::MOUSEBUTTONDOWN)
-    {
-        if (mpWindowImpl->mbCompoundControl || (rNEvt.GetWindow() == this))
-        {
-            if (rNEvt.GetWindow() == this)
-                CallEventListeners(VclEventId::WindowMouseButtonDown,
-                                   const_cast<MouseEvent*>(rNEvt.GetMouseEvent()));
-            else
-            {
-                MouseEvent aMouseEvent
-                    = ImplTranslateMouseEvent(*rNEvt.GetMouseEvent(), rNEvt.GetWindow(), this);
-                CallEventListeners(VclEventId::WindowMouseButtonDown, &aMouseEvent);
-            }
-        }
-    }
-    else if (rNEvt.GetType() == NotifyEventType::KEYINPUT)
-    {
-        if (mpWindowImpl->mbCompoundControl || (rNEvt.GetWindow() == this))
-            CallEventListeners(VclEventId::WindowKeyInput,
-                               const_cast<KeyEvent*>(rNEvt.GetKeyEvent()));
-    }
-    else if (rNEvt.GetType() == NotifyEventType::KEYUP)
-    {
-        if (mpWindowImpl->mbCompoundControl || (rNEvt.GetWindow() == this))
-            CallEventListeners(VclEventId::WindowKeyUp, const_cast<KeyEvent*>(rNEvt.GetKeyEvent()));
     }
 
     if (xWindow->isDisposed())
