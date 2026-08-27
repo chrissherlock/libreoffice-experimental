@@ -1665,6 +1665,11 @@ private:
 
     static SAL_DLLPRIVATE void ImplDeactivateOldWindows(FocusAction eFocusAction, vcl::Window* pOldOverlapWindow, vcl::Window* pOldRealWindow);
     static SAL_DLLPRIVATE void ImplActivateNewWindows(FocusAction eFocusAction, vcl::Window* pNewOverlapWindow, vcl::Window* pNewRealWindow);
+
+    SAL_DLLPRIVATE bool ImplTriggerAutoScroll(Scrollable* pHScrl, Scrollable* pVScrl);
+    SAL_DLLPRIVATE bool ImplExecuteWheelScroll(const CommandEvent& rCmd, Scrollable* pHScrl, Scrollable* pVScrl);
+    SAL_DLLPRIVATE bool ImplExecuteGesturePan(const CommandEvent& rCmd, Scrollable* pHScrl, Scrollable* pVScrl);
+    SAL_DLLPRIVATE bool ImplExecuteAutoScroll(const CommandEvent& rCmd, Scrollable* pHScrl, Scrollable* pVScrl);
 };
 }
 
