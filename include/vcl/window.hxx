@@ -1647,6 +1647,7 @@ private:
     SAL_DLLPRIVATE void ImplUpdateFramePosition();
     SAL_DLLPRIVATE SalFrame* ImplFindParentFrame() const;
     SAL_DLLPRIVATE void ImplUpdateFramePos(SalFrame* pParentFrame);
+    SAL_DLLPRIVATE void ImplUpdateClientWindowPos();
 };
 }
 
