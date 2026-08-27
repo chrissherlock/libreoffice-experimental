@@ -1657,10 +1657,14 @@ private:
     SAL_DLLPRIVATE void ImplUpdateFramePos(SalFrame* pParentFrame);
     SAL_DLLPRIVATE void ImplUpdateClientWindowPos();
     SAL_DLLPRIVATE bool ImplIsActivatable() const;
+
     static SAL_DLLPRIVATE FocusAction ImplResolveFocusAction(vcl::Window* pOldRealWindow, vcl::Window* pOldOverlapWindow,
                                                              vcl::Window* pNewRealWindow, vcl::Window* pNewOverlapWindow);
     static SAL_DLLPRIVATE FocusAction ImplCheckNonActivatableNewWindow(vcl::Window* pNewRealWindow, vcl::Window* pOldOverlapWindow);
     static SAL_DLLPRIVATE FocusAction ImplResolveLastDeactivatedWindow(vcl::Window* pNewOverlapWindow);
+
+    static SAL_DLLPRIVATE void ImplDeactivateOldWindows(FocusAction eFocusAction, vcl::Window* pOldOverlapWindow, vcl::Window* pOldRealWindow);
+    static SAL_DLLPRIVATE void ImplActivateNewWindows(FocusAction eFocusAction, vcl::Window* pNewOverlapWindow, vcl::Window* pNewRealWindow);
 };
 }
 
