@@ -913,6 +913,71 @@ void Window::ImplCallMove()
     CallEventListeners(VclEventId::WindowMove);
 }
 
+bool Window::ImplIsActivatable() const
+{
+    return (GetType() != WindowType::FLOATINGWINDOW)
+           || (GetActivateMode() != ActivateModeFlags::NONE);
+}
+
+FocusAction Window::ImplCheckNonActivatableNewWindow(Window* pNewRealWindow,
+                                                     Window* pOldOverlapWindow)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    if (!pNewRealWindow->ImplIsActivatable())
+    {
+        pSVData->mpWinData->mpLastDeacWin = pOldOverlapWindow;
+        return FocusAction::ActivateOnly;
+    }
+
+    return FocusAction::Both;
+}
+
+FocusAction Window::ImplResolveLastDeactivatedWindow(Window* pNewOverlapWindow)
+{
+    FocusAction eFocusAction = FocusAction::Both;
+
+    ImplSVData* pSVData = ImplGetSVData();
+
+    if (pSVData->mpWinData->mpLastDeacWin)
+    {
+        if (pSVData->mpWinData->mpLastDeacWin.get() == pNewOverlapWindow)
+        {
+            eFocusAction = FocusAction::DeactivateOnly;
+        }
+        else
+        {
+            vcl::Window* pLastRealWindow = pSVData->mpWinData->mpLastDeacWin->ImplGetWindow();
+            pSVData->mpWinData->mpLastDeacWin->mpWindowImpl->mbActive = false;
+            pSVData->mpWinData->mpLastDeacWin->Deactivate();
+            if (pLastRealWindow != pSVData->mpWinData->mpLastDeacWin.get())
+            {
+                pLastRealWindow->mpWindowImpl->mbActive = true;
+                pLastRealWindow->Activate();
+            }
+        }
+
+        pSVData->mpWinData->mpLastDeacWin = nullptr;
+    }
+
+    return eFocusAction;
+}
+
+FocusAction Window::ImplResolveFocusAction(vcl::Window* pOldRealWindow,
+                                           vcl::Window* pOldOverlapWindow,
+                                           vcl::Window* pNewRealWindow,
+                                           vcl::Window* pNewOverlapWindow)
+{
+    FocusAction eFocusAction = FocusAction::Both;
+
+    if (pOldRealWindow->ImplIsActivatable())
+        eFocusAction = ImplCheckNonActivatableNewWindow(pNewRealWindow, pOldOverlapWindow);
+    else if (pNewRealWindow->ImplIsActivatable())
+        eFocusAction = ImplResolveLastDeactivatedWindow(pNewOverlapWindow);
+
+    return eFocusAction;
+}
+
 void Window::ImplCallFocusChangeActivate(vcl::Window* pNewOverlapWindow,
                                          vcl::Window* pOldOverlapWindow)
 {
@@ -922,60 +987,26 @@ void Window::ImplCallFocusChangeActivate(vcl::Window* pNewOverlapWindow,
     vcl::Window* pOldRealWindow = pOldOverlapWindow->ImplGetWindow();
     vcl::Window* pNewRealWindow = pNewOverlapWindow->ImplGetWindow();
 
-    ImplSVData* pSVData = ImplGetSVData();
+    FocusAction eFocusAction = ImplResolveFocusAction(pOldRealWindow, pOldOverlapWindow,
+                                                      pNewRealWindow, pNewOverlapWindow);
 
-    bool bCallActivate = true;
-    bool bCallDeactivate = true;
-
-    if ((pOldRealWindow->GetType() != WindowType::FLOATINGWINDOW)
-        || pOldRealWindow->GetActivateMode() != ActivateModeFlags::NONE)
-    {
-        if ((pNewRealWindow->GetType() == WindowType::FLOATINGWINDOW)
-            && pNewRealWindow->GetActivateMode() == ActivateModeFlags::NONE)
-        {
-            pSVData->mpWinData->mpLastDeacWin = pOldOverlapWindow;
-            bCallDeactivate = false;
-        }
-    }
-    else if ((pNewRealWindow->GetType() != WindowType::FLOATINGWINDOW)
-             || pNewRealWindow->GetActivateMode() != ActivateModeFlags::NONE)
-    {
-        if (pSVData->mpWinData->mpLastDeacWin)
-        {
-            if (pSVData->mpWinData->mpLastDeacWin.get() == pNewOverlapWindow)
-                bCallActivate = false;
-            else
-            {
-                vcl::Window* pLastRealWindow = pSVData->mpWinData->mpLastDeacWin->ImplGetWindow();
-                pSVData->mpWinData->mpLastDeacWin->mpWindowImpl->mbActive = false;
-                pSVData->mpWinData->mpLastDeacWin->Deactivate();
-                if (pLastRealWindow != pSVData->mpWinData->mpLastDeacWin.get())
-                {
-                    pLastRealWindow->mpWindowImpl->mbActive = true;
-                    pLastRealWindow->Activate();
-                }
-            }
-            pSVData->mpWinData->mpLastDeacWin = nullptr;
-        }
-    }
-
-    if (bCallDeactivate)
+    if (eFocusAction != FocusAction::ActivateOnly)
     {
         if (pOldOverlapWindow->mpWindowImpl->mbActive)
         {
             pOldOverlapWindow->mpWindowImpl->mbActive = false;
             pOldOverlapWindow->Deactivate();
         }
-        if (pOldRealWindow != pOldOverlapWindow)
+
+        // Combined the nested if statement here for cleaner reading
+        if (pOldRealWindow != pOldOverlapWindow && pOldRealWindow->mpWindowImpl->mbActive)
         {
-            if (pOldRealWindow->mpWindowImpl->mbActive)
-            {
-                pOldRealWindow->mpWindowImpl->mbActive = false;
-                pOldRealWindow->Deactivate();
-            }
+            pOldRealWindow->mpWindowImpl->mbActive = false;
+            pOldRealWindow->Deactivate();
         }
     }
-    if (!bCallActivate || pNewOverlapWindow->mpWindowImpl->mbActive)
+
+    if (eFocusAction == FocusAction::DeactivateOnly || pNewOverlapWindow->mpWindowImpl->mbActive)
         return;
 
     pNewOverlapWindow->mpWindowImpl->mbActive = true;
