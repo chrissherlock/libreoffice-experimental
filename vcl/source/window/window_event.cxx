@@ -978,6 +978,42 @@ FocusAction Window::ImplResolveFocusAction(vcl::Window* pOldRealWindow,
     return eFocusAction;
 }
 
+void Window::ImplDeactivateOldWindows(FocusAction eFocusAction, vcl::Window* pOldOverlapWindow,
+                                      vcl::Window* pOldRealWindow)
+{
+    if (eFocusAction == FocusAction::ActivateOnly)
+        return;
+
+    if (pOldOverlapWindow->mpWindowImpl->mbActive)
+    {
+        pOldOverlapWindow->mpWindowImpl->mbActive = false;
+        pOldOverlapWindow->Deactivate();
+    }
+
+    if (pOldRealWindow != pOldOverlapWindow && pOldRealWindow->mpWindowImpl->mbActive)
+    {
+        pOldRealWindow->mpWindowImpl->mbActive = false;
+        pOldRealWindow->Deactivate();
+    }
+}
+
+void Window::ImplActivateNewWindows(FocusAction eFocusAction, vcl::Window* pNewOverlapWindow,
+                                    vcl::Window* pNewRealWindow)
+{
+    // The early return now safely just exits the activation helper
+    if (eFocusAction == FocusAction::DeactivateOnly || pNewOverlapWindow->mpWindowImpl->mbActive)
+        return;
+
+    pNewOverlapWindow->mpWindowImpl->mbActive = true;
+    pNewOverlapWindow->Activate();
+
+    if (pNewRealWindow != pNewOverlapWindow && !pNewRealWindow->mpWindowImpl->mbActive)
+    {
+        pNewRealWindow->mpWindowImpl->mbActive = true;
+        pNewRealWindow->Activate();
+    }
+}
+
 void Window::ImplCallFocusChangeActivate(vcl::Window* pNewOverlapWindow,
                                          vcl::Window* pOldOverlapWindow)
 {
@@ -990,36 +1026,8 @@ void Window::ImplCallFocusChangeActivate(vcl::Window* pNewOverlapWindow,
     FocusAction eFocusAction = ImplResolveFocusAction(pOldRealWindow, pOldOverlapWindow,
                                                       pNewRealWindow, pNewOverlapWindow);
 
-    if (eFocusAction != FocusAction::ActivateOnly)
-    {
-        if (pOldOverlapWindow->mpWindowImpl->mbActive)
-        {
-            pOldOverlapWindow->mpWindowImpl->mbActive = false;
-            pOldOverlapWindow->Deactivate();
-        }
-
-        // Combined the nested if statement here for cleaner reading
-        if (pOldRealWindow != pOldOverlapWindow && pOldRealWindow->mpWindowImpl->mbActive)
-        {
-            pOldRealWindow->mpWindowImpl->mbActive = false;
-            pOldRealWindow->Deactivate();
-        }
-    }
-
-    if (eFocusAction == FocusAction::DeactivateOnly || pNewOverlapWindow->mpWindowImpl->mbActive)
-        return;
-
-    pNewOverlapWindow->mpWindowImpl->mbActive = true;
-    pNewOverlapWindow->Activate();
-
-    if (pNewRealWindow != pNewOverlapWindow)
-    {
-        if (!pNewRealWindow->mpWindowImpl->mbActive)
-        {
-            pNewRealWindow->mpWindowImpl->mbActive = true;
-            pNewRealWindow->Activate();
-        }
-    }
+    ImplDeactivateOldWindows(eFocusAction, pOldOverlapWindow, pOldRealWindow);
+    ImplActivateNewWindows(eFocusAction, pNewOverlapWindow, pNewRealWindow);
 }
 
 // returns how much was actually scrolled (so that abs(retval) <= abs(nN))
