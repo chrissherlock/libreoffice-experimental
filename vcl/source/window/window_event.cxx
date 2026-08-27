@@ -916,24 +916,17 @@ void Window::ImplCallMove()
 void Window::ImplCallFocusChangeActivate(vcl::Window* pNewOverlapWindow,
                                          vcl::Window* pOldOverlapWindow)
 {
+    if (!pOldOverlapWindow || !pNewOverlapWindow)
+        return;
+
+    vcl::Window* pOldRealWindow = pOldOverlapWindow->ImplGetWindow();
+    vcl::Window* pNewRealWindow = pNewOverlapWindow->ImplGetWindow();
+
     ImplSVData* pSVData = ImplGetSVData();
-    vcl::Window* pNewRealWindow;
-    vcl::Window* pOldRealWindow;
+
     bool bCallActivate = true;
     bool bCallDeactivate = true;
 
-    if (!pOldOverlapWindow)
-    {
-        return;
-    }
-
-    pOldRealWindow = pOldOverlapWindow->ImplGetWindow();
-    if (!pNewOverlapWindow)
-    {
-        return;
-    }
-
-    pNewRealWindow = pNewOverlapWindow->ImplGetWindow();
     if ((pOldRealWindow->GetType() != WindowType::FLOATINGWINDOW)
         || pOldRealWindow->GetActivateMode() != ActivateModeFlags::NONE)
     {
