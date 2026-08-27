@@ -421,7 +421,15 @@ namespace o3tl {
 bool ImplCallCommand( const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, void const * pData = nullptr,
                       bool bMouse = false, Point const * pPos = nullptr );
 
-namespace vcl {
+namespace vcl
+{
+
+enum class FocusAction
+{
+    Both,
+    ActivateOnly,
+    DeactivateOnly
+};
 
 class VCL_DLLPUBLIC Window : public virtual VclReferenceBase
 {
@@ -1648,6 +1656,11 @@ private:
     SAL_DLLPRIVATE SalFrame* ImplFindParentFrame() const;
     SAL_DLLPRIVATE void ImplUpdateFramePos(SalFrame* pParentFrame);
     SAL_DLLPRIVATE void ImplUpdateClientWindowPos();
+    SAL_DLLPRIVATE bool ImplIsActivatable() const;
+    static SAL_DLLPRIVATE FocusAction ImplResolveFocusAction(vcl::Window* pOldRealWindow, vcl::Window* pOldOverlapWindow,
+                                                             vcl::Window* pNewRealWindow, vcl::Window* pNewOverlapWindow);
+    static SAL_DLLPRIVATE FocusAction ImplCheckNonActivatableNewWindow(vcl::Window* pNewRealWindow, vcl::Window* pOldOverlapWindow);
+    static SAL_DLLPRIVATE FocusAction ImplResolveLastDeactivatedWindow(vcl::Window* pNewOverlapWindow);
 };
 }
 
