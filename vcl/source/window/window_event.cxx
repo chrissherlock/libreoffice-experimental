@@ -1030,40 +1030,58 @@ void Window::ImplCallFocusChangeActivate(vcl::Window* pNewOverlapWindow,
     ImplActivateNewWindows(eFocusAction, pNewOverlapWindow, pNewRealWindow);
 }
 
-// returns how much was actually scrolled (so that abs(retval) <= abs(nN))
-static double lcl_HandleScrollHelper(Scrollable* pScrl, double nN, bool isMultiplyByLineSize)
+static double lcl_CalculateScrolled(double nN, bool isMultiplyByLineSize, Scrollable* pScrl)
+{
+    if (nN == double(-LONG_MAX) || nN == double(LONG_MAX))
+        return nN;
+
+    double nAdjustedN = nN;
+    if (isMultiplyByLineSize)
+        nAdjustedN *= pScrl->GetLineSize();
+
+    tools::Long magnitude = o3tl::saturating_cast<tools::Long>(fabs(nAdjustedN));
+    tools::Long change = copysign(magnitude, nAdjustedN);
+
+    double scrolled = double(change);
+    if (isMultiplyByLineSize)
+        scrolled /= pScrl->GetLineSize();
+
+    return scrolled;
+}
+
+static long lcl_CalculateNewPosition(long nNewPos, double nN, bool isMultiplyByLineSize,
+                                     Scrollable* pScrl)
+{
+    if (nN == double(-LONG_MAX))
+    {
+        return nNewPos + pScrl->GetPageSize();
+    }
+    else if (nN == double(LONG_MAX))
+    {
+        return nNewPos - pScrl->GetPageSize();
+    }
+    else
+    {
+        double nAdjustedN = nN;
+        if (isMultiplyByLineSize)
+            nAdjustedN *= pScrl->GetLineSize();
+
+        tools::Long magnitude = o3tl::saturating_cast<tools::Long>(fabs(nAdjustedN));
+        tools::Long change = copysign(magnitude, nAdjustedN);
+
+        return nNewPos - change;
+    }
+}
+
+static double lcl_ProcessScroll(Scrollable* pScrl, double nN, bool isMultiplyByLineSize)
 {
     if (!pScrl || !nN || pScrl->Inactive())
         return 0.0;
 
     tools::Long nNewPos = pScrl->GetThumbPos();
-    double scrolled = nN;
 
-    if (nN == double(-LONG_MAX))
-        nNewPos += pScrl->GetPageSize();
-    else if (nN == double(LONG_MAX))
-        nNewPos -= pScrl->GetPageSize();
-    else
-    {
-        // allowing both chunked and continuous scrolling
-        if (isMultiplyByLineSize)
-        {
-            nN *= pScrl->GetLineSize();
-        }
-
-        // compute how many quantized units to scroll
-        tools::Long magnitude = o3tl::saturating_cast<tools::Long>(fabs(nN));
-        tools::Long change = copysign(magnitude, nN);
-
-        nNewPos = nNewPos - change;
-
-        scrolled = double(change);
-        // convert back to chunked/continuous
-        if (isMultiplyByLineSize)
-        {
-            scrolled /= pScrl->GetLineSize();
-        }
-    }
+    nNewPos = lcl_CalculateNewPosition(nNewPos, nN, isMultiplyByLineSize, pScrl);
+    double scrolled = lcl_CalculateScrolled(nN, isMultiplyByLineSize, pScrl);
 
     pScrl->DoScroll(nNewPos);
 
@@ -1124,7 +1142,7 @@ bool Window::HandleScrollCommand(const CommandEvent& rCmd, Scrollable* pHScrl, S
                         if (nLines)
                         {
                             Scrollable* pScrl = pData->IsHorz() ? pHScrl : pVScrl;
-                            double scrolled = lcl_HandleScrollHelper(pScrl, nLines, true);
+                            double scrolled = lcl_ProcessScroll(pScrl, nLines, true);
                             *partialScroll = nLines - scrolled;
                             bRet = true;
                         }
@@ -1165,7 +1183,7 @@ bool Window::HandleScrollCommand(const CommandEvent& rCmd, Scrollable* pHScrl, S
 #else
                                 bool const isMultiplyByLineSize = false;
 #endif
-                                lcl_HandleScrollHelper(pHScrl, deltaXInLogic, isMultiplyByLineSize);
+                                lcl_ProcessScroll(pHScrl, deltaXInLogic, isMultiplyByLineSize);
                                 bRet = true;
                             }
                         }
@@ -1196,7 +1214,7 @@ bool Window::HandleScrollCommand(const CommandEvent& rCmd, Scrollable* pHScrl, S
 #else
                                 bool const isMultiplyByLineSize = false;
 #endif
-                                lcl_HandleScrollHelper(pVScrl, deltaYInLogic, isMultiplyByLineSize);
+                                lcl_ProcessScroll(pVScrl, deltaYInLogic, isMultiplyByLineSize);
 
                                 bRet = true;
                             }
@@ -1282,8 +1300,8 @@ bool Window::HandleScrollCommand(const CommandEvent& rCmd, Scrollable* pHScrl, S
 
 void Window::ImplHandleScroll(Scrollable* pHScrl, double nX, Scrollable* pVScrl, double nY)
 {
-    lcl_HandleScrollHelper(pHScrl, nX, true);
-    lcl_HandleScrollHelper(pVScrl, nY, true);
+    lcl_ProcessScroll(pHScrl, nX, true);
+    lcl_ProcessScroll(pVScrl, nY, true);
 }
 
 } /* namespace vcl */
