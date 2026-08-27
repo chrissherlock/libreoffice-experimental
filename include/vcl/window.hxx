@@ -1646,6 +1646,7 @@ private:
     SAL_DLLPRIVATE bool ImplDispatchKeyMouseEvent(const NotifyEvent& rNEvt);
     SAL_DLLPRIVATE void ImplUpdateFramePosition();
     SAL_DLLPRIVATE SalFrame* ImplFindParentFrame() const;
+    SAL_DLLPRIVATE void ImplUpdateFramePos(SalFrame* pParentFrame);
 };
 }
 
