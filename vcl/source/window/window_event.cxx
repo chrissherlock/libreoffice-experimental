@@ -854,23 +854,26 @@ void Window::ImplCallResize()
     CallEventListeners(VclEventId::WindowResize);
 }
 
+SalFrame* Window::ImplFindParentFrame() const
+{
+    vcl::Window* pParent = ImplGetParent();
+    while (pParent)
+    {
+        if (pParent->mpWindowImpl && pParent->mpWindowImpl->mpFrame != mpWindowImpl->mpFrame)
+            return pParent->mpWindowImpl->mpFrame;
+
+        pParent = pParent->GetParent();
+    }
+
+    return nullptr;
+}
+
 void Window::ImplUpdateFramePosition()
 {
     if (!mpWindowImpl->mbFrame)
         return;
 
-    // update frame position
-    SalFrame* pParentFrame = nullptr;
-    vcl::Window* pParent = ImplGetParent();
-    while (pParent)
-    {
-        if (pParent->mpWindowImpl && pParent->mpWindowImpl->mpFrame != mpWindowImpl->mpFrame)
-        {
-            pParentFrame = pParent->mpWindowImpl->mpFrame;
-            break;
-        }
-        pParent = pParent->GetParent();
-    }
+    SalFrame* pParentFrame = ImplFindParentFrame();
 
     SalFrameGeometry g = mpWindowImpl->mpFrame->GetGeometry();
     mpWindowImpl->maPos = Point(g.x(), g.y());
