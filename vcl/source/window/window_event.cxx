@@ -1084,209 +1084,209 @@ static double lcl_ProcessScroll(Scrollable* pScrl, double nN, bool isMultiplyByL
 
 bool Window::HandleScrollCommand(const CommandEvent& rCmd, Scrollable* pHScrl, Scrollable* pVScrl)
 {
+    if (!pHScrl && !pVScrl)
+        return false;
+
     bool bRet = false;
 
-    if (pHScrl || pVScrl)
+    switch (rCmd.GetCommand())
     {
-        switch (rCmd.GetCommand())
+        case CommandEventId::StartAutoScroll:
         {
-            case CommandEventId::StartAutoScroll:
+            StartAutoScrollFlags nFlags = StartAutoScrollFlags::NONE;
+            if (pHScrl)
             {
-                StartAutoScrollFlags nFlags = StartAutoScrollFlags::NONE;
-                if (pHScrl)
-                {
-                    if ((pHScrl->GetVisibleSize() < pHScrl->GetRangeMax()) && !pHScrl->Inactive())
-                        nFlags |= StartAutoScrollFlags::Horz;
-                }
-                if (pVScrl)
-                {
-                    if ((pVScrl->GetVisibleSize() < pVScrl->GetRangeMax()) && !pVScrl->Inactive())
-                        nFlags |= StartAutoScrollFlags::Vert;
-                }
-
-                if (nFlags != StartAutoScrollFlags::NONE)
-                {
-                    StartAutoScroll(nFlags);
-                    bRet = true;
-                }
+                if ((pHScrl->GetVisibleSize() < pHScrl->GetRangeMax()) && !pHScrl->Inactive())
+                    nFlags |= StartAutoScrollFlags::Horz;
             }
-            break;
-
-            case CommandEventId::Wheel:
+            if (pVScrl)
             {
-                const CommandWheelData* pData = rCmd.GetWheelData();
+                if ((pVScrl->GetVisibleSize() < pVScrl->GetRangeMax()) && !pVScrl->Inactive())
+                    nFlags |= StartAutoScrollFlags::Vert;
+            }
 
-                if (pData && (CommandWheelMode::SCROLL == pData->GetMode()))
+            if (nFlags != StartAutoScrollFlags::NONE)
+            {
+                StartAutoScroll(nFlags);
+                bRet = true;
+            }
+        }
+        break;
+
+        case CommandEventId::Wheel:
+        {
+            const CommandWheelData* pData = rCmd.GetWheelData();
+
+            if (pData && (CommandWheelMode::SCROLL == pData->GetMode()))
+            {
+                if (!pData->IsDeltaPixel())
                 {
-                    if (!pData->IsDeltaPixel())
+                    double nScrollLines = pData->GetScrollLines();
+                    double nLines;
+                    double* partialScroll = pData->IsHorz() ? &mpWindowImpl->mfPartialScrollX
+                                                            : &mpWindowImpl->mfPartialScrollY;
+                    if (nScrollLines == COMMAND_WHEEL_PAGESCROLL)
                     {
-                        double nScrollLines = pData->GetScrollLines();
-                        double nLines;
-                        double* partialScroll = pData->IsHorz() ? &mpWindowImpl->mfPartialScrollX
-                                                                : &mpWindowImpl->mfPartialScrollY;
-                        if (nScrollLines == COMMAND_WHEEL_PAGESCROLL)
+                        if (pData->GetDelta() < 0)
+                            nLines = double(-LONG_MAX);
+                        else
+                            nLines = double(LONG_MAX);
+                    }
+                    else
+                        nLines = *partialScroll + pData->GetNotchDelta() * nScrollLines;
+                    if (nLines)
+                    {
+                        Scrollable* pScrl = pData->IsHorz() ? pHScrl : pVScrl;
+                        double scrolled = lcl_ProcessScroll(pScrl, nLines, true);
+                        *partialScroll = nLines - scrolled;
+                        bRet = true;
+                    }
+                }
+                else
+                {
+                    // Mobile / touch scrolling section
+                    const Point& deltaPoint = rCmd.GetMousePosPixel();
+
+                    double deltaXInPixels = double(deltaPoint.X());
+                    double deltaYInPixels = double(deltaPoint.Y());
+                    Size winSize = GetOutputSizePixel();
+
+                    if (pHScrl)
+                    {
+                        double visSizeX = double(pHScrl->GetVisibleSize());
+                        double ratioX = deltaXInPixels / double(winSize.getWidth());
+                        tools::Long deltaXInLogic = tools::Long(visSizeX * ratioX);
+                        // Touch need to work by pixels. Did not apply this to
+                        // Android, as android code may require adaptations
+                        // to work with this scrolling code
+#ifndef IOS
+                        tools::Long lineSizeX = pHScrl->GetLineSize();
+
+                        if (lineSizeX)
                         {
-                            if (pData->GetDelta() < 0)
-                                nLines = double(-LONG_MAX);
-                            else
-                                nLines = double(LONG_MAX);
+                            deltaXInLogic /= lineSizeX;
                         }
                         else
-                            nLines = *partialScroll + pData->GetNotchDelta() * nScrollLines;
-                        if (nLines)
                         {
-                            Scrollable* pScrl = pData->IsHorz() ? pHScrl : pVScrl;
-                            double scrolled = lcl_ProcessScroll(pScrl, nLines, true);
-                            *partialScroll = nLines - scrolled;
+                            deltaXInLogic = 0;
+                        }
+#endif
+                        if (deltaXInLogic)
+                        {
+#ifndef IOS
+                            bool const isMultiplyByLineSize = true;
+#else
+                            bool const isMultiplyByLineSize = false;
+#endif
+                            lcl_ProcessScroll(pHScrl, deltaXInLogic, isMultiplyByLineSize);
                             bRet = true;
                         }
                     }
-                    else
+                    if (pVScrl)
                     {
-                        // Mobile / touch scrolling section
-                        const Point& deltaPoint = rCmd.GetMousePosPixel();
+                        double visSizeY = double(pVScrl->GetVisibleSize());
+                        double ratioY = deltaYInPixels / double(winSize.getHeight());
+                        tools::Long deltaYInLogic = tools::Long(visSizeY * ratioY);
 
-                        double deltaXInPixels = double(deltaPoint.X());
-                        double deltaYInPixels = double(deltaPoint.Y());
-                        Size winSize = GetOutputSizePixel();
-
-                        if (pHScrl)
+                        // Touch need to work by pixels. Did not apply this to
+                        // Android, as android code may require adaptations
+                        // to work with this scrolling code
+#ifndef IOS
+                        tools::Long lineSizeY = pVScrl->GetLineSize();
+                        if (lineSizeY)
                         {
-                            double visSizeX = double(pHScrl->GetVisibleSize());
-                            double ratioX = deltaXInPixels / double(winSize.getWidth());
-                            tools::Long deltaXInLogic = tools::Long(visSizeX * ratioX);
-                            // Touch need to work by pixels. Did not apply this to
-                            // Android, as android code may require adaptations
-                            // to work with this scrolling code
-#ifndef IOS
-                            tools::Long lineSizeX = pHScrl->GetLineSize();
-
-                            if (lineSizeX)
-                            {
-                                deltaXInLogic /= lineSizeX;
-                            }
-                            else
-                            {
-                                deltaXInLogic = 0;
-                            }
+                            deltaYInLogic /= lineSizeY;
+                        }
+                        else
+                        {
+                            deltaYInLogic = 0;
+                        }
 #endif
-                            if (deltaXInLogic)
-                            {
+                        if (deltaYInLogic)
+                        {
 #ifndef IOS
-                                bool const isMultiplyByLineSize = true;
+                            bool const isMultiplyByLineSize = true;
 #else
-                                bool const isMultiplyByLineSize = false;
+                            bool const isMultiplyByLineSize = false;
 #endif
-                                lcl_ProcessScroll(pHScrl, deltaXInLogic, isMultiplyByLineSize);
-                                bRet = true;
-                            }
-                        }
-                        if (pVScrl)
-                        {
-                            double visSizeY = double(pVScrl->GetVisibleSize());
-                            double ratioY = deltaYInPixels / double(winSize.getHeight());
-                            tools::Long deltaYInLogic = tools::Long(visSizeY * ratioY);
+                            lcl_ProcessScroll(pVScrl, deltaYInLogic, isMultiplyByLineSize);
 
-                            // Touch need to work by pixels. Did not apply this to
-                            // Android, as android code may require adaptations
-                            // to work with this scrolling code
-#ifndef IOS
-                            tools::Long lineSizeY = pVScrl->GetLineSize();
-                            if (lineSizeY)
-                            {
-                                deltaYInLogic /= lineSizeY;
-                            }
-                            else
-                            {
-                                deltaYInLogic = 0;
-                            }
-#endif
-                            if (deltaYInLogic)
-                            {
-#ifndef IOS
-                                bool const isMultiplyByLineSize = true;
-#else
-                                bool const isMultiplyByLineSize = false;
-#endif
-                                lcl_ProcessScroll(pVScrl, deltaYInLogic, isMultiplyByLineSize);
-
-                                bRet = true;
-                            }
+                            bRet = true;
                         }
                     }
                 }
             }
-            break;
-
-            case CommandEventId::GesturePan:
-            {
-                const CommandGesturePanData* pData = rCmd.GetGesturePanData();
-                if (pData)
-                {
-                    if (pData->meEventType == GestureEventPanType::Begin)
-                    {
-                        if (pHScrl)
-                            mpWindowImpl->mpFrameData->mnTouchPanPositionX = pHScrl->GetThumbPos();
-                        if (pVScrl)
-                            mpWindowImpl->mpFrameData->mnTouchPanPositionY = pVScrl->GetThumbPos();
-                    }
-                    else if (pData->meEventType == GestureEventPanType::Update)
-                    {
-                        bool bHorz = pData->meOrientation == PanningOrientation::Horizontal;
-                        Scrollable* pScrl = bHorz ? pHScrl : pVScrl;
-                        if (pScrl)
-                        {
-                            Point aGesturePt(pData->mfX, pData->mfY);
-                            tools::Rectangle aWinRect(this->GetOutputRectPixel());
-                            bool bContains = aWinRect.Contains(aGesturePt);
-                            if (bContains)
-                            {
-                                double nWinSize;
-                                tools::Long nOriginalPos;
-                                if (bHorz)
-                                {
-                                    nWinSize = GetOutputSizePixel().getWidth();
-                                    nOriginalPos = mpWindowImpl->mpFrameData->mnTouchPanPositionX;
-                                }
-                                else
-                                {
-                                    nWinSize = GetOutputSizePixel().getHeight();
-                                    nOriginalPos = mpWindowImpl->mpFrameData->mnTouchPanPositionY;
-                                }
-                                double nOffset = pData->mfOffset;
-                                double nRatio = nOffset / nWinSize;
-                                tools::Long nVisibleSize = pScrl->GetVisibleSize();
-                                tools::Long nDeltaInLogic = tools::Long(nVisibleSize * nRatio);
-                                tools::Long nNewPos = nOriginalPos - nDeltaInLogic;
-
-                                pScrl->DoScroll(nNewPos);
-                            }
-                        }
-                    }
-                    else if (pData->meEventType == GestureEventPanType::End)
-                    {
-                        mpWindowImpl->mpFrameData->mnTouchPanPositionX = -1;
-                        mpWindowImpl->mpFrameData->mnTouchPanPositionY = -1;
-                    }
-                    bRet = true;
-                }
-                break;
-            }
-
-            case CommandEventId::AutoScroll:
-            {
-                const CommandScrollData* pData = rCmd.GetAutoScrollData();
-                if (pData && (pData->GetDeltaX() || pData->GetDeltaY()))
-                {
-                    ImplHandleScroll(pHScrl, pData->GetDeltaX(), pVScrl, pData->GetDeltaY());
-                    bRet = true;
-                }
-            }
-            break;
-
-            default:
-                break;
         }
+        break;
+
+        case CommandEventId::GesturePan:
+        {
+            const CommandGesturePanData* pData = rCmd.GetGesturePanData();
+            if (pData)
+            {
+                if (pData->meEventType == GestureEventPanType::Begin)
+                {
+                    if (pHScrl)
+                        mpWindowImpl->mpFrameData->mnTouchPanPositionX = pHScrl->GetThumbPos();
+                    if (pVScrl)
+                        mpWindowImpl->mpFrameData->mnTouchPanPositionY = pVScrl->GetThumbPos();
+                }
+                else if (pData->meEventType == GestureEventPanType::Update)
+                {
+                    bool bHorz = pData->meOrientation == PanningOrientation::Horizontal;
+                    Scrollable* pScrl = bHorz ? pHScrl : pVScrl;
+                    if (pScrl)
+                    {
+                        Point aGesturePt(pData->mfX, pData->mfY);
+                        tools::Rectangle aWinRect(this->GetOutputRectPixel());
+                        bool bContains = aWinRect.Contains(aGesturePt);
+                        if (bContains)
+                        {
+                            double nWinSize;
+                            tools::Long nOriginalPos;
+                            if (bHorz)
+                            {
+                                nWinSize = GetOutputSizePixel().getWidth();
+                                nOriginalPos = mpWindowImpl->mpFrameData->mnTouchPanPositionX;
+                            }
+                            else
+                            {
+                                nWinSize = GetOutputSizePixel().getHeight();
+                                nOriginalPos = mpWindowImpl->mpFrameData->mnTouchPanPositionY;
+                            }
+                            double nOffset = pData->mfOffset;
+                            double nRatio = nOffset / nWinSize;
+                            tools::Long nVisibleSize = pScrl->GetVisibleSize();
+                            tools::Long nDeltaInLogic = tools::Long(nVisibleSize * nRatio);
+                            tools::Long nNewPos = nOriginalPos - nDeltaInLogic;
+
+                            pScrl->DoScroll(nNewPos);
+                        }
+                    }
+                }
+                else if (pData->meEventType == GestureEventPanType::End)
+                {
+                    mpWindowImpl->mpFrameData->mnTouchPanPositionX = -1;
+                    mpWindowImpl->mpFrameData->mnTouchPanPositionY = -1;
+                }
+                bRet = true;
+            }
+            break;
+        }
+
+        case CommandEventId::AutoScroll:
+        {
+            const CommandScrollData* pData = rCmd.GetAutoScrollData();
+            if (pData && (pData->GetDeltaX() || pData->GetDeltaY()))
+            {
+                ImplHandleScroll(pHScrl, pData->GetDeltaX(), pVScrl, pData->GetDeltaY());
+                bRet = true;
+            }
+        }
+        break;
+
+        default:
+            break;
     }
 
     return bRet;
