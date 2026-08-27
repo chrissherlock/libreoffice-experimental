@@ -1053,24 +1053,18 @@ static long lcl_CalculateNewPosition(long nNewPos, double nN, bool isMultiplyByL
                                      Scrollable* pScrl)
 {
     if (nN == double(-LONG_MAX))
-    {
         return nNewPos + pScrl->GetPageSize();
-    }
-    else if (nN == double(LONG_MAX))
-    {
+    if (nN == double(LONG_MAX))
         return nNewPos - pScrl->GetPageSize();
-    }
-    else
-    {
-        double nAdjustedN = nN;
-        if (isMultiplyByLineSize)
-            nAdjustedN *= pScrl->GetLineSize();
 
-        tools::Long magnitude = o3tl::saturating_cast<tools::Long>(fabs(nAdjustedN));
-        tools::Long change = copysign(magnitude, nAdjustedN);
+    double nAdjustedN = nN;
+    if (isMultiplyByLineSize)
+        nAdjustedN *= pScrl->GetLineSize();
 
-        return nNewPos - change;
-    }
+    tools::Long magnitude = o3tl::saturating_cast<tools::Long>(fabs(nAdjustedN));
+    tools::Long change = copysign(magnitude, nAdjustedN);
+
+    return nNewPos - change;
 }
 
 static double lcl_ProcessScroll(Scrollable* pScrl, double nN, bool isMultiplyByLineSize)
