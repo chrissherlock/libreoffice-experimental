@@ -43,28 +43,44 @@ vcl::Window* Window::ImplGetMenuBarWindow() const
     return nullptr;
 }
 
+void Window::ImplRestoreAppFocusWin()
+{
+    // #i56102# restore app focus win in case the
+    // window was disabled when the frame focus changed
+    ImplSVData* pSVData = ImplGetSVData();
+
+    if (pSVData->mpWinData->mpFocusWin == nullptr && mpWindowImpl->mpFrameData->mbHasFocus
+        && mpWindowImpl->mpFrameData->mpFocusWin == this)
+    {
+        pSVData->mpWinData->mpFocusWin = this;
+    }
+}
+
+void Window::ImplCancelTrackingAndPassFocus()
+{
+    // the tracking mode will be stopped or the capture will be stolen
+    // when a window is disabled,
+    if (IsTracking())
+        EndTracking(TrackingEventFlags::Cancel);
+
+    if (IsMouseCaptured())
+        ReleaseMouse();
+
+    // try to pass focus to the next control
+    // if the window has focus and is contained in the dialog control
+    // mpWindowImpl->mbDisabled should only be set after a call of ImplDlgCtrlNextWindow().
+    // Otherwise ImplDlgCtrlNextWindow() should be used
+    if (HasFocus())
+        ImplDlgCtrlNextWindow();
+}
+
 void Window::Enable(bool bEnable, bool bChild)
 {
     if (isDisposed())
         return;
 
     if (!bEnable)
-    {
-        // the tracking mode will be stopped or the capture will be stolen
-        // when a window is disabled,
-        if (IsTracking())
-            EndTracking(TrackingEventFlags::Cancel);
-
-        if (IsMouseCaptured())
-            ReleaseMouse();
-
-        // try to pass focus to the next control
-        // if the window has focus and is contained in the dialog control
-        // mpWindowImpl->mbDisabled should only be set after a call of ImplDlgCtrlNextWindow().
-        // Otherwise ImplDlgCtrlNextWindow() should be used
-        if (HasFocus())
-            ImplDlgCtrlNextWindow();
-    }
+        ImplCancelTrackingAndPassFocus();
 
     if (mpWindowImpl->mpBorderWindow)
     {
@@ -74,12 +90,8 @@ void Window::Enable(bool bEnable, bool bChild)
             pMenuBarWindow->Enable(bEnable);
     }
 
-    // #i56102# restore app focus win in case the
-    // window was disabled when the frame focus changed
-    ImplSVData* pSVData = ImplGetSVData();
-    if (bEnable && pSVData->mpWinData->mpFocusWin == nullptr
-        && mpWindowImpl->mpFrameData->mbHasFocus && mpWindowImpl->mpFrameData->mpFocusWin == this)
-        pSVData->mpWinData->mpFocusWin = this;
+    if (bEnable)
+        ImplRestoreAppFocusWin();
 
     if (mpWindowImpl->mbDisabled != !bEnable)
     {
@@ -138,12 +150,8 @@ void Window::EnableInput(bool bEnable, bool bChild)
         }
     }
 
-    // #i56102# restore app focus win in case the
-    // window was disabled when the frame focus changed
-    ImplSVData* pSVData = ImplGetSVData();
-    if (bEnable && pSVData->mpWinData->mpFocusWin == nullptr
-        && mpWindowImpl->mpFrameData->mbHasFocus && mpWindowImpl->mpFrameData->mpFocusWin == this)
-        pSVData->mpWinData->mpFocusWin = this;
+    if (bEnable)
+        ImplRestoreAppFocusWin();
 
     if (bChild)
     {

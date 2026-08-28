@@ -1677,6 +1677,8 @@ private:
     SAL_DLLPRIVATE bool ImplExecuteGesturePanScroll(const CommandGesturePanData* pData, Scrollable* pHScrl, Scrollable* pVScrl);
 
     SAL_DLLPRIVATE vcl::Window* ImplGetMenuBarWindow() const;
+    SAL_DLLPRIVATE void ImplRestoreAppFocusWin();
+    SAL_DLLPRIVATE void ImplCancelTrackingAndPassFocus();
 };
 }
 
