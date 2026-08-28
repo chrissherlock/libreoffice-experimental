@@ -1679,6 +1679,9 @@ private:
     SAL_DLLPRIVATE vcl::Window* ImplGetMenuBarWindow() const;
     SAL_DLLPRIVATE void ImplRestoreAppFocusWin();
     SAL_DLLPRIVATE void ImplCancelTrackingAndPassFocus();
+
+    SAL_DLLPRIVATE void ImplEnableBorderAndMenuBar(bool bEnable);
+    SAL_DLLPRIVATE void ImplEnableInputBorderAndMenuBar(bool bEnable);
 };
 }
 

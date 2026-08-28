@@ -74,6 +74,28 @@ void Window::ImplCancelTrackingAndPassFocus()
         ImplDlgCtrlNextWindow();
 }
 
+void Window::ImplEnableBorderAndMenuBar(bool bEnable)
+{
+    if (mpWindowImpl->mpBorderWindow)
+    {
+        mpWindowImpl->mpBorderWindow->Enable(bEnable, false);
+
+        if (vcl::Window* pMenuBarWindow = ImplGetMenuBarWindow())
+            pMenuBarWindow->Enable(bEnable);
+    }
+}
+
+void Window::ImplEnableInputBorderAndMenuBar(bool bEnable)
+{
+    if (mpWindowImpl->mpBorderWindow)
+    {
+        mpWindowImpl->mpBorderWindow->EnableInput(bEnable, false);
+
+        if (vcl::Window* pMenuBarWindow = ImplGetMenuBarWindow())
+            pMenuBarWindow->EnableInput(bEnable);
+    }
+}
+
 void Window::Enable(bool bEnable, bool bChild)
 {
     if (isDisposed())
@@ -82,13 +104,7 @@ void Window::Enable(bool bEnable, bool bChild)
     if (!bEnable)
         ImplCancelTrackingAndPassFocus();
 
-    if (mpWindowImpl->mpBorderWindow)
-    {
-        mpWindowImpl->mpBorderWindow->Enable(bEnable, false);
-
-        if (vcl::Window* pMenuBarWindow = ImplGetMenuBarWindow())
-            pMenuBarWindow->Enable(bEnable);
-    }
+    ImplEnableBorderAndMenuBar(bEnable);
 
     if (bEnable)
         ImplRestoreAppFocusWin();
@@ -122,13 +138,7 @@ void Window::EnableInput(bool bEnable, bool bChild)
     if (!mpWindowImpl)
         return;
 
-    if (mpWindowImpl->mpBorderWindow)
-    {
-        mpWindowImpl->mpBorderWindow->EnableInput(bEnable, false);
-
-        if (vcl::Window* pMenuBarWindow = ImplGetMenuBarWindow())
-            pMenuBarWindow->EnableInput(bEnable);
-    }
+    ImplEnableInputBorderAndMenuBar(bEnable);
 
     if ((!bEnable && mpWindowImpl->meAlwaysInputMode != AlwaysInputEnabled) || bEnable)
     {
