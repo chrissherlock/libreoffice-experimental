@@ -1134,65 +1134,45 @@ bool Window::ImplExecutePixelScroll(const CommandEvent& rCmd, Scrollable* pHScrl
                                     Scrollable* pVScrl)
 {
     const Point& deltaPoint = rCmd.GetMousePosPixel();
+    const Size winSize = GetOutputSizePixel();
 
-    double deltaXInPixels = double(deltaPoint.X());
-    double deltaYInPixels = double(deltaPoint.Y());
-    Size winSize = GetOutputSizePixel();
+    auto processAxis = [](Scrollable* pScrl, double deltaPixels, double winSizeAxis) -> bool {
+        if (!pScrl || winSizeAxis == 0.0)
+            return false;
 
-    if (pHScrl)
-    {
-        double visSizeX = double(pHScrl->GetVisibleSize());
-        double ratioX = deltaXInPixels / double(winSize.getWidth());
-        tools::Long deltaXInLogic = tools::Long(visSizeX * ratioX);
+        const double visSize = double(pScrl->GetVisibleSize());
+        const double ratio = deltaPixels / winSizeAxis;
+        tools::Long deltaInLogic = tools::Long(visSize * ratio);
 
 #ifndef IOS
-        tools::Long lineSizeX = pHScrl->GetLineSize();
-
-        if (lineSizeX)
-            deltaXInLogic /= lineSizeX;
+        const tools::Long lineSize = pScrl->GetLineSize();
+        if (lineSize)
+            deltaInLogic /= lineSize;
         else
-            deltaXInLogic = 0;
-#endif
-        if (deltaXInLogic)
-        {
-#ifndef IOS
-            bool const isMultiplyByLineSize = true;
+            deltaInLogic = 0;
+
+        const bool isMultiplyByLineSize = true;
 #else
-            bool const isMultiplyByLineSize = false;
+        const bool isMultiplyByLineSize = false;
 #endif
-            lcl_ProcessScroll(pHScrl, deltaXInLogic, isMultiplyByLineSize);
+
+        if (deltaInLogic)
+        {
+            lcl_ProcessScroll(pScrl, deltaInLogic, isMultiplyByLineSize);
             return true;
         }
-    }
 
-    if (pVScrl)
-    {
-        double visSizeY = double(pVScrl->GetVisibleSize());
-        double ratioY = deltaYInPixels / double(winSize.getHeight());
-        tools::Long deltaYInLogic = tools::Long(visSizeY * ratioY);
+        return false;
+    };
 
-#ifndef IOS
-        tools::Long lineSizeY = pVScrl->GetLineSize();
-        if (lineSizeY)
-            deltaYInLogic /= lineSizeY;
-        else
-            deltaYInLogic = 0;
-#endif
+    bool bScrolled = false;
+    if (processAxis(pHScrl, double(deltaPoint.X()), double(winSize.getWidth())))
+        bScrolled = true;
 
-        if (deltaYInLogic)
-        {
-#ifndef IOS
-            bool const isMultiplyByLineSize = true;
-#else
-            bool const isMultiplyByLineSize = false;
-#endif
-            lcl_ProcessScroll(pVScrl, deltaYInLogic, isMultiplyByLineSize);
+    if (processAxis(pVScrl, double(deltaPoint.Y()), double(winSize.getHeight())))
+        bScrolled = true;
 
-            return true;
-        }
-    }
-
-    return false;
+    return bScrolled;
 }
 
 bool Window::ImplExecuteWheelScroll(const CommandEvent& rCmd, Scrollable* pHScrl,
