@@ -822,21 +822,17 @@ void Window::ImplCallInitShow()
     CompatStateChanged(StateChangedType::InitShow);
     mpWindowImpl->mbInInitShow = false;
 
-    vcl::Window* pWindow = mpWindowImpl->mpHierarchy->mpFirstOverlap;
-    while (pWindow)
-    {
-        if (pWindow->mpWindowImpl->mbVisible)
-            pWindow->ImplCallInitShow();
-        pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
-    }
+    auto initVisibleWindows = [](vcl::Window* pWindow) {
+        while (pWindow)
+        {
+            if (pWindow->mpWindowImpl->mbVisible)
+                pWindow->ImplCallInitShow();
+            pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
+        }
+    };
 
-    pWindow = mpWindowImpl->mpHierarchy->mpFirstChild;
-    while (pWindow)
-    {
-        if (pWindow->mpWindowImpl->mbVisible)
-            pWindow->ImplCallInitShow();
-        pWindow = pWindow->mpWindowImpl->mpHierarchy->mpNext;
-    }
+    initVisibleWindows(mpWindowImpl->mpHierarchy->mpFirstOverlap);
+    initVisibleWindows(mpWindowImpl->mpHierarchy->mpFirstChild);
 }
 
 void Window::ImplCallResize()
