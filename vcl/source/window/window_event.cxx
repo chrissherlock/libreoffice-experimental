@@ -1123,19 +1123,17 @@ bool Window::ImplExecuteWheelScroll(const CommandEvent& rCmd, Scrollable* pHScrl
     if (!pData->IsDeltaPixel())
     {
         const double nLines = ImplCalculateWheelScrollLines(pData);
-        if (nLines)
-        {
-            const bool bIsHorz = pData->IsHorz();
-            double& rPartialScroll
-                = bIsHorz ? mpWindowImpl->mfPartialScrollX : mpWindowImpl->mfPartialScrollY;
-            Scrollable* pScrl = bIsHorz ? pHScrl : pVScrl;
+        if (!nLines)
+            return false; // Exit early, do not fall through to touch/pixel logic
 
-            const double scrolled = lcl_ProcessScroll(pScrl, nLines, true);
-            rPartialScroll = nLines - scrolled;
-            return true;
-        }
+        const bool bIsHorz = pData->IsHorz();
+        double& rPartialScroll
+            = bIsHorz ? mpWindowImpl->mfPartialScrollX : mpWindowImpl->mfPartialScrollY;
+        Scrollable* pScrl = bIsHorz ? pHScrl : pVScrl;
 
-        return false;
+        const double scrolled = lcl_ProcessScroll(pScrl, nLines, true);
+        rPartialScroll = nLines - scrolled;
+        return true;
     }
 
     // Mobile / touch scrolling section
