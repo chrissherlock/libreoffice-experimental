@@ -1188,6 +1188,47 @@ bool Window::ImplExecuteWheelScroll(const CommandEvent& rCmd, Scrollable* pHScrl
         return ImplExecutePixelScroll(rCmd, pHScrl, pVScrl);
 }
 
+bool Window::ImplExecuteGesturePanScroll(const CommandGesturePanData* pData, Scrollable* pHScrl,
+                                         Scrollable* pVScrl)
+{
+    const bool bHorz = (pData->meOrientation == PanningOrientation::Horizontal);
+    Scrollable* pScrl = bHorz ? pHScrl : pVScrl;
+
+    if (!pScrl)
+        return false;
+
+    const Point aGesturePt(pData->mfX, pData->mfY);
+    const tools::Rectangle aWinRect(GetOutputRectPixel());
+
+    if (!aWinRect.Contains(aGesturePt))
+        return false;
+
+    const Size aWinSize = GetOutputSizePixel();
+    double nWinSizeAxis;
+    tools::Long nOriginalPos;
+
+    if (bHorz)
+    {
+        nWinSizeAxis = aWinSize.getWidth();
+        nOriginalPos = mpWindowImpl->mpFrameData->mnTouchPanPositionX;
+    }
+    else
+    {
+        nWinSizeAxis = aWinSize.getHeight();
+        nOriginalPos = mpWindowImpl->mpFrameData->mnTouchPanPositionY;
+    }
+
+    if (nWinSizeAxis == 0.0)
+        return false;
+
+    const double nRatio = pData->mfOffset / nWinSizeAxis;
+    const tools::Long nVisibleSize = pScrl->GetVisibleSize();
+    const tools::Long nDeltaInLogic = tools::Long(nVisibleSize * nRatio);
+
+    pScrl->DoScroll(nOriginalPos - nDeltaInLogic);
+    return true;
+}
+
 bool Window::ImplExecuteGesturePan(const CommandEvent& rCmd, Scrollable* pHScrl, Scrollable* pVScrl)
 {
     const CommandGesturePanData* pData = rCmd.GetGesturePanData();
@@ -1204,39 +1245,8 @@ bool Window::ImplExecuteGesturePan(const CommandEvent& rCmd, Scrollable* pHScrl,
     }
     else if (pData->meEventType == GestureEventPanType::Update)
     {
-        bool bHorz = pData->meOrientation == PanningOrientation::Horizontal;
-        Scrollable* pScrl = bHorz ? pHScrl : pVScrl;
-
-        if (pScrl)
-        {
-            Point aGesturePt(pData->mfX, pData->mfY);
-            tools::Rectangle aWinRect(this->GetOutputRectPixel());
-
-            if (aWinRect.Contains(aGesturePt))
-            {
-                double nWinSize;
-                tools::Long nOriginalPos;
-
-                if (bHorz)
-                {
-                    nWinSize = GetOutputSizePixel().getWidth();
-                    nOriginalPos = mpWindowImpl->mpFrameData->mnTouchPanPositionX;
-                }
-                else
-                {
-                    nWinSize = GetOutputSizePixel().getHeight();
-                    nOriginalPos = mpWindowImpl->mpFrameData->mnTouchPanPositionY;
-                }
-
-                double nOffset = pData->mfOffset;
-                double nRatio = nOffset / nWinSize;
-                tools::Long nVisibleSize = pScrl->GetVisibleSize();
-                tools::Long nDeltaInLogic = tools::Long(nVisibleSize * nRatio);
-                tools::Long nNewPos = nOriginalPos - nDeltaInLogic;
-
-                pScrl->DoScroll(nNewPos);
-            }
-        }
+        if (ImplExecuteGesturePanScroll(pData, pHScrl, pVScrl))
+            return true;
     }
     else if (pData->meEventType == GestureEventPanType::End)
     {
