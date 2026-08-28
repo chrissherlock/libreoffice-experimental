@@ -1113,30 +1113,26 @@ double Window::ImplCalculateWheelScrollLines(const CommandWheelData* pData)
     return rPartialScroll + pData->GetNotchDelta() * nScrollLines;
 }
 
-bool Window::ImplExecuteWheelScroll(const CommandEvent& rCmd, Scrollable* pHScrl,
-                                    Scrollable* pVScrl)
+bool Window::ImplExecuteLineScroll(const CommandWheelData* pData, Scrollable* pHScrl,
+                                   Scrollable* pVScrl)
 {
-    const CommandWheelData* pData = rCmd.GetWheelData();
-    if (!pData || (pData->GetMode() != CommandWheelMode::SCROLL))
+    const double nLines = ImplCalculateWheelScrollLines(pData);
+    if (!nLines)
         return false;
 
-    if (!pData->IsDeltaPixel())
-    {
-        const double nLines = ImplCalculateWheelScrollLines(pData);
-        if (!nLines)
-            return false; // Exit early, do not fall through to touch/pixel logic
+    const bool bIsHorz = pData->IsHorz();
+    double& rPartialScroll
+        = bIsHorz ? mpWindowImpl->mfPartialScrollX : mpWindowImpl->mfPartialScrollY;
+    Scrollable* pScrl = bIsHorz ? pHScrl : pVScrl;
 
-        const bool bIsHorz = pData->IsHorz();
-        double& rPartialScroll
-            = bIsHorz ? mpWindowImpl->mfPartialScrollX : mpWindowImpl->mfPartialScrollY;
-        Scrollable* pScrl = bIsHorz ? pHScrl : pVScrl;
+    const double scrolled = lcl_ProcessScroll(pScrl, nLines, true);
+    rPartialScroll = nLines - scrolled;
+    return true;
+}
 
-        const double scrolled = lcl_ProcessScroll(pScrl, nLines, true);
-        rPartialScroll = nLines - scrolled;
-        return true;
-    }
-
-    // Mobile / touch scrolling section
+bool Window::ImplExecutePixelScroll(const CommandEvent& rCmd, Scrollable* pHScrl,
+                                    Scrollable* pVScrl)
+{
     const Point& deltaPoint = rCmd.GetMousePosPixel();
 
     double deltaXInPixels = double(deltaPoint.X());
@@ -1197,6 +1193,19 @@ bool Window::ImplExecuteWheelScroll(const CommandEvent& rCmd, Scrollable* pHScrl
     }
 
     return false;
+}
+
+bool Window::ImplExecuteWheelScroll(const CommandEvent& rCmd, Scrollable* pHScrl,
+                                    Scrollable* pVScrl)
+{
+    const CommandWheelData* pData = rCmd.GetWheelData();
+    if (!pData || (pData->GetMode() != CommandWheelMode::SCROLL))
+        return false;
+
+    if (!pData->IsDeltaPixel())
+        return ImplExecuteLineScroll(pData, pHScrl, pVScrl);
+    else
+        return ImplExecutePixelScroll(rCmd, pHScrl, pVScrl);
 }
 
 bool Window::ImplExecuteGesturePan(const CommandEvent& rCmd, Scrollable* pHScrl, Scrollable* pVScrl)
