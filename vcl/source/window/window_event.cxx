@@ -1101,37 +1101,37 @@ bool Window::ImplTriggerAutoScroll(Scrollable* pHScrl, Scrollable* pVScrl)
     return false;
 }
 
+double Window::ImplCalculateWheelScrollLines(const CommandWheelData* pData)
+{
+    const double nScrollLines = pData->GetScrollLines();
+    if (nScrollLines == COMMAND_WHEEL_PAGESCROLL)
+        return pData->GetDelta() < 0 ? static_cast<double>(-LONG_MAX)
+                                     : static_cast<double>(LONG_MAX);
+
+    double& rPartialScroll
+        = pData->IsHorz() ? mpWindowImpl->mfPartialScrollX : mpWindowImpl->mfPartialScrollY;
+    return rPartialScroll + pData->GetNotchDelta() * nScrollLines;
+}
+
 bool Window::ImplExecuteWheelScroll(const CommandEvent& rCmd, Scrollable* pHScrl,
                                     Scrollable* pVScrl)
 {
     const CommandWheelData* pData = rCmd.GetWheelData();
-
     if (!pData || (pData->GetMode() != CommandWheelMode::SCROLL))
         return false;
 
     if (!pData->IsDeltaPixel())
     {
-        double nScrollLines = pData->GetScrollLines();
-        double nLines;
-        double* partialScroll
-            = pData->IsHorz() ? &mpWindowImpl->mfPartialScrollX : &mpWindowImpl->mfPartialScrollY;
-        if (nScrollLines == COMMAND_WHEEL_PAGESCROLL)
-        {
-            if (pData->GetDelta() < 0)
-                nLines = double(-LONG_MAX);
-            else
-                nLines = double(LONG_MAX);
-        }
-        else
-        {
-            nLines = *partialScroll + pData->GetNotchDelta() * nScrollLines;
-        }
-
+        const double nLines = ImplCalculateWheelScrollLines(pData);
         if (nLines)
         {
-            Scrollable* pScrl = pData->IsHorz() ? pHScrl : pVScrl;
-            double scrolled = lcl_ProcessScroll(pScrl, nLines, true);
-            *partialScroll = nLines - scrolled;
+            const bool bIsHorz = pData->IsHorz();
+            double& rPartialScroll
+                = bIsHorz ? mpWindowImpl->mfPartialScrollX : mpWindowImpl->mfPartialScrollY;
+            Scrollable* pScrl = bIsHorz ? pHScrl : pVScrl;
+
+            const double scrolled = lcl_ProcessScroll(pScrl, nLines, true);
+            rPartialScroll = nLines - scrolled;
             return true;
         }
 
