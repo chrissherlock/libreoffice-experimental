@@ -1674,6 +1674,8 @@ private:
     SAL_DLLPRIVATE bool ImplExecuteLineScroll(const CommandWheelData* pData, Scrollable* pHScrl, Scrollable* pVScrl);
     SAL_DLLPRIVATE bool ImplExecutePixelScroll(const CommandEvent& rCmd, Scrollable* pHScrl, Scrollable* pVScrl);
     SAL_DLLPRIVATE bool ImplExecuteGesturePanScroll(const CommandGesturePanData* pData, Scrollable* pHScrl, Scrollable* pVScrl);
+
+    SAL_DLLPRIVATE vcl::Window* ImplGetMenuBarWindow() const;
 };
 }
 

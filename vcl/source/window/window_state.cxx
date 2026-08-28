@@ -34,6 +34,15 @@
 
 namespace vcl
 {
+vcl::Window* Window::ImplGetMenuBarWindow() const
+{
+    if (mpWindowImpl->mpBorderWindow
+        && mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
+        return static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->mpMenuBarWindow;
+
+    return nullptr;
+}
+
 void Window::Enable(bool bEnable, bool bChild)
 {
     if (isDisposed())
@@ -60,10 +69,9 @@ void Window::Enable(bool bEnable, bool bChild)
     if (mpWindowImpl->mpBorderWindow)
     {
         mpWindowImpl->mpBorderWindow->Enable(bEnable, false);
-        if ((mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
-            && static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->mpMenuBarWindow)
-            static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())
-                ->mpMenuBarWindow->Enable(bEnable);
+
+        if (vcl::Window* pMenuBarWindow = ImplGetMenuBarWindow())
+            pMenuBarWindow->Enable(bEnable);
     }
 
     // #i56102# restore app focus win in case the
@@ -105,10 +113,9 @@ void Window::EnableInput(bool bEnable, bool bChild)
     if (mpWindowImpl->mpBorderWindow)
     {
         mpWindowImpl->mpBorderWindow->EnableInput(bEnable, false);
-        if ((mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
-            && static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->mpMenuBarWindow)
-            static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())
-                ->mpMenuBarWindow->EnableInput(bEnable);
+
+        if (vcl::Window* pMenuBarWindow = ImplGetMenuBarWindow())
+            pMenuBarWindow->EnableInput(bEnable);
     }
 
     if ((!bEnable && mpWindowImpl->meAlwaysInputMode != AlwaysInputEnabled) || bEnable)
