@@ -285,7 +285,6 @@ static void lcl_HandleMove(vcl::Window* pWindow)
             ->mpClientWindow->ImplCallMove(); // notify client to update geometry
 }
 
-
 static void lcl_HandleGetFocus(vcl::Window* pWindow)
 {
     if (!pWindow || !pWindow->ImplGetWindowImpl() || !pWindow->ImplGetWindowImpl()->mpFrameData)
@@ -769,10 +768,11 @@ static tools::Rectangle lcl_GetChildCursorRect(const vcl::Window* pChild,
     vcl::Cursor* pCursor = pChild->GetCursor();
 
     if (!pCursor)
-        return tools::Rectangle(Point(pChild->GetDeviceOriginX(), pChild->GetDeviceOriginY()), Size());
+        return tools::Rectangle(Point(pChild->GetDeviceOriginX(), pChild->GetDeviceOriginY()),
+                                Size());
 
-    const auto aPos = pChildOutDev->convertTo<vcl::DevicePoint>(
-        vcl::LogicPoint(pCursor->GetPos()), pChildOutDev->GetMapMode());
+    const auto aPos = pChildOutDev->convertTo<vcl::DevicePoint>(vcl::LogicPoint(pCursor->GetPos()),
+                                                                pChildOutDev->GetMapMode());
     auto aSize = pChild->convertTo<vcl::WindowSize>(vcl::LogicSize(pCursor->GetSize()),
                                                     pChild->GetMapMode());
 
@@ -957,21 +957,22 @@ static bool lcl_HasToolboxFocus(vcl::Window* pFocusWin)
 
 static bool lcl_IsContextMenuShortcut(sal_uInt16 nCode, const vcl::KeyCode& rKeyCode)
 {
-    return (nCode == KEY_CONTEXTMENU) ||
-           ((nCode == KEY_F10) && rKeyCode.IsShift() && !rKeyCode.IsMod1() && !rKeyCode.IsMod2());
+    return (nCode == KEY_CONTEXTMENU)
+           || ((nCode == KEY_F10) && rKeyCode.IsShift() && !rKeyCode.IsMod1()
+               && !rKeyCode.IsMod2());
 }
 
 static bool lcl_IsTipHelpShortcut(sal_uInt16 nCode, const vcl::KeyCode& rKeyCode)
 {
-    return ((nCode == KEY_F2) && rKeyCode.IsShift()) ||
-           ((nCode == KEY_F1) && rKeyCode.IsMod1());
+    return ((nCode == KEY_F2) && rKeyCode.IsShift()) || ((nCode == KEY_F1) && rKeyCode.IsMod1());
 }
 
-static bool lcl_IsBalloonHelpRequested(sal_uInt16 nCode, const vcl::KeyCode& rKeyCode, vcl::Window* pFocusWin)
+static bool lcl_IsBalloonHelpRequested(sal_uInt16 nCode, const vcl::KeyCode& rKeyCode,
+                                       vcl::Window* pFocusWin)
 {
     // Check for the Shift+F1 toolbox override edge case
-    const bool bToolboxFocus = (nCode == KEY_F1) && rKeyCode.IsShift() &&
-                               lcl_HasToolboxFocus(pFocusWin);
+    const bool bToolboxFocus
+        = (nCode == KEY_F1) && rKeyCode.IsShift() && lcl_HasToolboxFocus(pFocusWin);
 
     // Return true if it's a standard tip shortcut OR the toolbox override
     return lcl_IsTipHelpShortcut(nCode, rKeyCode) || bToolboxFocus;
@@ -1000,7 +1001,8 @@ static bool lcl_ProcessHelpAndMenuKeys(vcl::Window* pChild, vcl::Window* pWindow
     if (lcl_IsContextMenuShortcut(nCode, rKeyCode))
         return !ImplCallCommand(pChild, CommandEventId::ContextMenu);
 
-    if (lcl_IsBalloonHelpRequested(nCode, rKeyCode, pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin))
+    if (lcl_IsBalloonHelpRequested(nCode, rKeyCode,
+                                   pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin))
         return lcl_TriggerBalloonHelp(pChild);
 
     if ((nCode != KEY_F1) && (nCode != KEY_HELP))
@@ -1053,7 +1055,8 @@ static bool lcl_InterceptTrackingKey(sal_uInt16 nCode)
         pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Cancel
                                                     | TrackingEventFlags::Key);
 
-        if (FloatingWindow* pCloseableFloat = lcl_GetCloseableFloatWindow(pSVData->mpWinData->mpFirstFloat))
+        if (FloatingWindow* pCloseableFloat
+            = lcl_GetCloseableFloatWindow(pSVData->mpWinData->mpFirstFloat))
         {
             pCloseableFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel
                                           | FloatWinPopupEndFlags::CloseAll);
@@ -1135,8 +1138,8 @@ static bool lcl_ShouldSwapHorizontalArrows(sal_uInt16 nCode, const vcl::Window* 
 }
 
 static bool lcl_HandleApplicationKey(NotifyEventType nSVEvent, sal_uInt16 nKeyCode,
-                                      sal_uInt16 nCharCode, sal_uInt16 nRepeat,
-                                      bool bForward, vcl::Window* pWindow)
+                                     sal_uInt16 nCharCode, sal_uInt16 nRepeat, bool bForward,
+                                     vcl::Window* pWindow)
 {
     if (!bForward)
         return false;
@@ -1203,8 +1206,7 @@ static bool lcl_DispatchHelpAndMenuKeys(NotifyEventType nSVEvent, bool bKeyPreNo
         return true;
 
     if (lcl_AcceptsKeyInput(nSVEvent, pChild))
-        return lcl_ProcessHelpAndMenuKeys(pChild, pWindow, rLocalKeyCode.GetCode(),
-                                          rLocalKeyCode);
+        return lcl_ProcessHelpAndMenuKeys(pChild, pWindow, rLocalKeyCode.GetCode(), rLocalKeyCode);
 
     if (lcl_AcceptsKeyUp(pChild))
         return false;
@@ -1273,7 +1275,8 @@ static bool lcl_HandleKey(vcl::Window* pWindow, NotifyEventType nSVEvent, sal_uI
     ImplGetSVData()->maAppData.mnLastInputTime = tools::Time::GetSystemTicks();
 
     if (nSVEvent == NotifyEventType::KEYINPUT
-        && lcl_HandleKeyInputPreProcessing(aKeyCode, nEvCode, (nEvCode == KEY_F6) && aKeyCode.IsMod1()))
+        && lcl_HandleKeyInputPreProcessing(aKeyCode, nEvCode,
+                                           (nEvCode == KEY_F6) && aKeyCode.IsMod1()))
     {
         return true;
     }
@@ -1369,14 +1372,13 @@ static void lcl_InitExtTextInput(vcl::Window* pChild)
     ImplCallCommand(pChild, CommandEventId::StartExtTextInput);
 }
 
-static sal_Int32 lcl_CalculateTextDeltaStart(const sal_Unicode* pOldStr,
-                                             const sal_Unicode* pNewStr,
+static sal_Int32 lcl_CalculateTextDeltaStart(const sal_Unicode* pOldStr, const sal_Unicode* pNewStr,
                                              sal_Int32 nMinLen)
 {
     std::basic_string_view<sal_Unicode> aOldView(pOldStr, nMinLen);
     std::basic_string_view<sal_Unicode> aNewView(pNewStr, nMinLen);
 
-    auto [itOldStr, itNewStr] = std::ranges::mismatch(aOldView, aNewView);
+    auto[itOldStr, itNewStr] = std::ranges::mismatch(aOldView, aNewView);
     return std::distance(aOldView.begin(), itOldStr);
 }
 
@@ -1396,7 +1398,7 @@ static sal_Int32 lcl_CalculateAttributeDeltaStart(const ExtTextInputAttr* pOldAt
     std::span<const ExtTextInputAttr> aOldAttrs(pOldAttr, nTextDeltaStart);
     std::span<const ExtTextInputAttr> aNewAttrs(pNewAttr, nTextDeltaStart);
 
-    auto [itOldAttr, itNewAttr] = std::ranges::mismatch(aOldAttrs, aNewAttrs);
+    auto[itOldAttr, itNewAttr] = std::ranges::mismatch(aOldAttrs, aNewAttrs);
     return std::distance(aOldAttrs.begin(), itOldAttr);
 }
 
@@ -1432,20 +1434,21 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
 
     const sal_Int32 nMinLen = std::min(pWinData->mpExtOldText->getLength(), rText.getLength());
 
-    sal_Int32 nDeltaStart = lcl_CalculateTextDeltaStart(
-        pWinData->mpExtOldText->getStr(), rText.getStr(), nMinLen);
+    sal_Int32 nDeltaStart
+        = lcl_CalculateTextDeltaStart(pWinData->mpExtOldText->getStr(), rText.getStr(), nMinLen);
 
-    nDeltaStart = lcl_CalculateAttributeDeltaStart(
-        pWinData->mpExtOldAttrAry.get(), pTextAttr, nDeltaStart);
+    nDeltaStart
+        = lcl_CalculateAttributeDeltaStart(pWinData->mpExtOldAttrAry.get(), pTextAttr, nDeltaStart);
 
-    const bool bOnlyCursorMoved = (nDeltaStart >= nMinLen) &&
-                                  (pWinData->mpExtOldText->getLength() == rText.getLength());
+    const bool bOnlyCursorMoved
+        = (nDeltaStart >= nMinLen) && (pWinData->mpExtOldText->getLength() == rText.getLength());
 
     // Cache the current text and attributes for the next event
     lcl_UpdateExtTextInputState(pWinData, rText, pTextAttr);
 
     // Fire the event
-    const CommandExtTextInputData aData(rText, pTextAttr, nCursorPos, nCursorFlags, bOnlyCursorMoved);
+    const CommandExtTextInputData aData(rText, pTextAttr, nCursorPos, nCursorFlags,
+                                        bOnlyCursorMoved);
     return !ImplCallCommand(pChild, CommandEventId::ExtTextInput, &aData);
 }
 
