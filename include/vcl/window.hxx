@@ -1693,6 +1693,7 @@ private:
     SAL_DLLPRIVATE void ImplEnableOverlapWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow);
     SAL_DLLPRIVATE void ImplEnableFloatingWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow);
     SAL_DLLPRIVATE void ImplEnableOwnerDrawWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow);
+    SAL_DLLPRIVATE void ImplEnableChildNativeWidgets(bool bEnable);
 
     SAL_DLLPRIVATE void ImplUpdateModalCount(int nDelta);
 
