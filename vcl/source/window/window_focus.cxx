@@ -300,6 +300,26 @@ void Window::HideTracking()
     mpWindowImpl->mbTrackVisible = false;
 }
 
+constexpr tools::Long INCLUSIVE_OFFSET = 1;
+constexpr tools::Long OPPOSING_SIDES = 2;
+
+constexpr tools::Long innerTop(tools::Long nTop, tools::Long nBorder) { return nTop + nBorder; }
+
+constexpr tools::Long innerBottom(tools::Long nBottom, tools::Long nBorder)
+{
+    return nBottom - nBorder + INCLUSIVE_OFFSET;
+}
+
+constexpr tools::Long innerRight(tools::Long nRight, tools::Long nBorder)
+{
+    return nRight - nBorder + INCLUSIVE_OFFSET;
+}
+
+constexpr tools::Long innerHeight(tools::Long nHeight, tools::Long nBorder)
+{
+    return nHeight - (nBorder * OPPOSING_SIDES);
+}
+
 void Window::InvertTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags)
 {
     OutputDevice* pOutDev = GetOutDev();
@@ -349,27 +369,33 @@ void Window::InvertTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags
     {
         pGraphics->Invert(aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),
                           SalInvert::TrackFrame, *GetOutDev());
+        return;
     }
-    else if (nStyle == ShowTrackFlags::Split)
+
+    if (nStyle == ShowTrackFlags::Split)
     {
         pGraphics->Invert(aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),
                           SalInvert::N50, *GetOutDev());
+        return;
     }
-    else
-    {
-        tools::Long nBorder = 1;
-        if (nStyle == ShowTrackFlags::Big)
-            nBorder = 5;
 
-        pGraphics->Invert(aRect.Left(), aRect.Top(), aRect.GetWidth(), nBorder, SalInvert::N50,
-                          *GetOutDev());
-        pGraphics->Invert(aRect.Left(), aRect.Bottom() - nBorder + 1, aRect.GetWidth(), nBorder,
-                          SalInvert::N50, *GetOutDev());
-        pGraphics->Invert(aRect.Left(), aRect.Top() + nBorder, nBorder,
-                          aRect.GetHeight() - (nBorder * 2), SalInvert::N50, *GetOutDev());
-        pGraphics->Invert(aRect.Right() - nBorder + 1, aRect.Top() + nBorder, nBorder,
-                          aRect.GetHeight() - (nBorder * 2), SalInvert::N50, *GetOutDev());
-    }
+    constexpr tools::Long DEFAULT_TRACK_BORDER = 1;
+    constexpr tools::Long BIG_TRACK_BORDER = 5;
+
+    const tools::Long nBorder
+        = (nStyle == ShowTrackFlags::Big) ? BIG_TRACK_BORDER : DEFAULT_TRACK_BORDER;
+
+    pGraphics->Invert(aRect.Left(), aRect.Top(), aRect.GetWidth(), nBorder, SalInvert::N50,
+                      *GetOutDev());
+
+    pGraphics->Invert(aRect.Left(), innerBottom(aRect.Bottom(), nBorder), aRect.GetWidth(), nBorder,
+                      SalInvert::N50, *GetOutDev());
+
+    pGraphics->Invert(aRect.Left(), innerTop(aRect.Top(), nBorder), nBorder,
+                      innerHeight(aRect.GetHeight(), nBorder), SalInvert::N50, *GetOutDev());
+
+    pGraphics->Invert(innerRight(aRect.Right(), nBorder), innerTop(aRect.Top(), nBorder), nBorder,
+                      innerHeight(aRect.GetHeight(), nBorder), SalInvert::N50, *GetOutDev());
 }
 
 IMPL_LINK(Window, ImplTrackTimerHdl, Timer*, pTimer, void)
