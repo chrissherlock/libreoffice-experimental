@@ -1702,6 +1702,9 @@ private:
     SAL_DLLPRIVATE bool ImplShouldFallbackToParentBackground(const Wallpaper& rBack) const;
     SAL_DLLPRIVATE void ImplEnableChildNativeWidgets(bool bEnable);
     SAL_DLLPRIVATE void ImplUpdateNativeWidgetState(bool bEnable);
+
+    SAL_DLLPRIVATE void ImplShowFocusRect(ImplWinData* pWinData, const tools::Rectangle& rRect);
+    SAL_DLLPRIVATE void ImplShowNativeFocus();
 };
 }
 
