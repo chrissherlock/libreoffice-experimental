@@ -96,68 +96,6 @@ KeyIndicatorState Window::GetIndicatorState() const
     return mpWindowImpl->mpFrame->GetIndicatorState();
 }
 
-void Window::SetText( const OUString& rStr )
-{
-    if (!mpWindowImpl || rStr == mpWindowImpl->maText)
-        return;
-
-    OUString oldTitle( mpWindowImpl->maText );
-    mpWindowImpl->maText = rStr;
-
-    if ( mpWindowImpl->mpBorderWindow )
-        mpWindowImpl->mpBorderWindow->SetText( rStr );
-    else if ( mpWindowImpl->mbFrame )
-        mpWindowImpl->mpFrame->SetTitle( rStr );
-
-    CallEventListeners( VclEventId::WindowFrameTitleChanged, &oldTitle );
-
-    // #107247# needed for accessibility
-    // The VclEventId::WindowFrameTitleChanged is (mis)used to notify accessible name changes.
-    // Therefore a window, which is labeled by this window, must also notify an accessible
-    // name change.
-    if ( IsReallyVisible() )
-    {
-        vcl::Window* pWindow = GetAccessibleRelationLabelFor();
-        if ( pWindow && pWindow != this )
-            pWindow->CallEventListeners( VclEventId::WindowFrameTitleChanged, &oldTitle );
-    }
-
-    CompatStateChanged( StateChangedType::Text );
-}
-
-OUString Window::GetText() const
-{
-
-    return mpWindowImpl->maText;
-}
-
-OUString Window::GetDisplayText() const
-{
-
-    return GetText();
-}
-
-const OUString& Window::GetHelpText() const
-{
-    const OUString& rStrHelpId(GetHelpId());
-    const bool bStrHelpId = !rStrHelpId.isEmpty();
-
-    if (mpWindowImpl->mbHelpTextDynamic && bStrHelpId)
-    {
-        static const char* pEnv = getenv( "HELP_DEBUG" );
-        if( pEnv && *pEnv )
-        {
-            mpWindowImpl->maHelpText = mpWindowImpl->maHelpText + "\n------------------\n" + rStrHelpId;
-        }
-        mpWindowImpl->mbHelpTextDynamic = false;
-    }
-
-    //Fallback to Window::GetAccessibleDescription without reentry to GetHelpText()
-    if (mpWindowImpl->maHelpText.isEmpty() && mpWindowImpl->mpAccessibleInfos && mpWindowImpl->mpAccessibleInfos->pAccessibleDescription)
-        return *mpWindowImpl->mpAccessibleInfos->pAccessibleDescription;
-    return mpWindowImpl->maHelpText;
-}
-
 void Window::ImplCallDeactivateListeners( vcl::Window *pNew )
 {
     // no deactivation if the newly activated window is my child
