@@ -23,6 +23,7 @@
 #include <vcl/event.hxx>
 #include <vcl/sysdata.hxx>
 #include <vcl/syswin.hxx>
+#include <vcl/toolkit/dialog.hxx>
 #include <vcl/vclevent.hxx>
 #include <vcl/window.hxx>
 
@@ -354,6 +355,152 @@ void Window::SetUpdateMode(bool bUpdate)
     }
 }
 
+// --------- old inline methods ---------------
+
+vcl::Window* Window::ImplGetBorderWindow() const
+{
+    return mpWindowImpl ? mpWindowImpl->mpBorderWindow.get() : nullptr;
+}
+
+void Window::ImplSetMouseTransparent(bool bTransparent)
+{
+    if (mpWindowImpl)
+        mpWindowImpl->mbMouseTransparent = bTransparent;
+}
+
+bool Window::IsFormControl() const { return mpWindowImpl ? mpWindowImpl->mbIsFormControl : false; }
+
+void Window::SetFormControl(bool bFormControl)
+{
+    if (mpWindowImpl)
+        mpWindowImpl->mbIsFormControl = bFormControl;
+}
+
+Dialog* Window::GetParentDialog() const
+{
+    const vcl::Window* pWindow = this;
+
+    while (pWindow)
+    {
+        if (pWindow->IsDialog())
+            break;
+
+        pWindow = pWindow->GetParent();
+    }
+
+    return const_cast<Dialog*>(dynamic_cast<const Dialog*>(pWindow));
+}
+
+bool Window::IsMenuFloatingWindow() const
+{
+    return mpWindowImpl && mpWindowImpl->mbMenuFloatingWindow;
+}
+
+bool Window::IsNativeFrame() const
+{
+    // #101741 do not check for WB_CLOSEABLE because undecorated floaters (like menus!) are closeable
+    if (mpWindowImpl->mbFrame && (mpWindowImpl->mnStyle & (WB_MOVEABLE | WB_SIZEABLE)))
+        return true;
+
+    return false;
+}
+
+void Window::EnableAllResize() { mpWindowImpl->mbAllResize = true; }
+
+void Window::EnableChildTransparentMode(bool bEnable)
+{
+    mpWindowImpl->mbChildTransparent = bEnable;
+}
+
+bool Window::IsChildTransparentModeEnabled() const
+{
+    return mpWindowImpl && mpWindowImpl->mbChildTransparent;
+}
+
+bool Window::IsMouseTransparent() const { return mpWindowImpl && mpWindowImpl->mbMouseTransparent; }
+
+bool Window::IsPaintTransparent() const { return mpWindowImpl && mpWindowImpl->mbPaintTransparent; }
+
+void Window::SetDialogControlStart(bool bStart) { mpWindowImpl->mbDlgCtrlStart = bStart; }
+
+bool Window::IsDialogControlStart() const { return mpWindowImpl && mpWindowImpl->mbDlgCtrlStart; }
+
+void Window::SetDialogControlFlags(DialogControlFlags nFlags)
+{
+    mpWindowImpl->mnDlgCtrlFlags = nFlags;
+}
+
+DialogControlFlags Window::GetDialogControlFlags() const { return mpWindowImpl->mnDlgCtrlFlags; }
+
+const InputContext& Window::GetInputContext() const { return mpWindowImpl->maInputContext; }
+
+bool Window::IsControlFont() const { return bool(mpWindowImpl->mpControlFont); }
+
+const Color& Window::GetControlForeground() const { return mpWindowImpl->maControlForeground; }
+
+bool Window::IsControlForeground() const { return mpWindowImpl->mbControlForeground; }
+
+const Color& Window::GetControlBackground() const { return mpWindowImpl->maControlBackground; }
+
+bool Window::IsControlBackground() const { return mpWindowImpl->mbControlBackground; }
+
+bool Window::IsInPaint() const { return mpWindowImpl && mpWindowImpl->mbInPaint; }
+
+bool Window::IsVisible() const { return mpWindowImpl && mpWindowImpl->mbVisible; }
+
+bool Window::IsReallyVisible() const { return mpWindowImpl && mpWindowImpl->mbReallyVisible; }
+
+bool Window::IsReallyShown() const { return mpWindowImpl && mpWindowImpl->mbReallyShown; }
+
+bool Window::IsInInitShow() const { return mpWindowImpl->mbInInitShow; }
+
+bool Window::IsEnabled() const { return mpWindowImpl && !mpWindowImpl->mbDisabled; }
+
+bool Window::IsInputEnabled() const { return mpWindowImpl && !mpWindowImpl->mbInputDisabled; }
+
+bool Window::IsAlwaysEnableInput() const
+{
+    return mpWindowImpl->meAlwaysInputMode == AlwaysInputEnabled;
+}
+
+ActivateModeFlags Window::GetActivateMode() const { return mpWindowImpl->mnActivateMode; }
+
+bool Window::IsAlwaysOnTopEnabled() const { return mpWindowImpl->mbAlwaysOnTop; }
+
+void Window::EnablePaint(bool bEnable) { mpWindowImpl->mbPaintDisabled = !bEnable; }
+
+bool Window::IsPaintEnabled() const { return !mpWindowImpl->mbPaintDisabled; }
+
+bool Window::IsUpdateMode() const { return !mpWindowImpl->mbNoUpdate; }
+
+void Window::SetParentUpdateMode(bool bUpdate) { mpWindowImpl->mbNoParentUpdate = !bUpdate; }
+
+bool Window::IsActive() const { return mpWindowImpl->mbActive; }
+
+GetFocusFlags Window::GetGetFocusFlags() const { return mpWindowImpl->mnGetFocusFlags; }
+
+bool Window::IsCompoundControl() const { return mpWindowImpl && mpWindowImpl->mbCompoundControl; }
+
+bool Window::IsWait() const { return (mpWindowImpl->mnWaitCount != 0); }
+
+vcl::Cursor* Window::GetCursor() const
+{
+    if (!mpWindowImpl)
+        return nullptr;
+
+    return mpWindowImpl->mpCursor;
+}
+
+bool Window::IsCreatedWithToolkit() const { return mpWindowImpl->mbCreatedWithToolkit; }
+
+void Window::SetCreatedWithToolkit(bool b) { mpWindowImpl->mbCreatedWithToolkit = b; }
+
+PointerStyle Window::GetPointer() const { return mpWindowImpl->maPointer; }
+
+VCLXWindow* Window::GetWindowPeer() const
+{
+    return mpWindowImpl ? mpWindowImpl->mpVCLXWindow : nullptr;
+}
 } /* namespace vcl */
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
