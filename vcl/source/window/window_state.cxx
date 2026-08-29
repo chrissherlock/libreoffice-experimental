@@ -215,6 +215,70 @@ void Window::EnableInput(bool bEnable, bool bChild)
         ImplGenerateMouseMove();
 }
 
+void Window::ImplEnableOverlapWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow)
+{
+    vcl::Window* pFirstOverlap = ImplGetFirstOverlapWindow();
+
+    for (vcl::Window* pSysWin
+         = mpWindowImpl->mpFrameWindow->mpWindowImpl->mpFrameData->mpFirstOverlap;
+         pSysWin != nullptr; pSysWin = pSysWin->mpWindowImpl->mpHierarchy->mpNextOverlap)
+    {
+        // Skip if Window is not in the path from this window
+        if (!pFirstOverlap->ImplIsWindowOrChild(pSysWin, true))
+            continue;
+
+        // Skip if Window is in the exclude window path
+        if (pExcludeWindow && pExcludeWindow->ImplIsWindowOrChild(pSysWin, true))
+            continue;
+
+        pSysWin->EnableInput(bEnable);
+    }
+}
+
+void Window::ImplEnableFloatingWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow)
+{
+    vcl::Window* pFirstOverlap = ImplGetFirstOverlapWindow();
+
+    for (vcl::Window* pFrameWin = ImplGetSVData()->maFrameData.mpFirstFrame; pFrameWin != nullptr;
+         pFrameWin = pFrameWin->mpWindowImpl->mpFrameData->mpNextFrame)
+    {
+        if (!pFrameWin->ImplIsFloatingWindow())
+            continue;
+
+        // Skip if Window is not in the path from this window
+        if (!pFirstOverlap->ImplIsWindowOrChild(pFrameWin, true))
+            continue;
+
+        // Skip if Window is in the exclude window path
+        if (pExcludeWindow && pExcludeWindow->ImplIsWindowOrChild(pFrameWin, true))
+            continue;
+
+        pFrameWin->EnableInput(bEnable);
+    }
+}
+
+void Window::ImplEnableOwnerDrawWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow)
+{
+    if (!mpWindowImpl->mbFrame)
+        return;
+
+    vcl::Window* pFirstOverlap = ImplGetFirstOverlapWindow();
+    ::std::vector<VclPtr<vcl::Window>>& rList = mpWindowImpl->mpFrameData->maOwnerDrawList;
+
+    for (auto const& elem : rList)
+    {
+        // Skip if Window is not in the path from this window
+        if (!pFirstOverlap->ImplIsWindowOrChild(elem, true))
+            continue;
+
+        // Skip if Window is in the exclude window path
+        if (pExcludeWindow && pExcludeWindow->ImplIsWindowOrChild(elem, true))
+            continue;
+
+        elem->EnableInput(bEnable);
+    }
+}
+
 void Window::EnableInput(bool bEnable, const vcl::Window* pExcludeWindow)
 {
     if (!mpWindowImpl)
@@ -226,54 +290,10 @@ void Window::EnableInput(bool bEnable, const vcl::Window* pExcludeWindow)
     // shouldn't be the case, then this must be changed in dialog.cxx
     if (pExcludeWindow)
         pExcludeWindow = pExcludeWindow->ImplGetFirstOverlapWindow();
-    vcl::Window* pSysWin = mpWindowImpl->mpFrameWindow->mpWindowImpl->mpFrameData->mpFirstOverlap;
-    while (pSysWin)
-    {
-        // Is Window in the path from this window
-        if (ImplGetFirstOverlapWindow()->ImplIsWindowOrChild(pSysWin, true))
-        {
-            // Is Window not in the exclude window path or not the
-            // exclude window, then change the status
-            if (!pExcludeWindow || !pExcludeWindow->ImplIsWindowOrChild(pSysWin, true))
-                pSysWin->EnableInput(bEnable);
-        }
-        pSysWin = pSysWin->mpWindowImpl->mpHierarchy->mpNextOverlap;
-    }
 
-    // enable/disable floating system windows as well
-    vcl::Window* pFrameWin = ImplGetSVData()->maFrameData.mpFirstFrame;
-    while (pFrameWin)
-    {
-        if (pFrameWin->ImplIsFloatingWindow())
-        {
-            // Is Window in the path from this window
-            if (ImplGetFirstOverlapWindow()->ImplIsWindowOrChild(pFrameWin, true))
-            {
-                // Is Window not in the exclude window path or not the
-                // exclude window, then change the status
-                if (!pExcludeWindow || !pExcludeWindow->ImplIsWindowOrChild(pFrameWin, true))
-                    pFrameWin->EnableInput(bEnable);
-            }
-        }
-        pFrameWin = pFrameWin->mpWindowImpl->mpFrameData->mpNextFrame;
-    }
-
-    // the same for ownerdraw floating windows
-    if (!mpWindowImpl->mbFrame)
-        return;
-
-    ::std::vector<VclPtr<vcl::Window>>& rList = mpWindowImpl->mpFrameData->maOwnerDrawList;
-    for (auto const& elem : rList)
-    {
-        // Is Window in the path from this window
-        if (ImplGetFirstOverlapWindow()->ImplIsWindowOrChild(elem, true))
-        {
-            // Is Window not in the exclude window path or not the
-            // exclude window, then change the status
-            if (!pExcludeWindow || !pExcludeWindow->ImplIsWindowOrChild(elem, true))
-                elem->EnableInput(bEnable);
-        }
-    }
+    ImplEnableOverlapWindowsInput(bEnable, pExcludeWindow);
+    ImplEnableFloatingWindowsInput(bEnable, pExcludeWindow);
+    ImplEnableOwnerDrawWindowsInput(bEnable, pExcludeWindow);
 }
 
 void Window::AlwaysEnableInput(bool bAlways, bool bChild)
