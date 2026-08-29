@@ -18,6 +18,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <vcl/CoordinateMapper.hxx>
 #include <vcl/cursor.hxx>
 #include <vcl/event.hxx>
 #include <vcl/toolbox.hxx>
@@ -247,6 +248,50 @@ void Window::SetCursor(vcl::Cursor* pCursor)
         pCursor->ImplShow();
 }
 
+void Window::ImplPointToLogic(vcl::RenderContext const& rRenderContext, vcl::Font& rFont) const
+{
+    Size aSize = rFont.GetFontSize();
+    // On macOS the native toolkits express font sizes in Quartz points, which
+    // already are VCL's logical (device independent) pixels; the display
+    // scaling is handled by the window's backing store. Applying the screen DPI
+    // here would scale the text twice, so keep the point size as-is.
+#ifndef MACOSX
+    if (aSize.Width())
+    {
+        aSize.setWidth(aSize.Width() * mpWindowImpl->mpFrameData->mnDPIX);
+        aSize.AdjustWidth(72 / 2);
+        aSize.setWidth(aSize.Width() / 72);
+    }
+    aSize.setHeight(aSize.Height() * mpWindowImpl->mpFrameData->mnDPIY);
+    aSize.AdjustHeight(72 / 2);
+    aSize.setHeight(aSize.Height() / 72);
+#endif
+
+    aSize = rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(aSize));
+
+    rFont.SetFontSize(aSize);
+}
+
+void Window::ImplLogicToPoint(vcl::RenderContext const& rRenderContext, vcl::Font& rFont) const
+{
+    auto aSize = rRenderContext.convertTo<vcl::WindowSize>(vcl::LogicSize(rFont.GetFontSize()),
+                                                           rRenderContext.GetMapMode());
+
+#ifndef MACOSX
+    if (aSize->Width())
+    {
+        aSize->setWidth(aSize->Width() * 72);
+        aSize->AdjustWidth(mpWindowImpl->mpFrameData->mnDPIX / 2);
+        aSize->setWidth(aSize->Width() / mpWindowImpl->mpFrameData->mnDPIX);
+    }
+
+    aSize->setHeight(aSize->Height() * 72);
+    aSize->AdjustHeight(mpWindowImpl->mpFrameData->mnDPIY / 2);
+    aSize->setHeight(aSize->Height() / mpWindowImpl->mpFrameData->mnDPIY);
+#endif
+
+    rFont.SetFontSize(aSize.get());
+}
 } // end vcl namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

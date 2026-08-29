@@ -52,89 +52,9 @@ namespace vcl {
     return mpWindowImpl ? mpWindowImpl->mxOutDev.get() : nullptr;
 }
 
-void Window::ImplPointToLogic(vcl::RenderContext const& rRenderContext, vcl::Font& rFont) const
-{
-    Size aSize = rFont.GetFontSize();
-
-    // On macOS the native toolkits express font sizes in Quartz points, which
-    // already are VCL's logical (device independent) pixels; the display
-    // scaling is handled by the window's backing store. Applying the screen DPI
-    // here would scale the text twice, so keep the point size as-is.
-#ifndef MACOSX
-    if (aSize.Width())
-    {
-        aSize.setWidth(aSize.Width() * mpWindowImpl->mpFrameData->mnDPIX);
-        aSize.AdjustWidth(72 / 2 );
-        aSize.setWidth( aSize.Width() / 72 );
-    }
-    aSize.setHeight(aSize.Height() * mpWindowImpl->mpFrameData->mnDPIY);
-    aSize.AdjustHeight(72/2 );
-    aSize.setHeight( aSize.Height() / 72 );
-#endif
-
-    aSize =  rRenderContext.convertTo<vcl::LogicSize>(vcl::WindowSize(aSize));
-
-    rFont.SetFontSize(aSize);
-}
-
-void Window::ImplLogicToPoint(vcl::RenderContext const & rRenderContext, vcl::Font& rFont) const
-{
-    auto aSize = rRenderContext.convertTo<vcl::WindowSize>(vcl::LogicSize(rFont.GetFontSize()), rRenderContext.GetMapMode());
-
-    if (aSize->Width())
-    {
-        aSize->setWidth(aSize->Width() * 72);
-        aSize->AdjustWidth(mpWindowImpl->mpFrameData->mnDPIX / 2);
-        aSize->setWidth(aSize->Width() / mpWindowImpl->mpFrameData->mnDPIX);
-    }
-    aSize->setHeight(aSize->Height() * 72);
-    aSize->AdjustHeight(mpWindowImpl->mpFrameData->mnDPIY / 2);
-    aSize->setHeight(aSize->Height() / mpWindowImpl->mpFrameData->mnDPIY);
-
-    rFont.SetFontSize(aSize.get());
-}
-
 KeyIndicatorState Window::GetIndicatorState() const
 {
     return mpWindowImpl->mpFrame->GetIndicatorState();
-}
-
-void Window::ImplCallDeactivateListeners( vcl::Window *pNew )
-{
-    // no deactivation if the newly activated window is my child
-    if ( !pNew || !ImplIsChild( pNew ) )
-    {
-        VclPtr<vcl::Window> xWindow(this);
-        CallEventListeners( VclEventId::WindowDeactivate, pNew );
-        if( !xWindow->mpWindowImpl )
-            return;
-
-        // #100759#, avoid walking the wrong frame's hierarchy
-        //           eg, undocked docking windows (ImplDockFloatWin)
-        if ( ImplGetParent() && ImplGetParent()->mpWindowImpl &&
-             mpWindowImpl->mpFrameWindow == ImplGetParent()->mpWindowImpl->mpFrameWindow )
-            ImplGetParent()->ImplCallDeactivateListeners( pNew );
-    }
-}
-
-void Window::ImplCallActivateListeners( vcl::Window *pOld )
-{
-    // no activation if the old active window is my child
-    if ( pOld && ImplIsChild( pOld ))
-        return;
-
-    VclPtr<vcl::Window> xWindow(this);
-    CallEventListeners( VclEventId::WindowActivate, pOld );
-    if( !xWindow->mpWindowImpl )
-        return;
-
-    if ( ImplGetParent() )
-        ImplGetParent()->ImplCallActivateListeners( pOld );
-    else if( (mpWindowImpl->mnStyle & WB_INTROWIN) == 0 )
-    {
-        // top level frame reached: store hint for DefModalDialogParent
-        ImplGetSVData()->maFrameData.mpActiveApplicationFrame = mpWindowImpl->mpFrameWindow;
-    }
 }
 
 void Window::RecordLayoutData( vcl::ControlLayoutData* pLayout, const tools::Rectangle& rRect )
@@ -168,14 +88,6 @@ void Window::ImplMirrorFramePos( Point &pt ) const
 void Window::ImplIsInTaskPaneList( bool mbIsInTaskList )
 {
     mpWindowImpl->mbIsInTaskPaneList = mbIsInTaskList;
-}
-
-void Window::ImplNotifyIconifiedState( bool bIconified )
-{
-    mpWindowImpl->mpFrameWindow->CallEventListeners( bIconified ? VclEventId::WindowMinimize : VclEventId::WindowNormalize );
-    // #109206# notify client window as well to have toolkit topwindow listeners notified
-    if( mpWindowImpl->mpFrameWindow->mpWindowImpl->mpClientWindow && mpWindowImpl->mpFrameWindow != mpWindowImpl->mpFrameWindow->mpWindowImpl->mpClientWindow )
-        mpWindowImpl->mpFrameWindow->mpWindowImpl->mpClientWindow->CallEventListeners( bIconified ? VclEventId::WindowMinimize : VclEventId::WindowNormalize );
 }
 
 bool Window::HasActiveChildFrame() const
