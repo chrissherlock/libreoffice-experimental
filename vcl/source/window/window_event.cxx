@@ -1303,6 +1303,60 @@ void Window::ImplHandleScroll(Scrollable* pHScrl, double nX, Scrollable* pVScrl,
     lcl_ProcessScroll(pVScrl, nY, true);
 }
 
+void Window::ImplCallDeactivateListeners(vcl::Window* pNew)
+{
+    // no deactivation if the newly activated window is my child
+    if (pNew && ImplIsChild(pNew))
+        return;
+
+    VclPtr<vcl::Window> xWindow(this);
+    CallEventListeners(VclEventId::WindowDeactivate, pNew);
+    if (!xWindow->mpWindowImpl)
+        return;
+
+    // #100759#, avoid walking the wrong frame's hierarchy
+    //           eg, undocked docking windows (ImplDockFloatWin)
+    if (ImplGetParent() && ImplGetParent()->mpWindowImpl
+        && mpWindowImpl->mpFrameWindow == ImplGetParent()->mpWindowImpl->mpFrameWindow)
+        ImplGetParent()->ImplCallDeactivateListeners(pNew);
+}
+
+void Window::ImplCallActivateListeners(vcl::Window* pOld)
+{
+    // no activation if the old active window is my child
+    if (pOld && ImplIsChild(pOld))
+        return;
+
+    VclPtr<vcl::Window> xWindow(this);
+    CallEventListeners(VclEventId::WindowActivate, pOld);
+    if (!xWindow->mpWindowImpl)
+        return;
+
+    if (ImplGetParent())
+    {
+        ImplGetParent()->ImplCallActivateListeners(pOld);
+    }
+    else if ((mpWindowImpl->mnStyle & WB_INTROWIN) == 0)
+    {
+        // top level frame reached: store hint for DefModalDialogParent
+        ImplGetSVData()->maFrameData.mpActiveApplicationFrame = mpWindowImpl->mpFrameWindow;
+    }
+}
+
+void Window::ImplNotifyIconifiedState(bool bIconified)
+{
+    mpWindowImpl->mpFrameWindow->CallEventListeners(bIconified ? VclEventId::WindowMinimize
+                                                               : VclEventId::WindowNormalize);
+
+    // #109206# notify client window as well to have toolkit topwindow listeners notified
+    if (mpWindowImpl->mpFrameWindow->mpWindowImpl->mpClientWindow
+        && mpWindowImpl->mpFrameWindow != mpWindowImpl->mpFrameWindow->mpWindowImpl->mpClientWindow)
+    {
+        mpWindowImpl->mpFrameWindow->mpWindowImpl->mpClientWindow->CallEventListeners(
+            bIconified ? VclEventId::WindowMinimize : VclEventId::WindowNormalize);
+    }
+}
+
 } /* namespace vcl */
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
