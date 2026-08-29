@@ -251,6 +251,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/window_event \
     vcl/source/window/window_visibility \
     vcl/source/window/window_style \
+    vcl/source/window/window_builder \
     vcl/source/window/window_uno \
     vcl/source/window/window2 \
     vcl/source/window/window3 \
