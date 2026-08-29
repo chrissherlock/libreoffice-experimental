@@ -149,12 +149,17 @@ void Window::GetBorder(sal_Int32& rLeftBorder, sal_Int32& rTopBorder, sal_Int32&
     rBottomBorder = mpWindowImpl->mnBottomBorder;
 }
 
+bool Window::ImplShouldFallbackToParentBackground(const Wallpaper& rBack) const
+{
+    return !rBack.IsBitmap() && !rBack.IsGradient() && rBack.GetColor() == COL_TRANSPARENT
+           && mpWindowImpl->mpHierarchy->mpParent;
+}
+
 const Wallpaper& Window::GetDisplayBackground() const
 {
     // FIXME: fix issue 52349, need to fix this really in
     // all NWF enabled controls
-    const ToolBox* pTB = dynamic_cast<const ToolBox*>(this);
-    if (pTB && IsNativeWidgetEnabled())
+    if (const ToolBox* pTB = dynamic_cast<const ToolBox*>(this); pTB && IsNativeWidgetEnabled())
         return pTB->ImplGetToolBoxPrivateData()->maDisplayBackground;
 
     if (!IsBackground() && mpWindowImpl->mpHierarchy->mpParent)
@@ -162,8 +167,7 @@ const Wallpaper& Window::GetDisplayBackground() const
 
     const Wallpaper& rBack = GetBackground();
 
-    if (!rBack.IsBitmap() && !rBack.IsGradient() && rBack.GetColor() == COL_TRANSPARENT
-        && mpWindowImpl->mpHierarchy->mpParent)
+    if (ImplShouldFallbackToParentBackground(rBack))
         return mpWindowImpl->mpHierarchy->mpParent->GetDisplayBackground();
 
     return rBack;
