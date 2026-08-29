@@ -257,7 +257,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/window_zoom \
     vcl/source/window/window_uno \
     vcl/source/window/window_docking \
-    vcl/source/window/window3 \
     vcl/source/window/window \
     vcl/source/window/winproc \
     vcl/source/window/mouseevent \
