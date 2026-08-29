@@ -174,6 +174,28 @@ void Window::Enable(bool bEnable, bool bChild)
         ImplGenerateMouseMove();
 }
 
+void Window::ImplCancelTracking()
+{
+    // the tracking mode will be stopped or the capture will be stolen
+    // when a window is disabled,
+    if (IsTracking())
+        EndTracking(TrackingEventFlags::Cancel);
+
+    if (IsMouseCaptured())
+        ReleaseMouse();
+}
+
+void Window::ImplSetInputState(bool bEnable)
+{
+    if (!bEnable && mpWindowImpl->meAlwaysInputMode == AlwaysInputEnabled)
+        return;
+
+    if (!bEnable)
+        ImplCancelTracking();
+
+    ImplUpdateInputEnableState(bEnable);
+}
+
 void Window::EnableInput(bool bEnable, bool bChild)
 {
     if (!mpWindowImpl)
@@ -181,20 +203,7 @@ void Window::EnableInput(bool bEnable, bool bChild)
 
     ImplEnableInputBorderAndMenuBar(bEnable);
 
-    if ((!bEnable && mpWindowImpl->meAlwaysInputMode != AlwaysInputEnabled) || bEnable)
-    {
-        // automatically stop the tracking mode or steal capture
-        // if the window is disabled
-        if (!bEnable)
-        {
-            if (IsTracking())
-                EndTracking(TrackingEventFlags::Cancel);
-            if (IsMouseCaptured())
-                ReleaseMouse();
-        }
-
-        ImplUpdateInputEnableState(bEnable);
-    }
+    ImplSetInputState(bEnable);
 
     if (bEnable)
         ImplRestoreAppFocusWin();
