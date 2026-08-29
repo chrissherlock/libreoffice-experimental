@@ -292,6 +292,135 @@ void Window::ImplLogicToPoint(vcl::RenderContext const& rRenderContext, vcl::Fon
 
     rFont.SetFontSize(aSize.get());
 }
+
+void Window::SetControlFont()
+{
+    if (mpWindowImpl && mpWindowImpl->mpControlFont)
+    {
+        mpWindowImpl->mpControlFont.reset();
+        CompatStateChanged(StateChangedType::ControlFont);
+    }
+}
+
+void Window::SetControlFont(const vcl::Font& rFont)
+{
+    if (rFont == vcl::Font())
+    {
+        SetControlFont();
+        return;
+    }
+
+    if (mpWindowImpl->mpControlFont)
+    {
+        if (*mpWindowImpl->mpControlFont == rFont)
+            return;
+        *mpWindowImpl->mpControlFont = rFont;
+    }
+    else
+        mpWindowImpl->mpControlFont = rFont;
+
+    CompatStateChanged(StateChangedType::ControlFont);
+}
+
+vcl::Font Window::GetControlFont() const
+{
+    if (mpWindowImpl->mpControlFont)
+        return *mpWindowImpl->mpControlFont;
+    else
+    {
+        vcl::Font aFont;
+        return aFont;
+    }
+}
+
+void Window::ApplyControlFont(vcl::RenderContext& rRenderContext, const vcl::Font& rFont)
+{
+    vcl::Font aFont(rFont);
+    if (IsControlFont())
+        aFont.Merge(GetControlFont());
+    SetZoomedPointFont(rRenderContext, aFont);
+}
+
+void Window::SetControlForeground()
+{
+    if (mpWindowImpl->mbControlForeground)
+    {
+        mpWindowImpl->maControlForeground = COL_TRANSPARENT;
+        mpWindowImpl->mbControlForeground = false;
+        CompatStateChanged(StateChangedType::ControlForeground);
+    }
+}
+
+void Window::SetControlForeground(const Color& rColor)
+{
+    if (rColor.IsTransparent())
+    {
+        if (mpWindowImpl->mbControlForeground)
+        {
+            mpWindowImpl->maControlForeground = COL_TRANSPARENT;
+            mpWindowImpl->mbControlForeground = false;
+            CompatStateChanged(StateChangedType::ControlForeground);
+        }
+    }
+    else
+    {
+        if (mpWindowImpl->maControlForeground != rColor)
+        {
+            mpWindowImpl->maControlForeground = rColor;
+            mpWindowImpl->mbControlForeground = true;
+            CompatStateChanged(StateChangedType::ControlForeground);
+        }
+    }
+}
+
+void Window::ApplyControlForeground(vcl::RenderContext& rRenderContext, const Color& rDefaultColor)
+{
+    Color aTextColor(rDefaultColor);
+    if (IsControlForeground())
+        aTextColor = GetControlForeground();
+    rRenderContext.SetTextColor(aTextColor);
+}
+
+void Window::SetControlBackground()
+{
+    if (mpWindowImpl->mbControlBackground)
+    {
+        mpWindowImpl->maControlBackground = COL_TRANSPARENT;
+        mpWindowImpl->mbControlBackground = false;
+        CompatStateChanged(StateChangedType::ControlBackground);
+    }
+}
+
+void Window::SetControlBackground(const Color& rColor)
+{
+    if (rColor.IsTransparent())
+    {
+        if (mpWindowImpl->mbControlBackground)
+        {
+            mpWindowImpl->maControlBackground = COL_TRANSPARENT;
+            mpWindowImpl->mbControlBackground = false;
+            CompatStateChanged(StateChangedType::ControlBackground);
+        }
+    }
+    else
+    {
+        if (mpWindowImpl->maControlBackground != rColor)
+        {
+            mpWindowImpl->maControlBackground = rColor;
+            mpWindowImpl->mbControlBackground = true;
+            CompatStateChanged(StateChangedType::ControlBackground);
+        }
+    }
+}
+
+void Window::ApplyControlBackground(vcl::RenderContext& rRenderContext, const Color& rDefaultColor)
+{
+    Color aColor(rDefaultColor);
+    if (IsControlBackground())
+        aColor = GetControlBackground();
+    rRenderContext.SetBackground(aColor);
+}
+
 } // end vcl namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
