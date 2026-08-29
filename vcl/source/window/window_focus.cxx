@@ -418,11 +418,8 @@ void Window::StartTracking(StartTrackingFlags nFlags)
                                         ? mpWindowImpl->mpFrameData->mpTrackWin
                                         : pSVData->mpWinData->mpTrackWin;
 
-    if (pTrackWin.get() != this)
-    {
-        if (pTrackWin)
-            pTrackWin->EndTracking(TrackingEventFlags::Cancel);
-    }
+    if (pTrackWin && pTrackWin.get() != this)
+        pTrackWin->EndTracking(TrackingEventFlags::Cancel);
 
     SAL_WARN_IF(pSVData->mpWinData->mpTrackTimer, "vcl",
                 "StartTracking called while TrackerTimer still running");
