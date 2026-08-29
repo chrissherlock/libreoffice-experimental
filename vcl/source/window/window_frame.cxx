@@ -35,6 +35,22 @@
 
 namespace vcl
 {
+static bool lcl_IsFloatingWindowDecorated(const vcl::Window* pChildFrame)
+{
+    // #i15285# unfortunately WB_MOVEABLE is the same as WB_TABSTOP which can
+    // be removed for ToolBoxes to influence the keyboard accessibility
+    // thus WB_MOVEABLE is no indicator for decoration anymore
+    // but FloatingWindows carry this information in their TitleType...
+    // TODO: avoid duplicate WinBits !!!
+
+    if (pChildFrame && pChildFrame->ImplIsFloatingWindow())
+    {
+        return static_cast<const FloatingWindow*>(pChildFrame)->GetTitleType()
+               != FloatWinTitleType::NONE;
+    }
+    return false;
+}
+
 bool Window::HasActiveChildFrame() const
 {
     bool bRet = false;
@@ -44,20 +60,9 @@ bool Window::HasActiveChildFrame() const
     {
         if (pFrameWin != mpWindowImpl->mpFrameWindow)
         {
-            bool bDecorated = false;
-            VclPtr<vcl::Window> pChildFrame = pFrameWin->ImplGetWindow();
-
-            // #i15285# unfortunately WB_MOVEABLE is the same as WB_TABSTOP which can
-            // be removed for ToolBoxes to influence the keyboard accessibility
-            // thus WB_MOVEABLE is no indicator for decoration anymore
-            // but FloatingWindows carry this information in their TitleType...
-            // TODO: avoid duplicate WinBits !!!
-
-            if (pChildFrame && pChildFrame->ImplIsFloatingWindow())
-                bDecorated = static_cast<FloatingWindow*>(pChildFrame.get())->GetTitleType()
-                             != FloatWinTitleType::NONE;
-
-            if ((bDecorated || (pFrameWin->mpWindowImpl->mnStyle & (WB_MOVEABLE | WB_SIZEABLE)))
+            if (VclPtr<vcl::Window> pChildFrame = pFrameWin->ImplGetWindow();
+                (lcl_IsFloatingWindowDecorated(pChildFrame)
+                 || (pFrameWin->mpWindowImpl->mnStyle & (WB_MOVEABLE | WB_SIZEABLE)))
                 && pChildFrame && pChildFrame->IsVisible() && pChildFrame->IsActive()
                 && ImplIsChild(pChildFrame, true))
             {
