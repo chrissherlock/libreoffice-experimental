@@ -263,6 +263,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
     {
         if ( (nSVEvent == NotifyEventType::MOUSEBUTTONUP) && aHelpData.mbExtHelpMode )
             Help::EndExtHelp();
+
         if ( aHelpData.mpHelpWin )
         {
             if( xWindow->ImplGetWindow() == aHelpData.mpHelpWin )
@@ -271,7 +272,9 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                 return true; // xWindow is dead now - avoid crash!
             }
             else
+            {
                 ImplDestroyHelpWindow( true );
+            }
         }
 
         if ( (pWinFrameData->mnLastMouseX != nX) ||
@@ -290,6 +293,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
     pWinFrameData->mnMouseCode  = nCode;
     MouseEventModifiers const nTmpMask = MouseEventModifiers::SYNTHETIC | MouseEventModifiers::MODIFIERCHANGED;
     pWinFrameData->mnMouseMode  = nMode & ~nTmpMask;
+
     if ( bMouseLeave )
     {
         pWinFrameData->mbMouseIn = false;
@@ -302,7 +306,9 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         }
     }
     else
+    {
         pWinFrameData->mbMouseIn = true;
+    }
 
     DBG_ASSERT(!pSVData->mpWinData->mpTrackWin
                    || (pSVData->mpWinData->mpTrackWin == pSVData->mpWinData->mpCaptureWin),
@@ -369,7 +375,9 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             // Call the hook also, if Window is disabled
 
             if ( nSVEvent == NotifyEventType::MOUSEBUTTONDOWN )
+            {
                 return true;
+            }
             else
             {
                 // Set normal MousePointer for disabled windows
@@ -485,11 +493,14 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                 }
             }
             else
+            {
                 pMouseDownWin->ImplGetFrameData()->mbStartDragCalled  = true;
+            }
         }
 
         if (xWindow->isDisposed())
             return true;
+
         // test for mouseleave and mouseenter
         VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
         if ( pChild != pMouseMoveWin )
@@ -521,7 +532,9 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
 
             nMode |= MouseEventModifiers::ENTERWINDOW;
         }
+
         pWinFrameData->mpMouseMoveWin = pChild;
+
         if( pChild )
             pChild->ImplGetWinData()->mbMouseOver = true;
 
@@ -568,6 +581,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                 }
                 pChild->ImplGetFrameData()->mnMouseDownTime = nMsgTime;
             }
+
             nClicks = pChild->ImplGetFrameData()->mnClickCount;
         }
 
@@ -589,16 +603,13 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         pChild = pSVData->mpWinData->mpTrackWin;
 
     // handle FloatingMode
-    if (!pSVData->mpWinData->mpTrackWin && pSVData->mpWinData->mpFirstFloat)
+    if (!pSVData->mpWinData->mpTrackWin && pSVData->mpWinData->mpFirstFloat
+        && lcl_HandleMouseFloatMode(pChild, aMousePos, nCode, nSVEvent, bMouseLeave))
     {
-        if ( lcl_HandleMouseFloatMode( pChild, aMousePos, nCode, nSVEvent, bMouseLeave ) )
-        {
-            if ( !pChild->isDisposed() )
-            {
-                pChild->ImplGetFrameData()->mbStartDragCalled = true;
-            }
-            return true;
-        }
+        if ( !pChild->isDisposed() )
+            pChild->ImplGetFrameData()->mbStartDragCalled = true;
+
+        return true;
     }
 
     // call handler
@@ -619,13 +630,18 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             && // totop for floating windows in popup would change the focus and would close them immediately
             !(pChild->ImplGetFrameWindow()->GetStyle()
               & WB_OWNERDRAWDECORATION)) // ownerdrawdecorated windows must never grab focus
+        {
             pChild->ToTop();
+        }
+
         if ( pChild->isDisposed() )
             return true;
     }
 
     if ( ImplCallPreNotify( aNEvt ) || pChild->isDisposed() )
+    {
         bRet = true;
+    }
     else
     {
         bRet = false;
@@ -648,7 +664,9 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             else
             {
                 if( pChild->isDisposed() )
+                {
                     bCallHelpRequest = false;
+                }
                 else
                 {
                     // if the MouseMove handler changes the help window's visibility
@@ -663,7 +681,9 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         else if ( nSVEvent == NotifyEventType::MOUSEBUTTONDOWN )
         {
             if ( pSVData->mpWinData->mpTrackWin )
+            {
                 bRet = true;
+            }
             else
             {
                 pChild->ImplGetWindowImpl()->mbMouseButtonDown = false;
