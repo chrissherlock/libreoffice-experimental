@@ -229,46 +229,6 @@ const OUString& Window::GetHelpText() const
     return mpWindowImpl->maHelpText;
 }
 
-void Window::SetWindowPeer( Reference< css::awt::XVclWindowPeer > const & xPeer, VCLXWindow* pVCLXWindow  )
-{
-    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
-        return;
-
-    // be safe against re-entrance: first clear the old ref, then assign the new one
-    if (mpWindowImpl->mxWindowPeer)
-    {
-        // first, disconnect the peer from ourself, otherwise disposing it, will dispose us
-        UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
-        SAL_WARN_IF( !pWrapper, "vcl.window", "SetComponentInterface: No Wrapper!" );
-        if ( pWrapper )
-            pWrapper->SetWindowInterface( nullptr, mpWindowImpl->mxWindowPeer );
-        mpWindowImpl->mxWindowPeer->dispose();
-        mpWindowImpl->mxWindowPeer.clear();
-    }
-    mpWindowImpl->mxWindowPeer = xPeer;
-
-    mpWindowImpl->mpVCLXWindow = pVCLXWindow;
-}
-
-Reference< css::awt::XVclWindowPeer > Window::GetComponentInterface( bool bCreate )
-{
-    if ( !mpWindowImpl->mxWindowPeer.is() && bCreate )
-    {
-        UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
-        if ( pWrapper )
-            mpWindowImpl->mxWindowPeer = pWrapper->GetWindowInterface( this );
-    }
-    return mpWindowImpl->mxWindowPeer;
-}
-
-void Window::SetComponentInterface( Reference< css::awt::XVclWindowPeer > const & xIFace )
-{
-    UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
-    SAL_WARN_IF( !pWrapper, "vcl.window", "SetComponentInterface: No Wrapper!" );
-    if ( pWrapper )
-        pWrapper->SetWindowInterface( this, xIFace );
-}
-
 void Window::ImplCallDeactivateListeners( vcl::Window *pNew )
 {
     // no deactivation if the newly activated window is my child
@@ -305,21 +265,6 @@ void Window::ImplCallActivateListeners( vcl::Window *pOld )
         // top level frame reached: store hint for DefModalDialogParent
         ImplGetSVData()->maFrameData.mpActiveApplicationFrame = mpWindowImpl->mpFrameWindow;
     }
-}
-
-void Window::SetClipboard(Reference<XClipboard> const & xClipboard)
-{
-    if (mpWindowImpl->mpFrameData)
-        mpWindowImpl->mpFrameData->mxClipboard = xClipboard;
-}
-
-Reference< XClipboard > Window::GetClipboard()
-{
-    if (!mpWindowImpl->mpFrameData)
-        return static_cast<XClipboard*>(nullptr);
-    if (!mpWindowImpl->mpFrameData->mxClipboard.is())
-        mpWindowImpl->mpFrameData->mxClipboard = GetSystemClipboard();
-    return mpWindowImpl->mpFrameData->mxClipboard;
 }
 
 void Window::RecordLayoutData( vcl::ControlLayoutData* pLayout, const tools::Rectangle& rRect )
