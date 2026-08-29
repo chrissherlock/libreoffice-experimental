@@ -52,11 +52,6 @@ namespace vcl {
     return mpWindowImpl ? mpWindowImpl->mxOutDev.get() : nullptr;
 }
 
-KeyIndicatorState Window::GetIndicatorState() const
-{
-    return mpWindowImpl->mpFrame->GetIndicatorState();
-}
-
 void Window::RecordLayoutData( vcl::ControlLayoutData* pLayout, const tools::Rectangle& rRect )
 {
     assert(GetOutDev()->mpOutDevData);
@@ -78,11 +73,6 @@ bool Window::IsScrollable() const
             pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
     }
     return false;
-}
-
-void Window::ImplMirrorFramePos( Point &pt ) const
-{
-    pt.setX(mpWindowImpl->mpFrame->GetWidth() - 1 - pt.X());
 }
 
 void Window::ImplIsInTaskPaneList( bool mbIsInTaskList )
@@ -120,12 +110,6 @@ bool Window::HasActiveChildFrame() const
         pFrameWin = pFrameWin->mpWindowImpl->mpFrameData->mpNextFrame;
     }
     return bRet;
-}
-
-const SystemEnvData* Window::GetSystemData() const
-{
-
-    return mpWindowImpl->mpFrame ? &mpWindowImpl->mpFrame->GetSystemData() : nullptr;
 }
 
 bool Window::SupportsDoubleBuffering() const
