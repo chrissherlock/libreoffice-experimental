@@ -19,6 +19,7 @@
 
 #include <comphelper/configuration.hxx>
 
+#include <vcl/toolkit/floatwin.hxx>
 #include <vcl/window.hxx>
 #include <vcl/wintypes.hxx>
 
@@ -34,6 +35,43 @@
 
 namespace vcl
 {
+bool Window::HasActiveChildFrame() const
+{
+    bool bRet = false;
+    vcl::Window* pFrameWin = ImplGetSVData()->maFrameData.mpFirstFrame;
+
+    while (pFrameWin)
+    {
+        if (pFrameWin != mpWindowImpl->mpFrameWindow)
+        {
+            bool bDecorated = false;
+            VclPtr<vcl::Window> pChildFrame = pFrameWin->ImplGetWindow();
+
+            // #i15285# unfortunately WB_MOVEABLE is the same as WB_TABSTOP which can
+            // be removed for ToolBoxes to influence the keyboard accessibility
+            // thus WB_MOVEABLE is no indicator for decoration anymore
+            // but FloatingWindows carry this information in their TitleType...
+            // TODO: avoid duplicate WinBits !!!
+
+            if (pChildFrame && pChildFrame->ImplIsFloatingWindow())
+                bDecorated = static_cast<FloatingWindow*>(pChildFrame.get())->GetTitleType()
+                             != FloatWinTitleType::NONE;
+
+            if ((bDecorated || (pFrameWin->mpWindowImpl->mnStyle & (WB_MOVEABLE | WB_SIZEABLE)))
+                && pChildFrame && pChildFrame->IsVisible() && pChildFrame->IsActive()
+                && ImplIsChild(pChildFrame, true))
+            {
+                bRet = true;
+                break;
+            }
+        }
+
+        pFrameWin = pFrameWin->mpWindowImpl->mpFrameData->mpNextFrame;
+    }
+
+    return bRet;
+}
+
 bool Window::ImplShouldInherit3DLook(const vcl::Window* pParent) const
 {
     return !mpWindowImpl->mbOverlapWin && pParent && (pParent->GetStyle() & WB_3DLOOK);
