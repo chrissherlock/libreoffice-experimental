@@ -180,7 +180,7 @@ void Window::EnableNativeWidget(bool bEnable)
     if (pNoNWF && *pNoNWF)
         bEnable = false;
 
-    if (bEnable != ImplGetWinData()->mbEnableNativeWidget)
+    if (ImplGetWinData()->mbEnableNativeWidget != bEnable)
     {
         ImplGetWinData()->mbEnableNativeWidget = bEnable;
 
@@ -195,12 +195,16 @@ void Window::EnableNativeWidget(bool bEnable)
             mpWindowImpl->mpBorderWindow->ImplGetWinData()->mbEnableNativeWidget = bEnable;
     }
 
+    ImplEnableChildNativeWidgets(bEnable);
+}
+
+void Window::ImplEnableChildNativeWidgets(bool bEnable)
+{
     // push down, useful for compound controls
-    VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
-    while (pChild)
+    for (VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild; pChild != nullptr;
+         pChild = pChild->mpWindowImpl->mpHierarchy->mpNext)
     {
         pChild->EnableNativeWidget(bEnable);
-        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
     }
 }
 
