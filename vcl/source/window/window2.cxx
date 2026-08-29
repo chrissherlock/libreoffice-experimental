@@ -96,16 +96,6 @@ void Window::EnableDocking( bool bEnable )
     return ImplGetTopmostFrameWindow()->mpWindowImpl->mpFrameData->maOwnerDrawList;
 }
 
-void Window::SetHelpId( const OUString& rHelpId )
-{
-    mpWindowImpl->maHelpId = rHelpId;
-}
-
-const OUString& Window::GetHelpId() const
-{
-    return mpWindowImpl->maHelpId;
-}
-
 // --------- old inline methods ---------------
 
 vcl::Window* Window::ImplGetBorderWindow() const
@@ -353,23 +343,6 @@ vcl::Cursor* Window::GetCursor() const
     if (!mpWindowImpl)
         return nullptr;
     return mpWindowImpl->mpCursor;
-}
-
-void Window::SetHelpText( const OUString& rHelpText )
-{
-    mpWindowImpl->maHelpText = rHelpText;
-    mpWindowImpl->mbHelpTextDynamic = true;
-}
-
-void Window::SetQuickHelpText( const OUString& rHelpText )
-{
-    if (mpWindowImpl)
-        mpWindowImpl->maQuickHelpText = rHelpText;
-}
-
-const OUString& Window::GetQuickHelpText() const
-{
-    return mpWindowImpl->maQuickHelpText;
 }
 
 bool Window::IsCreatedWithToolkit() const
