@@ -477,6 +477,30 @@ const SystemEnvData* Window::GetSystemData() const
     return mpWindowImpl->mpFrame ? &mpWindowImpl->mpFrame->GetSystemData() : nullptr;
 }
 
+void Window::FlashWindow() const
+{
+    vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
+
+    if (pMyParent && pMyParent->mpWindowImpl)
+        pMyParent->mpWindowImpl->mpFrame->FlashWindow();
+}
+
+void Window::SetTaskBarProgress(int nCurrentProgress)
+{
+    vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
+
+    if (pMyParent && pMyParent->mpWindowImpl)
+        pMyParent->mpWindowImpl->mpFrame->SetTaskBarProgress(nCurrentProgress);
+}
+
+void Window::SetTaskBarState(VclTaskBarStates eTaskBarState)
+{
+    vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
+
+    if (pMyParent && pMyParent->mpWindowImpl)
+        pMyParent->mpWindowImpl->mpFrame->SetTaskBarState(eTaskBarState);
+}
+
 } // end vcl namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
