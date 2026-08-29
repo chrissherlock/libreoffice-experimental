@@ -412,6 +412,21 @@ SalGraphics* Window::ImplGetFrameGraphics() const
     return pFrameWinOutDev->mpGraphics;
 }
 
+KeyIndicatorState Window::GetIndicatorState() const
+{
+    return mpWindowImpl->mpFrame->GetIndicatorState();
+}
+
+void Window::ImplMirrorFramePos(Point& pt) const
+{
+    pt.setX(mpWindowImpl->mpFrame->GetWidth() - 1 - pt.X());
+}
+
+const SystemEnvData* Window::GetSystemData() const
+{
+    return mpWindowImpl->mpFrame ? &mpWindowImpl->mpFrame->GetSystemData() : nullptr;
+}
+
 } // end vcl namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
