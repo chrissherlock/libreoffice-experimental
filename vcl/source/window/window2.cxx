@@ -51,36 +51,11 @@
 namespace vcl
 {
 
-DockingManager* Window::GetDockingManager()
-{
-    return ImplGetDockingManager();
-}
-
-void Window::EnableDocking( bool bEnable )
-{
-    // update list of dockable windows
-    if( bEnable )
-        ImplGetDockingManager()->AddWindow( this );
-    else
-        ImplGetDockingManager()->RemoveWindow( this );
-}
-
-// retrieves the list of owner draw decorated windows for this window hierarchy
-::std::vector<VclPtr<vcl::Window> >& Window::ImplGetOwnerDrawList()
-{
-    return ImplGetTopmostFrameWindow()->mpWindowImpl->mpFrameData->maOwnerDrawList;
-}
-
 // --------- old inline methods ---------------
 
 vcl::Window* Window::ImplGetBorderWindow() const
 {
     return mpWindowImpl ? mpWindowImpl->mpBorderWindow.get() : nullptr;
-}
-
-bool Window::IsDockingWindow() const
-{
-    return mpWindowImpl && mpWindowImpl->mbDockWin;
 }
 
 void Window::ImplSetMouseTransparent( bool bTransparent )
