@@ -61,25 +61,6 @@ void Window::RecordLayoutData( vcl::ControlLayoutData* pLayout, const tools::Rec
     GetOutDev()->mpOutDevData->mpRecordLayout = nullptr;
 }
 
-bool Window::IsScrollable() const
-{
-    // check for scrollbars
-    VclPtr< vcl::Window > pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
-    while( pChild )
-    {
-        if( pChild->GetType() == WindowType::SCROLLBAR )
-            return true;
-        else
-            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
-    }
-    return false;
-}
-
-void Window::ImplIsInTaskPaneList( bool mbIsInTaskList )
-{
-    mpWindowImpl->mbIsInTaskPaneList = mbIsInTaskList;
-}
-
 bool Window::SupportsDoubleBuffering() const
 {
     return mpWindowImpl->mpFrameData->mpBuffer;
