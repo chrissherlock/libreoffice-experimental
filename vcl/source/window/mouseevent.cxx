@@ -79,6 +79,23 @@ static bool lcl_IsFloatPopupModeWindow(const vcl::Window* pChild)
            || pSVData->mpWinData->mpFirstFloat->ImplIsFloatPopupModeWindow(pChild);
 }
 
+static bool lcl_HandleFloatMouseMove(vcl::Window* pChild, bool bMouseLeave,
+                                     const FloatingWindow* pFloat, bool bHitTestInsideRect)
+{
+    if (bMouseLeave)
+        return true;
+
+    if (pFloat && !bHitTestInsideRect)
+        return false;
+
+    if (ImplGetSVHelpData().mpHelpWin && !ImplGetSVHelpData().mbKeyboardHelp)
+        ImplDestroyHelpWindow(true);
+
+    pChild->ImplGetFrame()->SetPointer(PointerStyle::Arrow);
+
+    return true;
+}
+
 static bool lcl_HandleMouseFloatMode( vcl::Window* pChild, const Point& rMousePos,
                                       sal_uInt16 nCode, NotifyEventType nSVEvent,
                                       bool bMouseLeave )
@@ -86,29 +103,12 @@ static bool lcl_HandleMouseFloatMode( vcl::Window* pChild, const Point& rMousePo
     if (lcl_IsFloatPopupModeWindow(pChild))
         return false;
 
+    bool bHitTestInsideRect = false;
     ImplSVData* pSVData = ImplGetSVData();
+    FloatingWindow* pFloat = pSVData->mpWinData->mpFirstFloat->ImplFloatHitTest(pChild, rMousePos, bHitTestInsideRect);
 
-    /*
-     *  #93895# since floats are system windows, coordinates have
-     *  to be converted to float relative for the hittest
-     */
-    bool            bHitTestInsideRect = false;
-    FloatingWindow* pFloat = pSVData->mpWinData->mpFirstFloat->ImplFloatHitTest( pChild, rMousePos, bHitTestInsideRect );
-    if ( nSVEvent == NotifyEventType::MOUSEMOVE )
-    {
-        if ( bMouseLeave )
-            return true;
-
-        if ( !pFloat || bHitTestInsideRect )
-        {
-            if ( ImplGetSVHelpData().mpHelpWin && !ImplGetSVHelpData().mbKeyboardHelp )
-                ImplDestroyHelpWindow( true );
-            pChild->ImplGetFrame()->SetPointer( PointerStyle::Arrow );
-            return true;
-        }
-
-        return false;
-    }
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+        return lcl_HandleFloatMouseMove(pChild, bMouseLeave, pFloat, bHitTestInsideRect);
 
     if ( nCode & MOUSE_LEFT )
     {
