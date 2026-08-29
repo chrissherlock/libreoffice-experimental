@@ -299,13 +299,4 @@ VCLXWindow* Window::GetWindowPeer() const
 
 } /* namespace vcl */
 
-void InvertFocusRect(vcl::RenderContext& rRenderContext, const tools::Rectangle& rRect)
-{
-    const int nBorder = 1;
-    rRenderContext.Invert(tools::Rectangle(Point(rRect.Left(), rRect.Top()), Size(rRect.GetWidth(), nBorder)), InvertFlags::N50);
-    rRenderContext.Invert(tools::Rectangle(Point(rRect.Left(), rRect.Bottom()-nBorder+1), Size(rRect.GetWidth(), nBorder)), InvertFlags::N50);
-    rRenderContext.Invert(tools::Rectangle(Point(rRect.Left(), rRect.Top()+nBorder), Size(nBorder, rRect.GetHeight()-(nBorder*2))), InvertFlags::N50);
-    rRenderContext.Invert(tools::Rectangle(Point(rRect.Right()-nBorder+1, rRect.Top()+nBorder), Size(nBorder, rRect.GetHeight()-(nBorder*2))), InvertFlags::N50);
-}
-
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
