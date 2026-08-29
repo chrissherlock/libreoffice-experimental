@@ -53,28 +53,8 @@
 
 using namespace com::sun::star;
 
-namespace vcl {
-
-vcl::Font Window::GetDrawPixelFont(OutputDevice const * pDev) const
+namespace vcl
 {
-    vcl::Font aFont = GetPointFont(*GetOutDev());
-    MapMode aPtMapMode(MapUnit::MapPoint);
-    const auto aFontSize = pDev->convertTo<vcl::WindowSize>(vcl::LogicSize(aFont.GetFontSize()), aPtMapMode);
-    aFont.SetFontSize(aFontSize.get());
-    return aFont;
-}
-
-tools::Long Window::GetDrawPixel( OutputDevice const * pDev, tools::Long nPixels ) const
-{
-    tools::Long nP = nPixels;
-    if ( pDev->GetOutDevType() != OUTDEV_WINDOW )
-    {
-        MapMode aMap( MapUnit::Map100thMM );
-        auto aSz = convertTo<vcl::WindowSize>(vcl::LogicSize(Size(nP, 0)), aMap);
-        nP = aSz->Width();
-    }
-    return nP;
-}
 
 DockingManager* Window::GetDockingManager()
 {
