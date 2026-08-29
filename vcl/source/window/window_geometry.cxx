@@ -1511,6 +1511,26 @@ tools::Long Window::ImplGetBorderHeight() const
     return mpWindowImpl->mnTopBorder + mpWindowImpl->mnBottomBorder;
 }
 
+bool Window::IsScrollable() const
+{
+    // check for scrollbars
+    VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
+    while (pChild)
+    {
+        if (pChild->GetType() == WindowType::SCROLLBAR)
+            return true;
+
+        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+    }
+
+    return false;
+}
+
+void Window::ImplIsInTaskPaneList(bool mbIsInTaskList)
+{
+    mpWindowImpl->mbIsInTaskPaneList = mbIsInTaskList;
+}
+
 } // end namespace vcl
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
