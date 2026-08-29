@@ -545,10 +545,9 @@ void Window::StartAutoScroll(StartAutoScrollFlags nFlags)
 {
     ImplSVData* pSVData = ImplGetSVData();
 
-    if (pSVData->mpWinData->mpAutoScrollWin.get() != this)
+    if (pSVData->mpWinData->mpAutoScrollWin.get() != this && pSVData->mpWinData->mpAutoScrollWin)
     {
-        if (pSVData->mpWinData->mpAutoScrollWin)
-            pSVData->mpWinData->mpAutoScrollWin->EndAutoScroll();
+        pSVData->mpWinData->mpAutoScrollWin->EndAutoScroll();
     }
 
     pSVData->mpWinData->mpAutoScrollWin = this;
@@ -560,13 +559,13 @@ void Window::EndAutoScroll()
 {
     ImplSVData* pSVData = ImplGetSVData();
 
-    if (pSVData->mpWinData->mpAutoScrollWin.get() == this)
-    {
-        pSVData->mpWinData->mpAutoScrollWin = nullptr;
-        pSVData->mpWinData->mnAutoScrollFlags = StartAutoScrollFlags::NONE;
-        pSVData->maAppData.mpWheelWindow->ImplStop();
-        pSVData->maAppData.mpWheelWindow.disposeAndClear();
-    }
+    if (pSVData->mpWinData->mpAutoScrollWin.get() != this)
+        return;
+
+    pSVData->mpWinData->mpAutoScrollWin = nullptr;
+    pSVData->mpWinData->mnAutoScrollFlags = StartAutoScrollFlags::NONE;
+    pSVData->maAppData.mpWheelWindow->ImplStop();
+    pSVData->maAppData.mpWheelWindow.disposeAndClear();
 }
 
 VclPtr<vcl::Window> Window::SaveFocus()
