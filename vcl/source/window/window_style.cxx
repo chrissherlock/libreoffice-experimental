@@ -180,22 +180,26 @@ void Window::EnableNativeWidget(bool bEnable)
     if (pNoNWF && *pNoNWF)
         bEnable = false;
 
-    if (ImplGetWinData()->mbEnableNativeWidget != bEnable)
-    {
-        ImplGetWinData()->mbEnableNativeWidget = bEnable;
-
-        // send datachanged event to allow for internal changes required for NWF
-        // like clipmode, transparency, etc.
-        DataChangedEvent aDCEvt(DataChangedEventType::SETTINGS, &*GetOutDev()->moSettings,
-                                AllSettingsFlags::STYLE);
-        CompatDataChanged(aDCEvt);
-
-        // sometimes the borderwindow is queried, so keep it in sync
-        if (mpWindowImpl->mpBorderWindow)
-            mpWindowImpl->mpBorderWindow->ImplGetWinData()->mbEnableNativeWidget = bEnable;
-    }
-
+    ImplUpdateNativeWidgetState(bEnable);
     ImplEnableChildNativeWidgets(bEnable);
+}
+
+void Window::ImplUpdateNativeWidgetState(bool bEnable)
+{
+    if (ImplGetWinData()->mbEnableNativeWidget == bEnable)
+        return;
+
+    ImplGetWinData()->mbEnableNativeWidget = bEnable;
+
+    // send datachanged event to allow for internal changes required for NWF
+    // like clipmode, transparency, etc.
+    DataChangedEvent aDCEvt(DataChangedEventType::SETTINGS, &*GetOutDev()->moSettings,
+                            AllSettingsFlags::STYLE);
+    CompatDataChanged(aDCEvt);
+
+    // sometimes the borderwindow is queried, so keep it in sync
+    if (mpWindowImpl->mpBorderWindow)
+        mpWindowImpl->mpBorderWindow->ImplGetWinData()->mbEnableNativeWidget = bEnable;
 }
 
 void Window::ImplEnableChildNativeWidgets(bool bEnable)
