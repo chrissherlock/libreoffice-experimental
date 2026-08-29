@@ -70,17 +70,23 @@
 
 #include <algorithm>
 
+static bool lcl_IsFloatPopupModeWindow(const vcl::Window* pChild)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    return !pSVData->mpWinData->mpFirstFloat
+           || pSVData->mpWinData->mpCaptureWin
+           || pSVData->mpWinData->mpFirstFloat->ImplIsFloatPopupModeWindow(pChild);
+}
+
 static bool lcl_HandleMouseFloatMode( vcl::Window* pChild, const Point& rMousePos,
                                       sal_uInt16 nCode, NotifyEventType nSVEvent,
                                       bool bMouseLeave )
 {
-    ImplSVData* pSVData = ImplGetSVData();
-
-    if (!pSVData->mpWinData->mpFirstFloat || pSVData->mpWinData->mpCaptureWin
-        || pSVData->mpWinData->mpFirstFloat->ImplIsFloatPopupModeWindow(pChild))
-    {
+    if (lcl_IsFloatPopupModeWindow(pChild))
         return false;
-    }
+
+    ImplSVData* pSVData = ImplGetSVData();
 
     /*
      *  #93895# since floats are system windows, coordinates have
