@@ -94,21 +94,6 @@ void Window::ImplSetMouseTransparent( bool bTransparent )
         mpWindowImpl->mbMouseTransparent = bTransparent;
 }
 
-WinBits Window::GetStyle() const
-{
-    return mpWindowImpl ? mpWindowImpl->mnStyle : 0;
-}
-
-WinBits Window::GetPrevStyle() const
-{
-    return mpWindowImpl ? mpWindowImpl->mnPrevStyle : 0;
-}
-
-WindowExtendedStyle Window::GetExtendedStyle() const
-{
-    return mpWindowImpl ? mpWindowImpl->mnExtendedStyle : WindowExtendedStyle::NONE;
-}
-
 bool Window::IsFormControl() const
 {
     return mpWindowImpl ? mpWindowImpl->mbIsFormControl : false;
