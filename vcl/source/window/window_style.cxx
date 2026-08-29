@@ -47,6 +47,19 @@ void Window::SetStyle(WinBits nStyle)
         CompatStateChanged(StateChangedType::Style);
 }
 
+static SalExtStyle lcl_GetExtendedStyle(WindowExtendedStyle nExtendedStyle)
+{
+    SalExtStyle nExt = 0;
+
+    if (nExtendedStyle & WindowExtendedStyle::Document)
+        nExt |= SAL_FRAME_EXT_STYLE_DOCUMENT;
+
+    if (nExtendedStyle & WindowExtendedStyle::DocModified)
+        nExt |= SAL_FRAME_EXT_STYLE_DOCMODIFIED;
+
+    return nExt;
+}
+
 void Window::SetExtendedStyle(WindowExtendedStyle nExtendedStyle)
 {
     if (mpWindowImpl->mnExtendedStyle == nExtendedStyle)
@@ -58,17 +71,7 @@ void Window::SetExtendedStyle(WindowExtendedStyle nExtendedStyle)
         pWindow = this;
 
     if (pWindow->mpWindowImpl->mbFrame)
-    {
-        SalExtStyle nExt = 0;
-
-        if (nExtendedStyle & WindowExtendedStyle::Document)
-            nExt |= SAL_FRAME_EXT_STYLE_DOCUMENT;
-
-        if (nExtendedStyle & WindowExtendedStyle::DocModified)
-            nExt |= SAL_FRAME_EXT_STYLE_DOCMODIFIED;
-
-        pWindow->ImplGetFrame()->SetExtendedFrameStyle(nExt);
-    }
+        pWindow->ImplGetFrame()->SetExtendedFrameStyle(lcl_GetExtendedStyle(nExtendedStyle));
 
     mpWindowImpl->mnExtendedStyle = nExtendedStyle;
 }
