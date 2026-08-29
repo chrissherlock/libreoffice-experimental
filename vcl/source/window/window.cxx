@@ -167,129 +167,6 @@ KeyIndicatorState Window::GetIndicatorState() const
     return mpWindowImpl->mpFrame->GetIndicatorState();
 }
 
-void Window::SetStyle( WinBits nStyle )
-{
-    if ( mpWindowImpl && mpWindowImpl->mnStyle != nStyle )
-    {
-        mpWindowImpl->mnPrevStyle = mpWindowImpl->mnStyle;
-        mpWindowImpl->mnStyle = nStyle;
-        CompatStateChanged( StateChangedType::Style );
-    }
-}
-
-void Window::SetExtendedStyle( WindowExtendedStyle nExtendedStyle )
-{
-
-    if ( mpWindowImpl->mnExtendedStyle == nExtendedStyle )
-        return;
-
-    vcl::Window* pWindow = ImplGetBorderWindow();
-    if( ! pWindow )
-        pWindow = this;
-    if( pWindow->mpWindowImpl->mbFrame )
-    {
-        SalExtStyle nExt = 0;
-        if( nExtendedStyle & WindowExtendedStyle::Document )
-            nExt |= SAL_FRAME_EXT_STYLE_DOCUMENT;
-        if( nExtendedStyle & WindowExtendedStyle::DocModified )
-            nExt |= SAL_FRAME_EXT_STYLE_DOCMODIFIED;
-
-        pWindow->ImplGetFrame()->SetExtendedFrameStyle( nExt );
-    }
-    mpWindowImpl->mnExtendedStyle = nExtendedStyle;
-}
-
-void Window::SetBorderStyle( WindowBorderStyle nBorderStyle )
-{
-
-    if ( !mpWindowImpl->mpBorderWindow )
-        return;
-
-    if( nBorderStyle == WindowBorderStyle::REMOVEBORDER &&
-        ! mpWindowImpl->mpBorderWindow->mpWindowImpl->mbFrame &&
-        mpWindowImpl->mpBorderWindow->mpWindowImpl->mpHierarchy->mpParent
-        )
-    {
-        // this is a little awkward: some controls (e.g. svtools ProgressBar)
-        // cannot avoid getting constructed with WB_BORDER but want to disable
-        // borders in case of NWF drawing. So they need a method to remove their border window
-        VclPtr<vcl::Window> pBorderWin = mpWindowImpl->mpBorderWindow;
-        // remove us as border window's client
-        pBorderWin->mpWindowImpl->mpClientWindow = nullptr;
-        mpWindowImpl->mpBorderWindow = nullptr;
-        mpWindowImpl->mpHierarchy->mpRealParent = pBorderWin->mpWindowImpl->mpHierarchy->mpParent;
-        // reparent us above the border window
-        SetParent( pBorderWin->mpWindowImpl->mpHierarchy->mpParent );
-        // set us to the position and size of our previous border
-        Point aBorderPos( pBorderWin->GetPosPixel() );
-        Size aBorderSize( pBorderWin->GetSizePixel() );
-        setPosSizePixel( aBorderPos.X(), aBorderPos.Y(), aBorderSize.Width(), aBorderSize.Height() );
-        // release border window
-        pBorderWin.disposeAndClear();
-
-        // set new style bits
-        SetStyle( GetStyle() & (~WB_BORDER) );
-    }
-    else
-    {
-        if ( mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW )
-            static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetBorderStyle( nBorderStyle );
-        else
-            mpWindowImpl->mpBorderWindow->SetBorderStyle( nBorderStyle );
-    }
-}
-
-WindowBorderStyle Window::GetBorderStyle() const
-{
-
-    if ( mpWindowImpl->mpBorderWindow )
-    {
-        if ( mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW )
-            return static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->GetBorderStyle();
-        else
-            return mpWindowImpl->mpBorderWindow->GetBorderStyle();
-    }
-
-    return WindowBorderStyle::NONE;
-}
-
-void Window::SetPointFont(vcl::RenderContext& rRenderContext, const vcl::Font& rFont,
-                          bool bUseRenderContextDPI)
-{
-    vcl::Font aFont = rFont;
-    ImplPointToLogic(rRenderContext, aFont, bUseRenderContextDPI);
-    rRenderContext.SetFont(aFont);
-}
-
-vcl::Font Window::GetPointFont(vcl::RenderContext const & rRenderContext) const
-{
-    vcl::Font aFont = rRenderContext.GetFont();
-    ImplLogicToPoint(rRenderContext, aFont);
-    return aFont;
-}
-
-void Window::GetBorder( sal_Int32& rLeftBorder, sal_Int32& rTopBorder,
-                               sal_Int32& rRightBorder, sal_Int32& rBottomBorder ) const
-{
-    rLeftBorder     = mpWindowImpl->mnLeftBorder;
-    rTopBorder      = mpWindowImpl->mnTopBorder;
-    rRightBorder    = mpWindowImpl->mnRightBorder;
-    rBottomBorder   = mpWindowImpl->mnBottomBorder;
-}
-
-void Window::SetCursor( vcl::Cursor* pCursor )
-{
-
-    if ( mpWindowImpl->mpCursor != pCursor )
-    {
-        if ( mpWindowImpl->mpCursor )
-            mpWindowImpl->mpCursor->ImplHide();
-        mpWindowImpl->mpCursor = pCursor;
-        if ( pCursor )
-            pCursor->ImplShow();
-    }
-}
-
 void Window::SetText( const OUString& rStr )
 {
     if (!mpWindowImpl || rStr == mpWindowImpl->maText)
@@ -329,29 +206,6 @@ OUString Window::GetDisplayText() const
 {
 
     return GetText();
-}
-
-const Wallpaper& Window::GetDisplayBackground() const
-{
-    // FIXME: fix issue 52349, need to fix this really in
-    // all NWF enabled controls
-    const ToolBox* pTB = dynamic_cast<const ToolBox*>(this);
-    if( pTB && IsNativeWidgetEnabled() )
-        return pTB->ImplGetToolBoxPrivateData()->maDisplayBackground;
-
-    if( !IsBackground() )
-    {
-        if( mpWindowImpl->mpHierarchy->mpParent )
-            return mpWindowImpl->mpHierarchy->mpParent->GetDisplayBackground();
-    }
-
-    const Wallpaper& rBack = GetBackground();
-    if( ! rBack.IsBitmap() &&
-        ! rBack.IsGradient() &&
-        rBack.GetColor()== COL_TRANSPARENT &&
-        mpWindowImpl->mpHierarchy->mpParent )
-            return mpWindowImpl->mpHierarchy->mpParent->GetDisplayBackground();
-    return rBack;
 }
 
 const OUString& Window::GetHelpText() const
@@ -570,44 +424,6 @@ bool Window::HasActiveChildFrame() const
         pFrameWin = pFrameWin->mpWindowImpl->mpFrameData->mpNextFrame;
     }
     return bRet;
-}
-
-void Window::EnableNativeWidget( bool bEnable )
-{
-    static const char* pNoNWF = getenv( "SAL_NO_NWF" );
-    if( pNoNWF && *pNoNWF )
-        bEnable = false;
-
-    if( bEnable != ImplGetWinData()->mbEnableNativeWidget )
-    {
-        ImplGetWinData()->mbEnableNativeWidget = bEnable;
-
-        // send datachanged event to allow for internal changes required for NWF
-        // like clipmode, transparency, etc.
-        DataChangedEvent aDCEvt( DataChangedEventType::SETTINGS, &*GetOutDev()->moSettings, AllSettingsFlags::STYLE );
-        CompatDataChanged( aDCEvt );
-
-        // sometimes the borderwindow is queried, so keep it in sync
-        if( mpWindowImpl->mpBorderWindow )
-            mpWindowImpl->mpBorderWindow->ImplGetWinData()->mbEnableNativeWidget = bEnable;
-    }
-
-    // push down, useful for compound controls
-    VclPtr< vcl::Window > pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
-    while( pChild )
-    {
-        pChild->EnableNativeWidget( bEnable );
-        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
-    }
-}
-
-bool Window::IsNativeWidgetEnabled() const
-{
-    return mpWindowImpl && ImplGetWinData()->mbEnableNativeWidget;
-}
-
-void Window::ApplySettings(vcl::RenderContext& /*rRenderContext*/)
-{
 }
 
 const SystemEnvData* Window::GetSystemData() const
