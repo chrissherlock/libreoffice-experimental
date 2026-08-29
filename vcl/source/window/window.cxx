@@ -91,11 +91,6 @@ void Window::ImplLogicToPoint(vcl::RenderContext const & rRenderContext, vcl::Fo
     rFont.SetFontSize(aSize.get());
 }
 
-void Window::SetModalHierarchyHdl(const Link<bool, void>& rLink)
-{
-    ImplGetFrame()->SetModalHierarchyHdl(rLink);
-}
-
 KeyIndicatorState Window::GetIndicatorState() const
 {
     return mpWindowImpl->mpFrame->GetIndicatorState();
@@ -227,37 +222,6 @@ bool Window::IsScrollable() const
 void Window::ImplMirrorFramePos( Point &pt ) const
 {
     pt.setX(mpWindowImpl->mpFrame->GetWidth() - 1 - pt.X());
-}
-
-// frame based modal counter (dialogs are not modal to the whole application anymore)
-bool Window::IsInModalMode() const
-{
-    return (mpWindowImpl->mpFrameWindow->mpWindowImpl->mpFrameData->mnModalMode != 0);
-}
-
-void Window::ImplUpdateModalCount(int nDelta)
-{
-    vcl::Window* pFrameWindow = mpWindowImpl->mpFrameWindow;
-    vcl::Window* pParent = pFrameWindow;
-    while( pFrameWindow )
-    {
-        pFrameWindow->mpWindowImpl->mpFrameData->mnModalMode += nDelta;
-        while( pParent && pParent->mpWindowImpl->mpFrameWindow == pFrameWindow )
-        {
-            pParent = pParent->GetParent();
-        }
-        pFrameWindow = pParent ? pParent->mpWindowImpl->mpFrameWindow.get() : nullptr;
-    }
-}
-
-void Window::IncModalCount()
-{
-    ImplUpdateModalCount(1);
-}
-
-void Window::DecModalCount()
-{
-    ImplUpdateModalCount(-1);
 }
 
 void Window::ImplIsInTaskPaneList( bool mbIsInTaskList )
