@@ -1683,6 +1683,10 @@ private:
     SAL_DLLPRIVATE void ImplEnableInputBorderAndMenuBar(bool bEnable);
     SAL_DLLPRIVATE void ImplUpdateEnableState(bool bEnable);
     SAL_DLLPRIVATE void ImplUpdateInputEnableState(bool bEnable);
+
+    SAL_DLLPRIVATE void ImplEnableChildWindows(bool bEnable);
+    SAL_DLLPRIVATE void ImplEnableInputChildWindows(bool bEnable);
+    SAL_DLLPRIVATE void ImplAlwaysEnableInputChildWindows(bool bAlways);
 };
 }
 

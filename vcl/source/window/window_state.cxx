@@ -122,6 +122,36 @@ void Window::ImplUpdateInputEnableState(bool bEnable)
         mpWindowImpl->mpSysObj->Enable(!mpWindowImpl->mbDisabled && bEnable);
 }
 
+void Window::ImplEnableChildWindows(bool bEnable)
+{
+    VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
+    while (pChild)
+    {
+        pChild->Enable(bEnable, true);
+        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+    }
+}
+
+void Window::ImplEnableInputChildWindows(bool bEnable)
+{
+    VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
+    while (pChild)
+    {
+        pChild->EnableInput(bEnable, true);
+        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+    }
+}
+
+void Window::ImplAlwaysEnableInputChildWindows(bool bAlways)
+{
+    VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
+    while (pChild)
+    {
+        pChild->AlwaysEnableInput(bAlways, true);
+        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+    }
+}
+
 void Window::Enable(bool bEnable, bool bChild)
 {
     if (isDisposed())
@@ -138,14 +168,7 @@ void Window::Enable(bool bEnable, bool bChild)
     ImplUpdateEnableState(bEnable);
 
     if (bChild)
-    {
-        VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
-        while (pChild)
-        {
-            pChild->Enable(bEnable, bChild);
-            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
-        }
-    }
+        ImplEnableChildWindows(bEnable);
 
     if (IsReallyVisible())
         ImplGenerateMouseMove();
@@ -177,14 +200,7 @@ void Window::EnableInput(bool bEnable, bool bChild)
         ImplRestoreAppFocusWin();
 
     if (bChild)
-    {
-        VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
-        while (pChild)
-        {
-            pChild->EnableInput(bEnable, bChild);
-            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
-        }
-    }
+        ImplEnableInputChildWindows(bEnable);
 
     if (IsReallyVisible())
         ImplGenerateMouseMove();
@@ -267,14 +283,7 @@ void Window::AlwaysEnableInput(bool bAlways, bool bChild)
     }
 
     if (bChild)
-    {
-        VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
-        while (pChild)
-        {
-            pChild->AlwaysEnableInput(bAlways, bChild);
-            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
-        }
-    }
+        ImplAlwaysEnableInputChildWindows(bAlways);
 }
 
 void Window::SetActivateMode(ActivateModeFlags nMode)
