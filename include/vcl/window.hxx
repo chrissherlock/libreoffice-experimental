@@ -1691,6 +1691,9 @@ private:
     SAL_DLLPRIVATE void ImplAlwaysEnableInputChildWindows(bool bAlways);
 
     SAL_DLLPRIVATE void ImplSetInputState(bool bEnable);
+    SAL_DLLPRIVATE void ImplEnableOverlapWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow);
+    SAL_DLLPRIVATE void ImplEnableFloatingWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow);
+    SAL_DLLPRIVATE void ImplEnableOwnerDrawWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow);
 };
 }
 
