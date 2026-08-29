@@ -44,37 +44,44 @@ static bool lcl_IsFloatingWindowDecorated(const vcl::Window* pChildFrame)
     // TODO: avoid duplicate WinBits !!!
 
     if (pChildFrame && pChildFrame->ImplIsFloatingWindow())
-    {
         return static_cast<const FloatingWindow*>(pChildFrame)->GetTitleType()
                != FloatWinTitleType::NONE;
-    }
+
     return false;
+}
+
+bool Window::ImplHasActiveChildFrame(const vcl::Window* pFrameWin) const
+{
+    if (pFrameWin == mpWindowImpl->mpFrameWindow)
+        return false;
+
+    VclPtr<vcl::Window> pChildFrame = pFrameWin->ImplGetWindow();
+    if (!pChildFrame)
+        return false;
+
+    const bool bIsDecorated = lcl_IsFloatingWindowDecorated(pChildFrame)
+                              || (pFrameWin->mpWindowImpl->mnStyle & (WB_MOVEABLE | WB_SIZEABLE));
+    if (!bIsDecorated)
+        return false;
+
+    if (!pChildFrame->IsVisible() || !pChildFrame->IsActive())
+        return false;
+
+    return ImplIsChild(pChildFrame, true);
 }
 
 bool Window::HasActiveChildFrame() const
 {
-    bool bRet = false;
     vcl::Window* pFrameWin = ImplGetSVData()->maFrameData.mpFirstFrame;
-
     while (pFrameWin)
     {
-        if (pFrameWin != mpWindowImpl->mpFrameWindow)
-        {
-            if (VclPtr<vcl::Window> pChildFrame = pFrameWin->ImplGetWindow();
-                (lcl_IsFloatingWindowDecorated(pChildFrame)
-                 || (pFrameWin->mpWindowImpl->mnStyle & (WB_MOVEABLE | WB_SIZEABLE)))
-                && pChildFrame && pChildFrame->IsVisible() && pChildFrame->IsActive()
-                && ImplIsChild(pChildFrame, true))
-            {
-                bRet = true;
-                break;
-            }
-        }
+        if (pFrameWin != mpWindowImpl->mpFrameWindow && ImplHasActiveChildFrame(pFrameWin))
+            return true;
 
         pFrameWin = pFrameWin->mpWindowImpl->mpFrameData->mpNextFrame;
     }
 
-    return bRet;
+    return false;
 }
 
 bool Window::ImplShouldInherit3DLook(const vcl::Window* pParent) const
