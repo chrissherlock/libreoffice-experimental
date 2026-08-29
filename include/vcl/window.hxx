@@ -1695,6 +1695,9 @@ private:
     SAL_DLLPRIVATE void ImplEnableOwnerDrawWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow);
 
     SAL_DLLPRIVATE void ImplUpdateModalCount(int nDelta);
+
+    SAL_DLLPRIVATE bool ImplShouldHaveBorder(WindowBorderStyle nBorderStyle);
+    SAL_DLLPRIVATE void ImplSetBorderWindowStyle(WindowBorderStyle nBorderStyle);
 };
 }
 
