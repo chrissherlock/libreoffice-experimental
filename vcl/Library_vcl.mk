@@ -241,6 +241,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/WindowOutputDevice \
     vcl/source/window/WindowImpl \
     vcl/source/window/window_core \
+    vcl/source/window/window_help \
     vcl/source/window/window_text \
     vcl/source/window/window_state \
     vcl/source/window/window_frame \
