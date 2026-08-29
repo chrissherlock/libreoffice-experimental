@@ -32,12 +32,13 @@ namespace vcl
 {
 void Window::SetStyle(WinBits nStyle)
 {
-    if (mpWindowImpl && mpWindowImpl->mnStyle != nStyle)
-    {
-        mpWindowImpl->mnPrevStyle = mpWindowImpl->mnStyle;
-        mpWindowImpl->mnStyle = nStyle;
-        CompatStateChanged(StateChangedType::Style);
-    }
+    if (!mpWindowImpl || mpWindowImpl->mnStyle == nStyle)
+        return;
+
+    mpWindowImpl->mnPrevStyle = mpWindowImpl->mnStyle;
+    mpWindowImpl->mnStyle = nStyle;
+
+    CompatStateChanged(StateChangedType::Style);
 }
 
 void Window::SetExtendedStyle(WindowExtendedStyle nExtendedStyle)
@@ -46,18 +47,23 @@ void Window::SetExtendedStyle(WindowExtendedStyle nExtendedStyle)
         return;
 
     vcl::Window* pWindow = ImplGetBorderWindow();
+
     if (!pWindow)
         pWindow = this;
+
     if (pWindow->mpWindowImpl->mbFrame)
     {
         SalExtStyle nExt = 0;
+
         if (nExtendedStyle & WindowExtendedStyle::Document)
             nExt |= SAL_FRAME_EXT_STYLE_DOCUMENT;
+
         if (nExtendedStyle & WindowExtendedStyle::DocModified)
             nExt |= SAL_FRAME_EXT_STYLE_DOCMODIFIED;
 
         pWindow->ImplGetFrame()->SetExtendedFrameStyle(nExt);
     }
+
     mpWindowImpl->mnExtendedStyle = nExtendedStyle;
 }
 
@@ -74,16 +80,20 @@ void Window::SetBorderStyle(WindowBorderStyle nBorderStyle)
         // cannot avoid getting constructed with WB_BORDER but want to disable
         // borders in case of NWF drawing. So they need a method to remove their border window
         VclPtr<vcl::Window> pBorderWin = mpWindowImpl->mpBorderWindow;
+
         // remove us as border window's client
         pBorderWin->mpWindowImpl->mpClientWindow = nullptr;
         mpWindowImpl->mpBorderWindow = nullptr;
         mpWindowImpl->mpHierarchy->mpRealParent = pBorderWin->mpWindowImpl->mpHierarchy->mpParent;
+
         // reparent us above the border window
         SetParent(pBorderWin->mpWindowImpl->mpHierarchy->mpParent);
+
         // set us to the position and size of our previous border
         Point aBorderPos(pBorderWin->GetPosPixel());
         Size aBorderSize(pBorderWin->GetSizePixel());
         setPosSizePixel(aBorderPos.X(), aBorderPos.Y(), aBorderSize.Width(), aBorderSize.Height());
+
         // release border window
         pBorderWin.disposeAndClear();
 
@@ -102,16 +112,13 @@ void Window::SetBorderStyle(WindowBorderStyle nBorderStyle)
 
 WindowBorderStyle Window::GetBorderStyle() const
 {
-    if (mpWindowImpl->mpBorderWindow)
-    {
-        if (mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
-            return static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())
-                ->GetBorderStyle();
-        else
-            return mpWindowImpl->mpBorderWindow->GetBorderStyle();
-    }
+    if (!mpWindowImpl->mpBorderWindow)
+        return WindowBorderStyle::NONE;
 
-    return WindowBorderStyle::NONE;
+    if (mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
+        return static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->GetBorderStyle();
+
+    return mpWindowImpl->mpBorderWindow->GetBorderStyle();
 }
 
 void Window::GetBorder(sal_Int32& rLeftBorder, sal_Int32& rTopBorder, sal_Int32& rRightBorder,
@@ -131,22 +138,22 @@ const Wallpaper& Window::GetDisplayBackground() const
     if (pTB && IsNativeWidgetEnabled())
         return pTB->ImplGetToolBoxPrivateData()->maDisplayBackground;
 
-    if (!IsBackground())
-    {
-        if (mpWindowImpl->mpHierarchy->mpParent)
-            return mpWindowImpl->mpHierarchy->mpParent->GetDisplayBackground();
-    }
+    if (!IsBackground() && mpWindowImpl->mpHierarchy->mpParent)
+        return mpWindowImpl->mpHierarchy->mpParent->GetDisplayBackground();
 
     const Wallpaper& rBack = GetBackground();
+
     if (!rBack.IsBitmap() && !rBack.IsGradient() && rBack.GetColor() == COL_TRANSPARENT
         && mpWindowImpl->mpHierarchy->mpParent)
         return mpWindowImpl->mpHierarchy->mpParent->GetDisplayBackground();
+
     return rBack;
 }
 
 void Window::EnableNativeWidget(bool bEnable)
 {
     static const char* pNoNWF = getenv("SAL_NO_NWF");
+
     if (pNoNWF && *pNoNWF)
         bEnable = false;
 
@@ -198,14 +205,16 @@ vcl::Font Window::GetPointFont(vcl::RenderContext const& rRenderContext) const
 
 void Window::SetCursor(vcl::Cursor* pCursor)
 {
-    if (mpWindowImpl->mpCursor != pCursor)
-    {
-        if (mpWindowImpl->mpCursor)
-            mpWindowImpl->mpCursor->ImplHide();
-        mpWindowImpl->mpCursor = pCursor;
-        if (pCursor)
-            pCursor->ImplShow();
-    }
+    if (mpWindowImpl->mpCursor == pCursor)
+        return;
+
+    if (mpWindowImpl->mpCursor)
+        mpWindowImpl->mpCursor->ImplHide();
+
+    mpWindowImpl->mpCursor = pCursor;
+
+    if (pCursor)
+        pCursor->ImplShow();
 }
 
 } // end vcl namespace
