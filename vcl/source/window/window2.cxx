@@ -55,44 +55,6 @@ using namespace com::sun::star;
 
 namespace vcl {
 
-void Window::SetZoom( double fZoom )
-{
-    if ( mpWindowImpl && mpWindowImpl->mfZoom != fZoom )
-    {
-        mpWindowImpl->mfZoom = fZoom;
-        CompatStateChanged( StateChangedType::Zoom );
-    }
-}
-
-void Window::SetZoomedPointFont(vcl::RenderContext& rRenderContext, const vcl::Font& rFont)
-{
-    double fZoom = GetZoom();
-    if (fZoom != 1.0)
-    {
-        vcl::Font aFont(rFont);
-        Size aSize = aFont.GetFontSize();
-        aSize.setWidth(basegfx::fround<tools::Long>(aSize.Width() * fZoom));
-        aSize.setHeight(basegfx::fround<tools::Long>(aSize.Height() * fZoom));
-        aFont.SetFontSize(aSize);
-        SetPointFont(rRenderContext, aFont);
-    }
-    else
-    {
-        SetPointFont(rRenderContext, rFont);
-    }
-}
-
-tools::Long Window::CalcZoom( tools::Long nCalc ) const
-{
-    double fZoom = GetZoom();
-    if ( fZoom != 1.0)
-    {
-        double n = nCalc * fZoom;
-        nCalc = basegfx::fround<tools::Long>(n);
-    }
-    return nCalc;
-}
-
 void Window::SetControlFont()
 {
     if (mpWindowImpl && mpWindowImpl->mpControlFont)
@@ -519,16 +481,6 @@ vcl::Cursor* Window::GetCursor() const
     if (!mpWindowImpl)
         return nullptr;
     return mpWindowImpl->mpCursor;
-}
-
-double Window::GetZoom() const
-{
-    return mpWindowImpl->mfZoom;
-}
-
-bool Window::IsZoom() const
-{
-    return mpWindowImpl->mfZoom != 1.0;
 }
 
 void Window::SetHelpText( const OUString& rHelpText )
