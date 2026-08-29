@@ -188,35 +188,49 @@ void Window::ShowFocus(const tools::Rectangle& rRect)
 
     // native themeing suggest not to use focus rects
     if (!(mpWindowImpl->mbUseNativeFocus && IsNativeWidgetEnabled()))
-    {
-        if (!mpWindowImpl->mbInPaint)
-        {
-            if (mpWindowImpl->mbFocusVisible)
-            {
-                if (*pWinData->mpFocusRect == rRect)
-                {
-                    mpWindowImpl->mbInShowFocus = false;
-                    return;
-                }
-
-                ImplInvertFocus(*pWinData->mpFocusRect);
-            }
-
-            ImplInvertFocus(rRect);
-        }
-        pWinData->mpFocusRect = rRect;
-        mpWindowImpl->mbFocusVisible = true;
-    }
+        ImplShowFocusRect(pWinData, rRect);
     else
-    {
-        if (!mpWindowImpl->mbNativeFocusVisible)
-        {
-            mpWindowImpl->mbNativeFocusVisible = true;
-            if (!mpWindowImpl->mbInPaint)
-                Invalidate();
-        }
-    }
+        ImplShowNativeFocus();
+
     mpWindowImpl->mbInShowFocus = false;
+}
+
+static bool lcl_IsSameFocusRect(const WindowImpl* pWindowImpl, const ImplWinData* pWinData,
+                                const tools::Rectangle& rRect)
+{
+    return !pWindowImpl->mbInPaint && pWindowImpl->mbFocusVisible
+           && *pWinData->mpFocusRect == rRect;
+}
+
+void Window::ImplShowFocusRect(ImplWinData* pWinData, const tools::Rectangle& rRect)
+{
+    if (lcl_IsSameFocusRect(mpWindowImpl.get(), pWinData, rRect))
+    {
+        mpWindowImpl->mbInShowFocus = false;
+        return;
+    }
+
+    if (!mpWindowImpl->mbInPaint)
+    {
+        if (mpWindowImpl->mbFocusVisible)
+            ImplInvertFocus(*pWinData->mpFocusRect);
+
+        ImplInvertFocus(rRect);
+    }
+
+    pWinData->mpFocusRect = rRect;
+    mpWindowImpl->mbFocusVisible = true;
+}
+
+void Window::ImplShowNativeFocus()
+{
+    if (mpWindowImpl->mbNativeFocusVisible)
+        return;
+
+    mpWindowImpl->mbNativeFocusVisible = true;
+
+    if (!mpWindowImpl->mbInPaint)
+        Invalidate();
 }
 
 void Window::HideFocus()
