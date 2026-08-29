@@ -502,13 +502,13 @@ bool Window::IsInModalMode() const
     return (mpWindowImpl->mpFrameWindow->mpWindowImpl->mpFrameData->mnModalMode != 0);
 }
 
-void Window::IncModalCount()
+void Window::ImplUpdateModalCount(int nDelta)
 {
     vcl::Window* pFrameWindow = mpWindowImpl->mpFrameWindow;
     vcl::Window* pParent = pFrameWindow;
     while( pFrameWindow )
     {
-        pFrameWindow->mpWindowImpl->mpFrameData->mnModalMode++;
+        pFrameWindow->mpWindowImpl->mpFrameData->mnModalMode += nDelta;
         while( pParent && pParent->mpWindowImpl->mpFrameWindow == pFrameWindow )
         {
             pParent = pParent->GetParent();
@@ -516,19 +516,15 @@ void Window::IncModalCount()
         pFrameWindow = pParent ? pParent->mpWindowImpl->mpFrameWindow.get() : nullptr;
     }
 }
+
+void Window::IncModalCount()
+{
+    ImplUpdateModalCount(1);
+}
+
 void Window::DecModalCount()
 {
-    vcl::Window* pFrameWindow = mpWindowImpl->mpFrameWindow;
-    vcl::Window* pParent = pFrameWindow;
-    while( pFrameWindow )
-    {
-        pFrameWindow->mpWindowImpl->mpFrameData->mnModalMode--;
-        while( pParent && pParent->mpWindowImpl->mpFrameWindow == pFrameWindow )
-        {
-            pParent = pParent->GetParent();
-        }
-        pFrameWindow = pParent ? pParent->mpWindowImpl->mpFrameWindow.get() : nullptr;
-    }
+    ImplUpdateModalCount(-1);
 }
 
 void Window::ImplIsInTaskPaneList( bool mbIsInTaskList )
