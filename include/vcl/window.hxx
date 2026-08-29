@@ -1657,6 +1657,7 @@ private:
     SAL_DLLPRIVATE void ImplUpdateFramePos(SalFrame* pParentFrame);
     SAL_DLLPRIVATE void ImplUpdateClientWindowPos();
     SAL_DLLPRIVATE bool ImplIsActivatable() const;
+    SAL_DLLPRIVATE bool ImplHasActiveChildFrame(const vcl::Window* pFrameWin) const;
 
     static SAL_DLLPRIVATE FocusAction ImplResolveFocusAction(vcl::Window* pOldRealWindow, vcl::Window* pOldOverlapWindow,
                                                              vcl::Window* pNewRealWindow, vcl::Window* pNewOverlapWindow);
