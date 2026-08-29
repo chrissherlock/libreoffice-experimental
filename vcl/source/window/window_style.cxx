@@ -421,6 +421,14 @@ void Window::ApplyControlBackground(vcl::RenderContext& rRenderContext, const Co
     rRenderContext.SetBackground(aColor);
 }
 
+WinBits Window::GetStyle() const { return mpWindowImpl ? mpWindowImpl->mnStyle : 0; }
+
+WinBits Window::GetPrevStyle() const { return mpWindowImpl ? mpWindowImpl->mnPrevStyle : 0; }
+
+WindowExtendedStyle Window::GetExtendedStyle() const
+{
+    return mpWindowImpl ? mpWindowImpl->mnExtendedStyle : WindowExtendedStyle::NONE;
+}
 } // end vcl namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
