@@ -471,27 +471,32 @@ void Window::EndTracking(TrackingEventFlags nFlags)
     ReleaseMouse();
 
     // call EndTracking if required
-    if (mpWindowImpl->mpFrameData)
-    {
-        Point aMousePos(mpWindowImpl->mpFrameData->mnLastMouseX,
-                        mpWindowImpl->mpFrameData->mnLastMouseY);
-        if (GetOutDev()->ImplIsAntiparallel())
-        {
-            // re-mirror frame pos at pChild
-            const OutputDevice* pOutDev = GetOutDev();
-            pOutDev->ReMirror(aMousePos);
-        }
+    if (!mpWindowImpl->mpFrameData)
+        return;
 
-        MouseEvent aMEvt(ScreenToOutputPixel(aMousePos), mpWindowImpl->mpFrameData->mnClickCount,
-                         MouseEventModifiers::NONE, mpWindowImpl->mpFrameData->mnMouseCode,
-                         mpWindowImpl->mpFrameData->mnMouseCode);
-        TrackingEvent aTEvt(aMEvt, nFlags | TrackingEventFlags::End);
-        // CompatTracking effectively
-        if (!mpWindowImpl || mpWindowImpl->mbInDispose)
-            return Window::Tracking(aTEvt);
-        else
-            return Tracking(aTEvt);
+    Point aMousePos(mpWindowImpl->mpFrameData->mnLastMouseX,
+                    mpWindowImpl->mpFrameData->mnLastMouseY);
+    if (GetOutDev()->ImplIsAntiparallel())
+    {
+        // re-mirror frame pos at pChild
+        const OutputDevice* pOutDev = GetOutDev();
+        pOutDev->ReMirror(aMousePos);
     }
+
+    MouseEvent aMEvt(ScreenToOutputPixel(aMousePos), mpWindowImpl->mpFrameData->mnClickCount,
+                     MouseEventModifiers::NONE, mpWindowImpl->mpFrameData->mnMouseCode,
+                     mpWindowImpl->mpFrameData->mnMouseCode);
+
+    TrackingEvent aTEvt(aMEvt, nFlags | TrackingEventFlags::End);
+
+    // CompatTracking effectively
+    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
+    {
+        Window::Tracking(aTEvt);
+        return;
+    }
+
+    Tracking(aTEvt);
 }
 
 bool Window::IsTracking() const
