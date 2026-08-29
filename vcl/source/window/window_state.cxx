@@ -96,6 +96,32 @@ void Window::ImplEnableInputBorderAndMenuBar(bool bEnable)
     }
 }
 
+void Window::ImplUpdateEnableState(bool bEnable)
+{
+    if (mpWindowImpl->mbDisabled == !bEnable)
+        return;
+
+    mpWindowImpl->mbDisabled = !bEnable;
+
+    if (mpWindowImpl->mpSysObj)
+        mpWindowImpl->mpSysObj->Enable(bEnable && !mpWindowImpl->mbInputDisabled);
+
+    CompatStateChanged(StateChangedType::Enable);
+
+    CallEventListeners(bEnable ? VclEventId::WindowEnabled : VclEventId::WindowDisabled);
+}
+
+void Window::ImplUpdateInputEnableState(bool bEnable)
+{
+    if (mpWindowImpl->mbInputDisabled == !bEnable)
+        return;
+
+    mpWindowImpl->mbInputDisabled = !bEnable;
+
+    if (mpWindowImpl->mpSysObj)
+        mpWindowImpl->mpSysObj->Enable(!mpWindowImpl->mbDisabled && bEnable);
+}
+
 void Window::Enable(bool bEnable, bool bChild)
 {
     if (isDisposed())
@@ -109,15 +135,7 @@ void Window::Enable(bool bEnable, bool bChild)
     if (bEnable)
         ImplRestoreAppFocusWin();
 
-    if (mpWindowImpl->mbDisabled != !bEnable)
-    {
-        mpWindowImpl->mbDisabled = !bEnable;
-        if (mpWindowImpl->mpSysObj)
-            mpWindowImpl->mpSysObj->Enable(bEnable && !mpWindowImpl->mbInputDisabled);
-        CompatStateChanged(StateChangedType::Enable);
-
-        CallEventListeners(bEnable ? VclEventId::WindowEnabled : VclEventId::WindowDisabled);
-    }
+    ImplUpdateEnableState(bEnable);
 
     if (bChild)
     {
@@ -152,12 +170,7 @@ void Window::EnableInput(bool bEnable, bool bChild)
                 ReleaseMouse();
         }
 
-        if (mpWindowImpl->mbInputDisabled != !bEnable)
-        {
-            mpWindowImpl->mbInputDisabled = !bEnable;
-            if (mpWindowImpl->mpSysObj)
-                mpWindowImpl->mpSysObj->Enable(!mpWindowImpl->mbDisabled && bEnable);
-        }
+        ImplUpdateInputEnableState(bEnable);
     }
 
     if (bEnable)
