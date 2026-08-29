@@ -30,15 +30,21 @@
 
 namespace vcl
 {
+static bool lcl_ApplyStyleChange(WindowImpl* pImpl, WinBits nStyle)
+{
+    if (!pImpl || pImpl->mnStyle == nStyle)
+        return false;
+
+    pImpl->mnPrevStyle = pImpl->mnStyle;
+    pImpl->mnStyle = nStyle;
+
+    return true;
+}
+
 void Window::SetStyle(WinBits nStyle)
 {
-    if (!mpWindowImpl || mpWindowImpl->mnStyle == nStyle)
-        return;
-
-    mpWindowImpl->mnPrevStyle = mpWindowImpl->mnStyle;
-    mpWindowImpl->mnStyle = nStyle;
-
-    CompatStateChanged(StateChangedType::Style);
+    if (lcl_ApplyStyleChange(mpWindowImpl.get(), nStyle))
+        CompatStateChanged(StateChangedType::Style);
 }
 
 void Window::SetExtendedStyle(WindowExtendedStyle nExtendedStyle)
