@@ -48,11 +48,6 @@
 #include <salframe.hxx>
 #include <scrwnd.hxx>
 
-#include <com/sun/star/accessibility/AccessibleRelation.hpp>
-#include <com/sun/star/accessibility/AccessibleRole.hpp>
-
-using namespace com::sun::star;
-
 namespace vcl
 {
 
