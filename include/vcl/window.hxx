@@ -1699,6 +1699,7 @@ private:
 
     SAL_DLLPRIVATE bool ImplShouldHaveBorder(WindowBorderStyle nBorderStyle);
     SAL_DLLPRIVATE void ImplSetBorderWindowStyle(WindowBorderStyle nBorderStyle);
+    SAL_DLLPRIVATE bool ImplShouldFallbackToParentBackground(const Wallpaper& rBack) const;
 };
 }
 
