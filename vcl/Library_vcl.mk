@@ -241,6 +241,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/lokwindow \
     vcl/source/window/WindowOutputDevice \
     vcl/source/window/WindowImpl \
+    vcl/source/window/window \
     vcl/source/window/window_core \
     vcl/source/window/window_output \
     vcl/source/window/window_help \
@@ -258,8 +259,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/window_zoom \
     vcl/source/window/window_uno \
     vcl/source/window/window_docking \
-    vcl/source/window/window \
-    vcl/source/window/winproc \
+    vcl/source/window/window_proc \
     vcl/source/window/mouseevent \
     vcl/source/window/HandleGestureEventBase \
     vcl/source/window/HandleGestureEvent \
