@@ -20,6 +20,7 @@
 #pragma once
 
 #include <vcl/ctrl.hxx>
+#include <vcl/image.hxx>
 #include <vcl/toolbox.hxx>
 
 #include <optional>
