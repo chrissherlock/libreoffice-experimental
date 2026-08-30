@@ -446,13 +446,12 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
     VclPtr<vcl::Window> pChild = *oChild;
 
     // execute a few tests and catch the message or implement the status
-    if ( pChild )
+    if (pChild)
     {
-        if( pChild->GetOutDev()->ImplIsAntiparallel() )
+        if (const OutputDevice *pChildWinOutDev = pChild->GetOutDev();
+            pChildWinOutDev->ImplIsAntiparallel())
         {
-            // re-mirror frame pos at pChild
-            const OutputDevice *pChildWinOutDev = pChild->GetOutDev();
-            pChildWinOutDev->ReMirror( aMousePos );
+            pChildWinOutDev->ReMirror(aMousePos);
         }
 
         // no mouse messages to disabled windows
