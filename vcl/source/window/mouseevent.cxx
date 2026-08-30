@@ -140,6 +140,32 @@ static bool lcl_HandleFloatMouseLeftButton(FloatingWindow* pFloat, NotifyEventTy
     return false;
 }
 
+static bool lcl_ClosesOnAnyClick(FloatWinPopupFlags nPopupFlags)
+{
+    return bool(nPopupFlags & FloatWinPopupFlags::AllMouseButtonClose);
+}
+
+static bool lcl_ShouldIgnoreMouseUp(FloatWinPopupFlags nPopupFlags, NotifyEventType nSVEvent)
+{
+    return (nPopupFlags & FloatWinPopupFlags::NoMouseUpClose) &&
+           (nSVEvent == NotifyEventType::MOUSEBUTTONUP);
+}
+
+static bool lcl_EndPopupOnAnyClick(FloatingWindow* pLastLevelFloat, NotifyEventType nSVEvent)
+{
+    FloatWinPopupFlags nPopupFlags = pLastLevelFloat->GetPopupModeFlags();
+
+    if (lcl_ClosesOnAnyClick(nPopupFlags))
+    {
+        if (lcl_ShouldIgnoreMouseUp(nPopupFlags, nSVEvent))
+            return true;
+
+        pLastLevelFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel | FloatWinPopupEndFlags::CloseAll);
+    }
+
+    return true;
+}
+
 static bool lcl_HandleMouseFloatMode( vcl::Window* pChild, const Point& rMousePos,
                                       sal_uInt16 nCode, NotifyEventType nSVEvent,
                                       bool bMouseLeave )
@@ -161,20 +187,7 @@ static bool lcl_HandleMouseFloatMode( vcl::Window* pChild, const Point& rMousePo
         return false;
 
     FloatingWindow* pLastLevelFloat = pSVData->mpWinData->mpFirstFloat->ImplFindLastLevelFloat();
-    FloatWinPopupFlags nPopupFlags = pLastLevelFloat->GetPopupModeFlags();
-
-    if ( nPopupFlags & FloatWinPopupFlags::AllMouseButtonClose )
-    {
-        if ( (nPopupFlags & FloatWinPopupFlags::NoMouseUpClose) &&
-             (nSVEvent == NotifyEventType::MOUSEBUTTONUP) )
-        {
-            return true;
-        }
-
-        pLastLevelFloat->EndPopupMode( FloatWinPopupEndFlags::Cancel | FloatWinPopupEndFlags::CloseAll );
-    }
-
-    return true;
+    return lcl_EndPopupOnAnyClick(pLastLevelFloat, nSVEvent);
 }
 
 static void lcl_HandleMouseHelpRequest( vcl::Window* pChild, const Point& rMousePos )
