@@ -351,6 +351,19 @@ static sal_uInt16 lcl_UpdateFrameMouseState(ImplFrameData* pWinFrameData, Point 
     return nOldCode;
 }
 
+static bool lcl_TeardownKillableTooltip(const VclPtr<vcl::Window>& xWindow)
+{
+    if (!lcl_IsKillableTooltip())
+        return false;
+
+    ImplDestroyHelpWindow(true);
+
+    if (xWindow->isDisposed())
+        return true; // xWindow is dead now - avoid crash! (#122045#)
+
+    return false;
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nModifiers )
@@ -373,21 +386,10 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
     ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
     const sal_uInt16 nOldCode = lcl_UpdateFrameMouseState(pWinFrameData, aMousePos, nCode, nModifiers);
 
-    if ( bMouseLeave )
-    {
-        pWinFrameData->mbMouseIn = false;
-        if ( ImplGetSVHelpData().mpHelpWin && !ImplGetSVHelpData().mbKeyboardHelp )
-        {
-            ImplDestroyHelpWindow( true );
+    pWinFrameData->mbMouseIn = !bMouseLeave;
 
-            if ( xWindow->isDisposed() )
-                return true; // xWindow is dead now - avoid crash! (#122045#)
-        }
-    }
-    else
-    {
-        pWinFrameData->mbMouseIn = true;
-    }
+    if (bMouseLeave && lcl_TeardownKillableTooltip(xWindow))
+        return true;
 
     ImplSVData* pSVData = ImplGetSVData();
 
