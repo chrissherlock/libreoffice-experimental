@@ -298,9 +298,44 @@ static bool lcl_NeedsLOKRemirroring(const VclPtr<vcl::Window>& xWindow)
            !xWindow->GetOutDev()->ImplIsAntiparallel();
 }
 
+static bool lcl_EnforceMouseMoveBeforeClick(const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent,
+                                            Point aMousePos, sal_uInt64 nMsgTime,
+                                            sal_uInt16 nCode, MouseEventModifiers nModifiers)
+{
+    if (nSVEvent != NotifyEventType::MOUSEBUTTONDOWN && nSVEvent != NotifyEventType::MOUSEBUTTONUP)
+        return false;
+
+    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+
+    if ((nSVEvent == NotifyEventType::MOUSEBUTTONUP) && aHelpData.mbExtHelpMode)
+        Help::EndExtHelp();
+
+    if (aHelpData.mpHelpWin)
+    {
+        if (xWindow->ImplGetWindow() == aHelpData.mpHelpWin)
+        {
+            ImplDestroyHelpWindow(false);
+            return true; // xWindow is dead now - avoid crash!
+        }
+        else
+        {
+            ImplDestroyHelpWindow(true);
+        }
+    }
+
+    if (ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
+        pWinFrameData->mnLastMouseX != aMousePos.X() || pWinFrameData->mnLastMouseY != aMousePos.Y())
+    {
+        sal_uInt16 nMoveCode = nCode & ~(MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE);
+        ImplHandleMouseEvent(xWindow, NotifyEventType::MOUSEMOVE, false, aMousePos, nMsgTime, nMoveCode, nModifiers);
+    }
+
+    return false;
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
-                           sal_uInt16 nCode, MouseEventModifiers nMode )
+                           sal_uInt16 nCode, MouseEventModifiers nModifiers )
 {
     SAL_INFO( "vcl.debugevent",
               "mouse event "
@@ -308,40 +343,14 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                "(MouseLeave " << bMouseLeave << ") "
                "(X, Y " << aMousePos.X() << ", " << aMousePos.Y() << ") "
                "(Code " << nCode << ") "
-               "(Modifiers " << static_cast<sal_uInt16>(nMode) << ")");
+               "(Modifiers " << static_cast<sal_uInt16>(nModifiers) << ")");
 
     if (lcl_NeedsLOKRemirroring(xWindow))
         xWindow->GetOutDev()->ReMirror(aMousePos);
 
-    // we need a mousemove event, before we get a mousebuttondown or a
-    // mousebuttonup event
-    if ( (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN) || (nSVEvent == NotifyEventType::MOUSEBUTTONUP) )
-    {
-        ImplSVHelpData& aHelpData = ImplGetSVHelpData();
-
-        if ((nSVEvent == NotifyEventType::MOUSEBUTTONUP) && aHelpData.mbExtHelpMode)
-            Help::EndExtHelp();
-
-        if (aHelpData.mpHelpWin)
-        {
-            if (xWindow->ImplGetWindow() == aHelpData.mpHelpWin)
-            {
-                ImplDestroyHelpWindow( false );
-                return true; // xWindow is dead now - avoid crash!
-            }
-            else
-            {
-                ImplDestroyHelpWindow( true );
-            }
-        }
-
-        if (ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
-            pWinFrameData->mnLastMouseX != aMousePos.X() || pWinFrameData->mnLastMouseY != aMousePos.Y())
-        {
-            sal_uInt16 nMoveCode = nCode & ~(MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE);
-            ImplHandleMouseEvent(xWindow, NotifyEventType::MOUSEMOVE, false, aMousePos, nMsgTime, nMoveCode, nMode);
-        }
-    }
+    // we need a mousemove event, before we get a mousebuttondown or a mousebuttonup event
+    if (lcl_EnforceMouseMoveBeforeClick(xWindow, nSVEvent, aMousePos, nMsgTime, nCode, nModifiers))
+        return true;
 
     ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
     sal_uInt16 nOldCode = pWinFrameData->mnMouseCode;
@@ -353,7 +362,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
     pWinFrameData->mnLastMouseY = aMousePos.Y();
     pWinFrameData->mnMouseCode  = nCode;
     MouseEventModifiers const nTmpMask = MouseEventModifiers::SYNTHETIC | MouseEventModifiers::MODIFIERCHANGED;
-    pWinFrameData->mnMouseMode  = nMode & ~nTmpMask;
+    pWinFrameData->mnMouseMode  = nModifiers & ~nTmpMask;
 
     if ( bMouseLeave )
     {
@@ -434,7 +443,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             {
                 lcl_HandleMouseHelpRequest( pChild, aMousePos );
                 if( pWinFrameData->mpMouseMoveWin.get() != pChild )
-                    nMode |= MouseEventModifiers::ENTERWINDOW;
+                    nModifiers |= MouseEventModifiers::ENTERWINDOW;
             }
 
             // Call the hook also, if Window is disabled
@@ -573,7 +582,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             if ( pMouseMoveWin )
             {
                 Point       aLeaveMousePos = pMouseMoveWin->ScreenToOutputPixel( aMousePos );
-                MouseEvent  aMLeaveEvt( aLeaveMousePos, nClicks, nMode | MouseEventModifiers::LEAVEWINDOW, nCode, nCode );
+                MouseEvent  aMLeaveEvt( aLeaveMousePos, nClicks, nModifiers | MouseEventModifiers::LEAVEWINDOW, nCode, nCode );
                 NotifyEvent aNLeaveEvt( NotifyEventType::MOUSEMOVE, pMouseMoveWin, &aMLeaveEvt );
                 pWinFrameData->mbInMouseMove = true;
                 pMouseMoveWin->ImplGetWinData()->mbMouseOver = false;
@@ -595,7 +604,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                     return true;
             }
 
-            nMode |= MouseEventModifiers::ENTERWINDOW;
+            nModifiers |= MouseEventModifiers::ENTERWINDOW;
         }
 
         pWinFrameData->mpMouseMoveWin = pChild;
@@ -658,7 +667,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
 
     // create mouse event
     Point aChildPos = pChild->ScreenToOutputPixel( aMousePos );
-    MouseEvent aMEvt( aChildPos, nClicks, nMode, nCode, nCode );
+    MouseEvent aMEvt( aChildPos, nClicks, nModifiers, nCode, nCode );
 
 
     // tracking window gets the mouse events
