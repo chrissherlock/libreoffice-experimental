@@ -433,6 +433,54 @@ static bool lcl_IsClickDuringExtTextInput(NotifyEventType nSVEvent)
         && (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN || nSVEvent == NotifyEventType::MOUSEBUTTONUP);
 }
 
+static bool lcl_IsStartDragButton(sal_uInt16 nCode)
+{
+    constexpr sal_uInt16 nButtonMask = MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE;
+    return (nCode & nButtonMask) == (MouseSettings::GetStartDragCode() & nButtonMask);
+}
+
+static bool lcl_ExceedsDragTolerance(long nMouseX, long nMouseY,
+                                     long nDragW, long nDragH,
+                                     const ImplFrameData* pFrameData)
+{
+    return std::abs(nMouseX - pFrameData->mnFirstMouseX) > nDragW ||
+           std::abs(nMouseY - pFrameData->mnFirstMouseY) > nDragH;
+}
+
+static bool lcl_IsRedundantMouseMove(bool bMouseLeave,
+                                     const VclPtr<vcl::Window>& pChild,
+                                     const ImplFrameData* pWinFrameData,
+                                     const Point& aChildMousePos,
+                                     sal_uInt16 nOldCode)
+{
+    return !bMouseLeave &&
+           (pChild == pWinFrameData->mpMouseMoveWin) &&
+           (aChildMousePos.X() == pWinFrameData->mnLastMouseWinX) &&
+           (aChildMousePos.Y() == pWinFrameData->mnLastMouseWinY) &&
+           (nOldCode == pWinFrameData->mnMouseCode);
+}
+
+static bool lcl_IsWithinDoubleClickTolerance(long nMouseX, long nMouseY,
+                                             long nDblClkW, long nDblClkH,
+                                             const ImplFrameData* pFrameData)
+{
+    return std::abs(nMouseX - pFrameData->mnFirstMouseX) <= nDblClkW &&
+           std::abs(nMouseY - pFrameData->mnFirstMouseY) <= nDblClkH;
+}
+
+static bool lcl_IsSameTargetAsFirstClick(const VclPtr<vcl::Window>& pChild, sal_uInt16 nCode)
+{
+    const ImplFrameData* pFrameData = pChild->ImplGetFrameData();
+    return (pChild == pFrameData->mpMouseDownWin) &&
+           (nCode == pFrameData->mnFirstMouseCode);
+}
+
+static bool lcl_IsWithinDoubleClickTime(sal_uInt64 nMsgTime, sal_uInt64 nDblClkTime,
+                                        const ImplFrameData* pFrameData)
+{
+    return (nMsgTime - pFrameData->mnMouseDownTime) < nDblClkTime;
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nModifiers )
@@ -506,11 +554,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         if ( pChild )
         {
             Point aChildMousePos = pChild->ScreenToOutputPixel( aMousePos );
-            if ( !bMouseLeave &&
-                 (pChild == pWinFrameData->mpMouseMoveWin) &&
-                 (aChildMousePos.X() == pWinFrameData->mnLastMouseWinX) &&
-                 (aChildMousePos.Y() == pWinFrameData->mnLastMouseWinY) &&
-                 (nOldCode == pWinFrameData->mnMouseCode) )
+            if (lcl_IsRedundantMouseMove(bMouseLeave, pChild, pWinFrameData, aChildMousePos, nOldCode))
             {
                 // set mouse pointer anew, as it could have changed
                 // due to the mode switch
@@ -535,8 +579,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             // the status of the mouse buttons, such that e. g. Mod1 can
             // change immediately to the copy mode
             const MouseSettings& rMSettings = pMouseDownWin->GetSettings().GetMouseSettings();
-            if ( (nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) ==
-                 (MouseSettings::GetStartDragCode() & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) )
+            if (lcl_IsStartDragButton(nCode))
             {
                 if ( !pMouseDownWin->ImplGetFrameData()->mbStartDragCalled )
                 {
@@ -544,10 +587,8 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                     tools::Long nDragH  = rMSettings.GetStartDragHeight();
                     tools::Long nMouseX = aMousePos.X(); // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
                     tools::Long nMouseY = aMousePos.Y();
-                    if ( (((nMouseX-nDragW) > pMouseDownWin->ImplGetFrameData()->mnFirstMouseX) ||
-                           ((nMouseX+nDragW) < pMouseDownWin->ImplGetFrameData()->mnFirstMouseX)) ||
-                         (((nMouseY-nDragH) > pMouseDownWin->ImplGetFrameData()->mnFirstMouseY) ||
-                           ((nMouseY+nDragH) < pMouseDownWin->ImplGetFrameData()->mnFirstMouseY)) )
+
+                    if (lcl_ExceedsDragTolerance(nMouseX, nMouseY, nDragW, nDragH, pMouseDownWin->ImplGetFrameData()))
                     {
                         pMouseDownWin->ImplGetFrameData()->mbStartDragCalled  = true;
 
@@ -657,13 +698,9 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                 tools::Long nMouseX = aMousePos.X();   // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
                 tools::Long nMouseY = aMousePos.Y();
 
-                if ( (pChild == pChild->ImplGetFrameData()->mpMouseDownWin) &&
-                     (nCode == pChild->ImplGetFrameData()->mnFirstMouseCode) &&
-                     ((nMsgTime-pChild->ImplGetFrameData()->mnMouseDownTime) < nDblClkTime) &&
-                     ((nMouseX-nDblClkW) <= pChild->ImplGetFrameData()->mnFirstMouseX) &&
-                     ((nMouseX+nDblClkW) >= pChild->ImplGetFrameData()->mnFirstMouseX) &&
-                     ((nMouseY-nDblClkH) <= pChild->ImplGetFrameData()->mnFirstMouseY) &&
-                     ((nMouseY+nDblClkH) >= pChild->ImplGetFrameData()->mnFirstMouseY) )
+                if (lcl_IsSameTargetAsFirstClick(pChild, nCode)
+                    && lcl_IsWithinDoubleClickTime(nMsgTime, nDblClkTime, pWinFrameData)
+                    && lcl_IsWithinDoubleClickTolerance(nMouseX, nMouseY, nDblClkW, nDblClkH, pWinFrameData))
                 {
                     pChild->ImplGetFrameData()->mnClickCount++;
                     pChild->ImplGetFrameData()->mbStartDragCalled  = true;
