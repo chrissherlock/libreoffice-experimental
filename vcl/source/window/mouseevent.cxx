@@ -69,6 +69,7 @@
 #include <com/sun/star/awt/MouseEvent.hpp>
 
 #include <algorithm>
+#include <memory>
 
 static bool lcl_IsFloatPopupModeWindow(const vcl::Window* pChild)
 {
@@ -281,15 +282,12 @@ struct ContextMenuEvent
 
 }
 
-static void lcl_ContextMenuEventLink( void* pCEvent, void* )
+static void lcl_ContextMenuEventLink(void* pCEvent, void*)
 {
-    ContextMenuEvent* pEv = static_cast<ContextMenuEvent*>(pCEvent);
+    std::unique_ptr<ContextMenuEvent> pEv(static_cast<ContextMenuEvent*>(pCEvent));
 
-    if( ! pEv->pWindow->isDisposed() )
-    {
-        ImplCallCommand( pEv->pWindow, CommandEventId::ContextMenu, nullptr, true, &pEv->aChildPos );
-    }
-    delete pEv;
+    if (!pEv->pWindow->isDisposed())
+        ImplCallCommand(pEv->pWindow, CommandEventId::ContextMenu, nullptr, true, &pEv->aChildPos);
 }
 
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
