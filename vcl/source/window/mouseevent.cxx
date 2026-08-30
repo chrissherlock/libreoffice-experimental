@@ -572,8 +572,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         // call Start-Drag handler if required
         // Warning: should be called before Move, as otherwise during
         // fast mouse movements the applications move to the selection state
-        vcl::Window* pMouseDownWin = pWinFrameData->mpMouseDownWin;
-        if ( pMouseDownWin )
+        if (vcl::Window* pMouseDownWin = pWinFrameData->mpMouseDownWin)
         {
             // check for matching StartDrag mode. We only compare
             // the status of the mouse buttons, such that e. g. Mod1 can
