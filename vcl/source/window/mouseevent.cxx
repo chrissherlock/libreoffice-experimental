@@ -407,6 +407,24 @@ static bool lcl_IsMouseInputBlocked(const VclPtr<vcl::Window>& pChild)
         && (!pChild->IsEnabled() || !pChild->IsInputEnabled() || pChild->IsInModalMode());
 }
 
+static bool lcl_TryConsumeBlockedEvent(const VclPtr<vcl::Window>& pChild, const Point& aMousePos,
+                                       sal_uInt16 nCode, NotifyEventType nSVEvent, bool bMouseLeave)
+{
+    lcl_DispatchFloatMouseEvent(pChild, aMousePos, nCode, nSVEvent, bMouseLeave);
+
+    if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
+        return true;
+
+    // Set normal MousePointer for disabled windows
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+    {
+        lcl_HandleMouseHelpRequest(pChild, aMousePos);
+        lcl_SetMousePointer(pChild);
+    }
+
+    return false;
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nModifiers )
@@ -462,24 +480,8 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             pChildWinOutDev->ReMirror(aMousePos);
         }
 
-        // no mouse messages to disabled windows
-        // #106845# if the window was disabled during capturing we have to pass the mouse events to release capturing
         if (lcl_IsMouseInputBlocked(pChild))
-        {
-            lcl_DispatchFloatMouseEvent(pChild, aMousePos, nCode, nSVEvent, bMouseLeave);
-
-            if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
-                return true;
-
-            // Set normal MousePointer for disabled windows
-            if (nSVEvent == NotifyEventType::MOUSEMOVE)
-            {
-                lcl_HandleMouseHelpRequest(pChild, aMousePos);
-                lcl_SetMousePointer(pChild);
-            }
-
-            return false;
-        }
+            return lcl_TryConsumeBlockedEvent(pChild, aMousePos, nCode, nSVEvent, bMouseLeave);
 
         // End ExtTextInput-Mode, if the user click in the same TopLevel Window
         if (pSVData->mpWinData->mpExtTextInputWin
