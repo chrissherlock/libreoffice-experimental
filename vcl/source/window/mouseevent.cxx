@@ -586,6 +586,28 @@ static void lcl_UpdateClickSequence(const VclPtr<vcl::Window>& pChild, const Poi
     pChild->ImplGetFrameData()->mnMouseDownTime = nMsgTime;
 }
 
+static bool lcl_CheckRedundantMouseMove(bool bMouseLeave, const VclPtr<vcl::Window>& pChild,
+                                       ImplFrameData* pWinFrameData, const Point& aMousePos,
+                                       sal_uInt16 nOldCode)
+{
+    if (!pChild)
+        return false;
+
+    Point aChildMousePos = pChild->ScreenToOutputPixel(aMousePos);
+    if (lcl_IsRedundantMouseMove(bMouseLeave, pChild, pWinFrameData, aChildMousePos, nOldCode))
+    {
+        // set mouse pointer anew, as it could have changed
+        // due to the mode switch
+        lcl_SetMousePointer(pChild);
+        return true;
+    }
+
+    pWinFrameData->mnLastMouseWinX = aChildMousePos.X();
+    pWinFrameData->mnLastMouseWinY = aChildMousePos.Y();
+
+    return false;
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nModifiers )
@@ -651,26 +673,13 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
 
     sal_uInt16 nClicks = 0;
 
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+        nClicks = pWinFrameData->mnClickCount;
+
     if ( nSVEvent == NotifyEventType::MOUSEMOVE )
     {
-        // check if MouseMove belongs to same window and if the
-        // status did not change
-        if ( pChild )
-        {
-            Point aChildMousePos = pChild->ScreenToOutputPixel( aMousePos );
-            if (lcl_IsRedundantMouseMove(bMouseLeave, pChild, pWinFrameData, aChildMousePos, nOldCode))
-            {
-                // set mouse pointer anew, as it could have changed
-                // due to the mode switch
-                lcl_SetMousePointer( pChild );
-                return false;
-            }
-
-            pWinFrameData->mnLastMouseWinX = aChildMousePos.X();
-            pWinFrameData->mnLastMouseWinY = aChildMousePos.Y();
-        }
-
-        nClicks = pWinFrameData->mnClickCount;
+        if (lcl_CheckRedundantMouseMove(bMouseLeave, pChild, pWinFrameData, aMousePos, nOldCode))
+            return false;
 
         // call Start-Drag handler if required
         // Warning: should be called before Move, as otherwise during
