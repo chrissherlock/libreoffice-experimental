@@ -339,20 +339,19 @@ static bool lcl_EnforceMouseMoveBeforeClick(const VclPtr<vcl::Window>& xWindow, 
     return false;
 }
 
-static sal_uInt16 lcl_UpdateFrameMouseState(ImplFrameData* pWinFrameData, Point aMousePos,
-                                            sal_uInt16 nCode, MouseEventModifiers nModifiers)
+static sal_uInt16 lcl_UpdateFrameMouseState(ImplFrameData* pWinFrameData, const MouseAction& rAction)
 {
     const sal_uInt16 nOldCode = pWinFrameData->mnMouseCode;
 
     // update frame data
     pWinFrameData->mnBeforeLastMouseX = pWinFrameData->mnLastMouseX;
     pWinFrameData->mnBeforeLastMouseY = pWinFrameData->mnLastMouseY;
-    pWinFrameData->mnLastMouseX = aMousePos.X();
-    pWinFrameData->mnLastMouseY = aMousePos.Y();
-    pWinFrameData->mnMouseCode  = nCode;
+    pWinFrameData->mnLastMouseX = rAction.aPos.X();
+    pWinFrameData->mnLastMouseY = rAction.aPos.Y();
+    pWinFrameData->mnMouseCode  = rAction.nCode;
 
     const MouseEventModifiers nTmpMask = MouseEventModifiers::SYNTHETIC | MouseEventModifiers::MODIFIERCHANGED;
-    pWinFrameData->mnMouseMode  = nModifiers & ~nTmpMask;
+    pWinFrameData->mnMouseMode  = rAction.nModifiers & ~nTmpMask;
 
     return nOldCode;
 }
@@ -877,7 +876,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         return true;
 
     ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
-    const sal_uInt16 nOldCode = lcl_UpdateFrameMouseState(pWinFrameData, aMousePos, nCode, nModifiers);
+    const sal_uInt16 nOldCode = lcl_UpdateFrameMouseState(pWinFrameData, { aMousePos, nCode, nModifiers });
 
     pWinFrameData->mbMouseIn = !bMouseLeave;
 
