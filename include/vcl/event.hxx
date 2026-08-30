@@ -104,6 +104,14 @@ namespace o3tl
 #define MOUSE_MIDDLE            (sal_uInt16(0x0002))
 #define MOUSE_RIGHT             (sal_uInt16(0x0004))
 
+struct MouseAction
+{
+    Point aPos;
+    sal_uInt64 nMsgTime;
+    sal_uInt16 nCode;
+    MouseEventModifiers nModifiers;
+};
+
 class VCL_DLLPUBLIC MouseEvent
 {
 private:

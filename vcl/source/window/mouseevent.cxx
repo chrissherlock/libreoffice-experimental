@@ -71,14 +71,6 @@
 #include <algorithm>
 #include <memory>
 
-struct MouseAction
-{
-    Point aPos;
-    sal_uInt64 nMsgTime;
-    sal_uInt16 nCode;
-    MouseEventModifiers nModifiers;
-};
-
 static bool lcl_IsFloatPopupModeWindow(const vcl::Window* pChild)
 {
     ImplSVData* pSVData = ImplGetSVData();
