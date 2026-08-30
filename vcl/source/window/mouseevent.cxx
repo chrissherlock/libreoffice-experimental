@@ -1112,7 +1112,7 @@ static void lcl_CheckLOKDragGesture(ImplFrameData* pFrameData, vcl::Window* pDow
 
 bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType nEvent, bool /*bMouseLeave*/,
                            tools::Long nX, tools::Long nY, sal_uInt64 /*nMsgTime*/,
-                           sal_uInt16 nCode, MouseEventModifiers nMode, sal_uInt16 nClicks)
+                           sal_uInt16 nCode, MouseEventModifiers nModifiers, sal_uInt16 nClicks)
 {
     Point aMousePos(nX, nY);
 
@@ -1152,7 +1152,7 @@ bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType
         lcl_CheckLOKDragGesture(pFrameData, pDownWin, nCode, nClicks, aMousePos, aWinPos);
     }
 
-    MouseEvent aMouseEvent(aWinPos, nClicks, nMode, nCode, nCode);
+    MouseEvent aMouseEvent(aWinPos, nClicks, nModifiers, nCode, nCode);
     if (nEvent == NotifyEventType::MOUSEMOVE)
     {
         if (pFrameData->mpTrackWin)
