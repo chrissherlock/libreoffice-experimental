@@ -291,25 +291,21 @@ static void lcl_ContextMenuEventLink(void* pCEvent, void*)
 }
 
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
-                           tools::Long nX, tools::Long nY, sal_uInt64 nMsgTime,
+                           Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nMode )
 {
     SAL_INFO( "vcl.debugevent",
               "mouse event "
                "(NotifyEventType " << static_cast<sal_uInt16>(nSVEvent) << ") "
                "(MouseLeave " << bMouseLeave << ") "
-               "(X, Y " << nX << ", " << nY << ") "
+               "(X, Y " << aMousePos.X() << ", " << aMousePos.Y() << ") "
                "(Code " << nCode << ") "
                "(Modifiers " << static_cast<sal_uInt16>(nMode) << ")");
-
-    Point aMousePos(nX, nY);
 
     if (comphelper::LibreOfficeKit::isActive() && AllSettings::GetLayoutRTL()
         && xWindow->GetOutDev() && !xWindow->GetOutDev()->ImplIsAntiparallel())
     {
         xWindow->GetOutDev()->ReMirror(aMousePos);
-        nX = aMousePos.X();
-        nY = aMousePos.Y();
     }
 
     ImplSVHelpData& aHelpData = ImplGetSVHelpData();
@@ -336,19 +332,19 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             }
         }
 
-        if ( (pWinFrameData->mnLastMouseX != nX) ||
-             (pWinFrameData->mnLastMouseY != nY) )
+        if ( (pWinFrameData->mnLastMouseX != aMousePos.X()) ||
+             (pWinFrameData->mnLastMouseY != aMousePos.Y()) )
         {
             sal_uInt16 nMoveCode = nCode & ~(MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE);
-            ImplHandleMouseEvent(xWindow, NotifyEventType::MOUSEMOVE, false, nX, nY, nMsgTime, nMoveCode, nMode);
+            ImplHandleMouseEvent(xWindow, NotifyEventType::MOUSEMOVE, false, aMousePos, nMsgTime, nMoveCode, nMode);
         }
     }
 
     // update frame data
     pWinFrameData->mnBeforeLastMouseX = pWinFrameData->mnLastMouseX;
     pWinFrameData->mnBeforeLastMouseY = pWinFrameData->mnLastMouseY;
-    pWinFrameData->mnLastMouseX = nX;
-    pWinFrameData->mnLastMouseY = nY;
+    pWinFrameData->mnLastMouseX = aMousePos.X();
+    pWinFrameData->mnLastMouseY = aMousePos.Y();
     pWinFrameData->mnMouseCode  = nCode;
     MouseEventModifiers const nTmpMask = MouseEventModifiers::SYNTHETIC | MouseEventModifiers::MODIFIERCHANGED;
     pWinFrameData->mnMouseMode  = nMode & ~nTmpMask;
@@ -504,8 +500,6 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                 {
                     tools::Long nDragW  = rMSettings.GetStartDragWidth();
                     tools::Long nDragH  = rMSettings.GetStartDragHeight();
-                    //long nMouseX = nX;
-                    //long nMouseY = nY;
                     tools::Long nMouseX = aMousePos.X(); // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
                     tools::Long nMouseY = aMousePos.Y();
                     if ( (((nMouseX-nDragW) > pMouseDownWin->ImplGetFrameData()->mnFirstMouseX) ||
@@ -618,8 +612,6 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                 sal_uInt64 nDblClkTime = rMSettings.GetDoubleClickTime();
                 tools::Long    nDblClkW    = rMSettings.GetDoubleClickWidth();
                 tools::Long    nDblClkH    = rMSettings.GetDoubleClickHeight();
-                //long    nMouseX     = nX;
-                //long    nMouseY     = nY;
                 tools::Long nMouseX = aMousePos.X();   // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
                 tools::Long nMouseY = aMousePos.Y();
 

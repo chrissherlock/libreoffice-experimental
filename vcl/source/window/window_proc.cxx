@@ -506,8 +506,8 @@ MouseEventModifiers ImplGetMouseButtonMode(SalMouseEvent const* pEvent)
 static bool lcl_HandleSalMouseMoveBase(vcl::Window* pWindow, SalMouseEvent const* pEvent,
                                        bool bLeave)
 {
-    return ImplHandleMouseEvent(pWindow, NotifyEventType::MOUSEMOVE, bLeave, pEvent->mnX,
-                                pEvent->mnY, pEvent->mnTime, pEvent->mnCode,
+    return ImplHandleMouseEvent(pWindow, NotifyEventType::MOUSEMOVE, bLeave,
+                                Point(pEvent->mnX, pEvent->mnY), pEvent->mnTime, pEvent->mnCode,
                                 ImplGetMouseMoveMode(pEvent));
 }
 
@@ -529,7 +529,7 @@ static sal_uInt16 lcl_GetMouseButtonCode(SalMouseEvent const* pEvent)
 static bool lcl_HandleSalMouseButtonBase(vcl::Window* pWindow, SalMouseEvent const* pEvent,
                                          NotifyEventType nEventType)
 {
-    return ImplHandleMouseEvent(pWindow, nEventType, false, pEvent->mnX, pEvent->mnY,
+    return ImplHandleMouseEvent(pWindow, nEventType, false, Point(pEvent->mnX, pEvent->mnY),
                                 pEvent->mnTime, lcl_GetMouseButtonCode(pEvent),
                                 ImplGetMouseButtonMode(pEvent));
 }
