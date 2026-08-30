@@ -651,7 +651,6 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
 
     sal_uInt16 nClicks = 0;
 
-    // determine mouse event data
     if ( nSVEvent == NotifyEventType::MOUSEMOVE )
     {
         // check if MouseMove belongs to same window and if the
@@ -671,7 +670,6 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             pWinFrameData->mnLastMouseWinY = aChildMousePos.Y();
         }
 
-        // mouse click
         nClicks = pWinFrameData->mnClickCount;
 
         // call Start-Drag handler if required
@@ -684,9 +682,8 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             return true;
 
         // test for mouseleave and mouseenter
-        VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
-
-        if (pMouseMoveWin && pChild != pMouseMoveWin)
+        if (VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
+            pMouseMoveWin && pChild != pMouseMoveWin)
         {
             pWinFrameData->mbInMouseMove = true;
             pMouseMoveWin->ImplGetWinData()->mbMouseOver = false;
@@ -703,6 +700,8 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                 return true;
         }
 
+        // Re-evaluate pMouseMoveWin after potential changes
+        VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
         if (pChild != pMouseMoveWin)
             nModifiers |= MouseEventModifiers::ENTERWINDOW;
 
