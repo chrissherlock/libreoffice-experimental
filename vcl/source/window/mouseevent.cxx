@@ -333,6 +333,24 @@ static bool lcl_EnforceMouseMoveBeforeClick(const VclPtr<vcl::Window>& xWindow, 
     return false;
 }
 
+static sal_uInt16 lcl_UpdateFrameMouseState(ImplFrameData* pWinFrameData, Point aMousePos,
+                                            sal_uInt16 nCode, MouseEventModifiers nModifiers)
+{
+    const sal_uInt16 nOldCode = pWinFrameData->mnMouseCode;
+
+    // update frame data
+    pWinFrameData->mnBeforeLastMouseX = pWinFrameData->mnLastMouseX;
+    pWinFrameData->mnBeforeLastMouseY = pWinFrameData->mnLastMouseY;
+    pWinFrameData->mnLastMouseX = aMousePos.X();
+    pWinFrameData->mnLastMouseY = aMousePos.Y();
+    pWinFrameData->mnMouseCode  = nCode;
+
+    const MouseEventModifiers nTmpMask = MouseEventModifiers::SYNTHETIC | MouseEventModifiers::MODIFIERCHANGED;
+    pWinFrameData->mnMouseMode  = nModifiers & ~nTmpMask;
+
+    return nOldCode;
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nModifiers )
@@ -353,16 +371,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         return true;
 
     ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
-    sal_uInt16 nOldCode = pWinFrameData->mnMouseCode;
-
-    // update frame data
-    pWinFrameData->mnBeforeLastMouseX = pWinFrameData->mnLastMouseX;
-    pWinFrameData->mnBeforeLastMouseY = pWinFrameData->mnLastMouseY;
-    pWinFrameData->mnLastMouseX = aMousePos.X();
-    pWinFrameData->mnLastMouseY = aMousePos.Y();
-    pWinFrameData->mnMouseCode  = nCode;
-    MouseEventModifiers const nTmpMask = MouseEventModifiers::SYNTHETIC | MouseEventModifiers::MODIFIERCHANGED;
-    pWinFrameData->mnMouseMode  = nModifiers & ~nTmpMask;
+    const sal_uInt16 nOldCode = lcl_UpdateFrameMouseState(pWinFrameData, aMousePos, nCode, nModifiers);
 
     if ( bMouseLeave )
     {
@@ -668,7 +677,6 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
     // create mouse event
     Point aChildPos = pChild->ScreenToOutputPixel( aMousePos );
     MouseEvent aMEvt( aChildPos, nClicks, nModifiers, nCode, nCode );
-
 
     // tracking window gets the mouse events
     if (pSVData->mpWinData->mpTrackWin)
