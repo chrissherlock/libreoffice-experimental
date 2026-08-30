@@ -686,72 +686,67 @@ static bool lcl_RaiseWindow(const VclPtr<vcl::Window>& pChild)
     return pChild->isDisposed();
 }
 
-static bool lcl_InvokeMouseOrTrackingEvent(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
-                                           const MouseEvent& rMEvt, bool& rCallHelpRequest)
+static bool lcl_InvokeTrackingEvent(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                    const MouseEvent& rMEvt, bool& rCallHelpRequest)
 {
-    ImplSVData* pSVData = ImplGetSVData();
-    bool bRet = false;
-
     if (nSVEvent == NotifyEventType::MOUSEMOVE)
     {
-        if (pSVData->mpWinData->mpTrackWin)
+        TrackingEvent aTEvt(rMEvt);
+        pChild->Tracking(aTEvt);
+
+        ImplSVData* pSVData = ImplGetSVData();
+
+        // When ScrollRepeat, we restart the timer
+        if (!pChild->isDisposed() && pSVData->mpWinData->mpTrackTimer &&
+            (pSVData->mpWinData->mnTrackFlags & StartTrackingFlags::ScrollRepeat))
         {
-            TrackingEvent aTEvt(rMEvt);
-            pChild->Tracking(aTEvt);
-            if (!pChild->isDisposed())
-            {
-                // When ScrollRepeat, we restart the timer
-                if (pSVData->mpWinData->mpTrackTimer
-                    && (pSVData->mpWinData->mnTrackFlags & StartTrackingFlags::ScrollRepeat))
-                    pSVData->mpWinData->mpTrackTimer->Start();
-            }
+            pSVData->mpWinData->mpTrackTimer->Start();
+        }
+
+        rCallHelpRequest = false;
+    }
+    else if (nSVEvent != NotifyEventType::MOUSEBUTTONDOWN) // MouseButtonUp
+    {
+        pChild->EndTracking();
+    }
+
+    // Tracking events always return true
+    return true;
+}
+
+static bool lcl_InvokeStandardMouseEvent(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                         const MouseEvent& rMEvt, bool& rCallHelpRequest)
+{
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+    {
+        if (pChild->isDisposed())
+        {
             rCallHelpRequest = false;
-            bRet = true;
         }
         else
         {
-            if (pChild->isDisposed())
-            {
+            // if the MouseMove changes the help window's visibility,
+            // the HelpRequest should not be called anymore
+            vcl::Window* pOldHelpTextWin = ImplGetSVHelpData().mpHelpWin;
+            pChild->MouseMove(rMEvt);
+
+            if (pOldHelpTextWin != ImplGetSVHelpData().mpHelpWin)
                 rCallHelpRequest = false;
-            }
-            else
-            {
-                // if the MouseMove handler changes the help window's visibility
-                // the HelpRequest handler should not be called anymore
-                vcl::Window* pOldHelpTextWin = ImplGetSVHelpData().mpHelpWin;
-                pChild->MouseMove(rMEvt);
-                if (pOldHelpTextWin != ImplGetSVHelpData().mpHelpWin)
-                    rCallHelpRequest = false;
-            }
         }
     }
     else if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
     {
-        if (pSVData->mpWinData->mpTrackWin)
-        {
-            bRet = true;
-        }
-        else
-        {
-            pChild->ImplGetWindowImpl()->mbMouseButtonDown = false;
-            pChild->MouseButtonDown(rMEvt);
-        }
+        pChild->ImplGetWindowImpl()->mbMouseButtonDown = false;
+        pChild->MouseButtonDown(rMEvt);
     }
-    else
+    else // MouseButtonUp
     {
-        if (pSVData->mpWinData->mpTrackWin)
-        {
-            pChild->EndTracking();
-            bRet = true;
-        }
-        else
-        {
-            pChild->ImplGetWindowImpl()->mbMouseButtonUp = false;
-            pChild->MouseButtonUp(rMEvt);
-        }
+        pChild->ImplGetWindowImpl()->mbMouseButtonUp = false;
+        pChild->MouseButtonUp(rMEvt);
     }
 
-    return bRet;
+    // Standard core events return false at this stage
+    return false;
 }
 
 static bool lcl_DispatchMouseEvent(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
@@ -761,14 +756,21 @@ static bool lcl_DispatchMouseEvent(const VclPtr<vcl::Window>& pChild, NotifyEven
     if (ImplCallPreNotify(rNEvt) || pChild->isDisposed())
         return true;
 
-    bool bRet = lcl_InvokeMouseOrTrackingEvent(pChild, nSVEvent, rMEvt, rCallHelpRequest);
+    bool bEventConsumed;
+    ImplSVData* pSVData = ImplGetSVData();
+
+    // Route based on active tracking mode
+    if (pSVData->mpWinData->mpTrackWin)
+        bEventConsumed = lcl_InvokeTrackingEvent(pChild, nSVEvent, rMEvt, rCallHelpRequest);
+    else
+        bEventConsumed = lcl_InvokeStandardMouseEvent(pChild, nSVEvent, rMEvt, rCallHelpRequest);
 
     assert(rNEvt.GetWindow() == pChild);
 
     if (!pChild->isDisposed())
         pChild->ImplNotifyKeyMouseCommandEventListeners(rNEvt);
 
-    return bRet;
+    return bEventConsumed;
 }
 
 static bool lcl_UpdateMouseStateAndHelp(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
