@@ -608,6 +608,84 @@ static bool lcl_CheckRedundantMouseMove(bool bMouseLeave, const VclPtr<vcl::Wind
     return false;
 }
 
+static bool lcl_CheckAndDeliverMouseLeave(ImplFrameData* pWinFrameData, VclPtr<vcl::Window>& pChild,
+                                          const Point& aMousePos, sal_Int32 nClicks,
+                                          sal_uInt16 nCode, MouseEventModifiers nModifiers)
+{
+    if (VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
+        pMouseMoveWin && pChild != pMouseMoveWin)
+    {
+        pWinFrameData->mbInMouseMove = true;
+        pMouseMoveWin->ImplGetWinData()->mbMouseOver = false;
+
+        lcl_DeliverMouseLeaveEvent(pMouseMoveWin, aMousePos, nClicks, nCode, nModifiers);
+
+        pWinFrameData->mpMouseMoveWin = nullptr;
+        pWinFrameData->mbInMouseMove = false;
+
+        if ( pChild && pChild->isDisposed() )
+            pChild = nullptr;
+
+        if ( pMouseMoveWin->isDisposed() )
+            return true;
+    }
+
+    return false;
+}
+
+enum class MouseEventRouting
+{
+    Proceed,
+    Consumed,
+    Ignored
+};
+
+static MouseEventRouting lcl_RouteMouseMove(const VclPtr<vcl::Window>& xWindow, VclPtr<vcl::Window>& pChild,
+                                            ImplFrameData* pWinFrameData, const Point& aMousePos,
+                                            sal_uInt16 nCode, MouseEventModifiers& nModifiers)
+{
+    sal_uInt16 nClicks = pWinFrameData->mnClickCount;
+
+    // call Start-Drag handler if required
+    if (vcl::Window* pMouseDownWin = pWinFrameData->mpMouseDownWin)
+        lcl_CheckAndInitiateStartDrag(pMouseDownWin, nCode, aMousePos, nClicks);
+
+    if (xWindow->isDisposed())
+        return MouseEventRouting::Consumed;
+
+    if (lcl_CheckAndDeliverMouseLeave(pWinFrameData, pChild, aMousePos, nClicks, nCode, nModifiers))
+        return MouseEventRouting::Consumed;
+
+    // Re-evaluate pMouseMoveWin after potential changes
+    VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
+    if (pChild != pMouseMoveWin)
+        nModifiers |= MouseEventModifiers::ENTERWINDOW;
+
+    pWinFrameData->mpMouseMoveWin = pChild;
+
+    if (pChild)
+        pChild->ImplGetWinData()->mbMouseOver = true;
+
+    // MouseLeave
+    if (!pChild)
+        return MouseEventRouting::Ignored;
+
+    return MouseEventRouting::Proceed;
+}
+
+static bool lcl_RaiseWindow(const VclPtr<vcl::Window>& pChild)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    if (!pSVData->mpWinData->mpFirstFloat
+        && !(pChild->ImplGetFrameWindow()->GetStyle() & WB_OWNERDRAWDECORATION))
+    {
+        pChild->ToTop();
+    }
+
+    return pChild->isDisposed();
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nModifiers )
@@ -674,53 +752,17 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
     sal_uInt16 nClicks = 0;
 
     if (nSVEvent == NotifyEventType::MOUSEMOVE)
+    {
         nClicks = pWinFrameData->mnClickCount;
 
-    if ( nSVEvent == NotifyEventType::MOUSEMOVE )
-    {
         if (lcl_CheckRedundantMouseMove(bMouseLeave, pChild, pWinFrameData, aMousePos, nOldCode))
             return false;
 
-        // call Start-Drag handler if required
-        // Warning: should be called before Move, as otherwise during
-        // fast mouse movements the applications move to the selection state
-        if (vcl::Window* pMouseDownWin = pWinFrameData->mpMouseDownWin)
-            lcl_CheckAndInitiateStartDrag(pMouseDownWin, nCode, aMousePos, nClicks);
+        MouseEventRouting eRoute = lcl_RouteMouseMove(xWindow, pChild, pWinFrameData, aMousePos, nCode, nModifiers);
 
-        if (xWindow->isDisposed())
+        if (eRoute == MouseEventRouting::Consumed)
             return true;
-
-        // test for mouseleave and mouseenter
-        if (VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
-            pMouseMoveWin && pChild != pMouseMoveWin)
-        {
-            pWinFrameData->mbInMouseMove = true;
-            pMouseMoveWin->ImplGetWinData()->mbMouseOver = false;
-
-            lcl_DeliverMouseLeaveEvent(pMouseMoveWin, aMousePos, nClicks, nCode, nModifiers);
-
-            pWinFrameData->mpMouseMoveWin = nullptr;
-            pWinFrameData->mbInMouseMove = false;
-
-            if ( pChild && pChild->isDisposed() )
-                pChild = nullptr;
-
-            if ( pMouseMoveWin->isDisposed() )
-                return true;
-        }
-
-        // Re-evaluate pMouseMoveWin after potential changes
-        VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
-        if (pChild != pMouseMoveWin)
-            nModifiers |= MouseEventModifiers::ENTERWINDOW;
-
-        pWinFrameData->mpMouseMoveWin = pChild;
-
-        if (pChild)
-            pChild->ImplGetWinData()->mbMouseOver = true;
-
-        // MouseLeave
-        if (!pChild)
+        if (eRoute == MouseEventRouting::Ignored)
             return false;
     }
     else
@@ -764,17 +806,9 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         pChild->ImplGetFrameData()->mbInMouseMove = true;
 
     // bring window into foreground on mouseclick
-    if ( nSVEvent == NotifyEventType::MOUSEBUTTONDOWN )
+    if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
     {
-        if (!pSVData->mpWinData->mpFirstFloat
-            && // totop for floating windows in popup would change the focus and would close them immediately
-            !(pChild->ImplGetFrameWindow()->GetStyle()
-              & WB_OWNERDRAWDECORATION)) // ownerdrawdecorated windows must never grab focus
-        {
-            pChild->ToTop();
-        }
-
-        if ( pChild->isDisposed() )
+        if (lcl_RaiseWindow(pChild))
             return true;
     }
 
