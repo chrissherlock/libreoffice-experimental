@@ -152,7 +152,7 @@ void Window::ImplCallMouseMove( sal_uInt16 nMouseCode, bool bModChanged )
     nMode |= MouseEventModifiers::SYNTHETIC;
     if ( bModChanged )
         nMode |= MouseEventModifiers::MODIFIERCHANGED;
-    ImplHandleMouseEvent( mpWindowImpl->mpFrameWindow, NotifyEventType::MOUSEMOVE, bLeave, nX, nY, nTime, nCode, nMode );
+    ImplHandleMouseEvent( mpWindowImpl->mpFrameWindow, NotifyEventType::MOUSEMOVE, bLeave, Point(nX, nY), nTime, nCode, nMode );
 }
 
 void Window::ImplGenerateMouseMove()
