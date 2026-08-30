@@ -686,16 +686,12 @@ static bool lcl_RaiseWindow(const VclPtr<vcl::Window>& pChild)
     return pChild->isDisposed();
 }
 
-static bool lcl_DispatchMouseEvent(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
-                                   NotifyEvent& rNEvt, const MouseEvent& rMEvt,
-                                   bool& rCallHelpRequest)
+static bool lcl_InvokeMouseOrTrackingEvent(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                           const MouseEvent& rMEvt, bool& rCallHelpRequest)
 {
-    if (ImplCallPreNotify(rNEvt) || pChild->isDisposed())
-        return true;
-
     ImplSVData* pSVData = ImplGetSVData();
-
     bool bRet = false;
+
     if (nSVEvent == NotifyEventType::MOUSEMOVE)
     {
         if (pSVData->mpWinData->mpTrackWin)
@@ -754,6 +750,18 @@ static bool lcl_DispatchMouseEvent(const VclPtr<vcl::Window>& pChild, NotifyEven
             pChild->MouseButtonUp(rMEvt);
         }
     }
+
+    return bRet;
+}
+
+static bool lcl_DispatchMouseEvent(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                   NotifyEvent& rNEvt, const MouseEvent& rMEvt,
+                                   bool& rCallHelpRequest)
+{
+    if (ImplCallPreNotify(rNEvt) || pChild->isDisposed())
+        return true;
+
+    bool bRet = lcl_InvokeMouseOrTrackingEvent(pChild, nSVEvent, rMEvt, rCallHelpRequest);
 
     assert(rNEvt.GetWindow() == pChild);
 
