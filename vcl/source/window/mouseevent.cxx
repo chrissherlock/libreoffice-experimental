@@ -201,19 +201,31 @@ static bool lcl_IsPartOfHelpWindowHierarchy(const vcl::Window* pChild)
     return pHelpWin->IsWindowOrChild(pChild) || pChild->IsWindowOrChild(pHelpWin);
 }
 
+static HelpEventMode lcl_GetHelpEventMode()
+{
+    const ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+    HelpEventMode nHelpMode = HelpEventMode::NONE;
+
+    if (aHelpData.mbQuickHelp)
+        nHelpMode = HelpEventMode::QUICK;
+
+    if (aHelpData.mbBalloonHelp)
+        nHelpMode |= HelpEventMode::BALLOON;
+
+    return nHelpMode;
+}
+
 static void lcl_HandleMouseHelpRequest( vcl::Window* pChild, const Point& rMousePos )
 {
     if (lcl_IsPartOfHelpWindowHierarchy(pChild))
         return;
 
-    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
-    HelpEventMode nHelpMode = HelpEventMode::NONE;
-    if ( aHelpData.mbQuickHelp )
-        nHelpMode = HelpEventMode::QUICK;
-    if ( aHelpData.mbBalloonHelp )
-        nHelpMode |= HelpEventMode::BALLOON;
-    if ( !(bool(nHelpMode)) )
+    const HelpEventMode nHelpMode = lcl_GetHelpEventMode();
+
+    if (nHelpMode == HelpEventMode::NONE)
         return;
+
+    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
 
     if ( pChild->IsInputEnabled() && !pChild->IsInModalMode() )
     {
