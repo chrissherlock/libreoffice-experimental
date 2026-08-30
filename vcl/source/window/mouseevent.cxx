@@ -995,16 +995,128 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
     return lcl_DispatchCommandEvents(pChild, nSVEvent, nClicks, nCode, aChildPos, bEventConsumed);
 }
 
+static bool lcl_ExecuteLOKDragOver(ImplFrameData* pFrameData, vcl::Window* pDragWin,
+                                   sal_uInt16 nCode, const Point& aWinPos)
+{
+    css::uno::Reference<css::datatransfer::dnd::XDropTargetDragContext> xDropTargetDragContext =
+        new GenericDropTargetDragContext();
+    rtl::Reference<DNDListenerContainer> xDropTarget(
+        pDragWin->ImplGetWindowImpl()->mxDNDListenerContainer);
+
+    if (!xDropTarget.is() ||
+        !xDropTargetDragContext.is() ||
+        (nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) !=
+        (MouseSettings::GetStartDragCode() & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)))
+    {
+        pFrameData->mbStartDragCalled = pFrameData->mbDragging = false;
+        return false;
+    }
+
+    xDropTarget->fireDragOverEvent(
+        xDropTargetDragContext,
+        css::datatransfer::dnd::DNDConstants::ACTION_MOVE,
+        aWinPos.X(),
+        aWinPos.Y(),
+        (css::datatransfer::dnd::DNDConstants::ACTION_COPY |
+         css::datatransfer::dnd::DNDConstants::ACTION_MOVE |
+         css::datatransfer::dnd::DNDConstants::ACTION_LINK));
+
+    return true;
+}
+
+static bool lcl_ExecuteLOKDrop(ImplFrameData* pFrameData, vcl::Window* pDragWin,
+                               const Point& aMousePos)
+{
+    css::uno::Reference<css::datatransfer::XTransferable> xTransfer;
+    css::uno::Reference<css::datatransfer::dnd::XDropTargetDropContext> xDropTargetDropContext =
+        new GenericDropTargetDropContext();
+    rtl::Reference<DNDListenerContainer> xDropTarget(
+        pDragWin->ImplGetWindowImpl()->mxDNDListenerContainer);
+
+    if (!xDropTarget.is() || !xDropTargetDropContext.is())
+    {
+        pFrameData->mbStartDragCalled = pFrameData->mbDragging = false;
+        return false;
+    }
+
+    Point dragOverPos = pDragWin->ScreenToOutputPixel(aMousePos);
+    xDropTarget->fireDropEvent(
+        xDropTargetDropContext,
+        css::datatransfer::dnd::DNDConstants::ACTION_MOVE,
+        dragOverPos.X(),
+        dragOverPos.Y(),
+        (css::datatransfer::dnd::DNDConstants::ACTION_COPY |
+         css::datatransfer::dnd::DNDConstants::ACTION_MOVE |
+         css::datatransfer::dnd::DNDConstants::ACTION_LINK),
+        xTransfer);
+
+    pFrameData->mbStartDragCalled = pFrameData->mbDragging = false;
+    return true;
+}
+
+static void lcl_CheckLOKDragGesture(ImplFrameData* pFrameData, vcl::Window* pDownWin,
+                                    sal_uInt16 nCode, sal_uInt16 nClicks,
+                                    const Point& aMousePos, const Point& aWinPos)
+{
+    const MouseSettings& aSettings = pDownWin->GetSettings().GetMouseSettings();
+    if ((nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) !=
+        (MouseSettings::GetStartDragCode() & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)))
+    {
+        return;
+    }
+
+    if (pFrameData->mbStartDragCalled)
+        return;
+
+    tools::Long nDragWidth = aSettings.GetStartDragWidth();
+    tools::Long nDragHeight = aSettings.GetStartDragHeight();
+    tools::Long nMouseX = aMousePos.X();
+    tools::Long nMouseY = aMousePos.Y();
+
+    if (((nMouseX - nDragWidth) > pFrameData->mnFirstMouseX ||
+         (nMouseX + nDragWidth) < pFrameData->mnFirstMouseX) ||
+        ((nMouseY - nDragHeight) > pFrameData->mnFirstMouseY ||
+         (nMouseY + nDragHeight) < pFrameData->mnFirstMouseY))
+    {
+        pFrameData->mbStartDragCalled = true;
+
+        if (!pFrameData->mbInternalDragGestureRecognizer)
+            return;
+
+        rtl::Reference<DNDListenerContainer> xDragGestureRecognizer(
+            pDownWin->ImplGetWindowImpl()->mxDNDListenerContainer);
+
+        if (!xDragGestureRecognizer.is())
+            return;
+
+        css::awt::MouseEvent aEvent(
+            static_cast<css::uno::XInterface*>(nullptr),
+#ifdef MACOSX
+            nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3),
+#else
+            nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2),
+#endif
+            nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE),
+            nMouseX, nMouseY, nClicks, false);
+
+        css::uno::Reference<css::datatransfer::dnd::XDragSource> xDragSource =
+            pDownWin->GetDragSource();
+
+        if (xDragSource.is())
+        {
+            xDragGestureRecognizer->fireDragGestureEvent(
+                0, aWinPos.X(), aWinPos.Y(), xDragSource, css::uno::Any(aEvent));
+        }
+    }
+}
+
 bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType nEvent, bool /*bMouseLeave*/,
-                             tools::Long nX, tools::Long nY, sal_uInt64 /*nMsgTime*/,
-                             sal_uInt16 nCode, MouseEventModifiers nMode, sal_uInt16 nClicks)
+                           tools::Long nX, tools::Long nY, sal_uInt64 /*nMsgTime*/,
+                           sal_uInt16 nCode, MouseEventModifiers nMode, sal_uInt16 nClicks)
 {
     Point aMousePos(nX, nY);
 
-    if (!xWindow)
-        return false;
-
-    if (xWindow->isDisposed())
+    if (!xWindow || xWindow->isDisposed())
         return false;
 
     ImplFrameData* pFrameData = xWindow->ImplGetFrameData();
@@ -1020,70 +1132,16 @@ bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType
     pFrameData->mbMouseIn = false;
 
     vcl::Window* pDragWin = pFrameData->mpMouseDownWin;
-    if (pDragWin &&
-        nEvent == NotifyEventType::MOUSEMOVE &&
-        pFrameData->mbDragging)
+    if (pDragWin && pFrameData->mbDragging)
     {
-        css::uno::Reference<css::datatransfer::dnd::XDropTargetDragContext> xDropTargetDragContext =
-            new GenericDropTargetDragContext();
-        rtl::Reference<DNDListenerContainer> xDropTarget(
-            pDragWin->ImplGetWindowImpl()->mxDNDListenerContainer);
-
-        if (!xDropTarget.is() ||
-            !xDropTargetDragContext.is() ||
-            (nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) !=
-            (MouseSettings::GetStartDragCode() & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)))
-        {
-            pFrameData->mbStartDragCalled = pFrameData->mbDragging = false;
-            return false;
-        }
-
-        xDropTarget->fireDragOverEvent(
-            xDropTargetDragContext,
-            css::datatransfer::dnd::DNDConstants::ACTION_MOVE,
-            aWinPos.X(),
-            aWinPos.Y(),
-            (css::datatransfer::dnd::DNDConstants::ACTION_COPY |
-             css::datatransfer::dnd::DNDConstants::ACTION_MOVE |
-             css::datatransfer::dnd::DNDConstants::ACTION_LINK));
-
-        return true;
-    }
-
-    if (pDragWin &&
-        nEvent == NotifyEventType::MOUSEBUTTONUP &&
-        pFrameData->mbDragging)
-    {
-        css::uno::Reference<css::datatransfer::XTransferable> xTransfer;
-        css::uno::Reference<css::datatransfer::dnd::XDropTargetDropContext> xDropTargetDropContext =
-            new GenericDropTargetDropContext();
-        rtl::Reference<DNDListenerContainer> xDropTarget(
-            pDragWin->ImplGetWindowImpl()->mxDNDListenerContainer);
-
-        if (!xDropTarget.is() || !xDropTargetDropContext.is())
-        {
-            pFrameData->mbStartDragCalled = pFrameData->mbDragging = false;
-            return false;
-        }
-
-        Point dragOverPos = pDragWin->ScreenToOutputPixel(aMousePos);
-        xDropTarget->fireDropEvent(
-            xDropTargetDropContext,
-            css::datatransfer::dnd::DNDConstants::ACTION_MOVE,
-            dragOverPos.X(),
-            dragOverPos.Y(),
-            (css::datatransfer::dnd::DNDConstants::ACTION_COPY |
-             css::datatransfer::dnd::DNDConstants::ACTION_MOVE |
-             css::datatransfer::dnd::DNDConstants::ACTION_LINK),
-            xTransfer);
-
-        pFrameData->mbStartDragCalled = pFrameData->mbDragging = false;
-        return true;
+        if (nEvent == NotifyEventType::MOUSEMOVE)
+            return lcl_ExecuteLOKDragOver(pFrameData, pDragWin, nCode, aWinPos);
+        if (nEvent == NotifyEventType::MOUSEBUTTONUP)
+            return lcl_ExecuteLOKDrop(pFrameData, pDragWin, aMousePos);
     }
 
     if (pFrameData->mbDragging)
     {
-        // wrong status, reset
         pFrameData->mbStartDragCalled = pFrameData->mbDragging = false;
         return false;
     }
@@ -1091,63 +1149,7 @@ bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType
     vcl::Window* pDownWin = pFrameData->mpMouseDownWin;
     if (pDownWin && nEvent == NotifyEventType::MOUSEMOVE)
     {
-        const MouseSettings& aSettings = pDownWin->GetSettings().GetMouseSettings();
-        if ((nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) ==
-            (MouseSettings::GetStartDragCode() & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) )
-        {
-            if (!pFrameData->mbStartDragCalled)
-            {
-                tools::Long nDragWidth = aSettings.GetStartDragWidth();
-                tools::Long nDragHeight = aSettings.GetStartDragHeight();
-                tools::Long nMouseX = aMousePos.X();
-                tools::Long nMouseY = aMousePos.Y();
-
-                if ((((nMouseX - nDragWidth) > pFrameData->mnFirstMouseX) ||
-                     ((nMouseX + nDragWidth) < pFrameData->mnFirstMouseX)) ||
-                    (((nMouseY - nDragHeight) > pFrameData->mnFirstMouseY) ||
-                     ((nMouseY + nDragHeight) < pFrameData->mnFirstMouseY)))
-                {
-                    pFrameData->mbStartDragCalled  = true;
-
-                    if (pFrameData->mbInternalDragGestureRecognizer)
-                    {
-                        // query DropTarget from child window
-                        rtl::Reference<DNDListenerContainer> xDragGestureRecognizer(
-                            pDownWin->ImplGetWindowImpl()->mxDNDListenerContainer );
-
-                        if (xDragGestureRecognizer.is())
-                        {
-                            // create a UNO mouse event out of the available data
-                            css::awt::MouseEvent aEvent(
-                                static_cast < css::uno::XInterface * > ( nullptr ),
- #ifdef MACOSX
-                                nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3),
- #else
-                                nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2),
- #endif
-                                nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE),
-                                nMouseX,
-                                nMouseY,
-                                nClicks,
-                                false);
-                            css::uno::Reference< css::datatransfer::dnd::XDragSource > xDragSource =
-                                pDownWin->GetDragSource();
-
-                            if (xDragSource.is())
-                            {
-                                xDragGestureRecognizer->
-                                    fireDragGestureEvent(
-                                        0,
-                                        aWinPos.X(),
-                                        aWinPos.Y(),
-                                        xDragSource,
-                                        css::uno::Any(aEvent));
-                            }
-                        }
-                    }
-                }
-            }
-        }
+        lcl_CheckLOKDragGesture(pFrameData, pDownWin, nCode, nClicks, aMousePos, aWinPos);
     }
 
     MouseEvent aMouseEvent(aWinPos, nClicks, nMode, nCode, nCode);
@@ -1159,10 +1161,11 @@ bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType
             pFrameData->mpTrackWin->Tracking(aTrackingEvent);
         }
         else
+        {
             xWindow->MouseMove(aMouseEvent);
+        }
     }
-    else if (nEvent == NotifyEventType::MOUSEBUTTONDOWN &&
-        !pFrameData->mpTrackWin)
+    else if (nEvent == NotifyEventType::MOUSEBUTTONDOWN && !pFrameData->mpTrackWin)
     {
         pFrameData->mpMouseDownWin = xWindow;
         pFrameData->mnFirstMouseX = aMousePos.X();
@@ -1173,9 +1176,7 @@ bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType
     else
     {
         if (pFrameData->mpTrackWin)
-        {
             pFrameData->mpTrackWin->EndTracking();
-        }
 
         pFrameData->mpMouseDownWin = nullptr;
         pFrameData->mpMouseMoveWin = nullptr;
@@ -1187,10 +1188,10 @@ bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType
         return true;
 
     // ContextMenu
-    if ( (nCode == MouseSettings::GetContextMenuCode()) &&
-         (nClicks == MouseSettings::GetContextMenuClicks()) )
+    if ((nCode == MouseSettings::GetContextMenuCode()) &&
+        (nClicks == MouseSettings::GetContextMenuClicks()))
     {
-       ImplCallCommand(xWindow, CommandEventId::ContextMenu, nullptr, true, &aWinPos);
+        ImplCallCommand(xWindow, CommandEventId::ContextMenu, nullptr, true, &aWinPos);
     }
 
     return true;
