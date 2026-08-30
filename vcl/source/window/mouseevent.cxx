@@ -425,6 +425,14 @@ static bool lcl_TryConsumeBlockedEvent(const VclPtr<vcl::Window>& pChild, const 
     return false;
 }
 
+static bool lcl_IsClickDuringExtTextInput(NotifyEventType nSVEvent)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    return pSVData->mpWinData->mpExtTextInputWin != nullptr
+        && (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN || nSVEvent == NotifyEventType::MOUSEBUTTONUP);
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nModifiers )
@@ -484,9 +492,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             return lcl_TryConsumeBlockedEvent(pChild, aMousePos, nCode, nSVEvent, bMouseLeave);
 
         // End ExtTextInput-Mode, if the user click in the same TopLevel Window
-        if (pSVData->mpWinData->mpExtTextInputWin
-            && ((nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
-                || (nSVEvent == NotifyEventType::MOUSEBUTTONUP)))
+        if (lcl_IsClickDuringExtTextInput(nSVEvent))
             pSVData->mpWinData->mpExtTextInputWin->EndExtTextInput();
     }
 
