@@ -773,39 +773,31 @@ static bool lcl_DispatchMouseEvent(const VclPtr<vcl::Window>& pChild, NotifyEven
     return bEventConsumed;
 }
 
-static bool lcl_UpdateMouseStateAndHelp(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
-                                        const MouseEvent& rMEvt, bool bCallHelpRequest,
-                                        bool bMouseLeave, bool bRet)
+static void lcl_UpdateMouseMoveState(const VclPtr<vcl::Window>& pChild, const MouseEvent& rMEvt,
+                                     bool bCallHelpRequest, bool bMouseLeave)
 {
-    if (nSVEvent == NotifyEventType::MOUSEMOVE)
-    {
-        pChild->ImplGetWindowImpl()->mpFrameData->mbInMouseMove = false;
+    pChild->ImplGetWindowImpl()->mpFrameData->mbInMouseMove = false;
 
-        if (bCallHelpRequest && !ImplGetSVHelpData().mbKeyboardHelp)
-            lcl_HandleMouseHelpRequest(pChild, pChild->OutputToScreenPixel(rMEvt.GetPosPixel()));
+    if (bCallHelpRequest && !ImplGetSVHelpData().mbKeyboardHelp)
+        lcl_HandleMouseHelpRequest(pChild, pChild->OutputToScreenPixel(rMEvt.GetPosPixel()));
 
-        // set new mouse pointer
-        if (!bMouseLeave)
-            lcl_SetMousePointer(pChild);
+    // set new mouse pointer
+    if (!bMouseLeave)
+        lcl_SetMousePointer(pChild);
+}
 
-        return true; // bRet is forced to true for MOUSEMOVE in the original logic
-    }
+static bool lcl_CheckButtonConsumption(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                       bool bEventConsumed)
+{
+    if (bEventConsumed)
+        return true;
 
-    if (!bRet)
-    {
-        if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
-        {
-            if (!pChild->ImplGetWindowImpl()->mbMouseButtonDown)
-                return true;
-        }
-        else
-        {
-            if (!pChild->ImplGetWindowImpl()->mbMouseButtonUp)
-                return true;
-        }
-    }
-
-    return bRet;
+    // Check if the button flags were reset by the event invocation,
+    // which indicates the event was consumed.
+    if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
+        return !pChild->ImplGetWindowImpl()->mbMouseButtonDown;
+    else
+        return !pChild->ImplGetWindowImpl()->mbMouseButtonUp;
 }
 
 static bool lcl_DispatchCommandEvents(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
@@ -985,17 +977,22 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             return true;
     }
 
-    bool bRet = lcl_DispatchMouseEvent(pChild, nSVEvent, aNEvt, aMEvt, bCallHelpRequest);
+    bool bEventConsumed = lcl_DispatchMouseEvent(pChild, nSVEvent, aNEvt, aMEvt, bCallHelpRequest);
 
     if (pChild->isDisposed())
         return true;
 
-    bRet = lcl_UpdateMouseStateAndHelp(pChild, nSVEvent, aMEvt, bCallHelpRequest, bMouseLeave, bRet);
-
+    // Route final state updates based on event type
     if (nSVEvent == NotifyEventType::MOUSEMOVE)
-        return bRet; // Mouse moves do not generate the command events below
+    {
+        lcl_UpdateMouseMoveState(pChild, aMEvt, bCallHelpRequest, bMouseLeave);
+        return true; // Mouse moves do not generate the command events below
+    }
 
-    return lcl_DispatchCommandEvents(pChild, nSVEvent, nClicks, nCode, aChildPos, bRet);
+    // Update consumption state for button events
+    bEventConsumed = lcl_CheckButtonConsumption(pChild, nSVEvent, bEventConsumed);
+
+    return lcl_DispatchCommandEvents(pChild, nSVEvent, nClicks, nCode, aChildPos, bEventConsumed);
 }
 
 bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType nEvent, bool /*bMouseLeave*/,
