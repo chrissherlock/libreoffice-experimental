@@ -215,6 +215,22 @@ static HelpEventMode lcl_GetHelpEventMode()
     return nHelpMode;
 }
 
+static void lcl_InvokeHelpRequest(vcl::Window* pChild, const Point& rMousePos, HelpEventMode nHelpMode)
+{
+    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+    HelpEvent aHelpEvent(rMousePos, nHelpMode);
+
+    aHelpData.mbRequestingHelp = true;
+    pChild->RequestHelp(aHelpEvent);
+    aHelpData.mbRequestingHelp = false;
+}
+
+static bool lcl_IsKillableTooltip()
+{
+    const ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+    return aHelpData.mpHelpWin && !aHelpData.mbKeyboardHelp;
+}
+
 static void lcl_HandleMouseHelpRequest( vcl::Window* pChild, const Point& rMousePos )
 {
     if (lcl_IsPartOfHelpWindowHierarchy(pChild))
@@ -225,20 +241,14 @@ static void lcl_HandleMouseHelpRequest( vcl::Window* pChild, const Point& rMouse
     if (nHelpMode == HelpEventMode::NONE)
         return;
 
-    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+    if (pChild->IsInputEnabled() && !pChild->IsInModalMode())
+    {
+        lcl_InvokeHelpRequest(pChild, rMousePos, nHelpMode);
+        return;
+    }
 
-    if ( pChild->IsInputEnabled() && !pChild->IsInModalMode() )
-    {
-        HelpEvent aHelpEvent( rMousePos, nHelpMode );
-        aHelpData.mbRequestingHelp = true;
-        pChild->RequestHelp( aHelpEvent );
-        aHelpData.mbRequestingHelp = false;
-    }
-    // #104172# do not kill keyboard activated tooltips
-    else if ( aHelpData.mpHelpWin && !aHelpData.mbKeyboardHelp)
-    {
-        ImplDestroyHelpWindow( true );
-    }
+    if (lcl_IsKillableTooltip())
+        ImplDestroyHelpWindow(true);
 }
 
 static void lcl_SetMousePointer( vcl::Window const * pChild )
