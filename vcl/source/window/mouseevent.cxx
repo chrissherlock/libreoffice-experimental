@@ -167,9 +167,9 @@ static bool lcl_EndPopupOnAnyClick(FloatingWindow* pLastLevelFloat, NotifyEventT
     return true;
 }
 
-static bool lcl_HandleMouseFloatMode( vcl::Window* pChild, const Point& rMousePos,
-                                      sal_uInt16 nCode, NotifyEventType nSVEvent,
-                                      bool bMouseLeave )
+static bool lcl_DispatchFloatMouseEvent(vcl::Window* pChild, const Point& rMousePos,
+                                        sal_uInt16 nCode, NotifyEventType nSVEvent,
+                                        bool bMouseLeave)
 {
     if (lcl_IsFloatPopupModeWindow(pChild))
         return false;
@@ -399,6 +399,14 @@ static std::optional<VclPtr<vcl::Window>> lcl_FindMouseWindow(const VclPtr<vcl::
     return pChild; // Success, implicitly wraps the VclPtr in the std::optional
 }
 
+static bool lcl_IsMouseInputBlocked(const VclPtr<vcl::Window>& pChild)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    return pSVData->mpWinData->mpCaptureWin.get() != pChild
+        && (!pChild->IsEnabled() || !pChild->IsInputEnabled() || pChild->IsInModalMode());
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nModifiers )
@@ -456,11 +464,11 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
 
         // no mouse messages to disabled windows
         // #106845# if the window was disabled during capturing we have to pass the mouse events to release capturing
-        if (pSVData->mpWinData->mpCaptureWin.get() != pChild
-            && (!pChild->IsEnabled() || !pChild->IsInputEnabled() || pChild->IsInModalMode()))
+        if (lcl_IsMouseInputBlocked(pChild))
         {
-            lcl_HandleMouseFloatMode( pChild, aMousePos, nCode, nSVEvent, bMouseLeave );
-            if ( nSVEvent == NotifyEventType::MOUSEMOVE )
+            lcl_DispatchFloatMouseEvent(pChild, aMousePos, nCode, nSVEvent, bMouseLeave);
+
+            if (nSVEvent == NotifyEventType::MOUSEMOVE)
             {
                 lcl_HandleMouseHelpRequest( pChild, aMousePos );
                 if( pWinFrameData->mpMouseMoveWin.get() != pChild )
@@ -696,7 +704,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
 
     // handle FloatingMode
     if (!pSVData->mpWinData->mpTrackWin && pSVData->mpWinData->mpFirstFloat
-        && lcl_HandleMouseFloatMode(pChild, aMousePos, nCode, nSVEvent, bMouseLeave))
+        && lcl_DispatchFloatMouseEvent(pChild, aMousePos, nCode, nSVEvent, bMouseLeave))
     {
         if ( !pChild->isDisposed() )
             pChild->ImplGetFrameData()->mbStartDragCalled = true;
