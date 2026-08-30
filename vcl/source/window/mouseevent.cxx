@@ -472,8 +472,8 @@ static bool lcl_IsWithinDoubleClickTime(sal_uInt64 nMsgTime, sal_uInt64 nDblClkT
     return (nMsgTime - pFrameData->mnMouseDownTime) < nDblClkTime;
 }
 
-static void lcl_FireDragGesture(vcl::Window* pMouseDownWin, sal_uInt16 nCode,
-                                const Point& rMousePos, sal_Int32 nClicks)
+static void lcl_FireDragGesture(vcl::Window* pMouseDownWin, const MouseAction& rAction,
+                                sal_Int32 nClicks)
 {
     rtl::Reference< DNDListenerContainer > xDragGestureRecognizer(
         pMouseDownWin->ImplGetWindowImpl()->mxDNDListenerContainer);
@@ -489,13 +489,13 @@ static void lcl_FireDragGesture(vcl::Window* pMouseDownWin, sal_uInt16 nCode,
     // create a UNO mouse event out of the available data
     css::awt::MouseEvent aMouseEvent(static_cast<css::uno::XInterface *>(nullptr),
 #ifdef MACOSX
-        nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3),
+        rAction.nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3),
 #else
-        nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2),
+        rAction.nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2),
 #endif
-        nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE),
-        rMousePos.X(),
-        rMousePos.Y(),
+        rAction.nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE),
+        rAction.aPos.X(),
+        rAction.aPos.Y(),
         nClicks,
         false);
 
@@ -510,15 +510,15 @@ static void lcl_FireDragGesture(vcl::Window* pMouseDownWin, sal_uInt16 nCode,
     }
 }
 
-static void lcl_CheckAndInitiateStartDrag(vcl::Window* pMouseDownWin, sal_uInt16 nCode,
-                                           const Point& aMousePos, sal_Int32 nClicks)
+static void lcl_CheckAndInitiateStartDrag(vcl::Window* pMouseDownWin, const MouseAction& rAction,
+                                          sal_Int32 nClicks)
 {
     const MouseSettings& rMSettings = pMouseDownWin->GetSettings().GetMouseSettings();
 
     tools::Long nDragW  = rMSettings.GetStartDragWidth();
     tools::Long nDragH  = rMSettings.GetStartDragHeight();
-    tools::Long nMouseX = aMousePos.X(); // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
-    tools::Long nMouseY = aMousePos.Y();
+    tools::Long nMouseX = rAction.aPos.X(); // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
+    tools::Long nMouseY = rAction.aPos.Y();
 
     if (!lcl_ExceedsDragTolerance(nMouseX, nMouseY, nDragW, nDragH, pMouseDownWin->ImplGetFrameData()))
         return;
@@ -527,15 +527,14 @@ static void lcl_CheckAndInitiateStartDrag(vcl::Window* pMouseDownWin, sal_uInt16
 
     // Check if drag source provides its own recognizer
     if( pMouseDownWin->ImplGetFrameData()->mbInternalDragGestureRecognizer)
-        lcl_FireDragGesture(pMouseDownWin, nCode, Point(nMouseX, nMouseY), nClicks);
+        lcl_FireDragGesture(pMouseDownWin, { Point(nMouseX, nMouseY), rAction.nMsgTime, rAction.nCode, rAction.nModifiers }, nClicks);
 }
 
 static void lcl_DeliverMouseLeaveEvent(const VclPtr<vcl::Window>& pMouseMoveWin,
-                                       const Point& aMousePos, sal_Int32 nClicks,
-                                       sal_uInt16 nCode, MouseEventModifiers nModifiers)
+                                       const MouseAction& rAction, sal_Int32 nClicks)
 {
-    const Point aLeaveMousePos = pMouseMoveWin->ScreenToOutputPixel(aMousePos);
-    MouseEvent aMLeaveEvt(aLeaveMousePos, nClicks, nModifiers | MouseEventModifiers::LEAVEWINDOW, nCode, nCode);
+    const Point aLeaveMousePos = pMouseMoveWin->ScreenToOutputPixel(rAction.aPos);
+    MouseEvent aMLeaveEvt(aLeaveMousePos, nClicks, rAction.nModifiers | MouseEventModifiers::LEAVEWINDOW, rAction.nCode, rAction.nCode);
     NotifyEvent aNLeaveEvt(NotifyEventType::MOUSEMOVE, pMouseMoveWin, &aMLeaveEvt);
 
     // A MouseLeave can destroy this window
@@ -548,8 +547,7 @@ static void lcl_DeliverMouseLeaveEvent(const VclPtr<vcl::Window>& pMouseMoveWin,
         aNLeaveEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners(aNLeaveEvt);
 }
 
-static void lcl_UpdateClickSequence(const VclPtr<vcl::Window>& pChild, const Point& aMousePos,
-                                    sal_uInt64 nMsgTime, sal_uInt16 nCode,
+static void lcl_UpdateClickSequence(const VclPtr<vcl::Window>& pChild, const MouseAction& rAction,
                                     ImplFrameData* pWinFrameData)
 {
     if (!pChild)
@@ -559,11 +557,11 @@ static void lcl_UpdateClickSequence(const VclPtr<vcl::Window>& pChild, const Poi
     const sal_uInt64 nDblClkTime = rMSettings.GetDoubleClickTime();
     const tools::Long nDblClkW = rMSettings.GetDoubleClickWidth();
     const tools::Long nDblClkH = rMSettings.GetDoubleClickHeight();
-    const tools::Long nMouseX = aMousePos.X();   // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
-    const tools::Long nMouseY = aMousePos.Y();
+    const tools::Long nMouseX = rAction.aPos.X();   // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
+    const tools::Long nMouseY = rAction.aPos.Y();
 
-    if (lcl_IsSameTargetAsFirstClick(pChild, nCode)
-        && lcl_IsWithinDoubleClickTime(nMsgTime, nDblClkTime, pWinFrameData)
+    if (lcl_IsSameTargetAsFirstClick(pChild, rAction.nCode)
+        && lcl_IsWithinDoubleClickTime(rAction.nMsgTime, nDblClkTime, pWinFrameData)
         && lcl_IsWithinDoubleClickTolerance(nMouseX, nMouseY, nDblClkW, nDblClkH, pWinFrameData))
     {
         pChild->ImplGetFrameData()->mnClickCount++;
@@ -575,12 +573,12 @@ static void lcl_UpdateClickSequence(const VclPtr<vcl::Window>& pChild, const Poi
         pChild->ImplGetFrameData()->mnClickCount = 1;
         pChild->ImplGetFrameData()->mnFirstMouseX = nMouseX;
         pChild->ImplGetFrameData()->mnFirstMouseY = nMouseY;
-        pChild->ImplGetFrameData()->mnFirstMouseCode = nCode;
-        pChild->ImplGetFrameData()->mbStartDragCalled = (nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) !=
+        pChild->ImplGetFrameData()->mnFirstMouseCode = rAction.nCode;
+        pChild->ImplGetFrameData()->mbStartDragCalled = (rAction.nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) !=
                                                         (MouseSettings::GetStartDragCode() & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE));
     }
 
-    pChild->ImplGetFrameData()->mnMouseDownTime = nMsgTime;
+    pChild->ImplGetFrameData()->mnMouseDownTime = rAction.nMsgTime;
 }
 
 static bool lcl_CheckRedundantMouseMove(bool bMouseLeave, const VclPtr<vcl::Window>& pChild,
@@ -614,7 +612,7 @@ static bool lcl_CheckAndDeliverMouseLeave(ImplFrameData* pWinFrameData, VclPtr<v
         pWinFrameData->mbInMouseMove = true;
         pMouseMoveWin->ImplGetWinData()->mbMouseOver = false;
 
-        lcl_DeliverMouseLeaveEvent(pMouseMoveWin, rAction.aPos, pWinFrameData->mnClickCount, rAction.nCode, rAction.nModifiers);
+        lcl_DeliverMouseLeaveEvent(pMouseMoveWin, rAction, pWinFrameData->mnClickCount);
 
         pWinFrameData->mpMouseMoveWin = nullptr;
         pWinFrameData->mbInMouseMove = false;
@@ -643,7 +641,7 @@ static MouseEventRouting lcl_RouteMouseMove(const VclPtr<vcl::Window>& xWindow, 
 
     // call Start-Drag handler if required
     if (vcl::Window* pMouseDownWin = pWinFrameData->mpMouseDownWin)
-        lcl_CheckAndInitiateStartDrag(pMouseDownWin, rAction.nCode, rAction.aPos, nClicks);
+        lcl_CheckAndInitiateStartDrag(pMouseDownWin, rAction, nClicks);
 
     if (xWindow->isDisposed())
         return MouseEventRouting::Consumed;
@@ -930,7 +928,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
     }
     else
     {
-        lcl_UpdateClickSequence(pChild, aMousePos, nMsgTime, nCode, pWinFrameData);
+        lcl_UpdateClickSequence(pChild, aAction, pWinFrameData);
         pSVData->maAppData.mnLastInputTime = tools::Time::GetSystemTicks();
     }
 
