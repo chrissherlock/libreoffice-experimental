@@ -301,12 +301,13 @@ static bool lcl_NeedsLOKRemirroring(const VclPtr<vcl::Window>& xWindow)
 struct MouseAction
 {
     Point aPos;
+    sal_uInt64 nMsgTime;
     sal_uInt16 nCode;
     MouseEventModifiers nModifiers;
 };
 
 static bool lcl_EnforceMouseMoveBeforeClick(const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent,
-                                            const MouseAction& rAction, sal_uInt64 nMsgTime)
+                                            const MouseAction& rAction)
 {
     if (nSVEvent != NotifyEventType::MOUSEBUTTONDOWN && nSVEvent != NotifyEventType::MOUSEBUTTONUP)
         return false;
@@ -333,7 +334,7 @@ static bool lcl_EnforceMouseMoveBeforeClick(const VclPtr<vcl::Window>& xWindow, 
         pWinFrameData->mnLastMouseX != rAction.aPos.X() || pWinFrameData->mnLastMouseY != rAction.aPos.Y())
     {
         sal_uInt16 nMoveCode = rAction.nCode & ~(MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE);
-        ImplHandleMouseEvent(xWindow, NotifyEventType::MOUSEMOVE, false, rAction.aPos, nMsgTime, nMoveCode, rAction.nModifiers);
+        ImplHandleMouseEvent(xWindow, NotifyEventType::MOUSEMOVE, false, rAction.aPos, rAction.nMsgTime, nMoveCode, rAction.nModifiers);
     }
 
     return false;
@@ -869,12 +870,14 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
     if (lcl_NeedsLOKRemirroring(xWindow))
         xWindow->GetOutDev()->ReMirror(aMousePos);
 
+    MouseAction aAction { aMousePos, nMsgTime, nCode, nModifiers };
+
     // we need a mousemove event, before we get a mousebuttondown or a mousebuttonup event
-    if (lcl_EnforceMouseMoveBeforeClick(xWindow, nSVEvent, { aMousePos, nCode, nModifiers }, nMsgTime))
+    if (lcl_EnforceMouseMoveBeforeClick(xWindow, nSVEvent, aAction))
         return true;
 
     ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
-    const sal_uInt16 nOldCode = lcl_UpdateFrameMouseState(pWinFrameData, { aMousePos, nCode, nModifiers });
+    const sal_uInt16 nOldCode = lcl_UpdateFrameMouseState(pWinFrameData, aAction);
 
     pWinFrameData->mbMouseIn = !bMouseLeave;
 
@@ -907,6 +910,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             pChildWinOutDev->ImplIsAntiparallel())
         {
             pChildWinOutDev->ReMirror(aMousePos);
+            aAction = { aMousePos, nMsgTime, nCode, nModifiers };
         }
 
         if (lcl_IsMouseInputBlocked(pChild))
@@ -926,7 +930,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         if (lcl_CheckRedundantMouseMove(bMouseLeave, pChild, pWinFrameData, aMousePos, nOldCode))
             return false;
 
-        MouseEventRouting eRoute = lcl_RouteMouseMove(xWindow, pChild, pWinFrameData, { aMousePos, nCode, nModifiers});
+        MouseEventRouting eRoute = lcl_RouteMouseMove(xWindow, pChild, pWinFrameData, aAction);
 
         if (eRoute == MouseEventRouting::Consumed)
             return true;
