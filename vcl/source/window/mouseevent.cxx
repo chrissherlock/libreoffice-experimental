@@ -71,6 +71,14 @@
 #include <algorithm>
 #include <memory>
 
+struct MouseAction
+{
+    Point aPos;
+    sal_uInt64 nMsgTime;
+    sal_uInt16 nCode;
+    MouseEventModifiers nModifiers;
+};
+
 static bool lcl_IsFloatPopupModeWindow(const vcl::Window* pChild)
 {
     ImplSVData* pSVData = ImplGetSVData();
@@ -167,21 +175,20 @@ static bool lcl_EndPopupOnAnyClick(FloatingWindow* pLastLevelFloat, NotifyEventT
     return true;
 }
 
-static bool lcl_DispatchFloatMouseEvent(vcl::Window* pChild, const Point& rMousePos,
-                                        sal_uInt16 nCode, NotifyEventType nSVEvent,
-                                        bool bMouseLeave)
+static bool lcl_DispatchFloatMouseEvent(vcl::Window* pChild, const MouseAction& rAction,
+                                        NotifyEventType nSVEvent, bool bMouseLeave)
 {
     if (lcl_IsFloatPopupModeWindow(pChild))
         return false;
 
     bool bHitTestInsideRect = false;
     ImplSVData* pSVData = ImplGetSVData();
-    FloatingWindow* pFloat = pSVData->mpWinData->mpFirstFloat->ImplFloatHitTest(pChild, rMousePos, bHitTestInsideRect);
+    FloatingWindow* pFloat = pSVData->mpWinData->mpFirstFloat->ImplFloatHitTest(pChild, rAction.aPos, bHitTestInsideRect);
 
     if (nSVEvent == NotifyEventType::MOUSEMOVE)
         return lcl_HandleFloatMouseMove(pChild, bMouseLeave, pFloat, bHitTestInsideRect);
 
-    if (nCode & MOUSE_LEFT)
+    if (rAction.nCode & MOUSE_LEFT)
         return lcl_HandleFloatMouseLeftButton(pFloat, nSVEvent, bHitTestInsideRect);
 
     if (pFloat)
@@ -298,14 +305,6 @@ static bool lcl_NeedsLOKRemirroring(const VclPtr<vcl::Window>& xWindow)
            !xWindow->GetOutDev()->ImplIsAntiparallel();
 }
 
-struct MouseAction
-{
-    Point aPos;
-    sal_uInt64 nMsgTime;
-    sal_uInt16 nCode;
-    MouseEventModifiers nModifiers;
-};
-
 static bool lcl_EnforceMouseMoveBeforeClick(const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent,
                                             const MouseAction& rAction)
 {
@@ -413,10 +412,10 @@ static bool lcl_IsMouseInputBlocked(const VclPtr<vcl::Window>& pChild)
         && (!pChild->IsEnabled() || !pChild->IsInputEnabled() || pChild->IsInModalMode());
 }
 
-static bool lcl_TryConsumeBlockedEvent(const VclPtr<vcl::Window>& pChild, const Point& aMousePos,
-                                       sal_uInt16 nCode, NotifyEventType nSVEvent, bool bMouseLeave)
+static bool lcl_TryConsumeBlockedEvent(const VclPtr<vcl::Window>& pChild, const MouseAction& rAction,
+                                       NotifyEventType nSVEvent, bool bMouseLeave)
 {
-    lcl_DispatchFloatMouseEvent(pChild, aMousePos, nCode, nSVEvent, bMouseLeave);
+    lcl_DispatchFloatMouseEvent(pChild, rAction, nSVEvent, bMouseLeave);
 
     if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
         return true;
@@ -424,7 +423,7 @@ static bool lcl_TryConsumeBlockedEvent(const VclPtr<vcl::Window>& pChild, const 
     // Set normal MousePointer for disabled windows
     if (nSVEvent == NotifyEventType::MOUSEMOVE)
     {
-        lcl_HandleMouseHelpRequest(pChild, aMousePos);
+        lcl_HandleMouseHelpRequest(pChild, rAction.aPos);
         lcl_SetMousePointer(pChild);
     }
 
@@ -914,7 +913,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         }
 
         if (lcl_IsMouseInputBlocked(pChild))
-            return lcl_TryConsumeBlockedEvent(pChild, aMousePos, nCode, nSVEvent, bMouseLeave);
+            return lcl_TryConsumeBlockedEvent(pChild, aAction, nSVEvent, bMouseLeave);
 
         // End ExtTextInput-Mode, if the user click in the same TopLevel Window
         if (lcl_IsClickDuringExtTextInput(nSVEvent))
@@ -958,7 +957,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
 
     // handle FloatingMode
     if (!pSVData->mpWinData->mpTrackWin && pSVData->mpWinData->mpFirstFloat
-        && lcl_DispatchFloatMouseEvent(pChild, aMousePos, nCode, nSVEvent, bMouseLeave))
+        && lcl_DispatchFloatMouseEvent(pChild, aAction, nSVEvent, bMouseLeave))
     {
         if ( !pChild->isDisposed() )
             pChild->ImplGetFrameData()->mbStartDragCalled = true;
