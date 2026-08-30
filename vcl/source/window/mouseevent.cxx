@@ -481,6 +481,44 @@ static bool lcl_IsWithinDoubleClickTime(sal_uInt64 nMsgTime, sal_uInt64 nDblClkT
     return (nMsgTime - pFrameData->mnMouseDownTime) < nDblClkTime;
 }
 
+static void lcl_FireDragGesture(vcl::Window* pMouseDownWin, sal_uInt16 nCode,
+                                const Point& rMousePos, sal_Int32 nClicks)
+{
+    rtl::Reference< DNDListenerContainer > xDragGestureRecognizer(
+        pMouseDownWin->ImplGetWindowImpl()->mxDNDListenerContainer);
+
+    if (!xDragGestureRecognizer.is())
+        return;
+
+    // retrieve mouse position relative to mouse down window
+    Point relLoc = pMouseDownWin->ScreenToOutputPixel(Point(
+        pMouseDownWin->ImplGetFrameData()->mnFirstMouseX,
+        pMouseDownWin->ImplGetFrameData()->mnFirstMouseY));
+
+    // create a UNO mouse event out of the available data
+    css::awt::MouseEvent aMouseEvent(static_cast<css::uno::XInterface *>(nullptr),
+#ifdef MACOSX
+        nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3),
+#else
+        nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2),
+#endif
+        nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE),
+        rMousePos.X(),
+        rMousePos.Y(),
+        nClicks,
+        false);
+
+    SolarMutexReleaser aReleaser;
+
+    // FIXME: where do I get Action from ?
+    if (css::uno::Reference<css::datatransfer::dnd::XDragSource> xDragSource = pMouseDownWin->GetDragSource();
+        xDragSource.is())
+    {
+        xDragGestureRecognizer->fireDragGestureEvent( 0,
+            relLoc.X(), relLoc.Y(), xDragSource, css::uno::Any( aMouseEvent ) );
+    }
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nModifiers )
@@ -592,44 +630,8 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                         pMouseDownWin->ImplGetFrameData()->mbStartDragCalled  = true;
 
                         // Check if drag source provides its own recognizer
-                        if( pMouseDownWin->ImplGetFrameData()->mbInternalDragGestureRecognizer )
-                        {
-                            // query DropTarget from child window
-                            rtl::Reference< DNDListenerContainer > xDragGestureRecognizer(
-                                    pMouseDownWin->ImplGetWindowImpl()->mxDNDListenerContainer );
-
-                            if( xDragGestureRecognizer.is() )
-                            {
-                                // retrieve mouse position relative to mouse down window
-                                Point relLoc = pMouseDownWin->ScreenToOutputPixel( Point(
-                                    pMouseDownWin->ImplGetFrameData()->mnFirstMouseX,
-                                    pMouseDownWin->ImplGetFrameData()->mnFirstMouseY ) );
-
-                                // create a UNO mouse event out of the available data
-                                css::awt::MouseEvent aMouseEvent( static_cast < css::uno::XInterface * > ( nullptr ),
-#ifdef MACOSX
-                                    nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3),
-#else
-                                    nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2),
-#endif
-                                    nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE),
-                                    nMouseX,
-                                    nMouseY,
-                                    nClicks,
-                                    false );
-
-                                SolarMutexReleaser aReleaser;
-
-                                // FIXME: where do I get Action from ?
-                                css::uno::Reference< css::datatransfer::dnd::XDragSource > xDragSource = pMouseDownWin->GetDragSource();
-
-                                if( xDragSource.is() )
-                                {
-                                    xDragGestureRecognizer->fireDragGestureEvent( 0,
-                                        relLoc.X(), relLoc.Y(), xDragSource, css::uno::Any( aMouseEvent ) );
-                                }
-                            }
-                        }
+                        if( pMouseDownWin->ImplGetFrameData()->mbInternalDragGestureRecognizer)
+                            lcl_FireDragGesture(pMouseDownWin, nCode, Point(nMouseX, nMouseY), nClicks);
                     }
                 }
             }
