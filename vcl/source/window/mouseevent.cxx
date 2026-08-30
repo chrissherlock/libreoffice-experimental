@@ -537,17 +537,53 @@ static void lcl_DeliverMouseLeaveEvent(const VclPtr<vcl::Window>& pMouseMoveWin,
                                        const Point& aMousePos, sal_Int32 nClicks,
                                        sal_uInt16 nCode, MouseEventModifiers nModifiers)
 {
-    Point       aLeaveMousePos = pMouseMoveWin->ScreenToOutputPixel( aMousePos );
-    MouseEvent  aMLeaveEvt( aLeaveMousePos, nClicks, nModifiers | MouseEventModifiers::LEAVEWINDOW, nCode, nCode );
-    NotifyEvent aNLeaveEvt( NotifyEventType::MOUSEMOVE, pMouseMoveWin, &aMLeaveEvt );
+    const Point aLeaveMousePos = pMouseMoveWin->ScreenToOutputPixel(aMousePos);
+    MouseEvent aMLeaveEvt(aLeaveMousePos, nClicks, nModifiers | MouseEventModifiers::LEAVEWINDOW, nCode, nCode);
+    NotifyEvent aNLeaveEvt(NotifyEventType::MOUSEMOVE, pMouseMoveWin, &aMLeaveEvt);
 
     // A MouseLeave can destroy this window
-    if ( !ImplCallPreNotify( aNLeaveEvt ) )
+    if (ImplCallPreNotify(aNLeaveEvt))
+        return;
+
+    pMouseMoveWin->MouseMove(aMLeaveEvt);
+
+    if (!pMouseMoveWin->isDisposed())
+        aNLeaveEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners(aNLeaveEvt);
+}
+
+static void lcl_UpdateClickSequence(const VclPtr<vcl::Window>& pChild, const Point& aMousePos,
+                                    sal_uInt64 nMsgTime, sal_uInt16 nCode,
+                                    ImplFrameData* pWinFrameData)
+{
+    if (!pChild)
+        return;
+
+    const MouseSettings& rMSettings = pChild->GetSettings().GetMouseSettings();
+    const sal_uInt64 nDblClkTime = rMSettings.GetDoubleClickTime();
+    const tools::Long nDblClkW = rMSettings.GetDoubleClickWidth();
+    const tools::Long nDblClkH = rMSettings.GetDoubleClickHeight();
+    const tools::Long nMouseX = aMousePos.X();   // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
+    const tools::Long nMouseY = aMousePos.Y();
+
+    if (lcl_IsSameTargetAsFirstClick(pChild, nCode)
+        && lcl_IsWithinDoubleClickTime(nMsgTime, nDblClkTime, pWinFrameData)
+        && lcl_IsWithinDoubleClickTolerance(nMouseX, nMouseY, nDblClkW, nDblClkH, pWinFrameData))
     {
-        pMouseMoveWin->MouseMove( aMLeaveEvt );
-        if( !pMouseMoveWin->isDisposed() )
-            aNLeaveEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners( aNLeaveEvt );
+        pChild->ImplGetFrameData()->mnClickCount++;
+        pChild->ImplGetFrameData()->mbStartDragCalled  = true;
     }
+    else
+    {
+        pChild->ImplGetFrameData()->mpMouseDownWin = pChild;
+        pChild->ImplGetFrameData()->mnClickCount = 1;
+        pChild->ImplGetFrameData()->mnFirstMouseX = nMouseX;
+        pChild->ImplGetFrameData()->mnFirstMouseY = nMouseY;
+        pChild->ImplGetFrameData()->mnFirstMouseCode = nCode;
+        pChild->ImplGetFrameData()->mbStartDragCalled = (nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) !=
+                                                        (MouseSettings::GetStartDragCode() & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE));
+    }
+
+    pChild->ImplGetFrameData()->mnMouseDownTime = nMsgTime;
 }
 
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
@@ -681,41 +717,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
     }
     else
     {
-        if (pChild)
-        {
-            // mouse click
-            if ( nSVEvent == NotifyEventType::MOUSEBUTTONDOWN )
-            {
-                const MouseSettings& rMSettings = pChild->GetSettings().GetMouseSettings();
-                sal_uInt64 nDblClkTime = rMSettings.GetDoubleClickTime();
-                tools::Long    nDblClkW    = rMSettings.GetDoubleClickWidth();
-                tools::Long    nDblClkH    = rMSettings.GetDoubleClickHeight();
-                tools::Long nMouseX = aMousePos.X();   // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
-                tools::Long nMouseY = aMousePos.Y();
-
-                if (lcl_IsSameTargetAsFirstClick(pChild, nCode)
-                    && lcl_IsWithinDoubleClickTime(nMsgTime, nDblClkTime, pWinFrameData)
-                    && lcl_IsWithinDoubleClickTolerance(nMouseX, nMouseY, nDblClkW, nDblClkH, pWinFrameData))
-                {
-                    pChild->ImplGetFrameData()->mnClickCount++;
-                    pChild->ImplGetFrameData()->mbStartDragCalled  = true;
-                }
-                else
-                {
-                    pChild->ImplGetFrameData()->mpMouseDownWin     = pChild;
-                    pChild->ImplGetFrameData()->mnClickCount       = 1;
-                    pChild->ImplGetFrameData()->mnFirstMouseX      = nMouseX;
-                    pChild->ImplGetFrameData()->mnFirstMouseY      = nMouseY;
-                    pChild->ImplGetFrameData()->mnFirstMouseCode   = nCode;
-                    pChild->ImplGetFrameData()->mbStartDragCalled  = (nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) !=
-                                                                     (MouseSettings::GetStartDragCode() & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE));
-                }
-                pChild->ImplGetFrameData()->mnMouseDownTime = nMsgTime;
-            }
-
-            nClicks = pChild->ImplGetFrameData()->mnClickCount;
-        }
-
+        lcl_UpdateClickSequence(pChild, aMousePos, nMsgTime, nCode, pWinFrameData);
         pSVData->maAppData.mnLastInputTime = tools::Time::GetSystemTicks();
     }
 
