@@ -290,6 +290,14 @@ static void lcl_ContextMenuEventLink(void* pCEvent, void*)
         ImplCallCommand(pEv->pWindow, CommandEventId::ContextMenu, nullptr, true, &pEv->aChildPos);
 }
 
+static bool lcl_NeedsLOKRemirroring(const VclPtr<vcl::Window>& xWindow)
+{
+    return comphelper::LibreOfficeKit::isActive() &&
+           AllSettings::GetLayoutRTL() &&
+           xWindow->GetOutDev() &&
+           !xWindow->GetOutDev()->ImplIsAntiparallel();
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nMode )
@@ -302,26 +310,21 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                "(Code " << nCode << ") "
                "(Modifiers " << static_cast<sal_uInt16>(nMode) << ")");
 
-    if (comphelper::LibreOfficeKit::isActive() && AllSettings::GetLayoutRTL()
-        && xWindow->GetOutDev() && !xWindow->GetOutDev()->ImplIsAntiparallel())
-    {
+    if (lcl_NeedsLOKRemirroring(xWindow))
         xWindow->GetOutDev()->ReMirror(aMousePos);
-    }
-
-    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
-    ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
-    sal_uInt16 nOldCode = pWinFrameData->mnMouseCode;
 
     // we need a mousemove event, before we get a mousebuttondown or a
     // mousebuttonup event
     if ( (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN) || (nSVEvent == NotifyEventType::MOUSEBUTTONUP) )
     {
-        if ( (nSVEvent == NotifyEventType::MOUSEBUTTONUP) && aHelpData.mbExtHelpMode )
+        ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+
+        if ((nSVEvent == NotifyEventType::MOUSEBUTTONUP) && aHelpData.mbExtHelpMode)
             Help::EndExtHelp();
 
-        if ( aHelpData.mpHelpWin )
+        if (aHelpData.mpHelpWin)
         {
-            if( xWindow->ImplGetWindow() == aHelpData.mpHelpWin )
+            if (xWindow->ImplGetWindow() == aHelpData.mpHelpWin)
             {
                 ImplDestroyHelpWindow( false );
                 return true; // xWindow is dead now - avoid crash!
@@ -332,13 +335,16 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             }
         }
 
-        if ( (pWinFrameData->mnLastMouseX != aMousePos.X()) ||
-             (pWinFrameData->mnLastMouseY != aMousePos.Y()) )
+        if (ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
+            pWinFrameData->mnLastMouseX != aMousePos.X() || pWinFrameData->mnLastMouseY != aMousePos.Y())
         {
             sal_uInt16 nMoveCode = nCode & ~(MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE);
             ImplHandleMouseEvent(xWindow, NotifyEventType::MOUSEMOVE, false, aMousePos, nMsgTime, nMoveCode, nMode);
         }
     }
+
+    ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
+    sal_uInt16 nOldCode = pWinFrameData->mnMouseCode;
 
     // update frame data
     pWinFrameData->mnBeforeLastMouseX = pWinFrameData->mnLastMouseX;
