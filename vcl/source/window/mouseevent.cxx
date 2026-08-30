@@ -190,14 +190,23 @@ static bool lcl_HandleMouseFloatMode( vcl::Window* pChild, const Point& rMousePo
     return lcl_EndPopupOnAnyClick(pLastLevelFloat, nSVEvent);
 }
 
+static bool lcl_IsPartOfHelpWindowHierarchy(const vcl::Window* pChild)
+{
+    const ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+    const vcl::Window* pHelpWin = aHelpData.mpHelpWin;
+
+    if (!pHelpWin)
+        return false;
+
+    return pHelpWin->IsWindowOrChild(pChild) || pChild->IsWindowOrChild(pHelpWin);
+}
+
 static void lcl_HandleMouseHelpRequest( vcl::Window* pChild, const Point& rMousePos )
 {
-    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
-    if ( aHelpData.mpHelpWin &&
-         ( aHelpData.mpHelpWin->IsWindowOrChild( pChild ) ||
-           pChild->IsWindowOrChild( aHelpData.mpHelpWin ) ))
+    if (lcl_IsPartOfHelpWindowHierarchy(pChild))
         return;
 
+    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
     HelpEventMode nHelpMode = HelpEventMode::NONE;
     if ( aHelpData.mbQuickHelp )
         nHelpMode = HelpEventMode::QUICK;
