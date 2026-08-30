@@ -301,14 +301,8 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                "(X, Y " << nX << ", " << nY << ") "
                "(Code " << nCode << ") "
                "(Modifiers " << static_cast<sal_uInt16>(nMode) << ")");
-    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
-    ImplSVData* pSVData = ImplGetSVData();
-    Point       aMousePos( nX, nY );
-    VclPtr<vcl::Window> pChild;
-    bool        bRet(false);
-    sal_uInt16  nClicks(0);
-    ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
-    sal_uInt16      nOldCode = pWinFrameData->mnMouseCode;
+
+    Point aMousePos(nX, nY);
 
     if (comphelper::LibreOfficeKit::isActive() && AllSettings::GetLayoutRTL()
         && xWindow->GetOutDev() && !xWindow->GetOutDev()->ImplIsAntiparallel())
@@ -317,6 +311,10 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         nX = aMousePos.X();
         nY = aMousePos.Y();
     }
+
+    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+    ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
+    sal_uInt16 nOldCode = pWinFrameData->mnMouseCode;
 
     // we need a mousemove event, before we get a mousebuttondown or a
     // mousebuttonup event
@@ -371,6 +369,8 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         pWinFrameData->mbMouseIn = true;
     }
 
+    ImplSVData* pSVData = ImplGetSVData();
+
     DBG_ASSERT(!pSVData->mpWinData->mpTrackWin
                    || (pSVData->mpWinData->mpTrackWin == pSVData->mpWinData->mpCaptureWin),
                "ImplHandleMouseEvent: TrackWin != CaptureWin");
@@ -381,6 +381,8 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         pSVData->mpWinData->mpAutoScrollWin->EndAutoScroll();
         return true;
     }
+
+    VclPtr<vcl::Window> pChild;
 
     // find mouse window
     if (pSVData->mpWinData->mpCaptureWin)
@@ -455,6 +457,8 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
                 || (nSVEvent == NotifyEventType::MOUSEBUTTONUP)))
             pSVData->mpWinData->mpExtTextInputWin->EndExtTextInput();
     }
+
+    sal_uInt16 nClicks = 0;
 
     // determine mouse event data
     if ( nSVEvent == NotifyEventType::MOUSEMOVE )
@@ -698,6 +702,8 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         if ( pChild->isDisposed() )
             return true;
     }
+
+    bool bRet = false;
 
     if ( ImplCallPreNotify( aNEvt ) || pChild->isDisposed() )
     {
