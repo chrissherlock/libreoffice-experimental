@@ -364,6 +364,41 @@ static bool lcl_TeardownKillableTooltip(const VclPtr<vcl::Window>& xWindow)
     return false;
 }
 
+static std::optional<VclPtr<vcl::Window>> lcl_FindMouseWindow(const VclPtr<vcl::Window>& xWindow,
+                                                              bool bMouseLeave,
+                                                              Point aMousePos)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+    VclPtr<vcl::Window> pChild;
+
+    // find mouse window
+    if (pSVData->mpWinData->mpCaptureWin)
+    {
+        pChild = pSVData->mpWinData->mpCaptureWin;
+
+        SAL_WARN_IF(xWindow != pChild->ImplGetFrameWindow(), "vcl",
+                    "ImplHandleMouseEvent: mouse event is not sent to capture window");
+
+        // java client cannot capture mouse correctly
+        if (xWindow != pChild->ImplGetFrameWindow() || bMouseLeave)
+            return std::nullopt; // Signal caller to abort (return false)
+    }
+    else
+    {
+        if (bMouseLeave)
+            pChild = nullptr;
+        else
+            pChild = xWindow->ImplFindWindow(aMousePos);
+    }
+
+    // test this because mouse events are buffered in the remote version
+    // and size may not be in sync
+    if (!pChild && !bMouseLeave)
+        return std::nullopt; // Signal caller to abort (return false)
+
+    return pChild; // Success, implicitly wraps the VclPtr in the std::optional
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nModifiers )
@@ -404,35 +439,11 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         return true;
     }
 
-    VclPtr<vcl::Window> pChild;
-
-    // find mouse window
-    if (pSVData->mpWinData->mpCaptureWin)
-    {
-        pChild = pSVData->mpWinData->mpCaptureWin;
-
-        SAL_WARN_IF( xWindow != pChild->ImplGetFrameWindow(), "vcl",
-                    "ImplHandleMouseEvent: mouse event is not sent to capture window" );
-
-        // java client cannot capture mouse correctly
-        if ( xWindow != pChild->ImplGetFrameWindow() )
-            return false;
-
-        if ( bMouseLeave )
-            return false;
-    }
-    else
-    {
-        if ( bMouseLeave )
-            pChild = nullptr;
-        else
-            pChild = xWindow->ImplFindWindow( aMousePos );
-    }
-
-    // test this because mouse events are buffered in the remote version
-    // and size may not be in sync
-    if ( !pChild && !bMouseLeave )
+    std::optional<VclPtr<vcl::Window>> oChild = lcl_FindMouseWindow(xWindow, bMouseLeave, aMousePos);
+    if (!oChild)
         return false;
+
+    VclPtr<vcl::Window> pChild = *oChild;
 
     // execute a few tests and catch the message or implement the status
     if ( pChild )
