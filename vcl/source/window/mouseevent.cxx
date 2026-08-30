@@ -433,12 +433,6 @@ static bool lcl_IsClickDuringExtTextInput(NotifyEventType nSVEvent)
         && (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN || nSVEvent == NotifyEventType::MOUSEBUTTONUP);
 }
 
-static bool lcl_IsStartDragButton(sal_uInt16 nCode)
-{
-    constexpr sal_uInt16 nButtonMask = MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE;
-    return (nCode & nButtonMask) == (MouseSettings::GetStartDragCode() & nButtonMask);
-}
-
 static bool lcl_ExceedsDragTolerance(long nMouseX, long nMouseY,
                                      long nDragW, long nDragH,
                                      const ImplFrameData* pFrameData)
@@ -519,11 +513,6 @@ static void lcl_FireDragGesture(vcl::Window* pMouseDownWin, sal_uInt16 nCode,
     }
 }
 
-static bool lcl_CanInitiateStartDrag(vcl::Window* pMouseDownWin, sal_uInt16 nCode)
-{
-    return lcl_IsStartDragButton(nCode) && !pMouseDownWin->ImplGetFrameData()->mbStartDragCalled;
-}
-
 static void lcl_CheckAndInitiateStartDrag(vcl::Window* pMouseDownWin, sal_uInt16 nCode,
                                            const Point& aMousePos, sal_Int32 nClicks)
 {
@@ -542,6 +531,23 @@ static void lcl_CheckAndInitiateStartDrag(vcl::Window* pMouseDownWin, sal_uInt16
     // Check if drag source provides its own recognizer
     if( pMouseDownWin->ImplGetFrameData()->mbInternalDragGestureRecognizer)
         lcl_FireDragGesture(pMouseDownWin, nCode, Point(nMouseX, nMouseY), nClicks);
+}
+
+static void lcl_DeliverMouseLeaveEvent(const VclPtr<vcl::Window>& pMouseMoveWin,
+                                       const Point& aMousePos, sal_Int32 nClicks,
+                                       sal_uInt16 nCode, MouseEventModifiers nModifiers)
+{
+    Point       aLeaveMousePos = pMouseMoveWin->ScreenToOutputPixel( aMousePos );
+    MouseEvent  aMLeaveEvt( aLeaveMousePos, nClicks, nModifiers | MouseEventModifiers::LEAVEWINDOW, nCode, nCode );
+    NotifyEvent aNLeaveEvt( NotifyEventType::MOUSEMOVE, pMouseMoveWin, &aMLeaveEvt );
+
+    // A MouseLeave can destroy this window
+    if ( !ImplCallPreNotify( aNLeaveEvt ) )
+    {
+        pMouseMoveWin->MouseMove( aMLeaveEvt );
+        if( !pMouseMoveWin->isDisposed() )
+            aNLeaveEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners( aNLeaveEvt );
+    }
 }
 
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
@@ -643,43 +649,34 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
 
         // test for mouseleave and mouseenter
         VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
-        if ( pChild != pMouseMoveWin )
+
+        if (pMouseMoveWin && pChild != pMouseMoveWin)
         {
-            if ( pMouseMoveWin )
-            {
-                Point       aLeaveMousePos = pMouseMoveWin->ScreenToOutputPixel( aMousePos );
-                MouseEvent  aMLeaveEvt( aLeaveMousePos, nClicks, nModifiers | MouseEventModifiers::LEAVEWINDOW, nCode, nCode );
-                NotifyEvent aNLeaveEvt( NotifyEventType::MOUSEMOVE, pMouseMoveWin, &aMLeaveEvt );
-                pWinFrameData->mbInMouseMove = true;
-                pMouseMoveWin->ImplGetWinData()->mbMouseOver = false;
+            pWinFrameData->mbInMouseMove = true;
+            pMouseMoveWin->ImplGetWinData()->mbMouseOver = false;
 
-                // A MouseLeave can destroy this window
-                if ( !ImplCallPreNotify( aNLeaveEvt ) )
-                {
-                    pMouseMoveWin->MouseMove( aMLeaveEvt );
-                    if( !pMouseMoveWin->isDisposed() )
-                        aNLeaveEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners( aNLeaveEvt );
-                }
+            lcl_DeliverMouseLeaveEvent(pMouseMoveWin, aMousePos, nClicks, nCode, nModifiers);
 
-                pWinFrameData->mpMouseMoveWin = nullptr;
-                pWinFrameData->mbInMouseMove = false;
+            pWinFrameData->mpMouseMoveWin = nullptr;
+            pWinFrameData->mbInMouseMove = false;
 
-                if ( pChild && pChild->isDisposed() )
-                    pChild = nullptr;
-                if ( pMouseMoveWin->isDisposed() )
-                    return true;
-            }
+            if ( pChild && pChild->isDisposed() )
+                pChild = nullptr;
 
-            nModifiers |= MouseEventModifiers::ENTERWINDOW;
+            if ( pMouseMoveWin->isDisposed() )
+                return true;
         }
+
+        if (pChild != pMouseMoveWin)
+            nModifiers |= MouseEventModifiers::ENTERWINDOW;
 
         pWinFrameData->mpMouseMoveWin = pChild;
 
-        if( pChild )
+        if (pChild)
             pChild->ImplGetWinData()->mbMouseOver = true;
 
         // MouseLeave
-        if ( !pChild )
+        if (!pChild)
             return false;
     }
     else
