@@ -615,25 +615,22 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             // check for matching StartDrag mode. We only compare
             // the status of the mouse buttons, such that e. g. Mod1 can
             // change immediately to the copy mode
-            if (lcl_IsStartDragButton(nCode))
+            if (lcl_IsStartDragButton(nCode) && !pMouseDownWin->ImplGetFrameData()->mbStartDragCalled)
             {
-                if (!pMouseDownWin->ImplGetFrameData()->mbStartDragCalled)
+                const MouseSettings& rMSettings = pMouseDownWin->GetSettings().GetMouseSettings();
+
+                tools::Long nDragW  = rMSettings.GetStartDragWidth();
+                tools::Long nDragH  = rMSettings.GetStartDragHeight();
+                tools::Long nMouseX = aMousePos.X(); // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
+                tools::Long nMouseY = aMousePos.Y();
+
+                if (lcl_ExceedsDragTolerance(nMouseX, nMouseY, nDragW, nDragH, pMouseDownWin->ImplGetFrameData()))
                 {
-                    const MouseSettings& rMSettings = pMouseDownWin->GetSettings().GetMouseSettings();
+                    pMouseDownWin->ImplGetFrameData()->mbStartDragCalled  = true;
 
-                    tools::Long nDragW  = rMSettings.GetStartDragWidth();
-                    tools::Long nDragH  = rMSettings.GetStartDragHeight();
-                    tools::Long nMouseX = aMousePos.X(); // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
-                    tools::Long nMouseY = aMousePos.Y();
-
-                    if (lcl_ExceedsDragTolerance(nMouseX, nMouseY, nDragW, nDragH, pMouseDownWin->ImplGetFrameData()))
-                    {
-                        pMouseDownWin->ImplGetFrameData()->mbStartDragCalled  = true;
-
-                        // Check if drag source provides its own recognizer
-                        if( pMouseDownWin->ImplGetFrameData()->mbInternalDragGestureRecognizer)
-                            lcl_FireDragGesture(pMouseDownWin, nCode, Point(nMouseX, nMouseY), nClicks);
-                    }
+                    // Check if drag source provides its own recognizer
+                    if( pMouseDownWin->ImplGetFrameData()->mbInternalDragGestureRecognizer)
+                        lcl_FireDragGesture(pMouseDownWin, nCode, Point(nMouseX, nMouseY), nClicks);
                 }
             }
             else
