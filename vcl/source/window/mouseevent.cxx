@@ -614,8 +614,7 @@ static bool lcl_CheckRedundantMouseMove(bool bMouseLeave, const VclPtr<vcl::Wind
 }
 
 static bool lcl_CheckAndDeliverMouseLeave(ImplFrameData* pWinFrameData, VclPtr<vcl::Window>& pChild,
-                                          const Point& aMousePos, sal_Int32 nClicks,
-                                          sal_uInt16 nCode, MouseEventModifiers nModifiers)
+                                      const MouseAction& rAction)
 {
     if (VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
         pMouseMoveWin && pChild != pMouseMoveWin)
@@ -623,7 +622,7 @@ static bool lcl_CheckAndDeliverMouseLeave(ImplFrameData* pWinFrameData, VclPtr<v
         pWinFrameData->mbInMouseMove = true;
         pMouseMoveWin->ImplGetWinData()->mbMouseOver = false;
 
-        lcl_DeliverMouseLeaveEvent(pMouseMoveWin, aMousePos, nClicks, nCode, nModifiers);
+        lcl_DeliverMouseLeaveEvent(pMouseMoveWin, rAction.aPos, pWinFrameData->mnClickCount, rAction.nCode, rAction.nModifiers);
 
         pWinFrameData->mpMouseMoveWin = nullptr;
         pWinFrameData->mbInMouseMove = false;
@@ -646,25 +645,24 @@ enum class MouseEventRouting
 };
 
 static MouseEventRouting lcl_RouteMouseMove(const VclPtr<vcl::Window>& xWindow, VclPtr<vcl::Window>& pChild,
-                                            ImplFrameData* pWinFrameData, const Point& aMousePos,
-                                            sal_uInt16 nCode, MouseEventModifiers& nModifiers)
+                                            ImplFrameData* pWinFrameData, const MouseAction& rAction)
 {
     sal_uInt16 nClicks = pWinFrameData->mnClickCount;
 
     // call Start-Drag handler if required
     if (vcl::Window* pMouseDownWin = pWinFrameData->mpMouseDownWin)
-        lcl_CheckAndInitiateStartDrag(pMouseDownWin, nCode, aMousePos, nClicks);
+        lcl_CheckAndInitiateStartDrag(pMouseDownWin, rAction.nCode, rAction.aPos, nClicks);
 
     if (xWindow->isDisposed())
         return MouseEventRouting::Consumed;
 
-    if (lcl_CheckAndDeliverMouseLeave(pWinFrameData, pChild, aMousePos, nClicks, nCode, nModifiers))
+    if (lcl_CheckAndDeliverMouseLeave(pWinFrameData, pChild, rAction))
         return MouseEventRouting::Consumed;
 
     // Re-evaluate pMouseMoveWin after potential changes
     VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
     if (pChild != pMouseMoveWin)
-        nModifiers |= MouseEventModifiers::ENTERWINDOW;
+        const_cast<MouseEventModifiers&>(rAction.nModifiers) |= MouseEventModifiers::ENTERWINDOW;
 
     pWinFrameData->mpMouseMoveWin = pChild;
 
@@ -928,7 +926,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         if (lcl_CheckRedundantMouseMove(bMouseLeave, pChild, pWinFrameData, aMousePos, nOldCode))
             return false;
 
-        MouseEventRouting eRoute = lcl_RouteMouseMove(xWindow, pChild, pWinFrameData, aMousePos, nCode, nModifiers);
+        MouseEventRouting eRoute = lcl_RouteMouseMove(xWindow, pChild, pWinFrameData, { aMousePos, nCode, nModifiers});
 
         if (eRoute == MouseEventRouting::Consumed)
             return true;
