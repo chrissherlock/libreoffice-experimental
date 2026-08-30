@@ -615,11 +615,12 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             // check for matching StartDrag mode. We only compare
             // the status of the mouse buttons, such that e. g. Mod1 can
             // change immediately to the copy mode
-            const MouseSettings& rMSettings = pMouseDownWin->GetSettings().GetMouseSettings();
             if (lcl_IsStartDragButton(nCode))
             {
-                if ( !pMouseDownWin->ImplGetFrameData()->mbStartDragCalled )
+                if (!pMouseDownWin->ImplGetFrameData()->mbStartDragCalled)
                 {
+                    const MouseSettings& rMSettings = pMouseDownWin->GetSettings().GetMouseSettings();
+
                     tools::Long nDragW  = rMSettings.GetStartDragWidth();
                     tools::Long nDragH  = rMSettings.GetStartDragHeight();
                     tools::Long nMouseX = aMousePos.X(); // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
