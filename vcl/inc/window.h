@@ -458,8 +458,7 @@ typedef std::unique_ptr<PaintBufferGuard, o3tl::default_delete<PaintBufferGuard>
 // helper methods
 
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
-                           tools::Long nX, tools::Long nY, sal_uInt64 nMsgTime,
-                           sal_uInt16 nCode, MouseEventModifiers nMode );
+                           Point aMousePos, sal_uInt64 nMsgTime, sal_uInt16 nCode, MouseEventModifiers nMode );
 
 bool ImplLOKHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                               tools::Long nX, tools::Long nY, sal_uInt64 nMsgTime,
