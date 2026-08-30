@@ -468,27 +468,17 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         {
             lcl_DispatchFloatMouseEvent(pChild, aMousePos, nCode, nSVEvent, bMouseLeave);
 
+            if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
+                return true;
+
+            // Set normal MousePointer for disabled windows
             if (nSVEvent == NotifyEventType::MOUSEMOVE)
             {
-                lcl_HandleMouseHelpRequest( pChild, aMousePos );
-                if( pWinFrameData->mpMouseMoveWin.get() != pChild )
-                    nModifiers |= MouseEventModifiers::ENTERWINDOW;
+                lcl_HandleMouseHelpRequest(pChild, aMousePos);
+                lcl_SetMousePointer(pChild);
             }
 
-            // Call the hook also, if Window is disabled
-
-            if ( nSVEvent == NotifyEventType::MOUSEBUTTONDOWN )
-            {
-                return true;
-            }
-            else
-            {
-                // Set normal MousePointer for disabled windows
-                if ( nSVEvent == NotifyEventType::MOUSEMOVE )
-                    lcl_SetMousePointer( pChild );
-
-                return false;
-            }
+            return false;
         }
 
         // End ExtTextInput-Mode, if the user click in the same TopLevel Window
