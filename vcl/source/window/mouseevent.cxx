@@ -298,9 +298,15 @@ static bool lcl_NeedsLOKRemirroring(const VclPtr<vcl::Window>& xWindow)
            !xWindow->GetOutDev()->ImplIsAntiparallel();
 }
 
+struct MouseAction
+{
+    Point aPos;
+    sal_uInt16 nCode;
+    MouseEventModifiers nModifiers;
+};
+
 static bool lcl_EnforceMouseMoveBeforeClick(const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent,
-                                            Point aMousePos, sal_uInt64 nMsgTime,
-                                            sal_uInt16 nCode, MouseEventModifiers nModifiers)
+                                            const MouseAction& rAction, sal_uInt64 nMsgTime)
 {
     if (nSVEvent != NotifyEventType::MOUSEBUTTONDOWN && nSVEvent != NotifyEventType::MOUSEBUTTONUP)
         return false;
@@ -324,10 +330,10 @@ static bool lcl_EnforceMouseMoveBeforeClick(const VclPtr<vcl::Window>& xWindow, 
     }
 
     if (ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
-        pWinFrameData->mnLastMouseX != aMousePos.X() || pWinFrameData->mnLastMouseY != aMousePos.Y())
+        pWinFrameData->mnLastMouseX != rAction.aPos.X() || pWinFrameData->mnLastMouseY != rAction.aPos.Y())
     {
-        sal_uInt16 nMoveCode = nCode & ~(MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE);
-        ImplHandleMouseEvent(xWindow, NotifyEventType::MOUSEMOVE, false, aMousePos, nMsgTime, nMoveCode, nModifiers);
+        sal_uInt16 nMoveCode = rAction.nCode & ~(MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE);
+        ImplHandleMouseEvent(xWindow, NotifyEventType::MOUSEMOVE, false, rAction.aPos, nMsgTime, nMoveCode, rAction.nModifiers);
     }
 
     return false;
@@ -867,7 +873,7 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
         xWindow->GetOutDev()->ReMirror(aMousePos);
 
     // we need a mousemove event, before we get a mousebuttondown or a mousebuttonup event
-    if (lcl_EnforceMouseMoveBeforeClick(xWindow, nSVEvent, aMousePos, nMsgTime, nCode, nModifiers))
+    if (lcl_EnforceMouseMoveBeforeClick(xWindow, nSVEvent, { aMousePos, nCode, nModifiers }, nMsgTime))
         return true;
 
     ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
