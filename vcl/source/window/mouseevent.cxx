@@ -231,21 +231,29 @@ static bool lcl_IsKillableTooltip()
     return aHelpData.mpHelpWin && !aHelpData.mbKeyboardHelp;
 }
 
+static bool lcl_ConsumeHelpRequest(vcl::Window* pChild, const Point& rMousePos)
+{
+    const HelpEventMode nHelpMode = lcl_GetHelpEventMode();
+
+    if (nHelpMode == HelpEventMode::NONE)
+        return true;
+
+    if (pChild->IsInputEnabled() && !pChild->IsInModalMode())
+    {
+        lcl_InvokeHelpRequest(pChild, rMousePos, nHelpMode);
+        return true;
+    }
+
+    return false;
+}
+
 static void lcl_HandleMouseHelpRequest( vcl::Window* pChild, const Point& rMousePos )
 {
     if (lcl_IsPartOfHelpWindowHierarchy(pChild))
         return;
 
-    const HelpEventMode nHelpMode = lcl_GetHelpEventMode();
-
-    if (nHelpMode == HelpEventMode::NONE)
+    if (lcl_ConsumeHelpRequest(pChild, rMousePos))
         return;
-
-    if (pChild->IsInputEnabled() && !pChild->IsInModalMode())
-    {
-        lcl_InvokeHelpRequest(pChild, rMousePos, nHelpMode);
-        return;
-    }
 
     if (lcl_IsKillableTooltip())
         ImplDestroyHelpWindow(true);
