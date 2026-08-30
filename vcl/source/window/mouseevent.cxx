@@ -686,6 +686,169 @@ static bool lcl_RaiseWindow(const VclPtr<vcl::Window>& pChild)
     return pChild->isDisposed();
 }
 
+static bool lcl_DispatchMouseEvent(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                   NotifyEvent& rNEvt, const MouseEvent& rMEvt,
+                                   bool& rCallHelpRequest)
+{
+    if (ImplCallPreNotify(rNEvt) || pChild->isDisposed())
+        return true;
+
+    ImplSVData* pSVData = ImplGetSVData();
+
+    bool bRet = false;
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+    {
+        if (pSVData->mpWinData->mpTrackWin)
+        {
+            TrackingEvent aTEvt(rMEvt);
+            pChild->Tracking(aTEvt);
+            if (!pChild->isDisposed())
+            {
+                // When ScrollRepeat, we restart the timer
+                if (pSVData->mpWinData->mpTrackTimer
+                    && (pSVData->mpWinData->mnTrackFlags & StartTrackingFlags::ScrollRepeat))
+                    pSVData->mpWinData->mpTrackTimer->Start();
+            }
+            rCallHelpRequest = false;
+            bRet = true;
+        }
+        else
+        {
+            if (pChild->isDisposed())
+            {
+                rCallHelpRequest = false;
+            }
+            else
+            {
+                // if the MouseMove handler changes the help window's visibility
+                // the HelpRequest handler should not be called anymore
+                vcl::Window* pOldHelpTextWin = ImplGetSVHelpData().mpHelpWin;
+                pChild->MouseMove(rMEvt);
+                if (pOldHelpTextWin != ImplGetSVHelpData().mpHelpWin)
+                    rCallHelpRequest = false;
+            }
+        }
+    }
+    else if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
+    {
+        if (pSVData->mpWinData->mpTrackWin)
+        {
+            bRet = true;
+        }
+        else
+        {
+            pChild->ImplGetWindowImpl()->mbMouseButtonDown = false;
+            pChild->MouseButtonDown(rMEvt);
+        }
+    }
+    else
+    {
+        if (pSVData->mpWinData->mpTrackWin)
+        {
+            pChild->EndTracking();
+            bRet = true;
+        }
+        else
+        {
+            pChild->ImplGetWindowImpl()->mbMouseButtonUp = false;
+            pChild->MouseButtonUp(rMEvt);
+        }
+    }
+
+    assert(rNEvt.GetWindow() == pChild);
+
+    if (!pChild->isDisposed())
+        pChild->ImplNotifyKeyMouseCommandEventListeners(rNEvt);
+
+    return bRet;
+}
+
+static bool lcl_UpdateMouseStateAndHelp(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                        const MouseEvent& rMEvt, bool bCallHelpRequest,
+                                        bool bMouseLeave, bool bRet)
+{
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+    {
+        pChild->ImplGetWindowImpl()->mpFrameData->mbInMouseMove = false;
+
+        if (bCallHelpRequest && !ImplGetSVHelpData().mbKeyboardHelp)
+            lcl_HandleMouseHelpRequest(pChild, pChild->OutputToScreenPixel(rMEvt.GetPosPixel()));
+
+        // set new mouse pointer
+        if (!bMouseLeave)
+            lcl_SetMousePointer(pChild);
+
+        return true; // bRet is forced to true for MOUSEMOVE in the original logic
+    }
+
+    if (!bRet)
+    {
+        if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
+        {
+            if (!pChild->ImplGetWindowImpl()->mbMouseButtonDown)
+                return true;
+        }
+        else
+        {
+            if (!pChild->ImplGetWindowImpl()->mbMouseButtonUp)
+                return true;
+        }
+    }
+
+    return bRet;
+}
+
+static bool lcl_DispatchCommandEvents(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                      sal_uInt16 nClicks, sal_uInt16 nCode,
+                                      const Point& rChildPos, bool bRet)
+{
+    if ((nSVEvent != NotifyEventType::MOUSEBUTTONDOWN) && (nSVEvent != NotifyEventType::MOUSEBUTTONUP))
+        return bRet;
+
+    // Command-Events
+    if (/*!bRet &&*/ (nClicks == 1) && (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN) &&
+        (nCode == MOUSE_MIDDLE))
+    {
+        MouseMiddleButtonAction nMiddleAction = pChild->GetSettings().GetMouseSettings().GetMiddleButtonAction();
+        if (nMiddleAction == MouseMiddleButtonAction::AutoScroll)
+            bRet = !ImplCallCommand(pChild, CommandEventId::StartAutoScroll, nullptr, true, &rChildPos);
+        else if (nMiddleAction == MouseMiddleButtonAction::PasteSelection)
+            bRet = !ImplCallCommand(pChild, CommandEventId::PasteSelection, nullptr, true, &rChildPos);
+
+        return bRet;
+    }
+
+    // ContextMenu
+    if ((nCode != MouseSettings::GetContextMenuCode()) ||
+        (nClicks != MouseSettings::GetContextMenuClicks()))
+    {
+        return bRet;
+    }
+
+    bool bContextMenu = (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN);
+    if (!bContextMenu)
+        return bRet;
+
+    ImplSVData* pSVData = ImplGetSVData();
+    if (!pSVData->maAppData.mpActivePopupMenu)
+        return !ImplCallCommand(pChild, CommandEventId::ContextMenu, nullptr, true, &rChildPos);
+
+    /*  #i34277# there already is a context menu open
+     *  that was probably just closed with EndPopupMode.
+     *  We need to give the eventual corresponding
+     *  PopupMenu::Execute a chance to end properly.
+     *  Therefore delay context menu command and
+     *  issue only after popping one frame of the
+     *  Yield stack.
+     */
+    ContextMenuEvent* pEv = new ContextMenuEvent;
+    pEv->pWindow = pChild;
+    pEv->aChildPos = rChildPos;
+    Application::PostUserEvent(LINK_NONMEMBER(pEv, lcl_ContextMenuEventLink));
+
+    return bRet;
+}
+
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
                            Point aMousePos, sal_uInt64 nMsgTime,
                            sal_uInt16 nCode, MouseEventModifiers nModifiers )
@@ -812,159 +975,17 @@ bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType n
             return true;
     }
 
-    bool bRet = false;
-
-    if ( ImplCallPreNotify( aNEvt ) || pChild->isDisposed() )
-    {
-        bRet = true;
-    }
-    else
-    {
-        bRet = false;
-        if ( nSVEvent == NotifyEventType::MOUSEMOVE )
-        {
-            if (pSVData->mpWinData->mpTrackWin)
-            {
-                TrackingEvent aTEvt( aMEvt );
-                pChild->Tracking( aTEvt );
-                if ( !pChild->isDisposed() )
-                {
-                    // When ScrollRepeat, we restart the timer
-                    if (pSVData->mpWinData->mpTrackTimer
-                        && (pSVData->mpWinData->mnTrackFlags & StartTrackingFlags::ScrollRepeat))
-                        pSVData->mpWinData->mpTrackTimer->Start();
-                }
-                bCallHelpRequest = false;
-                bRet = true;
-            }
-            else
-            {
-                if( pChild->isDisposed() )
-                {
-                    bCallHelpRequest = false;
-                }
-                else
-                {
-                    // if the MouseMove handler changes the help window's visibility
-                    // the HelpRequest handler should not be called anymore
-                    vcl::Window* pOldHelpTextWin = ImplGetSVHelpData().mpHelpWin;
-                    pChild->MouseMove( aMEvt );
-                    if ( pOldHelpTextWin != ImplGetSVHelpData().mpHelpWin )
-                        bCallHelpRequest = false;
-                }
-            }
-        }
-        else if ( nSVEvent == NotifyEventType::MOUSEBUTTONDOWN )
-        {
-            if ( pSVData->mpWinData->mpTrackWin )
-            {
-                bRet = true;
-            }
-            else
-            {
-                pChild->ImplGetWindowImpl()->mbMouseButtonDown = false;
-                pChild->MouseButtonDown( aMEvt );
-            }
-        }
-        else
-        {
-            if (pSVData->mpWinData->mpTrackWin)
-            {
-                pChild->EndTracking();
-                bRet = true;
-            }
-            else
-            {
-                pChild->ImplGetWindowImpl()->mbMouseButtonUp = false;
-                pChild->MouseButtonUp( aMEvt );
-            }
-        }
-
-        assert(aNEvt.GetWindow() == pChild);
-
-        if (!pChild->isDisposed())
-            pChild->ImplNotifyKeyMouseCommandEventListeners( aNEvt );
-    }
+    bool bRet = lcl_DispatchMouseEvent(pChild, nSVEvent, aNEvt, aMEvt, bCallHelpRequest);
 
     if (pChild->isDisposed())
         return true;
 
-    if ( nSVEvent == NotifyEventType::MOUSEMOVE )
-        pChild->ImplGetWindowImpl()->mpFrameData->mbInMouseMove = false;
+    bRet = lcl_UpdateMouseStateAndHelp(pChild, nSVEvent, aMEvt, bCallHelpRequest, bMouseLeave, bRet);
 
-    if ( nSVEvent == NotifyEventType::MOUSEMOVE )
-    {
-        if ( bCallHelpRequest && !ImplGetSVHelpData().mbKeyboardHelp )
-            lcl_HandleMouseHelpRequest( pChild, pChild->OutputToScreenPixel( aMEvt.GetPosPixel() ) );
-        bRet = true;
-    }
-    else if ( !bRet )
-    {
-        if ( nSVEvent == NotifyEventType::MOUSEBUTTONDOWN )
-        {
-            if ( !pChild->ImplGetWindowImpl()->mbMouseButtonDown )
-                bRet = true;
-        }
-        else
-        {
-            if ( !pChild->ImplGetWindowImpl()->mbMouseButtonUp )
-                bRet = true;
-        }
-    }
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+        return bRet; // Mouse moves do not generate the command events below
 
-    if ( nSVEvent == NotifyEventType::MOUSEMOVE )
-    {
-        // set new mouse pointer
-        if ( !bMouseLeave )
-            lcl_SetMousePointer( pChild );
-
-        return bRet;
-    }
-
-    if ( (nSVEvent != NotifyEventType::MOUSEBUTTONDOWN) && (nSVEvent != NotifyEventType::MOUSEBUTTONUP) )
-        return bRet;
-
-    // Command-Events
-    if ( /*!bRet &&*/ (nClicks == 1) && (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN) &&
-         (nCode == MOUSE_MIDDLE) )
-    {
-        MouseMiddleButtonAction nMiddleAction = pChild->GetSettings().GetMouseSettings().GetMiddleButtonAction();
-        if ( nMiddleAction == MouseMiddleButtonAction::AutoScroll )
-            bRet = !ImplCallCommand( pChild, CommandEventId::StartAutoScroll, nullptr, true, &aChildPos );
-        else if ( nMiddleAction == MouseMiddleButtonAction::PasteSelection )
-            bRet = !ImplCallCommand( pChild, CommandEventId::PasteSelection, nullptr, true, &aChildPos );
-
-        return bRet;
-    }
-
-    // ContextMenu
-    if ( (nCode != MouseSettings::GetContextMenuCode()) ||
-         (nClicks != MouseSettings::GetContextMenuClicks()) )
-    {
-        return bRet;
-    }
-
-    bool bContextMenu = (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN);
-    if ( !bContextMenu )
-        return bRet;
-
-    if ( !pSVData->maAppData.mpActivePopupMenu )
-        return !ImplCallCommand( pChild, CommandEventId::ContextMenu, nullptr, true, &aChildPos );
-
-    /*  #i34277# there already is a context menu open
-    *   that was probably just closed with EndPopupMode.
-    *   We need to give the eventual corresponding
-    *   PopupMenu::Execute a chance to end properly.
-    *   Therefore delay context menu command and
-    *   issue only after popping one frame of the
-    *   Yield stack.
-    */
-    ContextMenuEvent* pEv = new ContextMenuEvent;
-    pEv->pWindow = std::move(pChild);
-    pEv->aChildPos = aChildPos;
-    Application::PostUserEvent( LINK_NONMEMBER( pEv, lcl_ContextMenuEventLink ) );
-
-    return bRet;
+    return lcl_DispatchCommandEvents(pChild, nSVEvent, nClicks, nCode, aChildPos, bRet);
 }
 
 bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType nEvent, bool /*bMouseLeave*/,
