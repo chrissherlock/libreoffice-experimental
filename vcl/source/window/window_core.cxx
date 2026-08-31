@@ -36,6 +36,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>
 #include <salframe.hxx>

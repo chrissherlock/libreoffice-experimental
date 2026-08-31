@@ -24,6 +24,7 @@
 #include <brdwin.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 
 #include <comphelper/OAccessible.hxx>
 

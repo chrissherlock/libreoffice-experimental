@@ -44,6 +44,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <font/EmphasisMark.hxx>
 
 #include <ImplLayoutArgs.hxx>

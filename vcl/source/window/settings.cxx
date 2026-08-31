@@ -32,6 +32,7 @@
 
 #include <window.h>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <salframe.hxx>
 #include <brdwin.hxx>
 #include <windowdev.hxx>

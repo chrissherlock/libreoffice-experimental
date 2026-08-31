@@ -61,6 +61,7 @@
 #include <vcl/uitest/uiobject.hxx>
 #include <sal/log.hxx>
 #include <tools/json_writer.hxx>
+#include <WindowHierarchy.hxx>
 
 VclContainer::VclContainer(vcl::Window *pParent, WinBits nStyle)
     : Window(WindowType::CONTAINER)

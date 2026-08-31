@@ -113,24 +113,6 @@ namespace o3tl {
     template<> struct typed_flags<ImplPaintFlags> : is_typed_flags<ImplPaintFlags, 0x003f> {};
 }
 
-struct WindowHierarchy
-{
-    VclPtr<vcl::Window> mpParent;            // Parent (includes BorderWindow)
-    VclPtr<vcl::Window> mpRealParent;        // Real parent (excludes BorderWindow)
-
-    VclPtr<vcl::Window> mpFirstChild;        // First child window
-    VclPtr<vcl::Window> mpLastChild;         // Last child window
-
-    VclPtr<vcl::Window> mpFirstOverlap;      // First overlap window child
-    VclPtr<vcl::Window> mpLastOverlap;       // Last overlap window child
-
-    VclPtr<vcl::Window> mpPrev;              // Previous sibling window
-    VclPtr<vcl::Window> mpNext;              // Next sibling window
-
-    VclPtr<vcl::Window> mpPrevOverlap;       // Previous overlap window of frame
-    VclPtr<vcl::Window> mpNextOverlap;       // Next overlap window of frame
-};
-
 namespace vcl
 {
 /// Sets up the buffer to have settings matching the window, and restores the original state in the dtor.

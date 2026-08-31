@@ -44,6 +44,7 @@
 #include <quartz/utils.h>
 #include <strings.hrc>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <vcl/mnemonic.hxx>
 
 namespace {

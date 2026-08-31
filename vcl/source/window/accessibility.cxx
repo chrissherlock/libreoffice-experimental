@@ -31,6 +31,7 @@
 #include <ImplAccessibleInfos.hxx>
 #include <window.h>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <accessibility/floatingwindowaccessible.hxx>
 #include <accessibility/vclxaccessiblefixedtext.hxx>
 #include <accessibility/vclxaccessiblestatusbar.hxx>

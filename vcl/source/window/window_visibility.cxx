@@ -23,6 +23,7 @@
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowClippingState.hxx>
+#include <WindowHierarchy.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>

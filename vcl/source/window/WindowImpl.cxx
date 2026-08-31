@@ -53,6 +53,7 @@
 #include <vcl/MappingPolicy.hxx>
 
 #include <WindowClippingState.hxx>
+#include <WindowHierarchy.hxx>
 #include <ImplAccessibleInfos.hxx>
 #include <ImplWinData.hxx>
 #include <ImplOutDevData.hxx>

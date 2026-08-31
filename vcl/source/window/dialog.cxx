@@ -33,6 +33,7 @@
 #include <officecfg/Office/Common.hxx>
 #include <osl/diagnose.h>
 
+#include <WindowHierarchy.hxx>
 #include <ImplFrameData.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
