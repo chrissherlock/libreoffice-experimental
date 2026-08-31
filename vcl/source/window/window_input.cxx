@@ -24,6 +24,7 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/window.hxx>
 
+#include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>

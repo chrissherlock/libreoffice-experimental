@@ -32,6 +32,7 @@
 #include <vcl/uitest/uiobject.hxx>
 #include <vcl/toolkit/unowrap.hxx>
 
+#include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>

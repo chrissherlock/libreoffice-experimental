@@ -36,6 +36,7 @@
 
 #include <sal/types.h>
 
+#include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <svdata.hxx>
 #include <salobj.hxx>
