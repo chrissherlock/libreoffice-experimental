@@ -28,6 +28,7 @@
 #include <vcl/vclevent.hxx>
 #include <vcl/wrkwin.hxx>
 
+#include <ImplAccessibleInfos.hxx>
 #include <window.h>
 #include <WindowImpl.hxx>
 #include <accessibility/floatingwindowaccessible.hxx>

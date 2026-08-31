@@ -32,6 +32,7 @@
 #include <vcl/uitest/uiobject.hxx>
 #include <vcl/toolkit/unowrap.hxx>
 
+#include <ImplAccessibleInfos.hxx>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>

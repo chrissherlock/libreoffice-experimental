@@ -20,6 +20,7 @@
 #include <vcl/vclevent.hxx>
 #include <vcl/window.hxx>
 
+#include <ImplAccessibleInfos.hxx>
 #include <WindowImpl.hxx>
 #include <salframe.hxx>
 

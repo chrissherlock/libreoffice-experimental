@@ -100,21 +100,6 @@ MouseEventModifiers ImplGetMouseMoveMode( SalMouseEvent const * pEvent );
 
 MouseEventModifiers ImplGetMouseButtonMode( SalMouseEvent const * pEvent );
 
-struct ImplAccessibleInfos
-{
-    sal_uInt16          nAccessibleRole;
-    std::optional<OUString>
-                        pAccessibleName;
-    std::optional<OUString>
-                        pAccessibleDescription;
-    rtl::Reference<comphelper::OAccessible> pAccessibleParent;
-    VclPtr<vcl::Window> pLabeledByWindow;
-    VclPtr<vcl::Window> pLabelForWindow;
-
-    ImplAccessibleInfos();
-    ~ImplAccessibleInfos();
-};
-
 enum class ImplPaintFlags {
     NONE             = 0x0000,
     Paint            = 0x0001,
