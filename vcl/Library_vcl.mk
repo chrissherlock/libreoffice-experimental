@@ -240,6 +240,8 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/lokwindow \
     vcl/source/window/WindowOutputDevice \
     vcl/source/window/WindowImpl \
+    vcl/source/window/PaintBufferGuard \
+    vcl/source/window/PaintHelper \
     vcl/source/window/window \
     vcl/source/window/window_core \
     vcl/source/window/window_output \
