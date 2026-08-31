@@ -21,7 +21,7 @@
 #include <vcl/transfer.hxx>
 #include <vcl/window.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
 #include <com/sun/star/datatransfer/clipboard/XClipboard.hpp>

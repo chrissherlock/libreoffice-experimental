@@ -17,6 +17,10 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <officecfg/Office/Common.hxx>
+#include <unotools/configmgr.hxx>
+#include <unotools/confignode.hxx>
+#include <comphelper/processfactory.hxx>
 #include <i18nlangtag/languagetag.hxx>
 #include <i18nlangtag/mslangid.hxx>
 
@@ -26,17 +30,11 @@
 #include <vcl/settings.hxx>
 #include <vcl/vclevent.hxx>
 
-#include <officecfg/Office/Common.hxx>
-
-#include <unotools/configmgr.hxx>
-#include <unotools/confignode.hxx>
-
-#include <comphelper/processfactory.hxx>
-
+#include <window.h>
+#include <WindowImpl.hxx>
 #include <salframe.hxx>
 #include <brdwin.hxx>
-
-#include <window.h>
+#include <windowdev.hxx>
 
 namespace vcl {
 

@@ -34,7 +34,7 @@
 #include <svdata.hxx>
 #include <strings.hrc>
 #include <bitmaps.hlst>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include "bufferdevice.hxx"
 #include <menubarvalue.hxx>
 

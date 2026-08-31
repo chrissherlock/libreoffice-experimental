@@ -57,7 +57,7 @@
 #include <salframe.hxx>
 #include <accmgr.hxx>
 #include <print.h>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <helpwin.hxx>
 #include <brdwin.hxx>
 

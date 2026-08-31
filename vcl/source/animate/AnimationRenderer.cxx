@@ -17,14 +17,17 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <memory>
-#include <animate/AnimationRenderer.hxx>
+#include <tools/helpers.hxx>
 
 #include <vcl/virdev.hxx>
 #include <vcl/window.hxx>
-#include <tools/helpers.hxx>
+
+#include <animate/AnimationRenderer.hxx>
 
 #include <window.h>
+#include <WindowImpl.hxx>
+
+#include <memory>
 
 AnimationRenderer::AnimationRenderer( Animation* pParent, OutputDevice* pOut,
                             const Point& rPt, const Size& rSz,

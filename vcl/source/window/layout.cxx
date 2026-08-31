@@ -54,7 +54,7 @@
 #include <bitmaps.hlst>
 #include <messagedialog.hxx>
 #include <svdata.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <boost/multi_array.hpp>
 #include <vcl/DesktopType.hxx>
 #include <vcl/toolkit/vclmedit.hxx>

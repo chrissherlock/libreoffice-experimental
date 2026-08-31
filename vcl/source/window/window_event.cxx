@@ -29,7 +29,7 @@
 #include <salframe.hxx>
 #include <svdata.hxx>
 #include <helpwin.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 
 #include "impldockingwrapper.hxx"
 

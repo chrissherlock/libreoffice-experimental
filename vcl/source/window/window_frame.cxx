@@ -23,7 +23,7 @@
 #include <vcl/window.hxx>
 #include <vcl/wintypes.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 #include <salgdi.hxx>

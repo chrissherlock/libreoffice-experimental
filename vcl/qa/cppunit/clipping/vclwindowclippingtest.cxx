@@ -19,6 +19,7 @@
 #include <vcl/svapp.hxx>
 
 #include <window.h>
+#include <WindowImpl.hxx>
 #include <clipping_window.hxx>
 
 namespace

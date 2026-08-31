@@ -20,7 +20,7 @@
 #include <vcl/event.hxx>
 #include <vcl/window.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 
 #include "HandleWheelEvent.hxx"
 

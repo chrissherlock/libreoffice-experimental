@@ -29,7 +29,7 @@
 #include <vcl/decoview.hxx>
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/settings.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 
 MenuFloatingWindow::MenuFloatingWindow(PopupMenu* pMen, vcl::Window* pParent, WinBits nStyle ) :
     FloatingWindow( pParent, nStyle ),

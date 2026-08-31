@@ -82,7 +82,7 @@
 #include <vcl/virdev.hxx>
 #include <bitmaps.hlst>
 #include <listbox.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <wizdlg.hxx>
 #include <salvtables.hxx>
 #include <comphelper/lok.hxx>

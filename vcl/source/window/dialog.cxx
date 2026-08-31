@@ -34,7 +34,7 @@
 #include <osl/diagnose.h>
 
 #include <svdata.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <accel.hxx>
 #include <brdwin.hxx>
 #include <salinst.hxx>

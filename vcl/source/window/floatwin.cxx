@@ -19,7 +19,7 @@
 
 #include <svdata.hxx>
 #include <brdwin.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <salframe.hxx>
 #include <helpwin.hxx>
 

@@ -11,6 +11,7 @@
 #include <vcl/window.hxx>
 
 #include <window.h>
+#include <WindowImpl.hxx>
 #include <clipping/ClipStateBuilder.hxx>
 
 namespace vcl::clipping

@@ -19,7 +19,7 @@
 
 #include <sal/config.h>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <helpwin.hxx>
 
 #include "HandleGestureEventBase.hxx"

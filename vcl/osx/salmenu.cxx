@@ -43,7 +43,7 @@
 #include <osx/a11ywrapper.h>
 #include <quartz/utils.h>
 #include <strings.hrc>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <vcl/mnemonic.hxx>
 
 namespace {

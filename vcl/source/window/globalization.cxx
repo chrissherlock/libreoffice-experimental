@@ -19,8 +19,9 @@
 
 #include <vcl/window.hxx>
 #include <vcl/outdev.hxx>
+
+#include <WindowImpl.hxx>
 #include <windowdev.hxx>
-#include <window.h>
 
 namespace vcl {
 

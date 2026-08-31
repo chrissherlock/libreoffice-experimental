@@ -44,7 +44,7 @@
 #include <salinst.hxx>
 #include <svdata.hxx>
 #include <strings.hrc>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <salmenu.hxx>
 #include <salframe.hxx>
 

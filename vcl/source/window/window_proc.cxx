@@ -33,7 +33,7 @@
 #include <vcl/menu.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <accmgr.hxx>

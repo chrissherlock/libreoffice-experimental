@@ -62,7 +62,7 @@
 #include <salframe.hxx>
 #include <salsys.hxx>
 #include <svdata.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <accmgr.hxx>
 #include <strings.hrc>
 #include <strings.hxx>

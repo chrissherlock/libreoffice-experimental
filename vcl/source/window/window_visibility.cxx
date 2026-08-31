@@ -19,7 +19,7 @@
 
 #include <vcl/window.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
