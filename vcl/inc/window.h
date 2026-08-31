@@ -100,34 +100,6 @@ MouseEventModifiers ImplGetMouseMoveMode( SalMouseEvent const * pEvent );
 
 MouseEventModifiers ImplGetMouseButtonMode( SalMouseEvent const * pEvent );
 
-struct ImplWinData
-{
-    std::optional<OUString>
-                        mpExtOldText;
-    std::unique_ptr<ExtTextInputAttr[]>
-                        mpExtOldAttrAry;
-    std::optional<tools::Rectangle>
-                        mpCursorRect;
-    tools::Long                mnCursorExtWidth;
-    bool                mbVertical;
-    std::unique_ptr<tools::Rectangle[]>
-                        mpCompositionCharRects;
-    tools::Long                mnCompositionCharRects;
-    std::optional<tools::Rectangle>
-                        mpFocusRect;
-    std::optional<tools::Rectangle>
-                        mpTrackRect;
-    ShowTrackFlags      mnTrackFlags;
-    sal_uInt16          mnIsTopWindow;
-    bool                mbMouseOver;            //< tracks mouse over for native widget paint effect
-    bool                mbEnableNativeWidget;   //< toggle native widget rendering
-    ::std::list< VclPtr<vcl::Window> >
-                        maTopWindowChildren;
-
-     ImplWinData();
-    ~ImplWinData();
-};
-
 struct ImplFrameData
 {
     Idle                maPaintIdle;            //< paint idle handler
