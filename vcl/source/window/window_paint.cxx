@@ -18,31 +18,25 @@
  */
 
 #include <config_features.h>
-#include <vcl/gdimtf.hxx>
-#include <tools/mapunit.hxx>
-#include <vcl/window.hxx>
-#include <vcl/virdev.hxx>
-#include <vcl/cursor.hxx>
-#include <vcl/settings.hxx>
-#include <vcl/syswin.hxx>
-#include <vcl/CoordinateMapper.hxx>
-#include <vcl/MappingPolicy.hxx>
 
-#include <sal/types.h>
-#include <sal/log.hxx>
+#include <comphelper/lok.hxx>
+#include <comphelper/profilezone.hxx>
+
+#include <vcl/CoordinateMapper.hxx>
+#include <vcl/cursor.hxx>
+#include <vcl/gdimtf.hxx>
+#include <vcl/syswin.hxx>
+#include <vcl/vclevent.hxx>
+
+#if HAVE_FEATURE_OPENGL
+#include <vcl/opengl/OpenGLHelper.hxx>
+#endif
 
 #include <clipping/ClippingBridge.hxx>
 #include <clipping/ClipStateBuilder.hxx>
 #include <clipping_window.hxx>
-#include <window.h>
-#include <salgdi.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
-#include <comphelper/lok.hxx>
-#include <comphelper/profilezone.hxx>
-#if HAVE_FEATURE_OPENGL
-#include <vcl/opengl/OpenGLHelper.hxx>
-#endif
 
 #include "PaintHelper.hxx"
 
