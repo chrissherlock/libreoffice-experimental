@@ -83,6 +83,7 @@
 #include <bitmaps.hlst>
 #include <listbox.hxx>
 #include <WindowImpl.hxx>
+#include <WindowClippingState.hxx>
 #include <wizdlg.hxx>
 #include <salvtables.hxx>
 #include <comphelper/lok.hxx>

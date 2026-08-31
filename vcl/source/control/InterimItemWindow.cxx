@@ -16,6 +16,7 @@
 #include <salobj.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowClippingState.hxx>
 
 InterimItemWindow::InterimItemWindow(vcl::Window* pParent, const OUString& rUIXMLDescription,
                                      const OUString& rID, bool bAllowCycleFocusOut)

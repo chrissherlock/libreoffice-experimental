@@ -25,6 +25,7 @@
 #include <vcl/CoordinateMapper.hxx>
 
 #include <WindowImpl.hxx>
+#include <WindowClippingState.hxx>
 #include <clipping_window.hxx>
 #include <salobj.hxx>
 
