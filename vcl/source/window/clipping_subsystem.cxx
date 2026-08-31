@@ -14,6 +14,7 @@
 #include <window.h>
 #include <clipping_window.hxx>
 #include <WindowImpl.hxx>
+#include <WindowClippingState.hxx>
 #include <salobj.hxx>
 
 namespace vcl::clipping

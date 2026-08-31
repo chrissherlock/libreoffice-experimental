@@ -113,31 +113,6 @@ namespace o3tl {
     template<> struct typed_flags<ImplPaintFlags> : is_typed_flags<ImplPaintFlags, 0x003f> {};
 }
 
-struct WindowClippingState
-{
-    // Proper constructor ensuring no "garbage" memory patterns
-    WindowClippingState()
-        : meParentClipMode(ParentClipMode::NoClip)
-        , mbInitWinClipRegion(true)
-        , mbInitChildRegion(false)
-        , mbClipSiblings(false)
-        , mbClipChildren(false)
-        , mbWinRegion(false)
-    {
-    }
-
-    vcl::Region                  maWinClipRegion;
-    std::unique_ptr<vcl::Region> mpChildClipRegion;
-    ParentClipMode               meParentClipMode;
-    bool                         mbInitWinClipRegion;
-    bool                         mbInitChildRegion;
-    bool                         mbClipSiblings;
-    bool                         mbClipChildren;
-
-    vcl::Region                  maWinRegion;
-    bool                         mbWinRegion;
-};
-
 struct WindowHierarchy
 {
     VclPtr<vcl::Window> mpParent;            // Parent (includes BorderWindow)
