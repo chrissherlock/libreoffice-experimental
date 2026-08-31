@@ -23,6 +23,7 @@
 #include <vcl/toolkit/dialog.hxx>
 #include <vcl/window.hxx>
 
+#include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <brdwin.hxx>

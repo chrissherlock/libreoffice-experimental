@@ -21,6 +21,7 @@
 #include <vcl/vclptr.hxx>
 #include <vcl/window.hxx>
 
+#include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 #include <svdata.hxx>
 

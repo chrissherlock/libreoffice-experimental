@@ -22,6 +22,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/syschild.hxx>
 
+#include <ImplFrameData.hxx>
 #include <clipping_window.hxx>
 #include <WindowImpl.hxx>
 #include <salframe.hxx>

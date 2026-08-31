@@ -42,6 +42,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 #include <font/EmphasisMark.hxx>
 

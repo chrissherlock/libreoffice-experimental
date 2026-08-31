@@ -32,6 +32,7 @@
 #include <vcl/opengl/OpenGLHelper.hxx>
 #endif
 
+#include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <clipping/ClippingBridge.hxx>

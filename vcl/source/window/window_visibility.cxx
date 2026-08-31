@@ -19,6 +19,7 @@
 
 #include <vcl/window.hxx>
 
+#include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <clipping_window.hxx>

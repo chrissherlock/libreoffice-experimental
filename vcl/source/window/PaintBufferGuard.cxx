@@ -26,6 +26,7 @@
 #endif
 
 #include <window.h>
+#include <ImplFrameData.hxx>
 
 namespace vcl
 {

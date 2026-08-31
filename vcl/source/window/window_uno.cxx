@@ -21,6 +21,7 @@
 #include <vcl/transfer.hxx>
 #include <vcl/window.hxx>
 
+#include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 
 #include <com/sun/star/awt/XVclWindowPeer.hpp>

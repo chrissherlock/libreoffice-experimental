@@ -19,7 +19,7 @@
 
 #include <vcl/event.hxx>
 
-#include <window.h>
+#include <ImplFrameData.hxx>
 #include <dndeventdispatcher.hxx>
 #include <svdata.hxx>
 

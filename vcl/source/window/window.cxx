@@ -22,6 +22,7 @@
 #include <vcl/vclevent.hxx>
 #include <vcl/window.hxx>
 
+#include <ImplFrameData.hxx>
 #include <ImplOutDevData.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
