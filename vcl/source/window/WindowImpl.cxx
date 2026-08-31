@@ -52,6 +52,7 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/MappingPolicy.hxx>
 
+#include <ImplAccessibleInfos.hxx>
 #include <ImplWinData.hxx>
 #include <ImplOutDevData.hxx>
 #include <clipping_window.hxx>
