@@ -27,6 +27,7 @@
 #include <vcl/vclevent.hxx>
 #include <vcl/window.hxx>
 
+#include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>

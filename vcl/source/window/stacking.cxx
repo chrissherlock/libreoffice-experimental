@@ -23,6 +23,7 @@
 #include <vcl/taskpanelist.hxx>
 #include <sal/log.hxx>
 
+#include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <clipping_window.hxx>

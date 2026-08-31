@@ -17,6 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <ImplFrameData.hxx>
 #include <svdata.hxx>
 #include <brdwin.hxx>
 #include <WindowImpl.hxx>

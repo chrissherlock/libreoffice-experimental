@@ -19,6 +19,7 @@
 
 #include <vcl/window.hxx>
 
+#include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 #include <salframe.hxx>
 

@@ -45,6 +45,7 @@
 #include <rtl/ustrbuf.hxx>
 #include <o3tl/string_view.hxx>
 
+#include <ImplFrameData.hxx>
 #include <accel.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>

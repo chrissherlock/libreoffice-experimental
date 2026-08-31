@@ -19,6 +19,7 @@
 
 #include <sal/config.h>
 
+#include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 #include <helpwin.hxx>
 

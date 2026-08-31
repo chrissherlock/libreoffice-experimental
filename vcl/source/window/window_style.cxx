@@ -25,6 +25,7 @@
 #include <vcl/window.hxx>
 
 #include <toolbox.h>
+#include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <brdwin.hxx>

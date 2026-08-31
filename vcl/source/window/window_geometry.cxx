@@ -24,6 +24,7 @@
 #include <vcl/syswin.hxx>
 #include <vcl/window.hxx>
 
+#include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 #include <brdwin.hxx>
 #include <clipping_window.hxx>
