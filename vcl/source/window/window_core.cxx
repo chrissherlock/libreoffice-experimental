@@ -32,7 +32,7 @@
 #include <vcl/uitest/uiobject.hxx>
 #include <vcl/toolkit/unowrap.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>
 #include <salframe.hxx>

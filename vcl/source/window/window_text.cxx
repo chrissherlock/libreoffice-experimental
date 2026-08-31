@@ -20,7 +20,7 @@
 #include <vcl/vclevent.hxx>
 #include <vcl/window.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <salframe.hxx>
 
 namespace vcl

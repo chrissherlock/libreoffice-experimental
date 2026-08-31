@@ -13893,6 +13893,7 @@ vcl/headless/svpvd.cxx
 vcl/inc/IconThemeSelector.hxx
 vcl/inc/IPrioritable.hxx
 vcl/inc/ResampleKernel.hxx
+vcl/inc/WindowImpl.hxx
 vcl/inc/bitmap/bmpfast.hxx
 vcl/inc/accel.hxx
 vcl/inc/accessibility/IComboListBoxHelper.hxx

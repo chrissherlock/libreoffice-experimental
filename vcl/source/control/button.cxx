@@ -44,7 +44,7 @@
 #include <accessibility/vclxaccessibleradiobutton.hxx>
 #include <bitmaps.hlst>
 #include <svdata.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <vclstatuslistener.hxx>
 #include <osl/diagnose.h>
 

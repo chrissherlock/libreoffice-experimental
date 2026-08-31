@@ -11,8 +11,9 @@
 #include <vcl/window.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <clipping_window.hxx>
 #include <window.h>
+#include <clipping_window.hxx>
+#include <WindowImpl.hxx>
 #include <salobj.hxx>
 
 namespace vcl::clipping

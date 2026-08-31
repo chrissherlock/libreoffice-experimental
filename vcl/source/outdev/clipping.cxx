@@ -26,7 +26,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <clipping.hxx>
 #include <clipping_window.hxx>
 #include <windowdev.hxx>

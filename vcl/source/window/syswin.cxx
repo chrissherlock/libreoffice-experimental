@@ -49,7 +49,7 @@
 #include <salframe.hxx>
 #include <svdata.hxx>
 #include <brdwin.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 
 using namespace ::com::sun::star::uno;
 

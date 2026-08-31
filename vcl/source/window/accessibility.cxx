@@ -17,6 +17,8 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
+
 #include <vcl/layout.hxx>
 #include <vcl/toolkit/fixed.hxx>
 #include <vcl/window.hxx>
@@ -26,12 +28,13 @@
 #include <vcl/vclevent.hxx>
 #include <vcl/wrkwin.hxx>
 
+#include <window.h>
+#include <WindowImpl.hxx>
 #include <accessibility/floatingwindowaccessible.hxx>
 #include <accessibility/vclxaccessiblefixedtext.hxx>
 #include <accessibility/vclxaccessiblestatusbar.hxx>
 #include <accessibility/vclxaccessibletabcontrol.hxx>
 #include <accessibility/vclxaccessibletabpagewindow.hxx>
-#include <window.h>
 #include <brdwin.hxx>
 
 #include <com/sun/star/accessibility/XAccessible.hpp>
@@ -39,8 +42,6 @@
 #include <com/sun/star/accessibility/AccessibleStateType.hpp>
 #include <com/sun/star/accessibility/XAccessibleEditableText.hpp>
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
-
-#include <sal/log.hxx>
 
 using namespace ::com::sun::star::uno;
 using namespace ::com::sun::star::datatransfer::clipboard;

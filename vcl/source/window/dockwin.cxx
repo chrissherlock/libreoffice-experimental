@@ -34,7 +34,7 @@
 
 #include <accel.hxx>
 #include <svdata.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <brdwin.hxx>
 
 #include "impldockingwrapper.hxx"

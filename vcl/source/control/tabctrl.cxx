@@ -42,7 +42,7 @@
 
 #include <bitmaps.hlst>
 #include <svdata.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 
 #include <deque>
 #include <unordered_map>

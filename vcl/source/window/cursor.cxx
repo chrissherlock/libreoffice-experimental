@@ -17,19 +17,19 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <memory>
-
 #include <comphelper/lok.hxx>
 #include <tools/mapunit.hxx>
+#include <tools/poly.hxx>
+
 #include <vcl/svapp.hxx>
 #include <vcl/timer.hxx>
 #include <vcl/settings.hxx>
 #include <vcl/window.hxx>
 #include <vcl/cursor.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 
-#include <tools/poly.hxx>
+#include <memory>
 
 struct ImplCursorData
 {

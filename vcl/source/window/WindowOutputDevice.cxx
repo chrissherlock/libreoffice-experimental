@@ -60,7 +60,7 @@
 #include <salinst.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <toolbox.h>
 #include <brdwin.hxx>
 #include <helpwin.hxx>

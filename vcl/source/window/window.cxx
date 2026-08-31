@@ -25,7 +25,7 @@
 #include <ImplOutDevData.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <helpwin.hxx>
 
 #ifdef _WIN32 // see #140456#

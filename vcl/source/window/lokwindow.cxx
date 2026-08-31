@@ -22,7 +22,7 @@
 #include <vcl/IDialogRenderable.hxx>
 #include <vcl/window.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 
 #include <cassert>
 #include <map>

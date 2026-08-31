@@ -17,12 +17,6 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <strings.hrc>
-#include <svdata.hxx>
-#include <brdwin.hxx>
-#include <salframe.hxx>
-#include <window.h>
-
 #include <vcl/textrectinfo.hxx>
 #include <vcl/event.hxx>
 #include <vcl/decoview.hxx>
@@ -36,6 +30,12 @@
 #include <vcl/settings.hxx>
 #include <vcl/toolbox.hxx>
 #include <vcl/ptrstyle.hxx>
+
+#include <WindowImpl.hxx>
+#include <strings.hrc>
+#include <svdata.hxx>
+#include <brdwin.hxx>
+#include <salframe.hxx>
 
 using namespace ::com::sun::star::uno;
 

@@ -33,7 +33,7 @@
 #include <vcl/settings.hxx>
 #include <config_features.h>
 #include <svdata.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 
 #define STATUSBAR_OFFSET_X      STATUSBAR_OFFSET
 #define STATUSBAR_OFFSET_Y      2

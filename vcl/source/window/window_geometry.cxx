@@ -24,7 +24,7 @@
 #include <vcl/syswin.hxx>
 #include <vcl/window.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <brdwin.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>

@@ -38,6 +38,7 @@
 #include <bufferdevice.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <svdata.hxx>
+#include <WindowImpl.hxx>
 #include <window.h>
 
 const size_t INITIAL_SETUP_ACTION_COUNT = 5;

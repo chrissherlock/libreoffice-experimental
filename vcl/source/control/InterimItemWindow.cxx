@@ -15,7 +15,7 @@
 
 #include <salobj.hxx>
 #include <svdata.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 
 InterimItemWindow::InterimItemWindow(vcl::Window* pParent, const OUString& rUIXMLDescription,
                                      const OUString& rID, bool bAllowCycleFocusOut)

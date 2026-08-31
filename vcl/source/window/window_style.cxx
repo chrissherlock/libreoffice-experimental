@@ -25,7 +25,7 @@
 #include <vcl/window.hxx>
 
 #include <toolbox.h>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 

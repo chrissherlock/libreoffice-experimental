@@ -29,7 +29,7 @@
 #include <svdata.hxx>
 #include <salframe.hxx>
 #include <brdwin.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 
 void WorkWindow::ImplInitWorkWindowData()
 {

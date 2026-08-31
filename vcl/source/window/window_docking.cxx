@@ -21,7 +21,7 @@
 #include <vcl/vclptr.hxx>
 #include <vcl/window.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <svdata.hxx>
 
 #include <vector>

@@ -40,7 +40,7 @@
 #include <vcl/weld/MessageDialog.hxx>
 
 #include <accessibility/vclxaccessibleedit.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <svdata.hxx>
 #include <strings.hrc>
 

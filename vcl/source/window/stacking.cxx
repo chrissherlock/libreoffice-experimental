@@ -23,11 +23,11 @@
 #include <vcl/taskpanelist.hxx>
 #include <sal/log.hxx>
 
+#include <WindowImpl.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
 #include <svdata.hxx>
-#include <window.h>
 #include <brdwin.hxx>
 
 #include <com/sun/star/awt/XTopWindow.hpp>

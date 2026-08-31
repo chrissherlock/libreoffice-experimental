@@ -24,9 +24,9 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <WindowImpl.hxx>
 #include <clipping_window.hxx>
 #include <salobj.hxx>
-#include <window.h>
 
 namespace vcl {
 

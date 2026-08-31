@@ -36,7 +36,7 @@
 
 #include <sal/types.h>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <svdata.hxx>
 #include <salobj.hxx>
 #include <salgdi.hxx>

@@ -48,7 +48,7 @@
 #include <SvLBoxButton.hxx>
 #include <accel.hxx>
 #include <svimpbox.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 
 #include <set>
 #include <string.h>

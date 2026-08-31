@@ -19,7 +19,7 @@
 
 
 #include <svdata.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 
 #include "dlgctrl.hxx"
 #include <vcl/event.hxx>

@@ -68,7 +68,7 @@
 #include <OptionalBox.hxx>
 #include <PriorityMergedHBox.hxx>
 #include <PriorityHBox.hxx>
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <xmlreader/xmlreader.hxx>
 #include <desktop/crashreport.hxx>
 #include <SvHeaderTabListBox.hxx>

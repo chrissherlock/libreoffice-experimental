@@ -25,6 +25,7 @@
 #include <vcl/opengl/OpenGLHelper.hxx>
 #endif
 
+#include <WindowImpl.hxx>
 #include <clipping_window.hxx>
 
 #include "PaintHelper.hxx"

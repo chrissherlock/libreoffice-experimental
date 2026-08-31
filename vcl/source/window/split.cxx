@@ -30,7 +30,7 @@
 #include <tools/lazydelete.hxx>
 #include <tools/mapunit.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 
 namespace
 {

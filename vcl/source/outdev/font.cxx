@@ -42,7 +42,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <window.h>
+#include <WindowImpl.hxx>
 #include <font/EmphasisMark.hxx>
 
 #include <ImplLayoutArgs.hxx>
