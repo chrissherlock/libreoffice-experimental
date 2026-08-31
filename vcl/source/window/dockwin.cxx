@@ -36,6 +36,7 @@
 #include <accel.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <brdwin.hxx>
 
 #include "impldockingwrapper.hxx"

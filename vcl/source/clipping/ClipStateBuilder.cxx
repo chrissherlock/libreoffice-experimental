@@ -12,6 +12,7 @@
 
 #include <WindowClippingState.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <clipping/ClipStateBuilder.hxx>
 
 namespace vcl::clipping

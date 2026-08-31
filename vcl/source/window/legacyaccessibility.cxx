@@ -18,6 +18,7 @@
  */
 
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 
 #include "dlgctrl.hxx"
 

@@ -36,6 +36,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <accmgr.hxx>

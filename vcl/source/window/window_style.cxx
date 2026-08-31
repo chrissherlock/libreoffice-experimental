@@ -28,6 +28,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 

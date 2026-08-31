@@ -31,6 +31,7 @@
 #include <helpwin.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 
 #include "impldockingwrapper.hxx"
 

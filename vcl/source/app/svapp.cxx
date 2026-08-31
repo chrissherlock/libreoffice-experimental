@@ -64,6 +64,7 @@
 #include <svdata.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <accmgr.hxx>
 #include <strings.hrc>
 #include <strings.hxx>

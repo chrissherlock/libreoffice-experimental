@@ -26,6 +26,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <brdwin.hxx>
 #include <clipping.hxx>
 #include <clipping_window.hxx>

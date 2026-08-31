@@ -34,6 +34,7 @@
 #include <config_features.h>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 
 #define STATUSBAR_OFFSET_X      STATUSBAR_OFFSET
 #define STATUSBAR_OFFSET_Y      2
