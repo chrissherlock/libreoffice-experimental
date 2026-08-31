@@ -27,6 +27,7 @@
 
 #include <window.h>
 #include <ImplFrameData.hxx>
+#include <PaintBufferGuard.hxx>
 
 namespace vcl
 {

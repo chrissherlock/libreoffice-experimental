@@ -27,6 +27,7 @@
 #include <vcl/window.hxx>
 #include <vcl/cursor.hxx>
 
+#include <PaintBufferGuard.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 

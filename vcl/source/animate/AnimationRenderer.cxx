@@ -25,6 +25,7 @@
 #include <animate/AnimationRenderer.hxx>
 
 #include <window.h>
+#include <PaintBufferGuard.hxx>
 #include <WindowImpl.hxx>
 
 #include <memory>

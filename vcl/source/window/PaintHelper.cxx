@@ -27,6 +27,7 @@
 
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
+#include <PaintBufferGuard.hxx>
 #include <WindowImpl.hxx>
 #include <WindowHierarchy.hxx>
 #include <clipping_window.hxx>
