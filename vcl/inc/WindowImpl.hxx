@@ -32,6 +32,7 @@
 #include <vcl/window.hxx>
 
 #include <window.h>
+#include <WindowHelpData.hxx>
 
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
 
@@ -112,10 +113,7 @@ public:
     tools::Long         mnY;
     tools::Long         mnAbsScreenX;
     Point               maPos;
-    OUString            maHelpId;
-    OUString            maHelpText;
-    OUString            maQuickHelpText;
-    OUString            maID;
+    WindowHelpData      maHelpData;
     InputContext        maInputContext;
     css::uno::Reference< css::awt::XVclWindowPeer > mxWindowPeer;
     rtl::Reference<comphelper::OAccessible> mpAccessible;
@@ -213,7 +211,6 @@ public:
                         mbMenuFloatingWindow:1,
                         mbDrawSelectionBackground:1,
                         mbIsInTaskPaneList:1,
-                        mbHelpTextDynamic:1,
                         mbFakeFocusSet:1,
                         mbHexpand:1,
                         mbVexpand:1,
