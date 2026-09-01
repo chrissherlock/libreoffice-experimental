@@ -229,7 +229,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mbDrawSelectionBackground           = false;                     // true: draws transparent window background to indicate (toolbox) selection
     mbIsInTaskPaneList                  = false;                     // true: window was added to the taskpanelist in the topmost system window
     mnNativeBackground                  = ControlPart::NONE;         // initialize later, depends on type
-    mbHelpTextDynamic                   = false;                     // true: append help id in HELP_DEBUG case
     mbFakeFocusSet                      = false;                     // true: pretend as if the window has focus.
     mbHexpand                           = false;
     mbVexpand                           = false;

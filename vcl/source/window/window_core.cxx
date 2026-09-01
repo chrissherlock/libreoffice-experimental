@@ -354,10 +354,10 @@ FactoryFunction Window::GetUITestFactory() const { return WindowUIObject::create
 const OUString& Window::get_id() const
 {
     static OUString empty;
-    return mpWindowImpl ? mpWindowImpl->maID : empty;
+    return mpWindowImpl ? mpWindowImpl->maHelpData.maID : empty;
 }
 
-void Window::set_id(const OUString& rID) { mpWindowImpl->maID = rID; }
+void Window::set_id(const OUString& rID) { mpWindowImpl->maHelpData.maID = rID; }
 
 void Window::SetCompoundControl(bool bCompound)
 {

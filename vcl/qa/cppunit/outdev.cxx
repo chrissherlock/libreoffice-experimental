@@ -38,6 +38,7 @@
 #include <bufferdevice.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <svdata.hxx>
+#include <PaintBufferGuard.hxx>
 #include <WindowImpl.hxx>
 #include <window.h>
 
