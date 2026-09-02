@@ -428,6 +428,7 @@ class WindowOutputDevice;
 class Dialog;
 class Edit;
 class WindowImpl;
+struct WindowHelpData;
 class PaintHelper;
 class VclSizeGroup;
 class Application;
@@ -1100,6 +1101,7 @@ protected:
 private:
     // --- Data Members ---
     std::unique_ptr<WindowImpl> mpWindowImpl;
+    std::unique_ptr<WindowHelpData> mpHelpData;
 
     // --- Lifecycle and Teardown ---
     SAL_DLLPRIVATE void ImplDeInitDND();

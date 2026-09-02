@@ -113,7 +113,6 @@ public:
     tools::Long         mnY;
     tools::Long         mnAbsScreenX;
     Point               maPos;
-    WindowHelpData      maHelpData;
     InputContext        maInputContext;
     css::uno::Reference< css::awt::XVclWindowPeer > mxWindowPeer;
     rtl::Reference<comphelper::OAccessible> mpAccessible;
