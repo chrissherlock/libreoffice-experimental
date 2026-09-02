@@ -35,6 +35,7 @@
 #include <ImplAccessibleInfos.hxx>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
+#include <WindowHelpData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowHierarchy.hxx>
 #include <dndeventdispatcher.hxx>
@@ -51,14 +52,16 @@
 namespace vcl
 {
 Window::Window(WindowType eType)
-    : mpWindowImpl(new WindowImpl(*this, eType))
+    : mpWindowImpl(std::make_unique<WindowImpl>(*this, eType))
+    , mpHelpData(std::make_unique<WindowHelpData>())
 {
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
     mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
 }
 
 Window::Window(vcl::Window* pParent, WinBits nStyle)
-    : mpWindowImpl(new WindowImpl(*this, WindowType::WINDOW))
+    : mpWindowImpl(std::make_unique<WindowImpl>(*this, WindowType::WINDOW))
+    , mpHelpData(std::make_unique<WindowHelpData>())
 {
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
     mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
@@ -171,6 +174,7 @@ void Window::dispose()
 
     // should be the last statements
     mpWindowImpl.reset();
+    mpHelpData.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy
@@ -354,10 +358,10 @@ FactoryFunction Window::GetUITestFactory() const { return WindowUIObject::create
 const OUString& Window::get_id() const
 {
     static OUString empty;
-    return mpWindowImpl ? mpWindowImpl->maHelpData.maID : empty;
+    return mpHelpData ? mpHelpData->maID : empty;
 }
 
-void Window::set_id(const OUString& rID) { mpWindowImpl->maHelpData.maID = rID; }
+void Window::set_id(const OUString& rID) { mpHelpData->maID = rID; }
 
 void Window::SetCompoundControl(bool bCompound)
 {

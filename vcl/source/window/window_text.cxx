@@ -63,26 +63,25 @@ const OUString& Window::GetHelpText() const
     const OUString& rStrHelpId(GetHelpId());
     const bool bStrHelpId = !rStrHelpId.isEmpty();
 
-    if (mpWindowImpl->maHelpData.mbHelpTextDynamic && bStrHelpId)
+    if (mpHelpData->mbHelpTextDynamic && bStrHelpId)
     {
         static const char* pEnv = getenv("HELP_DEBUG");
         if (pEnv && *pEnv)
         {
-            mpWindowImpl->maHelpData.maHelpText
-                = mpWindowImpl->maHelpData.maHelpText + "\n------------------\n" + rStrHelpId;
+            mpHelpData->maHelpText = mpHelpData->maHelpText + "\n------------------\n" + rStrHelpId;
         }
 
-        mpWindowImpl->maHelpData.mbHelpTextDynamic = false;
+        mpHelpData->mbHelpTextDynamic = false;
     }
 
     // Fallback to Window::GetAccessibleDescription without reentry to GetHelpText()
-    if (mpWindowImpl->maHelpData.maHelpText.isEmpty() && mpWindowImpl->mpAccessibleInfos
+    if (mpHelpData->maHelpText.isEmpty() && mpWindowImpl->mpAccessibleInfos
         && mpWindowImpl->mpAccessibleInfos->pAccessibleDescription)
     {
         return *mpWindowImpl->mpAccessibleInfos->pAccessibleDescription;
     }
 
-    return mpWindowImpl->maHelpData.maHelpText;
+    return mpHelpData->maHelpText;
 }
 } // end vcl namespace
 

@@ -25,26 +25,30 @@
 
 namespace vcl
 {
-void Window::SetHelpId(const OUString& rHelpId) { mpWindowImpl->maHelpData.maHelpId = rHelpId; }
+void Window::SetHelpId(const OUString& rHelpId)
+{
+    if (mpHelpData)
+        mpHelpData->maHelpId = rHelpId;
+}
 
-const OUString& Window::GetHelpId() const { return mpWindowImpl->maHelpData.maHelpId; }
+const OUString& Window::GetHelpId() const { return mpHelpData->maHelpId; }
 
 void Window::SetHelpText(const OUString& rHelpText)
 {
-    mpWindowImpl->maHelpData.maHelpText = rHelpText;
-    mpWindowImpl->maHelpData.mbHelpTextDynamic = true;
+    if (!mpHelpData)
+        return;
+
+    mpHelpData->maHelpText = rHelpText;
+    mpHelpData->mbHelpTextDynamic = true;
 }
 
 void Window::SetQuickHelpText(const OUString& rHelpText)
 {
-    if (mpWindowImpl)
-        mpWindowImpl->maHelpData.maQuickHelpText = rHelpText;
+    if (mpHelpData)
+        mpHelpData->maQuickHelpText = rHelpText;
 }
 
-const OUString& Window::GetQuickHelpText() const
-{
-    return mpWindowImpl->maHelpData.maQuickHelpText;
-}
+const OUString& Window::GetQuickHelpText() const { return mpHelpData->maQuickHelpText; }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
