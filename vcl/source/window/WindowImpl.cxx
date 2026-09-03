@@ -125,8 +125,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mpClientWindow                      = nullptr;                      // Client-Window of a FrameWindow
     mpLastFocusWindow                   = nullptr;                      // window for focus restore
     mpDlgCtrlDownWindow                 = nullptr;                      // window for dialog control
-    mnEventListenersIteratingCount = 0;
-    mnChildEventListenersIteratingCount = 0;
     mpCursor                            = nullptr;                      // cursor
     maPointer                           = PointerStyle::Arrow;
     mpVCLXWindow                        = nullptr;

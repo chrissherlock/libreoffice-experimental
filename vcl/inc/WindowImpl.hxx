@@ -81,15 +81,6 @@ public:
     VclPtr<vcl::Window> mpClientWindow;
     VclPtr<vcl::Window> mpLastFocusWindow;
     VclPtr<PushButton> mpDlgCtrlDownWindow;
-    std::vector<Link<VclWindowEvent&,void>> maEventListeners;
-    int mnEventListenersIteratingCount;
-    std::set<Link<VclWindowEvent&,void>> maEventListenersDeleted;
-    std::vector<Link<VclWindowEvent&,void>> maChildEventListeners;
-    int mnChildEventListenersIteratingCount;
-    std::set<Link<VclWindowEvent&,void>> maChildEventListenersDeleted;
-    Link<const CommandEvent&, bool> maCommandHdl;
-    Link<vcl::Window&, bool> maHelpRequestHdl;
-    Link<vcl::Window&, bool> maMnemonicActivateHdl;
 
     vcl::Cursor*        mpCursor;
     PointerStyle        maPointer;

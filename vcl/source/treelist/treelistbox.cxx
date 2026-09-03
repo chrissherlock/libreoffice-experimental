@@ -48,6 +48,7 @@
 #include <SvLBoxButton.hxx>
 #include <accel.hxx>
 #include <svimpbox.hxx>
+#include <WindowEventHandlers.hxx>
 #include <WindowImpl.hxx>
 
 #include <set>
@@ -3382,7 +3383,7 @@ void SvTreeListBox::SetHighlightRange( sal_uInt16 nStart, sal_uInt16 nEnd)
 
 void SvTreeListBox::Command(const CommandEvent& rCEvt)
 {
-    if (!ImplGetWindowImpl()->maCommandHdl.Call(rCEvt))
+    if (!ImplGetEventHandlers()->maCommandHdl.Call(rCEvt))
         m_pImpl->Command(rCEvt);
     //pass at least alt press/release to parent impl
     if (rCEvt.GetCommand() == CommandEventId::ModKeyChange)
