@@ -37,6 +37,7 @@
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowLayoutData.hxx>
 #include <brdwin.hxx>
 
 #include "impldockingwrapper.hxx"
@@ -996,7 +997,7 @@ void DockingWindow::setPosSizeOnContainee()
 
     // Don't make the border width accessible via get_border_width(),
     // otherwise the floating window will handle the border as well.
-    sal_Int32 nBorderWidth = mpWindowImpl->mnBorderWidth;
+    sal_Int32 nBorderWidth = mpLayoutData->mnBorderWidth;
 
     aSize.AdjustWidth( -(2 * nBorderWidth) );
     aSize.AdjustHeight( -(2 * nBorderWidth) );
@@ -1015,7 +1016,7 @@ Size DockingWindow::GetOptimalSize() const
 
     // Don't make the border width accessible via get_border_width(),
     // otherwise the floating window will handle the border as well.
-    sal_Int32 nBorderWidth = mpWindowImpl->mnBorderWidth;
+    sal_Int32 nBorderWidth = mpLayoutData->mnBorderWidth;
 
     aSize.AdjustHeight(2 * nBorderWidth );
     aSize.AdjustWidth(2 * nBorderWidth );
