@@ -431,6 +431,7 @@ class WindowImpl;
 struct WindowHelpData;
 struct WindowEventHandlers;
 struct WindowLayoutData;
+struct WindowAccessibleData;
 class PaintHelper;
 class VclSizeGroup;
 class Application;
@@ -554,6 +555,7 @@ public:
     SAL_DLLPRIVATE WindowImpl* ImplGetWindowImpl() const { return mpWindowImpl.get(); }
     SAL_DLLPRIVATE WindowEventHandlers* ImplGetEventHandlers() const { return mpEventHandlers.get(); }
     SAL_DLLPRIVATE WindowLayoutData* ImplGetLayoutData() const { return mpLayoutData.get(); }
+    SAL_DLLPRIVATE WindowAccessibleData* ImplGetAccessibleData() const { return mpAccessibleData.get(); }
     void SetType(WindowType eType);
     WindowType GetType() const;
     bool IsSystemWindow() const;
@@ -1108,6 +1110,7 @@ private:
     std::unique_ptr<WindowHelpData> mpHelpData;
     std::unique_ptr<WindowEventHandlers> mpEventHandlers;
     std::unique_ptr<WindowLayoutData> mpLayoutData;
+    std::unique_ptr<WindowAccessibleData> mpAccessibleData;
 
     // --- Lifecycle and Teardown ---
     SAL_DLLPRIVATE void ImplDeInitDND();

@@ -22,6 +22,7 @@
 
 #include <ImplAccessibleInfos.hxx>
 #include <WindowImpl.hxx>
+#include <WindowAccessibleData.hxx>
 #include <salframe.hxx>
 
 namespace vcl
@@ -75,10 +76,10 @@ const OUString& Window::GetHelpText() const
     }
 
     // Fallback to Window::GetAccessibleDescription without reentry to GetHelpText()
-    if (mpHelpData->maHelpText.isEmpty() && mpWindowImpl->mpAccessibleInfos
-        && mpWindowImpl->mpAccessibleInfos->pAccessibleDescription)
+    if (mpHelpData->maHelpText.isEmpty() && mpAccessibleData && mpAccessibleData->mpAccessibleInfos
+        && mpAccessibleData->mpAccessibleInfos->pAccessibleDescription)
     {
-        return *mpWindowImpl->mpAccessibleInfos->pAccessibleDescription;
+        return *mpAccessibleData->mpAccessibleInfos->pAccessibleDescription;
     }
 
     return mpHelpData->maHelpText;

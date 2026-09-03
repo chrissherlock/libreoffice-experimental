@@ -34,6 +34,7 @@
 #include <osl/diagnose.h>
 
 #include <WindowHierarchy.hxx>
+#include <WindowAccessibleData.hxx>
 #include <ImplFrameData.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
@@ -811,7 +812,7 @@ bool Dialog::Close()
     if ( xWindow->isDisposed() )
         return false;
 
-    if ( mpWindowImpl->mxWindowPeer.is() && IsCreatedWithToolkit() && !IsInExecute() )
+    if (mpAccessibleData && mpAccessibleData->mxWindowPeer.is() && IsCreatedWithToolkit() && !IsInExecute() )
         return false;
 
     // If there's a cancel button with a custom handler, then always give it a chance to

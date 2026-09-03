@@ -37,6 +37,7 @@
 #include <WindowImpl.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowLayoutData.hxx>
+#include <WindowAccessibleData.hxx>
 #include <brdwin.hxx>
 
 #include "impldockingwrapper.hxx"
@@ -631,10 +632,10 @@ bool DockingWindow::Close()
 {
     VclPtr<vcl::Window> xWindow = this;
     CallEventListeners( VclEventId::WindowClose );
-    if ( xWindow->isDisposed() )
+    if (xWindow->isDisposed())
         return false;
 
-    if ( mpWindowImpl->mxWindowPeer.is() && IsCreatedWithToolkit() )
+    if (mpAccessibleData && mpAccessibleData->mxWindowPeer.is() && IsCreatedWithToolkit())
         return false;
 
     Show( false, ShowFlags::NoFocusChange );

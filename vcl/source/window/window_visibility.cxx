@@ -24,6 +24,7 @@
 #include <WindowImpl.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowAccessibleData.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
@@ -126,7 +127,9 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
     }
     else if (mpWindowImpl->mbFrame)
     {
-        mpWindowImpl->mbSuppressAccessibilityEvents = true;
+        if (mpAccessibleData)
+            mpAccessibleData->mbSuppressAccessibilityEvents = true;
+
         mpWindowImpl->mpFrame->Show(false);
     }
 
@@ -239,7 +242,8 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
         pSVData->mpIntroWindow->Hide();
     }
 
-    mpWindowImpl->mbSuppressAccessibilityEvents = false;
+    if (mpAccessibleData)
+        mpAccessibleData->mbSuppressAccessibilityEvents = false;
 
     mpWindowImpl->mbPaintFrame = true;
 
