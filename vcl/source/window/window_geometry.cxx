@@ -28,6 +28,7 @@
 #include <WindowImpl.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowLayoutData.hxx>
 #include <brdwin.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
@@ -471,15 +472,23 @@ WindowImpl* Window::ImplGetEffectiveWindowImpl() const
                                         : mpWindowImpl.get();
 }
 
+WindowLayoutData* Window::ImplGetEffectiveWindowLayoutData() const
+{
+    if (mpWindowImpl->mpBorderWindow)
+        return mpWindowImpl->mpBorderWindow->mpLayoutData.get();
+
+    return mpLayoutData.get();
+}
+
 void Window::ImplQueueResizeOnGroup() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    if (!pWindowImpl->m_xSizeGroup
-        || pWindowImpl->m_xSizeGroup->get_mode() == VclSizeGroupMode::NONE)
+    if (!pLayoutData->m_xSizeGroup
+        || pLayoutData->m_xSizeGroup->get_mode() == VclSizeGroupMode::NONE)
         return;
 
-    const std::set<VclPtr<vcl::Window>>& rWindows = pWindowImpl->m_xSizeGroup->get_widgets();
+    const std::set<VclPtr<vcl::Window>>& rWindows = pLayoutData->m_xSizeGroup->get_widgets();
 
     for (VclPtr<vcl::Window> const& pOther : rWindows)
     {
@@ -525,26 +534,26 @@ void Window::queue_resize(StateChangedType eReason)
 
 void Window::set_height_request(sal_Int32 nHeightRequest)
 {
-    if (!mpWindowImpl)
+    if (!mpLayoutData)
         return;
 
-    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
-        pWindowImpl->mnHeightRequest != nHeightRequest)
+    if (WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
+        pLayoutData->mnHeightRequest != nHeightRequest)
     {
-        pWindowImpl->mnHeightRequest = nHeightRequest;
+        pLayoutData->mnHeightRequest = nHeightRequest;
         queue_resize();
     }
 }
 
 void Window::set_width_request(sal_Int32 nWidthRequest)
 {
-    if (!mpWindowImpl)
+    if (!mpLayoutData)
         return;
 
-    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
-        pWindowImpl->mnWidthRequest != nWidthRequest)
+    if (WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
+        pLayoutData->mnWidthRequest != nWidthRequest)
     {
-        pWindowImpl->mnWidthRequest = nWidthRequest;
+        pLayoutData->mnWidthRequest = nWidthRequest;
         queue_resize();
     }
 }
@@ -557,20 +566,20 @@ Size Window::get_ungrouped_preferred_size() const
         return aPreferredSize;
 
     // cache gets blown away by queue_resize
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    if (pWindowImpl->mnOptimalWidthCache == -1 || pWindowImpl->mnOptimalHeightCache == -1)
+    if (pLayoutData->mnOptimalWidthCache == -1 || pLayoutData->mnOptimalHeightCache == -1)
     {
         Size aOptimal(GetOptimalSize());
-        pWindowImpl->mnOptimalWidthCache = aOptimal.Width();
-        pWindowImpl->mnOptimalHeightCache = aOptimal.Height();
+        pLayoutData->mnOptimalWidthCache = aOptimal.Width();
+        pLayoutData->mnOptimalHeightCache = aOptimal.Height();
     }
 
     if (aPreferredSize.Width() == -1)
-        aPreferredSize.setWidth(pWindowImpl->mnOptimalWidthCache);
+        aPreferredSize.setWidth(pLayoutData->mnOptimalWidthCache);
 
     if (aPreferredSize.Height() == -1)
-        aPreferredSize.setHeight(pWindowImpl->mnOptimalHeightCache);
+        aPreferredSize.setHeight(pLayoutData->mnOptimalHeightCache);
 
     return aPreferredSize;
 }
@@ -579,18 +588,18 @@ Size Window::get_preferred_size() const
 {
     Size aPreferredSize(get_ungrouped_preferred_size());
 
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    if (!pWindowImpl->m_xSizeGroup)
+    if (!pLayoutData->m_xSizeGroup)
         return aPreferredSize;
 
-    const VclSizeGroupMode eMode = pWindowImpl->m_xSizeGroup->get_mode();
+    const VclSizeGroupMode eMode = pLayoutData->m_xSizeGroup->get_mode();
 
     if (eMode == VclSizeGroupMode::NONE)
         return aPreferredSize;
 
-    const bool bIgnoreInHidden = pWindowImpl->m_xSizeGroup->get_ignore_hidden();
-    const std::set<VclPtr<vcl::Window>>& rWindows = pWindowImpl->m_xSizeGroup->get_widgets();
+    const bool bIgnoreInHidden = pLayoutData->m_xSizeGroup->get_ignore_hidden();
+    const std::set<VclPtr<vcl::Window>>& rWindows = pLayoutData->m_xSizeGroup->get_widgets();
 
     for (const vcl::Window* pOther : rWindows)
     {
@@ -614,315 +623,319 @@ Size Window::get_preferred_size() const
 
 VclAlign Window::get_halign() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->meHalign;
+    return pLayoutData->meHalign;
 }
 
 void Window::set_halign(VclAlign eAlign)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->meHalign = eAlign;
+    pLayoutData->meHalign = eAlign;
 }
 
 VclAlign Window::get_valign() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->meValign;
+    return pLayoutData->meValign;
 }
 
 void Window::set_valign(VclAlign eAlign)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->meValign = eAlign;
+    pLayoutData->meValign = eAlign;
 }
 
 bool Window::get_hexpand() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mbHexpand;
+    return pLayoutData->mbHexpand;
 }
 
 void Window::set_hexpand(bool bExpand)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mbHexpand = bExpand;
+    pLayoutData->mbHexpand = bExpand;
 }
 
 bool Window::get_vexpand() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mbVexpand;
+    return pLayoutData->mbVexpand;
 }
 
 void Window::set_vexpand(bool bExpand)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mbVexpand = bExpand;
+    pLayoutData->mbVexpand = bExpand;
 }
 
 bool Window::get_expand() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mbExpand;
+    return pLayoutData->mbExpand;
 }
 
 void Window::set_expand(bool bExpand)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mbExpand = bExpand;
+    pLayoutData->mbExpand = bExpand;
 }
 
 VclPackType Window::get_pack_type() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mePackType;
+    return pLayoutData->mePackType;
 }
 
 void Window::set_pack_type(VclPackType ePackType)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mePackType = ePackType;
+    pLayoutData->mePackType = ePackType;
 }
 
 sal_Int32 Window::get_padding() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnPadding;
+    return pLayoutData->mnPadding;
 }
 
 void Window::set_padding(sal_Int32 nPadding)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mnPadding = nPadding;
+    pLayoutData->mnPadding = nPadding;
 }
 
 bool Window::get_fill() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mbFill;
+    return pLayoutData->mbFill;
 }
 
 void Window::set_fill(bool bFill)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mbFill = bFill;
+    pLayoutData->mbFill = bFill;
 }
 
 sal_Int32 Window::get_grid_width() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnGridWidth;
+    return pLayoutData->mnGridWidth;
 }
 
 void Window::set_grid_width(sal_Int32 nCols)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mnGridWidth = nCols;
+    pLayoutData->mnGridWidth = nCols;
 }
 
 sal_Int32 Window::get_grid_left_attach() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnGridLeftAttach;
+    return pLayoutData->mnGridLeftAttach;
 }
 
 void Window::set_grid_left_attach(sal_Int32 nAttach)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mnGridLeftAttach = nAttach;
+    pLayoutData->mnGridLeftAttach = nAttach;
 }
 
 sal_Int32 Window::get_grid_height() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnGridHeight;
+    return pLayoutData->mnGridHeight;
 }
 
 void Window::set_grid_height(sal_Int32 nRows)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mnGridHeight = nRows;
+    pLayoutData->mnGridHeight = nRows;
 }
 
 sal_Int32 Window::get_grid_top_attach() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnGridTopAttach;
+    return pLayoutData->mnGridTopAttach;
 }
 
 void Window::set_grid_top_attach(sal_Int32 nAttach)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mnGridTopAttach = nAttach;
+    pLayoutData->mnGridTopAttach = nAttach;
 }
 
 void Window::set_border_width(sal_Int32 nBorderWidth)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mnBorderWidth = nBorderWidth;
+    pLayoutData->mnBorderWidth = nBorderWidth;
 }
 
 sal_Int32 Window::get_border_width() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnBorderWidth;
+    return pLayoutData->mnBorderWidth;
 }
 
 void Window::set_margin_start(sal_Int32 nWidth)
 {
-    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl(); pWindowImpl->mnMarginLeft != nWidth)
+    if (WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
+        pLayoutData->mnMarginLeft != nWidth)
     {
-        pWindowImpl->mnMarginLeft = nWidth;
+        pLayoutData->mnMarginLeft = nWidth;
         queue_resize();
     }
 }
 
 sal_Int32 Window::get_margin_start() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnMarginLeft;
+    return pLayoutData->mnMarginLeft;
 }
 
 void Window::set_margin_end(sal_Int32 nWidth)
 {
-    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
-        pWindowImpl->mnMarginRight != nWidth)
+    if (WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
+        pLayoutData->mnMarginRight != nWidth)
     {
-        pWindowImpl->mnMarginRight = nWidth;
+        pLayoutData->mnMarginRight = nWidth;
         queue_resize();
     }
 }
 
 sal_Int32 Window::get_margin_end() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnMarginRight;
+    return pLayoutData->mnMarginRight;
 }
 
 void Window::set_margin_top(sal_Int32 nWidth)
 {
-    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl(); pWindowImpl->mnMarginTop != nWidth)
+    if (WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
+        pLayoutData->mnMarginTop != nWidth)
     {
-        pWindowImpl->mnMarginTop = nWidth;
+        pLayoutData->mnMarginTop = nWidth;
         queue_resize();
     }
 }
 
 sal_Int32 Window::get_margin_top() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnMarginTop;
+    return pLayoutData->mnMarginTop;
 }
 
 void Window::set_margin_bottom(sal_Int32 nWidth)
 {
-    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
-        pWindowImpl->mnMarginBottom != nWidth)
+    if (WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
+        pLayoutData->mnMarginBottom != nWidth)
     {
-        pWindowImpl->mnMarginBottom = nWidth;
+        pLayoutData->mnMarginBottom = nWidth;
         queue_resize();
     }
 }
 
 sal_Int32 Window::get_margin_bottom() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnMarginBottom;
+    return pLayoutData->mnMarginBottom;
 }
 
 sal_Int32 Window::get_height_request() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnHeightRequest;
+    return pLayoutData->mnHeightRequest;
 }
 
 sal_Int32 Window::get_width_request() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mnWidthRequest;
+    return pLayoutData->mnWidthRequest;
 }
 
 bool Window::get_secondary() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mbSecondary;
+    return pLayoutData->mbSecondary;
 }
 
 void Window::set_secondary(bool bSecondary)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mbSecondary = bSecondary;
+    pLayoutData->mbSecondary = bSecondary;
 }
 
 bool Window::get_non_homogeneous() const
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    return pWindowImpl->mbNonHomogeneous;
+    return pLayoutData->mbNonHomogeneous;
 }
 
 void Window::set_non_homogeneous(bool bNonHomogeneous)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
-    pWindowImpl->mbNonHomogeneous = bNonHomogeneous;
+    pLayoutData->mbNonHomogeneous = bNonHomogeneous;
 }
 
 void Window::add_to_size_group(const std::shared_ptr<VclSizeGroup>& xGroup)
 {
-    WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl();
+    WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
 
     // TODO multiple groups
-    pWindowImpl->m_xSizeGroup = xGroup;
-    pWindowImpl->m_xSizeGroup->insert(this);
+    pLayoutData->m_xSizeGroup = xGroup;
+    pLayoutData->m_xSizeGroup->insert(this);
 
-    if (VclSizeGroupMode::NONE != pWindowImpl->m_xSizeGroup->get_mode())
+    if (VclSizeGroupMode::NONE != pLayoutData->m_xSizeGroup->get_mode())
         queue_resize();
 }
 
 void Window::remove_from_all_size_groups()
 {
     // TODO multiple groups
-    if (WindowImpl* pWindowImpl = ImplGetEffectiveWindowImpl(); pWindowImpl->m_xSizeGroup)
+    if (WindowLayoutData* pLayoutData = ImplGetEffectiveWindowLayoutData();
+        pLayoutData->m_xSizeGroup)
     {
-        if (VclSizeGroupMode::NONE != pWindowImpl->m_xSizeGroup->get_mode())
+        if (VclSizeGroupMode::NONE != pLayoutData->m_xSizeGroup->get_mode())
             queue_resize();
-        pWindowImpl->m_xSizeGroup->erase(this);
-        pWindowImpl->m_xSizeGroup.reset();
+
+        pLayoutData->m_xSizeGroup->erase(this);
+        pLayoutData->m_xSizeGroup.reset();
     }
 }
 
@@ -1497,11 +1510,11 @@ Size Window::CalcOutputSize(const Size& rWinSz) const
 
 void Window::InvalidateSizeCache()
 {
-    WindowImpl* pWindowImpl = mpWindowImpl->mpBorderWindow
-                                  ? mpWindowImpl->mpBorderWindow->mpWindowImpl.get()
-                                  : mpWindowImpl.get();
-    pWindowImpl->mnOptimalWidthCache = -1;
-    pWindowImpl->mnOptimalHeightCache = -1;
+    WindowLayoutData* pLayoutData = mpWindowImpl->mpBorderWindow
+                                        ? mpWindowImpl->mpBorderWindow->mpLayoutData.get()
+                                        : mpLayoutData.get();
+    pLayoutData->mnOptimalWidthCache = -1;
+    pLayoutData->mnOptimalHeightCache = -1;
 }
 
 tools::Long Window::ImplGetBorderWidth() const

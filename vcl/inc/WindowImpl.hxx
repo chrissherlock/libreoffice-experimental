@@ -96,10 +96,6 @@ public:
     sal_Int32           mnTopBorder;
     sal_Int32           mnRightBorder;
     sal_Int32           mnBottomBorder;
-    sal_Int32           mnWidthRequest;
-    sal_Int32           mnHeightRequest;
-    sal_Int32           mnOptimalWidthCache;
-    sal_Int32           mnOptimalHeightCache;
     tools::Long         mnX;
     tools::Long         mnY;
     tools::Long         mnAbsScreenX;
@@ -107,7 +103,6 @@ public:
     InputContext        maInputContext;
     css::uno::Reference< css::awt::XVclWindowPeer > mxWindowPeer;
     rtl::Reference<comphelper::OAccessible> mpAccessible;
-    std::shared_ptr< VclSizeGroup > m_xSizeGroup;
     std::vector<VclPtr<FixedText>> m_aMnemonicLabels;
     std::unique_ptr<ImplAccessibleInfos> mpAccessibleInfos;
     VCLXWindow*         mpVCLXWindow;
@@ -129,19 +124,6 @@ public:
     ActivateModeFlags   mnActivateMode;
     DialogControlFlags  mnDlgCtrlFlags;
     AlwaysInputMode     meAlwaysInputMode;
-    VclAlign            meHalign;
-    VclAlign            meValign;
-    VclPackType         mePackType;
-    sal_Int32           mnPadding;
-    sal_Int32           mnGridHeight;
-    sal_Int32           mnGridLeftAttach;
-    sal_Int32           mnGridTopAttach;
-    sal_Int32           mnGridWidth;
-    sal_Int32           mnBorderWidth;
-    sal_Int32           mnMarginLeft;
-    sal_Int32           mnMarginRight;
-    sal_Int32           mnMarginTop;
-    sal_Int32           mnMarginBottom;
     bool                mbFrame:1,
                         mbBorderWin:1,
                         mbOverlapWin:1,
@@ -202,12 +184,6 @@ public:
                         mbDrawSelectionBackground:1,
                         mbIsInTaskPaneList:1,
                         mbFakeFocusSet:1,
-                        mbHexpand:1,
-                        mbVexpand:1,
-                        mbExpand:1,
-                        mbFill:1,
-                        mbSecondary:1,
-                        mbNonHomogeneous:1,
                         mbDoubleBufferingRequested:1;
     bool mbIsFormControl : 1 = false;
 

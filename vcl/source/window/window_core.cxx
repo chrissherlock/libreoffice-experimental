@@ -38,6 +38,7 @@
 #include <WindowHelpData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowEventHandlers.hxx>
+#include <WindowLayoutData.hxx>
 #include <WindowHierarchy.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>
@@ -56,6 +57,7 @@ Window::Window(WindowType eType)
     : mpWindowImpl(std::make_unique<WindowImpl>(*this, eType))
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
+    , mpLayoutData(std::make_unique<WindowLayoutData>())
 {
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
     mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
@@ -65,6 +67,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     : mpWindowImpl(std::make_unique<WindowImpl>(*this, WindowType::WINDOW))
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
+    , mpLayoutData(std::make_unique<WindowLayoutData>())
 {
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
     mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
@@ -179,6 +182,7 @@ void Window::dispose()
     mpWindowImpl.reset();
     mpHelpData.reset();
     mpEventHandlers.reset();
+    mpLayoutData.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy
