@@ -128,7 +128,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mpCursor                            = nullptr;                      // cursor
     maPointer                           = PointerStyle::Arrow;
     mpVCLXWindow                        = nullptr;
-    mpAccessibleInfos                   = nullptr;
     maControlForeground                 = COL_TRANSPARENT;  // no foreground set
     maControlBackground                 = COL_TRANSPARENT;  // no background set
     mnLeftBorder                        = 0;                         // width of left border
@@ -206,7 +205,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mbExtTextInput                      = false;                     // true: ExtTextInput-Mode is active
     mbInFocusHdl                        = false;                     // true: Within GetFocus-Handler
     mbCreatedWithToolkit                = false;
-    mbSuppressAccessibilityEvents       = false;                     // true: do not send any accessibility events
     mbDrawSelectionBackground           = false;                     // true: draws transparent window background to indicate (toolbox) selection
     mbIsInTaskPaneList                  = false;                     // true: window was added to the taskpanelist in the topmost system window
     mnNativeBackground                  = ControlPart::NONE;         // initialize later, depends on type
@@ -221,7 +219,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
 WindowImpl::~WindowImpl()
 {
     mpClippingState->mpChildClipRegion.reset();
-    mpAccessibleInfos.reset();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

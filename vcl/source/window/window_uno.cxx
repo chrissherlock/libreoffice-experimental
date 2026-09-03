@@ -23,6 +23,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowAccessibleData.hxx>
 
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
 #include <com/sun/star/datatransfer/clipboard/XClipboard.hpp>
@@ -36,31 +37,39 @@ void Window::SetWindowPeer(css::uno::Reference<css::awt::XVclWindowPeer> const& 
     if (!mpWindowImpl || mpWindowImpl->mbInDispose)
         return;
 
+    if (!mpAccessibleData)
+        return;
+
     // be safe against re-entrance: first clear the old ref, then assign the new one
-    if (mpWindowImpl->mxWindowPeer)
+    if (mpAccessibleData->mxWindowPeer)
     {
         // first, disconnect the peer from ourself, otherwise disposing it, will dispose us
         UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
         SAL_WARN_IF(!pWrapper, "vcl.window", "SetComponentInterface: No Wrapper!");
         if (pWrapper)
-            pWrapper->SetWindowInterface(nullptr, mpWindowImpl->mxWindowPeer);
-        mpWindowImpl->mxWindowPeer->dispose();
-        mpWindowImpl->mxWindowPeer.clear();
+            pWrapper->SetWindowInterface(nullptr, mpAccessibleData->mxWindowPeer);
+        mpAccessibleData->mxWindowPeer->dispose();
+        mpAccessibleData->mxWindowPeer.clear();
     }
-    mpWindowImpl->mxWindowPeer = xPeer;
+
+    mpAccessibleData->mxWindowPeer = xPeer;
 
     mpWindowImpl->mpVCLXWindow = pVCLXWindow;
 }
 
 css::uno::Reference<css::awt::XVclWindowPeer> Window::GetComponentInterface(bool bCreate)
 {
-    if (!mpWindowImpl->mxWindowPeer.is() && bCreate)
+    if (!mpAccessibleData)
+        return nullptr;
+
+    if (!mpAccessibleData->mxWindowPeer.is() && bCreate)
     {
         UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
         if (pWrapper)
-            mpWindowImpl->mxWindowPeer = pWrapper->GetWindowInterface(this);
+            mpAccessibleData->mxWindowPeer = pWrapper->GetWindowInterface(this);
     }
-    return mpWindowImpl->mxWindowPeer;
+
+    return mpAccessibleData->mxWindowPeer;
 }
 
 void Window::SetComponentInterface(css::uno::Reference<css::awt::XVclWindowPeer> const& xIFace)

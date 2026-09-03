@@ -51,6 +51,7 @@
 #include <svdata.hxx>
 #include <brdwin.hxx>
 #include <WindowImpl.hxx>
+#include <WindowAccessibleData.hxx>
 
 using namespace ::com::sun::star::uno;
 
@@ -283,7 +284,7 @@ bool SystemWindow::Close()
     if ( xWindow->isDisposed() )
         return false;
 
-    if ( mpWindowImpl->mxWindowPeer.is() && IsCreatedWithToolkit() )
+    if (mpAccessibleData && mpAccessibleData->mxWindowPeer.is() && IsCreatedWithToolkit())
         return false;
 
     // Is Window not closeable, ignore close

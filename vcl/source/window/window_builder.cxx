@@ -26,6 +26,7 @@
 #include <vcl/window.hxx>
 
 #include <WindowImpl.hxx>
+#include <WindowAccessibleData.hxx>
 
 #include <com/sun/star/accessibility/AccessibleRelation.hpp>
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
@@ -281,7 +282,10 @@ bool Window::set_property(const OUString& rKey, const OUString& rValue)
 
 void Window::add_mnemonic_label(FixedText* pLabel)
 {
-    std::vector<VclPtr<FixedText>>& v = mpWindowImpl->m_aMnemonicLabels;
+    if (!mpAccessibleData)
+        return;
+
+    std::vector<VclPtr<FixedText>>& v = mpAccessibleData->m_aMnemonicLabels;
     if (std::find(v.begin(), v.end(), VclPtr<FixedText>(pLabel)) != v.end())
         return;
     v.emplace_back(pLabel);
@@ -290,7 +294,10 @@ void Window::add_mnemonic_label(FixedText* pLabel)
 
 void Window::remove_mnemonic_label(FixedText* pLabel)
 {
-    std::vector<VclPtr<FixedText>>& v = mpWindowImpl->m_aMnemonicLabels;
+    if (!mpAccessibleData)
+        return;
+
+    std::vector<VclPtr<FixedText>>& v = mpAccessibleData->m_aMnemonicLabels;
     auto aFind = std::find(v.begin(), v.end(), VclPtr<FixedText>(pLabel));
     if (aFind == v.end())
         return;
@@ -300,7 +307,9 @@ void Window::remove_mnemonic_label(FixedText* pLabel)
 
 const std::vector<VclPtr<FixedText>>& Window::list_mnemonic_labels() const
 {
-    return mpWindowImpl->m_aMnemonicLabels;
+    assert(mpAccessibleData);
+
+    return mpAccessibleData->m_aMnemonicLabels;
 }
 } // end vcl namespace
 

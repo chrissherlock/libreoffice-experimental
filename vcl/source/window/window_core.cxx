@@ -30,6 +30,7 @@
 #include <vcl/vclevent.hxx>
 #include <vcl/window.hxx>
 #include <vcl/uitest/uiobject.hxx>
+#include <vcl/toolkit/fixed.hxx>
 #include <vcl/toolkit/unowrap.hxx>
 
 #include <ImplAccessibleInfos.hxx>
@@ -39,6 +40,7 @@
 #include <WindowImpl.hxx>
 #include <WindowEventHandlers.hxx>
 #include <WindowLayoutData.hxx>
+#include <WindowAccessibleData.hxx>
 #include <WindowHierarchy.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>
@@ -58,6 +60,7 @@ Window::Window(WindowType eType)
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
     , mpLayoutData(std::make_unique<WindowLayoutData>())
+    , mpAccessibleData(std::make_unique<WindowAccessibleData>())
 {
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
     mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
@@ -68,6 +71,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
     , mpLayoutData(std::make_unique<WindowLayoutData>())
+    , mpAccessibleData(std::make_unique<WindowAccessibleData>())
 {
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
     mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
@@ -175,14 +179,15 @@ void Window::dispose()
 
     ImplDisposeFrameData();
 
-    if (mpWindowImpl->mxWindowPeer)
-        mpWindowImpl->mxWindowPeer->dispose();
+    if (mpAccessibleData->mxWindowPeer)
+        mpAccessibleData->mxWindowPeer->dispose();
 
     // should be the last statements
     mpWindowImpl.reset();
     mpHelpData.reset();
     mpEventHandlers.reset();
     mpLayoutData.reset();
+    mpAccessibleData.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy
@@ -729,14 +734,17 @@ void Window::ImplDeInitAccessibility()
     if (pWrapper)
         pWrapper->WindowDestroyed(this);
 
-    if (mpWindowImpl->mpAccessible.is())
+    if (!mpAccessibleData)
+        return;
+
+    if (mpAccessibleData->mpAccessible.is())
     {
-        mpWindowImpl->mpAccessible->dispose();
-        mpWindowImpl->mpAccessible.clear();
+        mpAccessibleData->mpAccessible->dispose();
+        mpAccessibleData->mpAccessible.clear();
     }
 
-    if (mpWindowImpl->mpAccessibleInfos)
-        mpWindowImpl->mpAccessibleInfos->pAccessibleParent.clear();
+    if (mpAccessibleData->mpAccessibleInfos)
+        mpAccessibleData->mpAccessibleInfos->pAccessibleParent.clear();
 }
 
 void Window::ImplRemoveFromTaskPaneList()

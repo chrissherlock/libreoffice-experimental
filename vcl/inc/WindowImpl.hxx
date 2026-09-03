@@ -22,7 +22,6 @@
 #include <tools/color.hxx>
 #include <tools/gen.hxx>
 #include <tools/link.hxx>
-#include <comphelper/OAccessible.hxx>
 
 #include <vcl/inputctx.hxx>
 #include <vcl/ptrstyle.hxx>
@@ -33,8 +32,6 @@
 
 #include <window.h>
 #include <WindowHelpData.hxx>
-
-#include <com/sun/star/awt/XVclWindowPeer.hpp>
 
 #include <set>
 
@@ -101,10 +98,6 @@ public:
     tools::Long         mnAbsScreenX;
     Point               maPos;
     InputContext        maInputContext;
-    css::uno::Reference< css::awt::XVclWindowPeer > mxWindowPeer;
-    rtl::Reference<comphelper::OAccessible> mpAccessible;
-    std::vector<VclPtr<FixedText>> m_aMnemonicLabels;
-    std::unique_ptr<ImplAccessibleInfos> mpAccessibleInfos;
     VCLXWindow*         mpVCLXWindow;
 
     std::unique_ptr<WindowClippingState> mpClippingState;
@@ -179,7 +172,6 @@ public:
                         mbCreatedWithToolkit:1,
                         mbToolBox:1,
                         mbSplitter:1,
-                        mbSuppressAccessibilityEvents:1,
                         mbMenuFloatingWindow:1,
                         mbDrawSelectionBackground:1,
                         mbIsInTaskPaneList:1,
