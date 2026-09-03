@@ -429,6 +429,7 @@ class Dialog;
 class Edit;
 class WindowImpl;
 struct WindowHelpData;
+struct WindowEventHandlers;
 class PaintHelper;
 class VclSizeGroup;
 class Application;
@@ -550,6 +551,7 @@ public:
     SAL_DLLPRIVATE bool ImplIsOverlapWindow() const;
     SAL_DLLPRIVATE void ImplIsInTaskPaneList(bool mbIsInTaskList);
     SAL_DLLPRIVATE WindowImpl* ImplGetWindowImpl() const { return mpWindowImpl.get(); }
+    SAL_DLLPRIVATE WindowEventHandlers* ImplGetEventHandlers() const { return mpEventHandlers.get(); }
     void SetType(WindowType eType);
     WindowType GetType() const;
     bool IsSystemWindow() const;
@@ -1102,6 +1104,7 @@ private:
     // --- Data Members ---
     std::unique_ptr<WindowImpl> mpWindowImpl;
     std::unique_ptr<WindowHelpData> mpHelpData;
+    std::unique_ptr<WindowEventHandlers> mpEventHandlers;
 
     // --- Lifecycle and Teardown ---
     SAL_DLLPRIVATE void ImplDeInitDND();

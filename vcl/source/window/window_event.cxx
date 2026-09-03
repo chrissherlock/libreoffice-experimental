@@ -31,6 +31,7 @@
 #include <helpwin.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowEventHandlers.hxx>
 #include <WindowHierarchy.hxx>
 
 #include "impldockingwrapper.hxx"
@@ -39,7 +40,8 @@ namespace vcl
 {
 void Window::SimulateKeyPress(sal_uInt16 nKeyCode) const
 {
-    mpWindowImpl->mpFrame->SimulateKeyPress(nKeyCode);
+    if (mpWindowImpl)
+        mpWindowImpl->mpFrame->SimulateKeyPress(nKeyCode);
 }
 
 void Window::KeyInput(const KeyEvent& rKEvt)
@@ -80,14 +82,14 @@ void Window::Deactivate() {}
 
 void Window::SetCommandHdl(const Link<const CommandEvent&, bool>& rLink)
 {
-    if (mpWindowImpl)
-        mpWindowImpl->maCommandHdl = rLink;
+    if (mpEventHandlers)
+        mpEventHandlers->maCommandHdl = rLink;
 }
 
 void Window::SetHelpHdl(const Link<vcl::Window&, bool>& rLink)
 {
-    if (mpWindowImpl) // may be called after dispose
-        mpWindowImpl->maHelpRequestHdl = rLink;
+    if (mpEventHandlers) // may be called after dispose
+        mpEventHandlers->maHelpRequestHdl = rLink;
 }
 
 tools::Rectangle Window::ImplGetHelpScreenRect() const
@@ -165,13 +167,15 @@ void Window::RequestHelp(const HelpEvent& rHEvt)
         return;
     }
 
-    if (!mpWindowImpl->maHelpRequestHdl.IsSet() || mpWindowImpl->maHelpRequestHdl.Call(*this))
+    if (mpEventHandlers
+        && (!mpEventHandlers->maHelpRequestHdl.IsSet()
+            || mpEventHandlers->maHelpRequestHdl.Call(*this)))
         ImplStartHelp(rHEvt);
 }
 
 void Window::Command(const CommandEvent& rCEvt)
 {
-    if (mpWindowImpl && mpWindowImpl->maCommandHdl.Call(rCEvt))
+    if (mpEventHandlers && mpEventHandlers->maCommandHdl.Call(rCEvt))
         return;
 
     CallEventListeners(VclEventId::WindowCommand, const_cast<CommandEvent*>(&rCEvt));
@@ -547,24 +551,24 @@ void Window::CallEventListeners(VclEventId nEvent, void* pData)
 
     // If maEventListeners is empty, the XVCLWindow has not yet been initialized.
     // Calling GetComponentInterface will do that.
-    if (mpWindowImpl->maEventListeners.empty() && pData)
+    if (mpEventHandlers && mpEventHandlers->maEventListeners.empty() && pData)
         xWindow->GetComponentInterface();
 
-    if (!mpWindowImpl->maEventListeners.empty())
+    if (mpEventHandlers && !mpEventHandlers->maEventListeners.empty())
     {
         // Copy the list, because this can be destroyed when calling a Link...
-        std::vector<Link<VclWindowEvent&, void>> aCopy(mpWindowImpl->maEventListeners);
+        std::vector<Link<VclWindowEvent&, void>> aCopy(mpEventHandlers->maEventListeners);
 
         // we use an iterating counter/flag and a set of deleted Link's to avoid O(n^2) behaviour
-        mpWindowImpl->mnEventListenersIteratingCount++;
-        auto& rWindowImpl = *mpWindowImpl;
+        mpEventHandlers->mnEventListenersIteratingCount++;
+        auto& rEventHdlrs = *mpEventHandlers;
 
-        comphelper::ScopeGuard aGuard([&rWindowImpl, &xWindow, &bIgnoreDisposed]() {
+        comphelper::ScopeGuard aGuard([&rEventHdlrs, &xWindow, &bIgnoreDisposed]() {
             if (bIgnoreDisposed || !xWindow->isDisposed())
             {
-                rWindowImpl.mnEventListenersIteratingCount--;
-                if (rWindowImpl.mnEventListenersIteratingCount == 0)
-                    rWindowImpl.maEventListenersDeleted.clear();
+                rEventHdlrs.mnEventListenersIteratingCount--;
+                if (rEventHdlrs.mnEventListenersIteratingCount == 0)
+                    rEventHdlrs.maEventListenersDeleted.clear();
             }
         });
 
@@ -573,8 +577,8 @@ void Window::CallEventListeners(VclEventId nEvent, void* pData)
             if (!bIgnoreDisposed && xWindow->isDisposed())
                 break;
             // check this hasn't been removed in some re-enterancy scenario fdo#47368
-            if (rWindowImpl.maEventListenersDeleted.find(rLink)
-                == rWindowImpl.maEventListenersDeleted.end())
+            if (rEventHdlrs.maEventListenersDeleted.find(rLink)
+                == rEventHdlrs.maEventListenersDeleted.end())
                 rLink.Call(aEvent);
         }
     }
@@ -584,22 +588,22 @@ void Window::CallEventListeners(VclEventId nEvent, void* pData)
         if (!bIgnoreDisposed && xWindow->isDisposed())
             return;
 
-        if (!xWindow->mpWindowImpl)
+        if (!xWindow->mpEventHandlers)
             break;
 
-        auto& rWindowImpl = *xWindow->mpWindowImpl;
-        if (!rWindowImpl.maChildEventListeners.empty())
+        auto& rEventHdlrs = *xWindow->mpEventHandlers;
+        if (!rEventHdlrs.maChildEventListeners.empty())
         {
             // Copy the list, because this can be destroyed when calling a Link...
-            std::vector<Link<VclWindowEvent&, void>> aCopy(rWindowImpl.maChildEventListeners);
+            std::vector<Link<VclWindowEvent&, void>> aCopy(rEventHdlrs.maChildEventListeners);
             // we use an iterating counter/flag and a set of deleted Link's to avoid O(n^2) behaviour
-            rWindowImpl.mnChildEventListenersIteratingCount++;
-            comphelper::ScopeGuard aGuard([&rWindowImpl, &xWindow, &bIgnoreDisposed]() {
+            rEventHdlrs.mnChildEventListenersIteratingCount++;
+            comphelper::ScopeGuard aGuard([&rEventHdlrs, &xWindow, &bIgnoreDisposed]() {
                 if (bIgnoreDisposed || !xWindow->isDisposed())
                 {
-                    rWindowImpl.mnChildEventListenersIteratingCount--;
-                    if (rWindowImpl.mnChildEventListenersIteratingCount == 0)
-                        rWindowImpl.maChildEventListenersDeleted.clear();
+                    rEventHdlrs.mnChildEventListenersIteratingCount--;
+                    if (rEventHdlrs.mnChildEventListenersIteratingCount == 0)
+                        rEventHdlrs.maChildEventListenersDeleted.clear();
                 }
             });
             for (const Link<VclWindowEvent&, void>& rLink : aCopy)
@@ -607,8 +611,8 @@ void Window::CallEventListeners(VclEventId nEvent, void* pData)
                 if (!bIgnoreDisposed && xWindow->isDisposed())
                     return;
                 // Check this hasn't been removed in some re-enterancy scenario fdo#47368.
-                if (rWindowImpl.maChildEventListenersDeleted.find(rLink)
-                    == rWindowImpl.maChildEventListenersDeleted.end())
+                if (rEventHdlrs.maChildEventListenersDeleted.find(rLink)
+                    == rEventHdlrs.maChildEventListenersDeleted.end())
                     rLink.Call(aEvent);
             }
         }
@@ -622,33 +626,35 @@ void Window::CallEventListeners(VclEventId nEvent, void* pData)
 
 void Window::AddEventListener(const Link<VclWindowEvent&, void>& rEventListener)
 {
-    mpWindowImpl->maEventListeners.push_back(rEventListener);
+    if (mpEventHandlers)
+        mpEventHandlers->maEventListeners.push_back(rEventListener);
 }
 
 void Window::RemoveEventListener(const Link<VclWindowEvent&, void>& rEventListener)
 {
-    if (mpWindowImpl)
+    if (mpEventHandlers)
     {
-        auto& rListeners = mpWindowImpl->maEventListeners;
+        auto& rListeners = mpEventHandlers->maEventListeners;
         std::erase(rListeners, rEventListener);
-        if (mpWindowImpl->mnEventListenersIteratingCount)
-            mpWindowImpl->maEventListenersDeleted.insert(rEventListener);
+        if (mpEventHandlers->mnEventListenersIteratingCount)
+            mpEventHandlers->maEventListenersDeleted.insert(rEventListener);
     }
 }
 
 void Window::AddChildEventListener(const Link<VclWindowEvent&, void>& rEventListener)
 {
-    mpWindowImpl->maChildEventListeners.push_back(rEventListener);
+    if (mpEventHandlers)
+        mpEventHandlers->maChildEventListeners.push_back(rEventListener);
 }
 
 void Window::RemoveChildEventListener(const Link<VclWindowEvent&, void>& rEventListener)
 {
-    if (mpWindowImpl)
+    if (mpEventHandlers)
     {
-        auto& rListeners = mpWindowImpl->maChildEventListeners;
+        auto& rListeners = mpEventHandlers->maChildEventListeners;
         std::erase(rListeners, rEventListener);
-        if (mpWindowImpl->mnChildEventListenersIteratingCount)
-            mpWindowImpl->maChildEventListenersDeleted.insert(rEventListener);
+        if (mpEventHandlers->mnChildEventListenersIteratingCount)
+            mpEventHandlers->maChildEventListenersDeleted.insert(rEventListener);
     }
 }
 

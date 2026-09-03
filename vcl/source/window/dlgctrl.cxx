@@ -17,11 +17,9 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
+#include <sal/log.hxx>
+#include <i18nlangtag/languagetag.hxx>
 
-#include <svdata.hxx>
-#include <WindowImpl.hxx>
-
-#include "dlgctrl.hxx"
 #include <vcl/event.hxx>
 #include <vcl/toolkit/fixed.hxx>
 #include <vcl/layout.hxx>
@@ -31,8 +29,12 @@
 #include <vcl/toolkit/button.hxx>
 #include <vcl/toolbox.hxx>
 #include <vcl/settings.hxx>
-#include <sal/log.hxx>
-#include <i18nlangtag/languagetag.hxx>
+
+#include <svdata.hxx>
+#include <WindowImpl.hxx>
+#include <WindowEventHandlers.hxx>
+
+#include "dlgctrl.hxx"
 
 #include <com/sun/star/i18n/XCharacterClassification.hpp>
 
@@ -507,17 +509,15 @@ namespace vcl {
 
 void Window::SetMnemonicActivateHdl(const Link<vcl::Window&, bool>& rLink)
 {
-    if (mpWindowImpl) // may be called after dispose
-    {
-        mpWindowImpl->maMnemonicActivateHdl = rLink;
-    }
+    if (mpEventHandlers) // may be called after dispose
+        mpEventHandlers->maMnemonicActivateHdl = rLink;
 }
 
 void Window::ImplControlFocus( GetFocusFlags nFlags )
 {
     if ( nFlags & GetFocusFlags::Mnemonic )
     {
-        if (mpWindowImpl->maMnemonicActivateHdl.Call(*this))
+        if (mpEventHandlers->maMnemonicActivateHdl.Call(*this))
             return;
 
         const bool bUniqueMnemonic(nFlags & GetFocusFlags::UniqueMnemonic);
