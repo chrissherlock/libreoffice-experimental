@@ -27,10 +27,10 @@ namespace vcl {
 
 void Window::ImplEnableRTL( bool bEnable )
 {
-    if (mpWindowImpl->mxOutDev->mbEnableRTL != bEnable)
+    if (mxOutDev->mbEnableRTL != bEnable)
     {
         CompatStateChanged( StateChangedType::Mirroring );
-        mpWindowImpl->mxOutDev->OutputDevice::EnableRTL(bEnable);
+        mxOutDev->OutputDevice::EnableRTL(bEnable);
     }
 }
 

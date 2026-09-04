@@ -326,8 +326,8 @@ void Window::ImplInitFrameResolution(vcl::Window* pParent, WinBits nStyle)
     {
         const Size aSize = mpWindowImpl->mpFrame->GetClientSize();
 
-        mpWindowImpl->mxOutDev->SetOutputWidthPixel(aSize.Width());
-        mpWindowImpl->mxOutDev->SetOutputHeightPixel(aSize.Height());
+        mxOutDev->SetOutputWidthPixel(aSize.Width());
+        mxOutDev->SetOutputHeightPixel(aSize.Height());
     }
 }
 
@@ -347,7 +347,7 @@ void Window::ImplInitFromParentState(vcl::Window* pParent)
     {
         // we don't want to call the WindowOutputDevice override of this because
         // it calls back into us.
-        mpWindowImpl->mxOutDev->OutputDevice::SetSettings(pParent->GetSettings());
+        mxOutDev->OutputDevice::SetSettings(pParent->GetSettings());
     }
 }
 
@@ -381,7 +381,7 @@ void Window::ImplInitSettings(WinBits nStyle)
 
     // side effect: ImplUpdateGlobalSettings does an ImplGetFrame()->UpdateSettings
     ImplUpdateGlobalSettings(*pSVData->maAppData.mxSettings);
-    mpWindowImpl->mxOutDev->SetSettings(*pSVData->maAppData.mxSettings);
+    mxOutDev->SetSettings(*pSVData->maAppData.mxSettings);
     pSVData->maAppData.mbSettingsInit = true;
 }
 
