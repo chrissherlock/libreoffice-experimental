@@ -125,11 +125,7 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mpClientWindow                      = nullptr;                      // Client-Window of a FrameWindow
     mpLastFocusWindow                   = nullptr;                      // window for focus restore
     mpDlgCtrlDownWindow                 = nullptr;                      // window for dialog control
-    mpCursor                            = nullptr;                      // cursor
-    maPointer                           = PointerStyle::Arrow;
     mpVCLXWindow                        = nullptr;
-    maControlForeground                 = COL_TRANSPARENT;  // no foreground set
-    maControlBackground                 = COL_TRANSPARENT;  // no background set
     mnLeftBorder                        = 0;                         // width of left border
     mnTopBorder                         = 0;                         // width of top border
     mnRightBorder                       = 0;                         // width of right border
@@ -194,8 +190,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mbInShowFocus                       = false;                     // prevent recursion
     mbInHideFocus                       = false;                     // prevent recursion
     mbTrackVisible                      = false;                     // true: Tracking Visible
-    mbControlForeground                 = false;                     // true: Foreground-Property set
-    mbControlBackground                 = false;                     // true: Background-Property set
     mbAlwaysOnTop                       = false;                     // true: always visible for all others windows
     mbCompoundControl                   = false;                     // true: Composite Control => Listener...
     mbCompoundControlHasFocus           = false;                     // true: Composite Control has focus somewhere
@@ -207,7 +201,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mbCreatedWithToolkit                = false;
     mbDrawSelectionBackground           = false;                     // true: draws transparent window background to indicate (toolbox) selection
     mbIsInTaskPaneList                  = false;                     // true: window was added to the taskpanelist in the topmost system window
-    mnNativeBackground                  = ControlPart::NONE;         // initialize later, depends on type
     mbFakeFocusSet                      = false;                     // true: pretend as if the window has focus.
     static bool bDoubleBuffer = getenv("VCL_DOUBLEBUFFERING_FORCE_ENABLE");
     mbDoubleBufferingRequested = bDoubleBuffer; // when we are not sure, assume it cannot do double-buffering via RenderContext

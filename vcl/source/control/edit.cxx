@@ -42,6 +42,7 @@
 #include <accessibility/vclxaccessibleedit.hxx>
 #include <PaintBufferGuard.hxx>
 #include <WindowImpl.hxx>
+#include <WindowControlAppearance.hxx>
 #include <svdata.hxx>
 #include <strings.hrc>
 
@@ -357,7 +358,7 @@ void Edit::ApplySettings(vcl::RenderContext& rRenderContext)
         if (ImplUseNativeBorder(rRenderContext, GetStyle()))
         {
             // indicates that no non-native drawing of background should take place
-            mpWindowImpl->mnNativeBackground = ControlPart::Entire;
+            mpControlAppearance->mnNativeBackground = ControlPart::Entire;
         }
     }
     else if (ImplUseNativeBorder(rRenderContext, GetStyle()))

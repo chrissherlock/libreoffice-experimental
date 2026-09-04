@@ -36,6 +36,7 @@
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowClippingState.hxx>
+#include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
 #include <clipping/ClippingBridge.hxx>
 #include <clipping/ClipStateBuilder.hxx>
@@ -52,8 +53,8 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
 {
     pHelper->SetPop();
 
-    if ( mpWindowImpl->mpCursor )
-        pHelper->SetRestoreCursor(mpWindowImpl->mpCursor->ImplSuspend());
+    if ( mpControlAppearance &&  mpControlAppearance->mpCursor )
+        pHelper->SetRestoreCursor(mpControlAppearance->mpCursor->ImplSuspend());
 
     GetOutDev()->GetClipState().Invalidate();
     mpWindowImpl->mbInPaint = true;
@@ -102,8 +103,8 @@ void Window::PopPaintHelper(PaintHelper const *pHelper)
     mpWindowImpl->mbInPaint = false;
     GetOutDev()->GetClipState().Invalidate();
     mpWindowImpl->mpPaintRegion = nullptr;
-    if (mpWindowImpl->mpCursor)
-        mpWindowImpl->mpCursor->ImplResume(pHelper->GetRestoreCursor());
+    if (mpControlAppearance->mpCursor)
+        mpControlAppearance->mpCursor->ImplResume(pHelper->GetRestoreCursor());
 }
 
 void Window::ImplCallPaint(const vcl::Region* pRegion, ImplPaintFlags nPaintFlags)
@@ -1165,7 +1166,7 @@ void Window::Erase(vcl::RenderContext& rRenderContext)
 
     bool bNativeOK = false;
 
-    ControlPart aCtrlPart = ImplGetWindowImpl()->mnNativeBackground;
+    ControlPart aCtrlPart = ImplGetControlAppearance()->mnNativeBackground;
 
     if (aCtrlPart == ControlPart::Entire && IsControlBackground())
     {
@@ -1224,8 +1225,8 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if ( !nHorzScroll && !nVertScroll )
         return;
 
-    if ( mpWindowImpl->mpCursor )
-        mpWindowImpl->mpCursor->ImplSuspend();
+    if (mpControlAppearance &&  mpControlAppearance->mpCursor)
+        mpControlAppearance->mpCursor->ImplSuspend();
 
     ScrollFlags nOrgFlags = nFlags;
     if ( !(nFlags & (ScrollFlags::Children | ScrollFlags::NoChildren)) )
@@ -1380,8 +1381,8 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if ( nFlags & ScrollFlags::Update )
         PaintImmediately();
 
-    if ( mpWindowImpl->mpCursor )
-        mpWindowImpl->mpCursor->ImplResume();
+    if (mpControlAppearance && mpControlAppearance->mpCursor)
+        mpControlAppearance->mpCursor->ImplResume();
 }
 
 } /* namespace vcl */

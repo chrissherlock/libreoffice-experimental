@@ -30,6 +30,7 @@
 #include <PaintBufferGuard.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowControlAppearance.hxx>
 
 #include <memory>
 
@@ -238,7 +239,7 @@ void vcl::Cursor::ImplDoShow( bool bDrawDirect, bool bRestore )
         // show the cursor, if there is an active window and the cursor
         // has been selected in this window
         pWindow = Application::GetFocusWindow();
-        if (!pWindow || !pWindow->mpWindowImpl || (pWindow->mpWindowImpl->mpCursor != this)
+        if (!pWindow || !pWindow->mpWindowImpl || (pWindow->mpControlAppearance && pWindow->mpControlAppearance->mpCursor != this)
             || pWindow->mpWindowImpl->mbInPaint
             || !pWindow->mpWindowImpl->mpFrameData->mbHasFocus)
             pWindow = nullptr;

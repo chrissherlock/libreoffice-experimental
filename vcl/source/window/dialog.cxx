@@ -38,6 +38,7 @@
 #include <ImplFrameData.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowControlAppearance.hxx>
 #include <accel.hxx>
 #include <brdwin.hxx>
 #include <salinst.hxx>
@@ -504,7 +505,9 @@ void Dialog::ApplySettings(vcl::RenderContext& rRenderContext)
     else if (rRenderContext.IsNativeControlSupported(ControlType::WindowBackground, ControlPart::BackgroundDialog))
     {
         // NWF background
-        mpWindowImpl->mnNativeBackground = ControlPart::BackgroundDialog;
+        if (mpControlAppearance)
+            mpControlAppearance->mnNativeBackground = ControlPart::BackgroundDialog;
+
         EnableChildTransparentMode();
     }
     else
@@ -522,7 +525,7 @@ void Dialog::ImplInitSettings()
     // NWF background
     else if( IsNativeControlSupported(ControlType::WindowBackground, ControlPart::BackgroundDialog))
     {
-        mpWindowImpl->mnNativeBackground = ControlPart::BackgroundDialog;
+        mpControlAppearance->mnNativeBackground = ControlPart::BackgroundDialog;
         EnableChildTransparentMode();
     }
     // fallback to settings color

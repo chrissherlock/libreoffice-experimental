@@ -29,6 +29,7 @@
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowControlAppearance.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 
@@ -240,13 +241,16 @@ vcl::Font Window::GetPointFont(vcl::RenderContext const& rRenderContext) const
 
 void Window::SetCursor(vcl::Cursor* pCursor)
 {
-    if (mpWindowImpl->mpCursor == pCursor)
+    if (!mpControlAppearance)
         return;
 
-    if (mpWindowImpl->mpCursor)
-        mpWindowImpl->mpCursor->ImplHide();
+    if (mpControlAppearance->mpCursor == pCursor)
+        return;
 
-    mpWindowImpl->mpCursor = pCursor;
+    if (mpControlAppearance->mpCursor)
+        mpControlAppearance->mpCursor->ImplHide();
+
+    mpControlAppearance->mpCursor = pCursor;
 
     if (pCursor)
         pCursor->ImplShow();
@@ -298,9 +302,9 @@ void Window::ImplLogicToPoint(vcl::RenderContext const& rRenderContext, vcl::Fon
 
 void Window::SetControlFont()
 {
-    if (mpWindowImpl && mpWindowImpl->mpControlFont)
+    if (mpControlAppearance && mpControlAppearance->mpControlFont)
     {
-        mpWindowImpl->mpControlFont.reset();
+        mpControlAppearance->mpControlFont.reset();
         CompatStateChanged(StateChangedType::ControlFont);
     }
 }
@@ -313,27 +317,31 @@ void Window::SetControlFont(const vcl::Font& rFont)
         return;
     }
 
-    if (mpWindowImpl->mpControlFont)
+    if (!mpControlAppearance)
+        return;
+
+    if (mpControlAppearance->mpControlFont)
     {
-        if (*mpWindowImpl->mpControlFont == rFont)
+        if (*mpControlAppearance->mpControlFont == rFont)
             return;
-        *mpWindowImpl->mpControlFont = rFont;
+
+        *mpControlAppearance->mpControlFont = rFont;
     }
     else
-        mpWindowImpl->mpControlFont = rFont;
+    {
+        mpControlAppearance->mpControlFont = rFont;
+    }
 
     CompatStateChanged(StateChangedType::ControlFont);
 }
 
 vcl::Font Window::GetControlFont() const
 {
-    if (mpWindowImpl->mpControlFont)
-        return *mpWindowImpl->mpControlFont;
-    else
-    {
-        vcl::Font aFont;
-        return aFont;
-    }
+    if (mpControlAppearance && mpControlAppearance->mpControlFont)
+        return *mpControlAppearance->mpControlFont;
+
+    vcl::Font aFont;
+    return aFont;
 }
 
 void Window::ApplyControlFont(vcl::RenderContext& rRenderContext, const vcl::Font& rFont)
@@ -346,10 +354,10 @@ void Window::ApplyControlFont(vcl::RenderContext& rRenderContext, const vcl::Fon
 
 void Window::SetControlForeground()
 {
-    if (mpWindowImpl->mbControlForeground)
+    if (mpControlAppearance && mpControlAppearance->mbControlForeground)
     {
-        mpWindowImpl->maControlForeground = COL_TRANSPARENT;
-        mpWindowImpl->mbControlForeground = false;
+        mpControlAppearance->maControlForeground = COL_TRANSPARENT;
+        mpControlAppearance->mbControlForeground = false;
         CompatStateChanged(StateChangedType::ControlForeground);
     }
 }
@@ -358,19 +366,19 @@ void Window::SetControlForeground(const Color& rColor)
 {
     if (rColor.IsTransparent())
     {
-        if (mpWindowImpl->mbControlForeground)
+        if (mpControlAppearance && mpControlAppearance->mbControlForeground)
         {
-            mpWindowImpl->maControlForeground = COL_TRANSPARENT;
-            mpWindowImpl->mbControlForeground = false;
+            mpControlAppearance->maControlForeground = COL_TRANSPARENT;
+            mpControlAppearance->mbControlForeground = false;
             CompatStateChanged(StateChangedType::ControlForeground);
         }
     }
     else
     {
-        if (mpWindowImpl->maControlForeground != rColor)
+        if (mpControlAppearance && mpControlAppearance->maControlForeground != rColor)
         {
-            mpWindowImpl->maControlForeground = rColor;
-            mpWindowImpl->mbControlForeground = true;
+            mpControlAppearance->maControlForeground = rColor;
+            mpControlAppearance->mbControlForeground = true;
             CompatStateChanged(StateChangedType::ControlForeground);
         }
     }
@@ -386,31 +394,34 @@ void Window::ApplyControlForeground(vcl::RenderContext& rRenderContext, const Co
 
 void Window::SetControlBackground()
 {
-    if (mpWindowImpl->mbControlBackground)
+    if (mpControlAppearance && mpControlAppearance->mbControlBackground)
     {
-        mpWindowImpl->maControlBackground = COL_TRANSPARENT;
-        mpWindowImpl->mbControlBackground = false;
+        mpControlAppearance->maControlBackground = COL_TRANSPARENT;
+        mpControlAppearance->mbControlBackground = false;
         CompatStateChanged(StateChangedType::ControlBackground);
     }
 }
 
 void Window::SetControlBackground(const Color& rColor)
 {
+    if (!mpControlAppearance)
+        return;
+
     if (rColor.IsTransparent())
     {
-        if (mpWindowImpl->mbControlBackground)
+        if (mpControlAppearance->mbControlBackground)
         {
-            mpWindowImpl->maControlBackground = COL_TRANSPARENT;
-            mpWindowImpl->mbControlBackground = false;
+            mpControlAppearance->maControlBackground = COL_TRANSPARENT;
+            mpControlAppearance->mbControlBackground = false;
             CompatStateChanged(StateChangedType::ControlBackground);
         }
     }
     else
     {
-        if (mpWindowImpl->maControlBackground != rColor)
+        if (mpControlAppearance->maControlBackground != rColor)
         {
-            mpWindowImpl->maControlBackground = rColor;
-            mpWindowImpl->mbControlBackground = true;
+            mpControlAppearance->maControlBackground = rColor;
+            mpControlAppearance->mbControlBackground = true;
             CompatStateChanged(StateChangedType::ControlBackground);
         }
     }

@@ -36,6 +36,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
@@ -306,8 +307,8 @@ static void lcl_HandleGetFocus(vcl::Window* pWindow)
         = Application::PostUserEvent(LINK(pWindow, vcl::Window, ImplAsyncFocusHdl), nullptr, true);
 
     if (vcl::Window* pFocusWin = pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin;
-        pFocusWin && pFocusWin->ImplGetWindowImpl()->mpCursor)
-        pFocusWin->ImplGetWindowImpl()->mpCursor->ImplShow();
+        pFocusWin && pFocusWin->ImplGetControlAppearance()->mpCursor)
+        pFocusWin->ImplGetControlAppearance()->mpCursor->ImplShow();
 }
 
 static bool lcl_HasActiveTrackerForFrame(const vcl::Window* pWindow)
@@ -353,8 +354,8 @@ static void lcl_HandleLoseFocus(vcl::Window* pWindow)
         }
 
         if (vcl::Window* pFocusWin = pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin;
-            pFocusWin && pFocusWin->ImplGetWindowImpl()->mpCursor)
-            pFocusWin->ImplGetWindowImpl()->mpCursor->ImplHide();
+            pFocusWin && pFocusWin->ImplGetControlAppearance()->mpCursor)
+            pFocusWin->ImplGetControlAppearance()->mpCursor->ImplHide();
     }
 
     // Make sure that no menu is visible when a toplevel window loses focus.

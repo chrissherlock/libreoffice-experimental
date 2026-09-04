@@ -17,7 +17,6 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-
 #include <sal/log.hxx>
 #include <comphelper/string.hxx>
 #include <vcl/event.hxx>
@@ -34,6 +33,7 @@
 #include <config_features.h>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
 
 #define STATUSBAR_OFFSET_X      STATUSBAR_OFFSET
@@ -205,7 +205,7 @@ void StatusBar::ApplySettings(vcl::RenderContext& rRenderContext)
     if (!IsControlBackground() &&
           rRenderContext.IsNativeControlSupported(ControlType::WindowBackground, ControlPart::BackgroundWindow))
     {
-        ImplGetWindowImpl()->mnNativeBackground = ControlPart::BackgroundWindow;
+        ImplGetControlAppearance()->mnNativeBackground = ControlPart::BackgroundWindow;
         EnableChildTransparentMode();
     }
 }

@@ -26,6 +26,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
 #include <brdwin.hxx>
 #include <clipping.hxx>
@@ -731,8 +732,8 @@ void vcl::Window::ImplClearFocus()
 
     pSVData->mpWinData->mpFocusWin = nullptr;
 
-    if (ImplGetWindowImpl() && ImplGetWindowImpl()->mpCursor)
-        ImplGetWindowImpl()->mpCursor->ImplHide();
+    if (ImplGetControlAppearance() && ImplGetControlAppearance()->mpCursor)
+        ImplGetControlAppearance()->mpCursor->ImplHide();
 }
 
 static bool lcl_CanDeactivateWindow(const vcl::Window* pOverlapWindow,
