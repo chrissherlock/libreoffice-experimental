@@ -21,6 +21,7 @@
 #include <svdata.hxx>
 #include <brdwin.hxx>
 #include <WindowImpl.hxx>
+#include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
 #include <salframe.hxx>
 #include <helpwin.hxx>
@@ -115,8 +116,8 @@ void FloatingWindow::ImplInitFloating( vcl::Window* pParent, WinBits nStyle )
             pBorderWin  = VclPtr<ImplBorderWindow>::Create(pParent, nStyle, nBorderStyle);
             ImplInit(pBorderWin, nStyle & ~WB_BORDER, nullptr);
             pBorderWin->mpWindowImpl->mpClientWindow = this;
-            pBorderWin->GetBorder(mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder,
-                                  mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder);
+            pBorderWin->GetBorder(mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder,
+                                  mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder);
             pBorderWin->SetDisplayActive(true);
             mpWindowImpl->mpBorderWindow = pBorderWin;
             mpWindowImpl->mpHierarchy->mpRealParent = pParent;
@@ -325,7 +326,7 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
             case FloatWinPopupFlags::Left:
                 aPos.setX( devRect.Left()-aSize.Width()+1 );
                 aPos.setY( devRect.Top() );
-                aPos.AdjustY( -(pWindow->mpWindowImpl->mnTopBorder) );
+                aPos.AdjustY( -(pWindow->mpGeometry->mnTopBorder) );
                 if( bRTL )
                 {
                     if( (devRectRTL.Right()+aSize.Width()) > aScreenRect.Right() )
@@ -349,7 +350,7 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
                 break;
             case FloatWinPopupFlags::Right:
                 aPos     = devRect.TopRight();
-                aPos.AdjustY( -(pWindow->mpWindowImpl->mnTopBorder) );
+                aPos.AdjustY( -(pWindow->mpGeometry->mnTopBorder) );
                 if( bRTL )
                 {
                     if( (devRectRTL.Left() - aSize.Width()) < aScreenRect.Left() )
@@ -775,7 +776,7 @@ void FloatingWindow::SetTitleType( FloatWinTitleType nTitle )
     else // nTitle == FloatWinTitleType::NONE
         nTitleStyle = BorderWindowTitleType::NONE;
     static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetTitleType( nTitleStyle, aOutSize );
-    static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->GetBorder( mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder, mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder );
+    static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
 }
 
 void FloatingWindow::StartPopupMode( const tools::Rectangle& rRect, FloatWinPopupFlags nFlags )

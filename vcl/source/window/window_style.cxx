@@ -30,6 +30,7 @@
 #include <WindowImpl.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowControlAppearance.hxx>
+#include <WindowGeometry.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 
@@ -148,10 +149,10 @@ WindowBorderStyle Window::GetBorderStyle() const
 void Window::GetBorder(sal_Int32& rLeftBorder, sal_Int32& rTopBorder, sal_Int32& rRightBorder,
                        sal_Int32& rBottomBorder) const
 {
-    rLeftBorder = mpWindowImpl->mnLeftBorder;
-    rTopBorder = mpWindowImpl->mnTopBorder;
-    rRightBorder = mpWindowImpl->mnRightBorder;
-    rBottomBorder = mpWindowImpl->mnBottomBorder;
+    rLeftBorder = mpGeometry->mnLeftBorder;
+    rTopBorder = mpGeometry->mnTopBorder;
+    rRightBorder = mpGeometry->mnRightBorder;
+    rBottomBorder = mpGeometry->mnBottomBorder;
 }
 
 bool Window::ImplShouldFallbackToParentBackground(const Wallpaper& rBack) const

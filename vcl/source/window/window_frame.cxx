@@ -26,6 +26,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowGeometry.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 #include <salgdi.hxx>
@@ -131,8 +132,8 @@ vcl::Window* Window::ImplCreateBorderWindow(vcl::Window* pParent, WinBits nStyle
     VclPtrInstance<ImplBorderWindow> pBorderWin(pParent, nStyle & nBorderWinMask, nBorderTypeStyle);
 
     static_cast<vcl::Window*>(pBorderWin)->mpWindowImpl->mpClientWindow = this;
-    pBorderWin->GetBorder(mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder,
-                          mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder);
+    pBorderWin->GetBorder(mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder,
+                          mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder);
     mpWindowImpl->mpBorderWindow = pBorderWin;
 
     // Return the newly created border window to act as the new parent

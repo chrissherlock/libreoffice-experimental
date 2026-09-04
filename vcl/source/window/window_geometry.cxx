@@ -29,6 +29,7 @@
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowLayoutData.hxx>
+#include <WindowGeometry.hxx>
 #include <brdwin.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
@@ -247,7 +248,7 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
     ImplHandleResize(pBorderWindow, aClientSize.getWidth(), aClientSize.Height());
 }
 
-Point Window::GetPosPixel() const { return mpWindowImpl->maPos; }
+Point Window::GetPosPixel() const { return mpGeometry->maPos; }
 
 void Window::SetPosPixel(const Point& rNewPos)
 {
@@ -993,11 +994,11 @@ Size Window::ImplGetClientAvailableSize() const
 
     if (mpWindowImpl->mpClientWindow)
     {
-        nWidth -= mpWindowImpl->mpClientWindow->mpWindowImpl->mnLeftBorder;
-        nWidth -= mpWindowImpl->mpClientWindow->mpWindowImpl->mnRightBorder;
+        nWidth -= mpWindowImpl->mpClientWindow->mpGeometry->mnLeftBorder;
+        nWidth -= mpWindowImpl->mpClientWindow->mpGeometry->mnRightBorder;
 
-        nHeight -= mpWindowImpl->mpClientWindow->mpWindowImpl->mnTopBorder;
-        nHeight -= mpWindowImpl->mpClientWindow->mpWindowImpl->mnBottomBorder;
+        nHeight -= mpWindowImpl->mpClientWindow->mpGeometry->mnTopBorder;
+        nHeight -= mpWindowImpl->mpClientWindow->mpGeometry->mnBottomBorder;
     }
 
     return Size(nWidth, nHeight);
@@ -1021,8 +1022,8 @@ void Window::ImplAdjustPosForRTL(tools::Long& rX, tools::Long& rOrgX, Point& rPt
 
         if (bXAlreadyMirrored && pOutDev->ImplIsAntiparallel())
         {
-            rPtDev.setX(mpWindowImpl->mnAbsScreenX);
-            rOrgX = mpWindowImpl->maPos.X();
+            rPtDev.setX(mpGeometry->mnAbsScreenX);
+            rOrgX = mpGeometry->maPos.X();
         }
     }
 
@@ -1062,8 +1063,8 @@ bool Window::ImplUpdatePosX(tools::Long nX, bool bXAlreadyMirrored, bool bCopyBi
     ImplAdjustPosForRTL(nX, nOrgX, aPtDev, bXAlreadyMirrored);
 
     const bool bPositionUnchanged = [&]() {
-        return mpWindowImpl->mnAbsScreenX == aPtDev.X() && nX == mpWindowImpl->mnX
-               && nOrgX == mpWindowImpl->maPos.X();
+        return mpGeometry->mnAbsScreenX == aPtDev.X() && nX == mpGeometry->mnX
+               && nOrgX == mpGeometry->maPos.X();
     }();
 
     if (bPositionUnchanged)
@@ -1076,9 +1077,9 @@ bool Window::ImplUpdatePosX(tools::Long nX, bool bXAlreadyMirrored, bool bCopyBi
                                          true);
     }
 
-    mpWindowImpl->mnX = nX;
-    mpWindowImpl->maPos.setX(nOrgX);
-    mpWindowImpl->mnAbsScreenX = aPtDev.X();
+    mpGeometry->mnX = nX;
+    mpGeometry->maPos.setX(nOrgX);
+    mpGeometry->mnAbsScreenX = aPtDev.X();
 
     return true;
 }
@@ -1087,7 +1088,7 @@ bool Window::ImplUpdatePosY(tools::Long nY, bool bCopyBits,
                             std::unique_ptr<vcl::Region>& rpOverlapRegion)
 {
     // check maPos as well, as it could have been changed for client windows (ImplCallMove())
-    if (nY == mpWindowImpl->mnY && nY == mpWindowImpl->maPos.Y())
+    if (nY == mpGeometry->mnY && nY == mpGeometry->maPos.Y())
         return false;
 
     if (bCopyBits && !rpOverlapRegion)
@@ -1097,8 +1098,8 @@ bool Window::ImplUpdatePosY(tools::Long nY, bool bCopyBits,
                                          true);
     }
 
-    mpWindowImpl->mnY = nY;
-    mpWindowImpl->maPos.setY(nY);
+    mpGeometry->mnY = nY;
+    mpGeometry->maPos.setY(nY);
 
     return true;
 }
@@ -1108,8 +1109,8 @@ void Window::ImplUpdateClientWindow(bool bNewPos)
     if (!mpWindowImpl->mpClientWindow)
         return;
 
-    const Point aClientOrigin(mpWindowImpl->mpClientWindow->mpWindowImpl->mnLeftBorder,
-                              mpWindowImpl->mpClientWindow->mpWindowImpl->mnTopBorder);
+    const Point aClientOrigin(mpWindowImpl->mpClientWindow->mpGeometry->mnLeftBorder,
+                              mpWindowImpl->mpClientWindow->mpGeometry->mnTopBorder);
     const Size aClientSize = ImplGetClientAvailableSize();
 
     mpWindowImpl->mpClientWindow->ImplPosSizeWindow(
@@ -1118,7 +1119,7 @@ void Window::ImplUpdateClientWindow(bool bNewPos)
 
     // If we have a client window, then this is the position
     // of the Application's floating windows
-    mpWindowImpl->mpClientWindow->mpWindowImpl->maPos = mpWindowImpl->maPos;
+    mpWindowImpl->mpClientWindow->mpGeometry->maPos = mpGeometry->maPos;
 
     if (!bNewPos)
         return;
@@ -1320,7 +1321,7 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     bool bXAlreadyMirrored = false;
     if ((nFlags & PosSizeFlags::Width) && !(nFlags & PosSizeFlags::X))
     {
-        nX = mpWindowImpl->mnX;
+        nX = mpGeometry->mnX;
         nFlags |= PosSizeFlags::X;
         bXAlreadyMirrored = true;
     }
@@ -1339,7 +1340,7 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
 
     // the borderwindow always specifies the position for its client window
     if (mpWindowImpl->mpBorderWindow)
-        mpWindowImpl->maPos = mpWindowImpl->mpBorderWindow->mpWindowImpl->maPos;
+        mpGeometry->maPos = mpWindowImpl->mpBorderWindow->mpGeometry->maPos;
 
     ImplUpdateClientWindow(bNewPos);
 
@@ -1379,15 +1380,15 @@ bool Window::ImplUpdatePos()
 
     if (ImplIsOverlapWindow())
     {
-        GetOutDev()->SetDeviceOriginX(mpWindowImpl->mnX);
-        GetOutDev()->SetDeviceOriginY(mpWindowImpl->mnY);
+        GetOutDev()->SetDeviceOriginX(mpGeometry->mnX);
+        GetOutDev()->SetDeviceOriginY(mpGeometry->mnY);
     }
     else
     {
         vcl::Window* pParent = ImplGetParent();
 
-        GetOutDev()->SetDeviceOriginX(mpWindowImpl->mnX + pParent->GetOutDev()->GetDeviceOriginX());
-        GetOutDev()->SetDeviceOriginY(mpWindowImpl->mnY + pParent->GetOutDev()->GetDeviceOriginY());
+        GetOutDev()->SetDeviceOriginX(mpGeometry->mnX + pParent->GetOutDev()->GetDeviceOriginX());
+        GetOutDev()->SetDeviceOriginY(mpGeometry->mnY + pParent->GetOutDev()->GetDeviceOriginY());
     }
 
     VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
@@ -1519,12 +1520,12 @@ void Window::InvalidateSizeCache()
 
 tools::Long Window::ImplGetBorderWidth() const
 {
-    return mpWindowImpl->mnLeftBorder + mpWindowImpl->mnRightBorder;
+    return mpGeometry->mnLeftBorder + mpGeometry->mnRightBorder;
 }
 
 tools::Long Window::ImplGetBorderHeight() const
 {
-    return mpWindowImpl->mnTopBorder + mpWindowImpl->mnBottomBorder;
+    return mpGeometry->mnTopBorder + mpGeometry->mnBottomBorder;
 }
 
 bool Window::IsScrollable() const

@@ -33,6 +33,7 @@
 #include <WindowImpl.hxx>
 #include <WindowEventHandlers.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowGeometry.hxx>
 
 #include "impldockingwrapper.hxx"
 
@@ -878,12 +879,12 @@ SalFrame* Window::ImplFindParentFrame() const
 void Window::ImplUpdateFramePos(SalFrame* pParentFrame)
 {
     SalFrameGeometry g = mpWindowImpl->mpFrame->GetGeometry();
-    mpWindowImpl->maPos = Point(g.x(), g.y());
+    mpGeometry->maPos = Point(g.x(), g.y());
 
     if (pParentFrame)
     {
         g = pParentFrame->GetGeometry();
-        mpWindowImpl->maPos -= Point(g.x(), g.y());
+        mpGeometry->maPos -= Point(g.x(), g.y());
     }
 }
 
@@ -895,7 +896,7 @@ void Window::ImplUpdateClientWindowPos()
     vcl::Window* pClientWin = mpWindowImpl->mpClientWindow;
     while (pClientWin)
     {
-        pClientWin->mpWindowImpl->maPos = mpWindowImpl->maPos;
+        pClientWin->mpGeometry->maPos = mpGeometry->maPos;
         pClientWin = pClientWin->mpWindowImpl->mpClientWindow;
     }
 }

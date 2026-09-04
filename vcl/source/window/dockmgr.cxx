@@ -24,6 +24,7 @@
 #include <brdwin.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
 
 #include <comphelper/OAccessible.hxx>
@@ -781,10 +782,10 @@ void ImplDockingWindowWrapper::ImplPreparePopupMode()
     pWin->SetOutputSizePixel( xWindow->GetSizePixel() );
 
     xWindow->mpWindowImpl->mpBorderWindow  = nullptr;
-    xWindow->mpWindowImpl->mnLeftBorder    = 0;
-    xWindow->mpWindowImpl->mnTopBorder     = 0;
-    xWindow->mpWindowImpl->mnRightBorder   = 0;
-    xWindow->mpWindowImpl->mnBottomBorder  = 0;
+    xWindow->mpGeometry->mnLeftBorder    = 0;
+    xWindow->mpGeometry->mnTopBorder     = 0;
+    xWindow->mpGeometry->mnRightBorder   = 0;
+    xWindow->mpGeometry->mnBottomBorder  = 0;
 
     // reparent borderwindow and window
     if ( mpOldBorderWin )
@@ -863,8 +864,8 @@ IMPL_LINK_NOARG(ImplDockingWindowWrapper, PopupModeEnd, FloatingWindow*, void)
     {
         xWindow->SetParent( mpOldBorderWin );
         static_cast<ImplBorderWindow*>(mpOldBorderWin.get())->GetBorder(
-            xWindow->mpWindowImpl->mnLeftBorder, xWindow->mpWindowImpl->mnTopBorder,
-            xWindow->mpWindowImpl->mnRightBorder, xWindow->mpWindowImpl->mnBottomBorder );
+            xWindow->mpGeometry->mnLeftBorder, xWindow->mpGeometry->mnTopBorder,
+            xWindow->mpGeometry->mnRightBorder, xWindow->mpGeometry->mnBottomBorder );
         mpOldBorderWin->Resize();
     }
     xWindow->mpWindowImpl->mpBorderWindow = mpOldBorderWin;
@@ -929,10 +930,10 @@ void ImplDockingWindowWrapper::SetFloatingMode( bool bFloatMode )
         pWin->SetText( GetWindow()->GetText() );
 
         GetWindow()->mpWindowImpl->mpBorderWindow  = nullptr;
-        GetWindow()->mpWindowImpl->mnLeftBorder    = 0;
-        GetWindow()->mpWindowImpl->mnTopBorder     = 0;
-        GetWindow()->mpWindowImpl->mnRightBorder   = 0;
-        GetWindow()->mpWindowImpl->mnBottomBorder  = 0;
+        GetWindow()->mpGeometry->mnLeftBorder    = 0;
+        GetWindow()->mpGeometry->mnTopBorder     = 0;
+        GetWindow()->mpGeometry->mnRightBorder   = 0;
+        GetWindow()->mpGeometry->mnBottomBorder  = 0;
 
         // if the parent gets destroyed, we also have to reset the parent of the BorderWindow
         if ( mpOldBorderWin )
@@ -976,8 +977,8 @@ void ImplDockingWindowWrapper::SetFloatingMode( bool bFloatMode )
         {
             GetWindow()->SetParent( mpOldBorderWin );
             static_cast<ImplBorderWindow*>(mpOldBorderWin.get())->GetBorder(
-                GetWindow()->mpWindowImpl->mnLeftBorder, GetWindow()->mpWindowImpl->mnTopBorder,
-                GetWindow()->mpWindowImpl->mnRightBorder, GetWindow()->mpWindowImpl->mnBottomBorder );
+                GetWindow()->mpGeometry->mnLeftBorder, GetWindow()->mpGeometry->mnTopBorder,
+                GetWindow()->mpGeometry->mnRightBorder, GetWindow()->mpGeometry->mnBottomBorder );
             mpOldBorderWin->Resize();
         }
         GetWindow()->mpWindowImpl->mpBorderWindow = mpOldBorderWin;
