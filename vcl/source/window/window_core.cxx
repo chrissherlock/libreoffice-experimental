@@ -44,6 +44,7 @@
 #include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowGeometry.hxx>
+#include <WindowViewport.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>
 #include <salframe.hxx>
@@ -65,6 +66,7 @@ Window::Window(WindowType eType)
     , mpAccessibleData(std::make_unique<WindowAccessibleData>())
     , mpControlAppearance(std::make_unique<WindowControlAppearance>())
     , mpGeometry(std::make_unique<WindowGeometry>())
+    , mpViewport(std::make_unique<WindowViewport>())
 {
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
     mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
@@ -78,6 +80,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpAccessibleData(std::make_unique<WindowAccessibleData>())
     , mpControlAppearance(std::make_unique<WindowControlAppearance>())
     , mpGeometry(std::make_unique<WindowGeometry>())
+    , mpViewport(std::make_unique<WindowViewport>())
 {
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
     mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
@@ -196,6 +199,7 @@ void Window::dispose()
     mpAccessibleData.reset();
     mpControlAppearance.reset();
     mpGeometry.reset();
+    mpViewport.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy

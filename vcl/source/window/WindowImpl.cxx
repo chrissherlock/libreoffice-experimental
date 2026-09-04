@@ -110,9 +110,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mpHierarchy     = std::make_unique<WindowHierarchy>();
 
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(rWindow);
-    mfZoom                              = 1.0;
-    mfPartialScrollX                    = 0.0;
-    mfPartialScrollY                    = 0.0;
     mpClippingState->maWinRegion        = vcl::Region(true);
     mpClippingState->maWinClipRegion    = vcl::Region(true);
     mpWinData                           = nullptr;                      // Extra Window Data, that we don't need for all windows

@@ -434,6 +434,7 @@ struct WindowLayoutData;
 struct WindowAccessibleData;
 struct WindowControlAppearance;
 struct WindowGeometry;
+struct WindowViewport;
 class PaintHelper;
 class VclSizeGroup;
 class Application;
@@ -560,6 +561,7 @@ public:
     SAL_DLLPRIVATE WindowAccessibleData* ImplGetAccessibleData() const { return mpAccessibleData.get(); }
     SAL_DLLPRIVATE WindowControlAppearance* ImplGetControlAppearance() const { return mpControlAppearance.get(); }
     SAL_DLLPRIVATE WindowGeometry* ImplGetGeometry() const { return mpGeometry.get(); }
+    SAL_DLLPRIVATE WindowViewport* ImplGetViewport() const { return mpViewport.get(); }
     void SetType(WindowType eType);
     WindowType GetType() const;
     bool IsSystemWindow() const;
@@ -1117,6 +1119,7 @@ private:
     std::unique_ptr<WindowAccessibleData> mpAccessibleData;
     std::unique_ptr<WindowControlAppearance> mpControlAppearance;
     std::unique_ptr<WindowGeometry> mpGeometry;
+    std::unique_ptr<WindowViewport> mpViewport;
 
     // --- Lifecycle and Teardown ---
     SAL_DLLPRIVATE void ImplDeInitDND();
