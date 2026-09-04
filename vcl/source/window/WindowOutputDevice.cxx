@@ -53,6 +53,7 @@
 #include <vcl/MappingPolicy.hxx>
 
 #include <WindowHierarchy.hxx>
+#include <WindowControlAppearance.hxx>
 #include <ImplOutDevData.hxx>
 #include <clipping_window.hxx>
 #include <impfontcache.hxx>
@@ -351,8 +352,8 @@ css::awt::DeviceInfo WindowOutputDevice::GetDeviceInfo() const
 void WindowOutputDevice::ImplInitMapModeObjects()
 {
     OutputDevice::ImplInitMapModeObjects();
-    if (mxOwnerWindow->mpWindowImpl->mpCursor)
-        mxOwnerWindow->mpWindowImpl->mpCursor->ImplNew();
+    if (mxOwnerWindow->mpControlAppearance->mpCursor)
+        mxOwnerWindow->mpControlAppearance->mpCursor->ImplNew();
 }
 
 void WindowOutputDevice::EnableRTL ( bool bEnable )

@@ -39,6 +39,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowControlAppearance.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
 #include <svdata.hxx>
@@ -323,8 +324,8 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
     if ( pOldFocusWindow && pOldFocusWindow->mpWindowImpl )
     {
         // Cursor hidden
-        if ( pOldFocusWindow->mpWindowImpl->mpCursor )
-            pOldFocusWindow->mpWindowImpl->mpCursor->ImplHide();
+        if ( pOldFocusWindow->mpControlAppearance->mpCursor )
+            pOldFocusWindow->mpControlAppearance->mpCursor->ImplHide();
     }
 
     // !!!!! due to old SV-Office Activate/Deactivate handling
@@ -373,8 +374,8 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
 
         if (pSVData->mpWinData->mpFocusWin.get() == this)
         {
-            if ( mpWindowImpl->mpCursor )
-                mpWindowImpl->mpCursor->ImplShow();
+            if (mpControlAppearance && mpControlAppearance->mpCursor)
+                mpControlAppearance->mpCursor->ImplShow();
             mpWindowImpl->mbInFocusHdl = true;
             mpWindowImpl->mnGetFocusFlags = nFlags;
             // if we're changing focus due to closing a popup floating window
@@ -494,13 +495,13 @@ bool Window::IsMouseCaptured() const
 
 void Window::SetPointer( PointerStyle nPointer )
 {
-    if ( mpWindowImpl->maPointer == nPointer )
+    if (mpControlAppearance->maPointer == nPointer)
         return;
 
-    mpWindowImpl->maPointer   = nPointer;
+    mpControlAppearance->maPointer = nPointer;
 
     // possibly immediately move pointer
-    if ( !mpWindowImpl->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
+    if (!mpWindowImpl->mpFrameData->mbInMouseMove && ImplTestMousePointerSet())
         mpWindowImpl->mpFrame->SetPointer( ImplGetMousePointer() );
 }
 

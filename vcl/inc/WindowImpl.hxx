@@ -79,16 +79,10 @@ public:
     VclPtr<vcl::Window> mpLastFocusWindow;
     VclPtr<PushButton> mpDlgCtrlDownWindow;
 
-    vcl::Cursor*        mpCursor;
-    PointerStyle        maPointer;
     double              mfZoom;
     double              mfPartialScrollX;
     double              mfPartialScrollY;
     OUString            maText;
-    std::optional<vcl::Font>
-                        mpControlFont;
-    Color               maControlForeground;
-    Color               maControlBackground;
     sal_Int32           mnLeftBorder;
     sal_Int32           mnTopBorder;
     sal_Int32           mnRightBorder;
@@ -109,7 +103,6 @@ public:
     WinBits             mnPrevStyle;
     WindowExtendedStyle mnExtendedStyle;
     WindowType          meType;
-    ControlPart         mnNativeBackground;
     sal_uInt16          mnWaitCount;
     ImplPaintFlags      mnPaintFlags;
     GetFocusFlags       mnGetFocusFlags;
@@ -158,8 +151,6 @@ public:
                         mbNativeFocusVisible:1,
                         mbInShowFocus:1,
                         mbInHideFocus:1,
-                        mbControlForeground:1,
-                        mbControlBackground:1,
                         mbAlwaysOnTop:1,
                         mbCompoundControl:1,
                         mbCompoundControlHasFocus:1,

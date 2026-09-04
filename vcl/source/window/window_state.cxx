@@ -30,6 +30,7 @@
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowControlAppearance.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
@@ -436,15 +437,30 @@ DialogControlFlags Window::GetDialogControlFlags() const { return mpWindowImpl->
 
 const InputContext& Window::GetInputContext() const { return mpWindowImpl->maInputContext; }
 
-bool Window::IsControlFont() const { return bool(mpWindowImpl->mpControlFont); }
+bool Window::IsControlFont() const
+{
+    return bool(mpControlAppearance && mpControlAppearance->mpControlFont);
+}
 
-const Color& Window::GetControlForeground() const { return mpWindowImpl->maControlForeground; }
+const Color& Window::GetControlForeground() const
+{
+    return mpControlAppearance->maControlForeground;
+}
 
-bool Window::IsControlForeground() const { return mpWindowImpl->mbControlForeground; }
+bool Window::IsControlForeground() const
+{
+    return mpControlAppearance && mpControlAppearance->mbControlForeground;
+}
 
-const Color& Window::GetControlBackground() const { return mpWindowImpl->maControlBackground; }
+const Color& Window::GetControlBackground() const
+{
+    return mpControlAppearance->maControlBackground;
+}
 
-bool Window::IsControlBackground() const { return mpWindowImpl->mbControlBackground; }
+bool Window::IsControlBackground() const
+{
+    return mpControlAppearance && mpControlAppearance->mbControlBackground;
+}
 
 bool Window::IsInPaint() const { return mpWindowImpl && mpWindowImpl->mbInPaint; }
 
@@ -487,17 +503,17 @@ bool Window::IsWait() const { return (mpWindowImpl->mnWaitCount != 0); }
 
 vcl::Cursor* Window::GetCursor() const
 {
-    if (!mpWindowImpl)
+    if (!mpControlAppearance)
         return nullptr;
 
-    return mpWindowImpl->mpCursor;
+    return mpControlAppearance->mpCursor;
 }
 
 bool Window::IsCreatedWithToolkit() const { return mpWindowImpl->mbCreatedWithToolkit; }
 
 void Window::SetCreatedWithToolkit(bool b) { mpWindowImpl->mbCreatedWithToolkit = b; }
 
-PointerStyle Window::GetPointer() const { return mpWindowImpl->maPointer; }
+PointerStyle Window::GetPointer() const { return mpControlAppearance->maPointer; }
 
 VCLXWindow* Window::GetWindowPeer() const
 {
