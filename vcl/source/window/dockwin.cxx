@@ -38,6 +38,7 @@
 #include <WindowHierarchy.hxx>
 #include <WindowLayoutData.hxx>
 #include <WindowAccessibleData.hxx>
+#include <WindowGeometry.hxx>
 #include <brdwin.hxx>
 
 #include "impldockingwrapper.hxx"
@@ -737,10 +738,10 @@ void DockingWindow::SetFloatingMode( bool bFloatMode )
                                  this );
         mpFloatWin      = pWin;
         mpWindowImpl->mpBorderWindow  = nullptr;
-        mpWindowImpl->mnLeftBorder    = 0;
-        mpWindowImpl->mnTopBorder     = 0;
-        mpWindowImpl->mnRightBorder   = 0;
-        mpWindowImpl->mnBottomBorder  = 0;
+        mpGeometry->mnLeftBorder    = 0;
+        mpGeometry->mnTopBorder     = 0;
+        mpGeometry->mnRightBorder   = 0;
+        mpGeometry->mnBottomBorder  = 0;
         // if the parent gets destroyed, we also have to reset the parent of the BorderWindow
         if ( mpOldBorderWin )
             mpOldBorderWin->SetParent( pWin );
@@ -781,7 +782,7 @@ void DockingWindow::SetFloatingMode( bool bFloatMode )
         if ( mpOldBorderWin )
         {
             SetParent( mpOldBorderWin );
-            static_cast<ImplBorderWindow*>(mpOldBorderWin.get())->GetBorder( mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder, mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder );
+            static_cast<ImplBorderWindow*>(mpOldBorderWin.get())->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
             mpOldBorderWin->Resize();
         }
         mpWindowImpl->mpBorderWindow = mpOldBorderWin;

@@ -83,14 +83,6 @@ public:
     double              mfPartialScrollX;
     double              mfPartialScrollY;
     OUString            maText;
-    sal_Int32           mnLeftBorder;
-    sal_Int32           mnTopBorder;
-    sal_Int32           mnRightBorder;
-    sal_Int32           mnBottomBorder;
-    tools::Long         mnX;
-    tools::Long         mnY;
-    tools::Long         mnAbsScreenX;
-    Point               maPos;
     InputContext        maInputContext;
     VCLXWindow*         mpVCLXWindow;
 

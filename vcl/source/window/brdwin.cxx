@@ -32,6 +32,7 @@
 #include <vcl/ptrstyle.hxx>
 
 #include <WindowImpl.hxx>
+#include <WindowGeometry.hxx>
 #include <strings.hrc>
 #include <svdata.hxx>
 #include <brdwin.hxx>
@@ -1730,12 +1731,12 @@ void ImplBorderWindow::Resize()
                 nNotebookBarHeight);
     }
 
-    GetBorder( pClientWindow->mpWindowImpl->mnLeftBorder, pClientWindow->mpWindowImpl->mnTopBorder,
-               pClientWindow->mpWindowImpl->mnRightBorder, pClientWindow->mpWindowImpl->mnBottomBorder );
-    pClientWindow->ImplPosSizeWindow( pClientWindow->mpWindowImpl->mnLeftBorder,
-                                      pClientWindow->mpWindowImpl->mnTopBorder,
-                                      aSize.Width()-pClientWindow->mpWindowImpl->mnLeftBorder-pClientWindow->mpWindowImpl->mnRightBorder,
-                                      aSize.Height()-pClientWindow->mpWindowImpl->mnTopBorder-pClientWindow->mpWindowImpl->mnBottomBorder,
+    GetBorder( pClientWindow->mpGeometry->mnLeftBorder, pClientWindow->mpGeometry->mnTopBorder,
+               pClientWindow->mpGeometry->mnRightBorder, pClientWindow->mpGeometry->mnBottomBorder );
+    pClientWindow->ImplPosSizeWindow( pClientWindow->mpGeometry->mnLeftBorder,
+                                      pClientWindow->mpGeometry->mnTopBorder,
+                                      aSize.Width()-pClientWindow->mpGeometry->mnLeftBorder-pClientWindow->mpGeometry->mnRightBorder,
+                                      aSize.Height()-pClientWindow->mpGeometry->mnTopBorder-pClientWindow->mpGeometry->mnBottomBorder,
                                       PosSizeFlags::X | PosSizeFlags::Y |
                                       PosSizeFlags::Width | PosSizeFlags::Height );
 
@@ -1817,8 +1818,8 @@ void ImplBorderWindow::UpdateView( bool bNewView, const Size& rNewOutSize )
     vcl::Window* pClientWindow = ImplGetClientWindow();
     if ( pClientWindow )
     {
-        GetBorder( pClientWindow->mpWindowImpl->mnLeftBorder, pClientWindow->mpWindowImpl->mnTopBorder,
-                   pClientWindow->mpWindowImpl->mnRightBorder, pClientWindow->mpWindowImpl->mnBottomBorder );
+        GetBorder( pClientWindow->mpGeometry->mnLeftBorder, pClientWindow->mpGeometry->mnTopBorder,
+                   pClientWindow->mpGeometry->mnRightBorder, pClientWindow->mpGeometry->mnBottomBorder );
     }
     GetBorder( nLeftBorder, nTopBorder, nRightBorder, nBottomBorder );
     if ( aOldSize.Width() || aOldSize.Height() )

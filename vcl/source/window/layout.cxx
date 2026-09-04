@@ -62,6 +62,7 @@
 #include <sal/log.hxx>
 #include <tools/json_writer.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowGeometry.hxx>
 
 VclContainer::VclContainer(vcl::Window *pParent, WinBits nStyle)
     : Window(WindowType::CONTAINER)
@@ -2571,7 +2572,7 @@ void MessageDialog::StateChanged(StateChangedType nType)
         // MessageBox should be at least as wide as to see the title
         auto nTitleWidth = CalcTitleWidth();
         // Extra-Width for Close button
-        nTitleWidth += mpWindowImpl->mnTopBorder;
+        nTitleWidth += mpGeometry->mnTopBorder;
         if (get_preferred_size().Width() < nTitleWidth)
         {
             set_width_request(nTitleWidth);

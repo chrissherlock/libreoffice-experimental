@@ -39,6 +39,7 @@
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
 #include <WindowControlAppearance.hxx>
+#include <WindowGeometry.hxx>
 #include <accel.hxx>
 #include <brdwin.hxx>
 #include <salinst.hxx>
@@ -436,7 +437,7 @@ VclPtr<vcl::Window> Dialog::AddBorderWindow(vcl::Window* pParent, WinBits nStyle
     VclPtrInstance<ImplBorderWindow> pBorderWin( pParent, nStyle, BorderWindowStyle::Frame );
     ImplInit( pBorderWin, nStyle & ~WB_BORDER, nullptr );
     pBorderWin->mpWindowImpl->mpClientWindow = this;
-    pBorderWin->GetBorder( mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder, mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder );
+    pBorderWin->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
     mpWindowImpl->mpBorderWindow  = pBorderWin;
     mpWindowImpl->mpHierarchy->mpRealParent    = pParent;
 
@@ -485,7 +486,7 @@ void Dialog::ImplInitDialog( vcl::Window* pParent, WinBits nStyle, InitFlag eFla
         VclPtrInstance<ImplBorderWindow> pBorderWin( pParent, nStyle, BorderWindowStyle::Overlap );
         ImplInit( pBorderWin, nStyle & ~WB_BORDER, nullptr );
         pBorderWin->mpWindowImpl->mpClientWindow = this;
-        pBorderWin->GetBorder( mpWindowImpl->mnLeftBorder, mpWindowImpl->mnTopBorder, mpWindowImpl->mnRightBorder, mpWindowImpl->mnBottomBorder );
+        pBorderWin->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
         mpWindowImpl->mpBorderWindow  = pBorderWin;
         mpWindowImpl->mpHierarchy->mpRealParent    = pParent;
     }

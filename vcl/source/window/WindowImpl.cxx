@@ -126,13 +126,6 @@ WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
     mpLastFocusWindow                   = nullptr;                      // window for focus restore
     mpDlgCtrlDownWindow                 = nullptr;                      // window for dialog control
     mpVCLXWindow                        = nullptr;
-    mnLeftBorder                        = 0;                         // width of left border
-    mnTopBorder                         = 0;                         // width of top border
-    mnRightBorder                       = 0;                         // width of right border
-    mnBottomBorder                      = 0;                         // width of bottom border
-    mnX                                 = 0;                         // X-Position to Parent
-    mnY                                 = 0;                         // Y-Position to Parent
-    mnAbsScreenX                        = 0;                         // absolute X-position on screen, used for RTL window positioning
     mpClippingState->mpChildClipRegion  = nullptr;                      // Child-Clip-Region when ClipChildren
     mpPaintRegion                       = nullptr;                      // Paint-ClipRegion
     mnStyle                             = 0;                         // style (init in ImplInitWindow)
