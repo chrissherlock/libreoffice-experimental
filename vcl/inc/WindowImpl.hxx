@@ -79,9 +79,6 @@ public:
     VclPtr<vcl::Window> mpLastFocusWindow;
     VclPtr<PushButton> mpDlgCtrlDownWindow;
 
-    double              mfZoom;
-    double              mfPartialScrollX;
-    double              mfPartialScrollY;
     OUString            maText;
     InputContext        maInputContext;
     VCLXWindow*         mpVCLXWindow;

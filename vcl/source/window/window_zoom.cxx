@@ -20,14 +20,15 @@
 #include <vcl/window.hxx>
 
 #include <WindowImpl.hxx>
+#include <WindowViewport.hxx>
 
 namespace vcl
 {
 void Window::SetZoom(double fZoom)
 {
-    if (mpWindowImpl && mpWindowImpl->mfZoom != fZoom)
+    if (mpViewport && mpViewport->mfZoom != fZoom)
     {
-        mpWindowImpl->mfZoom = fZoom;
+        mpViewport->mfZoom = fZoom;
         CompatStateChanged(StateChangedType::Zoom);
     }
 }
@@ -61,9 +62,9 @@ tools::Long Window::CalcZoom(tools::Long nCalc) const
     return nCalc;
 }
 
-double Window::GetZoom() const { return mpWindowImpl->mfZoom; }
+double Window::GetZoom() const { return mpViewport->mfZoom; }
 
-bool Window::IsZoom() const { return mpWindowImpl->mfZoom != 1.0; }
+bool Window::IsZoom() const { return mpViewport->mfZoom != 1.0; }
 
 } // end vcl namespace
 

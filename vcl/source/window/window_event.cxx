@@ -34,6 +34,7 @@
 #include <WindowEventHandlers.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowGeometry.hxx>
+#include <WindowViewport.hxx>
 
 #include "impldockingwrapper.hxx"
 
@@ -1119,7 +1120,7 @@ double Window::ImplCalculateWheelScrollLines(const CommandWheelData* pData)
                                      : static_cast<double>(LONG_MAX);
 
     double& rPartialScroll
-        = pData->IsHorz() ? mpWindowImpl->mfPartialScrollX : mpWindowImpl->mfPartialScrollY;
+        = pData->IsHorz() ? mpViewport->mfPartialScrollX : mpViewport->mfPartialScrollY;
     return rPartialScroll + pData->GetNotchDelta() * nScrollLines;
 }
 
@@ -1131,8 +1132,7 @@ bool Window::ImplExecuteLineScroll(const CommandWheelData* pData, Scrollable* pH
         return false;
 
     const bool bIsHorz = pData->IsHorz();
-    double& rPartialScroll
-        = bIsHorz ? mpWindowImpl->mfPartialScrollX : mpWindowImpl->mfPartialScrollY;
+    double& rPartialScroll = bIsHorz ? mpViewport->mfPartialScrollX : mpViewport->mfPartialScrollY;
     Scrollable* pScrl = bIsHorz ? pHScrl : pVScrl;
 
     const double scrolled = lcl_ProcessScroll(pScrl, nLines, true);
