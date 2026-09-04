@@ -104,12 +104,11 @@ using namespace ::com::sun::star::lang;
 using namespace ::com::sun::star::datatransfer::clipboard;
 using namespace ::com::sun::star::datatransfer::dnd;
 
-WindowImpl::WindowImpl( vcl::Window& rWindow, WindowType eType )
+WindowImpl::WindowImpl( WindowType eType )
 {
     mpClippingState = std::make_unique<WindowClippingState>();
     mpHierarchy     = std::make_unique<WindowHierarchy>();
 
-    mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(rWindow);
     mpClippingState->maWinRegion        = vcl::Region(true);
     mpClippingState->maWinClipRegion    = vcl::Region(true);
     mpWinData                           = nullptr;                      // Extra Window Data, that we don't need for all windows

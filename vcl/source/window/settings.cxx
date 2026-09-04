@@ -55,8 +55,8 @@ void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
         }
     }
 
-    AllSettings aOldSettings(*mpWindowImpl->mxOutDev->moSettings);
-    AllSettingsFlags nChangeFlags = mpWindowImpl->mxOutDev->moSettings->Update( AllSettings::GetWindowUpdate(), rSettings );
+    AllSettings aOldSettings(*mxOutDev->moSettings);
+    AllSettingsFlags nChangeFlags = mxOutDev->moSettings->Update( AllSettings::GetWindowUpdate(), rSettings );
 
     // recalculate AppFont-resolution and DPI-resolution
     ImplInitResolutionSettings();
@@ -68,9 +68,9 @@ void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
     *  so we can spare all our users the hassle of reacting on
     *  this in their respective DataChanged.
     */
-    MouseSettings aSet( mpWindowImpl->mxOutDev->moSettings->GetMouseSettings() );
+    MouseSettings aSet( mxOutDev->moSettings->GetMouseSettings() );
     aSet.SetWheelBehavior( aOldSettings.GetMouseSettings().GetWheelBehavior() );
-    mpWindowImpl->mxOutDev->moSettings->SetMouseSettings( aSet );
+    mxOutDev->moSettings->SetMouseSettings( aSet );
 
     if( (nChangeFlags & AllSettingsFlags::STYLE) && IsBackground() )
     {

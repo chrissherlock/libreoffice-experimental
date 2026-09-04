@@ -59,7 +59,7 @@
 namespace vcl
 {
 Window::Window(WindowType eType)
-    : mpWindowImpl(std::make_unique<WindowImpl>(*this, eType))
+    : mpWindowImpl(std::make_unique<WindowImpl>(eType))
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
     , mpLayoutData(std::make_unique<WindowLayoutData>())
@@ -68,12 +68,14 @@ Window::Window(WindowType eType)
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())
 {
+    mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
+
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
-    mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
+    mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
 }
 
 Window::Window(vcl::Window* pParent, WinBits nStyle)
-    : mpWindowImpl(std::make_unique<WindowImpl>(*this, WindowType::WINDOW))
+    : mpWindowImpl(std::make_unique<WindowImpl>(WindowType::WINDOW))
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
     , mpLayoutData(std::make_unique<WindowLayoutData>())
@@ -82,8 +84,10 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())
 {
+    mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
+
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
-    mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
+    mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
 
     ImplInit(pParent, nStyle, nullptr);
 }
@@ -256,7 +260,7 @@ void Window::ImplInit(vcl::Window* pParent, WinBits nStyle, SystemParentData* pS
     mpWindowImpl->mnStyle = nStyle;
 
     if (pParent && !mpWindowImpl->mbFrame)
-        mpWindowImpl->mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
+        mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();
 
     // test for frame creation
     if (mpWindowImpl->mbFrame)
@@ -270,23 +274,21 @@ void Window::ImplInit(vcl::Window* pParent, WinBits nStyle, SystemParentData* pS
     mpWindowImpl->mpHierarchy->mpRealParent = pRealParent;
 
     // #99318: make sure fontcache and list is available before call to SetSettings
-    mpWindowImpl->mxOutDev->mxFontCollection = mpWindowImpl->mpFrameData->mxFontCollection;
-    mpWindowImpl->mxOutDev->mxFontCache = mpWindowImpl->mpFrameData->mxFontCache;
+    mxOutDev->mxFontCollection = mpWindowImpl->mpFrameData->mxFontCollection;
+    mxOutDev->mxFontCache = mpWindowImpl->mpFrameData->mxFontCache;
 
     ImplInitResolution(pParent, nStyle);
     ImplInitSettings(nStyle);
 
     // setup the scale factor for HiDPI displays
-    mpWindowImpl->mxOutDev->SetDPIScalePercentage(
-        lcl_CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
-    mpWindowImpl->mxOutDev->SetDPIX(mpWindowImpl->mpFrameData->mnDPIX);
-    mpWindowImpl->mxOutDev->SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
+    mxOutDev->SetDPIScalePercentage(lcl_CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
+    mxOutDev->SetDPIX(mpWindowImpl->mpFrameData->mnDPIX);
+    mxOutDev->SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
 
     if (!comphelper::IsFuzzing())
     {
-        const StyleSettings& rStyleSettings
-            = mpWindowImpl->mxOutDev->moSettings->GetStyleSettings();
-        mpWindowImpl->mxOutDev->maFont = rStyleSettings.GetAppFont();
+        const StyleSettings& rStyleSettings = mxOutDev->moSettings->GetStyleSettings();
+        mxOutDev->maFont = rStyleSettings.GetAppFont();
 
         if (nStyle & WB_3DLOOK)
         {
@@ -301,11 +303,11 @@ void Window::ImplInit(vcl::Window* pParent, WinBits nStyle, SystemParentData* pS
     }
     else
     {
-        mpWindowImpl->mxOutDev->maFont = OutputDevice::GetDefaultFont(
-            DefaultFontType::FIXED, LANGUAGE_ENGLISH_US, GetDefaultFontFlags::NONE);
+        mxOutDev->maFont = OutputDevice::GetDefaultFont(DefaultFontType::FIXED, LANGUAGE_ENGLISH_US,
+                                                        GetDefaultFontFlags::NONE);
     }
 
-    ImplPointToLogic(*GetOutDev(), mpWindowImpl->mxOutDev->maFont);
+    ImplPointToLogic(*GetOutDev(), mxOutDev->maFont);
 
     (void)ImplUpdatePos();
 

@@ -1110,6 +1110,8 @@ protected:
     SAL_DLLPRIVATE float approximate_char_width() const;
 
 private:
+    VclPtr<vcl::WindowOutputDevice> mxOutDev;
+
     // --- Data Members ---
     std::unique_ptr<WindowImpl> mpWindowImpl;
     std::unique_ptr<WindowHelpData> mpHelpData;

@@ -45,12 +45,12 @@ namespace vcl {
 
 ::OutputDevice const* Window::GetOutDev() const
 {
-    return mpWindowImpl ? mpWindowImpl->mxOutDev.get() : nullptr;
+    return mxOutDev.get();
 }
 
 ::OutputDevice* Window::GetOutDev()
 {
-    return mpWindowImpl ? mpWindowImpl->mxOutDev.get() : nullptr;
+    return mxOutDev.get();
 }
 
 void Window::RecordLayoutData( vcl::ControlLayoutData* pLayout, const tools::Rectangle& rRect )

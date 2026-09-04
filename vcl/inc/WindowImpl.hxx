@@ -64,10 +64,9 @@ private:
     WindowImpl(const WindowImpl&) = delete;
     WindowImpl& operator=(const WindowImpl&) = delete;
 public:
-    WindowImpl( vcl::Window& rWindow, WindowType );
+    WindowImpl( WindowType );
     ~WindowImpl();
 
-    VclPtr<vcl::WindowOutputDevice> mxOutDev;
     std::unique_ptr<ImplWinData> mpWinData;
     ImplFrameData*      mpFrameData;
     SalFrame*           mpFrame;
