@@ -1,4 +1,3 @@
-
 /* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
 /*
  * This file is part of the LibreOffice project.
@@ -20,7 +19,7 @@ namespace vcl::clipping
 ClipState ClipStateBuilder::BuildFromWindow(const vcl::Window& rWindow)
 {
     ClipState aState;
-    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    WindowClippingState* pImpl = rWindow.ImplGetClippingState();
 
     aState.bIsVisible = rWindow.IsVisible();
     aState.bClipChildren = (rWindow.GetStyle() & WB_CLIPCHILDREN) != 0;
@@ -33,7 +32,7 @@ ClipState ClipStateBuilder::BuildFromWindow(const vcl::Window& rWindow)
 
     // Extract custom region
     // The WindowImpl holds the ClippingState and hierarchy pointers
-    if (pImpl->mpClippingState && pImpl->mpClippingState->mbWinRegion)
+    if (pImpl && pImpl->mbWinRegion)
         aState.maCustomRegion = rWindow.GetWindowClipRegionPixel();
 
     return aState;

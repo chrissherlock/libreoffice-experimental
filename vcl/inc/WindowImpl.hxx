@@ -71,8 +71,6 @@ public:
     OUString            maText;
     VCLXWindow*         mpVCLXWindow;
 
-    std::unique_ptr<WindowClippingState> mpClippingState;
-
     WinBits             mnStyle;
     WinBits             mnPrevStyle;
     WindowExtendedStyle mnExtendedStyle;

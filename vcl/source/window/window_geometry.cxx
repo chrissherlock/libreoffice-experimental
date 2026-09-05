@@ -959,9 +959,8 @@ void Window::ImplAdjustNWFSizes()
 
 bool Window::ImplHasValidClippingRegion() const
 {
-    return !mpInvalidation->mbPaintTransparent
-           && !mpWindowImpl->mpClippingState->mbInitWinClipRegion
-           && !mpWindowImpl->mpClippingState->maWinClipRegion.IsEmpty();
+    return !mpInvalidation->mbPaintTransparent && !mpClippingState->mbInitWinClipRegion
+           && !mpClippingState->maWinClipRegion.IsEmpty();
 }
 
 bool Window::ImplShouldPaintImmediately() const
@@ -1154,9 +1153,8 @@ bool Window::ImplCopyBitsRegion(std::unique_ptr<vcl::Region>& rpOverlapRegion,
 {
     vcl::Region aRegion(GetOutputRectPixel());
 
-    if (mpWindowImpl->mpClippingState->mbWinRegion)
-        aRegion.Intersect(
-            GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
+    if (mpClippingState->mbWinRegion)
+        aRegion.Intersect(GetOutDev()->GetMapper().ViewToDevice(mpClippingState->maWinRegion));
 
     vcl::clipping::clipBoundaries(*this, aRegion, false, true);
 
@@ -1227,10 +1225,9 @@ void Window::ImplInvalidateGrownWindow(const vcl::Region& rInitialRegion)
     vcl::Region aRegion(GetOutputRectPixel());
     aRegion.Exclude(rInitialRegion);
 
-    if (mpWindowImpl->mpClippingState->mbWinRegion)
+    if (mpClippingState->mbWinRegion)
     {
-        aRegion.Intersect(
-            GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
+        aRegion.Intersect(GetOutDev()->GetMapper().ViewToDevice(mpClippingState->maWinRegion));
     }
 
     vcl::clipping::clipBoundaries(*this, aRegion, false, true);
@@ -1314,9 +1311,9 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     if (IsReallyVisible())
     {
         pInitialRegion.reset(new vcl::Region(aInitialWinRect));
-        if (mpWindowImpl->mpClippingState->mbWinRegion)
+        if (mpClippingState->mbWinRegion)
             pInitialRegion->Intersect(
-                GetOutDev()->GetMapper().ViewToDevice(mpWindowImpl->mpClippingState->maWinRegion));
+                GetOutDev()->GetMapper().ViewToDevice(mpClippingState->maWinRegion));
     }
 
     bool bXAlreadyMirrored = false;

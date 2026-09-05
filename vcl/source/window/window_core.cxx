@@ -48,6 +48,7 @@
 #include <WindowGeometry.hxx>
 #include <WindowViewport.hxx>
 #include <WindowLOKData.hxx>
+#include <WindowClippingState.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>
 #include <salframe.hxx>
@@ -73,6 +74,7 @@ Window::Window(WindowType eType)
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())
     , mpLOKData(std::make_unique<WindowLOKData>())
+    , mpClippingState(std::make_unique<WindowClippingState>())
     , mpInvalidation(std::make_unique<WindowInvalidation>())
 {
     mpWinData = nullptr;
@@ -94,6 +96,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())
     , mpLOKData(std::make_unique<WindowLOKData>())
+    , mpClippingState(std::make_unique<WindowClippingState>())
     , mpInvalidation(std::make_unique<WindowInvalidation>())
 {
     mpWinData = nullptr;
@@ -219,6 +222,7 @@ void Window::dispose()
     mpGeometry.reset();
     mpViewport.reset();
     mpLOKData.reset();
+    mpClippingState.reset();
     mpInvalidation.reset();
 
     pOutDev.disposeAndClear();

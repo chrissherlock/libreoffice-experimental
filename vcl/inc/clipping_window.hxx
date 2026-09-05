@@ -24,6 +24,7 @@
 #include <memory>
 
 class WindowImpl;
+struct WindowClippingState;
 struct WindowHierarchy;
 
 namespace vcl
@@ -105,11 +106,13 @@ VCL_DLLPUBLIC void gatherNativeSyncTargets(vcl::Window* pWindow,
                                            std::vector<vcl::Window*>& rTargets);
 
 VCL_DLLPUBLIC bool initChildRegion(vcl::Window& rWindow);
-VCL_DLLPUBLIC std::unique_ptr<vcl::Region> prepareClipInvalidation(WindowImpl& rImpl,
-                                                                   bool bSysObjOnlySmaller);
-VCL_DLLPUBLIC bool invalidateParentClipIfRequired(const WindowImpl& rChildImpl,
-                                                  WindowImpl& rParentImpl, WinBits nParentStyle);
-VCL_DLLPUBLIC NativeSyncStatus processClipResult(WindowImpl& rImpl, bool bClipSuccess,
+VCL_DLLPUBLIC std::unique_ptr<vcl::Region>
+prepareClipInvalidation(WindowImpl& rImpl, WindowClippingState& rClippingState,
+                        bool bSysObjOnlySmaller);
+VCL_DLLPUBLIC bool invalidateParentClipIfRequired(const WindowClippingState& rClippingState,
+                                                  WindowClippingState& rParentClippingState,
+                                                  WinBits nParentStyle);
+VCL_DLLPUBLIC NativeSyncStatus processClipResult(WindowClippingState& rImpl, bool bClipSuccess,
                                                  bool bCurrentUpdate);
 
 void calcOverlapRegionOverlaps(const vcl::Window& rWindow, const vcl::Region& rInterRegion,
