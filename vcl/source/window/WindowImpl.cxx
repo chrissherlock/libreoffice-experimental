@@ -111,7 +111,6 @@ WindowImpl::WindowImpl( WindowType eType )
 
     mpClippingState->maWinRegion        = vcl::Region(true);
     mpClippingState->maWinClipRegion    = vcl::Region(true);
-    mpWinData                           = nullptr;                      // Extra Window Data, that we don't need for all windows
     mpFrameData                         = nullptr;                      // Frame Data
     mpFrame                             = nullptr;                      // Pointer to frame window
     mpSysObj                            = nullptr;

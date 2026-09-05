@@ -95,10 +95,10 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
 
 void Window::PopPaintHelper(PaintHelper const *pHelper)
 {
-    if (mpWindowImpl->mpWinData)
+    if (mpWinData)
     {
         if (mpWindowImpl->mbFocusVisible)
-            ImplInvertFocus(*mpWindowImpl->mpWinData->mpFocusRect);
+            ImplInvertFocus(*mpWinData->mpFocusRect);
     }
     mpWindowImpl->mbInPaint = false;
     GetOutDev()->GetClipState().Invalidate();
@@ -1305,12 +1305,12 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
 
     if ( !aRegion.IsEmpty() )
     {
-        if ( mpWindowImpl->mpWinData )
+        if ( mpWinData )
         {
             if ( mpWindowImpl->mbFocusVisible )
-                ImplInvertFocus( *mpWindowImpl->mpWinData->mpFocusRect );
-            if ( mpWindowImpl->mbTrackVisible && (mpWindowImpl->mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
-                InvertTracking( *mpWindowImpl->mpWinData->mpTrackRect, mpWindowImpl->mpWinData->mnTrackFlags );
+                ImplInvertFocus( *mpWinData->mpFocusRect );
+            if ( mpWindowImpl->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
+                InvertTracking( *mpWinData->mpTrackRect, mpWinData->mnTrackFlags );
         }
 #ifndef IOS
         // This seems completely unnecessary with tiled rendering, and
@@ -1340,12 +1340,12 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
                                  *GetOutDev() );
         }
 #endif
-        if ( mpWindowImpl->mpWinData )
+        if ( mpWinData )
         {
             if ( mpWindowImpl->mbFocusVisible )
-                ImplInvertFocus( *mpWindowImpl->mpWinData->mpFocusRect );
-            if ( mpWindowImpl->mbTrackVisible && (mpWindowImpl->mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
-                InvertTracking( *mpWindowImpl->mpWinData->mpTrackRect, mpWindowImpl->mpWinData->mnTrackFlags );
+                ImplInvertFocus( *mpWinData->mpFocusRect );
+            if ( mpWindowImpl->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
+                InvertTracking( *mpWinData->mpTrackRect, mpWinData->mnTrackFlags );
         }
     }
 

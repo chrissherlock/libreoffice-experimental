@@ -46,7 +46,7 @@ bool Window::ImplShouldTransferFocusOnHide(ShowFlags nFlags) const
 
 void Window::ImplExpandInvalidationForNativeWidget(vcl::Region& rInvRegion) const
 {
-    if (!mpWindowImpl->mpWinData || !mpWindowImpl->mpWinData->mbEnableNativeWidget)
+    if (!mpWinData || !mpWinData->mbEnableNativeWidget)
         return;
 
     /*

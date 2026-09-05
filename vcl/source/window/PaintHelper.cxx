@@ -46,10 +46,10 @@ PaintHelper::PaintHelper(vcl::Window* pWindow, ImplPaintFlags nPaintFlags)
 PaintHelper::~PaintHelper()
 {
     WindowImpl* pWindowImpl = m_pWindow->ImplGetWindowImpl();
+    ImplWinData* pWinData = m_pWindow->ImplGetWinData();
+
     if (m_bPop)
-    {
         m_pWindow->PopPaintHelper(this);
-    }
 
     ImplFrameData* pFrameData = m_pWindow->mpWindowImpl->mpFrameData;
     if (m_nPaintFlags & (ImplPaintFlags::PaintAllChildren | ImplPaintFlags::PaintChildren))
@@ -64,13 +64,12 @@ PaintHelper::~PaintHelper()
         }
     }
 
-    if (pWindowImpl->mpWinData && pWindowImpl->mbTrackVisible
-        && (pWindowImpl->mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
+    if (pWinData && pWindowImpl->mbTrackVisible
+        && (pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
         /* #98602# need to invert the tracking rect AFTER
         * the children have painted
         */
-        m_pWindow->InvertTracking(*pWindowImpl->mpWinData->mpTrackRect,
-                                  pWindowImpl->mpWinData->mnTrackFlags);
+        m_pWindow->InvertTracking(*pWinData->mpTrackRect, pWinData->mnTrackFlags);
 
     // double-buffering: paint in case we created the buffer, the children are
     // already painted inside
@@ -112,6 +111,7 @@ void PaintHelper::PaintBuffer()
 void PaintHelper::DoPaint(const vcl::Region* pRegion)
 {
     WindowImpl* pWindowImpl = m_pWindow->ImplGetWindowImpl();
+    ImplWinData* pWinData = m_pWindow->ImplGetWinData();
 
     vcl::Region& rWinChildClipRegion = vcl::clipping::getWinChildClipRegion(*m_pWindow);
     ImplFrameData* pFrameData = m_pWindow->mpWindowImpl->mpFrameData;
@@ -124,13 +124,13 @@ void PaintHelper::DoPaint(const vcl::Region* pRegion)
         if (pRegion)
             pWindowImpl->maInvalidateRegion.Union(*pRegion);
 
-        if (pWindowImpl->mpWinData && pWindowImpl->mbTrackVisible)
+        if (pWinData && pWindowImpl->mbTrackVisible)
             /* #98602# need to repaint all children within the
            * tracking rectangle, so the following invert
            * operation takes places without traces of the previous
            * one.
            */
-            pWindowImpl->maInvalidateRegion.Union(*pWindowImpl->mpWinData->mpTrackRect);
+            pWindowImpl->maInvalidateRegion.Union(*pWinData->mpTrackRect);
 
         if (pWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAllChildren)
             m_pChildRegion.reset(new vcl::Region(pWindowImpl->maInvalidateRegion));

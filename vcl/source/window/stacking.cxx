@@ -631,14 +631,14 @@ bool Window::IsTopWindow() const
         return false;
 
     ImplGetWinData();
-    if( mpWindowImpl->mpWinData->mnIsTopWindow == sal_uInt16(~0))    // still uninitialized
+    if( mpWinData->mnIsTopWindow == sal_uInt16(~0))    // still uninitialized
     {
         // #113722#, cache result of expensive queryInterface call
         vcl::Window *pThisWin = const_cast<vcl::Window*>(this);
         uno::Reference< XTopWindow > xTopWindow( pThisWin->GetComponentInterface(), UNO_QUERY );
-        pThisWin->mpWindowImpl->mpWinData->mnIsTopWindow = xTopWindow.is() ? 1 : 0;
+        pThisWin->mpWinData->mnIsTopWindow = xTopWindow.is() ? 1 : 0;
     }
-    return mpWindowImpl->mpWinData->mnIsTopWindow == 1;
+    return mpWinData->mnIsTopWindow == 1;
 }
 
 vcl::Window* Window::ImplFindWindow( const Point& rFramePos )

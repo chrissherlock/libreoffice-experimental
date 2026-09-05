@@ -68,6 +68,7 @@ Window::Window(WindowType eType)
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())
 {
+    mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
 
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
@@ -84,6 +85,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())
 {
+    mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
 
     // true: this outdev will be mirrored if RTL window layout (UI mirroring) is globally active
@@ -188,7 +190,7 @@ void Window::dispose()
 
     ImplDeregisterTopWindowChild();
 
-    mpWindowImpl->mpWinData.reset();
+    mpWinData.reset();
 
     ImplDisposeFrameData();
 
@@ -430,16 +432,16 @@ vcl::Window* Window::ImplGetWindow() const
 
 ImplWinData* Window::ImplGetWinData() const
 {
-    if (!mpWindowImpl->mpWinData)
+    if (!mpWinData)
     {
         static const char* pNoNWF = getenv("SAL_NO_NWF");
 
-        const_cast<vcl::Window*>(this)->mpWindowImpl->mpWinData.reset(new ImplWinData);
-        mpWindowImpl->mpWinData->mbEnableNativeWidget
+        const_cast<vcl::Window*>(this)->mpWinData.reset(new ImplWinData);
+        mpWinData->mbEnableNativeWidget
             = !(pNoNWF && *pNoNWF); // true: try to draw this control with native theme API
     }
 
-    return mpWindowImpl->mpWinData.get();
+    return mpWinData.get();
 }
 
 vcl::Window* Window::ImplGetClientWindow() const
@@ -623,7 +625,7 @@ void Window::ImplDeregisterTopWindowChild()
     if (!mpWindowImpl->mbFrame)
         return;
 
-    bool bIsTopWindow = mpWindowImpl->mpWinData && (mpWindowImpl->mpWinData->mnIsTopWindow == 1);
+    bool bIsTopWindow = mpWinData && (mpWinData->mnIsTopWindow == 1);
     if (!bIsTopWindow || !mpWindowImpl->mpHierarchy->mpRealParent)
         return;
 
