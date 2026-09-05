@@ -38,6 +38,7 @@
 #include <ImplFrameData.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowGeometry.hxx>
 #include <accel.hxx>
@@ -1320,7 +1321,7 @@ vcl::Window* Dialog::GetFirstControlForFocus()
     if (!HasFocus() && pFirstOverlapWindow && pFirstOverlapWindow->mpWindowImpl)
     {
         // prefer a child window which had focus before
-        pFocusControl = ImplGetFirstOverlapWindow()->mpWindowImpl->mpLastFocusWindow;
+        pFocusControl = ImplGetFirstOverlapWindow()->mpInput->mpLastFocusWindow;
         // find the control out of the dialog control
         if ( pFocusControl )
             pFocusControl = ImplFindDlgCtrlWindow( pFocusControl );

@@ -60,6 +60,7 @@
 #include <accmgr.hxx>
 #include <print.h>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <helpwin.hxx>
 #include <brdwin.hxx>
 
@@ -731,12 +732,12 @@ static bool lcl_InvokeStandardMouseEvent(const VclPtr<vcl::Window>& pChild, Noti
     }
     else if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
     {
-        pChild->ImplGetWindowImpl()->mbMouseButtonDown = false;
+        pChild->ImplGetWindowInput()->mbMouseButtonDown = false;
         pChild->MouseButtonDown(rMEvt);
     }
     else // MouseButtonUp
     {
-        pChild->ImplGetWindowImpl()->mbMouseButtonUp = false;
+        pChild->ImplGetWindowInput()->mbMouseButtonUp = false;
         pChild->MouseButtonUp(rMEvt);
     }
 
@@ -790,9 +791,9 @@ static bool lcl_CheckButtonConsumption(const VclPtr<vcl::Window>& pChild, Notify
     // Check if the button flags were reset by the event invocation,
     // which indicates the event was consumed.
     if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
-        return !pChild->ImplGetWindowImpl()->mbMouseButtonDown;
+        return !pChild->ImplGetWindowInput()->mbMouseButtonDown;
     else
-        return !pChild->ImplGetWindowImpl()->mbMouseButtonUp;
+        return !pChild->ImplGetWindowInput()->mbMouseButtonUp;
 }
 
 static bool lcl_DispatchCommandEvents(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,

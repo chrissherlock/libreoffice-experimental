@@ -38,6 +38,7 @@
 #include <ImplWinData.hxx>
 #include <WindowHelpData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <WindowEventHandlers.hxx>
 #include <WindowLayoutData.hxx>
 #include <WindowAccessibleData.hxx>
@@ -60,6 +61,7 @@ namespace vcl
 {
 Window::Window(WindowType eType)
     : mpWindowImpl(std::make_unique<WindowImpl>(eType))
+    , mpInput(std::make_unique<WindowInput>())
     , mpHierarchy(std::make_unique<WindowHierarchy>())
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
@@ -78,6 +80,7 @@ Window::Window(WindowType eType)
 
 Window::Window(vcl::Window* pParent, WinBits nStyle)
     : mpWindowImpl(std::make_unique<WindowImpl>(WindowType::WINDOW))
+    , mpInput(std::make_unique<WindowInput>())
     , mpHierarchy(std::make_unique<WindowHierarchy>())
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
@@ -176,8 +179,8 @@ void Window::dispose()
 
     vcl::Window* pOverlapWindow = ImplTransferFocus();
 
-    if (pOverlapWindow != nullptr && pOverlapWindow->mpWindowImpl->mpLastFocusWindow == this)
-        pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
+    if (pOverlapWindow != nullptr && pOverlapWindow->mpInput->mpLastFocusWindow == this)
+        pOverlapWindow->mpInput->mpLastFocusWindow = nullptr;
 
     ImplResetGlobalWindowPointers();
     ImplResetFrameDataPointers();
@@ -200,6 +203,7 @@ void Window::dispose()
 
     // should be the last statements
     mpWindowImpl.reset();
+    mpInput.reset();
     mpHierarchy.reset();
     mpHelpData.reset();
     mpEventHandlers.reset();

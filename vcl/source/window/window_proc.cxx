@@ -36,6 +36,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
 #include <clipping_window.hxx>
@@ -94,7 +95,7 @@ bool ImplCallCommand(const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, voi
     if (const bool bPreNotify = ImplCallPreNotify(aNCmdEvt); pChild->isDisposed() || bPreNotify)
         return false;
 
-    pChild->ImplGetWindowImpl()->mbCommand = false;
+    pChild->ImplGetWindowInput()->mbCommand = false;
     pChild->Command(aCEvt);
 
     if (pChild->isDisposed())
@@ -105,7 +106,7 @@ bool ImplCallCommand(const VclPtr<vcl::Window>& pChild, CommandEventId nEvt, voi
     if (pChild->isDisposed())
         return false;
 
-    return pChild->ImplGetWindowImpl()->mbCommand;
+    return pChild->ImplGetWindowInput()->mbCommand;
 }
 
 static bool lcl_IsValidFrameFloatPopup(const vcl::Window* pFrameWindow)
@@ -1178,12 +1179,12 @@ static void lcl_DispatchKeyToChild(NotifyEventType nSVEvent, vcl::Window* pChild
     if (nSVEvent == NotifyEventType::KEYINPUT)
     {
         UITestLogger::getInstance().logKeyInput(pChild, rKeyEvt);
-        pChild->ImplGetWindowImpl()->mbKeyInput = false;
+        pChild->ImplGetWindowInput()->mbKeyInput = false;
         pChild->KeyInput(const_cast<KeyEvent&>(rKeyEvt));
     }
     else
     {
-        pChild->ImplGetWindowImpl()->mbKeyUp = false;
+        pChild->ImplGetWindowInput()->mbKeyUp = false;
         pChild->KeyUp(const_cast<KeyEvent&>(rKeyEvt));
     }
 
@@ -1193,12 +1194,12 @@ static void lcl_DispatchKeyToChild(NotifyEventType nSVEvent, vcl::Window* pChild
 
 static bool lcl_AcceptsKeyInput(NotifyEventType nSVEvent, const vcl::Window* pChild)
 {
-    return nSVEvent == NotifyEventType::KEYINPUT && pChild->ImplGetWindowImpl()->mbKeyInput;
+    return nSVEvent == NotifyEventType::KEYINPUT && pChild->ImplGetWindowInput()->mbKeyInput;
 }
 
 static bool lcl_AcceptsKeyUp(const vcl::Window* pChild)
 {
-    return pChild->ImplGetWindowImpl()->mbKeyUp;
+    return pChild->ImplGetWindowInput()->mbKeyUp;
 }
 
 static bool lcl_DispatchHelpAndMenuKeys(NotifyEventType nSVEvent, bool bKeyPreNotify,
@@ -1245,12 +1246,12 @@ static bool lcl_ForwardKeyEventToParent(NotifyEventType nSVEvent, vcl::Window* p
 
     if (nSVEvent == NotifyEventType::KEYINPUT)
     {
-        pParent->ImplGetWindowImpl()->mbKeyInput = false;
+        pParent->ImplGetWindowInput()->mbKeyInput = false;
         pParent->KeyInput(const_cast<KeyEvent&>(rKeyEvt));
     }
     else
     {
-        pParent->ImplGetWindowImpl()->mbKeyUp = false;
+        pParent->ImplGetWindowInput()->mbKeyUp = false;
         pParent->KeyUp(const_cast<KeyEvent&>(rKeyEvt));
     }
 
@@ -1261,7 +1262,7 @@ static bool lcl_ForwardKeyEventToParent(NotifyEventType nSVEvent, vcl::Window* p
     // we stop propagating and return true.
     // FIXME: This explicitly checks mbKeyInput even for NotifyEventType::KEYUP events.
     // This preserves legacy behavior, but should likely be checking mbKeyUp instead.
-    if (pParent->isDisposed() || !pParent->ImplGetWindowImpl()->mbKeyInput)
+    if (pParent->isDisposed() || !pParent->ImplGetWindowInput()->mbKeyInput)
         return true;
 
     return false;
@@ -1360,13 +1361,15 @@ static VclPtr<vcl::Window> lcl_WaitForExtTextInputWindow(vcl::Window* pWindow)
 
 static void lcl_InitExtTextInput(vcl::Window* pChild)
 {
-    auto* pImpl = pChild->ImplGetWindowImpl();
-
-    // If we are already in extended text input mode, do nothing.
-    if (pImpl->mbExtTextInput)
+    WindowInput* pInput = pChild->ImplGetWindowInput();
+    if (!pInput)
         return;
 
-    pImpl->mbExtTextInput = true;
+    // If we are already in extended text input mode, do nothing.
+    if (pInput->mbExtTextInput)
+        return;
+
+    pInput->mbExtTextInput = true;
 
     ImplWinData* pWinData = pChild->ImplGetWinData();
     pWinData->mpExtOldText = OUString();
@@ -1433,7 +1436,8 @@ static bool lcl_HandleExtTextInput(vcl::Window* pWindow, const OUString& rText,
 
     // Re-check the flag. lcl_InitExtTextInput fires StartExtTextInput,
     // which can trigger user code that synchronously aborts the input mode.
-    if (!pChild->ImplGetWindowImpl()->mbExtTextInput)
+    WindowInput* pInput = pChild->ImplGetWindowInput();
+    if (!pInput || !pInput->mbExtTextInput)
         return false;
 
     const sal_Int32 nMinLen = std::min(pWinData->mpExtOldText->getLength(), rText.getLength());
@@ -1462,7 +1466,7 @@ static bool lcl_HandleEndExtTextInput()
 
     if (vcl::Window* pChild = pSVData->mpWinData->mpExtTextInputWin)
     {
-        pChild->ImplGetWindowImpl()->mbExtTextInput = false;
+        pChild->ImplGetWindowInput()->mbExtTextInput = false;
         pSVData->mpWinData->mpExtTextInputWin = nullptr;
         ImplWinData* pWinData = pChild->ImplGetWinData();
         pWinData->mpExtOldText.reset();

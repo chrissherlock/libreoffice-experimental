@@ -27,6 +27,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
@@ -171,9 +172,9 @@ void Window::ImplNewInputContext()
 
 void Window::SetInputContext(const InputContext& rInputContext)
 {
-    mpWindowImpl->maInputContext = rInputContext;
+    mpInput->maInputContext = rInputContext;
 
-    if (!mpWindowImpl->mbInFocusHdl && HasFocus())
+    if (!mpInput->mbInFocusHdl && HasFocus())
         ImplNewInputContext();
 }
 
@@ -205,7 +206,7 @@ void Window::PostExtTextInputEvent(VclEventId nType, const OUString& rText)
 
 void Window::EndExtTextInput()
 {
-    if (mpWindowImpl->mbExtTextInput)
+    if (mpInput->mbExtTextInput)
         ImplGetFrame()->EndExtTextInput(EndExtTextInputFlags::Complete);
 }
 

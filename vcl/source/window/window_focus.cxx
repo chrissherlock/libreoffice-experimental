@@ -26,6 +26,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
 #include <brdwin.hxx>
@@ -65,7 +66,7 @@ vcl::Window* Window::ImplResetOverlapFocusState(vcl::Window* pOverlapWindow)
     ImplSVData* pSVData = ImplGetSVData();
 
     pSVData->mpWinData->mpFocusWin = nullptr;
-    pOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
+    pOverlapWindow->mpInput->mpLastFocusWindow = nullptr;
     return pOverlapWindow;
 }
 
@@ -110,7 +111,7 @@ vcl::Window* Window::ImplTransferFocus()
 
 bool Window::ImplShouldPassFocusToLastWindow() const
 {
-    return HasFocus() && mpWindowImpl->mpLastFocusWindow
+    return HasFocus() && mpInput->mpLastFocusWindow
            && !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus);
 }
 
@@ -123,7 +124,7 @@ void Window::GetFocus()
         // destroy this parent window during the focus transfer. If that happens,
         // we must bail out immediately to avoid a use-after-free crash.
         VclPtr<vcl::Window> xWindow(this);
-        mpWindowImpl->mpLastFocusWindow->GrabFocus();
+        mpInput->mpLastFocusWindow->GrabFocus();
 
         if (xWindow->isDisposed())
             return;
@@ -153,7 +154,7 @@ VclPtr<vcl::Window> Window::GetFocusedWindow() const
         return VclPtr<vcl::Window>();
 }
 
-void Window::SetFakeFocus(bool bFocus) { ImplGetWindowImpl()->mbFakeFocusSet = bFocus; }
+void Window::SetFakeFocus(bool bFocus) { ImplGetWindowInput()->mbFakeFocusSet = bFocus; }
 
 bool Window::HasChildPathFocus(bool bSystemWindow) const
 {
@@ -728,7 +729,7 @@ void vcl::Window::ImplClearFocus()
     // transfer the FocusWindow
     if (vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
         pOverlapWindow && pOverlapWindow->ImplGetWindowImpl())
-        pOverlapWindow->ImplGetWindowImpl()->mpLastFocusWindow = this;
+        pOverlapWindow->ImplGetWindowInput()->mpLastFocusWindow = this;
 
     pSVData->mpWinData->mpFocusWin = nullptr;
 

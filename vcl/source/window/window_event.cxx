@@ -31,6 +31,7 @@
 #include <helpwin.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <WindowEventHandlers.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowGeometry.hxx>
@@ -62,14 +63,14 @@ void Window::KeyInput(const KeyEvent& rKEvt)
 
     NotifyEvent aNEvt(NotifyEventType::KEYINPUT, this, &rKEvt);
     if (!CompatNotify(aNEvt))
-        mpWindowImpl->mbKeyInput = true;
+        mpInput->mbKeyInput = true;
 }
 
 void Window::KeyUp(const KeyEvent& rKEvt)
 {
     NotifyEvent aNEvt(NotifyEventType::KEYUP, this, &rKEvt);
     if (!CompatNotify(aNEvt))
-        mpWindowImpl->mbKeyUp = true;
+        mpInput->mbKeyUp = true;
 }
 
 void Window::Draw(OutputDevice&, const Point&, SystemTextColorFlags) {}
@@ -184,7 +185,7 @@ void Window::Command(const CommandEvent& rCEvt)
 
     NotifyEvent aNEvt(NotifyEventType::COMMAND, this, &rCEvt);
     if (!CompatNotify(aNEvt))
-        mpWindowImpl->mbCommand = true;
+        mpInput->mbCommand = true;
 }
 
 void Window::Tracking(const TrackingEvent& rTEvt)

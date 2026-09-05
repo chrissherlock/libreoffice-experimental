@@ -39,6 +39,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
@@ -184,15 +185,20 @@ void Window::ImplInvertFocus( const tools::Rectangle& rRect )
     InvertTracking( rRect, ShowTrackFlags::Small | ShowTrackFlags::TrackWindow );
 }
 
-static bool IsWindowFocused(const WindowImpl& rWinImpl)
+static bool lcl_IsWindowFocused(const vcl::Window& rWindow)
 {
-    if (rWinImpl.mpSysObj)
+    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    if (!pImpl)
+        return false;
+
+    if (pImpl->mpSysObj)
         return true;
 
-    if (rWinImpl.mpFrameData->mbHasFocus)
+    if (pImpl->mpFrameData->mbHasFocus)
         return true;
 
-    if (rWinImpl.mbFakeFocusSet)
+    WindowInput* pInput = rWindow.ImplGetWindowInput();
+    if (pInput && pInput->mbFakeFocusSet)
         return true;
 
     return false;
@@ -218,13 +224,13 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         // For a lack of design we need a little hack here to
         // ensure that dialogs on close pass the focus back to
         // the correct window
-        if ( mpWindowImpl->mpLastFocusWindow && (mpWindowImpl->mpLastFocusWindow.get() != this) &&
+        if ( mpInput->mpLastFocusWindow && (mpInput->mpLastFocusWindow.get() != this) &&
              !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus) &&
-             mpWindowImpl->mpLastFocusWindow->IsEnabled() &&
-             mpWindowImpl->mpLastFocusWindow->IsInputEnabled() &&
-             ! mpWindowImpl->mpLastFocusWindow->IsInModalMode()
+             mpInput->mpLastFocusWindow->IsEnabled() &&
+             mpInput->mpLastFocusWindow->IsInputEnabled() &&
+             ! mpInput->mpLastFocusWindow->IsInModalMode()
              )
-            mpWindowImpl->mpLastFocusWindow->GrabFocus();
+            mpInput->mpLastFocusWindow->GrabFocus();
         else
             mpHierarchy->mpClientWindow->GrabFocus();
         return;
@@ -234,14 +240,14 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         // For a lack of design we need a little hack here to
         // ensure that dialogs on close pass the focus back to
         // the correct window
-        if ( mpWindowImpl->mpLastFocusWindow && (mpWindowImpl->mpLastFocusWindow.get() != this) &&
+        if ( mpInput->mpLastFocusWindow && (mpInput->mpLastFocusWindow.get() != this) &&
              !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus) &&
-             mpWindowImpl->mpLastFocusWindow->IsEnabled() &&
-             mpWindowImpl->mpLastFocusWindow->IsInputEnabled() &&
-             ! mpWindowImpl->mpLastFocusWindow->IsInModalMode()
+             mpInput->mpLastFocusWindow->IsEnabled() &&
+             mpInput->mpLastFocusWindow->IsInputEnabled() &&
+             ! mpInput->mpLastFocusWindow->IsInModalMode()
              )
         {
-            mpWindowImpl->mpLastFocusWindow->GrabFocus();
+            mpInput->mpLastFocusWindow->GrabFocus();
             return;
         }
     }
@@ -268,7 +274,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         pFrame = pFrame->mpWindowImpl->mpFrameData->mpNextFrame;
     }
 
-    bool bHasFocus = IsWindowFocused(*mpWindowImpl);
+    bool bHasFocus = lcl_IsWindowFocused(*this);
 
     bool bMustNotGrabFocus = false;
     // #100242#, check parent hierarchy if some floater prohibits grab focus
@@ -299,7 +305,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
     // mark this windows as the last FocusWindow
     vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
     if (pOverlapWindow->mpWindowImpl)
-        pOverlapWindow->mpWindowImpl->mpLastFocusWindow = this;
+        pOverlapWindow->mpInput->mpLastFocusWindow = this;
     mpWindowImpl->mpFrameData->mpFocusWin = this;
 
     if( !bHasFocus )
@@ -376,7 +382,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         {
             if (mpControlAppearance && mpControlAppearance->mpCursor)
                 mpControlAppearance->mpCursor->ImplShow();
-            mpWindowImpl->mbInFocusHdl = true;
+            mpInput->mbInFocusHdl = true;
             mpWindowImpl->mnGetFocusFlags = nFlags;
             // if we're changing focus due to closing a popup floating window
             // notify the new focus window so it can restore the inner focus
@@ -397,7 +403,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
             if( !xWindow->isDisposed() )
             {
                 mpWindowImpl->mnGetFocusFlags = GetFocusFlags::NONE;
-                mpWindowImpl->mbInFocusHdl = false;
+                mpInput->mbInFocusHdl = false;
             }
         }
     }
@@ -431,14 +437,14 @@ void Window::MouseButtonDown( const MouseEvent& rMEvt )
 {
     NotifyEvent aNEvt( NotifyEventType::MOUSEBUTTONDOWN, this, &rMEvt );
     if (!EventNotify(aNEvt) && mpWindowImpl)
-        mpWindowImpl->mbMouseButtonDown = true;
+        mpInput->mbMouseButtonDown = true;
 }
 
 void Window::MouseButtonUp( const MouseEvent& rMEvt )
 {
     NotifyEvent aNEvt( NotifyEventType::MOUSEBUTTONUP, this, &rMEvt );
     if (!EventNotify(aNEvt) && mpWindowImpl)
-        mpWindowImpl->mbMouseButtonUp = true;
+        mpInput->mbMouseButtonUp = true;
 }
 
 void Window::SetMouseTransparent( bool bTransparent )

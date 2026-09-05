@@ -21,6 +21,7 @@
 #include <vcl/window.hxx>
 
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 
 #include "HandleWheelEvent.hxx"
 
@@ -66,13 +67,13 @@ bool HandleWheelEvent::CallCommand(vcl::Window* pWindow, const Point& rMousePos)
     if (bPreNotify)
         return false;
 
-    pWindow->ImplGetWindowImpl()->mbCommand = false;
+    pWindow->ImplGetWindowInput()->mbCommand = false;
     pWindow->Command(aCEvt);
 
     if (pWindow->isDisposed())
         return false;
 
-    if (pWindow->ImplGetWindowImpl()->mbCommand)
+    if (pWindow->ImplGetWindowInput()->mbCommand)
         return true;
 
     return false;

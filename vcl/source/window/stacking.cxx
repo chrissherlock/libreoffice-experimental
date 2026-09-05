@@ -26,6 +26,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
 #include <clipping_window.hxx>
@@ -971,9 +972,9 @@ void Window::SetParent( vcl::Window* pNewParent )
     {
         // reset Focus-Save
         if ( bFocusWin ||
-             (pOldOverlapWindow->mpWindowImpl->mpLastFocusWindow &&
-              IsWindowOrChild( pOldOverlapWindow->mpWindowImpl->mpLastFocusWindow )) )
-            pOldOverlapWindow->mpWindowImpl->mpLastFocusWindow = nullptr;
+             (pOldOverlapWindow->mpInput->mpLastFocusWindow &&
+              IsWindowOrChild( pOldOverlapWindow->mpInput->mpLastFocusWindow )) )
+            pOldOverlapWindow->mpInput->mpLastFocusWindow = nullptr;
 
         vcl::Window* pOverlapWindow = pOldOverlapWindow->mpHierarchy->mpFirstOverlap;
         while ( pOverlapWindow )
