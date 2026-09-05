@@ -133,7 +133,7 @@ static void lcl_EndPopupMode()
 
 static void lcl_KillOwnPopups(vcl::Window const* pWindow)
 {
-    if (!lcl_IsValidFrameFloatPopup(pWindow->ImplGetWindowImpl()->mpFrameWindow)
+    if (!lcl_IsValidFrameFloatPopup(pWindow->ImplGetWindowHierarchy()->mpFrameWindow)
         || lcl_CanCloseOnAppFocus())
         return;
 
@@ -161,8 +161,8 @@ static bool lcl_ShouldStartResizeTimer(const vcl::Window* pWindow)
     if (!lcl_ShouldBufferResize(pWindow))
         return false;
 
-    const vcl::Window* pTarget = pWindow->ImplGetWindowImpl()->mpClientWindow
-                                     ? pWindow->ImplGetWindowImpl()->mpClientWindow.get()
+    const vcl::Window* pTarget = pWindow->ImplGetWindowHierarchy()->mpClientWindow
+                                     ? pWindow->ImplGetWindowHierarchy()->mpClientWindow.get()
                                      : pWindow;
 
     if (const auto* pWorkWindow = dynamic_cast<const WorkWindow*>(pTarget);
@@ -176,7 +176,7 @@ static bool lcl_ShouldSkipResizePropagation(const vcl::Window* pWindow)
 {
     return !pWindow->IsVisible() && !pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize
            && !(pWindow->ImplGetWindowImpl()->mbFrame
-                && pWindow->ImplGetWindowImpl()
+                && pWindow->ImplGetWindowHierarchy()
                        ->mpClientWindow); // propagate resize for system border windows
 }
 
@@ -239,7 +239,7 @@ static void lcl_HandleMinimizedState(vcl::Window* pWindow, tools::Long nNewWidth
     if (const bool bMinimized = (nNewWidth <= 0) || (nNewHeight <= 0);
         bMinimized != pWindow->ImplGetWindowImpl()->mpFrameData->mbMinimized)
     {
-        pWindow->ImplGetWindowImpl()->mpFrameWindow->ImplNotifyIconifiedState(bMinimized);
+        pWindow->ImplGetWindowHierarchy()->mpFrameWindow->ImplNotifyIconifiedState(bMinimized);
         pWindow->ImplGetWindowImpl()->mpFrameData->mbMinimized = bMinimized;
     }
 }
@@ -284,8 +284,8 @@ static void lcl_HandleMove(vcl::Window* pWindow)
         pWindow->ImplGetWindowImpl()->mbCallMove
             = true; // make sure the framepos will be updated on the next Show()
 
-    if (pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplGetWindowImpl()->mpClientWindow)
-        pWindow->ImplGetWindowImpl()
+    if (pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplGetWindowHierarchy()->mpClientWindow)
+        pWindow->ImplGetWindowHierarchy()
             ->mpClientWindow->ImplCallMove(); // notify client to update geometry
 }
 
@@ -321,7 +321,7 @@ static bool lcl_HasActiveTrackerForFrame(const vcl::Window* pWindow)
     const vcl::Window* pTrackWin = pSVData->mpWinData->mpTrackWin.get();
 
     return pTrackWin->ImplGetWindowImpl()
-           && pTrackWin->ImplGetWindowImpl()->mpFrameWindow == pWindow;
+           && pTrackWin->ImplGetWindowHierarchy()->mpFrameWindow == pWindow;
 }
 
 static void lcl_HandleLoseFocus(vcl::Window* pWindow)
@@ -550,12 +550,12 @@ static bool lcl_HandleSalMouseButtonUp(vcl::Window* pWindow, SalMouseEvent const
 
 static bool lcl_HandleMenuEvent(vcl::Window const* pWindow, SalMenuEvent* pEvent, SalEvent nEvent)
 {
-    vcl::Window* pWin = pWindow->ImplGetWindowImpl()->mpHierarchy->mpFirstChild;
+    vcl::Window* pWin = pWindow->ImplGetWindowHierarchy()->mpFirstChild;
     while (pWin)
     {
         if (pWin->ImplGetWindowImpl()->mbSysWin)
             break;
-        pWin = pWin->ImplGetWindowImpl()->mpHierarchy->mpNext;
+        pWin = pWin->ImplGetWindowHierarchy()->mpNext;
     }
 
     if (!pWin)
@@ -696,7 +696,7 @@ static void lcl_HandleSalKeyMod(vcl::Window* pWindow, SalKeyModEvent const* pEve
     {
         sal_uInt16 nNewCode = pEvent->mnCode;
         nNewCode |= pWindow->ImplGetWindowImpl()->mpFrameData->mnMouseCode & ~MOUSE_MODIFIER_MASK;
-        pWindow->ImplGetWindowImpl()->mpFrameWindow->ImplCallMouseMove(nNewCode, true);
+        pWindow->ImplGetWindowHierarchy()->mpFrameWindow->ImplCallMouseMove(nNewCode, true);
     }
 
     // #105224# send commandevent to allow special treatment of Ctrl-LeftShift/Ctrl-RightShift etc.

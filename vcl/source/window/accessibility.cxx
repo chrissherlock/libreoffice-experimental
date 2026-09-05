@@ -139,7 +139,7 @@ bool Window::ImplIsAccessibleCandidate() const
 
 vcl::Window* Window::GetAccessibleParentWindow() const
 {
-    if (!mpWindowImpl || IsNativeFrame())
+    if (!mpHierarchy || IsNativeFrame())
         return nullptr;
 
     if (IsTopWindow())
@@ -148,30 +148,30 @@ vcl::Window* Window::GetAccessibleParentWindow() const
         // but don't report parent otherwise (which could e.g. be
         // a dialog's parent window that's otherwise a separate window and
         // doesn't consider the top level its a11y child either)
-        if (mpWindowImpl->mpBorderWindow && mpWindowImpl->mpBorderWindow->IsNativeFrame())
-            return mpWindowImpl->mpBorderWindow;
+        if (mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->IsNativeFrame())
+            return mpHierarchy->mpBorderWindow;
         return nullptr;
     }
 
-    vcl::Window* pParent = mpWindowImpl->mpHierarchy->mpParent;
+    vcl::Window* pParent = mpHierarchy->mpParent;
     if( GetType() == WindowType::MENUBARWINDOW )
     {
         // report the menubar as a child of THE workwindow
-        vcl::Window *pWorkWin = GetParent()->mpWindowImpl->mpHierarchy->mpFirstChild;
+        vcl::Window *pWorkWin = GetParent()->mpHierarchy->mpFirstChild;
         while( pWorkWin && (pWorkWin == this) )
-            pWorkWin = pWorkWin->mpWindowImpl->mpHierarchy->mpNext;
+            pWorkWin = pWorkWin->mpHierarchy->mpNext;
         pParent = pWorkWin;
     }
     // If this is a floating window which has a native border window, then that border should be reported as
     // the accessible parent
     else if( GetType() == WindowType::FLOATINGWINDOW &&
-        mpWindowImpl->mpBorderWindow && mpWindowImpl->mpBorderWindow->mpWindowImpl->mbFrame )
+        mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame )
     {
-        pParent = mpWindowImpl->mpBorderWindow;
+        pParent = mpHierarchy->mpBorderWindow;
     }
     else if( pParent && !pParent->ImplIsAccessibleCandidate() )
     {
-        pParent = pParent->mpWindowImpl->mpHierarchy->mpParent;
+        pParent = pParent->mpHierarchy->mpParent;
     }
     return pParent;
 }
@@ -182,12 +182,12 @@ sal_uInt16 Window::GetAccessibleChildWindowCount()
         return 0;
 
     sal_uInt16 nChildren = 0;
-    vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
+    vcl::Window* pChild = mpHierarchy->mpFirstChild;
     while( pChild )
     {
         if( pChild->IsVisible() )
             nChildren++;
-        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+        pChild = pChild->mpHierarchy->mpNext;
     }
 
     // report the menubarwindow as a child of THE workwindow
@@ -229,7 +229,7 @@ vcl::Window* Window::GetAccessibleChildWindow( sal_uInt16 n )
 
     // transform n to child number including invisible children
     sal_uInt16 nChildren = n;
-    vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
+    vcl::Window* pChild = mpHierarchy->mpFirstChild;
     while( pChild )
     {
         if( pChild->IsVisible() )
@@ -238,12 +238,12 @@ vcl::Window* Window::GetAccessibleChildWindow( sal_uInt16 n )
                 break;
             nChildren--;
         }
-        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+        pChild = pChild->mpHierarchy->mpNext;
     }
 
     if( GetType() == WindowType::BORDERWINDOW && pChild && pChild->GetType() == WindowType::MENUBARWINDOW )
     {
-        do pChild = pChild->mpWindowImpl->mpHierarchy->mpNext; while( pChild && ! pChild->IsVisible() );
+        do pChild = pChild->mpHierarchy->mpNext; while( pChild && ! pChild->IsVisible() );
         SAL_WARN_IF( !pChild, "vcl", "GetAccessibleChildWindow(): wrong index in border window");
     }
 
@@ -423,8 +423,8 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
 
         case WindowType::FLOATINGWINDOW:
             nRole = (mpWindowImpl->mbFrame
-                     || (mpWindowImpl->mpBorderWindow
-                         && mpWindowImpl->mpBorderWindow->mpWindowImpl->mbFrame)
+                     || (mpHierarchy->mpBorderWindow
+                         && mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame)
                      || (GetStyle() & WB_OWNERDRAWDECORATION))
                         ? accessibility::AccessibleRole::FRAME
                         : accessibility::AccessibleRole::WINDOW;
@@ -702,7 +702,7 @@ bool Window::IsAccessibilityEventsSuppressed()
         if (pParent->mpAccessibleData && pParent->mpAccessibleData->mbSuppressAccessibilityEvents)
             return true;
         else
-            pParent = pParent->mpWindowImpl->mpHierarchy->mpParent; // do not use GetParent() to find borderwindows that are frames
+            pParent = pParent->mpHierarchy->mpParent; // do not use GetParent() to find borderwindows that are frames
     }
     return false;
 }

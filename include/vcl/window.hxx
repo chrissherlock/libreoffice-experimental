@@ -428,6 +428,7 @@ class WindowOutputDevice;
 class Dialog;
 class Edit;
 class WindowImpl;
+struct WindowHierarchy;
 struct WindowHelpData;
 struct WindowEventHandlers;
 struct WindowLayoutData;
@@ -557,6 +558,7 @@ public:
     SAL_DLLPRIVATE bool ImplIsOverlapWindow() const;
     SAL_DLLPRIVATE void ImplIsInTaskPaneList(bool mbIsInTaskList);
     SAL_DLLPRIVATE WindowImpl* ImplGetWindowImpl() const { return mpWindowImpl.get(); }
+    SAL_DLLPRIVATE WindowHierarchy* ImplGetWindowHierarchy() const { return mpHierarchy.get(); }
     SAL_DLLPRIVATE WindowEventHandlers* ImplGetEventHandlers() const { return mpEventHandlers.get(); }
     SAL_DLLPRIVATE WindowLayoutData* ImplGetLayoutData() const { return mpLayoutData.get(); }
     SAL_DLLPRIVATE WindowAccessibleData* ImplGetAccessibleData() const { return mpAccessibleData.get(); }
@@ -1116,6 +1118,7 @@ private:
 
     // --- Data Members ---
     std::unique_ptr<WindowImpl> mpWindowImpl;
+    std::unique_ptr<WindowHierarchy> mpHierarchy;
     std::unique_ptr<ImplWinData> mpWinData;
     std::unique_ptr<WindowHelpData> mpHelpData;
     std::unique_ptr<WindowEventHandlers> mpEventHandlers;

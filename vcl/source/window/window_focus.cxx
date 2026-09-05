@@ -74,20 +74,20 @@ void Window::ImplTransferFocusToParent()
     vcl::Window* pTarget = GetParent();
 
     // When windows overlap, give focus to the parent of the next FrameWindow
-    if (mpWindowImpl->mpBorderWindow)
+    if (mpHierarchy->mpBorderWindow)
     {
-        if (mpWindowImpl->mpBorderWindow->ImplIsOverlapWindow())
-            pTarget = mpWindowImpl->mpBorderWindow->mpWindowImpl->mpOverlapWindow;
+        if (mpHierarchy->mpBorderWindow->ImplIsOverlapWindow())
+            pTarget = mpHierarchy->mpBorderWindow->mpHierarchy->mpOverlapWindow;
     }
     else if (ImplIsOverlapWindow())
     {
-        pTarget = mpWindowImpl->mpOverlapWindow;
+        pTarget = mpHierarchy->mpOverlapWindow;
     }
 
     if (pTarget && pTarget->IsEnabled() && pTarget->IsInputEnabled() && !pTarget->IsInModalMode())
         pTarget->GrabFocus();
     else
-        mpWindowImpl->mpFrameWindow->GrabFocus();
+        mpHierarchy->mpFrameWindow->GrabFocus();
 }
 
 vcl::Window* Window::ImplTransferFocus()
@@ -592,8 +592,8 @@ void Window::EndSaveFocus(const VclPtr<vcl::Window>& xFocusWin)
 
 static void lcl_ActivateFloatingWindows(vcl::Window const* pWindow, bool bActive)
 {
-    for (vcl::Window* pTempWindow = pWindow->ImplGetWindowImpl()->mpHierarchy->mpFirstOverlap;
-         pTempWindow; pTempWindow = pTempWindow->ImplGetWindowImpl()->mpHierarchy->mpNext)
+    for (vcl::Window* pTempWindow = pWindow->ImplGetWindowHierarchy()->mpFirstOverlap; pTempWindow;
+         pTempWindow = pTempWindow->ImplGetWindowHierarchy()->mpNext)
     {
         if (pTempWindow->GetActivateMode() == ActivateModeFlags::NONE)
         {

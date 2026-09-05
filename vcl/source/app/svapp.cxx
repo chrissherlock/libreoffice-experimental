@@ -662,7 +662,7 @@ void Application::SetSettings(const AllSettings& rSettings, bool bTemporary)
                     while ( pClientWin->ImplGetClientWindow() )
                         pClientWin = pClientWin->ImplGetClientWindow();
                     pClientWin->UpdateSettings( rSettings, true );
-                    pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNextOverlap;
+                    pTempWin = pTempWin->mpHierarchy->mpNextOverlap;
                 }
 
                 pFrame = pFrame->mpWindowImpl->mpFrameData->mpNextFrame;
@@ -742,7 +742,7 @@ void Application::NotifyAllWindows( DataChangedEvent& rDCEvt )
         while ( pSysWin )
         {
             pSysWin->NotifyAllChildren( rDCEvt );
-            pSysWin = pSysWin->mpWindowImpl->mpHierarchy->mpNextOverlap;
+            pSysWin = pSysWin->mpHierarchy->mpNextOverlap;
         }
 
         pFrame = pFrame->mpWindowImpl->mpFrameData->mpNextFrame;
@@ -1022,8 +1022,8 @@ IMPL_STATIC_LINK( Application, PostEventHandler, void*, pCallData, void )
         break;
     }
 
-    if( pData->mpWin && pData->mpWin->mpWindowImpl->mpFrameWindow && pEventData )
-        ImplWindowFrameProc( pData->mpWin->mpWindowImpl->mpFrameWindow.get(), nEvent, pEventData );
+    if( pData->mpWin && pData->mpWin->mpHierarchy->mpFrameWindow && pEventData )
+        ImplWindowFrameProc( pData->mpWin->mpHierarchy->mpFrameWindow.get(), nEvent, pEventData );
 
     // remove this event from list of posted events, watch for destruction of internal data
     auto svdata = ImplGetSVData();
@@ -1177,7 +1177,7 @@ vcl::Window* Application::GetActiveTopWindow()
     {
         if( pWin->IsTopWindow() )
             return pWin;
-        pWin = pWin->mpWindowImpl->mpHierarchy->mpParent;
+        pWin = pWin->mpHierarchy->mpParent;
     }
     return nullptr;
 }
@@ -1438,8 +1438,8 @@ vcl::Window* Dialog::GetDefDialogParent()
     vcl::Window *pWin = pSVData->mpWinData->mpFocusWin;
     if (pWin && !pWin->IsMenuFloatingWindow())
     {
-        while (pWin->mpWindowImpl && pWin->mpWindowImpl->mpHierarchy->mpParent)
-            pWin = pWin->mpWindowImpl->mpHierarchy->mpParent;
+        while (pWin->mpWindowImpl && pWin->mpHierarchy->mpParent)
+            pWin = pWin->mpHierarchy->mpParent;
 
         // check for corrupted window hierarchy, #122232#, may be we now crash somewhere else
         if (!pWin->mpWindowImpl)
@@ -1451,7 +1451,7 @@ vcl::Window* Dialog::GetDefDialogParent()
 
         if ((pWin->mpWindowImpl->mnStyle & WB_INTROWIN) == 0)
         {
-            return pWin->mpWindowImpl->mpFrameWindow->ImplGetWindow();
+            return pWin->mpHierarchy->mpFrameWindow->ImplGetWindow();
         }
     }
 
@@ -1459,7 +1459,7 @@ vcl::Window* Dialog::GetDefDialogParent()
     pWin = pSVData->maFrameData.mpActiveApplicationFrame;
     if (pWin)
     {
-        return pWin->mpWindowImpl->mpFrameWindow->ImplGetWindow();
+        return pWin->mpHierarchy->mpFrameWindow->ImplGetWindow();
     }
 
     // first visible top window (may be totally wrong...)
@@ -1471,9 +1471,9 @@ vcl::Window* Dialog::GetDefDialogParent()
             (pWin->mpWindowImpl->mnStyle & WB_INTROWIN) == 0
         )
         {
-            while( pWin->mpWindowImpl->mpHierarchy->mpParent )
-                pWin = pWin->mpWindowImpl->mpHierarchy->mpParent;
-            return pWin->mpWindowImpl->mpFrameWindow->ImplGetWindow();
+            while( pWin->mpHierarchy->mpParent )
+                pWin = pWin->mpHierarchy->mpParent;
+            return pWin->mpHierarchy->mpFrameWindow->ImplGetWindow();
         }
         pWin = pWin->mpWindowImpl->mpFrameData->mpNextFrame;
     }

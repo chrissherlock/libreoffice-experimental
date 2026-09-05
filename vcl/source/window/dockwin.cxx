@@ -453,7 +453,7 @@ void DockingWindow::Tracking( const TrackingEvent& rTEvt )
     {
         Point   aMousePos = rTEvt.GetMouseEvent().GetPosPixel();
         Point   aFrameMousePos = OutputToScreenPixel( aMousePos );
-        Size    aFrameSize = mpWindowImpl->mpFrameWindow->GetOutputSizePixel();
+        Size    aFrameSize = mpHierarchy->mpFrameWindow->GetOutputSizePixel();
         if ( aFrameMousePos.X() < 0 )
             aFrameMousePos.setX( 0 );
         if ( aFrameMousePos.Y() < 0 )
@@ -729,15 +729,15 @@ void DockingWindow::SetFloatingMode( bool bFloatMode )
 
         maDockPos = Window::GetPosPixel();
 
-        vcl::Window* pRealParent = mpWindowImpl->mpHierarchy->mpRealParent;
-        mpOldBorderWin = mpWindowImpl->mpBorderWindow;
+        vcl::Window* pRealParent = mpHierarchy->mpRealParent;
+        mpOldBorderWin = mpHierarchy->mpBorderWindow;
 
         VclPtrInstance<ImplDockFloatWin> pWin(
                                  mpImplData->mpParent,
                                  mnFloatBits & ( WB_MOVEABLE | WB_SIZEABLE | WB_CLOSEABLE ) ?  mnFloatBits | WB_SYSTEMWINDOW : mnFloatBits,
                                  this );
         mpFloatWin      = pWin;
-        mpWindowImpl->mpBorderWindow  = nullptr;
+        mpHierarchy->mpBorderWindow  = nullptr;
         mpGeometry->mnLeftBorder    = 0;
         mpGeometry->mnTopBorder     = 0;
         mpGeometry->mnRightBorder   = 0;
@@ -752,9 +752,9 @@ void DockingWindow::SetFloatingMode( bool bFloatMode )
 
         SetParent( pWin );
         SetPosPixel( Point() );
-        mpWindowImpl->mpBorderWindow = pWin;
-        pWin->mpWindowImpl->mpClientWindow = this;
-        mpWindowImpl->mpHierarchy->mpRealParent = pRealParent;
+        mpHierarchy->mpBorderWindow = pWin;
+        pWin->mpHierarchy->mpClientWindow = this;
+        mpHierarchy->mpRealParent = pRealParent;
         pWin->SetText( Window::GetText() );
         Size aSize(Window::GetSizePixel());
         pWin->SetOutputSizePixel(aSize);
@@ -777,17 +777,17 @@ void DockingWindow::SetFloatingMode( bool bFloatMode )
         maMinOutSize    = mpFloatWin->GetMinOutputSizePixel();
         mpImplData->maMaxOutSize = mpFloatWin->GetMaxOutputSizePixel();
 
-        vcl::Window* pRealParent = mpWindowImpl->mpHierarchy->mpRealParent;
-        mpWindowImpl->mpBorderWindow = nullptr;
+        vcl::Window* pRealParent = mpHierarchy->mpRealParent;
+        mpHierarchy->mpBorderWindow = nullptr;
         if ( mpOldBorderWin )
         {
             SetParent( mpOldBorderWin );
             static_cast<ImplBorderWindow*>(mpOldBorderWin.get())->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
             mpOldBorderWin->Resize();
         }
-        mpWindowImpl->mpBorderWindow = mpOldBorderWin;
+        mpHierarchy->mpBorderWindow = mpOldBorderWin;
         SetParent( pRealParent );
-        mpWindowImpl->mpHierarchy->mpRealParent = pRealParent;
+        mpHierarchy->mpRealParent = pRealParent;
         mpFloatWin.disposeAndClear();
         SetPosPixel( maDockPos );
     }

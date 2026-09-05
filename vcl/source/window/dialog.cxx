@@ -436,10 +436,13 @@ VclPtr<vcl::Window> Dialog::AddBorderWindow(vcl::Window* pParent, WinBits nStyle
 {
     VclPtrInstance<ImplBorderWindow> pBorderWin( pParent, nStyle, BorderWindowStyle::Frame );
     ImplInit( pBorderWin, nStyle & ~WB_BORDER, nullptr );
-    pBorderWin->mpWindowImpl->mpClientWindow = this;
+
+    pBorderWin->mpHierarchy->mpClientWindow = this;
+
     pBorderWin->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
-    mpWindowImpl->mpBorderWindow  = pBorderWin;
-    mpWindowImpl->mpHierarchy->mpRealParent    = pParent;
+
+    mpHierarchy->mpBorderWindow = pBorderWin;
+    mpHierarchy->mpRealParent = pParent;
 
     return pBorderWin;
 }
@@ -485,10 +488,13 @@ void Dialog::ImplInitDialog( vcl::Window* pParent, WinBits nStyle, InitFlag eFla
     {
         VclPtrInstance<ImplBorderWindow> pBorderWin( pParent, nStyle, BorderWindowStyle::Overlap );
         ImplInit( pBorderWin, nStyle & ~WB_BORDER, nullptr );
-        pBorderWin->mpWindowImpl->mpClientWindow = this;
+
+        pBorderWin->mpHierarchy->mpClientWindow = this;
+
         pBorderWin->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
-        mpWindowImpl->mpBorderWindow  = pBorderWin;
-        mpWindowImpl->mpHierarchy->mpRealParent    = pParent;
+
+        mpHierarchy->mpBorderWindow = pBorderWin;
+        mpHierarchy->mpRealParent = pParent;
     }
 
     SetActivateMode( ActivateModeFlags::GrabFocus );
@@ -1280,7 +1286,7 @@ void Dialog::ImplSetModalInputMode( bool bModal )
             // #103716# dialogs should always be modal to the whole frame window
             // #115933# disable the whole frame hierarchy, useful if our parent
             // is a modeless dialog
-            mpDialogParent = pParent->mpWindowImpl->mpFrameWindow;
+            mpDialogParent = pParent->mpHierarchy->mpFrameWindow;
             mpDialogParent->IncModalCount();
         }
     }

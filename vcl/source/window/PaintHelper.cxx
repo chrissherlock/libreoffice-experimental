@@ -51,24 +51,24 @@ PaintHelper::~PaintHelper()
     if (m_bPop)
         m_pWindow->PopPaintHelper(this);
 
-    ImplFrameData* pFrameData = m_pWindow->mpWindowImpl->mpFrameData;
+    ImplFrameData* pFrameData = pWindowImpl->mpFrameData;
     if (m_nPaintFlags & (ImplPaintFlags::PaintAllChildren | ImplPaintFlags::PaintChildren))
     {
         // Paint from the bottom child window and frontward.
-        vcl::Window* pTempWindow = pWindowImpl->mpHierarchy->mpLastChild;
+        vcl::Window* pTempWindow = m_pWindow->ImplGetWindowHierarchy()->mpLastChild;
         while (pTempWindow)
         {
-            if (pTempWindow->mpWindowImpl->mbVisible)
+            if (pTempWindow->ImplGetWindowImpl()->mbVisible)
                 pTempWindow->ImplCallPaint(m_pChildRegion.get(), m_nPaintFlags);
-            pTempWindow = pTempWindow->mpWindowImpl->mpHierarchy->mpPrev;
+            pTempWindow = pTempWindow->ImplGetWindowHierarchy()->mpPrev;
         }
     }
 
     if (pWinData && pWindowImpl->mbTrackVisible
         && (pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
         /* #98602# need to invert the tracking rect AFTER
-        * the children have painted
-        */
+         * the children have painted
+         */
         m_pWindow->InvertTracking(*pWinData->mpTrackRect, pWinData->mnTrackFlags);
 
     // double-buffering: paint in case we created the buffer, the children are

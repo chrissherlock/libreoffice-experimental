@@ -27,6 +27,7 @@
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowGeometry.hxx>
+#include <WindowHierarchy.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 #include <salgdi.hxx>
@@ -55,7 +56,7 @@ static bool lcl_IsFloatingWindowDecorated(const vcl::Window* pChildFrame)
 
 bool Window::ImplHasActiveChildFrame(const vcl::Window* pFrameWin) const
 {
-    if (pFrameWin == mpWindowImpl->mpFrameWindow)
+    if (pFrameWin == mpHierarchy->mpFrameWindow)
         return false;
 
     VclPtr<vcl::Window> pChildFrame = pFrameWin->ImplGetWindow();
@@ -78,7 +79,7 @@ bool Window::HasActiveChildFrame() const
     vcl::Window* pFrameWin = ImplGetSVData()->maFrameData.mpFirstFrame;
     while (pFrameWin)
     {
-        if (pFrameWin != mpWindowImpl->mpFrameWindow && ImplHasActiveChildFrame(pFrameWin))
+        if (pFrameWin != mpHierarchy->mpFrameWindow && ImplHasActiveChildFrame(pFrameWin))
             return true;
 
         pFrameWin = pFrameWin->mpWindowImpl->mpFrameData->mpNextFrame;
@@ -105,13 +106,13 @@ WinBits Window::ImplApplyBorderAnd3DStyle(WinBits nStyle, const vcl::Window* pPa
 
 bool Window::ImplNeedsSystemChildBorder(WinBits nStyle) const
 {
-    return !mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpWindowImpl->mpBorderWindow
+    return !mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpHierarchy->mpBorderWindow
            && (nStyle & WB_SYSTEMCHILDWINDOW);
 }
 
 bool Window::ImplNeedsBorderWindow(WinBits nStyle) const
 {
-    return !mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpWindowImpl->mpBorderWindow
+    return !mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpHierarchy->mpBorderWindow
            && (nStyle & WB_BORDER);
 }
 
@@ -131,13 +132,13 @@ vcl::Window* Window::ImplCreateBorderWindow(vcl::Window* pParent, WinBits nStyle
 
     VclPtrInstance<ImplBorderWindow> pBorderWin(pParent, nStyle & nBorderWinMask, nBorderTypeStyle);
 
-    static_cast<vcl::Window*>(pBorderWin)->mpWindowImpl->mpClientWindow = this;
+    static_cast<vcl::Window*>(pBorderWin)->mpHierarchy->mpClientWindow = this;
     pBorderWin->GetBorder(mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder,
                           mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder);
-    mpWindowImpl->mpBorderWindow = pBorderWin;
+    mpHierarchy->mpBorderWindow = pBorderWin;
 
     // Return the newly created border window to act as the new parent
-    return mpWindowImpl->mpBorderWindow;
+    return mpHierarchy->mpBorderWindow;
 }
 
 vcl::Window* Window::ImplInitBorderWindow(vcl::Window* pParent, WinBits nStyle,
@@ -287,8 +288,8 @@ void Window::ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInit
     // set window frame data
     mpWindowImpl->mpFrameData = new ImplFrameData(this);
     mpWindowImpl->mpFrame = pFrame;
-    mpWindowImpl->mpFrameWindow = this;
-    mpWindowImpl->mpOverlapWindow = this;
+    mpHierarchy->mpFrameWindow = this;
+    mpHierarchy->mpOverlapWindow = this;
 
     auto shouldDoubleBuffer = [nStyle, this]() {
         return !(nStyle & WB_DEFAULTWIN) && mpWindowImpl->mbDoubleBufferingRequested;
@@ -454,7 +455,7 @@ void Window::ImplInitAppFontData(vcl::Window const* pWindow)
 
 SalGraphics* Window::ImplGetFrameGraphics() const
 {
-    OutputDevice* pFrameWinOutDev = mpWindowImpl->mpFrameWindow->GetOutDev();
+    OutputDevice* pFrameWinOutDev = mpHierarchy->mpFrameWindow->GetOutDev();
 
     if (pFrameWinOutDev->mpGraphics)
         pFrameWinOutDev->GetClipState().Invalidate();

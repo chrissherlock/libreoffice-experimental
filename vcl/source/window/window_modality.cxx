@@ -21,6 +21,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <salframe.hxx>
 
 namespace vcl
@@ -33,21 +34,21 @@ void Window::SetModalHierarchyHdl(const Link<bool, void>& rLink)
 // frame based modal counter (dialogs are not modal to the whole application anymore)
 bool Window::IsInModalMode() const
 {
-    return (mpWindowImpl->mpFrameWindow->mpWindowImpl->mpFrameData->mnModalMode != 0);
+    return (mpHierarchy->mpFrameWindow->mpWindowImpl->mpFrameData->mnModalMode != 0);
 }
 
 void Window::ImplUpdateModalCount(int nDelta)
 {
-    vcl::Window* pFrameWindow = mpWindowImpl->mpFrameWindow;
+    vcl::Window* pFrameWindow = mpHierarchy->mpFrameWindow;
     vcl::Window* pParent = pFrameWindow;
     while (pFrameWindow)
     {
         pFrameWindow->mpWindowImpl->mpFrameData->mnModalMode += nDelta;
-        while (pParent && pParent->mpWindowImpl->mpFrameWindow == pFrameWindow)
+        while (pParent && pParent->mpHierarchy->mpFrameWindow == pFrameWindow)
         {
             pParent = pParent->GetParent();
         }
-        pFrameWindow = pParent ? pParent->mpWindowImpl->mpFrameWindow.get() : nullptr;
+        pFrameWindow = pParent ? pParent->mpHierarchy->mpFrameWindow.get() : nullptr;
     }
 }
 

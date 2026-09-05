@@ -41,31 +41,29 @@ ClipState ClipStateBuilder::BuildFromWindow(const vcl::Window& rWindow)
 
 void ClipStateBuilder::CollectSiblings(const vcl::Window& rWindow, std::vector<ClipNode>& rOut)
 {
-    // Access the hierarchy pointer inside WindowImpl
-    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
-    if (!pImpl->mpHierarchy)
+    const WindowHierarchy* pHierarchy = rWindow.ImplGetWindowHierarchy();
+    if (!pHierarchy)
         return;
 
-    vcl::Window* pSibling = pImpl->mpHierarchy->mpFirstOverlap;
+    vcl::Window* pSibling = pHierarchy->mpFirstOverlap;
     while (pSibling)
     {
         rOut.push_back({ pSibling->GetWindowExtentsRelative(rWindow) });
-        // Correct way to navigate the overlap linked list
-        pSibling = pSibling->ImplGetWindowImpl()->mpHierarchy->mpNextOverlap;
+        pSibling = pSibling->ImplGetWindowHierarchy()->mpNextOverlap;
     }
 }
 
 void ClipStateBuilder::CollectChildren(const vcl::Window& rWindow, std::vector<ClipNode>& rOut)
 {
-    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
-    if (!pImpl->mpHierarchy)
+    const WindowHierarchy* pHierarchy = rWindow.ImplGetWindowHierarchy();
+    if (!pHierarchy)
         return;
 
-    vcl::Window* pChild = pImpl->mpHierarchy->mpFirstChild;
+    vcl::Window* pChild = pHierarchy->mpFirstChild;
     while (pChild)
     {
         rOut.push_back({ pChild->GetWindowExtentsRelative(rWindow) });
-        pChild = pChild->ImplGetWindowImpl()->mpHierarchy->mpNext;
+        pChild = pChild->ImplGetWindowHierarchy()->mpNext;
     }
 }
 } // namespace vcl::clipping

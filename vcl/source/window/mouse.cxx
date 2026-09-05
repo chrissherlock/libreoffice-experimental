@@ -140,7 +140,7 @@ PointerStyle Window::ImplGetMousePointer() const
 
 void Window::ImplCallMouseMove( sal_uInt16 nMouseCode, bool bModChanged )
 {
-    if ( !(mpWindowImpl->mpFrameData->mbMouseIn && mpWindowImpl->mpFrameWindow->mpWindowImpl->mbReallyVisible) )
+    if ( !(mpWindowImpl->mpFrameData->mbMouseIn && mpHierarchy->mpFrameWindow->mpWindowImpl->mbReallyVisible) )
         return;
 
     sal_uInt64 nTime   = tools::Time::GetSystemTicks();
@@ -151,20 +151,20 @@ void Window::ImplCallMouseMove( sal_uInt16 nMouseCode, bool bModChanged )
     bool    bLeave;
     // check for MouseLeave
     bLeave = ((nX < 0) || (nY < 0) ||
-              (nX >= mpWindowImpl->mpFrameWindow->GetOutDev()->GetOutputWidthPixel()) ||
-              (nY >= mpWindowImpl->mpFrameWindow->GetOutDev()->GetOutputHeightPixel())) &&
+              (nX >= mpHierarchy->mpFrameWindow->GetOutDev()->GetOutputWidthPixel()) ||
+              (nY >= mpHierarchy->mpFrameWindow->GetOutDev()->GetOutputHeightPixel())) &&
              !ImplGetSVData()->mpWinData->mpCaptureWin;
     nMode |= MouseEventModifiers::SYNTHETIC;
     if ( bModChanged )
         nMode |= MouseEventModifiers::MODIFIERCHANGED;
-    ImplHandleMouseEvent( mpWindowImpl->mpFrameWindow, NotifyEventType::MOUSEMOVE, bLeave, Point(nX, nY), nTime, nCode, nMode );
+    ImplHandleMouseEvent( mpHierarchy->mpFrameWindow, NotifyEventType::MOUSEMOVE, bLeave, Point(nX, nY), nTime, nCode, nMode );
 }
 
 void Window::ImplGenerateMouseMove()
 {
     if ( mpWindowImpl && mpWindowImpl->mpFrameData &&
          !mpWindowImpl->mpFrameData->mnMouseMoveId )
-        mpWindowImpl->mpFrameData->mnMouseMoveId = Application::PostUserEvent( LINK( mpWindowImpl->mpFrameWindow, Window, ImplGenerateMouseMoveHdl ), nullptr, true );
+        mpWindowImpl->mpFrameData->mnMouseMoveId = Application::PostUserEvent( LINK( mpHierarchy->mpFrameWindow, Window, ImplGenerateMouseMoveHdl ), nullptr, true );
 }
 
 IMPL_LINK_NOARG(Window, ImplGenerateMouseMoveHdl, void*, void)
@@ -213,7 +213,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
     // we need to change all GrabFocus() instances in VCL,
     // e.g. in ToTop()
 
-    if ( mpWindowImpl->mpClientWindow )
+    if ( mpHierarchy->mpClientWindow )
     {
         // For a lack of design we need a little hack here to
         // ensure that dialogs on close pass the focus back to
@@ -226,7 +226,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
              )
             mpWindowImpl->mpLastFocusWindow->GrabFocus();
         else
-            mpWindowImpl->mpClientWindow->GrabFocus();
+            mpHierarchy->mpClientWindow->GrabFocus();
         return;
     }
     else if ( mpWindowImpl->mbFrame )
@@ -260,7 +260,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
     vcl::Window *pFrame = pSVData->maFrameData.mpFirstFrame;
     while( pFrame && pFrame->mpWindowImpl && pFrame->mpWindowImpl->mpFrameData )
     {
-        if( pFrame != mpWindowImpl->mpFrameWindow.get() && pFrame->mpWindowImpl->mpFrameData->mnFocusId )
+        if( pFrame != mpHierarchy->mpFrameWindow.get() && pFrame->mpWindowImpl->mpFrameData->mnFocusId )
         {
             bAsyncFocusWaiting = true;
             break;
@@ -283,7 +283,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         }
         if (!pParent->mpWindowImpl)
             break;
-        pParent = pParent->mpWindowImpl->mpHierarchy->mpParent;
+        pParent = pParent->mpHierarchy->mpParent;
     }
 
     if ( !(( pSVData->mpWinData->mpFocusWin.get() != this &&
@@ -444,8 +444,8 @@ void Window::MouseButtonUp( const MouseEvent& rMEvt )
 void Window::SetMouseTransparent( bool bTransparent )
 {
 
-    if ( mpWindowImpl->mpBorderWindow )
-        mpWindowImpl->mpBorderWindow->SetMouseTransparent( bTransparent );
+    if ( mpHierarchy->mpBorderWindow )
+        mpHierarchy->mpBorderWindow->SetMouseTransparent( bTransparent );
 
     if( mpWindowImpl->mpSysObj )
         mpWindowImpl->mpSysObj->SetMouseTransparent( bTransparent );
@@ -681,7 +681,7 @@ rtl::Reference<DNDListenerContainer> Window::GetDropTarget()
 
                 if( ! mpWindowImpl->mpFrameData->mxDropTargetListener.is() )
                 {
-                    mpWindowImpl->mpFrameData->mxDropTargetListener = new DNDEventDispatcher( mpWindowImpl->mpFrameWindow );
+                    mpWindowImpl->mpFrameData->mxDropTargetListener = new DNDEventDispatcher( mpHierarchy->mpFrameWindow );
 
                     try
                     {

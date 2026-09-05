@@ -31,6 +31,7 @@
 #include <brdwin.hxx>
 #include <WindowImpl.hxx>
 #include <WindowGeometry.hxx>
+#include <WindowHierarchy.hxx>
 
 void WorkWindow::ImplInitWorkWindowData()
 {
@@ -51,9 +52,9 @@ void WorkWindow::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentDat
 
     VclPtrInstance<ImplBorderWindow> pBorderWin( pParent, pSystemParentData, nStyle, nFrameStyle );
     Window::ImplInit( pBorderWin, nStyle & (WB_3DLOOK | WB_CLIPCHILDREN | WB_DIALOGCONTROL | WB_SYSTEMFLOATWIN), nullptr );
-    pBorderWin->mpWindowImpl->mpClientWindow = this;
+    pBorderWin->mpHierarchy->mpClientWindow = this;
     pBorderWin->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
-    mpWindowImpl->mpBorderWindow  = pBorderWin;
+    mpHierarchy->mpBorderWindow = pBorderWin;
 
     // mpWindowImpl->mpRealParent    = pParent; // should actually be set, but is not set due to errors with the menubar!!
 
@@ -146,7 +147,7 @@ void WorkWindow::ShowFullScreenMode( bool bFullScreenMode, sal_Int32 nDisplayScr
     // screen-specific system data.
     GetOutDev()->ImplDisposeCanvas();
 
-    mpWindowImpl->mpFrameWindow->mpWindowImpl->mbWaitSystemResize = true;
+    mpHierarchy->mpFrameWindow->mpWindowImpl->mbWaitSystemResize = true;
     ImplGetFrame()->ShowFullScreen( bFullScreenMode, nDisplayScreen );
 }
 

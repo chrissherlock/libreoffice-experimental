@@ -496,7 +496,7 @@ void DrawProgress(vcl::Window* pWindow, vcl::RenderContext& rRenderContext, cons
             vcl::Window* pEraseWindow = pWindow;
             while (pEraseWindow->IsPaintTransparent() && !pEraseWindow->ImplGetWindowImpl()->mbFrame)
             {
-                pEraseWindow = pEraseWindow->ImplGetWindowImpl()->mpHierarchy->mpParent;
+                pEraseWindow = pEraseWindow->ImplGetWindowHierarchy()->mpParent;
             }
 
             if (pEraseWindow == pWindow)

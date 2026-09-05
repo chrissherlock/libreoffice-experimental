@@ -69,10 +69,6 @@ public:
     ImplFrameData*      mpFrameData;
     SalFrame*           mpFrame;
     SalObject*          mpSysObj;
-    VclPtr<vcl::Window> mpFrameWindow;
-    VclPtr<vcl::Window> mpOverlapWindow;
-    VclPtr<vcl::Window> mpBorderWindow;
-    VclPtr<vcl::Window> mpClientWindow;
     VclPtr<vcl::Window> mpLastFocusWindow;
     VclPtr<PushButton> mpDlgCtrlDownWindow;
 
@@ -81,7 +77,6 @@ public:
     VCLXWindow*         mpVCLXWindow;
 
     std::unique_ptr<WindowClippingState> mpClippingState;
-    std::unique_ptr<WindowHierarchy>     mpHierarchy;
 
     vcl::Region         maInvalidateRegion;     //< region that has to be redrawn (frame coordinates)
     vcl::Region*        mpPaintRegion;          //< only set during Paint() method call (window coordinates)
