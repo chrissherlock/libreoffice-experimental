@@ -242,6 +242,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/WindowImpl \
     vcl/source/window/PaintBufferGuard \
     vcl/source/window/PaintHelper \
+    vcl/source/window/WindowLOKData \
     vcl/source/window/WindowInput \
     vcl/source/window/window \
     vcl/source/window/window_core \

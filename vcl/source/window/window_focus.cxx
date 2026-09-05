@@ -26,6 +26,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowLOKData.hxx>
 #include <WindowInput.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
@@ -440,8 +441,8 @@ IMPL_LINK(Window, ImplTrackTimerHdl, Timer*, pTimer, void)
 
 void Window::SetUseFrameData(bool bUseFrameData)
 {
-    if (mpWindowImpl)
-        mpWindowImpl->mbUseFrameData = bUseFrameData;
+    if (mpLOKData)
+        mpLOKData->mbUseFrameData = bUseFrameData;
 }
 
 void Window::StartTracking(StartTrackingFlags nFlags)
@@ -450,7 +451,7 @@ void Window::StartTracking(StartTrackingFlags nFlags)
         return;
 
     ImplSVData* pSVData = ImplGetSVData();
-    VclPtr<vcl::Window> pTrackWin = mpWindowImpl->mbUseFrameData
+    VclPtr<vcl::Window> pTrackWin = mpLOKData->mbUseFrameData
                                         ? mpWindowImpl->mpFrameData->mpTrackWin
                                         : pSVData->mpWinData->mpTrackWin;
 
@@ -460,7 +461,7 @@ void Window::StartTracking(StartTrackingFlags nFlags)
     SAL_WARN_IF(pSVData->mpWinData->mpTrackTimer, "vcl",
                 "StartTracking called while TrackerTimer still running");
 
-    if (!mpWindowImpl->mbUseFrameData
+    if (!mpLOKData->mbUseFrameData
         && (nFlags & (StartTrackingFlags::ScrollRepeat | StartTrackingFlags::ButtonRepeat)))
     {
         pSVData->mpWinData->mpTrackTimer.reset(
@@ -474,7 +475,7 @@ void Window::StartTracking(StartTrackingFlags nFlags)
         pSVData->mpWinData->mpTrackTimer->Start();
     }
 
-    if (mpWindowImpl->mbUseFrameData)
+    if (mpLOKData->mbUseFrameData)
     {
         mpWindowImpl->mpFrameData->mpTrackWin = this;
     }
@@ -492,14 +493,14 @@ void Window::EndTracking(TrackingEventFlags nFlags)
         return;
 
     ImplSVData* pSVData = ImplGetSVData();
-    VclPtr<vcl::Window> pTrackWin = mpWindowImpl->mbUseFrameData
+    VclPtr<vcl::Window> pTrackWin = mpLOKData->mbUseFrameData
                                         ? mpWindowImpl->mpFrameData->mpTrackWin
                                         : pSVData->mpWinData->mpTrackWin;
 
     if (pTrackWin.get() != this)
         return;
 
-    if (!mpWindowImpl->mbUseFrameData && pSVData->mpWinData->mpTrackTimer)
+    if (!mpLOKData->mbUseFrameData && pSVData->mpWinData->mpTrackTimer)
         pSVData->mpWinData->mpTrackTimer.reset();
 
     mpWindowImpl->mpFrameData->mpTrackWin = pSVData->mpWinData->mpTrackWin = nullptr;
@@ -540,10 +541,10 @@ bool Window::IsTracking() const
     if (!mpWindowImpl)
         return false;
 
-    if (mpWindowImpl->mbUseFrameData && mpWindowImpl->mpFrameData)
+    if (mpLOKData->mbUseFrameData && mpWindowImpl->mpFrameData)
         return mpWindowImpl->mpFrameData->mpTrackWin == this;
 
-    if (!mpWindowImpl->mbUseFrameData && ImplGetSVData()->mpWinData)
+    if (!mpLOKData->mbUseFrameData && ImplGetSVData()->mpWinData)
         return ImplGetSVData()->mpWinData->mpTrackWin == this;
 
     return false;

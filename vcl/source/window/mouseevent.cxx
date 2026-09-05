@@ -60,6 +60,7 @@
 #include <accmgr.hxx>
 #include <print.h>
 #include <WindowImpl.hxx>
+#include <WindowLOKData.hxx>
 #include <WindowInput.hxx>
 #include <helpwin.hxx>
 #include <brdwin.hxx>
@@ -479,7 +480,7 @@ static void lcl_FireDragGesture(vcl::Window* pMouseDownWin, const MouseAction& r
                                 sal_Int32 nClicks)
 {
     rtl::Reference< DNDListenerContainer > xDragGestureRecognizer(
-        pMouseDownWin->ImplGetWindowImpl()->mxDNDListenerContainer);
+        pMouseDownWin->ImplGetWindowLOKData()->mxDNDListenerContainer);
 
     if (!xDragGestureRecognizer.is())
         return;
@@ -1000,7 +1001,7 @@ static bool lcl_ExecuteLOKDragOver(ImplFrameData* pFrameData, vcl::Window* pDrag
     css::uno::Reference<css::datatransfer::dnd::XDropTargetDragContext> xDropTargetDragContext =
         new GenericDropTargetDragContext();
     rtl::Reference<DNDListenerContainer> xDropTarget(
-        pDragWin->ImplGetWindowImpl()->mxDNDListenerContainer);
+        pDragWin->ImplGetWindowLOKData()->mxDNDListenerContainer);
 
     if (!xDropTarget.is() ||
         !xDropTargetDragContext.is() ||
@@ -1030,7 +1031,7 @@ static bool lcl_ExecuteLOKDrop(ImplFrameData* pFrameData, vcl::Window* pDragWin,
     css::uno::Reference<css::datatransfer::dnd::XDropTargetDropContext> xDropTargetDropContext =
         new GenericDropTargetDropContext();
     rtl::Reference<DNDListenerContainer> xDropTarget(
-        pDragWin->ImplGetWindowImpl()->mxDNDListenerContainer);
+        pDragWin->ImplGetWindowLOKData()->mxDNDListenerContainer);
 
     if (!xDropTarget.is() || !xDropTargetDropContext.is())
     {
@@ -1083,7 +1084,7 @@ static void lcl_CheckLOKDragGesture(ImplFrameData* pFrameData, vcl::Window* pDow
             return;
 
         rtl::Reference<DNDListenerContainer> xDragGestureRecognizer(
-            pDownWin->ImplGetWindowImpl()->mxDNDListenerContainer);
+            pDownWin->ImplGetWindowLOKData()->mxDNDListenerContainer);
 
         if (!xDragGestureRecognizer.is())
             return;

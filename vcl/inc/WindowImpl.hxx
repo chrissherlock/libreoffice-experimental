@@ -136,12 +136,6 @@ public:
                         mbIsInTaskPaneList:1,
                         mbDoubleBufferingRequested:1;
     bool mbIsFormControl : 1 = false;
-
-    rtl::Reference< DNDListenerContainer > mxDNDListenerContainer;
-
-    const vcl::ILibreOfficeKitNotifier* mpLOKNotifier; ///< To emit the LOK callbacks eg. for dialog tunneling.
-    vcl::LOKWindowId mnLOKWindowId; ///< ID of this specific window.
-    bool mbUseFrameData;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

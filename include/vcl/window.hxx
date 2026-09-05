@@ -429,6 +429,7 @@ class Dialog;
 class Edit;
 class WindowImpl;
 struct WindowInput;
+struct WindowLOKData;
 struct WindowHierarchy;
 struct WindowHelpData;
 struct WindowEventHandlers;
@@ -559,6 +560,7 @@ public:
     SAL_DLLPRIVATE bool ImplIsOverlapWindow() const;
     SAL_DLLPRIVATE void ImplIsInTaskPaneList(bool mbIsInTaskList);
     SAL_DLLPRIVATE WindowImpl* ImplGetWindowImpl() const { return mpWindowImpl.get(); }
+    SAL_DLLPRIVATE WindowLOKData* ImplGetWindowLOKData() const { return mpLOKData.get(); }
     SAL_DLLPRIVATE WindowInput* ImplGetWindowInput() const { return mpInput.get(); }
     SAL_DLLPRIVATE WindowHierarchy* ImplGetWindowHierarchy() const { return mpHierarchy.get(); }
     SAL_DLLPRIVATE WindowEventHandlers* ImplGetEventHandlers() const { return mpEventHandlers.get(); }
@@ -1130,6 +1132,7 @@ private:
     std::unique_ptr<WindowControlAppearance> mpControlAppearance;
     std::unique_ptr<WindowGeometry> mpGeometry;
     std::unique_ptr<WindowViewport> mpViewport;
+    std::unique_ptr<WindowLOKData> mpLOKData;
 
     // --- Lifecycle and Teardown ---
     SAL_DLLPRIVATE void ImplDeInitDND();
