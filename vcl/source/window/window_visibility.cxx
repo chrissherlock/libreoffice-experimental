@@ -78,10 +78,10 @@ void Window::ImplInvalidateParentOnHide(vcl::Region& rInvRegion)
 
 vcl::Region Window::ImplGetWinClipRegion()
 {
-    if (mpWindowImpl->mpClippingState->mbInitWinClipRegion)
+    if (mpClippingState->mbInitWinClipRegion)
         clipping::initWinClipRegion(*this);
 
-    return mpWindowImpl->mpClippingState->maWinClipRegion;
+    return mpClippingState->maWinClipRegion;
 }
 
 std::optional<bool> Window::ImplHideWindow(ShowFlags nFlags)

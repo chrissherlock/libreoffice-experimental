@@ -553,10 +553,10 @@ void Window::SetZOrder( vcl::Window* pRefWindow, ZOrderFlags nFlags )
     if ( !IsReallyVisible() )
         return;
 
-    if ( !mpWindowImpl->mpClippingState->mbInitWinClipRegion && mpWindowImpl->mpClippingState->maWinClipRegion.IsEmpty() )
+    if ( !mpClippingState->mbInitWinClipRegion && mpClippingState->maWinClipRegion.IsEmpty() )
         return;
 
-    bool bInitWinClipRegion = mpWindowImpl->mpClippingState->mbInitWinClipRegion;
+    bool bInitWinClipRegion = mpClippingState->mbInitWinClipRegion;
     vcl::clipping::setClipFlag(*this);
 
     // When ClipRegion was not initialised, assume
@@ -945,8 +945,8 @@ void Window::SetParent( vcl::Window* pNewParent )
     ImplRemoveWindow( bNewFrame );
     ImplInsertWindow( pNewParent );
 
-    if ( mpWindowImpl->mpClippingState->meParentClipMode & ParentClipMode::Clip )
-        pNewParent->mpWindowImpl->mpClippingState->mbClipChildren = true;
+    if ( mpClippingState->meParentClipMode & ParentClipMode::Clip )
+        pNewParent->mpClippingState->mbClipChildren = true;
 
     ImplUpdateWindowPtr();
     if ( ImplUpdatePos() )

@@ -106,15 +106,10 @@ using namespace ::com::sun::star::datatransfer::dnd;
 
 WindowImpl::WindowImpl( WindowType eType )
 {
-    mpClippingState = std::make_unique<WindowClippingState>();
-
-    mpClippingState->maWinRegion        = vcl::Region(true);
-    mpClippingState->maWinClipRegion    = vcl::Region(true);
-    mpFrameData                         = nullptr;                      // Frame Data
-    mpFrame                             = nullptr;                      // Pointer to frame window
+    mpFrameData                         = nullptr;                   // Frame Data
+    mpFrame                             = nullptr;                   // Pointer to frame window
     mpSysObj                            = nullptr;
     mpVCLXWindow                        = nullptr;
-    mpClippingState->mpChildClipRegion  = nullptr;                      // Child-Clip-Region when ClipChildren
     mnStyle                             = 0;                         // style (init in ImplInitWindow)
     mnPrevStyle                         = 0;                         // prevstyle (set in SetStyle)
     mnExtendedStyle                     = WindowExtendedStyle::NONE; // extended style (init in ImplInitWindow)
@@ -174,7 +169,6 @@ WindowImpl::WindowImpl( WindowType eType )
 
 WindowImpl::~WindowImpl()
 {
-    mpClippingState->mpChildClipRegion.reset();
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

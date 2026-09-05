@@ -600,16 +600,16 @@ void Window::SetWindowRegionPixel()
     }
     else if( mpWindowImpl->mbFrame )
     {
-        mpWindowImpl->mpClippingState->maWinRegion = vcl::Region(true);
-        mpWindowImpl->mpClippingState->mbWinRegion = false;
+        mpClippingState->maWinRegion = vcl::Region(true);
+        mpClippingState->mbWinRegion = false;
         mpWindowImpl->mpFrame->ResetClipRegion();
     }
     else
     {
-        if ( mpWindowImpl->mpClippingState->mbWinRegion )
+        if ( mpClippingState->mbWinRegion )
         {
-            mpWindowImpl->mpClippingState->maWinRegion = vcl::Region(true);
-            mpWindowImpl->mpClippingState->mbWinRegion = false;
+            mpClippingState->maWinRegion = vcl::Region(true);
+            mpClippingState->mbWinRegion = false;
             vcl::clipping::setClipFlag(*this);
 
             if ( IsReallyVisible() )
@@ -630,14 +630,14 @@ void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
     {
         if( !rRegion.IsNull() )
         {
-            mpWindowImpl->mpClippingState->maWinRegion = rRegion;
-            mpWindowImpl->mpClippingState->mbWinRegion = ! rRegion.IsEmpty();
+            mpClippingState->maWinRegion = rRegion;
+            mpClippingState->mbWinRegion = ! rRegion.IsEmpty();
 
-            if( mpWindowImpl->mpClippingState->mbWinRegion )
+            if( mpClippingState->mbWinRegion )
             {
                 // set/update ClipRegion
                 RectangleVector aRectangles;
-                mpWindowImpl->mpClippingState->maWinRegion.GetRegionRectangles(aRectangles);
+                mpClippingState->maWinRegion.GetRegionRectangles(aRectangles);
                 mpWindowImpl->mpFrame->BeginSetClipRegion(aRectangles.size());
 
                 for (auto const& rectangle : aRectangles)
@@ -661,17 +661,17 @@ void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
     {
         if ( rRegion.IsNull() )
         {
-            if ( mpWindowImpl->mpClippingState->mbWinRegion )
+            if ( mpClippingState->mbWinRegion )
             {
-                mpWindowImpl->mpClippingState->maWinRegion = vcl::Region(true);
-                mpWindowImpl->mpClippingState->mbWinRegion = false;
+                mpClippingState->maWinRegion = vcl::Region(true);
+                mpClippingState->mbWinRegion = false;
                 vcl::clipping::setClipFlag(*this);
             }
         }
         else
         {
-            mpWindowImpl->mpClippingState->maWinRegion = rRegion;
-            mpWindowImpl->mpClippingState->mbWinRegion = true;
+            mpClippingState->maWinRegion = rRegion;
+            mpClippingState->mbWinRegion = true;
             vcl::clipping::setClipFlag(*this);
         }
 
@@ -1301,8 +1301,8 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     vcl::Region aRegion( GetOutputRectPixel() );
     if ( nFlags & ScrollFlags::Clip )
         aRegion.Intersect( rRect );
-    if ( mpWindowImpl->mpClippingState->mbWinRegion )
-        aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpWindowImpl->mpClippingState->maWinRegion ) );
+    if ( mpClippingState->mbWinRegion )
+        aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpClippingState->maWinRegion ) );
 
     aRegion.Exclude( aInvalidateRegion );
 

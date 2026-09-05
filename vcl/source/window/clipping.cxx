@@ -73,10 +73,10 @@ vcl::Region Window::GetWindowClipRegionPixel() const
 {
     vcl::Region aWinClipRegion;
 
-    if (mpWindowImpl->mpClippingState->mbInitWinClipRegion)
+    if (mpClippingState->mbInitWinClipRegion)
         clipping::initWinClipRegion(*this);
 
-    aWinClipRegion = mpWindowImpl->mpClippingState->maWinClipRegion;
+    aWinClipRegion = mpClippingState->maWinClipRegion;
 
     vcl::Region aWinRegion(GetOutputRectPixel());
 
@@ -93,7 +93,7 @@ void Window::EnableClipSiblings(bool bClipSiblings)
     if (mpHierarchy->mpBorderWindow)
         mpHierarchy->mpBorderWindow->EnableClipSiblings(bClipSiblings);
 
-    mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
+    mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
 } /* namespace vcl */

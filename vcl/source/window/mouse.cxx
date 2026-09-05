@@ -70,20 +70,24 @@ WindowHitTest Window::ImplHitTest( const Point& rFramePos )
         const OutputDevice *pOutDev = GetOutDev();
         pOutDev->ReMirror( aFramePos );
     }
+
     if ( !GetOutputRectPixel().Contains( aFramePos ) )
         return WindowHitTest::NONE;
-    if ( mpWindowImpl->mpClippingState->mbWinRegion )
+
+    if ( mpClippingState->mbWinRegion )
     {
         Point aTempPos = aFramePos;
         aTempPos.AdjustX( -GetOutDev()->GetDeviceOriginX() );
         aTempPos.AdjustY( -GetOutDev()->GetDeviceOriginY() );
-        if ( !mpWindowImpl->mpClippingState->maWinRegion.Contains( aTempPos ) )
+
+        if ( !mpClippingState->maWinRegion.Contains( aTempPos ) )
             return WindowHitTest::NONE;
     }
 
     WindowHitTest nHitTest = WindowHitTest::Inside;
     if ( mpWindowImpl->mbMouseTransparent )
         nHitTest |= WindowHitTest::Transparent;
+
     return nHitTest;
 }
 
