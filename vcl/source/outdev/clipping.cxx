@@ -27,6 +27,7 @@
 #include <vcl/CoordinateMapper.hxx>
 
 #include <WindowImpl.hxx>
+#include <WindowInvalidation.hxx>
 #include <clipping.hxx>
 #include <clipping_window.hxx>
 #include <windowdev.hxx>
@@ -195,11 +196,11 @@ void clipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect)
 static vcl::Region lcl_getWindowActiveClip(const WindowOutputDevice& rWinDev)
 {
     vcl::Region aRegion(true);
-    WindowImpl* pImpl = rWinDev.GetOwnerWindow()->ImplGetWindowImpl();
+    WindowInvalidation* pInvalidation = rWinDev.GetOwnerWindow()->ImplGetWindowInvalidation();
 
-    if (pImpl->mbInPaint && pImpl->mpPaintRegion)
+    if (pInvalidation->mbInPaint && pInvalidation->mpPaintRegion)
     {
-        aRegion = *(pImpl->mpPaintRegion);
+        aRegion = *(pInvalidation->mpPaintRegion);
         aRegion.Move(-rWinDev.GetDeviceOriginX(), -rWinDev.GetDeviceOriginY());
     }
 
@@ -243,12 +244,12 @@ void initDeviceClipRegion(OutputDevice& rDevice)
         if constexpr (std::is_same_v<T, WindowOutputDevice>)
         {
             vcl::Region aRegion;
-            WindowImpl* pImpl = rTypedDev.GetOwnerWindow()->ImplGetWindowImpl();
+            WindowInvalidation* pInvalidation = rTypedDev.GetOwnerWindow()->ImplGetWindowInvalidation();
 
-            if (pImpl->mbInPaint)
+            if (pInvalidation->mbInPaint)
             {
-                if (pImpl->mpPaintRegion)
-                    aRegion = *(pImpl->mpPaintRegion);
+                if (pInvalidation->mpPaintRegion)
+                    aRegion = *(pInvalidation->mpPaintRegion);
             }
             else
             {

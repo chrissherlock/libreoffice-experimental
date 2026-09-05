@@ -30,6 +30,7 @@
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInput.hxx>
+#include <WindowInvalidation.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowControlAppearance.hxx>
 #include <brdwin.hxx>
@@ -423,7 +424,10 @@ bool Window::IsChildTransparentModeEnabled() const
 
 bool Window::IsMouseTransparent() const { return mpWindowImpl && mpWindowImpl->mbMouseTransparent; }
 
-bool Window::IsPaintTransparent() const { return mpWindowImpl && mpWindowImpl->mbPaintTransparent; }
+bool Window::IsPaintTransparent() const
+{
+    return mpInvalidation && mpInvalidation->mbPaintTransparent;
+}
 
 void Window::SetDialogControlStart(bool bStart) { mpWindowImpl->mbDlgCtrlStart = bStart; }
 
@@ -463,7 +467,7 @@ bool Window::IsControlBackground() const
     return mpControlAppearance && mpControlAppearance->mbControlBackground;
 }
 
-bool Window::IsInPaint() const { return mpWindowImpl && mpWindowImpl->mbInPaint; }
+bool Window::IsInPaint() const { return mpInvalidation && mpInvalidation->mbInPaint; }
 
 bool Window::IsVisible() const { return mpWindowImpl && mpWindowImpl->mbVisible; }
 
@@ -486,9 +490,9 @@ ActivateModeFlags Window::GetActivateMode() const { return mpWindowImpl->mnActiv
 
 bool Window::IsAlwaysOnTopEnabled() const { return mpWindowImpl->mbAlwaysOnTop; }
 
-void Window::EnablePaint(bool bEnable) { mpWindowImpl->mbPaintDisabled = !bEnable; }
+void Window::EnablePaint(bool bEnable) { mpInvalidation->mbPaintDisabled = !bEnable; }
 
-bool Window::IsPaintEnabled() const { return !mpWindowImpl->mbPaintDisabled; }
+bool Window::IsPaintEnabled() const { return !mpInvalidation->mbPaintDisabled; }
 
 bool Window::IsUpdateMode() const { return !mpWindowImpl->mbNoUpdate; }
 

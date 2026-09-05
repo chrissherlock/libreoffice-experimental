@@ -29,6 +29,7 @@
 #include <ImplWinData.hxx>
 #include <PaintBufferGuard.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInvalidation.hxx>
 #include <WindowHierarchy.hxx>
 #include <clipping_window.hxx>
 
@@ -111,33 +112,40 @@ void PaintHelper::PaintBuffer()
 void PaintHelper::DoPaint(const vcl::Region* pRegion)
 {
     WindowImpl* pWindowImpl = m_pWindow->ImplGetWindowImpl();
+    WindowInvalidation* pInvalidation = m_pWindow->ImplGetWindowInvalidation();
     ImplWinData* pWinData = m_pWindow->ImplGetWinData();
 
     vcl::Region& rWinChildClipRegion = vcl::clipping::getWinChildClipRegion(*m_pWindow);
     ImplFrameData* pFrameData = m_pWindow->mpWindowImpl->mpFrameData;
-    if (pWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAll || pFrameData->mbInBufferedPaint)
+
+    if (pInvalidation->mnPaintFlags & ImplPaintFlags::PaintAll || pFrameData->mbInBufferedPaint)
     {
-        pWindowImpl->maInvalidateRegion = rWinChildClipRegion;
+        pInvalidation->maInvalidateRegion = rWinChildClipRegion;
     }
     else
     {
         if (pRegion)
-            pWindowImpl->maInvalidateRegion.Union(*pRegion);
+            pInvalidation->maInvalidateRegion.Union(*pRegion);
 
         if (pWinData && pWindowImpl->mbTrackVisible)
+        {
             /* #98602# need to repaint all children within the
-           * tracking rectangle, so the following invert
-           * operation takes places without traces of the previous
-           * one.
-           */
-            pWindowImpl->maInvalidateRegion.Union(*pWinData->mpTrackRect);
+            * tracking rectangle, so the following invert
+            * operation takes places without traces of the previous
+            * one.
+            */
+            pInvalidation->maInvalidateRegion.Union(*pWinData->mpTrackRect);
+        }
 
-        if (pWindowImpl->mnPaintFlags & ImplPaintFlags::PaintAllChildren)
-            m_pChildRegion.reset(new vcl::Region(pWindowImpl->maInvalidateRegion));
-        pWindowImpl->maInvalidateRegion.Intersect(rWinChildClipRegion);
+        if (pInvalidation->mnPaintFlags & ImplPaintFlags::PaintAllChildren)
+            m_pChildRegion.reset(new vcl::Region(pInvalidation->maInvalidateRegion));
+
+        pInvalidation->maInvalidateRegion.Intersect(rWinChildClipRegion);
     }
-    pWindowImpl->mnPaintFlags = ImplPaintFlags::NONE;
-    if (pWindowImpl->maInvalidateRegion.IsEmpty())
+
+    pInvalidation->mnPaintFlags = ImplPaintFlags::NONE;
+
+    if (pInvalidation->maInvalidateRegion.IsEmpty())
         return;
 
 #if HAVE_FEATURE_OPENGL

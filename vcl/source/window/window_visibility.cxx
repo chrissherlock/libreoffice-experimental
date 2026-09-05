@@ -25,6 +25,7 @@
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
+#include <WindowInvalidation.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
@@ -245,7 +246,7 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
     if (mpAccessibleData)
         mpAccessibleData->mbSuppressAccessibilityEvents = false;
 
-    mpWindowImpl->mbPaintFrame = true;
+    mpInvalidation->mbPaintFrame = true;
 
     VclPtr<vcl::Window> xWindow(this);
 
