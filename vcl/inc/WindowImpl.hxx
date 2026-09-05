@@ -55,8 +55,6 @@ class Window;
 class WindowOutputDevice;
 }
 
-enum AlwaysInputMode { AlwaysInputNone = 0, AlwaysInputEnabled = 1 };
-
 class WindowImpl
 {
 private:
@@ -69,11 +67,8 @@ public:
     ImplFrameData*      mpFrameData;
     SalFrame*           mpFrame;
     SalObject*          mpSysObj;
-    VclPtr<vcl::Window> mpLastFocusWindow;
-    VclPtr<PushButton> mpDlgCtrlDownWindow;
 
     OUString            maText;
-    InputContext        maInputContext;
     VCLXWindow*         mpVCLXWindow;
 
     std::unique_ptr<WindowClippingState> mpClippingState;
@@ -90,7 +85,6 @@ public:
     ParentClipMode      mnParentClipMode;
     ActivateModeFlags   mnActivateMode;
     DialogControlFlags  mnDlgCtrlFlags;
-    AlwaysInputMode     meAlwaysInputMode;
     bool                mbFrame:1,
                         mbBorderWin:1,
                         mbOverlapWin:1,
@@ -112,11 +106,6 @@ public:
                         mbNoPtrVisible:1,
                         mbPaintFrame:1,
                         mbInPaint:1,
-                        mbMouseButtonDown:1,
-                        mbMouseButtonUp:1,
-                        mbKeyInput:1,
-                        mbKeyUp:1,
-                        mbCommand:1,
                         mbDefPos:1,
                         mbDefSize:1,
                         mbCallMove:1,
@@ -138,8 +127,6 @@ public:
                         mbPaintDisabled:1,
                         mbAllResize:1,
                         mbInDispose:1,
-                        mbExtTextInput:1,
-                        mbInFocusHdl:1,
                         mbOverlapVisible:1,
                         mbCreatedWithToolkit:1,
                         mbToolBox:1,
@@ -147,7 +134,6 @@ public:
                         mbMenuFloatingWindow:1,
                         mbDrawSelectionBackground:1,
                         mbIsInTaskPaneList:1,
-                        mbFakeFocusSet:1,
                         mbDoubleBufferingRequested:1;
     bool mbIsFormControl : 1 = false;
 

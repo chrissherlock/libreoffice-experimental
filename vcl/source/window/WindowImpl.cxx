@@ -113,8 +113,6 @@ WindowImpl::WindowImpl( WindowType eType )
     mpFrameData                         = nullptr;                      // Frame Data
     mpFrame                             = nullptr;                      // Pointer to frame window
     mpSysObj                            = nullptr;
-    mpLastFocusWindow                   = nullptr;                      // window for focus restore
-    mpDlgCtrlDownWindow                 = nullptr;                      // window for dialog control
     mpVCLXWindow                        = nullptr;
     mpClippingState->mpChildClipRegion  = nullptr;                      // Child-Clip-Region when ClipChildren
     mpPaintRegion                       = nullptr;                      // Paint-ClipRegion
@@ -127,7 +125,6 @@ WindowImpl::WindowImpl( WindowType eType )
     mnPaintFlags                        = ImplPaintFlags::NONE;      // Flags for ImplCallPaint
     mnActivateMode                      = ActivateModeFlags::NONE;   // Will be converted in System/Overlap-Windows
     mnDlgCtrlFlags                      = DialogControlFlags::NONE;  // DialogControl-Flags
-    meAlwaysInputMode                   = AlwaysInputNone;           // AlwaysEnableInput not called
     mbFrame                             = false;                     // true: Window is a frame window
     mbBorderWin                         = false;                     // true: Window is a border window
     mbOverlapWin                        = false;                     // true: Window is an overlap window
@@ -153,11 +150,6 @@ WindowImpl::WindowImpl( WindowType eType )
     mbNoPtrVisible                      = false;                     // true: ShowPointer( false ) called
     mbPaintFrame                        = false;                     // true: Paint is visible, but not painted
     mbInPaint                           = false;                     // true: Inside PaintHdl
-    mbMouseButtonDown                   = false;                     // true: BaseMouseButtonDown called
-    mbMouseButtonUp                     = false;                     // true: BaseMouseButtonUp called
-    mbKeyInput                          = false;                     // true: BaseKeyInput called
-    mbKeyUp                             = false;                     // true: BaseKeyUp called
-    mbCommand                           = false;                     // true: BaseCommand called
     mbDefPos                            = true;                      // true: Position is not Set
     mbDefSize                           = true;                      // true: Size is not Set
     mbCallMove                          = true;                      // true: Move must be called by Show
@@ -179,12 +171,9 @@ WindowImpl::WindowImpl( WindowType eType )
     mbPaintDisabled                     = false;                     // true: Paint should not be executed
     mbAllResize                         = false;                     // true: Also sent ResizeEvents with 0,0
     mbInDispose                         = false;                     // true: We're still in Window::dispose()
-    mbExtTextInput                      = false;                     // true: ExtTextInput-Mode is active
-    mbInFocusHdl                        = false;                     // true: Within GetFocus-Handler
     mbCreatedWithToolkit                = false;
     mbDrawSelectionBackground           = false;                     // true: draws transparent window background to indicate (toolbox) selection
     mbIsInTaskPaneList                  = false;                     // true: window was added to the taskpanelist in the topmost system window
-    mbFakeFocusSet                      = false;                     // true: pretend as if the window has focus.
     static bool bDoubleBuffer = getenv("VCL_DOUBLEBUFFERING_FORCE_ENABLE");
     mbDoubleBufferingRequested = bDoubleBuffer; // when we are not sure, assume it cannot do double-buffering via RenderContext
     mpLOKNotifier                       = nullptr;

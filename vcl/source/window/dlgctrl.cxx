@@ -32,6 +32,7 @@
 
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <WindowEventHandlers.hxx>
 
 #include "dlgctrl.hxx"
@@ -750,12 +751,12 @@ bool Window::ImplDlgCtrl( const KeyEvent& rKEvt, bool bKeyInput )
                 pButtonWindow = nullptr;
         }
 
-        if ( bKeyInput && mpWindowImpl->mpDlgCtrlDownWindow )
+        if ( bKeyInput && mpInput->mpDlgCtrlDownWindow )
         {
-            if ( mpWindowImpl->mpDlgCtrlDownWindow.get() != pButtonWindow )
+            if ( mpInput->mpDlgCtrlDownWindow.get() != pButtonWindow )
             {
-                mpWindowImpl->mpDlgCtrlDownWindow->SetPressed( false );
-                mpWindowImpl->mpDlgCtrlDownWindow = nullptr;
+                mpInput->mpDlgCtrlDownWindow->SetPressed( false );
+                mpInput->mpDlgCtrlDownWindow = nullptr;
                 return true;
             }
         }
@@ -972,18 +973,18 @@ bool Window::ImplDlgCtrl( const KeyEvent& rKEvt, bool bKeyInput )
     {
         if ( bKeyInput )
         {
-            if ( mpWindowImpl->mpDlgCtrlDownWindow && (mpWindowImpl->mpDlgCtrlDownWindow.get() != pButtonWindow) )
+            if ( mpInput->mpDlgCtrlDownWindow && (mpInput->mpDlgCtrlDownWindow.get() != pButtonWindow) )
             {
-                mpWindowImpl->mpDlgCtrlDownWindow->SetPressed( false );
-                mpWindowImpl->mpDlgCtrlDownWindow = nullptr;
+                mpInput->mpDlgCtrlDownWindow->SetPressed( false );
+                mpInput->mpDlgCtrlDownWindow = nullptr;
             }
 
             static_cast<PushButton*>(pButtonWindow)->SetPressed( true );
-            mpWindowImpl->mpDlgCtrlDownWindow = static_cast<PushButton*>(pButtonWindow);
+            mpInput->mpDlgCtrlDownWindow = static_cast<PushButton*>(pButtonWindow);
         }
-        else if ( mpWindowImpl->mpDlgCtrlDownWindow.get() == pButtonWindow )
+        else if ( mpInput->mpDlgCtrlDownWindow.get() == pButtonWindow )
         {
-            mpWindowImpl->mpDlgCtrlDownWindow = nullptr;
+            mpInput->mpDlgCtrlDownWindow = nullptr;
             static_cast<PushButton*>(pButtonWindow)->SetPressed( false );
             static_cast<PushButton*>(pButtonWindow)->Click();
         }
@@ -1099,10 +1100,10 @@ static void ImplDlgCtrlUpdateDefButton( vcl::Window* pParent, const vcl::Window*
 
 void Window::ImplDlgCtrlFocusChanged( const vcl::Window* pWindow, bool bGetFocus )
 {
-    if ( mpWindowImpl->mpDlgCtrlDownWindow && !bGetFocus )
+    if ( mpInput->mpDlgCtrlDownWindow && !bGetFocus )
     {
-        mpWindowImpl->mpDlgCtrlDownWindow->SetPressed( false );
-        mpWindowImpl->mpDlgCtrlDownWindow = nullptr;
+        mpInput->mpDlgCtrlDownWindow->SetPressed( false );
+        mpInput->mpDlgCtrlDownWindow = nullptr;
     }
 
     ImplDlgCtrlUpdateDefButton( this, pWindow, bGetFocus );

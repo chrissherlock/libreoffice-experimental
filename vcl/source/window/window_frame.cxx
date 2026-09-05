@@ -26,6 +26,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
 #include <brdwin.hxx>
@@ -341,7 +342,7 @@ void Window::ImplInitFromParentState(vcl::Window* pParent)
     {
         mpWindowImpl->mbDisabled = pParent->mpWindowImpl->mbDisabled;
         mpWindowImpl->mbInputDisabled = pParent->mpWindowImpl->mbInputDisabled;
-        mpWindowImpl->meAlwaysInputMode = pParent->mpWindowImpl->meAlwaysInputMode;
+        mpInput->meAlwaysInputMode = pParent->mpInput->meAlwaysInputMode;
     }
 
     if (!comphelper::IsFuzzing())

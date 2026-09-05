@@ -29,6 +29,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowControlAppearance.hxx>
 #include <brdwin.hxx>
@@ -191,7 +192,7 @@ void Window::ImplCancelTracking()
 
 void Window::ImplSetInputState(bool bEnable)
 {
-    if (!bEnable && mpWindowImpl->meAlwaysInputMode == AlwaysInputEnabled)
+    if (!bEnable && mpInput->meAlwaysInputMode == AlwaysInputEnabled)
         return;
 
     if (!bEnable)
@@ -305,14 +306,14 @@ void Window::AlwaysEnableInput(bool bAlways, bool bChild)
     if (mpHierarchy->mpBorderWindow)
         mpHierarchy->mpBorderWindow->AlwaysEnableInput(bAlways, false);
 
-    if (bAlways && mpWindowImpl->meAlwaysInputMode != AlwaysInputEnabled)
+    if (bAlways && mpInput->meAlwaysInputMode != AlwaysInputEnabled)
     {
-        mpWindowImpl->meAlwaysInputMode = AlwaysInputEnabled;
+        mpInput->meAlwaysInputMode = AlwaysInputEnabled;
         EnableInput(true, false);
     }
-    else if (!bAlways && mpWindowImpl->meAlwaysInputMode == AlwaysInputEnabled)
+    else if (!bAlways && mpInput->meAlwaysInputMode == AlwaysInputEnabled)
     {
-        mpWindowImpl->meAlwaysInputMode = AlwaysInputNone;
+        mpInput->meAlwaysInputMode = AlwaysInputNone;
     }
 
     if (bChild)
@@ -435,7 +436,7 @@ void Window::SetDialogControlFlags(DialogControlFlags nFlags)
 
 DialogControlFlags Window::GetDialogControlFlags() const { return mpWindowImpl->mnDlgCtrlFlags; }
 
-const InputContext& Window::GetInputContext() const { return mpWindowImpl->maInputContext; }
+const InputContext& Window::GetInputContext() const { return mpInput->maInputContext; }
 
 bool Window::IsControlFont() const
 {
@@ -478,7 +479,7 @@ bool Window::IsInputEnabled() const { return mpWindowImpl && !mpWindowImpl->mbIn
 
 bool Window::IsAlwaysEnableInput() const
 {
-    return mpWindowImpl->meAlwaysInputMode == AlwaysInputEnabled;
+    return mpInput->meAlwaysInputMode == AlwaysInputEnabled;
 }
 
 ActivateModeFlags Window::GetActivateMode() const { return mpWindowImpl->mnActivateMode; }
