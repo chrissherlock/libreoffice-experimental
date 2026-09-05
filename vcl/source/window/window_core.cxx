@@ -39,6 +39,7 @@
 #include <WindowHelpData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInput.hxx>
+#include <WindowInvalidation.hxx>
 #include <WindowEventHandlers.hxx>
 #include <WindowLayoutData.hxx>
 #include <WindowAccessibleData.hxx>
@@ -72,6 +73,7 @@ Window::Window(WindowType eType)
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())
     , mpLOKData(std::make_unique<WindowLOKData>())
+    , mpInvalidation(std::make_unique<WindowInvalidation>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -92,6 +94,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())
     , mpLOKData(std::make_unique<WindowLOKData>())
+    , mpInvalidation(std::make_unique<WindowInvalidation>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -216,6 +219,7 @@ void Window::dispose()
     mpGeometry.reset();
     mpViewport.reset();
     mpLOKData.reset();
+    mpInvalidation.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy

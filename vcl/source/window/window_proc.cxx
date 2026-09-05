@@ -37,6 +37,7 @@
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInput.hxx>
+#include <WindowInvalidation.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
 #include <clipping_window.hxx>
@@ -1517,7 +1518,7 @@ static bool lcl_HandleGestureRotateEvent(vcl::Window* pWindow, const SalGestureR
 static void lcl_HandlePaint(vcl::Window* pWindow, const tools::Rectangle& rBoundRect,
                             bool bImmediateUpdate)
 {
-    pWindow->ImplGetWindowImpl()->mnPaintFlags |= ImplPaintFlags::CheckRtl;
+    pWindow->ImplGetWindowInvalidation()->mnPaintFlags |= ImplPaintFlags::CheckRtl;
 
     const vcl::Region aRegion(rBoundRect);
     pWindow->ImplInvalidateOverlapFrameRegion(aRegion);

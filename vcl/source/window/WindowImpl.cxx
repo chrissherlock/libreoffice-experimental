@@ -115,14 +115,12 @@ WindowImpl::WindowImpl( WindowType eType )
     mpSysObj                            = nullptr;
     mpVCLXWindow                        = nullptr;
     mpClippingState->mpChildClipRegion  = nullptr;                      // Child-Clip-Region when ClipChildren
-    mpPaintRegion                       = nullptr;                      // Paint-ClipRegion
     mnStyle                             = 0;                         // style (init in ImplInitWindow)
     mnPrevStyle                         = 0;                         // prevstyle (set in SetStyle)
     mnExtendedStyle                     = WindowExtendedStyle::NONE; // extended style (init in ImplInitWindow)
     meType                              = eType;                     // type
     mnGetFocusFlags                     = GetFocusFlags::NONE;       // Flags for GetFocus()-Call
     mnWaitCount                         = 0;                         // Wait-Count (>1 == "wait" mouse pointer)
-    mnPaintFlags                        = ImplPaintFlags::NONE;      // Flags for ImplCallPaint
     mnActivateMode                      = ActivateModeFlags::NONE;   // Will be converted in System/Overlap-Windows
     mnDlgCtrlFlags                      = DialogControlFlags::NONE;  // DialogControl-Flags
     mbFrame                             = false;                     // true: Window is a frame window
@@ -148,15 +146,12 @@ WindowImpl::WindowImpl( WindowType eType )
     mbInInitShow                        = false;                     // true: we are in InitShow
     mbChildPtrOverwrite                 = false;                     // true: PointerStyle overwrites Child-Pointer
     mbNoPtrVisible                      = false;                     // true: ShowPointer( false ) called
-    mbPaintFrame                        = false;                     // true: Paint is visible, but not painted
-    mbInPaint                           = false;                     // true: Inside PaintHdl
     mbDefPos                            = true;                      // true: Position is not Set
     mbDefSize                           = true;                      // true: Size is not Set
     mbCallMove                          = true;                      // true: Move must be called by Show
     mbCallResize                        = true;                      // true: Resize must be called by Show
     mbWaitSystemResize                  = true;                      // true: Wait for System-Resize
     mbChildTransparent                  = false;                     // true: Child-windows are allowed to switch to transparent (incl. Parent-CLIPCHILDREN)
-    mbPaintTransparent                  = false;                     // true: Paints should be executed on the Parent
     mbMouseTransparent                  = false;                     // true: Window is transparent for Mouse
     mbDlgCtrlStart                      = false;                     // true: From here on own Dialog-Control
     mbFocusVisible                      = false;                     // true: Focus Visible
@@ -168,7 +163,6 @@ WindowImpl::WindowImpl( WindowType eType )
     mbAlwaysOnTop                       = false;                     // true: always visible for all others windows
     mbCompoundControl                   = false;                     // true: Composite Control => Listener...
     mbCompoundControlHasFocus           = false;                     // true: Composite Control has focus somewhere
-    mbPaintDisabled                     = false;                     // true: Paint should not be executed
     mbAllResize                         = false;                     // true: Also sent ResizeEvents with 0,0
     mbInDispose                         = false;                     // true: We're still in Window::dispose()
     mbCreatedWithToolkit                = false;

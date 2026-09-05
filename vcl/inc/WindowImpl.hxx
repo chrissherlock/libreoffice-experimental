@@ -73,14 +73,11 @@ public:
 
     std::unique_ptr<WindowClippingState> mpClippingState;
 
-    vcl::Region         maInvalidateRegion;     //< region that has to be redrawn (frame coordinates)
-    vcl::Region*        mpPaintRegion;          //< only set during Paint() method call (window coordinates)
     WinBits             mnStyle;
     WinBits             mnPrevStyle;
     WindowExtendedStyle mnExtendedStyle;
     WindowType          meType;
     sal_uInt16          mnWaitCount;
-    ImplPaintFlags      mnPaintFlags;
     GetFocusFlags       mnGetFocusFlags;
     ParentClipMode      mnParentClipMode;
     ActivateModeFlags   mnActivateMode;
@@ -104,15 +101,12 @@ public:
                         mbInInitShow:1,
                         mbChildPtrOverwrite:1,
                         mbNoPtrVisible:1,
-                        mbPaintFrame:1,
-                        mbInPaint:1,
                         mbDefPos:1,
                         mbDefSize:1,
                         mbCallMove:1,
                         mbCallResize:1,
                         mbWaitSystemResize:1,
                         mbChildTransparent:1,
-                        mbPaintTransparent:1,
                         mbMouseTransparent:1,
                         mbDlgCtrlStart:1,
                         mbFocusVisible:1,
@@ -124,7 +118,6 @@ public:
                         mbAlwaysOnTop:1,
                         mbCompoundControl:1,
                         mbCompoundControlHasFocus:1,
-                        mbPaintDisabled:1,
                         mbAllResize:1,
                         mbInDispose:1,
                         mbOverlapVisible:1,

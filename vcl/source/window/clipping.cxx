@@ -26,6 +26,7 @@
 
 #include <WindowImpl.hxx>
 #include <WindowClippingState.hxx>
+#include <WindowInvalidation.hxx>
 #include <WindowHierarchy.hxx>
 #include <clipping_window.hxx>
 #include <salobj.hxx>
@@ -44,7 +45,7 @@ ParentClipMode Window::GetParentClipMode() const
 
 void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
 {
-    if (!mpWindowImpl->mpPaintRegion)
+    if (!mpInvalidation->mpPaintRegion)
         return;
 
     WindowRegion aPixRegion(rRegion);
@@ -64,7 +65,7 @@ void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
     if (aDevPixRegion.IsEmpty())
         return;
 
-    mpWindowImpl->mpPaintRegion->Union(aDevPixRegion);
+    mpInvalidation->mpPaintRegion->Union(aDevPixRegion);
     GetOutDev()->GetClipState().Invalidate();
 }
 

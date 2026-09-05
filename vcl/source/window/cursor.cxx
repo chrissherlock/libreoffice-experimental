@@ -30,6 +30,7 @@
 #include <PaintBufferGuard.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInvalidation.hxx>
 #include <WindowControlAppearance.hxx>
 
 #include <memory>
@@ -240,7 +241,7 @@ void vcl::Cursor::ImplDoShow( bool bDrawDirect, bool bRestore )
         // has been selected in this window
         pWindow = Application::GetFocusWindow();
         if (!pWindow || !pWindow->mpWindowImpl || (pWindow->mpControlAppearance && pWindow->mpControlAppearance->mpCursor != this)
-            || pWindow->mpWindowImpl->mbInPaint
+            || pWindow->mpInvalidation->mbInPaint
             || !pWindow->mpWindowImpl->mpFrameData->mbHasFocus)
             pWindow = nullptr;
     }

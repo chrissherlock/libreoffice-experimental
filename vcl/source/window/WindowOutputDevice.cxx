@@ -52,6 +52,7 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/MappingPolicy.hxx>
 
+#include <WindowInvalidation.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowControlAppearance.hxx>
 #include <ImplOutDevData.hxx>
@@ -382,13 +383,15 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
 {
     comphelper::ScopeGuard aResetMapMode([&rSaveDevice]() { rSaveDevice.SetMapMode(MapMode()); });
 
-    if (!mxOwnerWindow || !mxOwnerWindow->mpWindowImpl || !mxOwnerWindow->mpWindowImpl->mpPaintRegion)
+    WindowInvalidation* pInvalidation = mxOwnerWindow ? mxOwnerWindow->ImplGetWindowInvalidation() : nullptr;
+
+    if (!pInvalidation || !pInvalidation->mpPaintRegion)
     {
         rSaveDevice.DrawOutDev(Point(), rSize, rPos, rSize, *this);
         return;
     }
 
-    vcl::Region aClip(*mxOwnerWindow->mpWindowImpl->mpPaintRegion);
+    vcl::Region aClip(*pInvalidation->mpPaintRegion);
     aClip.Move(-GetDeviceOriginX(), -GetDeviceOriginY());
 
     const auto boundRect = convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle(rPos, rSize)), GetMapMode());

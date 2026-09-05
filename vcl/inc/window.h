@@ -100,19 +100,6 @@ MouseEventModifiers ImplGetMouseMoveMode( SalMouseEvent const * pEvent );
 
 MouseEventModifiers ImplGetMouseButtonMode( SalMouseEvent const * pEvent );
 
-enum class ImplPaintFlags {
-    NONE             = 0x0000,
-    Paint            = 0x0001,
-    PaintAll         = 0x0002,
-    PaintAllChildren = 0x0004,
-    PaintChildren    = 0x0008,
-    Erase            = 0x0010,
-    CheckRtl         = 0x0020,
-};
-namespace o3tl {
-    template<> struct typed_flags<ImplPaintFlags> : is_typed_flags<ImplPaintFlags, 0x003f> {};
-}
-
 // helper methods
 
 bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,

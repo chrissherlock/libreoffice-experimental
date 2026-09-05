@@ -26,6 +26,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInvalidation.hxx>
 #include <WindowLOKData.hxx>
 #include <WindowInput.hxx>
 #include <WindowControlAppearance.hxx>
@@ -193,33 +194,32 @@ void Window::ShowFocus(const tools::Rectangle& rRect)
 
     mpWindowImpl->mbInShowFocus = true;
 
-    ImplWinData* pWinData = ImplGetWinData();
-
     // native themeing suggest not to use focus rects
     if (!(mpWindowImpl->mbUseNativeFocus && IsNativeWidgetEnabled()))
-        ImplShowFocusRect(pWinData, rRect);
+        ImplShowFocusRect(rRect);
     else
         ImplShowNativeFocus();
 
     mpWindowImpl->mbInShowFocus = false;
 }
 
-static bool lcl_IsSameFocusRect(const WindowImpl* pWindowImpl, const ImplWinData* pWinData,
-                                const tools::Rectangle& rRect)
+static bool lcl_IsSameFocusRect(const vcl::Window* pWindow, const tools::Rectangle& rRect)
 {
-    return !pWindowImpl->mbInPaint && pWindowImpl->mbFocusVisible
-           && *pWinData->mpFocusRect == rRect;
+    return !pWindow->IsInPaint() && pWindow->ImplGetWindowImpl()->mbFocusVisible
+           && *pWindow->ImplGetWinData()->mpFocusRect == rRect;
 }
 
-void Window::ImplShowFocusRect(ImplWinData* pWinData, const tools::Rectangle& rRect)
+void Window::ImplShowFocusRect(const tools::Rectangle& rRect)
 {
-    if (lcl_IsSameFocusRect(mpWindowImpl.get(), pWinData, rRect))
+    if (lcl_IsSameFocusRect(this, rRect))
     {
         mpWindowImpl->mbInShowFocus = false;
         return;
     }
 
-    if (!mpWindowImpl->mbInPaint)
+    ImplWinData* pWinData = ImplGetWinData();
+
+    if (!mpInvalidation->mbInPaint)
     {
         if (mpWindowImpl->mbFocusVisible)
             ImplInvertFocus(*pWinData->mpFocusRect);
@@ -238,7 +238,7 @@ void Window::ImplShowNativeFocus()
 
     mpWindowImpl->mbNativeFocusVisible = true;
 
-    if (!mpWindowImpl->mbInPaint)
+    if (!mpInvalidation->mbInPaint)
         Invalidate();
 }
 
@@ -246,6 +246,7 @@ void Window::HideFocus()
 {
     if (mpWindowImpl->mbInHideFocus)
         return;
+
     mpWindowImpl->mbInHideFocus = true;
 
     // native themeing can suggest not to use focus rects
@@ -257,7 +258,7 @@ void Window::HideFocus()
             return;
         }
 
-        if (!mpWindowImpl->mbInPaint)
+        if (!mpInvalidation->mbInPaint)
             ImplInvertFocus(*ImplGetWinData()->mpFocusRect);
         mpWindowImpl->mbFocusVisible = false;
     }
@@ -266,7 +267,7 @@ void Window::HideFocus()
         if (mpWindowImpl->mbNativeFocusVisible)
         {
             mpWindowImpl->mbNativeFocusVisible = false;
-            if (!mpWindowImpl->mbInPaint)
+            if (!mpInvalidation->mbInPaint)
                 Invalidate();
         }
     }
@@ -278,7 +279,7 @@ void Window::ShowTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags)
 {
     ImplWinData* pWinData = ImplGetWinData();
 
-    if (!mpWindowImpl->mbInPaint || !(nFlags & ShowTrackFlags::TrackWindow))
+    if (!mpInvalidation->mbInPaint || !(nFlags & ShowTrackFlags::TrackWindow))
     {
         if (mpWindowImpl->mbTrackVisible)
         {
@@ -303,7 +304,7 @@ void Window::HideTracking()
 
     ImplWinData* pWinData = ImplGetWinData();
 
-    if (!mpWindowImpl->mbInPaint || !(pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
+    if (!mpInvalidation->mbInPaint || !(pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
         InvertTracking(*pWinData->mpTrackRect, pWinData->mnTrackFlags);
 
     mpWindowImpl->mbTrackVisible = false;

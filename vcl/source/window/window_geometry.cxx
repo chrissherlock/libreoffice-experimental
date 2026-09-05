@@ -26,6 +26,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInvalidation.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowLayoutData.hxx>
@@ -958,7 +959,8 @@ void Window::ImplAdjustNWFSizes()
 
 bool Window::ImplHasValidClippingRegion() const
 {
-    return !mpWindowImpl->mbPaintTransparent && !mpWindowImpl->mpClippingState->mbInitWinClipRegion
+    return !mpInvalidation->mbPaintTransparent
+           && !mpWindowImpl->mpClippingState->mbInitWinClipRegion
            && !mpWindowImpl->mpClippingState->maWinClipRegion.IsEmpty();
 }
 
@@ -1260,7 +1262,7 @@ void Window::ImplInvalidateWindowContent(bool bNewPos, bool bCopyBits,
 void Window::ImplInvalidateParentOrOverlaps(const vcl::Region& rInitialRegion)
 {
     vcl::Region aRegion(rInitialRegion);
-    if (!mpWindowImpl->mbPaintTransparent)
+    if (!mpInvalidation->mbPaintTransparent)
         vcl::clipping::excludeWindowRegion(*this, aRegion);
 
     vcl::clipping::clipBoundaries(*this, aRegion, false, true);
