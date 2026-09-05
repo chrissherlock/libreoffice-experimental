@@ -435,6 +435,7 @@ struct WindowAccessibleData;
 struct WindowControlAppearance;
 struct WindowGeometry;
 struct WindowViewport;
+struct ImplWinData;
 class PaintHelper;
 class VclSizeGroup;
 class Application;
@@ -1114,6 +1115,7 @@ private:
 
     // --- Data Members ---
     std::unique_ptr<WindowImpl> mpWindowImpl;
+    std::unique_ptr<ImplWinData> mpWinData;
     std::unique_ptr<WindowHelpData> mpHelpData;
     std::unique_ptr<WindowEventHandlers> mpEventHandlers;
     std::unique_ptr<WindowLayoutData> mpLayoutData;

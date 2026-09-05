@@ -39,7 +39,6 @@ class CommandEvent;
 class FixedText;
 struct ImplAccessibleInfos;
 struct ImplFrameData;
-struct ImplWinData;
 class PushButton;
 class SalObject;
 class SalFrame;
@@ -67,7 +66,6 @@ public:
     WindowImpl( WindowType );
     ~WindowImpl();
 
-    std::unique_ptr<ImplWinData> mpWinData;
     ImplFrameData*      mpFrameData;
     SalFrame*           mpFrame;
     SalObject*          mpSysObj;
