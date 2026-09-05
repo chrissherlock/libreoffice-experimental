@@ -40,6 +40,7 @@
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInput.hxx>
+#include <WindowLOKData.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
@@ -669,7 +670,7 @@ rtl::Reference<DNDListenerContainer> Window::GetDropTarget()
     if( !mpWindowImpl )
         return {};
 
-    if( ! mpWindowImpl->mxDNDListenerContainer.is() )
+    if( ! mpLOKData->mxDNDListenerContainer.is() )
     {
         sal_Int8 nDefaultActions = 0;
 
@@ -716,11 +717,11 @@ rtl::Reference<DNDListenerContainer> Window::GetDropTarget()
 
         }
 
-        mpWindowImpl->mxDNDListenerContainer = new DNDListenerContainer( nDefaultActions );
+        mpLOKData->mxDNDListenerContainer = new DNDListenerContainer( nDefaultActions );
     }
 
     // this object is located in the same process, so there will be no runtime exception
-    return mpWindowImpl->mxDNDListenerContainer;
+    return mpLOKData->mxDNDListenerContainer;
 }
 
 Reference< css::datatransfer::dnd::XDragSource > Window::GetDragSource()

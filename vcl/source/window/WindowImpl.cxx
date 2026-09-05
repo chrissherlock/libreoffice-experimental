@@ -176,9 +176,6 @@ WindowImpl::WindowImpl( WindowType eType )
     mbIsInTaskPaneList                  = false;                     // true: window was added to the taskpanelist in the topmost system window
     static bool bDoubleBuffer = getenv("VCL_DOUBLEBUFFERING_FORCE_ENABLE");
     mbDoubleBufferingRequested = bDoubleBuffer; // when we are not sure, assume it cannot do double-buffering via RenderContext
-    mpLOKNotifier                       = nullptr;
-    mnLOKWindowId                       = 0;
-    mbUseFrameData                      = false;
 }
 
 WindowImpl::~WindowImpl()

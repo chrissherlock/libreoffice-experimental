@@ -46,6 +46,7 @@
 #include <WindowHierarchy.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowViewport.hxx>
+#include <WindowLOKData.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>
 #include <salframe.hxx>
@@ -70,6 +71,7 @@ Window::Window(WindowType eType)
     , mpControlAppearance(std::make_unique<WindowControlAppearance>())
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())
+    , mpLOKData(std::make_unique<WindowLOKData>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -89,6 +91,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpControlAppearance(std::make_unique<WindowControlAppearance>())
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())
+    , mpLOKData(std::make_unique<WindowLOKData>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -212,6 +215,7 @@ void Window::dispose()
     mpControlAppearance.reset();
     mpGeometry.reset();
     mpViewport.reset();
+    mpLOKData.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy
@@ -710,8 +714,8 @@ void Window::ImplRemoveOwnerDrawDecoratedFrame()
 void Window::ImplDeInitDND()
 {
     // shutdown drag and drop listener container
-    if (mpWindowImpl->mxDNDListenerContainer.is())
-        mpWindowImpl->mxDNDListenerContainer->dispose();
+    if (mpLOKData->mxDNDListenerContainer.is())
+        mpLOKData->mxDNDListenerContainer->dispose();
 
     if (!mpWindowImpl->mbFrame || !mpWindowImpl->mpFrameData)
         return;

@@ -36,6 +36,7 @@
 #include <accel.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowLOKData.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowLayoutData.hxx>
 #include <WindowAccessibleData.hxx>
@@ -752,7 +753,7 @@ void DockingWindow::SetFloatingMode( bool bFloatMode )
 
         // #i123765# reset the buffered DropTargets when undocking, else it may not
         // be correctly initialized
-        mpWindowImpl->mxDNDListenerContainer.clear();
+        mpLOKData->mxDNDListenerContainer.clear();
 
         SetParent( pWin );
         SetPosPixel( Point() );

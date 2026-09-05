@@ -22,6 +22,7 @@
 #include <vcl/IDialogRenderable.hxx>
 #include <vcl/window.hxx>
 
+#include <WindowLOKData.hxx>
 #include <WindowImpl.hxx>
 
 #include <cassert>
@@ -48,7 +49,7 @@ namespace vcl
 void Window::SetLOKNotifier(const vcl::ILibreOfficeKitNotifier* pNotifier, bool bParent)
 {
     // don't allow setting this twice
-    assert(mpWindowImpl->mpLOKNotifier == nullptr);
+    assert(mpLOKData->mpLOKNotifier == nullptr);
     assert(pNotifier);
     // never use this in the desktop case
     assert(comphelper::LibreOfficeKit::isActive());
@@ -56,12 +57,12 @@ void Window::SetLOKNotifier(const vcl::ILibreOfficeKitNotifier* pNotifier, bool 
     if (!bParent)
     {
         // assign the LOK window id
-        assert(mpWindowImpl->mnLOKWindowId == 0);
-        mpWindowImpl->mnLOKWindowId = sLastLOKWindowId++;
-        GetLOKWindowsMap().emplace(mpWindowImpl->mnLOKWindowId, this);
+        assert(mpLOKData->mnLOKWindowId == 0);
+        mpLOKData->mnLOKWindowId = sLastLOKWindowId++;
+        GetLOKWindowsMap().emplace(mpLOKData->mnLOKWindowId, this);
     }
 
-    mpWindowImpl->mpLOKNotifier = pNotifier;
+    mpLOKData->mpLOKNotifier = pNotifier;
 }
 
 void Window::SetLOKWindowId()
@@ -70,9 +71,9 @@ void Window::SetLOKWindowId()
     assert(comphelper::LibreOfficeKit::isActive());
 
     // assign the LOK window id
-    assert(mpWindowImpl->mnLOKWindowId == 0);
-    mpWindowImpl->mnLOKWindowId = sLastLOKWindowId++;
-    GetLOKWindowsMap().emplace(mpWindowImpl->mnLOKWindowId, this);
+    assert(mpLOKData->mnLOKWindowId == 0);
+    mpLOKData->mnLOKWindowId = sLastLOKWindowId++;
+    GetLOKWindowsMap().emplace(mpLOKData->mnLOKWindowId, this);
 }
 
 VclPtr<Window> Window::FindLOKWindow(vcl::LOKWindowId nWindowId)
@@ -89,11 +90,11 @@ bool Window::IsLOKWindowsEmpty() { return GetLOKWindowsMap().empty(); }
 void Window::ReleaseLOKNotifier()
 {
     // unregister the LOK window binding
-    if (mpWindowImpl->mnLOKWindowId > 0)
-        GetLOKWindowsMap().erase(mpWindowImpl->mnLOKWindowId);
+    if (mpLOKData->mnLOKWindowId > 0)
+        GetLOKWindowsMap().erase(mpLOKData->mnLOKWindowId);
 
-    mpWindowImpl->mpLOKNotifier = nullptr;
-    mpWindowImpl->mnLOKWindowId = 0;
+    mpLOKData->mpLOKNotifier = nullptr;
+    mpLOKData->mnLOKWindowId = 0;
 }
 
 ILibreOfficeKitNotifier::~ILibreOfficeKitNotifier()
@@ -105,11 +106,11 @@ ILibreOfficeKitNotifier::~ILibreOfficeKitNotifier()
 
     for (auto it = GetLOKWindowsMap().begin(); it != GetLOKWindowsMap().end();)
     {
-        WindowImpl* pWindowImpl = it->second->ImplGetWindowImpl();
-        if (pWindowImpl && pWindowImpl->mpLOKNotifier == this)
+        WindowLOKData* pData = it->second->ImplGetWindowLOKData();
+        if (pData && pData->mpLOKNotifier == this)
         {
-            pWindowImpl->mpLOKNotifier = nullptr;
-            pWindowImpl->mnLOKWindowId = 0;
+            pData->mpLOKNotifier = nullptr;
+            pData->mnLOKWindowId = 0;
             it = GetLOKWindowsMap().erase(it);
             continue;
         }
@@ -120,13 +121,10 @@ ILibreOfficeKitNotifier::~ILibreOfficeKitNotifier()
 
 const vcl::ILibreOfficeKitNotifier* Window::GetLOKNotifier() const
 {
-    return mpWindowImpl ? mpWindowImpl->mpLOKNotifier : nullptr;
+    return mpLOKData ? mpLOKData->mpLOKNotifier : nullptr;
 }
 
-vcl::LOKWindowId Window::GetLOKWindowId() const
-{
-    return mpWindowImpl ? mpWindowImpl->mnLOKWindowId : 0;
-}
+vcl::LOKWindowId Window::GetLOKWindowId() const { return mpLOKData ? mpLOKData->mnLOKWindowId : 0; }
 
 VclPtr<vcl::Window> Window::GetParentWithLOKNotifier()
 {
