@@ -85,13 +85,13 @@ void Window::SetExtendedStyle(WindowExtendedStyle nExtendedStyle)
 bool Window::ImplShouldHaveBorder(WindowBorderStyle nBorderStyle)
 {
     return nBorderStyle != WindowBorderStyle::REMOVEBORDER
-           || mpWindowImpl->mpBorderWindow->mpWindowImpl->mbFrame
-           || !mpWindowImpl->mpBorderWindow->mpWindowImpl->mpHierarchy->mpParent;
+           || mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame
+           || !mpHierarchy->mpBorderWindow->mpHierarchy->mpParent;
 }
 
 void Window::ImplSetBorderWindowStyle(WindowBorderStyle nBorderStyle)
 {
-    vcl::Window* pBorderWindow = mpWindowImpl->mpBorderWindow.get();
+    vcl::Window* pBorderWindow = mpHierarchy->mpBorderWindow.get();
 
     if (pBorderWindow->GetType() == WindowType::BORDERWINDOW)
         static_cast<ImplBorderWindow*>(pBorderWindow)->SetBorderStyle(nBorderStyle);
@@ -101,7 +101,7 @@ void Window::ImplSetBorderWindowStyle(WindowBorderStyle nBorderStyle)
 
 void Window::SetBorderStyle(WindowBorderStyle nBorderStyle)
 {
-    if (!mpWindowImpl->mpBorderWindow)
+    if (!mpHierarchy->mpBorderWindow)
         return;
 
     if (ImplShouldHaveBorder(nBorderStyle))
@@ -113,15 +113,15 @@ void Window::SetBorderStyle(WindowBorderStyle nBorderStyle)
     // this is a little awkward: some controls (e.g. svtools ProgressBar)
     // cannot avoid getting constructed with WB_BORDER but want to disable
     // borders in case of NWF drawing. So they need a method to remove their border window
-    VclPtr<vcl::Window> pBorderWin = mpWindowImpl->mpBorderWindow;
+    VclPtr<vcl::Window> pBorderWin = mpHierarchy->mpBorderWindow;
 
     // remove us as border window's client
-    pBorderWin->mpWindowImpl->mpClientWindow = nullptr;
-    mpWindowImpl->mpBorderWindow = nullptr;
-    mpWindowImpl->mpHierarchy->mpRealParent = pBorderWin->mpWindowImpl->mpHierarchy->mpParent;
+    pBorderWin->mpHierarchy->mpClientWindow = nullptr;
+    mpHierarchy->mpBorderWindow = nullptr;
+    mpHierarchy->mpRealParent = pBorderWin->mpHierarchy->mpParent;
 
     // reparent us above the border window
-    SetParent(pBorderWin->mpWindowImpl->mpHierarchy->mpParent);
+    SetParent(pBorderWin->mpHierarchy->mpParent);
 
     // set us to the position and size of our previous border
     Point aBorderPos(pBorderWin->GetPosPixel());
@@ -137,13 +137,13 @@ void Window::SetBorderStyle(WindowBorderStyle nBorderStyle)
 
 WindowBorderStyle Window::GetBorderStyle() const
 {
-    if (!mpWindowImpl->mpBorderWindow)
+    if (!mpHierarchy->mpBorderWindow)
         return WindowBorderStyle::NONE;
 
-    if (mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
-        return static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->GetBorderStyle();
+    if (mpHierarchy->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
+        return static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->GetBorderStyle();
 
-    return mpWindowImpl->mpBorderWindow->GetBorderStyle();
+    return mpHierarchy->mpBorderWindow->GetBorderStyle();
 }
 
 void Window::GetBorder(sal_Int32& rLeftBorder, sal_Int32& rTopBorder, sal_Int32& rRightBorder,
@@ -158,7 +158,7 @@ void Window::GetBorder(sal_Int32& rLeftBorder, sal_Int32& rTopBorder, sal_Int32&
 bool Window::ImplShouldFallbackToParentBackground(const Wallpaper& rBack) const
 {
     return !rBack.IsBitmap() && !rBack.IsGradient() && rBack.GetColor() == COL_TRANSPARENT
-           && mpWindowImpl->mpHierarchy->mpParent;
+           && mpHierarchy->mpParent;
 }
 
 const Wallpaper& Window::GetDisplayBackground() const
@@ -168,13 +168,13 @@ const Wallpaper& Window::GetDisplayBackground() const
     if (const ToolBox* pTB = dynamic_cast<const ToolBox*>(this); pTB && IsNativeWidgetEnabled())
         return pTB->ImplGetToolBoxPrivateData()->maDisplayBackground;
 
-    if (!IsBackground() && mpWindowImpl->mpHierarchy->mpParent)
-        return mpWindowImpl->mpHierarchy->mpParent->GetDisplayBackground();
+    if (!IsBackground() && mpHierarchy->mpParent)
+        return mpHierarchy->mpParent->GetDisplayBackground();
 
     const Wallpaper& rBack = GetBackground();
 
     if (ImplShouldFallbackToParentBackground(rBack))
-        return mpWindowImpl->mpHierarchy->mpParent->GetDisplayBackground();
+        return mpHierarchy->mpParent->GetDisplayBackground();
 
     return rBack;
 }
@@ -204,15 +204,15 @@ void Window::ImplUpdateNativeWidgetState(bool bEnable)
     CompatDataChanged(aDCEvt);
 
     // sometimes the borderwindow is queried, so keep it in sync
-    if (mpWindowImpl->mpBorderWindow)
-        mpWindowImpl->mpBorderWindow->ImplGetWinData()->mbEnableNativeWidget = bEnable;
+    if (mpHierarchy->mpBorderWindow)
+        mpHierarchy->mpBorderWindow->ImplGetWinData()->mbEnableNativeWidget = bEnable;
 }
 
 void Window::ImplEnableChildNativeWidgets(bool bEnable)
 {
     // push down, useful for compound controls
-    for (VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild; pChild != nullptr;
-         pChild = pChild->mpWindowImpl->mpHierarchy->mpNext)
+    for (VclPtr<vcl::Window> pChild = mpHierarchy->mpFirstChild; pChild != nullptr;
+         pChild = pChild->mpHierarchy->mpNext)
     {
         pChild->EnableNativeWidget(bEnable);
     }

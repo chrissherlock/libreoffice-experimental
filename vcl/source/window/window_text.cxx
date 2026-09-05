@@ -22,6 +22,7 @@
 
 #include <ImplAccessibleInfos.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
 #include <salframe.hxx>
 
@@ -35,8 +36,8 @@ void Window::SetText(const OUString& rStr)
     OUString oldTitle(mpWindowImpl->maText);
     mpWindowImpl->maText = rStr;
 
-    if (mpWindowImpl->mpBorderWindow)
-        mpWindowImpl->mpBorderWindow->SetText(rStr);
+    if (mpHierarchy->mpBorderWindow)
+        mpHierarchy->mpBorderWindow->SetText(rStr);
     else if (mpWindowImpl->mbFrame)
         mpWindowImpl->mpFrame->SetTitle(rStr);
 

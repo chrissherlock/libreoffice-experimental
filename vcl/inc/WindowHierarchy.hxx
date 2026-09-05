@@ -42,6 +42,11 @@ struct WindowHierarchy
 
     VclPtr<vcl::Window> mpPrevOverlap; // Previous overlap window of frame
     VclPtr<vcl::Window> mpNextOverlap; // Next overlap window of frame
+
+    VclPtr<vcl::Window> mpFrameWindow; // window that is the frame for this window
+    VclPtr<vcl::Window> mpOverlapWindow; // first overlap parent
+    VclPtr<vcl::Window> mpBorderWindow; // Border-Window
+    VclPtr<vcl::Window> mpClientWindow; // Client-Window of a FrameWindow
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

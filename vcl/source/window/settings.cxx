@@ -41,13 +41,12 @@ namespace vcl {
 
 void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
 {
-
-    if ( mpWindowImpl->mpBorderWindow )
+    if ( mpHierarchy->mpBorderWindow )
     {
-        mpWindowImpl->mpBorderWindow->UpdateSettings( rSettings );
-        if (mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
+        mpHierarchy->mpBorderWindow->UpdateSettings( rSettings );
+        if (mpHierarchy->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
         {
-            ImplBorderWindow* pImpl = static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get());
+            ImplBorderWindow* pImpl = static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get());
             if (pImpl->mpMenuBarWindow)
                 pImpl->mpMenuBarWindow->UpdateSettings(rSettings, true);
             if (pImpl->mpNotebookBar)
@@ -100,11 +99,11 @@ void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
 
     if ( bChild )
     {
-        vcl::Window* pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
+        vcl::Window* pChild = mpHierarchy->mpFirstChild;
         while ( pChild )
         {
             pChild->UpdateSettings( rSettings, bChild );
-            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+            pChild = pChild->mpHierarchy->mpNext;
         }
     }
 }

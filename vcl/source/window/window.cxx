@@ -27,6 +27,7 @@
 #include <salframe.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <helpwin.hxx>
 
 #ifdef _WIN32 // see #140456#
@@ -73,7 +74,7 @@ void Window::RequestDoubleBuffering(bool bRequest)
     {
         mpWindowImpl->mpFrameData->mpBuffer = VclPtrInstance<VirtualDevice>();
         // Make sure that the buffer size matches the frame size.
-        mpWindowImpl->mpFrameData->mpBuffer->SetOutputSizePixel(mpWindowImpl->mpFrameWindow->GetOutputSizePixel());
+        mpWindowImpl->mpFrameData->mpBuffer->SetOutputSizePixel(mpHierarchy->mpFrameWindow->GetOutputSizePixel());
     }
     else
         mpWindowImpl->mpFrameData->mpBuffer.reset();

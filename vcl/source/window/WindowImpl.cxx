@@ -107,17 +107,12 @@ using namespace ::com::sun::star::datatransfer::dnd;
 WindowImpl::WindowImpl( WindowType eType )
 {
     mpClippingState = std::make_unique<WindowClippingState>();
-    mpHierarchy     = std::make_unique<WindowHierarchy>();
 
     mpClippingState->maWinRegion        = vcl::Region(true);
     mpClippingState->maWinClipRegion    = vcl::Region(true);
     mpFrameData                         = nullptr;                      // Frame Data
     mpFrame                             = nullptr;                      // Pointer to frame window
     mpSysObj                            = nullptr;
-    mpFrameWindow                       = nullptr;                      // window to top level parent (same as frame window)
-    mpOverlapWindow                     = nullptr;                      // first overlap parent
-    mpBorderWindow                      = nullptr;                      // Border-Window
-    mpClientWindow                      = nullptr;                      // Client-Window of a FrameWindow
     mpLastFocusWindow                   = nullptr;                      // window for focus restore
     mpDlgCtrlDownWindow                 = nullptr;                      // window for dialog control
     mpVCLXWindow                        = nullptr;

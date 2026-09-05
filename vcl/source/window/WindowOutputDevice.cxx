@@ -232,7 +232,7 @@ const OutputDevice* WindowOutputDevice::DrawOutDevDirectCheck(const OutputDevice
         pSrcDevChecked = nullptr;
     else if (GetOutDevType() != rSrcDev.GetOutDevType())
         pSrcDevChecked = &rSrcDev;
-    else if (mxOwnerWindow->mpWindowImpl->mpFrameWindow == static_cast<const vcl::WindowOutputDevice&>(rSrcDev).mxOwnerWindow->mpWindowImpl->mpFrameWindow)
+    else if (mxOwnerWindow->mpHierarchy->mpFrameWindow == static_cast<const vcl::WindowOutputDevice&>(rSrcDev).mxOwnerWindow->mpHierarchy->mpFrameWindow)
         pSrcDevChecked = nullptr;
     else
         pSrcDevChecked = &rSrcDev;
@@ -365,16 +365,16 @@ void WindowOutputDevice::EnableRTL ( bool bEnable )
 void WindowOutputDevice::ImplClearFontData(bool bNewFontLists)
 {
     OutputDevice::ImplClearFontData(bNewFontLists);
-    for (Window* pChild = mxOwnerWindow->mpWindowImpl->mpHierarchy->mpFirstChild; pChild;
-         pChild = pChild->mpWindowImpl->mpHierarchy->mpNext)
+    for (Window* pChild = mxOwnerWindow->mpHierarchy->mpFirstChild; pChild;
+         pChild = pChild->mpHierarchy->mpNext)
         pChild->GetOutDev()->ImplClearFontData(bNewFontLists);
 }
 
 void WindowOutputDevice::ImplRefreshFontData(bool bNewFontLists)
 {
     OutputDevice::ImplRefreshFontData(bNewFontLists);
-    for (Window* pChild = mxOwnerWindow->mpWindowImpl->mpHierarchy->mpFirstChild; pChild;
-         pChild = pChild->mpWindowImpl->mpHierarchy->mpNext)
+    for (Window* pChild = mxOwnerWindow->mpHierarchy->mpFirstChild; pChild;
+         pChild = pChild->mpHierarchy->mpNext)
         pChild->GetOutDev()->ImplRefreshFontData(bNewFontLists);
 }
 
@@ -435,7 +435,7 @@ void WindowOutputDevice::SetSettings( const AllSettings& rSettings )
 void WindowOutputDevice::SetSettings( const AllSettings& rSettings, bool bChild )
 {
 
-    if ( auto pBorderWindow = mxOwnerWindow->mpWindowImpl->mpBorderWindow.get() )
+    if ( auto pBorderWindow = mxOwnerWindow->mpHierarchy->mpBorderWindow.get() )
     {
         static_cast<vcl::WindowOutputDevice*>(pBorderWindow->GetOutDev())->SetSettings( rSettings, false );
         if ( (pBorderWindow->GetType() == WindowType::BORDERWINDOW) &&
@@ -458,11 +458,11 @@ void WindowOutputDevice::SetSettings( const AllSettings& rSettings, bool bChild 
 
     if ( bChild )
     {
-        vcl::Window* pChild = mxOwnerWindow->mpWindowImpl->mpHierarchy->mpFirstChild;
+        vcl::Window* pChild = mxOwnerWindow->mpHierarchy->mpFirstChild;
         while ( pChild )
         {
             static_cast<vcl::WindowOutputDevice*>(pChild->GetOutDev())->SetSettings( rSettings, bChild );
-            pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+            pChild = pChild->mpHierarchy->mpNext;
         }
     }
 }

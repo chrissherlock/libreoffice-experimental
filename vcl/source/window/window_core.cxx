@@ -60,6 +60,7 @@ namespace vcl
 {
 Window::Window(WindowType eType)
     : mpWindowImpl(std::make_unique<WindowImpl>(eType))
+    , mpHierarchy(std::make_unique<WindowHierarchy>())
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
     , mpLayoutData(std::make_unique<WindowLayoutData>())
@@ -77,6 +78,7 @@ Window::Window(WindowType eType)
 
 Window::Window(vcl::Window* pParent, WinBits nStyle)
     : mpWindowImpl(std::make_unique<WindowImpl>(WindowType::WINDOW))
+    , mpHierarchy(std::make_unique<WindowHierarchy>())
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
     , mpLayoutData(std::make_unique<WindowLayoutData>())
@@ -100,9 +102,8 @@ void Window::dispose()
 {
     assert(mpWindowImpl);
     assert(!mpWindowImpl->mbInDispose); // should only be called from disposeOnce()
-    assert(
-        (!mpWindowImpl->mpHierarchy->mpParent || mpWindowImpl->mpHierarchy->mpParent->mpWindowImpl)
-        && "vcl::Window child should have its parent disposed first");
+    assert((!mpHierarchy->mpParent || mpHierarchy->mpParent->mpWindowImpl)
+           && "vcl::Window child should have its parent disposed first");
 
     // remove Key and Mouse events issued by Application::PostKey/MouseEvent
     Application::RemoveMouseAndKeyEvents(this);
@@ -199,6 +200,7 @@ void Window::dispose()
 
     // should be the last statements
     mpWindowImpl.reset();
+    mpHierarchy.reset();
     mpHelpData.reset();
     mpEventHandlers.reset();
     mpLayoutData.reset();
@@ -273,7 +275,7 @@ void Window::ImplInit(vcl::Window* pParent, WinBits nStyle, SystemParentData* pS
     }
 
     // init data
-    mpWindowImpl->mpHierarchy->mpRealParent = pRealParent;
+    mpHierarchy->mpRealParent = pRealParent;
 
     // #99318: make sure fontcache and list is available before call to SetSettings
     mxOutDev->mxFontCollection = mpWindowImpl->mpFrameData->mxFontCollection;
@@ -335,12 +337,12 @@ void Window::ImplInitResolutionSettings()
         const StyleSettings& rStyleSettings = GetOutDev()->moSettings->GetStyleSettings();
         SetPointFont(*GetOutDev(), rStyleSettings.GetAppFont());
     }
-    else if (mpWindowImpl->mpHierarchy->mpParent)
+    else if (mpHierarchy->mpParent)
     {
-        GetOutDev()->SetDPIX(mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDPIX());
-        GetOutDev()->SetDPIY(mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDPIY());
+        GetOutDev()->SetDPIX(mpHierarchy->mpParent->GetOutDev()->GetDPIX());
+        GetOutDev()->SetDPIY(mpHierarchy->mpParent->GetOutDev()->GetDPIY());
         GetOutDev()->SetDPIScalePercentage(
-            mpWindowImpl->mpHierarchy->mpParent->GetOutDev()->GetDPIScalePercentage());
+            mpHierarchy->mpParent->GetOutDev()->GetDPIScalePercentage());
     }
 
     // update the recalculated values for logical units
@@ -374,11 +376,11 @@ void Window::CollectChildren(::std::vector<vcl::Window*>& rAllChildren)
 {
     rAllChildren.push_back(this);
 
-    VclPtr<vcl::Window> pChild = mpWindowImpl->mpHierarchy->mpFirstChild;
+    VclPtr<vcl::Window> pChild = mpHierarchy->mpFirstChild;
     while (pChild)
     {
         pChild->CollectChildren(rAllChildren);
-        pChild = pChild->mpWindowImpl->mpHierarchy->mpNext;
+        pChild = pChild->mpHierarchy->mpNext;
     }
 }
 
@@ -400,7 +402,7 @@ void Window::SetCompoundControl(bool bCompound)
 
 vcl::Window* Window::ImplGetFrameWindow() const
 {
-    return mpWindowImpl ? mpWindowImpl->mpFrameWindow.get() : nullptr;
+    return mpHierarchy ? mpHierarchy->mpFrameWindow.get() : nullptr;
 }
 
 weld::Window* Window::GetFrameWeld() const
@@ -424,8 +426,8 @@ SalFrame* Window::ImplGetFrame() const { return mpWindowImpl ? mpWindowImpl->mpF
 
 vcl::Window* Window::ImplGetWindow() const
 {
-    if (mpWindowImpl->mpClientWindow)
-        return mpWindowImpl->mpClientWindow;
+    if (mpHierarchy->mpClientWindow)
+        return mpHierarchy->mpClientWindow;
     else
         return const_cast<vcl::Window*>(this);
 }
@@ -446,7 +448,7 @@ ImplWinData* Window::ImplGetWinData() const
 
 vcl::Window* Window::ImplGetClientWindow() const
 {
-    return mpWindowImpl ? mpWindowImpl->mpClientWindow.get() : nullptr;
+    return mpHierarchy ? mpHierarchy->mpClientWindow.get() : nullptr;
 }
 
 bool Window::ImplIsFloatingWindow() const { return mpWindowImpl && mpWindowImpl->mbFloatWin; }
@@ -454,7 +456,7 @@ bool Window::ImplIsFloatingWindow() const { return mpWindowImpl && mpWindowImpl-
 void Window::ImplDisposeFrameData()
 {
     // remove BorderWindow or Frame window data
-    mpWindowImpl->mpBorderWindow.disposeAndClear();
+    mpHierarchy->mpBorderWindow.disposeAndClear();
 
     if (!mpWindowImpl->mbFrame)
         return;
@@ -531,15 +533,15 @@ void Window::ImplCheckLiveChildrenOnDestroy()
     bool bError = false;
     vcl::Window* pTempWin;
 
-    if (mpWindowImpl->mpHierarchy->mpFirstChild)
+    if (mpHierarchy->mpFirstChild)
     {
         OStringBuffer aTempStr
             = "Window (" + lcl_createWindowInfo(this) + ") with live children destroyed: ";
-        pTempWin = mpWindowImpl->mpHierarchy->mpFirstChild;
+        pTempWin = mpHierarchy->mpFirstChild;
         while (pTempWin)
         {
             aTempStr.append(lcl_createWindowInfo(pTempWin));
-            pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNext;
+            pTempWin = pTempWin->mpHierarchy->mpNext;
         }
         OSL_FAIL(aTempStr.getStr());
         Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
@@ -555,7 +557,7 @@ void Window::ImplCheckLiveChildrenOnDestroy()
                 bError = true;
                 aErrorStr.append(lcl_createWindowInfo(pTempWin));
             }
-            pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNextOverlap;
+            pTempWin = pTempWin->mpHierarchy->mpNextOverlap;
         }
         if (bError)
         {
@@ -586,15 +588,15 @@ void Window::ImplCheckLiveChildrenOnDestroy()
         Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
     }
 
-    if (mpWindowImpl->mpHierarchy->mpFirstOverlap)
+    if (mpHierarchy->mpFirstOverlap)
     {
         OStringBuffer aTempStr
             = "Window (" + lcl_createWindowInfo(this) + ") with live SystemWindows destroyed: ";
-        pTempWin = mpWindowImpl->mpHierarchy->mpFirstOverlap;
+        pTempWin = mpHierarchy->mpFirstOverlap;
         while (pTempWin)
         {
             aTempStr.append(lcl_createWindowInfo(pTempWin));
-            pTempWin = pTempWin->mpWindowImpl->mpHierarchy->mpNext;
+            pTempWin = pTempWin->mpHierarchy->mpNext;
         }
         OSL_FAIL(aTempStr.getStr());
         Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
@@ -626,10 +628,10 @@ void Window::ImplDeregisterTopWindowChild()
         return;
 
     bool bIsTopWindow = mpWinData && (mpWinData->mnIsTopWindow == 1);
-    if (!bIsTopWindow || !mpWindowImpl->mpHierarchy->mpRealParent)
+    if (!bIsTopWindow || !mpHierarchy->mpRealParent)
         return;
 
-    ImplWinData* pParentWinData = mpWindowImpl->mpHierarchy->mpRealParent->ImplGetWinData();
+    ImplWinData* pParentWinData = mpHierarchy->mpRealParent->ImplGetWinData();
 
     auto myPos = std::find(pParentWinData->maTopWindowChildren.begin(),
                            pParentWinData->maTopWindowChildren.end(), VclPtr<vcl::Window>(this));

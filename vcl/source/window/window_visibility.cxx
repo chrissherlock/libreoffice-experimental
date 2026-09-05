@@ -34,9 +34,9 @@ namespace vcl
 bool Window::ImplShouldTransferFocusOnHide(ShowFlags nFlags) const
 {
     const bool bIsOverlapWindowAvailable = !mpWindowImpl->mbFrame
-                                           && mpWindowImpl->mpOverlapWindow->IsEnabled()
-                                           && mpWindowImpl->mpOverlapWindow->IsInputEnabled()
-                                           && !mpWindowImpl->mpOverlapWindow->IsInModalMode();
+                                           && mpHierarchy->mpOverlapWindow->IsEnabled()
+                                           && mpHierarchy->mpOverlapWindow->IsInputEnabled()
+                                           && !mpHierarchy->mpOverlapWindow->IsInModalMode();
 
     const bool bCanYieldFocus
         = ImplIsOverlapWindow() && !(nFlags & ShowFlags::NoFocusChange) && HasChildPathFocus();
@@ -101,7 +101,7 @@ std::optional<bool> Window::ImplHideWindow(ShowFlags nFlags)
     vcl::clipping::setClipFlag(*this);
 
     if (ImplShouldTransferFocusOnHide(nFlags))
-        mpWindowImpl->mpOverlapWindow->GrabFocus();
+        mpHierarchy->mpOverlapWindow->GrabFocus();
 
     if (!mpWindowImpl->mbFrame)
         ImplInvalidateParentOnHide(aInvRegion);
@@ -117,13 +117,13 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
     if (!xWindow->mpWindowImpl)
         return std::nullopt;
 
-    if (mpWindowImpl->mpBorderWindow)
+    if (mpHierarchy->mpBorderWindow)
     {
-        bool bOldUpdate = mpWindowImpl->mpBorderWindow->mpWindowImpl->mbNoParentUpdate;
+        bool bOldUpdate = mpHierarchy->mpBorderWindow->mpWindowImpl->mbNoParentUpdate;
         if (mpWindowImpl->mbNoParentUpdate)
-            mpWindowImpl->mpBorderWindow->mpWindowImpl->mbNoParentUpdate = true;
-        mpWindowImpl->mpBorderWindow->Show(false, nFlags);
-        mpWindowImpl->mpBorderWindow->mpWindowImpl->mbNoParentUpdate = bOldUpdate;
+            mpHierarchy->mpBorderWindow->mpWindowImpl->mbNoParentUpdate = true;
+        mpHierarchy->mpBorderWindow->Show(false, nFlags);
+        mpHierarchy->mpBorderWindow->mpWindowImpl->mbNoParentUpdate = bOldUpdate;
     }
     else if (mpWindowImpl->mbFrame)
     {
@@ -161,7 +161,7 @@ bool Window::ImplIsMismatchedSubControl() const
 
 vcl::Window* Window::ImplGetVisibilityParent() const
 {
-    return ImplIsOverlapWindow() ? mpWindowImpl->mpOverlapWindow.get() : ImplGetParent();
+    return ImplIsOverlapWindow() ? mpHierarchy->mpOverlapWindow.get() : ImplGetParent();
 }
 
 void Window::ImplRaiseOverlapWindow(ShowFlags nFlags)
@@ -217,9 +217,9 @@ bool Window::ImplUpdateRealVisibility(ShowFlags nFlags)
 
 bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
 {
-    if (mpWindowImpl->mpBorderWindow)
+    if (mpHierarchy->mpBorderWindow)
     {
-        mpWindowImpl->mpBorderWindow->Show(true, nFlags);
+        mpHierarchy->mpBorderWindow->Show(true, nFlags);
         return true;
     }
 
@@ -347,15 +347,15 @@ void Window::ImplSetReallyVisible()
 
     // Helper to propagate visibility down the intrusive linked lists
     auto propagateToVisible = [](vcl::Window* pStart) {
-        for (vcl::Window* pWin = pStart; pWin; pWin = pWin->mpWindowImpl->mpHierarchy->mpNext)
+        for (vcl::Window* pWin = pStart; pWin; pWin = pWin->mpHierarchy->mpNext)
         {
             if (pWin->mpWindowImpl->mbVisible)
                 pWin->ImplSetReallyVisible();
         }
     };
 
-    propagateToVisible(mpWindowImpl->mpHierarchy->mpFirstOverlap);
-    propagateToVisible(mpWindowImpl->mpHierarchy->mpFirstChild);
+    propagateToVisible(mpHierarchy->mpFirstOverlap);
+    propagateToVisible(mpHierarchy->mpFirstChild);
 }
 
 } // end vcl namespace

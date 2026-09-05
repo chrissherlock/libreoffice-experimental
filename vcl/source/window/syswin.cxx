@@ -51,6 +51,7 @@
 #include <svdata.hxx>
 #include <brdwin.hxx>
 #include <WindowImpl.hxx>
+#include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
 
 using namespace ::com::sun::star::uno;
@@ -317,8 +318,8 @@ void SystemWindow::SetRepresentedURL( const OUString& i_rURL )
     if ( !mbSysChild && bChanged )
     {
         const vcl::Window* pWindow = this;
-        while ( pWindow->mpWindowImpl->mpBorderWindow )
-            pWindow = pWindow->mpWindowImpl->mpBorderWindow;
+        while ( pWindow->mpHierarchy->mpBorderWindow )
+            pWindow = pWindow->mpHierarchy->mpBorderWindow;
 
         if ( pWindow->mpWindowImpl->mbFrame )
             pWindow->mpWindowImpl->mpFrame->SetRepresentedURL( i_rURL );
@@ -335,8 +336,8 @@ void SystemWindow::SetIcon( sal_uInt16 nIcon )
     if ( !mbSysChild )
     {
         const vcl::Window* pWindow = this;
-        while ( pWindow->mpWindowImpl->mpBorderWindow )
-            pWindow = pWindow->mpWindowImpl->mpBorderWindow;
+        while ( pWindow->mpHierarchy->mpBorderWindow )
+            pWindow = pWindow->mpHierarchy->mpBorderWindow;
 
         if ( pWindow->mpWindowImpl->mbFrame )
             pWindow->mpWindowImpl->mpFrame->SetIcon( nIcon );
@@ -350,8 +351,8 @@ void SystemWindow::ShowTitleButton( TitleButton nButton, bool bVisible )
         if ( mbDockBtn != bVisible )
         {
             mbDockBtn = bVisible;
-            if ( mpWindowImpl->mpBorderWindow )
-                static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetDockButton( bVisible );
+            if ( mpHierarchy->mpBorderWindow )
+                static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetDockButton( bVisible );
         }
     }
     else if ( nButton == TitleButton::Hide )
@@ -359,14 +360,14 @@ void SystemWindow::ShowTitleButton( TitleButton nButton, bool bVisible )
         if ( mbHideBtn != bVisible )
         {
             mbHideBtn = bVisible;
-            if ( mpWindowImpl->mpBorderWindow )
-                static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetHideButton( bVisible );
+            if ( mpHierarchy->mpBorderWindow )
+                static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetHideButton( bVisible );
         }
     }
     else if ( nButton == TitleButton::Menu )
     {
-        if ( mpWindowImpl->mpBorderWindow )
-            static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetMenuButton( bVisible );
+        if ( mpHierarchy->mpBorderWindow )
+            static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMenuButton( bVisible );
     }
     else
         return;
@@ -383,11 +384,11 @@ bool SystemWindow::IsTitleButtonVisible( TitleButton nButton ) const
 void SystemWindow::SetMinOutputSizePixel( const Size& rSize )
 {
     maMinOutSize = rSize;
-    if ( mpWindowImpl->mpBorderWindow )
+    if ( mpHierarchy->mpBorderWindow )
     {
-        static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetMinOutputSize( rSize.Width(), rSize.Height() );
-        if ( mpWindowImpl->mpBorderWindow->mpWindowImpl->mbFrame )
-            mpWindowImpl->mpBorderWindow->mpWindowImpl->mpFrame->SetMinClientSize( rSize.Width(), rSize.Height() );
+        static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMinOutputSize( rSize.Width(), rSize.Height() );
+        if ( mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame )
+            mpHierarchy->mpBorderWindow->mpWindowImpl->mpFrame->SetMinClientSize( rSize.Width(), rSize.Height() );
     }
     else if ( mpWindowImpl->mbFrame )
         mpWindowImpl->mpFrame->SetMinClientSize( rSize.Width(), rSize.Height() );
@@ -402,11 +403,11 @@ void SystemWindow::SetMaxOutputSizePixel( const Size& rSize )
         aSize.setHeight( SHRT_MAX );
 
     mpImplData->maMaxOutSize = aSize;
-    if ( mpWindowImpl->mpBorderWindow )
+    if ( mpHierarchy->mpBorderWindow )
     {
-        static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetMaxOutputSize( aSize.Width(), aSize.Height() );
-        if ( mpWindowImpl->mpBorderWindow->mpWindowImpl->mbFrame )
-            mpWindowImpl->mpBorderWindow->mpWindowImpl->mpFrame->SetMaxClientSize( aSize.Width(), aSize.Height() );
+        static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMaxOutputSize( aSize.Width(), aSize.Height() );
+        if ( mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame )
+            mpHierarchy->mpBorderWindow->mpWindowImpl->mpFrame->SetMaxClientSize( aSize.Width(), aSize.Height() );
     }
     else if ( mpWindowImpl->mbFrame )
         mpWindowImpl->mpFrame->SetMaxClientSize( aSize.Width(), aSize.Height() );
@@ -641,8 +642,8 @@ void SystemWindow::SetWindowState(const vcl::WindowData& rData)
         return;
 
     vcl::Window* pWindow = this;
-    while ( pWindow->mpWindowImpl->mpBorderWindow )
-        pWindow = pWindow->mpWindowImpl->mpBorderWindow;
+    while ( pWindow->mpHierarchy->mpBorderWindow )
+        pWindow = pWindow->mpHierarchy->mpBorderWindow;
 
     if ( pWindow->mpWindowImpl->mbFrame )
     {
@@ -784,8 +785,8 @@ vcl::WindowData SystemWindow::GetWindowState(vcl::WindowDataMask nMask) const
     }
 
     const vcl::Window* pWindow = this;
-    while ( pWindow->mpWindowImpl->mpBorderWindow )
-        pWindow = pWindow->mpWindowImpl->mpBorderWindow;
+    while ( pWindow->mpHierarchy->mpBorderWindow )
+        pWindow = pWindow->mpHierarchy->mpBorderWindow;
 
     if ( pWindow->mpWindowImpl->mbFrame )
     {
@@ -852,7 +853,7 @@ void SystemWindow::SetMenuBar(MenuBar* pMenuBar)
     VclPtr<MenuBarWindow> pNewWindow;
     mpMenuBar = pMenuBar;
 
-    if ( mpWindowImpl->mpBorderWindow && (mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW) )
+    if ( mpHierarchy->mpBorderWindow && (mpHierarchy->mpBorderWindow->GetType() == WindowType::BORDERWINDOW) )
     {
         if ( pOldMenuBar )
             pOldWindow = pOldMenuBar->getMenuBarWindow();
@@ -867,13 +868,13 @@ void SystemWindow::SetMenuBar(MenuBar* pMenuBar)
         {
             SAL_WARN_IF( pMenuBar->m_pWindow, "vcl", "SystemWindow::SetMenuBar() - MenuBars can only set in one SystemWindow at time" );
 
-            pNewWindow = pMenuBar->ImplCreate(mpWindowImpl->mpBorderWindow, pOldWindow);
-            static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetMenuBarWindow(pNewWindow);
+            pNewWindow = pMenuBar->ImplCreate(mpHierarchy->mpBorderWindow, pOldWindow);
+            static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMenuBarWindow(pNewWindow);
 
             CallEventListeners( VclEventId::WindowMenubarAdded, static_cast<void*>(pMenuBar) );
         }
         else
-            static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetMenuBarWindow( nullptr );
+            static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMenuBarWindow( nullptr );
         ImplToBottomChild();
         if ( pOldMenuBar )
         {
@@ -916,7 +917,7 @@ void SystemWindow::SetNotebookBar(const OUString& rUIXMLDescription,
 
     if (rUIXMLDescription != maNotebookBarUIFile || bReloadNotebookbar)
     {
-        static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())
+        static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())
             ->SetNotebookBar(rUIXMLDescription, rFrame, std::move(pNotebookBarAddonsItem));
         maNotebookBarUIFile = rUIXMLDescription;
         if(GetNotebookBar())
@@ -928,13 +929,13 @@ void SystemWindow::SetNotebookBar(const OUString& rUIXMLDescription,
 
 void SystemWindow::CloseNotebookBar()
 {
-    static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->CloseNotebookBar();
+    static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->CloseNotebookBar();
     maNotebookBarUIFile.clear();
 }
 
 VclPtr<NotebookBar> const & SystemWindow::GetNotebookBar() const
 {
-    return static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->GetNotebookBar();
+    return static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->GetNotebookBar();
 }
 
 void SystemWindow::SetMenuBarMode( MenuBarMode nMode )
@@ -942,12 +943,12 @@ void SystemWindow::SetMenuBarMode( MenuBarMode nMode )
     if ( mnMenuBarMode != nMode )
     {
         mnMenuBarMode = nMode;
-        if ( mpWindowImpl->mpBorderWindow && (mpWindowImpl->mpBorderWindow->GetType() == WindowType::BORDERWINDOW) )
+        if ( mpHierarchy->mpBorderWindow && (mpHierarchy->mpBorderWindow->GetType() == WindowType::BORDERWINDOW) )
         {
             if ( nMode == MenuBarMode::Hide )
-                static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetMenuBarMode( true );
+                static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMenuBarMode( true );
             else
-                static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetMenuBarMode( false );
+                static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMenuBarMode( false );
         }
     }
 }

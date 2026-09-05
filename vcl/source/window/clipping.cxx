@@ -26,6 +26,7 @@
 
 #include <WindowImpl.hxx>
 #include <WindowClippingState.hxx>
+#include <WindowHierarchy.hxx>
 #include <clipping_window.hxx>
 #include <salobj.hxx>
 
@@ -88,8 +89,8 @@ vcl::Region Window::GetWindowClipRegionPixel() const
 
 void Window::EnableClipSiblings(bool bClipSiblings)
 {
-    if (mpWindowImpl->mpBorderWindow)
-        mpWindowImpl->mpBorderWindow->EnableClipSiblings(bClipSiblings);
+    if (mpHierarchy->mpBorderWindow)
+        mpHierarchy->mpBorderWindow->EnableClipSiblings(bClipSiblings);
 
     mpWindowImpl->mpClippingState->mbClipSiblings = bClipSiblings;
 }

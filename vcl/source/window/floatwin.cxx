@@ -115,12 +115,12 @@ void FloatingWindow::ImplInitFloating( vcl::Window* pParent, WinBits nStyle )
             }
             pBorderWin  = VclPtr<ImplBorderWindow>::Create(pParent, nStyle, nBorderStyle);
             ImplInit(pBorderWin, nStyle & ~WB_BORDER, nullptr);
-            pBorderWin->mpWindowImpl->mpClientWindow = this;
+            pBorderWin->mpHierarchy->mpClientWindow = this;
             pBorderWin->GetBorder(mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder,
                                   mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder);
             pBorderWin->SetDisplayActive(true);
-            mpWindowImpl->mpBorderWindow = pBorderWin;
-            mpWindowImpl->mpHierarchy->mpRealParent = pParent;
+            mpHierarchy->mpBorderWindow = pBorderWin;
+            mpHierarchy->mpRealParent = pParent;
         }
     }
     SetActivateMode( ActivateModeFlags::NONE );
@@ -242,8 +242,8 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
 
     // convert...
     vcl::Window* pW = pWindow;
-    if ( pW->mpWindowImpl->mpHierarchy->mpRealParent )
-        pW = pW->mpWindowImpl->mpHierarchy->mpRealParent;
+    if ( pW->mpHierarchy->mpRealParent )
+        pW = pW->mpHierarchy->mpRealParent;
 
     tools::Rectangle normRect( rRect );  // rRect is already relative to top-level window
     normRect.SetPos( pW->ScreenToOutputPixel( normRect.TopLeft() ) );
@@ -761,7 +761,7 @@ void FloatingWindow::PopupModeEnd()
 
 void FloatingWindow::SetTitleType( FloatWinTitleType nTitle )
 {
-    if ( (mnTitle == nTitle) || !mpWindowImpl->mpBorderWindow )
+    if ( (mnTitle == nTitle) || !mpHierarchy->mpBorderWindow )
         return;
 
     mnTitle = nTitle;
@@ -775,8 +775,8 @@ void FloatingWindow::SetTitleType( FloatWinTitleType nTitle )
         nTitleStyle = BorderWindowTitleType::Popup;
     else // nTitle == FloatWinTitleType::NONE
         nTitleStyle = BorderWindowTitleType::NONE;
-    static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->SetTitleType( nTitleStyle, aOutSize );
-    static_cast<ImplBorderWindow*>(mpWindowImpl->mpBorderWindow.get())->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
+    static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetTitleType( nTitleStyle, aOutSize );
+    static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
 }
 
 void FloatingWindow::StartPopupMode( const tools::Rectangle& rRect, FloatWinPopupFlags nFlags )

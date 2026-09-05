@@ -1415,9 +1415,7 @@ bool VclGrid::set_property(const OUString &rKey, const OUString &rValue)
 
 const vcl::Window *VclBin::get_child() const
 {
-    const WindowImpl* pWindowImpl = ImplGetWindowImpl();
-
-    return pWindowImpl->mpHierarchy->mpFirstChild;
+    return ImplGetWindowHierarchy()->mpFirstChild;
 }
 
 vcl::Window *VclBin::get_child()
@@ -1519,10 +1517,10 @@ const vcl::Window *VclFrame::get_label_widget() const
         return m_pLabel;
     assert(GetChildCount() <= 2);
     //The label widget is normally the first (of two) children
-    const WindowImpl* pWindowImpl = ImplGetWindowImpl();
-    if (pWindowImpl->mpHierarchy->mpFirstChild == pWindowImpl->mpHierarchy->mpLastChild) //no label exists
+    const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
+    if (pHierarchy->mpFirstChild == pHierarchy->mpLastChild) //no label exists
         return nullptr;
-    return pWindowImpl->mpHierarchy->mpFirstChild;
+    return pHierarchy->mpFirstChild;
 }
 
 vcl::Window *VclFrame::get_label_widget()
@@ -1534,12 +1532,16 @@ const vcl::Window *VclFrame::get_child() const
 {
     //The child widget is the normally the last (of two) children
     const WindowImpl* pWindowImpl = ImplGetWindowImpl();
+    const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
+
     assert(GetChildCount() == 2 || pWindowImpl->mbInDispose);
+
     if (!m_pLabel)
-        return pWindowImpl->mpHierarchy->mpLastChild;
-    if (pWindowImpl->mpHierarchy->mpFirstChild == pWindowImpl->mpHierarchy->mpLastChild) //only label exists
+        return pHierarchy->mpLastChild;
+    if (pHierarchy->mpFirstChild == pHierarchy->mpLastChild) //only label exists
         return nullptr;
-    return pWindowImpl->mpHierarchy->mpLastChild;
+
+    return pHierarchy->mpLastChild;
 }
 
 vcl::Window *VclFrame::get_child()
@@ -1684,11 +1686,11 @@ void VclExpander::dispose()
 
 const vcl::Window *VclExpander::get_child() const
 {
-    const WindowImpl* pWindowImpl = ImplGetWindowImpl();
+    const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
 
-    assert(pWindowImpl->mpHierarchy->mpFirstChild == m_pDisclosureButton);
+    assert(pHierarchy->mpFirstChild == m_pDisclosureButton);
 
-    return pWindowImpl->mpHierarchy->mpFirstChild->GetWindow(GetWindowType::Next);
+    return pHierarchy->mpFirstChild->GetWindow(GetWindowType::Next);
 }
 
 vcl::Window *VclExpander::get_child()
@@ -1700,10 +1702,10 @@ Size VclExpander::calculateRequisition() const
 {
     Size aRet(0, 0);
 
-    WindowImpl* pWindowImpl = ImplGetWindowImpl();
+    const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
 
     const vcl::Window *pChild = get_child();
-    const vcl::Window *pLabel = pChild != pWindowImpl->mpHierarchy->mpLastChild ? pWindowImpl->mpHierarchy->mpLastChild.get() : nullptr;
+    const vcl::Window *pLabel = pChild != pHierarchy->mpLastChild ? pHierarchy->mpLastChild.get() : nullptr;
 
     if (pChild && pChild->IsVisible() && m_pDisclosureButton->IsChecked())
         aRet = getLayoutRequisition(*pChild);
@@ -1728,11 +1730,11 @@ void VclExpander::setAllocation(const Size &rAllocation)
     Size aAllocation(rAllocation);
     Point aChildPos;
 
-    WindowImpl* pWindowImpl = ImplGetWindowImpl();
+    const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
 
     //The label widget is the last (of two) children
     vcl::Window *pChild = get_child();
-    vcl::Window *pLabel = pChild != pWindowImpl->mpHierarchy->mpLastChild.get() ? pWindowImpl->mpHierarchy->mpLastChild.get() : nullptr;
+    vcl::Window *pLabel = pChild != pHierarchy->mpLastChild.get() ? pHierarchy->mpLastChild.get() : nullptr;
 
     Size aButtonSize = getLayoutRequisition(*m_pDisclosureButton);
     Size aLabelSize;
@@ -1893,7 +1895,7 @@ const vcl::Window *VclScrolledWindow::get_child() const
 {
     const WindowImpl* pWindowImpl = ImplGetWindowImpl();
     assert(GetChildCount() == 4 || pWindowImpl->mbInDispose);
-    return pWindowImpl->mpHierarchy->mpLastChild;
+    return ImplGetWindowHierarchy()->mpLastChild;
 }
 
 vcl::Window *VclScrolledWindow::get_child()
@@ -2164,11 +2166,11 @@ void VclViewport::setAllocation(const Size &rAllocation)
 
 const vcl::Window *VclEventBox::get_child() const
 {
-    const WindowImpl* pWindowImpl = ImplGetWindowImpl();
+    const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
 
-    assert(pWindowImpl->mpHierarchy->mpFirstChild.get() == m_aEventBoxHelper.get());
+    assert(pHierarchy->mpFirstChild.get() == m_aEventBoxHelper.get());
 
-    return pWindowImpl->mpHierarchy->mpFirstChild->GetWindow(GetWindowType::Next);
+    return pHierarchy->mpFirstChild->GetWindow(GetWindowType::Next);
 }
 
 vcl::Window *VclEventBox::get_child()

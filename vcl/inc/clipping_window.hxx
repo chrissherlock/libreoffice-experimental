@@ -24,6 +24,7 @@
 #include <memory>
 
 class WindowImpl;
+struct WindowHierarchy;
 
 namespace vcl
 {
@@ -96,14 +97,14 @@ VCL_DLLPUBLIC void setParentClipMode(vcl::Window* pWindow, ParentClipMode nMode)
 VCL_DLLPUBLIC ParentClipMode getParentClipMode(const vcl::Window& rWindow);
 VCL_DLLPUBLIC vcl::Region& getWinChildClipRegion(vcl::Window& rWindow);
 
-VCL_DLLPUBLIC std::vector<vcl::Window*> getChildWindows(const WindowImpl& rImpl);
-VCL_DLLPUBLIC std::vector<vcl::Window*> getOverlapWindows(const WindowImpl& rImpl);
-VCL_DLLPUBLIC std::vector<vcl::Window*> getFollowingSiblings(const WindowImpl& rImpl);
+VCL_DLLPUBLIC std::vector<vcl::Window*> getChildWindows(const WindowHierarchy& rHierarchy);
+VCL_DLLPUBLIC std::vector<vcl::Window*> getOverlapWindows(const WindowHierarchy& rHierarchy);
+VCL_DLLPUBLIC std::vector<vcl::Window*> getFollowingSiblings(const WindowHierarchy& rHierarchy);
 VCL_DLLPUBLIC std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow);
 VCL_DLLPUBLIC void gatherNativeSyncTargets(vcl::Window* pWindow,
                                            std::vector<vcl::Window*>& rTargets);
 
-VCL_DLLPUBLIC bool initChildRegion(WindowImpl& rImpl);
+VCL_DLLPUBLIC bool initChildRegion(vcl::Window& rWindow);
 VCL_DLLPUBLIC std::unique_ptr<vcl::Region> prepareClipInvalidation(WindowImpl& rImpl,
                                                                    bool bSysObjOnlySmaller);
 VCL_DLLPUBLIC bool invalidateParentClipIfRequired(const WindowImpl& rChildImpl,

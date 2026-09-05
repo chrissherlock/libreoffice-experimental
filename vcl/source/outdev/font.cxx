@@ -512,7 +512,7 @@ void OutputDevice::ImplUpdateFontDataForAllFrames( const FontUpdateHandler_t pHd
         while ( pSysWin )
         {
             ( pSysWin->GetOutDev()->*pHdl )( bNewFontLists );
-            pSysWin = pSysWin->mpWindowImpl->mpHierarchy->mpNextOverlap;
+            pSysWin = pSysWin->mpHierarchy->mpNextOverlap;
         }
 
         pFrame = pFrame->mpWindowImpl->mpFrameData->mpNextFrame;
