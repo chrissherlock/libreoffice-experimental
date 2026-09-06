@@ -84,6 +84,7 @@
 #include <listbox.hxx>
 #include <WindowImpl.hxx>
 #include <WindowClippingState.hxx>
+#include <WindowVisibilityState.hxx>
 #include <wizdlg.hxx>
 #include <salvtables.hxx>
 #include <comphelper/lok.hxx>
@@ -1326,7 +1327,7 @@ void SalInstanceWidget::DoRecursivePaint(vcl::Window* pWindow, const Point& rRen
     }
 
     //set ReallyVisible to match Visible, we restore the original state after Paint
-    WindowImpl* pImpl = pWindow->ImplGetWindowImpl();
+    WindowVisibilityState* pImpl = pWindow->ImplGetVisibilityState();
     bool bRVisible = pImpl->mbReallyVisible;
     pImpl->mbReallyVisible = pWindow->IsVisible();
 

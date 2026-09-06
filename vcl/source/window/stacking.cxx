@@ -25,6 +25,7 @@
 
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
+#include <WindowVisibilityState.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInput.hxx>
 #include <WindowClippingState.hxx>
@@ -207,17 +208,20 @@ void Window::reorderWithinParent(sal_uInt16 nNewPosition)
 
 void Window::ImplToBottomChild()
 {
-    if ( ImplIsOverlapWindow() || mpWindowImpl->mbReallyVisible || (mpHierarchy->mpParent->mpHierarchy->mpLastChild.get() == this) )
+    if ( ImplIsOverlapWindow() || mpVisibilityState->mbReallyVisible || (mpHierarchy->mpParent->mpHierarchy->mpLastChild.get() == this) )
         return;
 
     // put the window to the end of the list
     if ( mpHierarchy->mpPrev )
+    {
         mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
+    }
     else
     {
         // coverity[copy_paste_error : FALSE] - this is correct mpFirstChild, not mpNext
         mpHierarchy->mpParent->mpHierarchy->mpFirstChild = mpHierarchy->mpNext;
     }
+
     mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
     mpHierarchy->mpPrev = mpHierarchy->mpParent->mpHierarchy->mpLastChild;
     mpHierarchy->mpParent->mpHierarchy->mpLastChild = this;
@@ -408,10 +412,10 @@ void Window::ImplShowAllOverlaps()
     vcl::Window* pOverlapWindow = mpHierarchy->mpFirstOverlap;
     while ( pOverlapWindow )
     {
-        if ( pOverlapWindow->mpWindowImpl->mbOverlapVisible )
+        if ( pOverlapWindow->mpVisibilityState->mbOverlapVisible )
         {
             pOverlapWindow->Show( true, ShowFlags::NoActivate );
-            pOverlapWindow->mpWindowImpl->mbOverlapVisible = false;
+            pOverlapWindow->mpVisibilityState->mbOverlapVisible = false;
         }
 
         pOverlapWindow = pOverlapWindow->mpHierarchy->mpNext;
@@ -425,7 +429,7 @@ void Window::ImplHideAllOverlaps()
     {
         if ( pOverlapWindow->IsVisible() )
         {
-            pOverlapWindow->mpWindowImpl->mbOverlapVisible = true;
+            pOverlapWindow->mpVisibilityState->mbOverlapVisible = true;
             pOverlapWindow->Show( false );
         }
 
@@ -659,7 +663,7 @@ vcl::Window* Window::ImplFindWindow( const Point& rFramePos )
     }
 
     // then we check our window
-    if ( !mpWindowImpl->mbVisible )
+    if ( !mpVisibilityState->mbVisible )
         return nullptr;
 
     WindowHitTest nHitTest = ImplHitTest( rFramePos );
@@ -725,11 +729,11 @@ bool Window::ImplIsWindowOrChild( const vcl::Window* pWindow, bool bSystemWindow
 
 void Window::ImplResetReallyVisible()
 {
-    bool bBecameReallyInvisible = mpWindowImpl->mbReallyVisible;
+    bool bBecameReallyInvisible = mpVisibilityState->mbReallyVisible;
 
     GetOutDev()->mbDevOutput     = false;
-    mpWindowImpl->mbReallyVisible = false;
-    mpWindowImpl->mbReallyShown   = false;
+    mpVisibilityState->mbReallyVisible = false;
+    mpVisibilityState->mbReallyShown   = false;
 
     // the SHOW/HIDE events serve as indicators to send child creation/destroy events to the access bridge.
     // For this, the data member of the event must not be NULL.
@@ -742,7 +746,7 @@ void Window::ImplResetReallyVisible()
     vcl::Window* pWindow = mpHierarchy->mpFirstOverlap;
     while ( pWindow )
     {
-        if ( pWindow->mpWindowImpl->mbReallyVisible )
+        if ( pWindow->mpVisibilityState->mbReallyVisible )
             pWindow->ImplResetReallyVisible();
         pWindow = pWindow->mpHierarchy->mpNext;
     }
@@ -750,7 +754,7 @@ void Window::ImplResetReallyVisible()
     pWindow = mpHierarchy->mpFirstChild;
     while ( pWindow )
     {
-        if ( pWindow->mpWindowImpl->mbReallyVisible )
+        if ( pWindow->mpVisibilityState->mbReallyVisible )
             pWindow->ImplResetReallyVisible();
         pWindow = pWindow->mpHierarchy->mpNext;
     }

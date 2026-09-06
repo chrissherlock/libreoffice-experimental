@@ -35,6 +35,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowVisibilityState.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
@@ -167,7 +168,7 @@ void Window::ImplCallOverlapPaint()
     vcl::Window* pTempWindow = mpHierarchy->mpFirstOverlap;
     while ( pTempWindow )
     {
-        if ( pTempWindow->mpWindowImpl->mbReallyVisible )
+        if ( pTempWindow->mpVisibilityState->mbReallyVisible )
             pTempWindow->ImplCallOverlapPaint();
         pTempWindow = pTempWindow->mpHierarchy->mpNext;
     }
@@ -198,7 +199,7 @@ IMPL_LINK_NOARG(Window, ImplHandlePaintHdl, Timer *, void)
     {
         mpWindowImpl->mpFrameData->maPaintIdle.Start();
     }
-    else if ( mpWindowImpl->mbReallyVisible )
+    else if ( mpVisibilityState->mbReallyVisible )
     {
         ImplCallOverlapPaint();
         if (comphelper::LibreOfficeKit::isActive() &&
@@ -211,7 +212,7 @@ IMPL_LINK_NOARG(Window, ImplHandleResizeTimerHdl, Timer *, void)
 {
     comphelper::ProfileZone aZone("VCL idle resize");
 
-    if( mpWindowImpl->mbReallyVisible )
+    if( mpVisibilityState->mbReallyVisible )
     {
         ImplCallResize();
         if( mpWindowImpl->mpFrameData->maPaintIdle.IsActive() )
@@ -538,7 +539,7 @@ void Window::ImplValidate()
 
 void Window::ImplUpdateAll()
 {
-    if ( !mpWindowImpl || !mpWindowImpl->mbReallyVisible )
+    if ( !mpVisibilityState || !mpVisibilityState->mbReallyVisible )
         return;
 
     bool bFlush = false;
@@ -815,10 +816,10 @@ void Window::Validate()
 
 bool Window::HasPaintEvent() const
 {
-    if (!mpWindowImpl)
+    if (!mpVisibilityState || !mpHierarchy || !mpInvalidation)
         return false;
 
-    if ( !mpWindowImpl->mbReallyVisible )
+    if ( !mpVisibilityState->mbReallyVisible )
         return false;
 
     if ( mpHierarchy->mpFrameWindow->mpInvalidation->mbPaintFrame )
@@ -844,7 +845,7 @@ bool Window::HasPaintEvent() const
 
 void Window::PaintImmediately()
 {
-    if (!mpWindowImpl)
+    if (!mpHierarchy || !mpVisibilityState)
         return;
 
     if ( mpHierarchy->mpBorderWindow )
@@ -853,7 +854,7 @@ void Window::PaintImmediately()
         return;
     }
 
-    if ( !mpWindowImpl->mbReallyVisible )
+    if ( !mpVisibilityState->mbReallyVisible )
         return;
 
     bool bFlush = false;
@@ -1010,8 +1011,8 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
     }
 
 
-    bool bRVisible = mpWindowImpl->mbReallyVisible;
-    mpWindowImpl->mbReallyVisible = mpWindowImpl->mbVisible;
+    bool bRVisible = mpVisibilityState->mbReallyVisible;
+    mpVisibilityState->mbReallyVisible = mpVisibilityState->mbVisible;
     bool bDevOutput = GetOutDev()->mbDevOutput;
     GetOutDev()->mbDevOutput = true;
 
@@ -1096,7 +1097,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 
     GetOutDev()->SetConnectMetaFile( pOldMtf );
     GetOutDev()->EnableOutput( bOutput );
-    mpWindowImpl->mbReallyVisible = bRVisible;
+    mpVisibilityState->mbReallyVisible = bRVisible;
 
     // paint metafile to VDev
     VclPtrInstance<VirtualDevice> pMaskedDevice(rTargetOutDev, DeviceFormat::WITH_ALPHA);
@@ -1136,7 +1137,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
     GetOutDev()->Pop();
 
     GetOutDev()->EnableOutput( bOutput );
-    mpWindowImpl->mbReallyVisible = bRVisible;
+    mpVisibilityState->mbReallyVisible = bRVisible;
     GetOutDev()->mbDevOutput = bDevOutput;
     GetOutDev()->SetDPIX(nOldDPIX);
     GetOutDev()->SetDPIY(nOldDPIY);
@@ -1151,7 +1152,7 @@ void Window::PaintToDevice(OutputDevice& rDev, const Point& rPos)
     SAL_WARN_IF(rDev.IsRTLEnabled(), "vcl.window", "PaintToDevice to mirroring device");
 
     vcl::Window* pRealParent = nullptr;
-    if( ! mpWindowImpl->mbVisible )
+    if( ! mpVisibilityState->mbVisible )
     {
         vcl::Window* pTempParent = ImplGetDefaultWindow();
         pTempParent->EnableChildTransparentMode();
@@ -1162,15 +1163,15 @@ void Window::PaintToDevice(OutputDevice& rDev, const Point& rPos)
         Hide();
     }
 
-    bool bVisible = mpWindowImpl->mbVisible;
-    mpWindowImpl->mbVisible = true;
+    bool bVisible = mpVisibilityState->mbVisible;
+    mpVisibilityState->mbVisible = true;
 
     if( mpHierarchy->mpBorderWindow )
         mpHierarchy->mpBorderWindow->ImplPaintToDevice(rDev, rPos);
     else
         ImplPaintToDevice(rDev, rPos);
 
-    mpWindowImpl->mbVisible = bVisible;
+    mpVisibilityState->mbVisible = bVisible;
 
     if( pRealParent )
         SetParent( pRealParent );

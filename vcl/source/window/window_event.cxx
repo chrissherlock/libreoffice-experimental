@@ -31,6 +31,7 @@
 #include <helpwin.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowVisibilityState.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowInput.hxx>
 #include <WindowEventHandlers.hxx>
@@ -832,15 +833,15 @@ void Window::ImplNotifyKeyMouseCommandEventListeners(NotifyEvent& rNEvt)
 
 void Window::ImplCallInitShow()
 {
-    mpWindowImpl->mbReallyShown = true;
-    mpWindowImpl->mbInInitShow = true;
+    mpVisibilityState->mbReallyShown = true;
+    mpVisibilityState->mbInInitShow = true;
     CompatStateChanged(StateChangedType::InitShow);
-    mpWindowImpl->mbInInitShow = false;
+    mpVisibilityState->mbInInitShow = false;
 
     auto initVisibleWindows = [](vcl::Window* pWindow) {
         while (pWindow)
         {
-            if (pWindow->mpWindowImpl->mbVisible)
+            if (pWindow->mpVisibilityState->mbVisible)
                 pWindow->ImplCallInitShow();
             pWindow = pWindow->mpHierarchy->mpNext;
         }

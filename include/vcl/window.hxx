@@ -393,6 +393,7 @@ class WindowOutputDevice;
 class Dialog;
 class Edit;
 class WindowImpl;
+struct WindowVisibilityState;
 struct WindowClippingState;
 struct WindowInvalidation;
 struct WindowInput;
@@ -540,6 +541,7 @@ public:
     SAL_DLLPRIVATE WindowGeometry* ImplGetGeometry() const { return mpGeometry.get(); }
     SAL_DLLPRIVATE WindowViewport* ImplGetViewport() const { return mpViewport.get(); }
     SAL_DLLPRIVATE WindowFocusState* ImplGetFocusState() const { return mpFocusState.get(); }
+    SAL_DLLPRIVATE WindowVisibilityState* ImplGetVisibilityState() const { return mpVisibilityState.get(); }
     void SetType(WindowType eType);
     WindowType GetType() const;
     bool IsSystemWindow() const;
@@ -1107,6 +1109,7 @@ private:
     std::unique_ptr<WindowClippingState> mpClippingState;
     std::unique_ptr<WindowInvalidation> mpInvalidation;
     std::unique_ptr<WindowFocusState> mpFocusState;
+    std::unique_ptr<WindowVisibilityState> mpVisibilityState;
 
     // --- Lifecycle and Teardown ---
     SAL_DLLPRIVATE void ImplDeInitDND();

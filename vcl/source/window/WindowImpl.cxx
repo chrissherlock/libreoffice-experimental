@@ -127,15 +127,10 @@ WindowImpl::WindowImpl( WindowType eType )
     mbToolBox                           = false;                     // true: ToolBox is the base class
     mbMenuFloatingWindow                = false;                     // true: MenuFloatingWindow is the base class
     mbSplitter                          = false;                     // true: Splitter is the base class
-    mbVisible                           = false;                     // true: Show( true ) called
-    mbOverlapVisible                    = false;                     // true: Hide called for visible window from ImplHideAllOverlapWindow()
     mbDisabled                          = false;                     // true: Enable( false ) called
     mbInputDisabled                     = false;                     // true: EnableInput( false ) called
     mbNoUpdate                          = false;                     // true: SetUpdateMode( false ) called
     mbNoParentUpdate                    = false;                     // true: SetParentUpdateMode( false ) called
-    mbReallyVisible                     = false;                     // true: this and all parents to an overlapped window are visible
-    mbReallyShown                       = false;                     // true: this and all parents to an overlapped window are shown
-    mbInInitShow                        = false;                     // true: we are in InitShow
     mbChildPtrOverwrite                 = false;                     // true: PointerStyle overwrites Child-Pointer
     mbNoPtrVisible                      = false;                     // true: ShowPointer( false ) called
     mbDefPos                            = true;                      // true: Position is not Set
