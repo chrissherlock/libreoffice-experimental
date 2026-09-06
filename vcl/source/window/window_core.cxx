@@ -37,6 +37,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowFocusState.hxx>
+#include <WindowVisibilityState.hxx>
 #include <WindowHelpData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInput.hxx>
@@ -78,6 +79,7 @@ Window::Window(WindowType eType)
     , mpClippingState(std::make_unique<WindowClippingState>())
     , mpInvalidation(std::make_unique<WindowInvalidation>())
     , mpFocusState(std::make_unique<WindowFocusState>())
+    , mpVisibilityState(std::make_unique<WindowVisibilityState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -101,6 +103,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpClippingState(std::make_unique<WindowClippingState>())
     , mpInvalidation(std::make_unique<WindowInvalidation>())
     , mpFocusState(std::make_unique<WindowFocusState>())
+    , mpVisibilityState(std::make_unique<WindowVisibilityState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -132,7 +135,7 @@ void Window::dispose()
     CallEventListeners(VclEventId::ObjectDying);
 
     // do not send child events for frames that were registered as native frames
-    if (!IsNativeFrame() && mpWindowImpl->mbReallyVisible)
+    if (!IsNativeFrame() && mpVisibilityState->mbReallyVisible)
         if (ImplIsAccessibleCandidate() && GetAccessibleParentWindow())
             GetAccessibleParentWindow()->CallEventListeners(VclEventId::WindowChildDestroyed, this);
 
@@ -228,6 +231,7 @@ void Window::dispose()
     mpClippingState.reset();
     mpInvalidation.reset();
     mpFocusState.reset();
+    mpVisibilityState.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy

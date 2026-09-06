@@ -20,6 +20,7 @@
 
 #include <window.h>
 #include <WindowImpl.hxx>
+#include <WindowVisibilityState.hxx>
 #include <clipping_window.hxx>
 
 namespace
@@ -71,8 +72,8 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testExcludeWindowRegion_Comprehensive)
     pChild->Show();
 
     // Force visibility flags for the headless environment
-    pRoot->ImplGetWindowImpl()->mbReallyVisible = true;
-    pChild->ImplGetWindowImpl()->mbReallyVisible = true;
+    pRoot->ImplGetVisibilityState()->mbReallyVisible = true;
+    pChild->ImplGetVisibilityState()->mbReallyVisible = true;
 
     // Standard Rectangular Exclusion
     {
@@ -149,10 +150,10 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testClipChildren_Comprehensive)
     Application::Reschedule();
 
     // Force visibility flags
-    pRoot->ImplGetWindowImpl()->mbVisible = true;
-    pRoot->ImplGetWindowImpl()->mbReallyVisible = true;
-    pChild->ImplGetWindowImpl()->mbVisible = true;
-    pChild->ImplGetWindowImpl()->mbReallyVisible = true;
+    pRoot->ImplGetVisibilityState()->mbVisible = true;
+    pRoot->ImplGetVisibilityState()->mbReallyVisible = true;
+    pChild->ImplGetVisibilityState()->mbVisible = true;
+    pChild->ImplGetVisibilityState()->mbReallyVisible = true;
 
     // Initialize ALL clipping states (Parent AND Child)
     vcl::clipping::initWinClipRegion(*pRoot);
@@ -216,12 +217,12 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testClipSiblings_Comprehensive)
     Application::Reschedule();
 
     // Force headless visibility for the entire tree
-    pRoot->ImplGetWindowImpl()->mbVisible = true;
-    pRoot->ImplGetWindowImpl()->mbReallyVisible = true;
-    pS1->ImplGetWindowImpl()->mbVisible = true;
-    pS1->ImplGetWindowImpl()->mbReallyVisible = true;
-    pS2->ImplGetWindowImpl()->mbVisible = true;
-    pS2->ImplGetWindowImpl()->mbReallyVisible = true;
+    pRoot->ImplGetVisibilityState()->mbVisible = true;
+    pRoot->ImplGetVisibilityState()->mbReallyVisible = true;
+    pS1->ImplGetVisibilityState()->mbVisible = true;
+    pS1->ImplGetVisibilityState()->mbReallyVisible = true;
+    pS2->ImplGetVisibilityState()->mbVisible = true;
+    pS2->ImplGetVisibilityState()->mbReallyVisible = true;
 
     // Initialize clipping states
     vcl::clipping::initWinClipRegion(*pRoot);

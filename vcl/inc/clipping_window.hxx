@@ -89,8 +89,9 @@ struct NativeSyncStatus
     bool bInvalidateDevice;
 };
 
-VCL_DLLPUBLIC bool syncNativeWindow(WindowImpl& rImpl, vcl::Region& rWinChildClipRegion,
-                                    const vcl::Region* pOldRegion, bool& rOutUpdate);
+VCL_DLLPUBLIC bool syncNativeWindow(WindowImpl& rImpl, WindowVisibilityState& rVisibilityState,
+                                    vcl::Region& rWinChildClipRegion, const vcl::Region* pOldRegion,
+                                    bool& rOutUpdate);
 VCL_DLLPUBLIC bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion);
 VCL_DLLPUBLIC void updateNativeObjectClip(vcl::Window& rWindow);
 

@@ -28,6 +28,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <PaintBufferGuard.hxx>
+#include <WindowVisibilityState.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowHierarchy.hxx>
@@ -59,7 +60,7 @@ PaintHelper::~PaintHelper()
         vcl::Window* pTempWindow = m_pWindow->ImplGetWindowHierarchy()->mpLastChild;
         while (pTempWindow)
         {
-            if (pTempWindow->ImplGetWindowImpl()->mbVisible)
+            if (pTempWindow->ImplGetVisibilityState()->mbVisible)
                 pTempWindow->ImplCallPaint(m_pChildRegion.get(), m_nPaintFlags);
             pTempWindow = pTempWindow->ImplGetWindowHierarchy()->mpPrev;
         }

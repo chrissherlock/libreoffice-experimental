@@ -39,6 +39,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowVisibilityState.hxx>
 #include <WindowInput.hxx>
 #include <WindowLOKData.hxx>
 #include <WindowControlAppearance.hxx>
@@ -147,7 +148,7 @@ PointerStyle Window::ImplGetMousePointer() const
 
 void Window::ImplCallMouseMove( sal_uInt16 nMouseCode, bool bModChanged )
 {
-    if ( !(mpWindowImpl->mpFrameData->mbMouseIn && mpHierarchy->mpFrameWindow->mpWindowImpl->mbReallyVisible) )
+    if ( !(mpWindowImpl->mpFrameData->mbMouseIn && mpHierarchy->mpFrameWindow->mpVisibilityState->mbReallyVisible) )
         return;
 
     sal_uInt64 nTime   = tools::Time::GetSystemTicks();

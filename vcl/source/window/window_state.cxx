@@ -29,6 +29,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowVisibilityState.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowInput.hxx>
 #include <WindowInvalidation.hxx>
@@ -470,13 +471,16 @@ bool Window::IsControlBackground() const
 
 bool Window::IsInPaint() const { return mpInvalidation && mpInvalidation->mbInPaint; }
 
-bool Window::IsVisible() const { return mpWindowImpl && mpWindowImpl->mbVisible; }
+bool Window::IsVisible() const { return mpVisibilityState && mpVisibilityState->mbVisible; }
 
-bool Window::IsReallyVisible() const { return mpWindowImpl && mpWindowImpl->mbReallyVisible; }
+bool Window::IsReallyVisible() const
+{
+    return mpVisibilityState && mpVisibilityState->mbReallyVisible;
+}
 
-bool Window::IsReallyShown() const { return mpWindowImpl && mpWindowImpl->mbReallyShown; }
+bool Window::IsReallyShown() const { return mpVisibilityState && mpVisibilityState->mbReallyShown; }
 
-bool Window::IsInInitShow() const { return mpWindowImpl->mbInInitShow; }
+bool Window::IsInInitShow() const { return mpVisibilityState->mbInInitShow; }
 
 bool Window::IsEnabled() const { return mpWindowImpl && !mpWindowImpl->mbDisabled; }
 

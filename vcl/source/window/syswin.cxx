@@ -51,6 +51,7 @@
 #include <svdata.hxx>
 #include <brdwin.hxx>
 #include <WindowImpl.hxx>
+#include <WindowVisibilityState.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
@@ -688,7 +689,7 @@ void SystemWindow::SetWindowState(const vcl::WindowData& rData)
                 while( pWin )
                 {
                     if( !pWin->IsAncestorOf( *this ) && ( pWin != this ) &&
-                        pWin->ImplGetWindow()->IsTopWindow() && pWin->mpWindowImpl->mbReallyVisible )
+                        pWin->ImplGetWindow()->IsTopWindow() && pWin->mpVisibilityState->mbReallyVisible )
                     {
                         SalFrameGeometry g = pWin->mpWindowImpl->mpFrame->GetGeometry();
                         if( std::abs(g.x()-aState.x()) < 2 && std::abs(g.y()-aState.y()) < 5 )

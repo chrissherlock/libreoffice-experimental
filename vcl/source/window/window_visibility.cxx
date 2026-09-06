@@ -22,6 +22,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowVisibilityState.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
@@ -86,7 +87,7 @@ vcl::Region Window::ImplGetWinClipRegion()
 
 std::optional<bool> Window::ImplHideWindow(ShowFlags nFlags)
 {
-    if (!mpWindowImpl->mbReallyVisible)
+    if (!mpVisibilityState->mbReallyVisible)
         return false;
 
     VclPtr<vcl::Window> xWindow(this);
@@ -97,7 +98,7 @@ std::optional<bool> Window::ImplHideWindow(ShowFlags nFlags)
     if (!xWindow->mpWindowImpl)
         return std::nullopt;
 
-    bool bRealVisibilityChanged = mpWindowImpl->mbReallyVisible;
+    bool bRealVisibilityChanged = mpVisibilityState->mbReallyVisible;
     ImplResetReallyVisible();
     vcl::clipping::setClipFlag(*this);
 
@@ -137,7 +138,7 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
     CompatStateChanged(StateChangedType::Visible);
 
     bool bRealVisibilityChanged = false;
-    if (mpWindowImpl->mbReallyVisible)
+    if (mpVisibilityState->mbReallyVisible)
     {
         std::optional<bool> bResult = ImplHideWindow(nFlags);
         if (!bResult)
@@ -187,7 +188,7 @@ bool Window::ImplUpdateRealVisibility(ShowFlags nFlags)
 
     // If it's not a frame and the parent isn't actually on screen,
     // we don't need to do any real visibility rendering yet.
-    if (!mpWindowImpl->mbFrame && !pVisibilityParent->mpWindowImpl->mbReallyVisible)
+    if (!mpWindowImpl->mbFrame && !pVisibilityParent->mpVisibilityState->mbReallyVisible)
         return false;
 
     // if a window becomes visible, send all child windows a StateChange,
@@ -195,8 +196,8 @@ bool Window::ImplUpdateRealVisibility(ShowFlags nFlags)
     ImplCallInitShow();
     ImplRaiseOverlapWindow(nFlags);
 
-    // adjust mpWindowImpl->mbReallyVisible
-    bool bRealVisibilityChanged = !mpWindowImpl->mbReallyVisible;
+    // adjust mpVisibilityState->mbReallyVisible
+    bool bRealVisibilityChanged = !mpVisibilityState->mbReallyVisible;
     ImplSetReallyVisible();
 
     // assure clip rectangles will be recalculated
@@ -304,10 +305,10 @@ std::optional<bool> Window::ImplShowWindow(ShowFlags nFlags)
 
 void Window::Show(bool bVisible, ShowFlags nFlags)
 {
-    if (!mpWindowImpl || mpWindowImpl->mbVisible == bVisible)
+    if (!mpWindowImpl || mpVisibilityState->mbVisible == bVisible)
         return;
 
-    mpWindowImpl->mbVisible = bVisible;
+    mpVisibilityState->mbVisible = bVisible;
 
     // Dispatch to the appropriate symmetric handler
     std::optional<bool> oRealVisChanged
@@ -328,14 +329,14 @@ void Window::ImplSetReallyVisible()
     // #i43594# it is possible that INITSHOW was never send, because the visibility state changed between
     // ImplCallInitShow() and ImplSetReallyVisible() when called from Show()
     // mbReallyShown is a useful indicator
-    if (!mpWindowImpl->mbReallyShown)
+    if (!mpVisibilityState->mbReallyShown)
         ImplCallInitShow();
 
-    bool bBecameReallyVisible = !mpWindowImpl->mbReallyVisible;
+    bool bBecameReallyVisible = !mpVisibilityState->mbReallyVisible;
 
     GetOutDev()->mbDevOutput = true;
-    mpWindowImpl->mbReallyVisible = true;
-    mpWindowImpl->mbReallyShown = true;
+    mpVisibilityState->mbReallyVisible = true;
+    mpVisibilityState->mbReallyShown = true;
 
     // the SHOW/HIDE events serve as indicators to send child creation/destroy events to the access bridge.
     // For this, the data member of the event must not be NULL.
@@ -350,7 +351,7 @@ void Window::ImplSetReallyVisible()
     auto propagateToVisible = [](vcl::Window* pStart) {
         for (vcl::Window* pWin = pStart; pWin; pWin = pWin->mpHierarchy->mpNext)
         {
-            if (pWin->mpWindowImpl->mbVisible)
+            if (pWin->mpVisibilityState->mbVisible)
                 pWin->ImplSetReallyVisible();
         }
     };

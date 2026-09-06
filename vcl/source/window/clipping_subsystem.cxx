@@ -14,6 +14,7 @@
 #include <window.h>
 #include <clipping_window.hxx>
 #include <WindowImpl.hxx>
+#include <WindowVisibilityState.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
 #include <salobj.hxx>
@@ -52,8 +53,9 @@ void initWinChildClipRegion(const vcl::Window& rWindow)
         clipChildren(rWindow, *pImpl->mpChildClipRegion);
 }
 
-bool syncNativeWindow(WindowImpl& rImpl, vcl::Region& rWinChildClipRegion,
-                      const vcl::Region* pOldRegion, bool& rOutUpdate)
+bool syncNativeWindow(WindowImpl& rImpl, WindowVisibilityState& rVisibilityState,
+                      vcl::Region& rWinChildClipRegion, const vcl::Region* pOldRegion,
+                      bool& rOutUpdate)
 {
     if (!rImpl.mpSysObj)
     {
@@ -61,7 +63,7 @@ bool syncNativeWindow(WindowImpl& rImpl, vcl::Region& rWinChildClipRegion,
         return true;
     }
 
-    if (!rImpl.mbReallyVisible || rWinChildClipRegion.IsEmpty())
+    if (!rVisibilityState.mbReallyVisible || rWinChildClipRegion.IsEmpty())
     {
         rImpl.mpSysObj->Show(false);
         rOutUpdate = true;
@@ -262,7 +264,8 @@ void accumulateSiblingBoundaries(vcl::Window& rWindow, const vcl::Region& rInter
     for (vcl::Window* pSibling : getChildWindows(*pParent->ImplGetWindowHierarchy()))
     {
         WindowImpl* pSiblingImpl = pSibling->ImplGetWindowImpl();
-        if (pSiblingImpl && pSiblingImpl->mbReallyVisible && (pSibling != &rWindow))
+        WindowVisibilityState* pSiblingVisibility = pSibling->ImplGetVisibilityState();
+        if (pSiblingImpl && pSiblingVisibility->mbReallyVisible && (pSibling != &rWindow))
         {
             aTempRegion = rInterRegion;
             intersectWindowRegion(*pSibling, aTempRegion);
@@ -282,7 +285,8 @@ void accumulateChildBoundaries(vcl::Window& rWindow, const vcl::Region& rInterRe
     for (vcl::Window* pChild : getChildWindows(*pHierarchy))
     {
         WindowImpl* pChildImpl = pChild->ImplGetWindowImpl();
-        if (pChildImpl && pChildImpl->mbReallyVisible)
+        WindowVisibilityState* pChildVisibility = pChild->ImplGetVisibilityState();
+        if (pChildImpl && pChildVisibility->mbReallyVisible)
         {
             aTempRegion = rInterRegion;
             intersectWindowRegion(*pChild, aTempRegion);
@@ -303,7 +307,7 @@ void accumulateChildOverlaps(vcl::Window* pWindow, const vcl::Region& rInterRegi
 void accumulateWindowAndChildOverlaps(vcl::Window* pWindow, const vcl::Region& rInterRegion,
                                       vcl::Region& rRegion)
 {
-    if (pWindow->ImplGetWindowImpl()->mbReallyVisible)
+    if (pWindow->ImplGetVisibilityState()->mbReallyVisible)
     {
         vcl::Region aTempRegion(rInterRegion);
         intersectWindowRegion(*pWindow, aTempRegion);
@@ -346,7 +350,7 @@ void excludeWindowRegion(vcl::Window& rWindow, vcl::Region& rRegion)
 
 void excludeWindowAndOverlapRegions(vcl::Window& rWindow, vcl::Region& rRegion)
 {
-    if (rWindow.ImplGetWindowImpl()->mbReallyVisible)
+    if (rWindow.ImplGetVisibilityState()->mbReallyVisible)
         excludeWindowRegion(rWindow, rRegion);
 
     excludeOverlapWindows(rWindow, rRegion);
@@ -365,7 +369,7 @@ bool clipChildren(const vcl::Window& rWindow, vcl::Region& rRegion)
 
     for (vcl::Window* pChild : getChildWindows(*rWindow.ImplGetWindowHierarchy()))
     {
-        if (pChild->ImplGetWindowImpl()->mbReallyVisible)
+        if (pChild->ImplGetVisibilityState()->mbReallyVisible)
         {
             ParentClipMode nClipMode = getParentClipMode(*pChild);
 
@@ -383,7 +387,7 @@ void clipAllChildren(const vcl::Window& rWindow, vcl::Region& rRegion)
 {
     for (vcl::Window* pChild : getChildWindows(*rWindow.ImplGetWindowHierarchy()))
     {
-        if (pChild->ImplGetWindowImpl()->mbReallyVisible)
+        if (pChild->ImplGetVisibilityState()->mbReallyVisible)
             excludeWindowRegion(*pChild, rRegion);
     }
 }
@@ -399,7 +403,7 @@ void clipSiblings(const vcl::Window& rWindow, vcl::Region& rRegion)
         if (pSibling == &rWindow)
             break; // We only clip against preceding siblings
 
-        if (pSibling->ImplGetWindowImpl()->mbReallyVisible)
+        if (pSibling->ImplGetVisibilityState()->mbReallyVisible)
             excludeWindowRegion(*pSibling, rRegion);
     }
 }
@@ -434,7 +438,7 @@ void excludeOverlapWindows(const vcl::Window& rWindow, vcl::Region& rRegion)
 {
     for (vcl::Window* pOverlap : getOverlapWindows(*rWindow.ImplGetWindowHierarchy()))
     {
-        if (pOverlap->ImplGetWindowImpl()->mbReallyVisible)
+        if (pOverlap->ImplGetVisibilityState()->mbReallyVisible)
         {
             excludeWindowRegion(*pOverlap, rRegion);
             excludeOverlapWindows(*pOverlap, rRegion);
@@ -482,7 +486,7 @@ void clipBoundaries(const vcl::Window& rWindow, vcl::Region& rRegion, bool bThis
 
     for (vcl::Window* pOverlapWin : getAncestralOverlapSiblings(const_cast<vcl::Window*>(&rWindow)))
     {
-        if (pOverlapWin->ImplGetWindowImpl()->mbReallyVisible)
+        if (pOverlapWin->ImplGetVisibilityState()->mbReallyVisible)
             excludeWindowRegion(*pOverlapWin, rRegion);
 
         excludeOverlapWindows(*pOverlapWin, rRegion);
@@ -577,8 +581,9 @@ bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion)
 
     vcl::Region& rWinChildClipRegion = getWinChildClipRegion(rWindow);
     bool bUpdate = true;
+    WindowVisibilityState* pVisibilityState = rWindow.ImplGetVisibilityState();
 
-    if (syncNativeWindow(*pWindowImpl, rWinChildClipRegion, pOldRegion, bUpdate))
+    if (syncNativeWindow(*pWindowImpl, *pVisibilityState, rWinChildClipRegion, pOldRegion, bUpdate))
         return bUpdate;
 
     lcl_updateNativeObjectClipRegion(rWindow, rWinChildClipRegion,
