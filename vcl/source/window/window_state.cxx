@@ -358,7 +358,7 @@ void Window::SetUpdateMode(bool bUpdate)
 {
     if (mpWindowImpl)
     {
-        mpWindowImpl->mbNoUpdate = !bUpdate;
+        mpInvalidation->mbNoUpdate = !bUpdate;
         CompatStateChanged(StateChangedType::UpdateMode);
     }
 }
@@ -417,12 +417,12 @@ void Window::EnableAllResize() { mpGeometry->mbAllResize = true; }
 
 void Window::EnableChildTransparentMode(bool bEnable)
 {
-    mpWindowImpl->mbChildTransparent = bEnable;
+    mpInvalidation->mbChildTransparent = bEnable;
 }
 
 bool Window::IsChildTransparentModeEnabled() const
 {
-    return mpWindowImpl && mpWindowImpl->mbChildTransparent;
+    return mpInvalidation && mpInvalidation->mbChildTransparent;
 }
 
 bool Window::IsMouseTransparent() const { return mpInput && mpInput->mbMouseTransparent; }
@@ -500,9 +500,9 @@ void Window::EnablePaint(bool bEnable) { mpInvalidation->mbPaintDisabled = !bEna
 
 bool Window::IsPaintEnabled() const { return !mpInvalidation->mbPaintDisabled; }
 
-bool Window::IsUpdateMode() const { return !mpWindowImpl->mbNoUpdate; }
+bool Window::IsUpdateMode() const { return !mpInvalidation->mbNoUpdate; }
 
-void Window::SetParentUpdateMode(bool bUpdate) { mpWindowImpl->mbNoParentUpdate = !bUpdate; }
+void Window::SetParentUpdateMode(bool bUpdate) { mpInvalidation->mbNoParentUpdate = !bUpdate; }
 
 bool Window::IsActive() const { return mpFocusState->mbActive; }
 

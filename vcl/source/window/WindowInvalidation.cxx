@@ -9,9 +9,14 @@
 
 #include <WindowInvalidation.hxx>
 
+#include <stdlib.h>
+
 WindowInvalidation::WindowInvalidation()
     : mpPaintRegion(nullptr)
 {
+    static bool bDoubleBuffer = getenv("VCL_DOUBLEBUFFERING_FORCE_ENABLE");
+    mbDoubleBufferingRequested
+        = bDoubleBuffer; // when we are not sure, assume it cannot do double-buffering via RenderContext
 }
 
 WindowInvalidation::~WindowInvalidation() = default;

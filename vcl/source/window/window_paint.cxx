@@ -91,7 +91,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
     }
 
     // #98943# trigger drawing of toolbox selection after all children are painted
-    if (mpWindowImpl->mbDrawSelectionBackground)
+    if (mpInvalidation->mbDrawSelectionBackground)
         pHelper->SetSelectionRect(aPaintRect);
     pHelper->SetPaintRect(aPaintRect);
 }

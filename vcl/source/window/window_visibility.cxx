@@ -72,7 +72,7 @@ void Window::ImplInvalidateParentOnHide(vcl::Region& rInvRegion)
 {
     ImplExpandInvalidationForNativeWidget(rInvRegion);
 
-    if (!mpWindowImpl->mbNoParentUpdate && !rInvRegion.IsEmpty())
+    if (!mpInvalidation->mbNoParentUpdate && !rInvRegion.IsEmpty())
         ImplInvalidateParentFrameRegion(rInvRegion);
 
     ImplGenerateMouseMove();
@@ -122,11 +122,11 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
 
     if (mpHierarchy->mpBorderWindow)
     {
-        bool bOldUpdate = mpHierarchy->mpBorderWindow->mpWindowImpl->mbNoParentUpdate;
-        if (mpWindowImpl->mbNoParentUpdate)
-            mpHierarchy->mpBorderWindow->mpWindowImpl->mbNoParentUpdate = true;
+        bool bOldUpdate = mpHierarchy->mpBorderWindow->mpInvalidation->mbNoParentUpdate;
+        if (mpInvalidation->mbNoParentUpdate)
+            mpHierarchy->mpBorderWindow->mpInvalidation->mbNoParentUpdate = true;
         mpHierarchy->mpBorderWindow->Show(false, nFlags);
-        mpHierarchy->mpBorderWindow->mpWindowImpl->mbNoParentUpdate = bOldUpdate;
+        mpHierarchy->mpBorderWindow->mpInvalidation->mbNoParentUpdate = bOldUpdate;
     }
     else if (mpWindowImpl->mbFrame)
     {
