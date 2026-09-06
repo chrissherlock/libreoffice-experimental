@@ -114,9 +114,7 @@ WindowImpl::WindowImpl( WindowType eType )
     mnPrevStyle                         = 0;                         // prevstyle (set in SetStyle)
     mnExtendedStyle                     = WindowExtendedStyle::NONE; // extended style (init in ImplInitWindow)
     meType                              = eType;                     // type
-    mnGetFocusFlags                     = GetFocusFlags::NONE;       // Flags for GetFocus()-Call
     mnWaitCount                         = 0;                         // Wait-Count (>1 == "wait" mouse pointer)
-    mnActivateMode                      = ActivateModeFlags::NONE;   // Will be converted in System/Overlap-Windows
     mnDlgCtrlFlags                      = DialogControlFlags::NONE;  // DialogControl-Flags
     mbFrame                             = false;                     // true: Window is a frame window
     mbBorderWin                         = false;                     // true: Window is a border window
@@ -135,7 +133,6 @@ WindowImpl::WindowImpl( WindowType eType )
     mbInputDisabled                     = false;                     // true: EnableInput( false ) called
     mbNoUpdate                          = false;                     // true: SetUpdateMode( false ) called
     mbNoParentUpdate                    = false;                     // true: SetParentUpdateMode( false ) called
-    mbActive                            = false;                     // true: Window Active
     mbReallyVisible                     = false;                     // true: this and all parents to an overlapped window are visible
     mbReallyShown                       = false;                     // true: this and all parents to an overlapped window are shown
     mbInInitShow                        = false;                     // true: we are in InitShow
@@ -149,15 +146,8 @@ WindowImpl::WindowImpl( WindowType eType )
     mbChildTransparent                  = false;                     // true: Child-windows are allowed to switch to transparent (incl. Parent-CLIPCHILDREN)
     mbMouseTransparent                  = false;                     // true: Window is transparent for Mouse
     mbDlgCtrlStart                      = false;                     // true: From here on own Dialog-Control
-    mbFocusVisible                      = false;                     // true: Focus Visible
-    mbUseNativeFocus                    = false;
-    mbNativeFocusVisible                = false;                     // true: native Focus Visible
-    mbInShowFocus                       = false;                     // prevent recursion
-    mbInHideFocus                       = false;                     // prevent recursion
     mbTrackVisible                      = false;                     // true: Tracking Visible
     mbAlwaysOnTop                       = false;                     // true: always visible for all others windows
-    mbCompoundControl                   = false;                     // true: Composite Control => Listener...
-    mbCompoundControlHasFocus           = false;                     // true: Composite Control has focus somewhere
     mbAllResize                         = false;                     // true: Also sent ResizeEvents with 0,0
     mbInDispose                         = false;                     // true: We're still in Window::dispose()
     mbCreatedWithToolkit                = false;

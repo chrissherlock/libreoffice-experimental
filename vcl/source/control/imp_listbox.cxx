@@ -32,6 +32,7 @@
 #include <listbox.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowFocusState.hxx>
 
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
 
@@ -2522,7 +2523,7 @@ ImplWin::ImplWin( vcl::Window* pParent, WinBits nWinStyle ) :
     else
         SetBackground( Wallpaper( GetSettings().GetStyleSettings().GetFieldColor() ) );
 
-    ImplGetWindowImpl()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
+    ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
 
     mbEdgeBlending = false;
     mnItemPos = LISTBOX_ENTRY_NOTFOUND;

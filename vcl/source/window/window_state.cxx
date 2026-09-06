@@ -29,6 +29,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowFocusState.hxx>
 #include <WindowInput.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowHierarchy.hxx>
@@ -326,26 +327,26 @@ void Window::SetActivateMode(ActivateModeFlags nMode)
     if (mpHierarchy->mpBorderWindow)
         mpHierarchy->mpBorderWindow->SetActivateMode(nMode);
 
-    if (mpWindowImpl->mnActivateMode == nMode)
+    if (mpFocusState->mnActivateMode == nMode)
         return;
 
-    mpWindowImpl->mnActivateMode = nMode;
+    mpFocusState->mnActivateMode = nMode;
 
     // possibly trigger Deactivate/Activate
-    if (mpWindowImpl->mnActivateMode != ActivateModeFlags::NONE)
+    if (mpFocusState->mnActivateMode != ActivateModeFlags::NONE)
     {
-        if ((mpWindowImpl->mbActive || (GetType() == WindowType::BORDERWINDOW))
+        if ((mpFocusState->mbActive || (GetType() == WindowType::BORDERWINDOW))
             && !HasChildPathFocus(true))
         {
-            mpWindowImpl->mbActive = false;
+            mpFocusState->mbActive = false;
             Deactivate();
         }
     }
     else
     {
-        if (!mpWindowImpl->mbActive || (GetType() == WindowType::BORDERWINDOW))
+        if (!mpFocusState->mbActive || (GetType() == WindowType::BORDERWINDOW))
         {
-            mpWindowImpl->mbActive = true;
+            mpFocusState->mbActive = true;
             Activate();
         }
     }
@@ -486,7 +487,7 @@ bool Window::IsAlwaysEnableInput() const
     return mpInput->meAlwaysInputMode == AlwaysInputEnabled;
 }
 
-ActivateModeFlags Window::GetActivateMode() const { return mpWindowImpl->mnActivateMode; }
+ActivateModeFlags Window::GetActivateMode() const { return mpFocusState->mnActivateMode; }
 
 bool Window::IsAlwaysOnTopEnabled() const { return mpWindowImpl->mbAlwaysOnTop; }
 
@@ -498,11 +499,11 @@ bool Window::IsUpdateMode() const { return !mpWindowImpl->mbNoUpdate; }
 
 void Window::SetParentUpdateMode(bool bUpdate) { mpWindowImpl->mbNoParentUpdate = !bUpdate; }
 
-bool Window::IsActive() const { return mpWindowImpl->mbActive; }
+bool Window::IsActive() const { return mpFocusState->mbActive; }
 
-GetFocusFlags Window::GetGetFocusFlags() const { return mpWindowImpl->mnGetFocusFlags; }
+GetFocusFlags Window::GetGetFocusFlags() const { return mpFocusState->mnGetFocusFlags; }
 
-bool Window::IsCompoundControl() const { return mpWindowImpl && mpWindowImpl->mbCompoundControl; }
+bool Window::IsCompoundControl() const { return mpFocusState && mpFocusState->mbCompoundControl; }
 
 bool Window::IsWait() const { return (mpWindowImpl->mnWaitCount != 0); }
 

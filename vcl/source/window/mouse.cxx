@@ -44,6 +44,7 @@
 #include <WindowControlAppearance.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowFocusState.hxx>
 #include <svdata.hxx>
 #include <salobj.hxx>
 #include <salgdi.hxx>
@@ -355,11 +356,11 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         if ( pNewOverlapWindow && pNewOverlapWindow->mpWindowImpl )
         {
             vcl::Window* pNewRealWindow = pNewOverlapWindow->ImplGetWindow();
-            pNewOverlapWindow->mpWindowImpl->mbActive = true;
+            pNewOverlapWindow->mpFocusState->mbActive = true;
             pNewOverlapWindow->Activate();
             if ( pNewRealWindow != pNewOverlapWindow  && pNewRealWindow && pNewRealWindow->mpWindowImpl )
             {
-                pNewRealWindow->mpWindowImpl->mbActive = true;
+                pNewRealWindow->mpFocusState->mbActive = true;
                 pNewRealWindow->Activate();
             }
         }
@@ -387,27 +388,35 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         {
             if (mpControlAppearance && mpControlAppearance->mpCursor)
                 mpControlAppearance->mpCursor->ImplShow();
+
             mpInput->mbInFocusHdl = true;
-            mpWindowImpl->mnGetFocusFlags = nFlags;
+            mpFocusState->mnGetFocusFlags = nFlags;
+
             // if we're changing focus due to closing a popup floating window
             // notify the new focus window so it can restore the inner focus
             // eg, toolboxes can select their recent active item
             if( pOldFocusWindow &&
                 ! pOldFocusWindow->isDisposed() &&
                 ( pOldFocusWindow->GetDialogControlFlags() & DialogControlFlags::FloatWinPopupModeEndCancel ) )
-                mpWindowImpl->mnGetFocusFlags |= GetFocusFlags::FloatWinPopupModeEndCancel;
+            {
+                mpFocusState->mnGetFocusFlags |= GetFocusFlags::FloatWinPopupModeEndCancel;
+            }
+
             NotifyEvent aNEvt( NotifyEventType::GETFOCUS, this );
+
             if ( !ImplCallPreNotify( aNEvt ) && !xWindow->isDisposed() )
                 CompatGetFocus();
+
             if( !xWindow->isDisposed() )
             {
                 if (pOldFocusWindow && pOldFocusWindow->isDisposed())
                     pOldFocusWindow = nullptr;
                 ImplCallActivateListeners(pOldFocusWindow);
             }
+
             if( !xWindow->isDisposed() )
             {
-                mpWindowImpl->mnGetFocusFlags = GetFocusFlags::NONE;
+                mpFocusState->mnGetFocusFlags = GetFocusFlags::NONE;
                 mpInput->mbInFocusHdl = false;
             }
         }
