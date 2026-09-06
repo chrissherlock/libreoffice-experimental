@@ -44,6 +44,12 @@ struct WindowInvalidation
     bool mbPaintDisabled : 1 = false;
     bool mbPaintTransparent : 1 = false;
 
+    bool mbNoUpdate : 1 = false;
+    bool mbNoParentUpdate : 1 = false;
+    bool mbChildTransparent : 1 = false;
+    bool mbDoubleBufferingRequested : 1 = false;
+    bool mbDrawSelectionBackground : 1 = false;
+
     WindowInvalidation();
     ~WindowInvalidation();
 };

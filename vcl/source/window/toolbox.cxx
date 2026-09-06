@@ -32,6 +32,7 @@
 #include <vcl/ptrstyle.hxx>
 
 #include <WindowHierarchy.hxx>
+#include <WindowInvalidation.hxx>
 #include <clipping.hxx>
 #include <clipping_window.hxx>
 #include <bitmaps.hlst>
@@ -4756,7 +4757,7 @@ void ToolBox::ImplShowFocus()
         if (pItem && pItem->mpWindow && !pItem->mpWindow->isDisposed())
         {
             vcl::Window *pWin = pItem->mpWindow->ImplGetWindowHierarchy()->mpBorderWindow ? pItem->mpWindow->ImplGetWindowHierarchy()->mpBorderWindow.get() : pItem->mpWindow.get();
-            pWin->ImplGetWindowImpl()->mbDrawSelectionBackground = true;
+            pWin->ImplGetWindowInvalidation()->mbDrawSelectionBackground = true;
             pWin->Invalidate();
         }
     }
@@ -4771,7 +4772,7 @@ void ToolBox::ImplHideFocus()
         if( pItem && pItem->mpWindow )
         {
             vcl::Window *pWin = pItem->mpWindow->ImplGetWindowHierarchy()->mpBorderWindow ? pItem->mpWindow->ImplGetWindowHierarchy()->mpBorderWindow.get() : pItem->mpWindow.get();
-            pWin->ImplGetWindowImpl()->mbDrawSelectionBackground = false;
+            pWin->ImplGetWindowInvalidation()->mbDrawSelectionBackground = false;
             pWin->Invalidate();
         }
     }

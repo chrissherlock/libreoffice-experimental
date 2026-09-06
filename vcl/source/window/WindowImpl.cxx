@@ -127,18 +127,12 @@ WindowImpl::WindowImpl( WindowType eType )
     mbToolBox                           = false;                     // true: ToolBox is the base class
     mbMenuFloatingWindow                = false;                     // true: MenuFloatingWindow is the base class
     mbSplitter                          = false;                     // true: Splitter is the base class
-    mbNoUpdate                          = false;                     // true: SetUpdateMode( false ) called
-    mbNoParentUpdate                    = false;                     // true: SetParentUpdateMode( false ) called
-    mbChildTransparent                  = false;                     // true: Child-windows are allowed to switch to transparent (incl. Parent-CLIPCHILDREN)
     mbDlgCtrlStart                      = false;                     // true: From here on own Dialog-Control
     mbTrackVisible                      = false;                     // true: Tracking Visible
     mbAlwaysOnTop                       = false;                     // true: always visible for all others windows
     mbInDispose                         = false;                     // true: We're still in Window::dispose()
     mbCreatedWithToolkit                = false;
-    mbDrawSelectionBackground           = false;                     // true: draws transparent window background to indicate (toolbox) selection
     mbIsInTaskPaneList                  = false;                     // true: window was added to the taskpanelist in the topmost system window
-    static bool bDoubleBuffer = getenv("VCL_DOUBLEBUFFERING_FORCE_ENABLE");
-    mbDoubleBufferingRequested = bDoubleBuffer; // when we are not sure, assume it cannot do double-buffering via RenderContext
 }
 
 WindowImpl::~WindowImpl()

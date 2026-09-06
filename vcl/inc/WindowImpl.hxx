@@ -85,9 +85,6 @@ public:
                         mbDockWin:1,
                         mbFloatWin:1,
                         mbPushButton:1,
-                        mbNoUpdate:1,
-                        mbNoParentUpdate:1,
-                        mbChildTransparent:1,
                         mbDlgCtrlStart:1,
                         mbTrackVisible:1,
                         mbAlwaysOnTop:1,
@@ -96,9 +93,7 @@ public:
                         mbToolBox:1,
                         mbSplitter:1,
                         mbMenuFloatingWindow:1,
-                        mbDrawSelectionBackground:1,
-                        mbIsInTaskPaneList:1,
-                        mbDoubleBufferingRequested:1;
+                        mbIsInTaskPaneList:1;
     bool mbIsFormControl : 1 = false;
 };
 

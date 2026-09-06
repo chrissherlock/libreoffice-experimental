@@ -26,6 +26,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInvalidation.hxx>
 #include <WindowInput.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
@@ -293,7 +294,7 @@ void Window::ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInit
     mpHierarchy->mpOverlapWindow = this;
 
     auto shouldDoubleBuffer = [nStyle, this]() {
-        return !(nStyle & WB_DEFAULTWIN) && mpWindowImpl->mbDoubleBufferingRequested;
+        return !(nStyle & WB_DEFAULTWIN) && mpInvalidation->mbDoubleBufferingRequested;
     };
 
     if (shouldDoubleBuffer())
