@@ -51,6 +51,7 @@
 #include <WindowViewport.hxx>
 #include <WindowLOKData.hxx>
 #include <WindowClippingState.hxx>
+#include <WindowPointerState.hxx>
 #include <dndeventdispatcher.hxx>
 #include <helpwin.hxx>
 #include <salframe.hxx>
@@ -80,6 +81,7 @@ Window::Window(WindowType eType)
     , mpInvalidation(std::make_unique<WindowInvalidation>())
     , mpFocusState(std::make_unique<WindowFocusState>())
     , mpVisibilityState(std::make_unique<WindowVisibilityState>())
+    , mpPointerState(std::make_unique<WindowPointerState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -104,6 +106,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpInvalidation(std::make_unique<WindowInvalidation>())
     , mpFocusState(std::make_unique<WindowFocusState>())
     , mpVisibilityState(std::make_unique<WindowVisibilityState>())
+    , mpPointerState(std::make_unique<WindowPointerState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -232,6 +235,7 @@ void Window::dispose()
     mpInvalidation.reset();
     mpFocusState.reset();
     mpVisibilityState.reset();
+    mpPointerState.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy

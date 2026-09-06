@@ -129,8 +129,6 @@ WindowImpl::WindowImpl( WindowType eType )
     mbSplitter                          = false;                     // true: Splitter is the base class
     mbNoUpdate                          = false;                     // true: SetUpdateMode( false ) called
     mbNoParentUpdate                    = false;                     // true: SetParentUpdateMode( false ) called
-    mbChildPtrOverwrite                 = false;                     // true: PointerStyle overwrites Child-Pointer
-    mbNoPtrVisible                      = false;                     // true: ShowPointer( false ) called
     mbDefPos                            = true;                      // true: Position is not Set
     mbDefSize                           = true;                      // true: Size is not Set
     mbCallMove                          = true;                      // true: Move must be called by Show

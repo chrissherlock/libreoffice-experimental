@@ -87,8 +87,6 @@ public:
                         mbPushButton:1,
                         mbNoUpdate:1,
                         mbNoParentUpdate:1,
-                        mbChildPtrOverwrite:1,
-                        mbNoPtrVisible:1,
                         mbDefPos:1,
                         mbDefSize:1,
                         mbCallMove:1,
