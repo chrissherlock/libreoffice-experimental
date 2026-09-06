@@ -76,9 +76,7 @@ public:
     WindowExtendedStyle mnExtendedStyle;
     WindowType          meType;
     sal_uInt16          mnWaitCount;
-    GetFocusFlags       mnGetFocusFlags;
     ParentClipMode      mnParentClipMode;
-    ActivateModeFlags   mnActivateMode;
     DialogControlFlags  mnDlgCtrlFlags;
     bool                mbFrame:1,
                         mbBorderWin:1,
@@ -93,7 +91,6 @@ public:
                         mbInputDisabled:1,
                         mbNoUpdate:1,
                         mbNoParentUpdate:1,
-                        mbActive:1,
                         mbReallyVisible:1,
                         mbReallyShown:1,
                         mbInInitShow:1,
@@ -107,15 +104,8 @@ public:
                         mbChildTransparent:1,
                         mbMouseTransparent:1,
                         mbDlgCtrlStart:1,
-                        mbFocusVisible:1,
                         mbTrackVisible:1,
-                        mbUseNativeFocus:1,
-                        mbNativeFocusVisible:1,
-                        mbInShowFocus:1,
-                        mbInHideFocus:1,
                         mbAlwaysOnTop:1,
-                        mbCompoundControl:1,
-                        mbCompoundControlHasFocus:1,
                         mbAllResize:1,
                         mbInDispose:1,
                         mbOverlapVisible:1,

@@ -36,6 +36,7 @@
 #include <ImplAccessibleInfos.hxx>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
+#include <WindowFocusState.hxx>
 #include <WindowHelpData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInput.hxx>
@@ -76,6 +77,7 @@ Window::Window(WindowType eType)
     , mpLOKData(std::make_unique<WindowLOKData>())
     , mpClippingState(std::make_unique<WindowClippingState>())
     , mpInvalidation(std::make_unique<WindowInvalidation>())
+    , mpFocusState(std::make_unique<WindowFocusState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -98,6 +100,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpLOKData(std::make_unique<WindowLOKData>())
     , mpClippingState(std::make_unique<WindowClippingState>())
     , mpInvalidation(std::make_unique<WindowInvalidation>())
+    , mpFocusState(std::make_unique<WindowFocusState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -224,6 +227,7 @@ void Window::dispose()
     mpLOKData.reset();
     mpClippingState.reset();
     mpInvalidation.reset();
+    mpFocusState.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy
@@ -412,8 +416,8 @@ void Window::set_id(const OUString& rID) { mpHelpData->maID = rID; }
 
 void Window::SetCompoundControl(bool bCompound)
 {
-    if (mpWindowImpl)
-        mpWindowImpl->mbCompoundControl = bCompound;
+    if (mpFocusState)
+        mpFocusState->mbCompoundControl = bCompound;
 }
 
 vcl::Window* Window::ImplGetFrameWindow() const

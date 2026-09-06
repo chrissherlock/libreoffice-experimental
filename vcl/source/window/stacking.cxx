@@ -29,6 +29,7 @@
 #include <WindowInput.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowFocusState.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
@@ -388,12 +389,12 @@ void Window::ImplFocusToTop( ToTopFlags nFlags, bool bReallyVisible )
             // should always find the belonging BorderWindow
             if ( !pFocusWindow->mpHierarchy->mpBorderWindow )
             {
-                if ( pFocusWindow->mpWindowImpl->mnActivateMode & ActivateModeFlags::GrabFocus )
+                if ( pFocusWindow->mpFocusState->mnActivateMode & ActivateModeFlags::GrabFocus )
                     break;
             }
             pFocusWindow = pFocusWindow->ImplGetParent();
         }
-        if ( (pFocusWindow->mpWindowImpl->mnActivateMode & ActivateModeFlags::GrabFocus) &&
+        if ( (pFocusWindow->mpFocusState->mnActivateMode & ActivateModeFlags::GrabFocus) &&
              !pFocusWindow->HasChildPathFocus( true ) )
             pFocusWindow->GrabFocus();
     }

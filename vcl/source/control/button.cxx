@@ -45,6 +45,7 @@
 #include <bitmaps.hlst>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowFocusState.hxx>
 #include <vclstatuslistener.hxx>
 #include <osl/diagnose.h>
 
@@ -663,9 +664,9 @@ void PushButton::ImplInitSettings( bool bBackground )
         SetPaintTransparent( true );
 
         if ((GetStyle() & WB_FLATBUTTON) == 0)
-            mpWindowImpl->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
+            ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
         else
-            mpWindowImpl->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRectsForFlatButtons;
+            ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRectsForFlatButtons;
     }
     else
     {
@@ -1050,7 +1051,7 @@ void PushButton::ImplDrawPushButton(vcl::RenderContext& rRenderContext)
         aControlValue.mbSingleLine = (aInRectSize.Height() < 2 * aFontSize.Height());
 
         if (!aControlValue.m_bFlatButton || (nState & ControlState::ROLLOVER) || (nState & ControlState::PRESSED)
-            || (HasFocus() && mpWindowImpl->mbUseNativeFocus
+            || (HasFocus() && ImplGetFocusState()->mbUseNativeFocus
                 && !IsNativeControlSupported(ControlType::Pushbutton, ControlPart::Focus)))
         {
             bNativeOK = rRenderContext.DrawNativeControl(ControlType::Pushbutton, ControlPart::Entire, aCtrlRegion, nState,
@@ -1886,7 +1887,7 @@ void RadioButton::ImplInitSettings( bool bBackground )
         SetPaintTransparent( true );
         SetBackground();
         if( IsNativeControlSupported( ControlType::Radiobutton, ControlPart::Entire ) )
-            mpWindowImpl->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
+            ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
     }
     else
     {
@@ -2982,7 +2983,7 @@ void CheckBox::ImplInitSettings( bool bBackground )
         SetPaintTransparent( true );
         SetBackground();
         if( IsNativeControlSupported( ControlType::Checkbox, ControlPart::Entire ) )
-            ImplGetWindowImpl()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
+            ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
     }
     else
     {

@@ -29,6 +29,7 @@
 #include <vcl/IDialogRenderable.hxx>
 #include <rtl/ustring.hxx>
 #include <vcl/commandevent.hxx>
+#include <vcl/focus.hxx>
 
 #include <memory>
 
@@ -166,19 +167,6 @@ enum class ZOrderFlags
 namespace o3tl
 {
 template <> struct typed_flags<ZOrderFlags> : is_typed_flags<ZOrderFlags, 0x000f>
-{
-};
-}
-
-// Activate-Flags
-enum class ActivateModeFlags
-{
-    NONE = 0,
-    GrabFocus = 0x0001,
-};
-namespace o3tl
-{
-template <> struct typed_flags<ActivateModeFlags> : is_typed_flags<ActivateModeFlags, 0x0001>
 {
 };
 }
@@ -341,29 +329,6 @@ enum class StateChangedType : sal_uInt16
     ControlFocus = 20
 };
 
-// GetFocusFlags
-// must match constants in css:awt::FocusChangeReason
-enum class GetFocusFlags
-{
-    NONE = 0x0000,
-    Tab = 0x0001,
-    CURSOR = 0x0002, // avoid name-clash with X11 #define
-    Mnemonic = 0x0004,
-    F6 = 0x0008,
-    Forward = 0x0010,
-    Backward = 0x0020,
-    Around = 0x0040,
-    UniqueMnemonic = 0x0100,
-    Init = 0x0200,
-    FloatWinPopupModeEndCancel = 0x0400,
-};
-namespace o3tl
-{
-template <> struct typed_flags<GetFocusFlags> : is_typed_flags<GetFocusFlags, 0x077f>
-{
-};
-}
-
 // DialogControl-Flags
 enum class DialogControlFlags
 {
@@ -441,6 +406,7 @@ struct WindowControlAppearance;
 struct WindowGeometry;
 struct WindowViewport;
 struct ImplWinData;
+struct WindowFocusState;
 class PaintHelper;
 class VclSizeGroup;
 class Application;
@@ -573,6 +539,7 @@ public:
     SAL_DLLPRIVATE WindowControlAppearance* ImplGetControlAppearance() const { return mpControlAppearance.get(); }
     SAL_DLLPRIVATE WindowGeometry* ImplGetGeometry() const { return mpGeometry.get(); }
     SAL_DLLPRIVATE WindowViewport* ImplGetViewport() const { return mpViewport.get(); }
+    SAL_DLLPRIVATE WindowFocusState* ImplGetFocusState() const { return mpFocusState.get(); }
     void SetType(WindowType eType);
     WindowType GetType() const;
     bool IsSystemWindow() const;
@@ -1139,6 +1106,7 @@ private:
     std::unique_ptr<WindowLOKData> mpLOKData;
     std::unique_ptr<WindowClippingState> mpClippingState;
     std::unique_ptr<WindowInvalidation> mpInvalidation;
+    std::unique_ptr<WindowFocusState> mpFocusState;
 
     // --- Lifecycle and Teardown ---
     SAL_DLLPRIVATE void ImplDeInitDND();

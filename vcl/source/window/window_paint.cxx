@@ -39,6 +39,7 @@
 #include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowInvalidation.hxx>
+#include <WindowFocusState.hxx>
 #include <clipping/ClippingBridge.hxx>
 #include <clipping/ClipStateBuilder.hxx>
 #include <clipping_window.hxx>
@@ -96,7 +97,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
 
 void Window::PopPaintHelper(PaintHelper const *pHelper)
 {
-    if (mpWinData && mpWindowImpl->mbFocusVisible)
+    if (mpWinData && mpFocusState->mbFocusVisible)
         ImplInvertFocus(*mpWinData->mpFocusRect);
 
     mpInvalidation->mbInPaint = false;
@@ -1323,7 +1324,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     {
         if ( mpWinData )
         {
-            if ( mpWindowImpl->mbFocusVisible )
+            if ( mpFocusState->mbFocusVisible )
                 ImplInvertFocus( *mpWinData->mpFocusRect );
             if ( mpWindowImpl->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
                 InvertTracking( *mpWinData->mpTrackRect, mpWinData->mnTrackFlags );
@@ -1358,7 +1359,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
 #endif
         if ( mpWinData )
         {
-            if ( mpWindowImpl->mbFocusVisible )
+            if ( mpFocusState->mbFocusVisible )
                 ImplInvertFocus( *mpWinData->mpFocusRect );
             if ( mpWindowImpl->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
                 InvertTracking( *mpWinData->mpTrackRect, mpWinData->mnTrackFlags );

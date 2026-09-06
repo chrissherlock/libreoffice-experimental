@@ -51,6 +51,7 @@
 #include <svdata.hxx>
 #include <brdwin.hxx>
 #include <WindowImpl.hxx>
+#include <WindowFocusState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
 
@@ -90,7 +91,7 @@ SystemWindow::SystemWindow(WindowType eType, const char* pIdleDebugName, bool tr
     , maLayoutIdle( pIdleDebugName, *this, transferableIdle )
 {
     mpWindowImpl->mbSysWin            = true;
-    mpWindowImpl->mnActivateMode      = ActivateModeFlags::GrabFocus;
+    mpFocusState->mnActivateMode      = ActivateModeFlags::GrabFocus;
 
     //To-Do, reuse maResizeTimer
     maLayoutIdle.SetPriority(TaskPriority::RESIZE);

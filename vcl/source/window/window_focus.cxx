@@ -25,6 +25,7 @@
 
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
+#include <WindowFocusState.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowLOKData.hxx>
@@ -189,23 +190,23 @@ void Window::CompatLoseFocus()
 
 void Window::ShowFocus(const tools::Rectangle& rRect)
 {
-    if (mpWindowImpl->mbInShowFocus)
+    if (mpFocusState->mbInShowFocus)
         return;
 
-    mpWindowImpl->mbInShowFocus = true;
+    mpFocusState->mbInShowFocus = true;
 
     // native themeing suggest not to use focus rects
-    if (!(mpWindowImpl->mbUseNativeFocus && IsNativeWidgetEnabled()))
+    if (!(mpFocusState->mbUseNativeFocus && IsNativeWidgetEnabled()))
         ImplShowFocusRect(rRect);
     else
         ImplShowNativeFocus();
 
-    mpWindowImpl->mbInShowFocus = false;
+    mpFocusState->mbInShowFocus = false;
 }
 
 static bool lcl_IsSameFocusRect(const vcl::Window* pWindow, const tools::Rectangle& rRect)
 {
-    return !pWindow->IsInPaint() && pWindow->ImplGetWindowImpl()->mbFocusVisible
+    return !pWindow->IsInPaint() && pWindow->ImplGetFocusState()->mbFocusVisible
            && *pWindow->ImplGetWinData()->mpFocusRect == rRect;
 }
 
@@ -213,7 +214,7 @@ void Window::ImplShowFocusRect(const tools::Rectangle& rRect)
 {
     if (lcl_IsSameFocusRect(this, rRect))
     {
-        mpWindowImpl->mbInShowFocus = false;
+        mpFocusState->mbInShowFocus = false;
         return;
     }
 
@@ -221,22 +222,22 @@ void Window::ImplShowFocusRect(const tools::Rectangle& rRect)
 
     if (!mpInvalidation->mbInPaint)
     {
-        if (mpWindowImpl->mbFocusVisible)
+        if (mpFocusState->mbFocusVisible)
             ImplInvertFocus(*pWinData->mpFocusRect);
 
         ImplInvertFocus(rRect);
     }
 
     pWinData->mpFocusRect = rRect;
-    mpWindowImpl->mbFocusVisible = true;
+    mpFocusState->mbFocusVisible = true;
 }
 
 void Window::ImplShowNativeFocus()
 {
-    if (mpWindowImpl->mbNativeFocusVisible)
+    if (mpFocusState->mbNativeFocusVisible)
         return;
 
-    mpWindowImpl->mbNativeFocusVisible = true;
+    mpFocusState->mbNativeFocusVisible = true;
 
     if (!mpInvalidation->mbInPaint)
         Invalidate();
@@ -244,35 +245,36 @@ void Window::ImplShowNativeFocus()
 
 void Window::HideFocus()
 {
-    if (mpWindowImpl->mbInHideFocus)
+    if (mpFocusState->mbInHideFocus)
         return;
 
-    mpWindowImpl->mbInHideFocus = true;
+    mpFocusState->mbInHideFocus = true;
 
     // native themeing can suggest not to use focus rects
-    if (!(mpWindowImpl->mbUseNativeFocus && IsNativeWidgetEnabled()))
+    if (!(mpFocusState->mbUseNativeFocus && IsNativeWidgetEnabled()))
     {
-        if (!mpWindowImpl->mbFocusVisible)
+        if (!mpFocusState->mbFocusVisible)
         {
-            mpWindowImpl->mbInHideFocus = false;
+            mpFocusState->mbInHideFocus = false;
             return;
         }
 
         if (!mpInvalidation->mbInPaint)
             ImplInvertFocus(*ImplGetWinData()->mpFocusRect);
-        mpWindowImpl->mbFocusVisible = false;
+
+        mpFocusState->mbFocusVisible = false;
     }
     else
     {
-        if (mpWindowImpl->mbNativeFocusVisible)
+        if (mpFocusState->mbNativeFocusVisible)
         {
-            mpWindowImpl->mbNativeFocusVisible = false;
+            mpFocusState->mbNativeFocusVisible = false;
             if (!mpInvalidation->mbInPaint)
                 Invalidate();
         }
     }
 
-    mpWindowImpl->mbInHideFocus = false;
+    mpFocusState->mbInHideFocus = false;
 }
 
 void Window::ShowTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags)
@@ -754,13 +756,13 @@ void vcl::Window::ImplDeactivateFocus()
     if (!lcl_CanDeactivateWindow(pOldOverlapWindow, pOldRealWindow))
         return;
 
-    pOldOverlapWindow->ImplGetWindowImpl()->mbActive = false;
+    pOldOverlapWindow->ImplGetFocusState()->mbActive = false;
     pOldOverlapWindow->Deactivate();
 
     if (pOldRealWindow == pOldOverlapWindow)
         return;
 
-    pOldRealWindow->ImplGetWindowImpl()->mbActive = false;
+    pOldRealWindow->ImplGetFocusState()->mbActive = false;
     pOldRealWindow->Deactivate();
 }
 

@@ -32,6 +32,7 @@
 
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowFocusState.hxx>
 #include <WindowInput.hxx>
 #include <WindowEventHandlers.hxx>
 
@@ -725,13 +726,19 @@ bool Window::ImplDlgCtrl( const KeyEvent& rKEvt, bool bKeyInput )
             if ( pTempWindow && (pTempWindow == pSWindow) )
             {
                 NotifyEvent aNEvt1( NotifyEventType::LOSEFOCUS, pSWindow );
+
                 if ( !ImplCallPreNotify( aNEvt1 ) )
                     pSWindow->CompatLoseFocus();
-                pSWindow->mpWindowImpl->mnGetFocusFlags = nGetFocusFlags | GetFocusFlags::Around;
+
+                pSWindow->mpFocusState->mnGetFocusFlags = nGetFocusFlags | GetFocusFlags::Around;
+
                 NotifyEvent aNEvt2( NotifyEventType::GETFOCUS, pSWindow );
+
                 if ( !ImplCallPreNotify( aNEvt2 ) )
                     pSWindow->CompatGetFocus();
-                pSWindow->mpWindowImpl->mnGetFocusFlags = GetFocusFlags::NONE;
+
+                pSWindow->mpFocusState->mnGetFocusFlags = GetFocusFlags::NONE;
+
                 return true;
             }
         }
@@ -856,13 +863,19 @@ bool Window::ImplDlgCtrl( const KeyEvent& rKEvt, bool bKeyInput )
                         if ( pWindow == pSWindow )
                         {
                             NotifyEvent aNEvt1( NotifyEventType::LOSEFOCUS, pSWindow );
+
                             if ( !ImplCallPreNotify( aNEvt1 ) )
                                 pSWindow->CompatLoseFocus();
-                            pSWindow->mpWindowImpl->mnGetFocusFlags = nGetFocusFlags | GetFocusFlags::Around;
+
+                            pSWindow->mpFocusState->mnGetFocusFlags = nGetFocusFlags | GetFocusFlags::Around;
+
                             NotifyEvent aNEvt2( NotifyEventType::GETFOCUS, pSWindow );
+
                             if ( !ImplCallPreNotify( aNEvt2 ) )
                                 pSWindow->CompatGetFocus();
-                            pSWindow->mpWindowImpl->mnGetFocusFlags = GetFocusFlags::NONE;
+
+                            pSWindow->mpFocusState->mnGetFocusFlags = GetFocusFlags::NONE;
+
                             return true;
                         }
                         else if ( pWindow )

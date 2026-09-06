@@ -43,6 +43,7 @@
 #include <bitmaps.hlst>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
+#include <WindowFocusState.hxx>
 
 #include <deque>
 #include <unordered_map>
@@ -174,7 +175,7 @@ void TabControl::ImplInitSettings( bool bBackground )
         vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent( true );
         SetBackground();
-        ImplGetWindowImpl()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
+        ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
 
         return;
     }
