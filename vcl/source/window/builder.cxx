@@ -69,6 +69,7 @@
 #include <PriorityMergedHBox.hxx>
 #include <PriorityHBox.hxx>
 #include <WindowImpl.hxx>
+#include <WindowInput.hxx>
 #include <xmlreader/xmlreader.hxx>
 #include <desktop/crashreport.hxx>
 #include <SvHeaderTabListBox.hxx>
@@ -1729,8 +1730,8 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
     if (xWindow)
     {
         // child windows of disabled windows are made disabled by vcl by default, we don't want that
-        WindowImpl *pWindowImpl = xWindow->ImplGetWindowImpl();
-        pWindowImpl->mbDisabled = false;
+        WindowInput *pWindowInput = xWindow->ImplGetWindowInput();
+        pWindowInput->mbDisabled = false;
 
         xWindow->SetHelpId(getHelpRoot() + id);
         SAL_INFO("vcl.builder", "for name '" << name << "' and id '" << id <<

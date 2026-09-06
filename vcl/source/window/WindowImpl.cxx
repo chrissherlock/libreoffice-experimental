@@ -127,8 +127,6 @@ WindowImpl::WindowImpl( WindowType eType )
     mbToolBox                           = false;                     // true: ToolBox is the base class
     mbMenuFloatingWindow                = false;                     // true: MenuFloatingWindow is the base class
     mbSplitter                          = false;                     // true: Splitter is the base class
-    mbDisabled                          = false;                     // true: Enable( false ) called
-    mbInputDisabled                     = false;                     // true: EnableInput( false ) called
     mbNoUpdate                          = false;                     // true: SetUpdateMode( false ) called
     mbNoParentUpdate                    = false;                     // true: SetParentUpdateMode( false ) called
     mbChildPtrOverwrite                 = false;                     // true: PointerStyle overwrites Child-Pointer
@@ -139,7 +137,6 @@ WindowImpl::WindowImpl( WindowType eType )
     mbCallResize                        = true;                      // true: Resize must be called by Show
     mbWaitSystemResize                  = true;                      // true: Wait for System-Resize
     mbChildTransparent                  = false;                     // true: Child-windows are allowed to switch to transparent (incl. Parent-CLIPCHILDREN)
-    mbMouseTransparent                  = false;                     // true: Window is transparent for Mouse
     mbDlgCtrlStart                      = false;                     // true: From here on own Dialog-Control
     mbTrackVisible                      = false;                     // true: Tracking Visible
     mbAlwaysOnTop                       = false;                     // true: always visible for all others windows
