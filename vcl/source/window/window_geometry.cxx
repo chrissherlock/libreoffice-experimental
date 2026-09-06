@@ -166,10 +166,10 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
                              tools::Long nHeight, PosSizeFlags nFlags)
 {
     if (nFlags & PosSizeFlags::Pos)
-        mpWindowImpl->mbDefPos = false;
+        mpGeometry->mbDefPos = false;
 
     if (nFlags & PosSizeFlags::Size)
-        mpWindowImpl->mbDefSize = false;
+        mpGeometry->mbDefSize = false;
 
     // The top BorderWindow is the window which is to be positioned
     VclPtr<vcl::Window> pBorderWindow = lcl_GetTopmostBorderWindow(this);
@@ -187,7 +187,7 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
 
     nX = lcl_CalculatePositionX(this, pBorderWindow.get(), nX, nY, nWidth, nHeight, nFlags);
 
-    const bool bHasValidSize = !mpWindowImpl->mbDefSize;
+    const bool bHasValidSize = !mpGeometry->mbDefSize;
 
     if (VclPtr<vcl::Window> pWinParent = pBorderWindow->GetParent(); pWinParent)
     {
@@ -289,9 +289,9 @@ void Window::SetPosSizePixel(const Point& rNewPos, const Size& rNewSize)
 
 void Window::SetOutputSizePixel(const Size& rNewSize) { SetSizePixel(CalcWindowSize(rNewSize)); }
 
-bool Window::IsDefaultPos() const { return mpWindowImpl->mbDefPos; }
+bool Window::IsDefaultPos() const { return mpGeometry->mbDefPos; }
 
-bool Window::IsDefaultSize() const { return mpWindowImpl->mbDefSize; }
+bool Window::IsDefaultSize() const { return mpGeometry->mbDefSize; }
 
 Point Window::GetOffsetPixelFrom(const vcl::Window& rWindow) const
 {
@@ -1127,7 +1127,7 @@ void Window::ImplUpdateClientWindow(bool bNewPos)
     if (mpHierarchy->mpClientWindow->IsVisible())
         mpHierarchy->mpClientWindow->ImplCallMove();
     else
-        mpHierarchy->mpClientWindow->mpWindowImpl->mbCallMove = true;
+        mpHierarchy->mpClientWindow->mpGeometry->mbCallMove = true;
 }
 
 bool Window::ImplCopyArea(vcl::Region& rRegion, const tools::Rectangle& rInitialWinRect)
@@ -1196,10 +1196,10 @@ void Window::ImplCallMoveResize(bool bNewPos, bool bNewSize)
 void Window::ImplDeferMoveResize(bool bNewPos, bool bNewSize)
 {
     if (bNewPos)
-        mpWindowImpl->mbCallMove = true;
+        mpGeometry->mbCallMove = true;
 
     if (bNewSize)
-        mpWindowImpl->mbCallResize = true;
+        mpGeometry->mbCallResize = true;
 }
 
 void Window::ImplInvalidateMovedWindow(bool bCopyBits, const tools::Rectangle& rInitialWinRect,

@@ -27,6 +27,7 @@
 #include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
 #include <WindowInvalidation.hxx>
+#include <WindowGeometry.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
@@ -263,7 +264,7 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
 
     // Query the correct size of the window, if we are waiting for
     // a system resize
-    if (mpWindowImpl->mbWaitSystemResize)
+    if (mpGeometry->mbWaitSystemResize)
     {
         const Size aOutSize = mpWindowImpl->mpFrame->GetClientSize();
         ImplHandleResize(this, aOutSize.Width(), aOutSize.Height());
@@ -285,10 +286,10 @@ std::optional<bool> Window::ImplShowWindow(ShowFlags nFlags)
     if (ImplIsMismatchedSubControl())
         EnableNativeWidget(GetParent()->IsNativeWidgetEnabled());
 
-    if (mpWindowImpl->mbCallMove)
+    if (mpGeometry->mbCallMove)
         ImplCallMove();
 
-    if (mpWindowImpl->mbCallResize)
+    if (mpGeometry->mbCallResize)
         ImplCallResize();
 
     CompatStateChanged(StateChangedType::Visible);

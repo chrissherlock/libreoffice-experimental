@@ -147,7 +147,7 @@ void WorkWindow::ShowFullScreenMode( bool bFullScreenMode, sal_Int32 nDisplayScr
     // screen-specific system data.
     GetOutDev()->ImplDisposeCanvas();
 
-    mpHierarchy->mpFrameWindow->mpWindowImpl->mbWaitSystemResize = true;
+    mpHierarchy->mpFrameWindow->mpGeometry->mbWaitSystemResize = true;
     ImplGetFrame()->ShowFullScreen( bFullScreenMode, nDisplayScreen );
 }
 

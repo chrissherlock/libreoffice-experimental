@@ -129,16 +129,10 @@ WindowImpl::WindowImpl( WindowType eType )
     mbSplitter                          = false;                     // true: Splitter is the base class
     mbNoUpdate                          = false;                     // true: SetUpdateMode( false ) called
     mbNoParentUpdate                    = false;                     // true: SetParentUpdateMode( false ) called
-    mbDefPos                            = true;                      // true: Position is not Set
-    mbDefSize                           = true;                      // true: Size is not Set
-    mbCallMove                          = true;                      // true: Move must be called by Show
-    mbCallResize                        = true;                      // true: Resize must be called by Show
-    mbWaitSystemResize                  = true;                      // true: Wait for System-Resize
     mbChildTransparent                  = false;                     // true: Child-windows are allowed to switch to transparent (incl. Parent-CLIPCHILDREN)
     mbDlgCtrlStart                      = false;                     // true: From here on own Dialog-Control
     mbTrackVisible                      = false;                     // true: Tracking Visible
     mbAlwaysOnTop                       = false;                     // true: always visible for all others windows
-    mbAllResize                         = false;                     // true: Also sent ResizeEvents with 0,0
     mbInDispose                         = false;                     // true: We're still in Window::dispose()
     mbCreatedWithToolkit                = false;
     mbDrawSelectionBackground           = false;                     // true: draws transparent window background to indicate (toolbox) selection

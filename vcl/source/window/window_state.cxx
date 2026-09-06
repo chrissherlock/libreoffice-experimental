@@ -35,6 +35,7 @@
 #include <WindowInvalidation.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowControlAppearance.hxx>
+#include <WindowGeometry.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
@@ -412,7 +413,7 @@ bool Window::IsNativeFrame() const
     return false;
 }
 
-void Window::EnableAllResize() { mpWindowImpl->mbAllResize = true; }
+void Window::EnableAllResize() { mpGeometry->mbAllResize = true; }
 
 void Window::EnableChildTransparentMode(bool bEnable)
 {

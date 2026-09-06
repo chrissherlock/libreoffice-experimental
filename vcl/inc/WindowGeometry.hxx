@@ -24,6 +24,13 @@ struct WindowGeometry
     tools::Long mnAbsScreenX = 0;
     Point maPos;
 
+    bool mbDefPos : 1 = true;
+    bool mbDefSize : 1 = true;
+    bool mbCallMove : 1 = true;
+    bool mbCallResize : 1 = true;
+    bool mbWaitSystemResize : 1 = true;
+    bool mbAllResize : 1 = false;
+
     WindowGeometry() = default;
 };
 
