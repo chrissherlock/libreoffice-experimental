@@ -31,6 +31,7 @@
 #include <WindowLOKData.hxx>
 #include <WindowInput.hxx>
 #include <WindowControlAppearance.hxx>
+#include <WindowControlState.hxx>
 #include <WindowHierarchy.hxx>
 #include <brdwin.hxx>
 #include <clipping.hxx>
@@ -115,7 +116,7 @@ vcl::Window* Window::ImplTransferFocus()
 bool Window::ImplShouldPassFocusToLastWindow() const
 {
     return HasFocus() && mpInput->mpLastFocusWindow
-           && !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus);
+           && !(mpControlState->mnDlgCtrlFlags & DialogControlFlags::WantFocus);
 }
 
 void Window::GetFocus()

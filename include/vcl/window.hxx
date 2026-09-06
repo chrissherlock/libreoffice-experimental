@@ -409,6 +409,7 @@ struct WindowViewport;
 struct ImplWinData;
 struct WindowFocusState;
 struct WindowPointerState;
+struct WindowControlState;
 class PaintHelper;
 class VclSizeGroup;
 class Application;
@@ -543,6 +544,7 @@ public:
     SAL_DLLPRIVATE WindowViewport* ImplGetViewport() const { return mpViewport.get(); }
     SAL_DLLPRIVATE WindowFocusState* ImplGetFocusState() const { return mpFocusState.get(); }
     SAL_DLLPRIVATE WindowVisibilityState* ImplGetVisibilityState() const { return mpVisibilityState.get(); }
+    SAL_DLLPRIVATE WindowControlState* ImplGetControlState() const { return mpControlState.get(); }
     void SetType(WindowType eType);
     WindowType GetType() const;
     bool IsSystemWindow() const;
@@ -1112,6 +1114,7 @@ private:
     std::unique_ptr<WindowFocusState> mpFocusState;
     std::unique_ptr<WindowVisibilityState> mpVisibilityState;
     std::unique_ptr<WindowPointerState> mpPointerState;
+    std::unique_ptr<WindowControlState> mpControlState;
 
     // --- Lifecycle and Teardown ---
     SAL_DLLPRIVATE void ImplDeInitDND();

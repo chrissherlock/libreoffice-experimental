@@ -31,6 +31,7 @@
 #include <WindowHierarchy.hxx>
 #include <WindowLayoutData.hxx>
 #include <WindowGeometry.hxx>
+#include <WindowControlState.hxx>
 #include <brdwin.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
@@ -1542,7 +1543,7 @@ bool Window::IsScrollable() const
 
 void Window::ImplIsInTaskPaneList(bool mbIsInTaskList)
 {
-    mpWindowImpl->mbIsInTaskPaneList = mbIsInTaskList;
+    mpControlState->mbIsInTaskPaneList = mbIsInTaskList;
 }
 
 } // end namespace vcl

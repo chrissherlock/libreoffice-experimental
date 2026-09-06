@@ -38,6 +38,7 @@
 #include <WindowHierarchy.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowViewport.hxx>
+#include <WindowControlState.hxx>
 
 #include "impldockingwrapper.hxx"
 
@@ -364,7 +365,7 @@ bool Window::ImplShouldForwardFocusToChild(const NotifyEvent& rNEvt) const
 {
     return (rNEvt.GetWindow() == this) && (rNEvt.GetType() == NotifyEventType::GETFOCUS)
            && !(GetStyle() & WB_TABSTOP)
-           && !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus);
+           && !(mpControlState->mnDlgCtrlFlags & DialogControlFlags::WantFocus);
 }
 
 bool Window::ImplDispatchDialogControlKeyEvent(NotifyEvent& rNEvt, bool bIsFloatingMode)
