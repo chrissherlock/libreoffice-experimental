@@ -76,7 +76,6 @@ public:
     WindowExtendedStyle mnExtendedStyle;
     WindowType          meType;
     sal_uInt16          mnWaitCount;
-    ParentClipMode      mnParentClipMode;
     DialogControlFlags  mnDlgCtrlFlags;
     bool                mbFrame:1,
                         mbBorderWin:1,
