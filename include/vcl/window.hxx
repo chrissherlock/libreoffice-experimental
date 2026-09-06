@@ -408,6 +408,7 @@ struct WindowGeometry;
 struct WindowViewport;
 struct ImplWinData;
 struct WindowFocusState;
+struct WindowPointerState;
 class PaintHelper;
 class VclSizeGroup;
 class Application;
@@ -1110,6 +1111,7 @@ private:
     std::unique_ptr<WindowInvalidation> mpInvalidation;
     std::unique_ptr<WindowFocusState> mpFocusState;
     std::unique_ptr<WindowVisibilityState> mpVisibilityState;
+    std::unique_ptr<WindowPointerState> mpPointerState;
 
     // --- Lifecycle and Teardown ---
     SAL_DLLPRIVATE void ImplDeInitDND();

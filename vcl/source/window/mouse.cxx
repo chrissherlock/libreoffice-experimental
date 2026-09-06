@@ -46,6 +46,7 @@
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowFocusState.hxx>
+#include <WindowPointerState.hxx>
 #include <svdata.hxx>
 #include <salobj.hxx>
 #include <salgdi.hxx>
@@ -119,7 +120,7 @@ PointerStyle Window::ImplGetMousePointer() const
     {
         // when the pointer is not visible stop the search, as
         // this status should not be overwritten
-        if ( pWindow->mpWindowImpl->mbNoPtrVisible )
+        if ( pWindow->mpPointerState->mbNoPtrVisible )
             return PointerStyle::Null;
 
         if ( !bWait )
@@ -131,7 +132,7 @@ PointerStyle Window::ImplGetMousePointer() const
             }
             else
             {
-                if ( pWindow->mpWindowImpl->mbChildPtrOverwrite )
+                if ( pWindow->mpPointerState->mbChildPtrOverwrite )
                     ePointerStyle = pWindow->GetPointer();
             }
         }
@@ -528,11 +529,10 @@ void Window::SetPointer( PointerStyle nPointer )
 
 void Window::EnableChildPointerOverwrite( bool bOverwrite )
 {
-
-    if ( mpWindowImpl->mbChildPtrOverwrite == bOverwrite )
+    if (mpPointerState->mbChildPtrOverwrite == bOverwrite)
         return;
 
-    mpWindowImpl->mbChildPtrOverwrite  = bOverwrite;
+    mpPointerState->mbChildPtrOverwrite = bOverwrite;
 
     // possibly immediately move pointer
     if ( !mpWindowImpl->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
@@ -595,9 +595,9 @@ Point Window::GetLastPointerPosPixel()
 void Window::ShowPointer( bool bVisible )
 {
 
-    if ( mpWindowImpl->mbNoPtrVisible != !bVisible )
+    if (mpPointerState->mbNoPtrVisible != !bVisible)
     {
-        mpWindowImpl->mbNoPtrVisible = !bVisible;
+        mpPointerState->mbNoPtrVisible = !bVisible;
 
         // possibly immediately move pointer
         if ( !mpWindowImpl->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
