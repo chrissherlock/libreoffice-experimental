@@ -853,7 +853,7 @@ void Window::ImplCallInitShow()
 
 void Window::ImplCallResize()
 {
-    mpWindowImpl->mbCallResize = false;
+    mpGeometry->mbCallResize = false;
 
     // Normally we avoid blanking on re-size unless people might notice:
     if (GetBackground().IsGradient())
@@ -916,7 +916,7 @@ void Window::ImplUpdateFramePosition()
 
 void Window::ImplCallMove()
 {
-    mpWindowImpl->mbCallMove = false;
+    mpGeometry->mbCallMove = false;
 
     ImplUpdateFramePosition();
 

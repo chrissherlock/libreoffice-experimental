@@ -40,6 +40,7 @@
 #include <WindowInvalidation.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowGeometry.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
 #include <accmgr.hxx>
@@ -176,7 +177,7 @@ static bool lcl_ShouldStartResizeTimer(const vcl::Window* pWindow)
 
 static bool lcl_ShouldSkipResizePropagation(const vcl::Window* pWindow)
 {
-    return !pWindow->IsVisible() && !pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize
+    return !pWindow->IsVisible() && !pWindow->ImplGetWindow()->ImplGetGeometry()->mbAllResize
            && !(pWindow->ImplGetWindowImpl()->mbFrame
                 && pWindow->ImplGetWindowHierarchy()
                        ->mpClientWindow); // propagate resize for system border windows
@@ -185,7 +186,7 @@ static bool lcl_ShouldSkipResizePropagation(const vcl::Window* pWindow)
 static void lcl_HandleResizePropagation(vcl::Window* pWindow)
 {
     if (lcl_ShouldSkipResizePropagation(pWindow))
-        pWindow->ImplGetWindowImpl()->mbCallResize = true;
+        pWindow->ImplGetGeometry()->mbCallResize = true;
 
     if (!lcl_ShouldStartResizeTimer(pWindow))
     {
@@ -208,12 +209,12 @@ static void lcl_HandleResizeDimensions(vcl::Window* pWindow, tools::Long nNewWid
 {
     if (const bool bChanged = lcl_HasSizeChanged(pWindow, nNewWidth, nNewHeight);
         !((nNewWidth > 0 && nNewHeight > 0)
-          || (pWindow->ImplGetWindow()->ImplGetWindowImpl()->mbAllResize && bChanged)))
+          || (pWindow->ImplGetWindow()->ImplGetGeometry()->mbAllResize && bChanged)))
         return;
 
     pWindow->GetOutDev()->SetOutputWidthPixel(nNewWidth);
     pWindow->GetOutDev()->SetOutputHeightPixel(nNewHeight);
-    pWindow->ImplGetWindowImpl()->mbWaitSystemResize = false;
+    pWindow->ImplGetGeometry()->mbWaitSystemResize = false;
 
     if (pWindow->IsReallyVisible())
         vcl::clipping::setClipFlag(*pWindow);
@@ -283,7 +284,7 @@ static void lcl_HandleMove(vcl::Window* pWindow)
     if (pWindow->IsVisible())
         pWindow->ImplCallMove();
     else
-        pWindow->ImplGetWindowImpl()->mbCallMove
+        pWindow->ImplGetGeometry()->mbCallMove
             = true; // make sure the framepos will be updated on the next Show()
 
     if (pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplGetWindowHierarchy()->mpClientWindow)

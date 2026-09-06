@@ -969,7 +969,7 @@ bool SystemWindow::UpdatePositionData()
     // When entering and exiting LibreOffice's internal full screen mode,
     // updating position data causes the "exit full screen" floating
     // toolbar to migrate after cycle.
-    if (mpWindowImpl->mbWaitSystemResize)
+    if (mpGeometry->mbWaitSystemResize)
         return false;
 
     auto pWin = ImplGetParent();
