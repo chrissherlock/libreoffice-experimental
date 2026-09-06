@@ -87,7 +87,7 @@ WindowHitTest Window::ImplHitTest( const Point& rFramePos )
     }
 
     WindowHitTest nHitTest = WindowHitTest::Inside;
-    if ( mpWindowImpl->mbMouseTransparent )
+    if ( mpInput->mbMouseTransparent )
         nHitTest |= WindowHitTest::Transparent;
 
     return nHitTest;
@@ -471,7 +471,7 @@ void Window::SetMouseTransparent( bool bTransparent )
     if( mpWindowImpl->mpSysObj )
         mpWindowImpl->mpSysObj->SetMouseTransparent( bTransparent );
 
-    mpWindowImpl->mbMouseTransparent = bTransparent;
+    mpInput->mbMouseTransparent = bTransparent;
 }
 
 void Window::LocalStartDrag()

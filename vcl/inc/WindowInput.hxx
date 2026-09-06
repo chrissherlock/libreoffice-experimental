@@ -42,6 +42,9 @@ struct WindowInput
     bool mbExtTextInput : 1 = false;
     bool mbInFocusHdl : 1 = false;
     bool mbFakeFocusSet : 1 = false;
+    bool mbDisabled : 1 = false;
+    bool mbInputDisabled : 1 = false;
+    bool mbMouseTransparent : 1 = false;
 
     WindowInput();
     ~WindowInput();

@@ -340,8 +340,8 @@ void Window::ImplInitFromParentState(vcl::Window* pParent)
 
     if (!ImplIsOverlapWindow())
     {
-        mpWindowImpl->mbDisabled = pParent->mpWindowImpl->mbDisabled;
-        mpWindowImpl->mbInputDisabled = pParent->mpWindowImpl->mbInputDisabled;
+        mpInput->mbDisabled = pParent->mpInput->mbDisabled;
+        mpInput->mbInputDisabled = pParent->mpInput->mbInputDisabled;
         mpInput->meAlwaysInputMode = pParent->mpInput->meAlwaysInputMode;
     }
 

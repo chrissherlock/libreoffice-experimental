@@ -106,13 +106,13 @@ void Window::ImplEnableInputBorderAndMenuBar(bool bEnable)
 
 void Window::ImplUpdateEnableState(bool bEnable)
 {
-    if (mpWindowImpl->mbDisabled == !bEnable)
+    if (mpInput->mbDisabled == !bEnable)
         return;
 
-    mpWindowImpl->mbDisabled = !bEnable;
+    mpInput->mbDisabled = !bEnable;
 
     if (mpWindowImpl->mpSysObj)
-        mpWindowImpl->mpSysObj->Enable(bEnable && !mpWindowImpl->mbInputDisabled);
+        mpWindowImpl->mpSysObj->Enable(bEnable && !mpInput->mbInputDisabled);
 
     CompatStateChanged(StateChangedType::Enable);
 
@@ -121,13 +121,13 @@ void Window::ImplUpdateEnableState(bool bEnable)
 
 void Window::ImplUpdateInputEnableState(bool bEnable)
 {
-    if (mpWindowImpl->mbInputDisabled == !bEnable)
+    if (mpInput->mbInputDisabled == !bEnable)
         return;
 
-    mpWindowImpl->mbInputDisabled = !bEnable;
+    mpInput->mbInputDisabled = !bEnable;
 
     if (mpWindowImpl->mpSysObj)
-        mpWindowImpl->mpSysObj->Enable(!mpWindowImpl->mbDisabled && bEnable);
+        mpWindowImpl->mpSysObj->Enable(!mpInput->mbDisabled && bEnable);
 }
 
 void Window::ImplEnableChildWindows(bool bEnable)
@@ -371,8 +371,8 @@ vcl::Window* Window::ImplGetBorderWindow() const
 
 void Window::ImplSetMouseTransparent(bool bTransparent)
 {
-    if (mpWindowImpl)
-        mpWindowImpl->mbMouseTransparent = bTransparent;
+    if (mpInput)
+        mpInput->mbMouseTransparent = bTransparent;
 }
 
 bool Window::IsFormControl() const { return mpWindowImpl ? mpWindowImpl->mbIsFormControl : false; }
@@ -424,7 +424,7 @@ bool Window::IsChildTransparentModeEnabled() const
     return mpWindowImpl && mpWindowImpl->mbChildTransparent;
 }
 
-bool Window::IsMouseTransparent() const { return mpWindowImpl && mpWindowImpl->mbMouseTransparent; }
+bool Window::IsMouseTransparent() const { return mpInput && mpInput->mbMouseTransparent; }
 
 bool Window::IsPaintTransparent() const
 {
@@ -482,9 +482,9 @@ bool Window::IsReallyShown() const { return mpVisibilityState && mpVisibilitySta
 
 bool Window::IsInInitShow() const { return mpVisibilityState->mbInInitShow; }
 
-bool Window::IsEnabled() const { return mpWindowImpl && !mpWindowImpl->mbDisabled; }
+bool Window::IsEnabled() const { return mpInput && !mpInput->mbDisabled; }
 
-bool Window::IsInputEnabled() const { return mpWindowImpl && !mpWindowImpl->mbInputDisabled; }
+bool Window::IsInputEnabled() const { return mpInput && !mpInput->mbInputDisabled; }
 
 bool Window::IsAlwaysEnableInput() const
 {
