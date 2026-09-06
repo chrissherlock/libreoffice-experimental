@@ -35,6 +35,7 @@
 #include <WindowInvalidation.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowControlAppearance.hxx>
+#include <WindowControlState.hxx>
 #include <WindowGeometry.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
@@ -432,16 +433,19 @@ bool Window::IsPaintTransparent() const
     return mpInvalidation && mpInvalidation->mbPaintTransparent;
 }
 
-void Window::SetDialogControlStart(bool bStart) { mpWindowImpl->mbDlgCtrlStart = bStart; }
+void Window::SetDialogControlStart(bool bStart) { mpControlState->mbDlgCtrlStart = bStart; }
 
-bool Window::IsDialogControlStart() const { return mpWindowImpl && mpWindowImpl->mbDlgCtrlStart; }
+bool Window::IsDialogControlStart() const
+{
+    return mpControlState && mpControlState->mbDlgCtrlStart;
+}
 
 void Window::SetDialogControlFlags(DialogControlFlags nFlags)
 {
-    mpWindowImpl->mnDlgCtrlFlags = nFlags;
+    mpControlState->mnDlgCtrlFlags = nFlags;
 }
 
-DialogControlFlags Window::GetDialogControlFlags() const { return mpWindowImpl->mnDlgCtrlFlags; }
+DialogControlFlags Window::GetDialogControlFlags() const { return mpControlState->mnDlgCtrlFlags; }
 
 const InputContext& Window::GetInputContext() const { return mpInput->maInputContext; }
 

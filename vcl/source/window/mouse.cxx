@@ -47,6 +47,7 @@
 #include <WindowHierarchy.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowPointerState.hxx>
+#include <WindowControlState.hxx>
 #include <svdata.hxx>
 #include <salobj.hxx>
 #include <salgdi.hxx>
@@ -233,7 +234,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         // ensure that dialogs on close pass the focus back to
         // the correct window
         if ( mpInput->mpLastFocusWindow && (mpInput->mpLastFocusWindow.get() != this) &&
-             !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus) &&
+             !(mpControlState->mnDlgCtrlFlags & DialogControlFlags::WantFocus) &&
              mpInput->mpLastFocusWindow->IsEnabled() &&
              mpInput->mpLastFocusWindow->IsInputEnabled() &&
              ! mpInput->mpLastFocusWindow->IsInModalMode()
@@ -249,7 +250,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         // ensure that dialogs on close pass the focus back to
         // the correct window
         if ( mpInput->mpLastFocusWindow && (mpInput->mpLastFocusWindow.get() != this) &&
-             !(mpWindowImpl->mnDlgCtrlFlags & DialogControlFlags::WantFocus) &&
+             !(mpControlState->mnDlgCtrlFlags & DialogControlFlags::WantFocus) &&
              mpInput->mpLastFocusWindow->IsEnabled() &&
              mpInput->mpLastFocusWindow->IsInputEnabled() &&
              ! mpInput->mpLastFocusWindow->IsInModalMode()

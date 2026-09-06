@@ -115,7 +115,6 @@ WindowImpl::WindowImpl( WindowType eType )
     mnExtendedStyle                     = WindowExtendedStyle::NONE; // extended style (init in ImplInitWindow)
     meType                              = eType;                     // type
     mnWaitCount                         = 0;                         // Wait-Count (>1 == "wait" mouse pointer)
-    mnDlgCtrlFlags                      = DialogControlFlags::NONE;  // DialogControl-Flags
     mbFrame                             = false;                     // true: Window is a frame window
     mbBorderWin                         = false;                     // true: Window is a border window
     mbOverlapWin                        = false;                     // true: Window is an overlap window
@@ -127,12 +126,10 @@ WindowImpl::WindowImpl( WindowType eType )
     mbToolBox                           = false;                     // true: ToolBox is the base class
     mbMenuFloatingWindow                = false;                     // true: MenuFloatingWindow is the base class
     mbSplitter                          = false;                     // true: Splitter is the base class
-    mbDlgCtrlStart                      = false;                     // true: From here on own Dialog-Control
     mbTrackVisible                      = false;                     // true: Tracking Visible
     mbAlwaysOnTop                       = false;                     // true: always visible for all others windows
     mbInDispose                         = false;                     // true: We're still in Window::dispose()
     mbCreatedWithToolkit                = false;
-    mbIsInTaskPaneList                  = false;                     // true: window was added to the taskpanelist in the topmost system window
 }
 
 WindowImpl::~WindowImpl()

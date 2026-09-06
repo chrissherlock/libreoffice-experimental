@@ -76,7 +76,6 @@ public:
     WindowExtendedStyle mnExtendedStyle;
     WindowType          meType;
     sal_uInt16          mnWaitCount;
-    DialogControlFlags  mnDlgCtrlFlags;
     bool                mbFrame:1,
                         mbBorderWin:1,
                         mbOverlapWin:1,
@@ -85,15 +84,13 @@ public:
                         mbDockWin:1,
                         mbFloatWin:1,
                         mbPushButton:1,
-                        mbDlgCtrlStart:1,
                         mbTrackVisible:1,
                         mbAlwaysOnTop:1,
                         mbInDispose:1,
                         mbCreatedWithToolkit:1,
                         mbToolBox:1,
                         mbSplitter:1,
-                        mbMenuFloatingWindow:1,
-                        mbIsInTaskPaneList:1;
+                        mbMenuFloatingWindow:1;
     bool mbIsFormControl : 1 = false;
 };
 

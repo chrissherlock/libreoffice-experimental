@@ -36,6 +36,7 @@
 #include <ImplAccessibleInfos.hxx>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
+#include <WindowControlState.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowHelpData.hxx>
@@ -82,6 +83,7 @@ Window::Window(WindowType eType)
     , mpFocusState(std::make_unique<WindowFocusState>())
     , mpVisibilityState(std::make_unique<WindowVisibilityState>())
     , mpPointerState(std::make_unique<WindowPointerState>())
+    , mpControlState(std::make_unique<WindowControlState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -107,6 +109,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpFocusState(std::make_unique<WindowFocusState>())
     , mpVisibilityState(std::make_unique<WindowVisibilityState>())
     , mpPointerState(std::make_unique<WindowPointerState>())
+    , mpControlState(std::make_unique<WindowControlState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -172,7 +175,7 @@ void Window::dispose()
     if (IsMouseCaptured())
         ReleaseMouse();
 
-    if (mpWindowImpl->mbIsInTaskPaneList)
+    if (mpControlState->mbIsInTaskPaneList)
         ImplRemoveFromTaskPaneList();
 
     // remove from size-group if necessary
@@ -236,6 +239,7 @@ void Window::dispose()
     mpFocusState.reset();
     mpVisibilityState.reset();
     mpPointerState.reset();
+    mpControlState.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy
