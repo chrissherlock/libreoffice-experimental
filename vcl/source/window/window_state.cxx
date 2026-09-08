@@ -29,6 +29,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowStyleState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowInput.hxx>
@@ -408,7 +409,7 @@ bool Window::IsMenuFloatingWindow() const
 bool Window::IsNativeFrame() const
 {
     // #101741 do not check for WB_CLOSEABLE because undecorated floaters (like menus!) are closeable
-    if (mpWindowImpl->mbFrame && (mpWindowImpl->mnStyle & (WB_MOVEABLE | WB_SIZEABLE)))
+    if (mpWindowImpl->mbFrame && (mpStyleState->mnStyle & (WB_MOVEABLE | WB_SIZEABLE)))
         return true;
 
     return false;

@@ -30,6 +30,7 @@
 #include <WindowInput.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowStyleState.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 #include <salgdi.hxx>
@@ -66,7 +67,7 @@ bool Window::ImplHasActiveChildFrame(const vcl::Window* pFrameWin) const
         return false;
 
     const bool bIsDecorated = lcl_IsFloatingWindowDecorated(pChildFrame)
-                              || (pFrameWin->mpWindowImpl->mnStyle & (WB_MOVEABLE | WB_SIZEABLE));
+                              || (pFrameWin->mpStyleState->mnStyle & (WB_MOVEABLE | WB_SIZEABLE));
     if (!bIsDecorated)
         return false;
 

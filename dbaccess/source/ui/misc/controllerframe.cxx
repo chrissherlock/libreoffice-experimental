@@ -32,6 +32,7 @@
 #include <comphelper/diagnose_ex.hxx>
 #include <toolkit/helper/vclunohelper.hxx>
 #include <vcl/window.hxx>
+#include <vcl/WindowExtendedStyle.hxx>
 
 namespace dbaui
 {

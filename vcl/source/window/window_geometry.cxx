@@ -25,6 +25,7 @@
 #include <vcl/window.hxx>
 
 #include <ImplFrameData.hxx>
+#include <WindowStyleState.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowClippingState.hxx>
@@ -417,7 +418,7 @@ tools::Long Window::CalcTitleWidth() const
         return mpHierarchy->mpBorderWindow->CalcTitleWidth();
     }
 
-    if (!mpWindowImpl->mbFrame || !(mpWindowImpl->mnStyle & WB_MOVEABLE))
+    if (!mpWindowImpl->mbFrame || !(mpStyleState->mnStyle & WB_MOVEABLE))
         return 0;
 
     // we guess the width for frame windows as we do not know the
