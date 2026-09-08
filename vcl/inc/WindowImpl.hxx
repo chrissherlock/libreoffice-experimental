@@ -71,9 +71,6 @@ public:
     OUString            maText;
     VCLXWindow*         mpVCLXWindow;
 
-    WinBits             mnStyle;
-    WinBits             mnPrevStyle;
-    WindowExtendedStyle mnExtendedStyle;
     WindowType          meType;
     sal_uInt16          mnWaitCount;
     bool                mbFrame:1,

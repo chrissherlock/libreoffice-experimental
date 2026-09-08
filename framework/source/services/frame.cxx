@@ -76,6 +76,7 @@
 #include <vcl/window.hxx>
 #include <vcl/wrkwin.hxx>
 #include <vcl/svapp.hxx>
+#include <vcl/WindowExtendedStyle.hxx>
 
 #include <toolkit/helper/vclunohelper.hxx>
 #include <unotools/moduleoptions.hxx>

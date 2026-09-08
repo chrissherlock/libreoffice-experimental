@@ -33,6 +33,7 @@
 #include <officecfg/Office/Common.hxx>
 #include <osl/diagnose.h>
 
+#include <WindowStyleState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
 #include <ImplFrameData.hxx>
@@ -482,7 +483,7 @@ void Dialog::ImplInitDialog( vcl::Window* pParent, WinBits nStyle, InitFlag eFla
             mpWindowImpl->mbOverlapWin    = true;
             ImplInit( pParent, (nStyle & (WB_MOVEABLE | WB_SIZEABLE | WB_STANDALONE)) | WB_CLOSEABLE, nullptr );
             // Now set all style bits
-            mpWindowImpl->mnStyle = nStyle;
+            mpStyleState->mnStyle = nStyle;
         }
     }
     else

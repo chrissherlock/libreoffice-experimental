@@ -110,9 +110,6 @@ WindowImpl::WindowImpl( WindowType eType )
     mpFrame                             = nullptr;                   // Pointer to frame window
     mpSysObj                            = nullptr;
     mpVCLXWindow                        = nullptr;
-    mnStyle                             = 0;                         // style (init in ImplInitWindow)
-    mnPrevStyle                         = 0;                         // prevstyle (set in SetStyle)
-    mnExtendedStyle                     = WindowExtendedStyle::NONE; // extended style (init in ImplInitWindow)
     meType                              = eType;                     // type
     mnWaitCount                         = 0;                         // Wait-Count (>1 == "wait" mouse pointer)
     mbFrame                             = false;                     // true: Window is a frame window

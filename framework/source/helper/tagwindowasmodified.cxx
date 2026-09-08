@@ -27,6 +27,7 @@
 #include <vcl/window.hxx>
 #include <vcl/svapp.hxx>
 #include <vcl/wintypes.hxx>
+#include <vcl/WindowExtendedStyle.hxx>
 
 namespace framework{
 

@@ -28,6 +28,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowStyleState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowGeometry.hxx>
@@ -36,7 +37,7 @@
 
 namespace vcl
 {
-static bool lcl_ApplyStyleChange(WindowImpl* pImpl, WinBits nStyle)
+static bool lcl_ApplyStyleChange(WindowStyleState* pImpl, WinBits nStyle)
 {
     if (!pImpl || pImpl->mnStyle == nStyle)
         return false;
@@ -49,7 +50,7 @@ static bool lcl_ApplyStyleChange(WindowImpl* pImpl, WinBits nStyle)
 
 void Window::SetStyle(WinBits nStyle)
 {
-    if (lcl_ApplyStyleChange(mpWindowImpl.get(), nStyle))
+    if (lcl_ApplyStyleChange(mpStyleState.get(), nStyle))
         CompatStateChanged(StateChangedType::Style);
 }
 
@@ -68,7 +69,7 @@ static SalExtStyle lcl_GetExtendedStyle(WindowExtendedStyle nExtendedStyle)
 
 void Window::SetExtendedStyle(WindowExtendedStyle nExtendedStyle)
 {
-    if (mpWindowImpl->mnExtendedStyle == nExtendedStyle)
+    if (mpStyleState->mnExtendedStyle == nExtendedStyle)
         return;
 
     vcl::Window* pWindow = ImplGetBorderWindow();
@@ -79,7 +80,7 @@ void Window::SetExtendedStyle(WindowExtendedStyle nExtendedStyle)
     if (pWindow->mpWindowImpl->mbFrame)
         pWindow->ImplGetFrame()->SetExtendedFrameStyle(lcl_GetExtendedStyle(nExtendedStyle));
 
-    mpWindowImpl->mnExtendedStyle = nExtendedStyle;
+    mpStyleState->mnExtendedStyle = nExtendedStyle;
 }
 
 bool Window::ImplShouldHaveBorder(WindowBorderStyle nBorderStyle)
@@ -436,13 +437,13 @@ void Window::ApplyControlBackground(vcl::RenderContext& rRenderContext, const Co
     rRenderContext.SetBackground(aColor);
 }
 
-WinBits Window::GetStyle() const { return mpWindowImpl ? mpWindowImpl->mnStyle : 0; }
+WinBits Window::GetStyle() const { return mpStyleState ? mpStyleState->mnStyle : 0; }
 
-WinBits Window::GetPrevStyle() const { return mpWindowImpl ? mpWindowImpl->mnPrevStyle : 0; }
+WinBits Window::GetPrevStyle() const { return mpStyleState ? mpStyleState->mnPrevStyle : 0; }
 
 WindowExtendedStyle Window::GetExtendedStyle() const
 {
-    return mpWindowImpl ? mpWindowImpl->mnExtendedStyle : WindowExtendedStyle::NONE;
+    return mpStyleState ? mpStyleState->mnExtendedStyle : WindowExtendedStyle::NONE;
 }
 } // end vcl namespace
 

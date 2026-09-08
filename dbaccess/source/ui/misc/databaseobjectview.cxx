@@ -47,6 +47,7 @@
 #include <vcl/weld/MessageDialog.hxx>
 #include <vcl/weld/Window.hxx>
 #include <vcl/window.hxx>
+#include <vcl/WindowExtendedStyle.hxx>
 
 namespace dbaui
 {

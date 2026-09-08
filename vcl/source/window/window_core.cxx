@@ -36,6 +36,7 @@
 #include <ImplAccessibleInfos.hxx>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
+#include <WindowStyleState.hxx>
 #include <WindowControlState.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowVisibilityState.hxx>
@@ -84,6 +85,7 @@ Window::Window(WindowType eType)
     , mpVisibilityState(std::make_unique<WindowVisibilityState>())
     , mpPointerState(std::make_unique<WindowPointerState>())
     , mpControlState(std::make_unique<WindowControlState>())
+    , mpStyleState(std::make_unique<WindowStyleState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -110,6 +112,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpVisibilityState(std::make_unique<WindowVisibilityState>())
     , mpPointerState(std::make_unique<WindowPointerState>())
     , mpControlState(std::make_unique<WindowControlState>())
+    , mpStyleState(std::make_unique<WindowStyleState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -240,6 +243,7 @@ void Window::dispose()
     mpVisibilityState.reset();
     mpPointerState.reset();
     mpControlState.reset();
+    mpStyleState.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy
@@ -293,7 +297,7 @@ void Window::ImplInit(vcl::Window* pParent, WinBits nStyle, SystemParentData* pS
 
     // insert window in list
     ImplInsertWindow(pParent);
-    mpWindowImpl->mnStyle = nStyle;
+    mpStyleState->mnStyle = nStyle;
 
     if (pParent && !mpWindowImpl->mbFrame)
         mxOutDev->mbEnableRTL = AllSettings::GetLayoutRTL();

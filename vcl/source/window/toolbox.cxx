@@ -31,6 +31,7 @@
 #include <vcl/settings.hxx>
 #include <vcl/ptrstyle.hxx>
 
+#include <WindowStyleState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowInvalidation.hxx>
 #include <clipping.hxx>
@@ -1172,8 +1173,8 @@ void ToolBox::ImplInit( vcl::Window* pParent, WinBits nStyle )
     DockingWindow::ImplInit( pParent, nStyle & ~WB_BORDER );
 
     // dockingwindow's ImplInit removes some bits, so restore them here to allow keyboard handling for toolbars
-    ImplGetWindowImpl()->mnStyle |= WB_TABSTOP|WB_NODIALOGCONTROL; // always set WB_TABSTOP for ToolBars
-    ImplGetWindowImpl()->mnStyle &= ~WB_DIALOGCONTROL;
+    ImplGetStyleState()->mnStyle |= WB_TABSTOP|WB_NODIALOGCONTROL; // always set WB_TABSTOP for ToolBars
+    ImplGetStyleState()->mnStyle &= ~WB_DIALOGCONTROL;
 
     ImplInitSettings(true, true, true);
 }

@@ -64,6 +64,7 @@
 #include <svdata.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowStyleState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowHierarchy.hxx>
 #include <accmgr.hxx>
@@ -1450,7 +1451,7 @@ vcl::Window* Dialog::GetDefDialogParent()
             return nullptr;
         }
 
-        if ((pWin->mpWindowImpl->mnStyle & WB_INTROWIN) == 0)
+        if ((pWin->mpStyleState->mnStyle & WB_INTROWIN) == 0)
         {
             return pWin->mpHierarchy->mpFrameWindow->ImplGetWindow();
         }
@@ -1469,7 +1470,7 @@ vcl::Window* Dialog::GetDefDialogParent()
     {
         if( pWin->ImplGetWindow()->IsTopWindow() &&
             pWin->mpVisibilityState->mbReallyVisible &&
-            (pWin->mpWindowImpl->mnStyle & WB_INTROWIN) == 0
+            (pWin->mpStyleState->mnStyle & WB_INTROWIN) == 0
         )
         {
             while( pWin->mpHierarchy->mpParent )

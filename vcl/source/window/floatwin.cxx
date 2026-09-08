@@ -23,6 +23,7 @@
 #include <WindowImpl.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowStyleState.hxx>
 #include <salframe.hxx>
 #include <helpwin.hxx>
 
@@ -783,7 +784,7 @@ void FloatingWindow::StartPopupMode( const tools::Rectangle& rRect, FloatWinPopu
 {
     // remove title
     mnOldTitle = mnTitle;
-    if ( ( mpWindowImpl->mnStyle & WB_POPUP ) && !GetText().isEmpty() )
+    if ( ( mpStyleState->mnStyle & WB_POPUP ) && !GetText().isEmpty() )
         SetTitleType( FloatWinTitleType::Popup );
     else if ( nFlags & FloatWinPopupFlags::AllowTearOff )
         SetTitleType( FloatWinTitleType::TearOff );

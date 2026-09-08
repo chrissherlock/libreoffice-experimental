@@ -128,6 +128,7 @@
 #include <vcl/graphicfilter.hxx>
 #include <vcl/weld/MessageDialog.hxx>
 #include <vcl/window.hxx>
+#include <vcl/WindowExtendedStyle.hxx>
 #include "langselect.hxx"
 #include <salhelper/thread.hxx>
 

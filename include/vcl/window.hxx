@@ -393,6 +393,7 @@ class WindowOutputDevice;
 class Dialog;
 class Edit;
 class WindowImpl;
+struct WindowStyleState;
 struct WindowVisibilityState;
 struct WindowClippingState;
 struct WindowInvalidation;
@@ -440,23 +441,7 @@ template <> struct typed_flags<WindowHitTest> : is_typed_flags<WindowHitTest, 0x
 };
 };
 
-enum class WindowExtendedStyle
-{
-    NONE = 0x0000,
-    Document = 0x0001,
-    DocModified = 0x0002,
-    /**
-     * This is a frame window that is requested to be hidden (not just "not yet
-     * shown").
-     */
-    DocHidden = 0x0004,
-};
-namespace o3tl
-{
-template <> struct typed_flags<WindowExtendedStyle> : is_typed_flags<WindowExtendedStyle, 0x0007>
-{
-};
-};
+enum class WindowExtendedStyle;
 
 bool ImplCallCommand(const VclPtr<vcl::Window>& pChild, CommandEventId nEvt,
                      void const* pData = nullptr, bool bMouse = false, Point const* pPos = nullptr);
@@ -545,6 +530,7 @@ public:
     SAL_DLLPRIVATE WindowFocusState* ImplGetFocusState() const { return mpFocusState.get(); }
     SAL_DLLPRIVATE WindowVisibilityState* ImplGetVisibilityState() const { return mpVisibilityState.get(); }
     SAL_DLLPRIVATE WindowControlState* ImplGetControlState() const { return mpControlState.get(); }
+    SAL_DLLPRIVATE WindowStyleState* ImplGetStyleState() const { return mpStyleState.get(); }
     void SetType(WindowType eType);
     WindowType GetType() const;
     bool IsSystemWindow() const;
@@ -1115,6 +1101,7 @@ private:
     std::unique_ptr<WindowVisibilityState> mpVisibilityState;
     std::unique_ptr<WindowPointerState> mpPointerState;
     std::unique_ptr<WindowControlState> mpControlState;
+    std::unique_ptr<WindowStyleState> mpStyleState;
 
     // --- Lifecycle and Teardown ---
     SAL_DLLPRIVATE void ImplDeInitDND();

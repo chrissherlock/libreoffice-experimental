@@ -38,6 +38,7 @@
 #include <utility>
 #include <vcl/svapp.hxx>
 #include <vcl/window.hxx>
+#include <vcl/WindowExtendedStyle.hxx>
 
 using namespace framework;
 

@@ -31,6 +31,7 @@
 #include <helpwin.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowStyleState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowInput.hxx>
@@ -1349,7 +1350,7 @@ void Window::ImplCallActivateListeners(vcl::Window* pOld)
     {
         ImplGetParent()->ImplCallActivateListeners(pOld);
     }
-    else if ((mpWindowImpl->mnStyle & WB_INTROWIN) == 0)
+    else if ((mpStyleState->mnStyle & WB_INTROWIN) == 0)
     {
         // top level frame reached: store hint for DefModalDialogParent
         ImplGetSVData()->maFrameData.mpActiveApplicationFrame = mpHierarchy->mpFrameWindow;

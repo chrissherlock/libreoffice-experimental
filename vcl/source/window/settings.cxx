@@ -33,6 +33,7 @@
 #include <window.h>
 #include <WindowImpl.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowStyleState.hxx>
 #include <salframe.hxx>
 #include <brdwin.hxx>
 #include <windowdev.hxx>
@@ -76,7 +77,7 @@ void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
         Wallpaper aWallpaper = GetBackground();
         if( !aWallpaper.IsBitmap() && !aWallpaper.IsGradient() )
         {
-            if ( mpWindowImpl->mnStyle & WB_3DLOOK )
+            if ( mpStyleState->mnStyle & WB_3DLOOK )
             {
                 if (aOldSettings.GetStyleSettings().GetFaceColor() != rSettings.GetStyleSettings().GetFaceColor())
                     SetBackground( Wallpaper( rSettings.GetStyleSettings().GetFaceColor() ) );

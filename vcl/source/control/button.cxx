@@ -44,6 +44,7 @@
 #include <accessibility/vclxaccessibleradiobutton.hxx>
 #include <bitmaps.hlst>
 #include <svdata.hxx>
+#include <WindowStyleState.hxx>
 #include <WindowImpl.hxx>
 #include <WindowFocusState.hxx>
 #include <vclstatuslistener.hxx>
@@ -2265,7 +2266,7 @@ std::vector< VclPtr<RadioButton> > RadioButton::GetRadioButtonGroup(bool bInclud
 
 void RadioButton::ImplUncheckAllOther()
 {
-    mpWindowImpl->mnStyle |= WB_TABSTOP;
+    mpStyleState->mnStyle |= WB_TABSTOP;
 
     std::vector<VclPtr<RadioButton> > aGroup(GetRadioButtonGroup(false));
     // iterate over radio button group and checked buttons
@@ -2279,7 +2280,7 @@ void RadioButton::ImplUncheckAllOther()
         }
 
         // not inside if clause to always remove wrongly set WB_TABSTOPS
-        pWindow->mpWindowImpl->mnStyle &= ~WB_TABSTOP;
+        pWindow->mpStyleState->mnStyle &= ~WB_TABSTOP;
     }
 }
 
@@ -2287,7 +2288,7 @@ void RadioButton::ImplCallClick( bool bGrabFocus, GetFocusFlags nFocusFlags )
 {
     mbStateChanged = !mbChecked;
     mbChecked = true;
-    mpWindowImpl->mnStyle |= WB_TABSTOP;
+    mpStyleState->mnStyle |= WB_TABSTOP;
     Invalidate();
     VclPtr<vcl::Window> xWindow = this;
     if ( mbRadioCheck )
@@ -2632,9 +2633,9 @@ void RadioButton::SetState( bool bCheck )
 {
     // carry the TabStop flag along correctly
     if ( bCheck )
-        mpWindowImpl->mnStyle |= WB_TABSTOP;
+        mpStyleState->mnStyle |= WB_TABSTOP;
     else
-        mpWindowImpl->mnStyle &= ~WB_TABSTOP;
+        mpStyleState->mnStyle &= ~WB_TABSTOP;
 
     if ( mbChecked != bCheck )
     {
@@ -2687,9 +2688,9 @@ void RadioButton::Check( bool bCheck )
 {
     // TabStop-Flag richtig mitfuehren
     if ( bCheck )
-        mpWindowImpl->mnStyle |= WB_TABSTOP;
+        mpStyleState->mnStyle |= WB_TABSTOP;
     else
-        mpWindowImpl->mnStyle &= ~WB_TABSTOP;
+        mpStyleState->mnStyle &= ~WB_TABSTOP;
 
     if ( mbChecked == bCheck )
         return;
