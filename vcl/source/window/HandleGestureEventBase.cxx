@@ -19,6 +19,7 @@
 
 #include <sal/config.h>
 
+#include <WindowPlatformState.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 #include <helpwin.hxx>
@@ -99,7 +100,7 @@ vcl::Window *HandleGestureEventBase::Dispatch(vcl::Window* pMouseWindow)
     if (pDispatchedTo)
         return pDispatchedTo;
 
-    vcl::Window* pFocusWindow = m_pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin;
+    vcl::Window* pFocusWindow = m_pWindow->ImplGetPlatformState()->mpFrameData->mpFocusWin;
     if ( !pFocusWindow || (pFocusWindow == pMouseWindow) ||
          (pFocusWindow != m_pSVData->mpWinData->mpFocusWin) )
     {

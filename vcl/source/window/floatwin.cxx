@@ -21,6 +21,7 @@
 #include <svdata.hxx>
 #include <brdwin.hxx>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowStyleState.hxx>
@@ -829,7 +830,7 @@ void FloatingWindow::StartPopupMode( const tools::Rectangle& rRect, FloatWinPopu
         // force key input even without focus (useful for menus)
         mbGrabFocus = true;
         mxPrevFocusWin = Window::SaveFocus();
-        mpWindowImpl->mpFrameData->mbHasFocus = true;
+        mpPlatformState->mpFrameData->mbHasFocus = true;
     }
     Show( true, ShowFlags::NoActivate );
     if (bGrabFocus)

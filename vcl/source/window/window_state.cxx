@@ -38,6 +38,7 @@
 #include <WindowControlAppearance.hxx>
 #include <WindowControlState.hxx>
 #include <WindowGeometry.hxx>
+#include <WindowPlatformState.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
@@ -60,8 +61,8 @@ void Window::ImplRestoreAppFocusWin()
     // window was disabled when the frame focus changed
     ImplSVData* pSVData = ImplGetSVData();
 
-    if (pSVData->mpWinData->mpFocusWin == nullptr && mpWindowImpl->mpFrameData->mbHasFocus
-        && mpWindowImpl->mpFrameData->mpFocusWin == this)
+    if (pSVData->mpWinData->mpFocusWin == nullptr && mpPlatformState->mpFrameData->mbHasFocus
+        && mpPlatformState->mpFrameData->mpFocusWin == this)
     {
         pSVData->mpWinData->mpFocusWin = this;
     }
@@ -114,8 +115,8 @@ void Window::ImplUpdateEnableState(bool bEnable)
 
     mpInput->mbDisabled = !bEnable;
 
-    if (mpWindowImpl->mpSysObj)
-        mpWindowImpl->mpSysObj->Enable(bEnable && !mpInput->mbInputDisabled);
+    if (mpPlatformState->mpSysObj)
+        mpPlatformState->mpSysObj->Enable(bEnable && !mpInput->mbInputDisabled);
 
     CompatStateChanged(StateChangedType::Enable);
 
@@ -129,8 +130,8 @@ void Window::ImplUpdateInputEnableState(bool bEnable)
 
     mpInput->mbInputDisabled = !bEnable;
 
-    if (mpWindowImpl->mpSysObj)
-        mpWindowImpl->mpSysObj->Enable(!mpInput->mbDisabled && bEnable);
+    if (mpPlatformState->mpSysObj)
+        mpPlatformState->mpSysObj->Enable(!mpInput->mbDisabled && bEnable);
 }
 
 void Window::ImplEnableChildWindows(bool bEnable)
@@ -231,7 +232,7 @@ void Window::ImplEnableOverlapWindowsInput(bool bEnable, const vcl::Window* pExc
     vcl::Window* pFirstOverlap = ImplGetFirstOverlapWindow();
 
     for (vcl::Window* pSysWin
-         = mpHierarchy->mpFrameWindow->mpWindowImpl->mpFrameData->mpFirstOverlap;
+         = mpHierarchy->mpFrameWindow->mpPlatformState->mpFrameData->mpFirstOverlap;
          pSysWin != nullptr; pSysWin = pSysWin->mpHierarchy->mpNextOverlap)
     {
         // Skip if Window is not in the path from this window
@@ -251,7 +252,7 @@ void Window::ImplEnableFloatingWindowsInput(bool bEnable, const vcl::Window* pEx
     vcl::Window* pFirstOverlap = ImplGetFirstOverlapWindow();
 
     for (vcl::Window* pFrameWin = ImplGetSVData()->maFrameData.mpFirstFrame; pFrameWin != nullptr;
-         pFrameWin = pFrameWin->mpWindowImpl->mpFrameData->mpNextFrame)
+         pFrameWin = pFrameWin->mpPlatformState->mpFrameData->mpNextFrame)
     {
         if (!pFrameWin->ImplIsFloatingWindow())
             continue;
@@ -274,7 +275,7 @@ void Window::ImplEnableOwnerDrawWindowsInput(bool bEnable, const vcl::Window* pE
         return;
 
     vcl::Window* pFirstOverlap = ImplGetFirstOverlapWindow();
-    ::std::vector<VclPtr<vcl::Window>>& rList = mpWindowImpl->mpFrameData->maOwnerDrawList;
+    ::std::vector<VclPtr<vcl::Window>>& rList = mpPlatformState->mpFrameData->maOwnerDrawList;
 
     for (auto const& elem : rList)
     {

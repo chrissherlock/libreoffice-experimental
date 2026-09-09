@@ -25,6 +25,7 @@
 
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInvalidation.hxx>
@@ -152,8 +153,8 @@ void Window::GrabFocusToDocument() { ImplGrabFocusToDocument(GetFocusFlags::NONE
 
 VclPtr<vcl::Window> Window::GetFocusedWindow() const
 {
-    if (mpWindowImpl && mpWindowImpl->mpFrameData)
-        return mpWindowImpl->mpFrameData->mpFocusWin;
+    if (mpWindowImpl && mpPlatformState->mpFrameData)
+        return mpPlatformState->mpFrameData->mpFocusWin;
     else
         return VclPtr<vcl::Window>();
 }
@@ -426,8 +427,8 @@ IMPL_LINK(Window, ImplTrackTimerHdl, Timer*, pTimer, void)
         pTimer->SetTimeout(GetSettings().GetMouseSettings().GetButtonRepeat());
 
     // create Tracking-Event
-    Point aMousePos(mpWindowImpl->mpFrameData->mnLastMouseX,
-                    mpWindowImpl->mpFrameData->mnLastMouseY);
+    Point aMousePos(mpPlatformState->mpFrameData->mnLastMouseX,
+                    mpPlatformState->mpFrameData->mnLastMouseY);
     if (GetOutDev()->ImplIsAntiparallel())
     {
         // re-mirror frame pos at pChild
@@ -435,9 +436,9 @@ IMPL_LINK(Window, ImplTrackTimerHdl, Timer*, pTimer, void)
         pOutDev->ReMirror(aMousePos);
     }
 
-    MouseEvent aMEvt(ScreenToOutputPixel(aMousePos), mpWindowImpl->mpFrameData->mnClickCount,
-                     MouseEventModifiers::NONE, mpWindowImpl->mpFrameData->mnMouseCode,
-                     mpWindowImpl->mpFrameData->mnMouseCode);
+    MouseEvent aMEvt(ScreenToOutputPixel(aMousePos), mpPlatformState->mpFrameData->mnClickCount,
+                     MouseEventModifiers::NONE, mpPlatformState->mpFrameData->mnMouseCode,
+                     mpPlatformState->mpFrameData->mnMouseCode);
 
     TrackingEvent aTEvt(aMEvt, TrackingEventFlags::Repeat);
     Tracking(aTEvt);
@@ -456,7 +457,7 @@ void Window::StartTracking(StartTrackingFlags nFlags)
 
     ImplSVData* pSVData = ImplGetSVData();
     VclPtr<vcl::Window> pTrackWin = mpLOKData->mbUseFrameData
-                                        ? mpWindowImpl->mpFrameData->mpTrackWin
+                                        ? mpPlatformState->mpFrameData->mpTrackWin
                                         : pSVData->mpWinData->mpTrackWin;
 
     if (pTrackWin && pTrackWin.get() != this)
@@ -481,7 +482,7 @@ void Window::StartTracking(StartTrackingFlags nFlags)
 
     if (mpLOKData->mbUseFrameData)
     {
-        mpWindowImpl->mpFrameData->mpTrackWin = this;
+        mpPlatformState->mpFrameData->mpTrackWin = this;
     }
     else
     {
@@ -498,7 +499,7 @@ void Window::EndTracking(TrackingEventFlags nFlags)
 
     ImplSVData* pSVData = ImplGetSVData();
     VclPtr<vcl::Window> pTrackWin = mpLOKData->mbUseFrameData
-                                        ? mpWindowImpl->mpFrameData->mpTrackWin
+                                        ? mpPlatformState->mpFrameData->mpTrackWin
                                         : pSVData->mpWinData->mpTrackWin;
 
     if (pTrackWin.get() != this)
@@ -507,16 +508,16 @@ void Window::EndTracking(TrackingEventFlags nFlags)
     if (!mpLOKData->mbUseFrameData && pSVData->mpWinData->mpTrackTimer)
         pSVData->mpWinData->mpTrackTimer.reset();
 
-    mpWindowImpl->mpFrameData->mpTrackWin = pSVData->mpWinData->mpTrackWin = nullptr;
+    mpPlatformState->mpFrameData->mpTrackWin = pSVData->mpWinData->mpTrackWin = nullptr;
     pSVData->mpWinData->mnTrackFlags = StartTrackingFlags::NONE;
     ReleaseMouse();
 
     // call EndTracking if required
-    if (!mpWindowImpl->mpFrameData)
+    if (!mpPlatformState->mpFrameData)
         return;
 
-    Point aMousePos(mpWindowImpl->mpFrameData->mnLastMouseX,
-                    mpWindowImpl->mpFrameData->mnLastMouseY);
+    Point aMousePos(mpPlatformState->mpFrameData->mnLastMouseX,
+                    mpPlatformState->mpFrameData->mnLastMouseY);
     if (GetOutDev()->ImplIsAntiparallel())
     {
         // re-mirror frame pos at pChild
@@ -524,9 +525,9 @@ void Window::EndTracking(TrackingEventFlags nFlags)
         pOutDev->ReMirror(aMousePos);
     }
 
-    MouseEvent aMEvt(ScreenToOutputPixel(aMousePos), mpWindowImpl->mpFrameData->mnClickCount,
-                     MouseEventModifiers::NONE, mpWindowImpl->mpFrameData->mnMouseCode,
-                     mpWindowImpl->mpFrameData->mnMouseCode);
+    MouseEvent aMEvt(ScreenToOutputPixel(aMousePos), mpPlatformState->mpFrameData->mnClickCount,
+                     MouseEventModifiers::NONE, mpPlatformState->mpFrameData->mnMouseCode,
+                     mpPlatformState->mpFrameData->mnMouseCode);
 
     TrackingEvent aTEvt(aMEvt, nFlags | TrackingEventFlags::End);
 
@@ -545,8 +546,8 @@ bool Window::IsTracking() const
     if (!mpWindowImpl)
         return false;
 
-    if (mpLOKData->mbUseFrameData && mpWindowImpl->mpFrameData)
-        return mpWindowImpl->mpFrameData->mpTrackWin == this;
+    if (mpLOKData->mbUseFrameData && mpPlatformState->mpFrameData)
+        return mpPlatformState->mpFrameData->mpTrackWin == this;
 
     if (!mpLOKData->mbUseFrameData && ImplGetSVData()->mpWinData)
         return ImplGetSVData()->mpWinData->mpTrackWin == this;
@@ -652,16 +653,16 @@ static void lcl_BringExecutingDialogToTop()
 
 bool vcl::Window::ImplResolveFocusLocally()
 {
-    return !ImplGetWindowImpl()->mpFrameData->mpFocusWin
+    return !ImplGetPlatformState()->mpFrameData->mpFocusWin
            || (ImplCanReceiveFocus() && ImplRestoreFocusToWindow());
 }
 
 bool vcl::Window::ImplSyncDelayedFocus()
 {
-    ImplGetWindowImpl()->mpFrameData->mnFocusId = nullptr;
+    ImplGetPlatformState()->mpFrameData->mnFocusId = nullptr;
 
-    const bool bHasFocus = ImplGetWindowImpl()->mpFrameData->mbHasFocus
-                           || ImplGetWindowImpl()->mpFrameData->mbSysObjFocus;
+    const bool bHasFocus = ImplGetPlatformState()->mpFrameData->mbHasFocus
+                           || ImplGetPlatformState()->mpFrameData->mbSysObjFocus;
 
     // If the status has been preserved, because we got back the focus
     // in the meantime, we do nothing
@@ -669,14 +670,14 @@ bool vcl::Window::ImplSyncDelayedFocus()
         return false;
 
     // redraw all floating windows inactive
-    if (ImplGetWindowImpl()->mpFrameData->mbStartFocusState != bHasFocus)
+    if (ImplGetPlatformState()->mpFrameData->mbStartFocusState != bHasFocus)
         lcl_ActivateFloatingWindows(this, bHasFocus);
 
     if (ImplResolveFocusLocally())
         return true;
 
     vcl::Window* pTopLevelWindow
-        = ImplGetWindowImpl()->mpFrameData->mpFocusWin->ImplGetFirstOverlapWindow();
+        = ImplGetPlatformState()->mpFrameData->mpFocusWin->ImplGetFirstOverlapWindow();
 
     if (lcl_ShouldBringDialogToTop(pTopLevelWindow))
     {
@@ -691,10 +692,10 @@ bool vcl::Window::ImplSyncDelayedFocus()
 bool vcl::Window::ImplProcessFocusGain()
 {
     // redraw all floating windows inactive
-    if (!ImplGetWindowImpl()->mpFrameData->mbStartFocusState)
+    if (!ImplGetPlatformState()->mpFrameData->mbStartFocusState)
         lcl_ActivateFloatingWindows(this, true);
 
-    if (!ImplGetWindowImpl()->mpFrameData->mpFocusWin)
+    if (!ImplGetPlatformState()->mpFrameData->mpFocusWin)
     {
         GrabFocus();
         return true;
@@ -704,7 +705,7 @@ bool vcl::Window::ImplProcessFocusGain()
         return true;
 
     vcl::Window* pTopLevelWindow
-        = ImplGetWindowImpl()->mpFrameData->mpFocusWin->ImplGetFirstOverlapWindow();
+        = ImplGetPlatformState()->mpFrameData->mpFocusWin->ImplGetFirstOverlapWindow();
 
     if (lcl_ShouldBringDialogToTop(pTopLevelWindow))
     {
@@ -784,7 +785,7 @@ void vcl::Window::ImplNotifyLostFocus()
 
 IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
 {
-    if (!ImplGetWindowImpl() || !ImplGetWindowImpl()->mpFrameData)
+    if (!ImplGetWindowImpl() || !ImplGetPlatformState()->mpFrameData)
         return;
 
     // If the status has been preserved, because we got back the focus
@@ -795,11 +796,11 @@ IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
     if (bHasFocus && ImplProcessFocusGain())
         return;
 
-    if (vcl::Window* pFocusWin = ImplGetWindowImpl()->mpFrameData->mpFocusWin)
+    if (vcl::Window* pFocusWin = ImplGetPlatformState()->mpFrameData->mpFocusWin)
         pFocusWin->ImplProcessFocusLoss();
 
     // Redraw all floating window inactive
-    if (ImplGetWindowImpl()->mpFrameData->mbStartFocusState != bHasFocus)
+    if (ImplGetPlatformState()->mpFrameData->mbStartFocusState != bHasFocus)
         lcl_ActivateFloatingWindows(this, bHasFocus);
 }
 

@@ -23,6 +23,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowAccessibleData.hxx>
 
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
@@ -83,17 +84,17 @@ void Window::SetComponentInterface(css::uno::Reference<css::awt::XVclWindowPeer>
 void Window::SetClipboard(
     css::uno::Reference<css::datatransfer::clipboard::XClipboard> const& xClipboard)
 {
-    if (mpWindowImpl->mpFrameData)
-        mpWindowImpl->mpFrameData->mxClipboard = xClipboard;
+    if (mpPlatformState->mpFrameData)
+        mpPlatformState->mpFrameData->mxClipboard = xClipboard;
 }
 
 css::uno::Reference<css::datatransfer::clipboard::XClipboard> Window::GetClipboard()
 {
-    if (!mpWindowImpl->mpFrameData)
+    if (!mpPlatformState->mpFrameData)
         return static_cast<css::datatransfer::clipboard::XClipboard*>(nullptr);
-    if (!mpWindowImpl->mpFrameData->mxClipboard.is())
-        mpWindowImpl->mpFrameData->mxClipboard = GetSystemClipboard();
-    return mpWindowImpl->mpFrameData->mxClipboard;
+    if (!mpPlatformState->mpFrameData->mxClipboard.is())
+        mpPlatformState->mpFrameData->mxClipboard = GetSystemClipboard();
+    return mpPlatformState->mpFrameData->mxClipboard;
 }
 
 } // end vcl namespace

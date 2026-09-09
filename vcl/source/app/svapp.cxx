@@ -63,6 +63,7 @@
 #include <salsys.hxx>
 #include <svdata.hxx>
 #include <ImplFrameData.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowImpl.hxx>
 #include <WindowStyleState.hxx>
 #include <WindowVisibilityState.hxx>
@@ -656,7 +657,7 @@ void Application::SetSettings(const AllSettings& rSettings, bool bTemporary)
                     pClientWin = pClientWin->ImplGetClientWindow();
                 pClientWin->UpdateSettings( rSettings, true );
 
-                vcl::Window* pTempWin = pFrame->mpWindowImpl->mpFrameData->mpFirstOverlap;
+                vcl::Window* pTempWin = pFrame->mpPlatformState->mpFrameData->mpFirstOverlap;
                 while ( pTempWin )
                 {
                     // call UpdateSettings from ClientWindow in order to prevent updating data twice
@@ -667,7 +668,7 @@ void Application::SetSettings(const AllSettings& rSettings, bool bTemporary)
                     pTempWin = pTempWin->mpHierarchy->mpNextOverlap;
                 }
 
-                pFrame = pFrame->mpWindowImpl->mpFrameData->mpNextFrame;
+                pFrame = pFrame->mpPlatformState->mpFrameData->mpNextFrame;
             }
 
             // if DPI resolution for screen output was changed set the new resolution for all
@@ -740,14 +741,14 @@ void Application::NotifyAllWindows( DataChangedEvent& rDCEvt )
     {
         pFrame->NotifyAllChildren( rDCEvt );
 
-        vcl::Window* pSysWin = pFrame->mpWindowImpl->mpFrameData->mpFirstOverlap;
+        vcl::Window* pSysWin = pFrame->mpPlatformState->mpFrameData->mpFirstOverlap;
         while ( pSysWin )
         {
             pSysWin->NotifyAllChildren( rDCEvt );
             pSysWin = pSysWin->mpHierarchy->mpNextOverlap;
         }
 
-        pFrame = pFrame->mpWindowImpl->mpFrameData->mpNextFrame;
+        pFrame = pFrame->mpPlatformState->mpFrameData->mpNextFrame;
     }
 }
 
@@ -1136,7 +1137,7 @@ vcl::Window* Application::GetFirstTopLevelWindow()
 
 vcl::Window* Application::GetNextTopLevelWindow( vcl::Window const * pWindow )
 {
-    return pWindow->mpWindowImpl->mpFrameData->mpNextFrame;
+    return pWindow->mpPlatformState->mpFrameData->mpNextFrame;
 }
 
 tools::Long    Application::GetTopWindowCount()
@@ -1148,7 +1149,7 @@ tools::Long    Application::GetTopWindowCount()
     {
         if( pWin->ImplGetWindow()->IsTopWindow() )
             nRet++;
-        pWin = pWin->mpWindowImpl->mpFrameData->mpNextFrame;
+        pWin = pWin->mpPlatformState->mpFrameData->mpNextFrame;
     }
     return nRet;
 }
@@ -1167,7 +1168,7 @@ vcl::Window* Application::GetTopWindow( tools::Long nIndex )
             else
                 nIdx++;
         }
-        pWin = pWin->mpWindowImpl->mpFrameData->mpNextFrame;
+        pWin = pWin->mpPlatformState->mpFrameData->mpNextFrame;
     }
     return nullptr;
 }
@@ -1477,7 +1478,7 @@ vcl::Window* Dialog::GetDefDialogParent()
                 pWin = pWin->mpHierarchy->mpParent;
             return pWin->mpHierarchy->mpFrameWindow->ImplGetWindow();
         }
-        pWin = pWin->mpWindowImpl->mpFrameData->mpNextFrame;
+        pWin = pWin->mpPlatformState->mpFrameData->mpNextFrame;
     }
 
     // use the desktop

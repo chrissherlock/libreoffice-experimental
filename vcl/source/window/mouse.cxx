@@ -39,6 +39,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowInput.hxx>
 #include <WindowLOKData.hxx>
@@ -150,14 +151,14 @@ PointerStyle Window::ImplGetMousePointer() const
 
 void Window::ImplCallMouseMove( sal_uInt16 nMouseCode, bool bModChanged )
 {
-    if ( !(mpWindowImpl->mpFrameData->mbMouseIn && mpHierarchy->mpFrameWindow->mpVisibilityState->mbReallyVisible) )
+    if ( !(mpPlatformState->mpFrameData->mbMouseIn && mpHierarchy->mpFrameWindow->mpVisibilityState->mbReallyVisible) )
         return;
 
     sal_uInt64 nTime   = tools::Time::GetSystemTicks();
-    tools::Long    nX      = mpWindowImpl->mpFrameData->mnLastMouseX;
-    tools::Long    nY      = mpWindowImpl->mpFrameData->mnLastMouseY;
+    tools::Long    nX      = mpPlatformState->mpFrameData->mnLastMouseX;
+    tools::Long    nY      = mpPlatformState->mpFrameData->mnLastMouseY;
     sal_uInt16  nCode   = nMouseCode;
-    MouseEventModifiers nMode = mpWindowImpl->mpFrameData->mnMouseMode;
+    MouseEventModifiers nMode = mpPlatformState->mpFrameData->mnMouseMode;
     bool    bLeave;
     // check for MouseLeave
     bLeave = ((nX < 0) || (nY < 0) ||
@@ -172,20 +173,20 @@ void Window::ImplCallMouseMove( sal_uInt16 nMouseCode, bool bModChanged )
 
 void Window::ImplGenerateMouseMove()
 {
-    if ( mpWindowImpl && mpWindowImpl->mpFrameData &&
-         !mpWindowImpl->mpFrameData->mnMouseMoveId )
-        mpWindowImpl->mpFrameData->mnMouseMoveId = Application::PostUserEvent( LINK( mpHierarchy->mpFrameWindow, Window, ImplGenerateMouseMoveHdl ), nullptr, true );
+    if ( mpWindowImpl && mpPlatformState->mpFrameData &&
+         !mpPlatformState->mpFrameData->mnMouseMoveId )
+        mpPlatformState->mpFrameData->mnMouseMoveId = Application::PostUserEvent( LINK( mpHierarchy->mpFrameWindow, Window, ImplGenerateMouseMoveHdl ), nullptr, true );
 }
 
 IMPL_LINK_NOARG(Window, ImplGenerateMouseMoveHdl, void*, void)
 {
-    mpWindowImpl->mpFrameData->mnMouseMoveId = nullptr;
+    mpPlatformState->mpFrameData->mnMouseMoveId = nullptr;
     vcl::Window* pCaptureWin = ImplGetSVData()->mpWinData->mpCaptureWin;
     if( ! pCaptureWin ||
-        (pCaptureWin->mpWindowImpl && pCaptureWin->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame)
+        (pCaptureWin->mpWindowImpl && pCaptureWin->mpPlatformState->mpFrame == mpPlatformState->mpFrame)
     )
     {
-        ImplCallMouseMove( mpWindowImpl->mpFrameData->mnMouseCode );
+        ImplCallMouseMove( mpPlatformState->mpFrameData->mnMouseCode );
     }
 }
 
@@ -196,7 +197,7 @@ void Window::ImplInvertFocus( const tools::Rectangle& rRect )
 
 static bool lcl_IsWindowFocused(const vcl::Window& rWindow)
 {
-    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
+    WindowPlatformState* pImpl = rWindow.ImplGetPlatformState();
     if (!pImpl)
         return false;
 
@@ -273,14 +274,14 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
 
     bool bAsyncFocusWaiting = false;
     vcl::Window *pFrame = pSVData->maFrameData.mpFirstFrame;
-    while( pFrame && pFrame->mpWindowImpl && pFrame->mpWindowImpl->mpFrameData )
+    while( pFrame && pFrame->mpWindowImpl && pFrame->mpPlatformState->mpFrameData )
     {
-        if( pFrame != mpHierarchy->mpFrameWindow.get() && pFrame->mpWindowImpl->mpFrameData->mnFocusId )
+        if( pFrame != mpHierarchy->mpFrameWindow.get() && pFrame->mpPlatformState->mpFrameData->mnFocusId )
         {
             bAsyncFocusWaiting = true;
             break;
         }
-        pFrame = pFrame->mpWindowImpl->mpFrameData->mpNextFrame;
+        pFrame = pFrame->mpPlatformState->mpFrameData->mpNextFrame;
     }
 
     bool bHasFocus = lcl_IsWindowFocused(*this);
@@ -315,7 +316,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
     vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
     if (pOverlapWindow->mpWindowImpl)
         pOverlapWindow->mpInput->mpLastFocusWindow = this;
-    mpWindowImpl->mpFrameData->mpFocusWin = this;
+    mpPlatformState->mpFrameData->mpFocusWin = this;
 
     if( !bHasFocus )
     {
@@ -327,7 +328,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         {
             // here we already switch focus as ToTop()
             // should not give focus to another window
-            mpWindowImpl->mpFrame->ToTop( SalFrameToTop::GrabFocus | SalFrameToTop::GrabFocusOnly );
+            mpPlatformState->mpFrame->ToTop( SalFrameToTop::GrabFocus | SalFrameToTop::GrabFocusOnly );
             return;
         }
     }
@@ -380,11 +381,11 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
 
     if (pSVData->mpWinData->mpFocusWin.get() == this)
     {
-        if ( mpWindowImpl->mpSysObj )
+        if ( mpPlatformState->mpSysObj )
         {
-            mpWindowImpl->mpFrameData->mpFocusWin = this;
-            if ( !mpWindowImpl->mpFrameData->mbInSysObjFocusHdl )
-                mpWindowImpl->mpSysObj->GrabFocus();
+            mpPlatformState->mpFrameData->mpFocusWin = this;
+            if ( !mpPlatformState->mpFrameData->mbInSysObjFocusHdl )
+                mpPlatformState->mpSysObj->GrabFocus();
         }
 
         if (pSVData->mpWinData->mpFocusWin.get() == this)
@@ -436,7 +437,7 @@ void Window::ImplGrabFocusToDocument( GetFocusFlags nFlags )
     {
         if( !pWin->GetParent() )
         {
-            pWin->mpWindowImpl->mpFrame->GrabFocus();
+            pWin->mpPlatformState->mpFrame->GrabFocus();
             pWin->ImplGetFrameWindow()->GetWindow( GetWindowType::Client )->ImplGrabFocus(nFlags);
             return;
         }
@@ -470,8 +471,8 @@ void Window::SetMouseTransparent( bool bTransparent )
     if ( mpHierarchy->mpBorderWindow )
         mpHierarchy->mpBorderWindow->SetMouseTransparent( bTransparent );
 
-    if( mpWindowImpl->mpSysObj )
-        mpWindowImpl->mpSysObj->SetMouseTransparent( bTransparent );
+    if( mpPlatformState->mpSysObj )
+        mpPlatformState->mpSysObj->SetMouseTransparent( bTransparent );
 
     mpInput->mbMouseTransparent = bTransparent;
 }
@@ -495,7 +496,7 @@ void Window::CaptureMouse()
     if (pSVData->mpWinData->mpCaptureWin.get() != this)
     {
         pSVData->mpWinData->mpCaptureWin = this;
-        mpWindowImpl->mpFrame->CaptureMouse( true );
+        mpPlatformState->mpFrame->CaptureMouse( true );
     }
 }
 
@@ -505,8 +506,8 @@ void Window::ReleaseMouse()
     {
         ImplSVData* pSVData = ImplGetSVData();
         pSVData->mpWinData->mpCaptureWin = nullptr;
-        if (mpWindowImpl && mpWindowImpl->mpFrame)
-            mpWindowImpl->mpFrame->CaptureMouse( false );
+        if (mpWindowImpl && mpPlatformState->mpFrame)
+            mpPlatformState->mpFrame->CaptureMouse( false );
         ImplGenerateMouseMove();
     }
 }
@@ -524,8 +525,8 @@ void Window::SetPointer( PointerStyle nPointer )
     mpControlAppearance->maPointer = nPointer;
 
     // possibly immediately move pointer
-    if (!mpWindowImpl->mpFrameData->mbInMouseMove && ImplTestMousePointerSet())
-        mpWindowImpl->mpFrame->SetPointer( ImplGetMousePointer() );
+    if (!mpPlatformState->mpFrameData->mbInMouseMove && ImplTestMousePointerSet())
+        mpPlatformState->mpFrame->SetPointer( ImplGetMousePointer() );
 }
 
 void Window::EnableChildPointerOverwrite( bool bOverwrite )
@@ -536,8 +537,8 @@ void Window::EnableChildPointerOverwrite( bool bOverwrite )
     mpPointerState->mbChildPtrOverwrite = bOverwrite;
 
     // possibly immediately move pointer
-    if ( !mpWindowImpl->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
-        mpWindowImpl->mpFrame->SetPointer( ImplGetMousePointer() );
+    if ( !mpPlatformState->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
+        mpPlatformState->mpFrame->SetPointer( ImplGetMousePointer() );
 }
 
 void Window::SetPointerPosPixel( const Point& rPos )
@@ -557,7 +558,7 @@ void Window::SetPointerPosPixel( const Point& rPos )
     {
         pOutDev->ReMirror( aPos );
     }
-    mpWindowImpl->mpFrame->SetPointerPos( aPos.X(), aPos.Y() );
+    mpPlatformState->mpFrame->SetPointerPos( aPos.X(), aPos.Y() );
 }
 
 void Window::SetLastMousePos(const Point& rPos)
@@ -565,14 +566,14 @@ void Window::SetLastMousePos(const Point& rPos)
     // Do this conversion, so when GetPointerPosPixel() calls
     // ScreenToOutputPixel(), we get back the original position.
     Point aPos = OutputToScreenPixel(rPos);
-    mpWindowImpl->mpFrameData->mnLastMouseX = aPos.X();
-    mpWindowImpl->mpFrameData->mnLastMouseY = aPos.Y();
+    mpPlatformState->mpFrameData->mnLastMouseX = aPos.X();
+    mpPlatformState->mpFrameData->mnLastMouseY = aPos.Y();
 }
 
 Point Window::GetPointerPosPixel()
 {
 
-    Point aPos( mpWindowImpl->mpFrameData->mnLastMouseX, mpWindowImpl->mpFrameData->mnLastMouseY );
+    Point aPos( mpPlatformState->mpFrameData->mnLastMouseX, mpPlatformState->mpFrameData->mnLastMouseY );
     if( GetOutDev()->ImplIsAntiparallel() )
     {
         const OutputDevice *pOutDev = GetOutDev();
@@ -584,7 +585,7 @@ Point Window::GetPointerPosPixel()
 Point Window::GetLastPointerPosPixel()
 {
 
-    Point aPos( mpWindowImpl->mpFrameData->mnBeforeLastMouseX, mpWindowImpl->mpFrameData->mnBeforeLastMouseY );
+    Point aPos( mpPlatformState->mpFrameData->mnBeforeLastMouseX, mpPlatformState->mpFrameData->mnBeforeLastMouseY );
     if( GetOutDev()->ImplIsAntiparallel() )
     {
         const OutputDevice *pOutDev = GetOutDev();
@@ -601,8 +602,8 @@ void Window::ShowPointer( bool bVisible )
         mpPointerState->mbNoPtrVisible = !bVisible;
 
         // possibly immediately move pointer
-        if ( !mpWindowImpl->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
-            mpWindowImpl->mpFrame->SetPointer( ImplGetMousePointer() );
+        if ( !mpPlatformState->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
+            mpPlatformState->mpFrame->SetPointer( ImplGetMousePointer() );
     }
 }
 
@@ -611,9 +612,9 @@ Window::PointerState Window::GetPointerState()
     PointerState aState;
     aState.mnState = 0;
 
-    if (mpWindowImpl->mpFrame)
+    if (mpPlatformState->mpFrame)
     {
-        SalFrame::SalPointerState aSalPointerState = mpWindowImpl->mpFrame->GetPointerState();
+        SalFrame::SalPointerState aSalPointerState = mpPlatformState->mpFrame->GetPointerState();
         if( GetOutDev()->ImplIsAntiparallel() )
         {
             const OutputDevice *pOutDev = GetOutDev();
@@ -638,8 +639,8 @@ void Window::EnterWait()
     if ( mpWindowImpl->mnWaitCount == 1 )
     {
         // possibly immediately move pointer
-        if ( !mpWindowImpl->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
-            mpWindowImpl->mpFrame->SetPointer( ImplGetMousePointer() );
+        if ( !mpPlatformState->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
+            mpPlatformState->mpFrame->SetPointer( ImplGetMousePointer() );
     }
 }
 
@@ -655,8 +656,8 @@ void Window::LeaveWait()
         if ( !mpWindowImpl->mnWaitCount )
         {
             // possibly immediately move pointer
-            if ( !mpWindowImpl->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
-                mpWindowImpl->mpFrame->SetPointer( ImplGetMousePointer() );
+            if ( !mpPlatformState->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
+                mpPlatformState->mpFrame->SetPointer( ImplGetMousePointer() );
         }
     }
 }
@@ -664,12 +665,12 @@ void Window::LeaveWait()
 bool Window::ImplStopDnd()
 {
     bool bRet = false;
-    if( mpWindowImpl->mpFrameData && mpWindowImpl->mpFrameData->mxDropTargetListener.is() )
+    if( mpPlatformState->mpFrameData && mpPlatformState->mpFrameData->mxDropTargetListener.is() )
     {
         bRet = true;
-        mpWindowImpl->mpFrameData->mxDropTarget.clear();
-        mpWindowImpl->mpFrameData->mxDragSource.clear();
-        mpWindowImpl->mpFrameData->mxDropTargetListener.clear();
+        mpPlatformState->mpFrameData->mxDropTarget.clear();
+        mpPlatformState->mpFrameData->mxDragSource.clear();
+        mpPlatformState->mpFrameData->mxDropTargetListener.clear();
     }
 
     return bRet;
@@ -689,43 +690,43 @@ rtl::Reference<DNDListenerContainer> Window::GetDropTarget()
     {
         sal_Int8 nDefaultActions = 0;
 
-        if( mpWindowImpl->mpFrameData )
+        if( mpPlatformState->mpFrameData )
         {
-            if( ! mpWindowImpl->mpFrameData->mxDropTarget.is() )
+            if( ! mpPlatformState->mpFrameData->mxDropTarget.is() )
             {
                 // initialization is done in GetDragSource
                 GetDragSource();
             }
 
-            if( mpWindowImpl->mpFrameData->mxDropTarget.is() )
+            if( mpPlatformState->mpFrameData->mxDropTarget.is() )
             {
-                nDefaultActions = mpWindowImpl->mpFrameData->mxDropTarget->getDefaultActions();
+                nDefaultActions = mpPlatformState->mpFrameData->mxDropTarget->getDefaultActions();
 
-                if( ! mpWindowImpl->mpFrameData->mxDropTargetListener.is() )
+                if( ! mpPlatformState->mpFrameData->mxDropTargetListener.is() )
                 {
-                    mpWindowImpl->mpFrameData->mxDropTargetListener = new DNDEventDispatcher( mpHierarchy->mpFrameWindow );
+                    mpPlatformState->mpFrameData->mxDropTargetListener = new DNDEventDispatcher( mpHierarchy->mpFrameWindow );
 
                     try
                     {
-                        mpWindowImpl->mpFrameData->mxDropTarget->addDropTargetListener( mpWindowImpl->mpFrameData->mxDropTargetListener );
+                        mpPlatformState->mpFrameData->mxDropTarget->addDropTargetListener( mpPlatformState->mpFrameData->mxDropTargetListener );
 
                         // register also as drag gesture listener if directly supported by drag source
                         Reference< css::datatransfer::dnd::XDragGestureRecognizer > xDragGestureRecognizer(
-                            mpWindowImpl->mpFrameData->mxDragSource, UNO_QUERY);
+                            mpPlatformState->mpFrameData->mxDragSource, UNO_QUERY);
 
                         if( xDragGestureRecognizer.is() )
                         {
-                            xDragGestureRecognizer->addDragGestureListener(mpWindowImpl->mpFrameData->mxDropTargetListener);
+                            xDragGestureRecognizer->addDragGestureListener(mpPlatformState->mpFrameData->mxDropTargetListener);
                         }
                         else
-                            mpWindowImpl->mpFrameData->mbInternalDragGestureRecognizer = true;
+                            mpPlatformState->mpFrameData->mbInternalDragGestureRecognizer = true;
 
                     }
                     catch (const RuntimeException&)
                     {
                         // release all instances
-                        mpWindowImpl->mpFrameData->mxDropTarget.clear();
-                        mpWindowImpl->mpFrameData->mxDragSource.clear();
+                        mpPlatformState->mpFrameData->mxDropTarget.clear();
+                        mpPlatformState->mpFrameData->mxDragSource.clear();
                     }
                 }
             }
@@ -743,23 +744,23 @@ Reference< css::datatransfer::dnd::XDragSource > Window::GetDragSource()
 {
 #if HAVE_FEATURE_DESKTOP
     const SystemEnvData* pEnvData = GetSystemData();
-    if (!mpWindowImpl->mpFrameData || !pEnvData)
+    if (!mpPlatformState->mpFrameData || !pEnvData)
         return Reference<css::datatransfer::dnd::XDragSource>();
-    if (mpWindowImpl->mpFrameData->mxDragSource.is())
-        return mpWindowImpl->mpFrameData->mxDragSource;
+    if (mpPlatformState->mpFrameData->mxDragSource.is())
+        return mpPlatformState->mpFrameData->mxDragSource;
 
     try
     {
         SalInstance* pInst = GetSalInstance();
-        mpWindowImpl->mpFrameData->mxDragSource = pInst->CreateDragSource(*pEnvData);
-        mpWindowImpl->mpFrameData->mxDropTarget = pInst->CreateDropTarget(*pEnvData);
+        mpPlatformState->mpFrameData->mxDragSource = pInst->CreateDragSource(*pEnvData);
+        mpPlatformState->mpFrameData->mxDropTarget = pInst->CreateDropTarget(*pEnvData);
     }
     catch (const Exception&)
     {
-        mpWindowImpl->mpFrameData->mxDropTarget.clear();
-        mpWindowImpl->mpFrameData->mxDragSource.clear();
+        mpPlatformState->mpFrameData->mxDropTarget.clear();
+        mpPlatformState->mpFrameData->mxDragSource.clear();
     }
-    return mpWindowImpl->mpFrameData->mxDragSource;
+    return mpPlatformState->mpFrameData->mxDragSource;
 #else
     return Reference< css::datatransfer::dnd::XDragSource > ();
 #endif

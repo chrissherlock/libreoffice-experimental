@@ -24,6 +24,7 @@
 
 #include <ImplFrameData.hxx>
 #include <ImplOutDevData.hxx>
+#include <WindowPlatformState.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
@@ -65,19 +66,19 @@ void Window::RecordLayoutData( vcl::ControlLayoutData* pLayout, const tools::Rec
 
 bool Window::SupportsDoubleBuffering() const
 {
-    return mpWindowImpl->mpFrameData->mpBuffer;
+    return mpPlatformState->mpFrameData->mpBuffer;
 }
 
 void Window::RequestDoubleBuffering(bool bRequest)
 {
     if (bRequest)
     {
-        mpWindowImpl->mpFrameData->mpBuffer = VclPtrInstance<VirtualDevice>();
+        mpPlatformState->mpFrameData->mpBuffer = VclPtrInstance<VirtualDevice>();
         // Make sure that the buffer size matches the frame size.
-        mpWindowImpl->mpFrameData->mpBuffer->SetOutputSizePixel(mpHierarchy->mpFrameWindow->GetOutputSizePixel());
+        mpPlatformState->mpFrameData->mpBuffer->SetOutputSizePixel(mpHierarchy->mpFrameWindow->GetOutputSizePixel());
     }
     else
-        mpWindowImpl->mpFrameData->mpBuffer.reset();
+        mpPlatformState->mpFrameData->mpBuffer.reset();
 }
 
 } /* namespace vcl */

@@ -17,6 +17,7 @@
 #include <WindowVisibilityState.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowPlatformState.hxx>
 #include <salobj.hxx>
 
 namespace vcl::clipping
@@ -53,7 +54,7 @@ void initWinChildClipRegion(const vcl::Window& rWindow)
         clipChildren(rWindow, *pImpl->mpChildClipRegion);
 }
 
-bool syncNativeWindow(WindowImpl& rImpl, WindowVisibilityState& rVisibilityState,
+bool syncNativeWindow(WindowPlatformState& rImpl, WindowVisibilityState& rVisibilityState,
                       vcl::Region& rWinChildClipRegion, const vcl::Region* pOldRegion,
                       bool& rOutUpdate)
 {
@@ -81,11 +82,11 @@ bool syncNativeWindow(WindowImpl& rImpl, WindowVisibilityState& rVisibilityState
     return false; // Signal that downstream native updates are required
 }
 
-std::unique_ptr<vcl::Region> prepareClipInvalidation(WindowImpl& rImpl,
-                                                     WindowClippingState& rClippingState,
-                                                     bool bSysObjOnlySmaller)
+std::unique_ptr<vcl::Region> getClipInvalidationRegion(WindowPlatformState& rPlatformState,
+                                                       WindowClippingState& rClippingState,
+                                                       bool bSysObjOnlySmaller)
 {
-    if (rImpl.mpSysObj && bSysObjOnlySmaller && !rClippingState.mbInitWinClipRegion)
+    if (rPlatformState.mpSysObj && bSysObjOnlySmaller && !rClippingState.mbInitWinClipRegion)
         return std::make_unique<vcl::Region>(rClippingState.maWinClipRegion);
 
     return nullptr;
@@ -541,13 +542,13 @@ ParentClipMode getParentClipMode(const vcl::Window& rWindow)
 static void lcl_updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region aRegion,
                                              const vcl::Region& rWinRectRegion)
 {
-    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
-    if (!pImpl || !pImpl->mpSysObj)
+    WindowPlatformState* pPlatformState = rWindow.ImplGetPlatformState();
+    if (!pPlatformState || !pPlatformState->mpSysObj)
         return;
 
     if (aRegion == rWinRectRegion)
     {
-        pImpl->mpSysObj->ResetClipRegion();
+        pPlatformState->mpSysObj->ResetClipRegion();
         return;
     }
 
@@ -557,21 +558,21 @@ static void lcl_updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region a
     // Set/update system object clip region
     RectangleVector aRectangles;
     aRegion.GetRegionRectangles(aRectangles);
-    pImpl->mpSysObj->BeginSetClipRegion(aRectangles.size());
+    pPlatformState->mpSysObj->BeginSetClipRegion(aRectangles.size());
 
     for (auto const& rectangle : aRectangles)
     {
-        pImpl->mpSysObj->UnionClipRegion(rectangle.Left(), rectangle.Top(), rectangle.GetWidth(),
-                                         rectangle.GetHeight());
+        pPlatformState->mpSysObj->UnionClipRegion(rectangle.Left(), rectangle.Top(),
+                                                  rectangle.GetWidth(), rectangle.GetHeight());
     }
 
-    pImpl->mpSysObj->EndSetClipRegion();
+    pPlatformState->mpSysObj->EndSetClipRegion();
 }
 
 bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion)
 {
-    WindowImpl* pWindowImpl = rWindow.ImplGetWindowImpl();
-    if (!pWindowImpl || !pWindowImpl->mpSysObj)
+    WindowPlatformState* pPlatformState = rWindow.ImplGetPlatformState();
+    if (!pPlatformState || !pPlatformState->mpSysObj)
         return true;
 
     WindowClippingState* pClippingState = rWindow.ImplGetClippingState();
@@ -583,13 +584,14 @@ bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion)
     bool bUpdate = true;
     WindowVisibilityState* pVisibilityState = rWindow.ImplGetVisibilityState();
 
-    if (syncNativeWindow(*pWindowImpl, *pVisibilityState, rWinChildClipRegion, pOldRegion, bUpdate))
+    if (syncNativeWindow(*pPlatformState, *pVisibilityState, rWinChildClipRegion, pOldRegion,
+                         bUpdate))
         return bUpdate;
 
     lcl_updateNativeObjectClipRegion(rWindow, rWinChildClipRegion,
                                      vcl::Region(rWindow.GetOutputRectPixel()));
 
-    pWindowImpl->mpSysObj->Show(true);
+    pPlatformState->mpSysObj->Show(true);
 
     return bUpdate;
 }
@@ -639,8 +641,9 @@ bool setClipFlagChildren(vcl::Window& rWindow, bool bSysObjOnlySmaller)
     if (!pClippingState)
         return true;
 
-    WindowImpl* pImpl = rWindow.ImplGetWindowImpl();
-    auto pOldRegion = prepareClipInvalidation(*pImpl, *pClippingState, bSysObjOnlySmaller);
+    WindowPlatformState* pPlatformState = rWindow.ImplGetPlatformState();
+    auto pOldRegion
+        = getClipInvalidationRegion(*pPlatformState, *pClippingState, bSysObjOnlySmaller);
 
     dirtyInitClipRegion(rWindow);
     pClippingState->mbInitWinClipRegion = true;
@@ -652,7 +655,7 @@ bool setClipFlagChildren(vcl::Window& rWindow, bool bSysObjOnlySmaller)
             bUpdate = false;
     }
 
-    if (!pImpl->mpSysObj)
+    if (!pPlatformState || !pPlatformState->mpSysObj)
         return bUpdate;
 
     bool bClipSuccess = nativeObjectClip(rWindow, pOldRegion.get());

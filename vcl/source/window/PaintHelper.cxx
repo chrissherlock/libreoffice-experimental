@@ -27,6 +27,7 @@
 
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
+#include <WindowPlatformState.hxx>
 #include <PaintBufferGuard.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowImpl.hxx>
@@ -47,13 +48,13 @@ PaintHelper::PaintHelper(vcl::Window* pWindow, ImplPaintFlags nPaintFlags)
 
 PaintHelper::~PaintHelper()
 {
-    WindowImpl* pWindowImpl = m_pWindow->ImplGetWindowImpl();
+    WindowPlatformState* pPlatformState = m_pWindow->ImplGetPlatformState();
     ImplWinData* pWinData = m_pWindow->ImplGetWinData();
 
     if (m_bPop)
         m_pWindow->PopPaintHelper(this);
 
-    ImplFrameData* pFrameData = pWindowImpl->mpFrameData;
+    ImplFrameData* pFrameData = pPlatformState ? pPlatformState->mpFrameData : nullptr;
     if (m_nPaintFlags & (ImplPaintFlags::PaintAllChildren | ImplPaintFlags::PaintChildren))
     {
         // Paint from the bottom child window and frontward.
@@ -66,7 +67,7 @@ PaintHelper::~PaintHelper()
         }
     }
 
-    if (pWinData && pWindowImpl->mbTrackVisible
+    if (pWinData && m_pWindow->ImplGetWindowImpl()->mbTrackVisible
         && (pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
         /* #98602# need to invert the tracking rect AFTER
          * the children have painted
@@ -75,7 +76,7 @@ PaintHelper::~PaintHelper()
 
     // double-buffering: paint in case we created the buffer, the children are
     // already painted inside
-    if (m_bStartedBufferedPaint && pFrameData->mbInBufferedPaint)
+    if (m_bStartedBufferedPaint && pFrameData && pFrameData->mbInBufferedPaint)
     {
         PaintBuffer();
         pFrameData->mbInBufferedPaint = false;
@@ -92,7 +93,7 @@ PaintHelper::~PaintHelper()
 
 void PaintHelper::StartBufferedPaint()
 {
-    ImplFrameData* pFrameData = m_pWindow->mpWindowImpl->mpFrameData;
+    ImplFrameData* pFrameData = m_pWindow->mpPlatformState->mpFrameData;
     assert(!pFrameData->mbInBufferedPaint);
 
     pFrameData->mbInBufferedPaint = true;
@@ -102,7 +103,7 @@ void PaintHelper::StartBufferedPaint()
 
 void PaintHelper::PaintBuffer()
 {
-    ImplFrameData* pFrameData = m_pWindow->mpWindowImpl->mpFrameData;
+    ImplFrameData* pFrameData = m_pWindow->mpPlatformState->mpFrameData;
     assert(pFrameData->mbInBufferedPaint);
     assert(m_bStartedBufferedPaint);
 
@@ -117,7 +118,7 @@ void PaintHelper::DoPaint(const vcl::Region* pRegion)
     ImplWinData* pWinData = m_pWindow->ImplGetWinData();
 
     vcl::Region& rWinChildClipRegion = vcl::clipping::getWinChildClipRegion(*m_pWindow);
-    ImplFrameData* pFrameData = m_pWindow->mpWindowImpl->mpFrameData;
+    ImplFrameData* pFrameData = m_pWindow->mpPlatformState->mpFrameData;
 
     if (pInvalidation->mnPaintFlags & ImplPaintFlags::PaintAll || pFrameData->mbInBufferedPaint)
     {

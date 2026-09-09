@@ -22,6 +22,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
@@ -133,7 +134,7 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
         if (mpAccessibleData)
             mpAccessibleData->mbSuppressAccessibilityEvents = true;
 
-        mpWindowImpl->mpFrame->Show(false);
+        mpPlatformState->mpFrame->Show(false);
     }
 
     CompatStateChanged(StateChangedType::Visible);
@@ -255,7 +256,7 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
     if (!Application::IsHeadlessModeEnabled())
     {
         bool bNoActivate(nFlags & (ShowFlags::NoActivate | ShowFlags::NoFocusChange));
-        mpWindowImpl->mpFrame->Show(true, bNoActivate);
+        mpPlatformState->mpFrame->Show(true, bNoActivate);
     }
 
     // Check if the window was destroyed during the system Show() call
@@ -266,15 +267,15 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
     // a system resize
     if (mpGeometry->mbWaitSystemResize)
     {
-        const Size aOutSize = mpWindowImpl->mpFrame->GetClientSize();
+        const Size aOutSize = mpPlatformState->mpFrame->GetClientSize();
         ImplHandleResize(this, aOutSize.Width(), aOutSize.Height());
     }
 
-    if (mpWindowImpl->mpFrameData->mpBuffer
-        && mpWindowImpl->mpFrameData->mpBuffer->GetOutputSizePixel() != GetOutputSizePixel())
+    if (mpPlatformState->mpFrameData->mpBuffer
+        && mpPlatformState->mpFrameData->mpBuffer->GetOutputSizePixel() != GetOutputSizePixel())
     {
         // Make sure that the buffer size matches the window size, even if no resize was needed.
-        mpWindowImpl->mpFrameData->mpBuffer->SetOutputSizePixel(GetOutputSizePixel());
+        mpPlatformState->mpFrameData->mpBuffer->SetOutputSizePixel(GetOutputSizePixel());
     }
 
     return true; // Window is still alive

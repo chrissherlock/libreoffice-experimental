@@ -28,6 +28,7 @@
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInput.hxx>
+#include <WindowPlatformState.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
@@ -129,10 +130,10 @@ void Window::ImplNewInputContext()
     // Is InputContext changed?
     const InputContext& rInputContext = pFocusWin->GetInputContext();
 
-    if (rInputContext == pFocusWin->mpWindowImpl->mpFrameData->maOldInputContext)
+    if (rInputContext == pFocusWin->mpPlatformState->mpFrameData->maOldInputContext)
         return;
 
-    pFocusWin->mpWindowImpl->mpFrameData->maOldInputContext = rInputContext;
+    pFocusWin->mpPlatformState->mpFrameData->maOldInputContext = rInputContext;
 
     SalInputContext aNewContext;
     const vcl::Font& rFont = rInputContext.GetFont();
@@ -253,7 +254,10 @@ void Window::SetCompositionCharRect(const tools::Rectangle* pRect, tools::Long n
     }
 }
 
-LanguageType Window::GetInputLanguage() const { return mpWindowImpl->mpFrame->GetInputLanguage(); }
+LanguageType Window::GetInputLanguage() const
+{
+    return mpPlatformState->mpFrame->GetInputLanguage();
+}
 
 OUString Window::GetSurroundingText() const { return OUString(); }
 

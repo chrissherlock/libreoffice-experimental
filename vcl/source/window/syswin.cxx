@@ -51,6 +51,7 @@
 #include <svdata.hxx>
 #include <brdwin.hxx>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowHierarchy.hxx>
@@ -324,7 +325,7 @@ void SystemWindow::SetRepresentedURL( const OUString& i_rURL )
             pWindow = pWindow->mpHierarchy->mpBorderWindow;
 
         if ( pWindow->mpWindowImpl->mbFrame )
-            pWindow->mpWindowImpl->mpFrame->SetRepresentedURL( i_rURL );
+            pWindow->mpPlatformState->mpFrame->SetRepresentedURL( i_rURL );
     }
 }
 
@@ -342,7 +343,7 @@ void SystemWindow::SetIcon( sal_uInt16 nIcon )
             pWindow = pWindow->mpHierarchy->mpBorderWindow;
 
         if ( pWindow->mpWindowImpl->mbFrame )
-            pWindow->mpWindowImpl->mpFrame->SetIcon( nIcon );
+            pWindow->mpPlatformState->mpFrame->SetIcon( nIcon );
     }
 }
 
@@ -390,10 +391,10 @@ void SystemWindow::SetMinOutputSizePixel( const Size& rSize )
     {
         static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMinOutputSize( rSize.Width(), rSize.Height() );
         if ( mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame )
-            mpHierarchy->mpBorderWindow->mpWindowImpl->mpFrame->SetMinClientSize( rSize.Width(), rSize.Height() );
+            mpHierarchy->mpBorderWindow->mpPlatformState->mpFrame->SetMinClientSize( rSize.Width(), rSize.Height() );
     }
     else if ( mpWindowImpl->mbFrame )
-        mpWindowImpl->mpFrame->SetMinClientSize( rSize.Width(), rSize.Height() );
+        mpPlatformState->mpFrame->SetMinClientSize( rSize.Width(), rSize.Height() );
 }
 
 void SystemWindow::SetMaxOutputSizePixel( const Size& rSize )
@@ -409,10 +410,10 @@ void SystemWindow::SetMaxOutputSizePixel( const Size& rSize )
     {
         static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMaxOutputSize( aSize.Width(), aSize.Height() );
         if ( mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame )
-            mpHierarchy->mpBorderWindow->mpWindowImpl->mpFrame->SetMaxClientSize( aSize.Width(), aSize.Height() );
+            mpHierarchy->mpBorderWindow->mpPlatformState->mpFrame->SetMaxClientSize( aSize.Width(), aSize.Height() );
     }
     else if ( mpWindowImpl->mbFrame )
-        mpWindowImpl->mpFrame->SetMaxClientSize( aSize.Width(), aSize.Height() );
+        mpPlatformState->mpFrame->SetMaxClientSize( aSize.Width(), aSize.Height() );
 }
 
 const Size& SystemWindow::GetMaxOutputSizePixel() const
@@ -691,7 +692,7 @@ void SystemWindow::SetWindowState(const vcl::WindowData& rData)
                     if( !pWin->IsAncestorOf( *this ) && ( pWin != this ) &&
                         pWin->ImplGetWindow()->IsTopWindow() && pWin->mpVisibilityState->mbReallyVisible )
                     {
-                        SalFrameGeometry g = pWin->mpWindowImpl->mpFrame->GetGeometry();
+                        SalFrameGeometry g = pWin->mpPlatformState->mpFrame->GetGeometry();
                         if( std::abs(g.x()-aState.x()) < 2 && std::abs(g.y()-aState.y()) < 5 )
                         {
                             tools::Long displacement = g.topDecoration() ? g.topDecoration() : 20;
@@ -713,11 +714,11 @@ void SystemWindow::SetWindowState(const vcl::WindowData& rData)
                             pWin = pSVData->maFrameData.mpFirstFrame; // check new pos again
                         }
                     }
-                    pWin = pWin->mpWindowImpl->mpFrameData->mpNextFrame;
+                    pWin = pWin->mpPlatformState->mpFrameData->mpNextFrame;
                 }
             }
 
-        mpWindowImpl->mpFrame->SetWindowState(aState);
+        mpPlatformState->mpFrame->SetWindowState(aState);
 
         // do a synchronous resize for layout reasons
         //  but use rData only when the window is not to be maximized (#i38089#)
@@ -725,7 +726,7 @@ void SystemWindow::SetWindowState(const vcl::WindowData& rData)
         if( (rData.mask() & vcl::WindowDataMask::State) && (nState & vcl::WindowState::Maximized) )
         {
             // query maximized size from frame
-            SalFrameGeometry aGeometry = mpWindowImpl->mpFrame->GetGeometry();
+            SalFrameGeometry aGeometry = mpPlatformState->mpFrame->GetGeometry();
 
             // but use it only if it is different from the restore size (rData)
             // as currently only on windows the exact size of a maximized window
@@ -753,7 +754,7 @@ void SystemWindow::SetWindowState(const vcl::WindowData& rData)
         tools::Long nY         = rData.y();
         tools::Long nWidth     = rData.width();
         tools::Long nHeight    = rData.height();
-        const SalFrameGeometry aGeom = pWindow->mpWindowImpl->mpFrame->GetGeometry();
+        const SalFrameGeometry aGeom = pWindow->mpPlatformState->mpFrame->GetGeometry();
         if( nX < 0 )
             nX = 0;
         if( nX + nWidth > static_cast<tools::Long>(aGeom.width()) )
@@ -792,7 +793,7 @@ vcl::WindowData SystemWindow::GetWindowState(vcl::WindowDataMask nMask) const
 
     if ( pWindow->mpWindowImpl->mbFrame )
     {
-        vcl::WindowData aState = mpWindowImpl->mpFrame->GetWindowState();
+        vcl::WindowData aState = mpPlatformState->mpFrame->GetWindowState();
         // Limit mask only to what we've received, the rest is not set.
         nValidMask &= aState.mask();
         aData.setMask(nValidMask);
@@ -964,17 +965,17 @@ bool SystemWindow::ImplIsInTaskPaneList( vcl::Window* pWin )
 
 unsigned int SystemWindow::GetScreenNumber() const
 {
-    return mpWindowImpl->mpFrame->GetUnmirroredGeometry().screen();
+    return mpPlatformState->mpFrame->GetUnmirroredGeometry().screen();
 }
 
 void SystemWindow::SetScreenNumber(unsigned int nDisplayScreen)
 {
-    mpWindowImpl->mpFrame->SetScreenNumber( nDisplayScreen );
+    mpPlatformState->mpFrame->SetScreenNumber( nDisplayScreen );
 }
 
 void SystemWindow::SetApplicationID(const OUString &rApplicationID)
 {
-    mpWindowImpl->mpFrame->SetApplicationID( rApplicationID );
+    mpPlatformState->mpFrame->SetApplicationID( rApplicationID );
 }
 
 void SystemWindow::SetCloseHdl(const Link<SystemWindow&,void>& rLink)

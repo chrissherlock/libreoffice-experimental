@@ -24,6 +24,7 @@
 #include <memory>
 
 class WindowImpl;
+struct WindowPlatformState;
 struct WindowClippingState;
 struct WindowHierarchy;
 
@@ -89,7 +90,8 @@ struct NativeSyncStatus
     bool bInvalidateDevice;
 };
 
-VCL_DLLPUBLIC bool syncNativeWindow(WindowImpl& rImpl, WindowVisibilityState& rVisibilityState,
+VCL_DLLPUBLIC bool syncNativeWindow(WindowPlatformState& rImpl,
+                                    WindowVisibilityState& rVisibilityState,
                                     vcl::Region& rWinChildClipRegion, const vcl::Region* pOldRegion,
                                     bool& rOutUpdate);
 VCL_DLLPUBLIC bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion);

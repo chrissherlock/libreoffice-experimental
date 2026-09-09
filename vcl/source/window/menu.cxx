@@ -45,6 +45,7 @@
 #include <svdata.hxx>
 #include <strings.hrc>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 #include <salmenu.hxx>
 #include <salframe.hxx>
 
@@ -1589,7 +1590,7 @@ Size Menu::ImplCalcSize(vcl::Window& rWin)
         // TODO: move GetScreenNumber from SystemWindow to Window ?
         // currently we rely on internal privileges
         unsigned int nDisplayScreen
-            = rWin.ImplGetWindowImpl()->mpFrame->GetUnmirroredGeometry().screen();
+            = rWin.ImplGetPlatformState()->mpFrame->GetUnmirroredGeometry().screen();
         tools::Rectangle aDispRect( Application::GetScreenPosSizePixel( nDisplayScreen ) );
         tools::Long nScreenWidth = aDispRect.GetWidth() >= 800 ? aDispRect.GetWidth() : 800;
         if( nMaxWidth > nScreenWidth/2 )

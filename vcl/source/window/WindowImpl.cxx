@@ -106,9 +106,6 @@ using namespace ::com::sun::star::datatransfer::dnd;
 
 WindowImpl::WindowImpl( WindowType eType )
 {
-    mpFrameData                         = nullptr;                   // Frame Data
-    mpFrame                             = nullptr;                   // Pointer to frame window
-    mpSysObj                            = nullptr;
     mpVCLXWindow                        = nullptr;
     meType                              = eType;                     // type
     mnWaitCount                         = 0;                         // Wait-Count (>1 == "wait" mouse pointer)

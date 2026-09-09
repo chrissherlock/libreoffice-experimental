@@ -29,6 +29,7 @@
 
 #include <PaintBufferGuard.hxx>
 #include <ImplFrameData.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowImpl.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowControlAppearance.hxx>
@@ -156,7 +157,7 @@ static void ImplCursorInvert(vcl::Window* pWindow, ImplCursorData const * pData)
     vcl::PaintBufferGuardPtr pGuard;
     const bool bDoubleBuffering = pWindow->SupportsDoubleBuffering();
     if (bDoubleBuffering)
-        pGuard.reset(new vcl::PaintBufferGuard(pWindow->ImplGetWindowImpl()->mpFrameData, pWindow));
+        pGuard.reset(new vcl::PaintBufferGuard(pWindow->ImplGetPlatformState()->mpFrameData, pWindow));
 
     vcl::RenderContext* pRenderContext = bDoubleBuffering ? pGuard->GetRenderContext() : pWindow->GetOutDev();
 
@@ -242,7 +243,7 @@ void vcl::Cursor::ImplDoShow( bool bDrawDirect, bool bRestore )
         pWindow = Application::GetFocusWindow();
         if (!pWindow || !pWindow->mpWindowImpl || (pWindow->mpControlAppearance && pWindow->mpControlAppearance->mpCursor != this)
             || pWindow->mpInvalidation->mbInPaint
-            || !pWindow->mpWindowImpl->mpFrameData->mbHasFocus)
+            || !pWindow->mpPlatformState->mpFrameData->mbHasFocus)
             pWindow = nullptr;
     }
 

@@ -33,6 +33,7 @@
 #include <WindowLayoutData.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowControlState.hxx>
+#include <WindowPlatformState.hxx>
 #include <brdwin.hxx>
 #include <clipping_window.hxx>
 #include <salframe.hxx>
@@ -202,14 +203,14 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
         // system windows will always grow to the right
         if (pWinParent->GetOutDev()->HasMirroredGraphics()
             && lcl_ShouldPreserveRTLPosition(nFlags, bHasValidSize,
-                                             pBorderWindow->mpWindowImpl->mpFrame->GetWidth()))
+                                             pBorderWindow->mpPlatformState->mpFrame->GetWidth()))
         {
             nFlags |= PosSizeFlags::X;
             nSysFlags |= SAL_FRAME_POSSIZE_X;
 
-            const SalFrameGeometry aSysGeometry = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
+            const SalFrameGeometry aSysGeometry = mpPlatformState->mpFrame->GetUnmirroredGeometry();
             const SalFrameGeometry aParentSysGeometry
-                = pWinParent->mpWindowImpl->mpFrame->GetUnmirroredGeometry();
+                = pWinParent->mpPlatformState->mpFrame->GetUnmirroredGeometry();
 
             tools::Long nBorderWinWidth = pBorderWindow->GetOutDev()->GetOutputWidthPixel();
 
@@ -238,11 +239,11 @@ void Window::setPosSizePixel(tools::Long nX, tools::Long nY, tools::Long nWidth,
         nHeight = aClampedSize.Height();
     }
 
-    pBorderWindow->mpWindowImpl->mpFrame->SetPosSize(nX, nY, nWidth, nHeight, nSysFlags);
+    pBorderWindow->mpPlatformState->mpFrame->SetPosSize(nX, nY, nWidth, nHeight, nSysFlags);
 
     // Adjust resize with the hack of different client size and frame geometries to fix
     // native menu bars. Eventually this should be replaced by proper mnTopBorder usage.
-    const Size aClientSize = pBorderWindow->mpWindowImpl->mpFrame->GetClientSize();
+    const Size aClientSize = pBorderWindow->mpPlatformState->mpFrame->GetClientSize();
 
     // Resize should be called directly. If we haven't
     // set the correct size, we get a second resize from
@@ -267,11 +268,11 @@ Size Window::GetSizePixel() const
     }
 
     // #i43257# trigger pending resize handler to assure correct window sizes
-    if (mpWindowImpl->mpFrameData->maResizeIdle.IsActive())
+    if (mpPlatformState->mpFrameData->maResizeIdle.IsActive())
     {
         VclPtr<vcl::Window> xWindow(const_cast<Window*>(this));
-        mpWindowImpl->mpFrameData->maResizeIdle.Stop();
-        mpWindowImpl->mpFrameData->maResizeIdle.Invoke(nullptr);
+        mpPlatformState->mpFrameData->maResizeIdle.Stop();
+        mpPlatformState->mpFrameData->maResizeIdle.Invoke(nullptr);
         if (xWindow->isDisposed())
             return Size(0, 0);
     }
@@ -334,7 +335,7 @@ AbsoluteScreenPixelPoint Window::OutputToAbsoluteScreenPixel(const Point& rPos) 
 {
     // relative to the screen
     Point p = OutputToScreenPixel(rPos);
-    SalFrameGeometry g = mpWindowImpl->mpFrame->GetGeometry();
+    SalFrameGeometry g = mpPlatformState->mpFrame->GetGeometry();
     p.AdjustX(g.x());
     p.AdjustY(g.y());
     return AbsoluteScreenPixelPoint(p);
@@ -344,7 +345,7 @@ Point Window::AbsoluteScreenToOutputPixel(const AbsoluteScreenPixelPoint& rPos) 
 {
     // relative to the screen
     Point p = ScreenToOutputPixel(Point(rPos));
-    SalFrameGeometry g = mpWindowImpl->mpFrame->GetGeometry();
+    SalFrameGeometry g = mpPlatformState->mpFrame->GetGeometry();
     p.AdjustX(-(g.x()));
     p.AdjustY(-(g.y()));
     return p;
@@ -353,7 +354,7 @@ Point Window::AbsoluteScreenToOutputPixel(const AbsoluteScreenPixelPoint& rPos) 
 AbsoluteScreenPixelRectangle Window::GetDesktopRectPixel() const
 {
     AbsoluteScreenPixelRectangle rRect;
-    mpHierarchy->mpFrameWindow->mpWindowImpl->mpFrame->GetWorkArea(rRect);
+    mpHierarchy->mpFrameWindow->mpPlatformState->mpFrame->GetWorkArea(rRect);
     return rRect;
 }
 
@@ -382,7 +383,7 @@ AbsoluteScreenPixelRectangle Window::GetWindowExtentsAbsolute() const
         || (mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame
             && GetType() != WindowType::WORKWINDOW))
     {
-        SalFrameGeometry g = mpWindowImpl->mpFrame->GetGeometry();
+        SalFrameGeometry g = mpPlatformState->mpFrame->GetGeometry();
         aPos.AdjustX(-sal_Int32(g.leftDecoration()));
         aPos.AdjustY(-sal_Int32(g.topDecoration()));
         aSize.AdjustWidth(g.leftDecoration() + g.rightDecoration());
@@ -1366,9 +1367,9 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     if (bNeedsNativePosUpdate)
         ImplUpdateNativeObjectPos();
 
-    if (bNewSize && mpWindowImpl->mpSysObj)
+    if (bNewSize && mpPlatformState->mpSysObj)
     {
-        mpWindowImpl->mpSysObj->SetPosSize(
+        mpPlatformState->mpSysObj->SetPosSize(
             GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY(),
             GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel());
     }
@@ -1399,7 +1400,7 @@ bool Window::ImplUpdatePos()
         pChild = pChild->mpHierarchy->mpNext;
     }
 
-    if (mpWindowImpl->mpSysObj)
+    if (mpPlatformState->mpSysObj)
         bSysChild = true;
 
     return bSysChild;
@@ -1407,8 +1408,8 @@ bool Window::ImplUpdatePos()
 
 void Window::ImplUpdateNativeObjectPos()
 {
-    if (mpWindowImpl->mpSysObj)
-        mpWindowImpl->mpSysObj->SetPosSize(
+    if (mpPlatformState->mpSysObj)
+        mpPlatformState->mpSysObj->SetPosSize(
             GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY(),
             GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel());
 
@@ -1466,7 +1467,7 @@ Window::ImplOutputToUnmirroredAbsoluteScreenPixel(const tools::Rectangle& rRect)
 {
     // this method creates unmirrored screen coordinates to be compared with the desktop
     // and is used for positioning of RTL popup windows correctly on the screen
-    SalFrameGeometry g = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
+    SalFrameGeometry g = mpPlatformState->mpFrame->GetUnmirroredGeometry();
 
     Point p1 = rRect.TopRight();
     p1 = OutputToScreenPixel(p1);
@@ -1485,7 +1486,7 @@ tools::Rectangle
 Window::ImplUnmirroredAbsoluteScreenToOutputPixel(const AbsoluteScreenPixelRectangle& rRect) const
 {
     // undo ImplOutputToUnmirroredAbsoluteScreenPixel
-    SalFrameGeometry g = mpWindowImpl->mpFrame->GetUnmirroredGeometry();
+    SalFrameGeometry g = mpPlatformState->mpFrame->GetUnmirroredGeometry();
 
     Point p1(rRect.TopRight());
     p1.AdjustY(-g.y());

@@ -33,6 +33,7 @@
 #include <officecfg/Office/Common.hxx>
 #include <osl/diagnose.h>
 
+#include <WindowPlatformState.hxx>
 #include <WindowStyleState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
@@ -469,7 +470,7 @@ void Dialog::ImplInitDialog( vcl::Window* pParent, WinBits nStyle, InitFlag eFla
     }
 
     if ( !pParent || (nStyle & WB_SYSTEMWINDOW) ||
-         (pParent->mpWindowImpl->mpFrameData->mbNeedSysWindow && !(nSysWinMode & SystemWindowFlags::NOAUTOMODE)) ||
+         (pParent->mpPlatformState->mpFrameData->mbNeedSysWindow && !(nSysWinMode & SystemWindowFlags::NOAUTOMODE)) ||
          (nSysWinMode & SystemWindowFlags::DIALOG) )
     {
         // create window with a small border ?

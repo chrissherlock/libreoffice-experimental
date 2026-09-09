@@ -64,10 +64,6 @@ public:
     WindowImpl( WindowType );
     ~WindowImpl();
 
-    ImplFrameData*      mpFrameData;
-    SalFrame*           mpFrame;
-    SalObject*          mpSysObj;
-
     OUString            maText;
     VCLXWindow*         mpVCLXWindow;
 

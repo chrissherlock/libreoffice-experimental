@@ -32,6 +32,7 @@
 #include <WindowImpl.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
+#include <WindowPlatformState.hxx>
 
 void WorkWindow::ImplInitWorkWindowData()
 {
@@ -172,9 +173,9 @@ void WorkWindow::StartPresentationMode( bool bPresentation, PresentationFlags nF
         if ( !mbSysChild )
         {
             if ( mnPresentationFlags & PresentationFlags::HideAllApps )
-                mpWindowImpl->mpFrame->SetAlwaysOnTop( true );
+                mpPlatformState->mpFrame->SetAlwaysOnTop( true );
             ToTop();
-            mpWindowImpl->mpFrame->StartPresentation( true );
+            mpPlatformState->mpFrame->StartPresentation( true );
         }
 
         Show();
@@ -184,9 +185,9 @@ void WorkWindow::StartPresentationMode( bool bPresentation, PresentationFlags nF
         Show( mbPresentationVisible );
         if ( !mbSysChild )
         {
-            mpWindowImpl->mpFrame->StartPresentation( false );
+            mpPlatformState->mpFrame->StartPresentation( false );
             if ( mnPresentationFlags & PresentationFlags::HideAllApps )
-                mpWindowImpl->mpFrame->SetAlwaysOnTop( false );
+                mpPlatformState->mpFrame->SetAlwaysOnTop( false );
         }
         ShowFullScreenMode( mbPresentationFull, nDisplayScreen );
 
@@ -199,7 +200,7 @@ void WorkWindow::StartPresentationMode( bool bPresentation, PresentationFlags nF
 
 bool WorkWindow::IsMinimized() const
 {
-    vcl::WindowData aData = mpWindowImpl->mpFrame->GetWindowState();
+    vcl::WindowData aData = mpPlatformState->mpFrame->GetWindowState();
     return bool(aData.state() & vcl::WindowState::Minimized);
 }
 
@@ -211,7 +212,7 @@ void WorkWindow::SetPluginParent( SystemParentData* pParent )
 
     bool bShown = IsVisible();
     Show( false );
-    mpWindowImpl->mpFrame->SetPluginParent( pParent );
+    mpPlatformState->mpFrame->SetPluginParent( pParent );
     Show( bShown );
 
     if( bWasDnd )
@@ -223,7 +224,7 @@ void WorkWindow::ImplSetFrameState(vcl::WindowState aFrameState )
     vcl::WindowData aState;
     aState.setMask(vcl::WindowDataMask::State);
     aState.setState(aFrameState);
-    mpWindowImpl->mpFrame->SetWindowState(aState);
+    mpPlatformState->mpFrame->SetWindowState(aState);
 }
 
 void WorkWindow::Minimize()
@@ -254,7 +255,7 @@ void WorkWindow::Maximize( bool bMaximize )
 
 bool WorkWindow::IsMaximized() const
 {
-    vcl::WindowData aState = mpWindowImpl->mpFrame->GetWindowState();
+    vcl::WindowData aState = mpPlatformState->mpFrame->GetWindowState();
     return bool(aState.state()
                 & (vcl::WindowState::Maximized | vcl::WindowState::MaximizedHorz
                    | vcl::WindowState::MaximizedVert));

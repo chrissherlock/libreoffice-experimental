@@ -36,6 +36,7 @@
 #include <ImplAccessibleInfos.hxx>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowStyleState.hxx>
 #include <WindowControlState.hxx>
 #include <WindowFocusState.hxx>
@@ -86,6 +87,7 @@ Window::Window(WindowType eType)
     , mpPointerState(std::make_unique<WindowPointerState>())
     , mpControlState(std::make_unique<WindowControlState>())
     , mpStyleState(std::make_unique<WindowStyleState>())
+    , mpPlatformState(std::make_unique<WindowPlatformState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -113,6 +115,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpPointerState(std::make_unique<WindowPointerState>())
     , mpControlState(std::make_unique<WindowControlState>())
     , mpStyleState(std::make_unique<WindowStyleState>())
+    , mpPlatformState(std::make_unique<WindowPlatformState>())
 {
     mpWinData = nullptr;
     mxOutDev = VclPtr<vcl::WindowOutputDevice>::Create(*this);
@@ -244,6 +247,7 @@ void Window::dispose()
     mpPointerState.reset();
     mpControlState.reset();
     mpStyleState.reset();
+    mpPlatformState.reset();
 
     pOutDev.disposeAndClear();
     // just to make loplugin:vclwidgets happy
@@ -314,16 +318,16 @@ void Window::ImplInit(vcl::Window* pParent, WinBits nStyle, SystemParentData* pS
     mpHierarchy->mpRealParent = pRealParent;
 
     // #99318: make sure fontcache and list is available before call to SetSettings
-    mxOutDev->mxFontCollection = mpWindowImpl->mpFrameData->mxFontCollection;
-    mxOutDev->mxFontCache = mpWindowImpl->mpFrameData->mxFontCache;
+    mxOutDev->mxFontCollection = mpPlatformState->mpFrameData->mxFontCollection;
+    mxOutDev->mxFontCache = mpPlatformState->mpFrameData->mxFontCache;
 
     ImplInitResolution(pParent, nStyle);
     ImplInitSettings(nStyle);
 
     // setup the scale factor for HiDPI displays
-    mxOutDev->SetDPIScalePercentage(lcl_CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
-    mxOutDev->SetDPIX(mpWindowImpl->mpFrameData->mnDPIX);
-    mxOutDev->SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
+    mxOutDev->SetDPIScalePercentage(lcl_CountDPIScaleFactor(mpPlatformState->mpFrameData->mnDPIY));
+    mxOutDev->SetDPIX(mpPlatformState->mpFrameData->mnDPIX);
+    mxOutDev->SetDPIY(mpPlatformState->mpFrameData->mnDPIY);
 
     if (!comphelper::IsFuzzing())
     {
@@ -364,12 +368,12 @@ void Window::ImplInitResolutionSettings()
     // recalculate AppFont-resolution and DPI-resolution
     if (mpWindowImpl->mbFrame)
     {
-        GetOutDev()->SetDPIX(mpWindowImpl->mpFrameData->mnDPIX);
-        GetOutDev()->SetDPIY(mpWindowImpl->mpFrameData->mnDPIY);
+        GetOutDev()->SetDPIX(mpPlatformState->mpFrameData->mnDPIX);
+        GetOutDev()->SetDPIY(mpPlatformState->mpFrameData->mnDPIY);
 
         // setup the scale factor for HiDPI displays
         GetOutDev()->SetDPIScalePercentage(
-            lcl_CountDPIScaleFactor(mpWindowImpl->mpFrameData->mnDPIY));
+            lcl_CountDPIScaleFactor(mpPlatformState->mpFrameData->mnDPIY));
         const StyleSettings& rStyleSettings = GetOutDev()->moSettings->GetStyleSettings();
         SetPointFont(*GetOutDev(), rStyleSettings.GetAppFont());
     }
@@ -455,10 +459,13 @@ vcl::Window* Window::GetFrameWindow() const
 
 ImplFrameData* Window::ImplGetFrameData()
 {
-    return mpWindowImpl ? mpWindowImpl->mpFrameData : nullptr;
+    return mpWindowImpl ? mpPlatformState->mpFrameData : nullptr;
 }
 
-SalFrame* Window::ImplGetFrame() const { return mpWindowImpl ? mpWindowImpl->mpFrame : nullptr; }
+SalFrame* Window::ImplGetFrame() const
+{
+    return mpPlatformState ? mpPlatformState->mpFrame : nullptr;
+}
 
 vcl::Window* Window::ImplGetWindow() const
 {
@@ -501,23 +508,23 @@ void Window::ImplDisposeFrameData()
 
     if (pSVData->maFrameData.mpFirstFrame == this)
     {
-        pSVData->maFrameData.mpFirstFrame = mpWindowImpl->mpFrameData->mpNextFrame;
+        pSVData->maFrameData.mpFirstFrame = mpPlatformState->mpFrameData->mpNextFrame;
     }
     else
     {
         sal_Int32 nWindows = 0;
         vcl::Window* pSysWin = pSVData->maFrameData.mpFirstFrame;
-        while (pSysWin && pSysWin->mpWindowImpl->mpFrameData->mpNextFrame.get() != this)
+        while (pSysWin && pSysWin->mpPlatformState->mpFrameData->mpNextFrame.get() != this)
         {
-            pSysWin = pSysWin->mpWindowImpl->mpFrameData->mpNextFrame;
+            pSysWin = pSysWin->mpPlatformState->mpFrameData->mpNextFrame;
             nWindows++;
         }
 
         if (pSysWin)
         {
-            assert(mpWindowImpl->mpFrameData->mpNextFrame.get() != pSysWin);
-            pSysWin->mpWindowImpl->mpFrameData->mpNextFrame
-                = mpWindowImpl->mpFrameData->mpNextFrame;
+            assert(mpPlatformState->mpFrameData->mpNextFrame.get() != pSysWin);
+            pSysWin->mpPlatformState->mpFrameData->mpNextFrame
+                = mpPlatformState->mpFrameData->mpNextFrame;
         }
         else // if it is not in the list, we can't remove it.
         {
@@ -528,18 +535,18 @@ void Window::ImplDisposeFrameData()
         }
     }
 
-    if (mpWindowImpl->mpFrame) // otherwise exception during init
+    if (mpPlatformState->mpFrame) // otherwise exception during init
     {
-        mpWindowImpl->mpFrame->SetCallback(nullptr, nullptr);
-        pSVData->mpDefInst->DestroyFrame(mpWindowImpl->mpFrame);
+        mpPlatformState->mpFrame->SetCallback(nullptr, nullptr);
+        pSVData->mpDefInst->DestroyFrame(mpPlatformState->mpFrame);
     }
 
-    assert(mpWindowImpl->mpFrameData->mnFocusId == nullptr);
-    assert(mpWindowImpl->mpFrameData->mnMouseMoveId == nullptr);
+    assert(mpPlatformState->mpFrameData->mnFocusId == nullptr);
+    assert(mpPlatformState->mpFrameData->mnMouseMoveId == nullptr);
 
-    mpWindowImpl->mpFrameData->mpBuffer.disposeAndClear();
-    delete mpWindowImpl->mpFrameData;
-    mpWindowImpl->mpFrameData = nullptr;
+    mpPlatformState->mpFrameData->mpBuffer.disposeAndClear();
+    delete mpPlatformState->mpFrameData;
+    mpPlatformState->mpFrameData = nullptr;
 }
 
 #if OSL_DEBUG_LEVEL > 0
@@ -583,9 +590,9 @@ void Window::ImplCheckLiveChildrenOnDestroy()
         Application::Abort(OStringToOUString(aTempStr, RTL_TEXTENCODING_UTF8));
     }
 
-    if (mpWindowImpl->mpFrameData != nullptr)
+    if (mpPlatformState->mpFrameData != nullptr)
     {
-        pTempWin = mpWindowImpl->mpFrameData->mpFirstOverlap;
+        pTempWin = mpPlatformState->mpFrameData->mpFirstOverlap;
         while (pTempWin)
         {
             if (IsAncestorOf(*pTempWin))
@@ -614,7 +621,7 @@ void Window::ImplCheckLiveChildrenOnDestroy()
             bError = true;
             aErrorStr.append(lcl_createWindowInfo(pTempWin));
         }
-        pTempWin = pTempWin->mpWindowImpl->mpFrameData->mpNextFrame;
+        pTempWin = pTempWin->mpPlatformState->mpFrameData->mpNextFrame;
     }
     if (bError)
     {
@@ -698,29 +705,29 @@ void Window::ImplResetGlobalWindowPointers()
 
 void Window::ImplResetFrameDataPointers()
 {
-    if (mpWindowImpl->mpFrameData == nullptr)
+    if (mpPlatformState->mpFrameData == nullptr)
         return;
 
     // reset marked windows
-    if (mpWindowImpl->mpFrameData->mpFocusWin == this)
-        mpWindowImpl->mpFrameData->mpFocusWin = nullptr;
+    if (mpPlatformState->mpFrameData->mpFocusWin == this)
+        mpPlatformState->mpFrameData->mpFocusWin = nullptr;
 
-    if (mpWindowImpl->mpFrameData->mpMouseMoveWin == this)
-        mpWindowImpl->mpFrameData->mpMouseMoveWin = nullptr;
+    if (mpPlatformState->mpFrameData->mpMouseMoveWin == this)
+        mpPlatformState->mpFrameData->mpMouseMoveWin = nullptr;
 
-    if (mpWindowImpl->mpFrameData->mpMouseDownWin == this)
-        mpWindowImpl->mpFrameData->mpMouseDownWin = nullptr;
+    if (mpPlatformState->mpFrameData->mpMouseDownWin == this)
+        mpPlatformState->mpFrameData->mpMouseDownWin = nullptr;
 
     // remove pending user events
     if (mpWindowImpl->mbFrame)
     {
-        if (mpWindowImpl->mpFrameData->mnFocusId)
-            Application::RemoveUserEvent(mpWindowImpl->mpFrameData->mnFocusId);
-        mpWindowImpl->mpFrameData->mnFocusId = nullptr;
+        if (mpPlatformState->mpFrameData->mnFocusId)
+            Application::RemoveUserEvent(mpPlatformState->mpFrameData->mnFocusId);
+        mpPlatformState->mpFrameData->mnFocusId = nullptr;
 
-        if (mpWindowImpl->mpFrameData->mnMouseMoveId)
-            Application::RemoveUserEvent(mpWindowImpl->mpFrameData->mnMouseMoveId);
-        mpWindowImpl->mpFrameData->mnMouseMoveId = nullptr;
+        if (mpPlatformState->mpFrameData->mnMouseMoveId)
+            Application::RemoveUserEvent(mpPlatformState->mpFrameData->mnMouseMoveId);
+        mpPlatformState->mpFrameData->mnMouseMoveId = nullptr;
     }
 }
 
@@ -745,31 +752,31 @@ void Window::ImplDeInitDND()
     if (mpLOKData->mxDNDListenerContainer.is())
         mpLOKData->mxDNDListenerContainer->dispose();
 
-    if (!mpWindowImpl->mbFrame || !mpWindowImpl->mpFrameData)
+    if (!mpWindowImpl->mbFrame || !mpPlatformState->mpFrameData)
         return;
 
     try
     {
         // deregister drop target listener
-        if (mpWindowImpl->mpFrameData->mxDropTargetListener.is())
+        if (mpPlatformState->mpFrameData->mxDropTargetListener.is())
         {
             css::uno::Reference<css::datatransfer::dnd::XDragGestureRecognizer>
-                xDragGestureRecognizer(mpWindowImpl->mpFrameData->mxDragSource,
+                xDragGestureRecognizer(mpPlatformState->mpFrameData->mxDragSource,
                                        css::uno::UNO_QUERY);
             if (xDragGestureRecognizer.is())
             {
                 xDragGestureRecognizer->removeDragGestureListener(
-                    mpWindowImpl->mpFrameData->mxDropTargetListener);
+                    mpPlatformState->mpFrameData->mxDropTargetListener);
             }
 
-            mpWindowImpl->mpFrameData->mxDropTarget->removeDropTargetListener(
-                mpWindowImpl->mpFrameData->mxDropTargetListener);
-            mpWindowImpl->mpFrameData->mxDropTargetListener.clear();
+            mpPlatformState->mpFrameData->mxDropTarget->removeDropTargetListener(
+                mpPlatformState->mpFrameData->mxDropTargetListener);
+            mpPlatformState->mpFrameData->mxDropTargetListener.clear();
         }
 
         // shutdown drag and drop for this frame window
         css::uno::Reference<css::lang::XComponent> xComponent(
-            mpWindowImpl->mpFrameData->mxDropTarget, css::uno::UNO_QUERY);
+            mpPlatformState->mpFrameData->mxDropTarget, css::uno::UNO_QUERY);
 
         // DNDEventDispatcher does not hold a reference of the DropTarget,
         // so it's ok if it does not support XComponent

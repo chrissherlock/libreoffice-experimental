@@ -40,6 +40,7 @@
 #include <WindowGeometry.hxx>
 #include <WindowViewport.hxx>
 #include <WindowControlState.hxx>
+#include <WindowPlatformState.hxx>
 
 #include "impldockingwrapper.hxx"
 
@@ -47,8 +48,8 @@ namespace vcl
 {
 void Window::SimulateKeyPress(sal_uInt16 nKeyCode) const
 {
-    if (mpWindowImpl)
-        mpWindowImpl->mpFrame->SimulateKeyPress(nKeyCode);
+    if (mpPlatformState)
+        mpPlatformState->mpFrame->SimulateKeyPress(nKeyCode);
 }
 
 void Window::KeyInput(const KeyEvent& rKEvt)
@@ -679,7 +680,7 @@ ImplSVEvent* Window::PostUserEvent(const Link<void*, void>& rLink, void* pCaller
 
     auto pTmpEvent = pSVEvent.get();
 
-    if (!mpWindowImpl->mpFrame->PostEvent(std::move(pSVEvent)))
+    if (!mpPlatformState->mpFrame->PostEvent(std::move(pSVEvent)))
         return nullptr;
 
     return pTmpEvent;
@@ -873,8 +874,8 @@ SalFrame* Window::ImplFindParentFrame() const
     vcl::Window* pParent = ImplGetParent();
     while (pParent)
     {
-        if (pParent->mpWindowImpl && pParent->mpWindowImpl->mpFrame != mpWindowImpl->mpFrame)
-            return pParent->mpWindowImpl->mpFrame;
+        if (pParent->mpWindowImpl && pParent->mpPlatformState->mpFrame != mpPlatformState->mpFrame)
+            return pParent->mpPlatformState->mpFrame;
 
         pParent = pParent->GetParent();
     }
@@ -884,7 +885,7 @@ SalFrame* Window::ImplFindParentFrame() const
 
 void Window::ImplUpdateFramePos(SalFrame* pParentFrame)
 {
-    SalFrameGeometry g = mpWindowImpl->mpFrame->GetGeometry();
+    SalFrameGeometry g = mpPlatformState->mpFrame->GetGeometry();
     mpGeometry->maPos = Point(g.x(), g.y());
 
     if (pParentFrame)
@@ -1225,12 +1226,12 @@ bool Window::ImplExecuteGesturePanScroll(const CommandGesturePanData* pData, Scr
     if (bHorz)
     {
         nWinSizeAxis = aWinSize.getWidth();
-        nOriginalPos = mpWindowImpl->mpFrameData->mnTouchPanPositionX;
+        nOriginalPos = mpPlatformState->mpFrameData->mnTouchPanPositionX;
     }
     else
     {
         nWinSizeAxis = aWinSize.getHeight();
-        nOriginalPos = mpWindowImpl->mpFrameData->mnTouchPanPositionY;
+        nOriginalPos = mpPlatformState->mpFrameData->mnTouchPanPositionY;
     }
 
     if (nWinSizeAxis == 0.0)
@@ -1253,10 +1254,10 @@ bool Window::ImplExecuteGesturePan(const CommandEvent& rCmd, Scrollable* pHScrl,
     if (pData->meEventType == GestureEventPanType::Begin)
     {
         if (pHScrl)
-            mpWindowImpl->mpFrameData->mnTouchPanPositionX = pHScrl->GetThumbPos();
+            mpPlatformState->mpFrameData->mnTouchPanPositionX = pHScrl->GetThumbPos();
 
         if (pVScrl)
-            mpWindowImpl->mpFrameData->mnTouchPanPositionY = pVScrl->GetThumbPos();
+            mpPlatformState->mpFrameData->mnTouchPanPositionY = pVScrl->GetThumbPos();
     }
     else if (pData->meEventType == GestureEventPanType::Update)
     {
@@ -1265,8 +1266,8 @@ bool Window::ImplExecuteGesturePan(const CommandEvent& rCmd, Scrollable* pHScrl,
     }
     else if (pData->meEventType == GestureEventPanType::End)
     {
-        mpWindowImpl->mpFrameData->mnTouchPanPositionX = -1;
-        mpWindowImpl->mpFrameData->mnTouchPanPositionY = -1;
+        mpPlatformState->mpFrameData->mnTouchPanPositionX = -1;
+        mpPlatformState->mpFrameData->mnTouchPanPositionY = -1;
     }
 
     return true;

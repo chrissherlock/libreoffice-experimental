@@ -22,6 +22,7 @@
 #include <vcl/svapp.hxx>
 #include <vcl/syschild.hxx>
 
+#include <WindowPlatformState.hxx>
 #include <ImplFrameData.hxx>
 #include <clipping_window.hxx>
 #include <WindowImpl.hxx>
@@ -88,14 +89,14 @@ static void ImplSysChildProc( SystemChildWindow* pInst, SalObjEvent nEvent )
 
 void SystemChildWindow::ImplInitSysChild( vcl::Window* pParent, WinBits nStyle, SystemWindowData *pData, bool bShow )
 {
-    mpWindowImpl->mpSysObj = GetSalInstance()->CreateObject(pParent->ImplGetFrame(), pData, bShow);
+    mpPlatformState->mpSysObj = GetSalInstance()->CreateObject(pParent->ImplGetFrame(), pData, bShow);
 
     Window::ImplInit( pParent, nStyle, nullptr );
 
     // we do not paint if it is the right SysChild
     if ( GetSystemData() )
     {
-        mpWindowImpl->mpSysObj->SetCallback( this, ImplSysChildProc );
+        mpPlatformState->mpSysObj->SetCallback( this, ImplSysChildProc );
         vcl::clipping::setParentClipMode(this, ParentClipMode::Clip);
         SetBackground();
     }
@@ -121,45 +122,45 @@ SystemChildWindow::~SystemChildWindow()
 void SystemChildWindow::dispose()
 {
     Hide();
-    if ( mpWindowImpl && mpWindowImpl->mpSysObj )
+    if ( mpWindowImpl && mpPlatformState->mpSysObj )
     {
-        GetSalInstance()->DestroyObject( mpWindowImpl->mpSysObj );
-        mpWindowImpl->mpSysObj = nullptr;
+        GetSalInstance()->DestroyObject( mpPlatformState->mpSysObj );
+        mpPlatformState->mpSysObj = nullptr;
     }
     Window::dispose();
 }
 
 const SystemEnvData* SystemChildWindow::GetSystemData() const
 {
-    if ( mpWindowImpl->mpSysObj )
-        return &mpWindowImpl->mpSysObj->GetSystemData();
+    if ( mpPlatformState->mpSysObj )
+        return &mpPlatformState->mpSysObj->GetSystemData();
     else
         return nullptr;
 }
 
 void SystemChildWindow::EnableEraseBackground( bool bEnable )
 {
-    if ( mpWindowImpl->mpSysObj )
-        mpWindowImpl->mpSysObj->EnableEraseBackground( bEnable );
+    if ( mpPlatformState->mpSysObj )
+        mpPlatformState->mpSysObj->EnableEraseBackground( bEnable );
 }
 
 Size SystemChildWindow::GetOptimalSize() const
 {
-    if (mpWindowImpl->mpSysObj)
-        return mpWindowImpl->mpSysObj->GetOptimalSize();
+    if (mpPlatformState->mpSysObj)
+        return mpPlatformState->mpSysObj->GetOptimalSize();
     return vcl::Window::GetOptimalSize();
 }
 
 void SystemChildWindow::SetLeaveEnterBackgrounds(const css::uno::Sequence<css::uno::Any>& rLeaveArgs, const css::uno::Sequence<css::uno::Any>& rEnterArgs)
 {
-    if (mpWindowImpl->mpSysObj)
-        mpWindowImpl->mpSysObj->SetLeaveEnterBackgrounds(rLeaveArgs, rEnterArgs);
+    if (mpPlatformState->mpSysObj)
+        mpPlatformState->mpSysObj->SetLeaveEnterBackgrounds(rLeaveArgs, rEnterArgs);
 }
 
 void SystemChildWindow::SetForwardKey( bool bEnable )
 {
-    if ( mpWindowImpl->mpSysObj )
-        mpWindowImpl->mpSysObj->SetForwardKey( bEnable );
+    if ( mpPlatformState->mpSysObj )
+        mpPlatformState->mpSysObj->SetForwardKey( bEnable );
 }
 
 sal_IntPtr SystemChildWindow::GetParentWindowHandle() const

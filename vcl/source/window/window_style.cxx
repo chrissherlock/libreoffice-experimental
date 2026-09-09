@@ -25,6 +25,7 @@
 #include <vcl/window.hxx>
 
 #include <toolbox.h>
+#include <WindowPlatformState.hxx>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
@@ -267,14 +268,14 @@ void Window::ImplPointToLogic(vcl::RenderContext const& rRenderContext, vcl::Fon
     {
         aSize.setWidth(aSize.Width()
                        * (bUseRenderContextDPI ? rRenderContext.GetDPIX()
-                                               : mpWindowImpl->mpFrameData->mnDPIX));
+                                               : mpPlatformState->mpFrameData->mnDPIX));
         aSize.AdjustWidth(72 / 2);
         aSize.setWidth(aSize.Width() / 72);
     }
 
     aSize.setHeight(
         aSize.Height()
-        * (bUseRenderContextDPI ? rRenderContext.GetDPIY() : mpWindowImpl->mpFrameData->mnDPIY));
+        * (bUseRenderContextDPI ? rRenderContext.GetDPIY() : mpPlatformState->mpFrameData->mnDPIY));
     aSize.AdjustHeight(72 / 2);
     aSize.setHeight(aSize.Height() / 72);
 
@@ -291,13 +292,13 @@ void Window::ImplLogicToPoint(vcl::RenderContext const& rRenderContext, vcl::Fon
     if (aSize->Width())
     {
         aSize->setWidth(aSize->Width() * 72);
-        aSize->AdjustWidth(mpWindowImpl->mpFrameData->mnDPIX / 2);
-        aSize->setWidth(aSize->Width() / mpWindowImpl->mpFrameData->mnDPIX);
+        aSize->AdjustWidth(mpPlatformState->mpFrameData->mnDPIX / 2);
+        aSize->setWidth(aSize->Width() / mpPlatformState->mpFrameData->mnDPIX);
     }
 
     aSize->setHeight(aSize->Height() * 72);
-    aSize->AdjustHeight(mpWindowImpl->mpFrameData->mnDPIY / 2);
-    aSize->setHeight(aSize->Height() / mpWindowImpl->mpFrameData->mnDPIY);
+    aSize->AdjustHeight(mpPlatformState->mpFrameData->mnDPIY / 2);
+    aSize->setHeight(aSize->Height() / mpPlatformState->mpFrameData->mnDPIY);
 
     rFont.SetFontSize(aSize.get());
 }
