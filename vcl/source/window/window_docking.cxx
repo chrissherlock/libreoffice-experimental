@@ -21,6 +21,7 @@
 #include <vcl/vclptr.hxx>
 #include <vcl/window.hxx>
 
+#include <WindowPlatformState.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
 #include <svdata.hxx>
@@ -43,7 +44,7 @@ void Window::EnableDocking(bool bEnable)
 // retrieves the list of owner draw decorated windows for this window hierarchy
 ::std::vector<VclPtr<vcl::Window>>& Window::ImplGetOwnerDrawList()
 {
-    return ImplGetTopmostFrameWindow()->mpWindowImpl->mpFrameData->maOwnerDrawList;
+    return ImplGetTopmostFrameWindow()->mpPlatformState->mpFrameData->maOwnerDrawList;
 }
 
 bool Window::IsDockingWindow() const { return mpWindowImpl && mpWindowImpl->mbDockWin; }

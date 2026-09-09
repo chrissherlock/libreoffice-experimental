@@ -38,6 +38,7 @@
 #include <bufferdevice.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <svdata.hxx>
+#include <WindowPlatformState.hxx>
 #include <PaintBufferGuard.hxx>
 #include <WindowImpl.hxx>
 #include <window.h>
@@ -511,7 +512,7 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testRTLGuard)
     ScopedVclPtrInstance<vcl::Window> pWindow(nullptr, WB_APP | WB_STDWORK);
     pWindow->EnableRTL();
     pWindow->RequestDoubleBuffering(true);
-    ImplFrameData* pFrameData = pWindow->ImplGetWindowImpl()->mpFrameData;
+    ImplFrameData* pFrameData = pWindow->ImplGetPlatformState()->mpFrameData;
     vcl::PaintBufferGuard aGuard(pFrameData, pWindow);
     // Without the accompanying fix in place, this test would have failed, because the RTL status
     // from pWindow was not propagated to aGuard.

@@ -27,6 +27,7 @@
 #include <window.h>
 #include <PaintBufferGuard.hxx>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 
 #include <memory>
 
@@ -151,7 +152,7 @@ void AnimationRenderer::drawToIndex( sal_uLong nIndex )
     if (mpRenderContext->GetOutDevType() == OUTDEV_WINDOW)
     {
         vcl::Window* pWindow = static_cast<vcl::WindowOutputDevice*>(mpRenderContext.get())->GetOwnerWindow();
-        pGuard.reset(new vcl::PaintBufferGuard(pWindow->ImplGetWindowImpl()->mpFrameData, pWindow));
+        pGuard.reset(new vcl::PaintBufferGuard(pWindow->ImplGetPlatformState()->mpFrameData, pWindow));
         pRenderContext = pGuard->GetRenderContext();
     }
 
@@ -185,7 +186,7 @@ void AnimationRenderer::draw( sal_uLong nIndex, VirtualDevice* pVDev )
     if (!pVDev && mpRenderContext->GetOutDevType() == OUTDEV_WINDOW)
     {
         vcl::Window* pWindow = static_cast<vcl::WindowOutputDevice*>(mpRenderContext.get())->GetOwnerWindow();
-        pGuard.reset(new vcl::PaintBufferGuard(pWindow->ImplGetWindowImpl()->mpFrameData, pWindow));
+        pGuard.reset(new vcl::PaintBufferGuard(pWindow->ImplGetPlatformState()->mpFrameData, pWindow));
         pRenderContext = pGuard->GetRenderContext();
     }
 

@@ -44,6 +44,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowHierarchy.hxx>
 #include <font/EmphasisMark.hxx>
 
@@ -483,7 +484,7 @@ void OutputDevice::ImplClearAllFontData(bool bNewFontLists)
     {
         OutputDevice *pDevice = pFrame->GetOutDev();
         pDevice->mpGraphics->ClearDevFontCache();
-        pDevice->mpGraphics->GetDevFontList(pFrame->mpWindowImpl->mpFrameData->mxFontCollection.get());
+        pDevice->mpGraphics->GetDevFontList(pFrame->mpPlatformState->mpFrameData->mxFontCollection.get());
     }
 }
 
@@ -508,14 +509,14 @@ void OutputDevice::ImplUpdateFontDataForAllFrames( const FontUpdateHandler_t pHd
     {
         ( pFrame->GetOutDev()->*pHdl )( bNewFontLists );
 
-        vcl::Window* pSysWin = pFrame->mpWindowImpl->mpFrameData->mpFirstOverlap;
+        vcl::Window* pSysWin = pFrame->mpPlatformState->mpFrameData->mpFirstOverlap;
         while ( pSysWin )
         {
             ( pSysWin->GetOutDev()->*pHdl )( bNewFontLists );
             pSysWin = pSysWin->mpHierarchy->mpNextOverlap;
         }
 
-        pFrame = pFrame->mpWindowImpl->mpFrameData->mpNextFrame;
+        pFrame = pFrame->mpPlatformState->mpFrameData->mpNextFrame;
     }
 
     // update all virtual devices

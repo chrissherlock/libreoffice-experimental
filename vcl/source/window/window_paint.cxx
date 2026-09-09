@@ -35,6 +35,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowControlAppearance.hxx>
@@ -189,22 +190,22 @@ IMPL_LINK_NOARG(Window, ImplHandlePaintHdl, Timer *, void)
     // save paint events until layout is done
     if (IsSystemWindow() && static_cast<const SystemWindow*>(this)->hasPendingLayout())
     {
-        mpWindowImpl->mpFrameData->maPaintIdle.Start();
+        mpPlatformState->mpFrameData->maPaintIdle.Start();
         return;
     }
 
     // save paint events until resizing or initial sizing done
     if (mpWindowImpl->mbFrame &&
-        mpWindowImpl->mpFrameData->maResizeIdle.IsActive())
+        mpPlatformState->mpFrameData->maResizeIdle.IsActive())
     {
-        mpWindowImpl->mpFrameData->maPaintIdle.Start();
+        mpPlatformState->mpFrameData->maPaintIdle.Start();
     }
     else if ( mpVisibilityState->mbReallyVisible )
     {
         ImplCallOverlapPaint();
         if (comphelper::LibreOfficeKit::isActive() &&
-            mpWindowImpl->mpFrameData->maPaintIdle.IsActive())
-            mpWindowImpl->mpFrameData->maPaintIdle.Stop();
+            mpPlatformState->mpFrameData->maPaintIdle.IsActive())
+            mpPlatformState->mpFrameData->maPaintIdle.Stop();
     }
 }
 
@@ -215,10 +216,10 @@ IMPL_LINK_NOARG(Window, ImplHandleResizeTimerHdl, Timer *, void)
     if( mpVisibilityState->mbReallyVisible )
     {
         ImplCallResize();
-        if( mpWindowImpl->mpFrameData->maPaintIdle.IsActive() )
+        if( mpPlatformState->mpFrameData->maPaintIdle.IsActive() )
         {
-            mpWindowImpl->mpFrameData->maPaintIdle.Stop();
-            mpWindowImpl->mpFrameData->maPaintIdle.Invoke( nullptr );
+            mpPlatformState->mpFrameData->maPaintIdle.Stop();
+            mpPlatformState->mpFrameData->maPaintIdle.Invoke( nullptr );
         }
     }
 }
@@ -282,8 +283,8 @@ void Window::ImplInvalidateFrameRegion( const vcl::Region* pRegion, InvalidateFl
         }
     }
 
-    if ( !mpWindowImpl->mpFrameData->maPaintIdle.IsActive() )
-        mpWindowImpl->mpFrameData->maPaintIdle.Start();
+    if ( !mpPlatformState->mpFrameData->maPaintIdle.IsActive() )
+        mpPlatformState->mpFrameData->maPaintIdle.Start();
 }
 
 void Window::ImplInvalidateOverlapFrameRegion( const vcl::Region& rRegion )
@@ -604,7 +605,7 @@ void Window::SetWindowRegionPixel()
     {
         mpClippingState->maWinRegion = vcl::Region(true);
         mpClippingState->mbWinRegion = false;
-        mpWindowImpl->mpFrame->ResetClipRegion();
+        mpPlatformState->mpFrame->ResetClipRegion();
     }
     else
     {
@@ -640,18 +641,18 @@ void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
                 // set/update ClipRegion
                 RectangleVector aRectangles;
                 mpClippingState->maWinRegion.GetRegionRectangles(aRectangles);
-                mpWindowImpl->mpFrame->BeginSetClipRegion(aRectangles.size());
+                mpPlatformState->mpFrame->BeginSetClipRegion(aRectangles.size());
 
                 for (auto const& rectangle : aRectangles)
                 {
-                    mpWindowImpl->mpFrame->UnionClipRegion(
+                    mpPlatformState->mpFrame->UnionClipRegion(
                         rectangle.Left(),
                         rectangle.Top(),
                         rectangle.GetWidth(),       // orig nWidth was ((R - L) + 1), same as GetWidth does
                         rectangle.GetHeight());     // same for height
                 }
 
-                mpWindowImpl->mpFrame->EndSetClipRegion();
+                mpPlatformState->mpFrame->EndSetClipRegion();
             }
             else
                 SetWindowRegionPixel();
@@ -993,7 +994,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 
         for( vcl::Window* pChild = mpHierarchy->mpFirstChild; pChild; pChild = pChild->mpHierarchy->mpNext )
         {
-            if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
+            if( pChild->mpPlatformState->mpFrame == mpPlatformState->mpFrame && pChild->IsVisible() )
             {
                 tools::Long nDeltaX = pChild->GetOutDev()->GetDeviceOriginX() - GetOutDev()->GetDeviceOriginX();
                 if( bHasMirroredGraphics )
@@ -1113,7 +1114,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 
     for( vcl::Window* pChild = mpHierarchy->mpFirstChild; pChild; pChild = pChild->mpHierarchy->mpNext )
     {
-        if( pChild->mpWindowImpl->mpFrame == mpWindowImpl->mpFrame && pChild->IsVisible() )
+        if( pChild->mpPlatformState->mpFrame == mpPlatformState->mpFrame && pChild->IsVisible() )
         {
             tools::Long nDeltaX = pChild->GetOutDev()->GetDeviceOriginX() - GetOutDev()->GetDeviceOriginX();
 

@@ -52,6 +52,7 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/MappingPolicy.hxx>
 
+#include <WindowPlatformState.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowControlAppearance.hxx>
@@ -131,7 +132,7 @@ bool WindowOutputDevice::AcquireGraphics() const
 
     ImplSVData* pSVData = ImplGetSVData();
 
-    mpGraphics = mxOwnerWindow->mpWindowImpl->mpFrame->AcquireGraphics();
+    mpGraphics = mxOwnerWindow->mpPlatformState->mpFrame->AcquireGraphics();
     // try harder if no wingraphics was available directly
     if ( !mpGraphics )
     {
@@ -139,7 +140,7 @@ bool WindowOutputDevice::AcquireGraphics() const
         vcl::WindowOutputDevice* pReleaseOutDev = pSVData->maGDIData.mpLastWinGraphics.get();
         while ( pReleaseOutDev )
         {
-            if ( pReleaseOutDev->mxOwnerWindow && pReleaseOutDev->mxOwnerWindow->mpWindowImpl->mpFrame == mxOwnerWindow->mpWindowImpl->mpFrame )
+            if ( pReleaseOutDev->mxOwnerWindow && pReleaseOutDev->mxOwnerWindow->mpPlatformState->mpFrame == mxOwnerWindow->mpPlatformState->mpFrame )
                 break;
             pReleaseOutDev = static_cast<vcl::WindowOutputDevice*>(pReleaseOutDev->mpPrevGraphics.get());
         }
@@ -158,7 +159,7 @@ bool WindowOutputDevice::AcquireGraphics() const
                 if ( !pSVData->maGDIData.mpLastWinGraphics )
                     break;
                 pSVData->maGDIData.mpLastWinGraphics->ReleaseGraphics();
-                mpGraphics = mxOwnerWindow->mpWindowImpl->mpFrame->AcquireGraphics();
+                mpGraphics = mxOwnerWindow->mpPlatformState->mpFrame->AcquireGraphics();
             }
         }
     }
@@ -202,7 +203,7 @@ void WindowOutputDevice::ReleaseGraphics( bool bRelease )
         return;
 
     if ( bRelease )
-        pWindow->mpWindowImpl->mpFrame->ReleaseGraphics( mpGraphics );
+        pWindow->mpPlatformState->mpFrame->ReleaseGraphics( mpGraphics );
     // remove from global LRU list of window graphics
     if ( mpPrevGraphics )
         mpPrevGraphics->mpNextGraphics = mpNextGraphics;
@@ -251,8 +252,8 @@ void WindowOutputDevice::DrawOutDevDirectProcess( const OutputDevice& rSrcDev, S
 
 void WindowOutputDevice::Flush()
 {
-    if (mxOwnerWindow->mpWindowImpl)
-        mxOwnerWindow->mpWindowImpl->mpFrame->Flush( GetOutputRectPixel() );
+    if (mxOwnerWindow->mpPlatformState)
+        mxOwnerWindow->mpPlatformState->mpFrame->Flush( GetOutputRectPixel() );
 }
 
 Reference< css::rendering::XCanvas > WindowOutputDevice::ImplGetCanvas( bool bSpriteCanvas ) const

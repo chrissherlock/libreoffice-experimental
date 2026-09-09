@@ -36,6 +36,7 @@
 #include <strings.hrc>
 #include <bitmaps.hlst>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 #include "bufferdevice.hxx"
 #include <menubarvalue.hxx>
 
@@ -1161,7 +1162,7 @@ tools::Rectangle MenuBarWindow::GetMenuBarButtonRectPixel( sal_uInt16 nId )
         if (m_pMenu->m_pSalMenu)
         {
             aRect
-                = m_pMenu->m_pSalMenu->GetMenuBarButtonRectPixel(nId, ImplGetWindowImpl()->mpFrame);
+                = m_pMenu->m_pSalMenu->GetMenuBarButtonRectPixel(nId, ImplGetPlatformState()->mpFrame);
             if( aRect == tools::Rectangle( Point( -1, -1 ), Size( 1, 1 ) ) )
             {
                 // system menu button is somewhere but location cannot be determined

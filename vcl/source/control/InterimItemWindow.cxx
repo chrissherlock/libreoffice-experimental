@@ -17,6 +17,7 @@
 #include <svdata.hxx>
 #include <WindowImpl.hxx>
 #include <WindowClippingState.hxx>
+#include <WindowPlatformState.hxx>
 
 InterimItemWindow::InterimItemWindow(vcl::Window* pParent, const OUString& rUIXMLDescription,
                                      const OUString& rID, bool bAllowCycleFocusOut)
@@ -83,13 +84,13 @@ void InterimItemWindow::UnclipVisibleSysObj()
     vcl::Window* pChild = m_xVclContentArea->GetWindow(GetWindowType::FirstChild);
     if (!pChild)
         return;
-    WindowImpl* pWindowImpl = pChild->ImplGetWindowImpl();
-    if (!pWindowImpl)
+    WindowPlatformState* pPlatform = pChild->ImplGetPlatformState();
+    if (!pPlatform)
         return;
-    if (!pWindowImpl->mpSysObj)
+    if (!pPlatform->mpSysObj)
         return;
-    pWindowImpl->mpSysObj->Show(true);
-    pWindowImpl->mpSysObj->ResetClipRegion();
+    pPlatform->mpSysObj->Show(true);
+    pPlatform->mpSysObj->ResetClipRegion();
     // flag that sysobj clip is dirty and needs to be recalculated on next use
     ImplGetClippingState()->mbInitWinClipRegion = true;
 }

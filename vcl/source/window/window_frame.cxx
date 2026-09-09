@@ -31,6 +31,7 @@
 #include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowStyleState.hxx>
+#include <WindowPlatformState.hxx>
 #include <brdwin.hxx>
 #include <salframe.hxx>
 #include <salgdi.hxx>
@@ -85,7 +86,7 @@ bool Window::HasActiveChildFrame() const
         if (pFrameWin != mpHierarchy->mpFrameWindow && ImplHasActiveChildFrame(pFrameWin))
             return true;
 
-        pFrameWin = pFrameWin->mpWindowImpl->mpFrameData->mpNextFrame;
+        pFrameWin = pFrameWin->mpPlatformState->mpFrameData->mpNextFrame;
     }
 
     return false;
@@ -268,7 +269,7 @@ SalFrame* Window::ImplCreateFrame(vcl::Window* pParent, SystemParentData* pSyste
                                   SalFrameStyleFlags nFrameStyle)
 {
     ImplSVData* pSVData = ImplGetSVData();
-    SalFrame* pParentFrame = pParent ? pParent->mpWindowImpl->mpFrame : nullptr;
+    SalFrame* pParentFrame = pParent ? pParent->mpPlatformState->mpFrame : nullptr;
 
     SalFrame* pFrame = pSystemParentData
                            ? pSVData->mpDefInst->CreateChildFrame(
@@ -289,8 +290,8 @@ SalFrame* Window::ImplCreateFrame(vcl::Window* pParent, SystemParentData* pSyste
 void Window::ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInitialParent)
 {
     // set window frame data
-    mpWindowImpl->mpFrameData = new ImplFrameData(this);
-    mpWindowImpl->mpFrame = pFrame;
+    mpPlatformState->mpFrameData = new ImplFrameData(this);
+    mpPlatformState->mpFrame = pFrame;
     mpHierarchy->mpFrameWindow = this;
     mpHierarchy->mpOverlapWindow = this;
 
@@ -312,13 +313,13 @@ void Window::ImplInitFrameResolution(vcl::Window* pParent, WinBits nStyle)
 {
     if (pParent)
     {
-        mpWindowImpl->mpFrameData->mnDPIX = pParent->mpWindowImpl->mpFrameData->mnDPIX;
-        mpWindowImpl->mpFrameData->mnDPIY = pParent->mpWindowImpl->mpFrameData->mnDPIY;
+        mpPlatformState->mpFrameData->mnDPIX = pParent->mpPlatformState->mpFrameData->mnDPIX;
+        mpPlatformState->mpFrameData->mnDPIY = pParent->mpPlatformState->mpFrameData->mnDPIY;
     }
     else if (auto* pGraphics = GetOutDev()->GetGraphics())
     {
-        pGraphics->GetResolution(mpWindowImpl->mpFrameData->mnDPIX,
-                                 mpWindowImpl->mpFrameData->mnDPIY);
+        pGraphics->GetResolution(mpPlatformState->mpFrameData->mnDPIX,
+                                 mpPlatformState->mpFrameData->mnDPIY);
     }
 
     // If we create a Window with default size, query this
@@ -328,7 +329,7 @@ void Window::ImplInitFrameResolution(vcl::Window* pParent, WinBits nStyle)
 
     if (nStyle & nDefaultSizeMask)
     {
-        const Size aSize = mpWindowImpl->mpFrame->GetClientSize();
+        const Size aSize = mpPlatformState->mpFrame->GetClientSize();
 
         mxOutDev->SetOutputWidthPixel(aSize.Width());
         mxOutDev->SetOutputHeightPixel(aSize.Height());
@@ -471,17 +472,17 @@ SalGraphics* Window::ImplGetFrameGraphics() const
 
 KeyIndicatorState Window::GetIndicatorState() const
 {
-    return mpWindowImpl->mpFrame->GetIndicatorState();
+    return mpPlatformState->mpFrame->GetIndicatorState();
 }
 
 void Window::ImplMirrorFramePos(Point& pt) const
 {
-    pt.setX(mpWindowImpl->mpFrame->GetWidth() - 1 - pt.X());
+    pt.setX(mpPlatformState->mpFrame->GetWidth() - 1 - pt.X());
 }
 
 const SystemEnvData* Window::GetSystemData() const
 {
-    return mpWindowImpl->mpFrame ? &mpWindowImpl->mpFrame->GetSystemData() : nullptr;
+    return mpPlatformState->mpFrame ? &mpPlatformState->mpFrame->GetSystemData() : nullptr;
 }
 
 void Window::FlashWindow() const
@@ -489,7 +490,7 @@ void Window::FlashWindow() const
     vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
 
     if (pMyParent && pMyParent->mpWindowImpl)
-        pMyParent->mpWindowImpl->mpFrame->FlashWindow();
+        pMyParent->mpPlatformState->mpFrame->FlashWindow();
 }
 
 void Window::SetTaskBarProgress(int nCurrentProgress)
@@ -497,7 +498,7 @@ void Window::SetTaskBarProgress(int nCurrentProgress)
     vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
 
     if (pMyParent && pMyParent->mpWindowImpl)
-        pMyParent->mpWindowImpl->mpFrame->SetTaskBarProgress(nCurrentProgress);
+        pMyParent->mpPlatformState->mpFrame->SetTaskBarProgress(nCurrentProgress);
 }
 
 void Window::SetTaskBarState(VclTaskBarStates eTaskBarState)
@@ -505,7 +506,7 @@ void Window::SetTaskBarState(VclTaskBarStates eTaskBarState)
     vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
 
     if (pMyParent && pMyParent->mpWindowImpl)
-        pMyParent->mpWindowImpl->mpFrame->SetTaskBarState(eTaskBarState);
+        pMyParent->mpPlatformState->mpFrame->SetTaskBarState(eTaskBarState);
 }
 
 } // end vcl namespace

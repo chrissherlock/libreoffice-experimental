@@ -60,6 +60,7 @@
 #include <accmgr.hxx>
 #include <print.h>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowLOKData.hxx>
 #include <WindowInput.hxx>
 #include <helpwin.hxx>
@@ -773,7 +774,7 @@ static bool lcl_DispatchMouseEvent(const VclPtr<vcl::Window>& pChild, NotifyEven
 static void lcl_UpdateMouseMoveState(const VclPtr<vcl::Window>& pChild, const MouseEvent& rMEvt,
                                      bool bCallHelpRequest, bool bMouseLeave)
 {
-    pChild->ImplGetWindowImpl()->mpFrameData->mbInMouseMove = false;
+    pChild->ImplGetPlatformState()->mpFrameData->mbInMouseMove = false;
 
     if (bCallHelpRequest && !ImplGetSVHelpData().mbKeyboardHelp)
         lcl_HandleMouseHelpRequest(pChild, pChild->OutputToScreenPixel(rMEvt.GetPosPixel()));

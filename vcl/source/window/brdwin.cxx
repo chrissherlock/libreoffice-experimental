@@ -33,6 +33,7 @@
 
 #include <WindowImpl.hxx>
 #include <WindowGeometry.hxx>
+#include <WindowPlatformState.hxx>
 #include <strings.hrc>
 #include <svdata.hxx>
 #include <brdwin.hxx>
@@ -877,7 +878,9 @@ bool ImplStdBorderWindowView::MouseButtonDown( const MouseEvent& rMEvt )
         if (nDragFullTest == DragFullOptions::WindowMove)
         {
             WindowImpl* pWindowImpl = maFrameData.mpBorderWindow->ImplGetWindowImpl();
-            if (pWindowImpl->mbFrame && pWindowImpl->mpFrame && pWindowImpl->mpFrame->StartSystemMove())
+            WindowPlatformState* pPlatformState = maFrameData.mpBorderWindow->ImplGetPlatformState();
+            if (pWindowImpl->mbFrame && pPlatformState && pPlatformState->mpFrame
+                && pPlatformState->mpFrame->StartSystemMove())
                 return true;
         }
 

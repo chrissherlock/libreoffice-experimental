@@ -36,6 +36,7 @@
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowPlatformState.hxx>
 #include <WindowInput.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowControlAppearance.hxx>
@@ -194,7 +195,7 @@ static void lcl_HandleResizePropagation(vcl::Window* pWindow)
         return;
     }
 
-    pWindow->ImplGetWindowImpl()->mpFrameData->maResizeIdle.Start();
+    pWindow->ImplGetPlatformState()->mpFrameData->maResizeIdle.Start();
 }
 
 static bool lcl_HasSizeChanged(const vcl::Window* pWindow, tools::Long nNewWidth,
@@ -224,7 +225,7 @@ static void lcl_HandleResizeDimensions(vcl::Window* pWindow, tools::Long nNewWid
     if (pWindow->SupportsDoubleBuffering() && pWindow->ImplGetWindowImpl()->mbFrame)
     {
         // Propagate resize for the frame's buffer.
-        pWindow->ImplGetWindowImpl()->mpFrameData->mpBuffer->SetOutputSizePixel(
+        pWindow->ImplGetPlatformState()->mpFrameData->mpBuffer->SetOutputSizePixel(
             pWindow->GetOutputSizePixel());
     }
 }
@@ -240,10 +241,10 @@ static void lcl_HandleMinimizedState(vcl::Window* pWindow, tools::Long nNewWidth
                                      tools::Long nNewHeight)
 {
     if (const bool bMinimized = (nNewWidth <= 0) || (nNewHeight <= 0);
-        bMinimized != pWindow->ImplGetWindowImpl()->mpFrameData->mbMinimized)
+        bMinimized != pWindow->ImplGetPlatformState()->mpFrameData->mbMinimized)
     {
         pWindow->ImplGetWindowHierarchy()->mpFrameWindow->ImplNotifyIconifiedState(bMinimized);
-        pWindow->ImplGetWindowImpl()->mpFrameData->mbMinimized = bMinimized;
+        pWindow->ImplGetPlatformState()->mpFrameData->mbMinimized = bMinimized;
     }
 }
 
@@ -259,7 +260,7 @@ void ImplHandleResize(vcl::Window* pWindow, tools::Long nNewWidth, tools::Long n
 
     lcl_HandleResizeDimensions(pWindow, nNewWidth, nNewHeight);
 
-    pWindow->ImplGetWindowImpl()->mpFrameData->mbNeedSysWindow
+    pWindow->ImplGetPlatformState()->mpFrameData->mbNeedSysWindow
         = (nNewWidth < IMPL_MIN_NEEDSYSWIN) || (nNewHeight < IMPL_MIN_NEEDSYSWIN);
 
     lcl_HandleMinimizedState(pWindow, nNewWidth, nNewHeight);
@@ -294,22 +295,22 @@ static void lcl_HandleMove(vcl::Window* pWindow)
 
 static void lcl_HandleGetFocus(vcl::Window* pWindow)
 {
-    if (!pWindow || !pWindow->ImplGetWindowImpl() || !pWindow->ImplGetWindowImpl()->mpFrameData)
+    if (!pWindow || !pWindow->ImplGetWindowImpl() || !pWindow->ImplGetPlatformState()->mpFrameData)
         return;
 
-    pWindow->ImplGetWindowImpl()->mpFrameData->mbHasFocus = true;
+    pWindow->ImplGetPlatformState()->mpFrameData->mbHasFocus = true;
 
     // execute Focus-Events after a delay, such that SystemChildWindows
     // do not blink when they receive focus
-    if (pWindow->ImplGetWindowImpl()->mpFrameData->mnFocusId)
+    if (pWindow->ImplGetPlatformState()->mpFrameData->mnFocusId)
         return;
 
-    pWindow->ImplGetWindowImpl()->mpFrameData->mbStartFocusState
-        = !pWindow->ImplGetWindowImpl()->mpFrameData->mbHasFocus;
-    pWindow->ImplGetWindowImpl()->mpFrameData->mnFocusId
+    pWindow->ImplGetPlatformState()->mpFrameData->mbStartFocusState
+        = !pWindow->ImplGetPlatformState()->mpFrameData->mbHasFocus;
+    pWindow->ImplGetPlatformState()->mpFrameData->mnFocusId
         = Application::PostUserEvent(LINK(pWindow, vcl::Window, ImplAsyncFocusHdl), nullptr, true);
 
-    if (vcl::Window* pFocusWin = pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin;
+    if (vcl::Window* pFocusWin = pWindow->ImplGetPlatformState()->mpFrameData->mpFocusWin;
         pFocusWin && pFocusWin->ImplGetControlAppearance()->mpCursor)
         pFocusWin->ImplGetControlAppearance()->mpCursor->ImplShow();
 }
@@ -342,21 +343,21 @@ static void lcl_HandleLoseFocus(vcl::Window* pWindow)
     if (lcl_HasActiveTrackerForFrame(pWindow))
         pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Cancel);
 
-    if (pWindow->ImplGetWindowImpl() && pWindow->ImplGetWindowImpl()->mpFrameData)
+    if (pWindow->ImplGetWindowImpl() && pWindow->ImplGetPlatformState()->mpFrameData)
     {
-        pWindow->ImplGetWindowImpl()->mpFrameData->mbHasFocus = false;
+        pWindow->ImplGetPlatformState()->mpFrameData->mbHasFocus = false;
 
         // execute Focus-Events after a delay, such that SystemChildWindows
         // do not flicker when they receive focus
-        if (!pWindow->ImplGetWindowImpl()->mpFrameData->mnFocusId)
+        if (!pWindow->ImplGetPlatformState()->mpFrameData->mnFocusId)
         {
-            pWindow->ImplGetWindowImpl()->mpFrameData->mbStartFocusState
-                = !pWindow->ImplGetWindowImpl()->mpFrameData->mbHasFocus;
-            pWindow->ImplGetWindowImpl()->mpFrameData->mnFocusId = Application::PostUserEvent(
+            pWindow->ImplGetPlatformState()->mpFrameData->mbStartFocusState
+                = !pWindow->ImplGetPlatformState()->mpFrameData->mbHasFocus;
+            pWindow->ImplGetPlatformState()->mpFrameData->mnFocusId = Application::PostUserEvent(
                 LINK(pWindow, vcl::Window, ImplAsyncFocusHdl), nullptr, true);
         }
 
-        if (vcl::Window* pFocusWin = pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin;
+        if (vcl::Window* pFocusWin = pWindow->ImplGetPlatformState()->mpFrameData->mpFocusWin;
             pFocusWin && pFocusWin->ImplGetControlAppearance()->mpCursor)
             pFocusWin->ImplGetControlAppearance()->mpCursor->ImplHide();
     }
@@ -640,8 +641,9 @@ static vcl::Window* lcl_FindFocusWindow(vcl::Window* pWindow, ImplSVData* pSVDat
     if (!pChild)
         pChild = pWindow;
 
-    if (auto pWinImpl = pChild->ImplGetWindowImpl(); pWinImpl && pWinImpl->mpFrameData)
-        return pWinImpl->mpFrameData->mpFocusWin.get();
+    if (auto pPlatformState = pChild->ImplGetPlatformState();
+        pPlatformState && pPlatformState->mpFrameData)
+        return pPlatformState->mpFrameData->mpFocusWin.get();
 
     return nullptr;
 }
@@ -694,11 +696,12 @@ static void lcl_HandleSalKeyMod(vcl::Window* pWindow, SalKeyModEvent const* pEve
         pWindow = pTrackWin;
 
     if (sal_uInt16 nOldCode
-        = pWindow->ImplGetWindowImpl()->mpFrameData->mnMouseCode & MOUSE_MODIFIER_MASK;
+        = pWindow->ImplGetPlatformState()->mpFrameData->mnMouseCode & MOUSE_MODIFIER_MASK;
         nOldCode != pEvent->mnCode)
     {
         sal_uInt16 nNewCode = pEvent->mnCode;
-        nNewCode |= pWindow->ImplGetWindowImpl()->mpFrameData->mnMouseCode & ~MOUSE_MODIFIER_MASK;
+        nNewCode
+            |= pWindow->ImplGetPlatformState()->mpFrameData->mnMouseCode & ~MOUSE_MODIFIER_MASK;
         pWindow->ImplGetWindowHierarchy()->mpFrameWindow->ImplCallMouseMove(nNewCode, true);
     }
 
@@ -1009,7 +1012,7 @@ static bool lcl_ProcessHelpAndMenuKeys(vcl::Window* pChild, vcl::Window* pWindow
         return !ImplCallCommand(pChild, CommandEventId::ContextMenu);
 
     if (lcl_IsBalloonHelpRequested(nCode, rKeyCode,
-                                   pWindow->ImplGetWindowImpl()->mpFrameData->mpFocusWin))
+                                   pWindow->ImplGetPlatformState()->mpFrameData->mpFocusWin))
         return lcl_TriggerBalloonHelp(pChild);
 
     if ((nCode != KEY_F1) && (nCode != KEY_HELP))
@@ -1231,7 +1234,8 @@ static bool lcl_IsSystemFloatingWindow(const vcl::Window* pWindow)
     if (!pParent)
         return false;
 
-    return pImpl->mpFrame != pParent->ImplGetWindowImpl()->mpFrame;
+    WindowPlatformState* pPlatformState = pWindow->ImplGetPlatformState();
+    return pPlatformState && pPlatformState->mpFrame != pParent->ImplGetPlatformState()->mpFrame;
 }
 
 static bool lcl_ForwardKeyEventToParent(NotifyEventType nSVEvent, vcl::Window* pWindow,
@@ -1346,7 +1350,7 @@ static VclPtr<vcl::Window> lcl_WaitForExtTextInputWindow(vcl::Window* pWindow)
         }
 
         // Target state achieved
-        if (!pChild->ImplGetWindowImpl()->mpFrameData->mnFocusId)
+        if (!pChild->ImplGetPlatformState()->mpFrameData->mnFocusId)
             break;
 
         if (comphelper::LibreOfficeKit::isActive())
@@ -1583,7 +1587,7 @@ static void lcl_DispatchPaintEvent(vcl::Window* pWindow, const void* pEvent)
 
     if (AllSettings::GetLayoutRTL())
     {
-        SalFrame* pSalFrame = pWindow->ImplGetWindowImpl()->mpFrame;
+        SalFrame* pSalFrame = pWindow->ImplGetPlatformState()->mpFrame;
         nBoundX = pSalFrame->GetWidth() - pPaintEvt->mnBoundWidth - nBoundX;
     }
 
@@ -1692,13 +1696,13 @@ bool ImplWindowFrameProc(vcl::Window* _pWindow, SalEvent nEvent, const void* pEv
 
         case SalEvent::Resize:
         {
-            const Size aNewSize = pWindow->ImplGetWindowImpl()->mpFrame->GetClientSize();
+            const Size aNewSize = pWindow->ImplGetPlatformState()->mpFrame->GetClientSize();
             ImplHandleResize(pWindow, aNewSize.Width(), aNewSize.Height());
             return true;
         }
         case SalEvent::MoveResize:
         {
-            const SalFrameGeometry g = pWindow->ImplGetWindowImpl()->mpFrame->GetGeometry();
+            const SalFrameGeometry g = pWindow->ImplGetPlatformState()->mpFrame->GetGeometry();
             lcl_HandleMoveResize(pWindow, g.width(), g.height());
             return true;
         }
