@@ -55,7 +55,7 @@ void Window::SetWindowPeer(css::uno::Reference<css::awt::XVclWindowPeer> const& 
 
     mpAccessibleData->mxWindowPeer = xPeer;
 
-    mpWindowImpl->mpVCLXWindow = pVCLXWindow;
+    mpAccessibleData->mpVCLXWindow = pVCLXWindow;
 }
 
 css::uno::Reference<css::awt::XVclWindowPeer> Window::GetComponentInterface(bool bCreate)

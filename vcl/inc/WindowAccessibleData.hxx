@@ -18,6 +18,7 @@
 
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
 
+class VCLXWindow;
 class FixedText;
 struct ImplAccessibleInfos;
 
@@ -27,6 +28,8 @@ struct WindowAccessibleData
     rtl::Reference<comphelper::OAccessible> mpAccessible;
     std::unique_ptr<ImplAccessibleInfos> mpAccessibleInfos;
     std::vector<VclPtr<FixedText>> m_aMnemonicLabels;
+
+    VCLXWindow* mpVCLXWindow = nullptr;
 
     bool mbSuppressAccessibilityEvents = false;
 
