@@ -107,7 +107,6 @@ using namespace ::com::sun::star::datatransfer::dnd;
 WindowImpl::WindowImpl( WindowType eType )
 {
     meType                              = eType;                     // type
-    mnWaitCount                         = 0;                         // Wait-Count (>1 == "wait" mouse pointer)
     mbFrame                             = false;                     // true: Window is a frame window
     mbBorderWin                         = false;                     // true: Window is a border window
     mbOverlapWin                        = false;                     // true: Window is an overlap window

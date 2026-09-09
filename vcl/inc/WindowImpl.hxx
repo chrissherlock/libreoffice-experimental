@@ -67,7 +67,6 @@ public:
     OUString            maText;
 
     WindowType          meType;
-    sal_uInt16          mnWaitCount;
     bool                mbFrame:1,
                         mbBorderWin:1,
                         mbOverlapWin:1,
