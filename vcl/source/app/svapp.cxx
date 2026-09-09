@@ -56,6 +56,7 @@
 #include <vcl/scheduler.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 
+#include <window.h>
 #include <dbggui.hxx>
 #include <salinst.hxx>
 #include <graphic/Manager.hxx>
@@ -64,7 +65,7 @@
 #include <svdata.hxx>
 #include <ImplFrameData.hxx>
 #include <WindowPlatformState.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowStyleState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowHierarchy.hxx>
@@ -1441,11 +1442,11 @@ vcl::Window* Dialog::GetDefDialogParent()
     vcl::Window *pWin = pSVData->mpWinData->mpFocusWin;
     if (pWin && !pWin->IsMenuFloatingWindow())
     {
-        while (pWin->mpWindowImpl && pWin->mpHierarchy->mpParent)
+        while (pWin->mpClassification && pWin->mpHierarchy->mpParent)
             pWin = pWin->mpHierarchy->mpParent;
 
         // check for corrupted window hierarchy, #122232#, may be we now crash somewhere else
-        if (!pWin->mpWindowImpl)
+        if (!pWin->mpClassification)
         {
             OSL_FAIL( "Window hierarchy corrupted!" );
             pSVData->mpWinData->mpFocusWin = nullptr;   // avoid further access

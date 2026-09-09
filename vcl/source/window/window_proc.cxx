@@ -33,9 +33,10 @@
 #include <vcl/menu.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <window.h>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowInput.hxx>
 #include <WindowInvalidation.hxx>
@@ -148,10 +149,10 @@ static bool lcl_ShouldBufferResize(const vcl::Window* pWindow)
 {
     // use resize buffering for user resizes
     // ownerdraw decorated windows and floating windows can be resized immediately (i.e. synchronously)
-    if (!pWindow->ImplGetWindowImpl()->mbFrame || !(pWindow->GetStyle() & WB_SIZEABLE)
+    if (!pWindow->ImplGetWindowClassification()->mbFrame || !(pWindow->GetStyle() & WB_SIZEABLE)
         || (pWindow->GetStyle()
             & WB_OWNERDRAWDECORATION) // synchronous resize for ownerdraw decorated windows (toolbars)
-        || pWindow->ImplGetWindowImpl()
+        || pWindow->ImplGetWindowClassification()
                ->mbFloatWin) // synchronous resize for floating windows, #i43799#
     {
         return false;
@@ -179,7 +180,7 @@ static bool lcl_ShouldStartResizeTimer(const vcl::Window* pWindow)
 static bool lcl_ShouldSkipResizePropagation(const vcl::Window* pWindow)
 {
     return !pWindow->IsVisible() && !pWindow->ImplGetWindow()->ImplGetGeometry()->mbAllResize
-           && !(pWindow->ImplGetWindowImpl()->mbFrame
+           && !(pWindow->ImplGetWindowClassification()->mbFrame
                 && pWindow->ImplGetWindowHierarchy()
                        ->mpClientWindow); // propagate resize for system border windows
 }
@@ -222,7 +223,7 @@ static void lcl_HandleResizeDimensions(vcl::Window* pWindow, tools::Long nNewWid
 
     lcl_HandleResizePropagation(pWindow);
 
-    if (pWindow->SupportsDoubleBuffering() && pWindow->ImplGetWindowImpl()->mbFrame)
+    if (pWindow->SupportsDoubleBuffering() && pWindow->ImplGetWindowClassification()->mbFrame)
     {
         // Propagate resize for the frame's buffer.
         pWindow->ImplGetPlatformState()->mpFrameData->mpBuffer->SetOutputSizePixel(
@@ -268,7 +269,7 @@ void ImplHandleResize(vcl::Window* pWindow, tools::Long nNewWidth, tools::Long n
 
 static void lcl_HandleMove(vcl::Window* pWindow)
 {
-    if (pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplIsFloatingWindow()
+    if (pWindow->ImplGetWindowClassification()->mbFrame && pWindow->ImplIsFloatingWindow()
         && pWindow->IsReallyVisible())
     {
         static_cast<FloatingWindow*>(pWindow)->EndPopupMode(FloatWinPopupEndFlags::TearOff);
@@ -288,14 +289,16 @@ static void lcl_HandleMove(vcl::Window* pWindow)
         pWindow->ImplGetGeometry()->mbCallMove
             = true; // make sure the framepos will be updated on the next Show()
 
-    if (pWindow->ImplGetWindowImpl()->mbFrame && pWindow->ImplGetWindowHierarchy()->mpClientWindow)
+    if (pWindow->ImplGetWindowClassification()->mbFrame
+        && pWindow->ImplGetWindowHierarchy()->mpClientWindow)
         pWindow->ImplGetWindowHierarchy()
             ->mpClientWindow->ImplCallMove(); // notify client to update geometry
 }
 
 static void lcl_HandleGetFocus(vcl::Window* pWindow)
 {
-    if (!pWindow || !pWindow->ImplGetWindowImpl() || !pWindow->ImplGetPlatformState()->mpFrameData)
+    if (!pWindow || !pWindow->ImplGetWindowClassification()
+        || !pWindow->ImplGetPlatformState()->mpFrameData)
         return;
 
     pWindow->ImplGetPlatformState()->mpFrameData->mbHasFocus = true;
@@ -324,7 +327,7 @@ static bool lcl_HasActiveTrackerForFrame(const vcl::Window* pWindow)
 
     const vcl::Window* pTrackWin = pSVData->mpWinData->mpTrackWin.get();
 
-    return pTrackWin->ImplGetWindowImpl()
+    return pTrackWin->ImplGetWindowClassification()
            && pTrackWin->ImplGetWindowHierarchy()->mpFrameWindow == pWindow;
 }
 
@@ -343,7 +346,7 @@ static void lcl_HandleLoseFocus(vcl::Window* pWindow)
     if (lcl_HasActiveTrackerForFrame(pWindow))
         pSVData->mpWinData->mpTrackWin->EndTracking(TrackingEventFlags::Cancel);
 
-    if (pWindow->ImplGetWindowImpl() && pWindow->ImplGetPlatformState()->mpFrameData)
+    if (pWindow->ImplGetWindowClassification() && pWindow->ImplGetPlatformState()->mpFrameData)
     {
         pWindow->ImplGetPlatformState()->mpFrameData->mbHasFocus = false;
 
@@ -557,7 +560,7 @@ static bool lcl_HandleMenuEvent(vcl::Window const* pWindow, SalMenuEvent* pEvent
     vcl::Window* pWin = pWindow->ImplGetWindowHierarchy()->mpFirstChild;
     while (pWin)
     {
-        if (pWin->ImplGetWindowImpl()->mbSysWin)
+        if (pWin->ImplGetWindowClassification()->mbSysWin)
             break;
         pWin = pWin->ImplGetWindowHierarchy()->mpNext;
     }
@@ -598,12 +601,14 @@ static bool lcl_HandleMenuEvent(vcl::Window const* pWindow, SalMenuEvent* pEvent
 
 static bool lcl_IsFloatingWindow(const vcl::Window* pWindow)
 {
-    return pWindow->ImplGetWindowImpl() && pWindow->ImplGetWindowImpl()->mbFloatWin;
+    return pWindow->ImplGetWindowClassification()
+           && pWindow->ImplGetWindowClassification()->mbFloatWin;
 }
 
 static bool lcl_IsDockingWindow(const vcl::Window* pWindow)
 {
-    return pWindow->ImplGetWindowImpl() && pWindow->ImplGetWindowImpl()->mbDockWin;
+    return pWindow->ImplGetWindowClassification()
+           && pWindow->ImplGetWindowClassification()->mbDockWin;
 }
 
 static bool lcl_ParentGrabsFocus(const vcl::Window* pChild)
@@ -676,7 +681,7 @@ static vcl::Window* lcl_GetKeyInputWindow(vcl::Window* pWindow)
     pSVData->maAppData.mnLastInputTime = tools::Time::GetSystemTicks();
 
     // #127104# workaround for destroyed windows
-    if (!pWindow->ImplGetWindowImpl())
+    if (!pWindow->ImplGetWindowClassification())
         return nullptr;
 
     return lcl_GetValidInputWindow(pWindow, pSVData);
@@ -955,7 +960,7 @@ static bool lcl_HasToolboxFocus(vcl::Window* pFocusWin)
 {
     for (vcl::Window* pWin = pFocusWin; pWin; pWin = pWin->GetParent())
     {
-        if (auto pImpl = pWin->ImplGetWindowImpl())
+        if (auto pImpl = pWin->ImplGetWindowClassification())
         {
             if (pImpl->mbToolBox)
                 return true;
@@ -1226,7 +1231,7 @@ static bool lcl_DispatchHelpAndMenuKeys(NotifyEventType nSVEvent, bool bKeyPreNo
 
 static bool lcl_IsSystemFloatingWindow(const vcl::Window* pWindow)
 {
-    const auto* pImpl = pWindow->ImplGetWindowImpl();
+    const auto* pImpl = pWindow->ImplGetWindowClassification();
     if (!pImpl || !pImpl->mbFloatWin)
         return false;
 
@@ -1619,7 +1624,7 @@ bool ImplWindowFrameProc(vcl::Window* _pWindow, SalEvent nEvent, const void* pEv
 
     const VclPtr<vcl::Window> pWindow(_pWindow);
 
-    if (pWindow->ImplGetWindowImpl() == nullptr)
+    if (pWindow->ImplGetWindowClassification() == nullptr)
         return false;
 
     switch (nEvent)

@@ -20,7 +20,7 @@
 #include <ImplFrameData.hxx>
 #include <svdata.hxx>
 #include <brdwin.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
@@ -67,7 +67,7 @@ void FloatingWindow::ImplInitFloating( vcl::Window* pParent, WinBits nStyle )
 {
     mpImplData.reset(new ImplData);
 
-    mpWindowImpl->mbFloatWin = true;
+    mpClassification->mbFloatWin = true;
     mbInCleanUp = false;
     mbGrabFocus = false;
 
@@ -81,7 +81,7 @@ void FloatingWindow::ImplInitFloating( vcl::Window* pParent, WinBits nStyle )
     // no Border, then we don't need a border window
     if (!nStyle)
     {
-        mpWindowImpl->mbOverlapWin = true;
+        mpClassification->mbOverlapWin = true;
         nStyle |= WB_DIALOGCONTROL;
         ImplInit(pParent, nStyle, nullptr);
     }
@@ -96,8 +96,8 @@ void FloatingWindow::ImplInitFloating( vcl::Window* pParent, WinBits nStyle )
             WinBits nFloatWinStyle = nStyle;
             // #99154# floaters are not closeable by default anymore, eg fullscreen floater
             // nFloatWinStyle |= WB_CLOSEABLE;
-            mpWindowImpl->mbFrame = true;
-            mpWindowImpl->mbOverlapWin = true;
+            mpClassification->mbFrame = true;
+            mpClassification->mbOverlapWin = true;
             ImplInit(pParent, nFloatWinStyle & ~WB_BORDER, nullptr);
         }
         else
@@ -793,7 +793,7 @@ void FloatingWindow::StartPopupMode( const tools::Rectangle& rRect, FloatWinPopu
         SetTitleType( FloatWinTitleType::NONE );
 
     // avoid close on focus change for decorated floating windows only
-    if( mpWindowImpl->mbFrame && (GetStyle() & WB_MOVEABLE) )
+    if( mpClassification->mbFrame && (GetStyle() & WB_MOVEABLE) )
         nFlags |= FloatWinPopupFlags::NoAppFocusClose;
 
     // compute window position according to flags and arrangement

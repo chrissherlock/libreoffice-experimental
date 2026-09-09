@@ -28,7 +28,7 @@
 #include <vcl/window.hxx>
 
 #include <ImplFrameData.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowPointerState.hxx>
 #include <WindowAccessibleData.hxx>
 #include <WindowStyleState.hxx>
@@ -82,7 +82,7 @@ void Window::ImplCancelTrackingAndPassFocus()
 
     // try to pass focus to the next control
     // if the window has focus and is contained in the dialog control
-    // mpWindowImpl->mbDisabled should only be set after a call of ImplDlgCtrlNextWindow().
+    // mpClassification->mbDisabled should only be set after a call of ImplDlgCtrlNextWindow().
     // Otherwise ImplDlgCtrlNextWindow() should be used
     if (HasFocus())
         ImplDlgCtrlNextWindow();
@@ -212,7 +212,7 @@ void Window::ImplSetInputState(bool bEnable)
 
 void Window::EnableInput(bool bEnable, bool bChild)
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return;
 
     ImplEnableInputBorderAndMenuBar(bEnable);
@@ -273,7 +273,7 @@ void Window::ImplEnableFloatingWindowsInput(bool bEnable, const vcl::Window* pEx
 
 void Window::ImplEnableOwnerDrawWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow)
 {
-    if (!mpWindowImpl->mbFrame)
+    if (!mpClassification->mbFrame)
         return;
 
     vcl::Window* pFirstOverlap = ImplGetFirstOverlapWindow();
@@ -295,7 +295,7 @@ void Window::ImplEnableOwnerDrawWindowsInput(bool bEnable, const vcl::Window* pE
 
 void Window::EnableInput(bool bEnable, const vcl::Window* pExcludeWindow)
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return;
 
     EnableInput(bEnable);
@@ -361,7 +361,7 @@ void Window::SetActivateMode(ActivateModeFlags nMode)
 
 void Window::SetUpdateMode(bool bUpdate)
 {
-    if (mpWindowImpl)
+    if (mpClassification)
     {
         mpInvalidation->mbNoUpdate = !bUpdate;
         CompatStateChanged(StateChangedType::UpdateMode);
@@ -372,7 +372,7 @@ void Window::SetUpdateMode(bool bUpdate)
 
 vcl::Window* Window::ImplGetBorderWindow() const
 {
-    return mpWindowImpl ? mpHierarchy->mpBorderWindow.get() : nullptr;
+    return mpClassification ? mpHierarchy->mpBorderWindow.get() : nullptr;
 }
 
 void Window::ImplSetMouseTransparent(bool bTransparent)
@@ -381,12 +381,15 @@ void Window::ImplSetMouseTransparent(bool bTransparent)
         mpInput->mbMouseTransparent = bTransparent;
 }
 
-bool Window::IsFormControl() const { return mpWindowImpl ? mpWindowImpl->mbIsFormControl : false; }
+bool Window::IsFormControl() const
+{
+    return mpClassification ? mpClassification->mbIsFormControl : false;
+}
 
 void Window::SetFormControl(bool bFormControl)
 {
-    if (mpWindowImpl)
-        mpWindowImpl->mbIsFormControl = bFormControl;
+    if (mpClassification)
+        mpClassification->mbIsFormControl = bFormControl;
 }
 
 Dialog* Window::GetParentDialog() const
@@ -406,13 +409,13 @@ Dialog* Window::GetParentDialog() const
 
 bool Window::IsMenuFloatingWindow() const
 {
-    return mpWindowImpl && mpWindowImpl->mbMenuFloatingWindow;
+    return mpClassification && mpClassification->mbMenuFloatingWindow;
 }
 
 bool Window::IsNativeFrame() const
 {
     // #101741 do not check for WB_CLOSEABLE because undecorated floaters (like menus!) are closeable
-    if (mpWindowImpl->mbFrame && (mpStyleState->mnStyle & (WB_MOVEABLE | WB_SIZEABLE)))
+    if (mpClassification->mbFrame && (mpStyleState->mnStyle & (WB_MOVEABLE | WB_SIZEABLE)))
         return true;
 
     return false;
@@ -502,7 +505,7 @@ bool Window::IsAlwaysEnableInput() const
 
 ActivateModeFlags Window::GetActivateMode() const { return mpFocusState->mnActivateMode; }
 
-bool Window::IsAlwaysOnTopEnabled() const { return mpWindowImpl->mbAlwaysOnTop; }
+bool Window::IsAlwaysOnTopEnabled() const { return mpClassification->mbAlwaysOnTop; }
 
 void Window::EnablePaint(bool bEnable) { mpInvalidation->mbPaintDisabled = !bEnable; }
 
@@ -528,9 +531,9 @@ vcl::Cursor* Window::GetCursor() const
     return mpControlAppearance->mpCursor;
 }
 
-bool Window::IsCreatedWithToolkit() const { return mpWindowImpl->mbCreatedWithToolkit; }
+bool Window::IsCreatedWithToolkit() const { return mpClassification->mbCreatedWithToolkit; }
 
-void Window::SetCreatedWithToolkit(bool b) { mpWindowImpl->mbCreatedWithToolkit = b; }
+void Window::SetCreatedWithToolkit(bool b) { mpClassification->mbCreatedWithToolkit = b; }
 
 PointerStyle Window::GetPointer() const { return mpControlAppearance->maPointer; }
 

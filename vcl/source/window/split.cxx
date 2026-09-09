@@ -30,7 +30,7 @@
 #include <tools/lazydelete.hxx>
 #include <tools/mapunit.hxx>
 
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 
 namespace
 {
@@ -134,7 +134,7 @@ Splitter::Splitter( vcl::Window* pParent, WinBits nStyle ) :
     mbInKeyEvent( false ),
     mnKeyboardStepSize( SPLITTER_DEFAULTSTEPSIZE )
 {
-    ImplGetWindowImpl()->mbSplitter        = true;
+    ImplGetWindowClassification()->mbSplitter        = true;
 
     ImplInit( pParent, nStyle );
 

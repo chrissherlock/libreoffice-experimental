@@ -36,8 +36,8 @@ void VclEventListeners::Call( VclSimpleEvent& rEvent ) const
     if (VclWindowEvent* pWindowEvent = dynamic_cast<VclWindowEvent*>(&rEvent))
     {
         VclPtr<vcl::Window> xWin(pWindowEvent->GetWindow());
-        // checking mpWindowImpl to see if disposal is complete yet
-        while ( aIter != aEnd && (!xWin || xWin->mpWindowImpl) )
+        // checking isDisposed() to see if disposal is complete yet
+        while ( aIter != aEnd && (!xWin || !xWin->isDisposed()) )
         {
             Link<VclSimpleEvent&,void> &rLink = *aIter;
             // check this hasn't been removed in some re-entrancy scenario fdo#47368

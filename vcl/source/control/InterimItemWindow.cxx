@@ -15,7 +15,6 @@
 
 #include <salobj.hxx>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowPlatformState.hxx>
 

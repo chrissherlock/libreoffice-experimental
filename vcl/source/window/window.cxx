@@ -27,7 +27,6 @@
 #include <WindowPlatformState.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
 #include <WindowHierarchy.hxx>
 #include <helpwin.hxx>
 

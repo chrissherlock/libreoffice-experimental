@@ -64,7 +64,7 @@
 #include <salinst.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <toolbox.h>
 #include <brdwin.hxx>
 #include <helpwin.hxx>
@@ -264,7 +264,7 @@ Reference< css::rendering::XCanvas > WindowOutputDevice::ImplGetCanvas( bool bSp
     Sequence< Any > aArg{
         Any(reinterpret_cast<sal_Int64>(this)),
         Any(css::awt::Rectangle( GetDeviceOriginX(), GetDeviceOriginY(), GetOutputWidthPixel(), GetOutputHeightPixel() )),
-        Any(mxOwnerWindow->mpWindowImpl->mbAlwaysOnTop),
+        Any(mxOwnerWindow->mpClassification->mbAlwaysOnTop),
         Any(Reference< css::awt::XWindow >(
                              mxOwnerWindow->GetComponentInterface(),
                              UNO_QUERY )),
@@ -288,7 +288,7 @@ Reference< css::rendering::XCanvas > WindowOutputDevice::ImplGetCanvas( bool bSp
         // implementation (not DX5 canvas, as it cannot cope with
         // surfaces spanning multiple displays). Note: canvas
         // (without sprite) stays the same)
-        const sal_uInt32 nDisplay = static_cast< WinSalFrame* >( mxOwnerWindow->mpWindowImpl->mpFrame )->mnDisplay;
+        const sal_uInt32 nDisplay = static_cast< WinSalFrame* >( mxOwnerWindow->mpClassification->mpFrame )->mnDisplay;
         if( nDisplay >= Application::GetScreenCount() )
         {
             xCanvas.set( xCanvasFactory->createInstanceWithArgumentsAndContext(

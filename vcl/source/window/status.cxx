@@ -32,7 +32,7 @@
 #include <vcl/settings.hxx>
 #include <config_features.h>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
 
@@ -494,7 +494,7 @@ void DrawProgress(vcl::Window* pWindow, vcl::RenderContext& rRenderContext, cons
         if(bNeedErase)
         {
             vcl::Window* pEraseWindow = pWindow;
-            while (pEraseWindow->IsPaintTransparent() && !pEraseWindow->ImplGetWindowImpl()->mbFrame)
+            while (pEraseWindow->IsPaintTransparent() && !pEraseWindow->ImplGetWindowClassification()->mbFrame)
             {
                 pEraseWindow = pEraseWindow->ImplGetWindowHierarchy()->mpParent;
             }
@@ -1142,8 +1142,8 @@ tools::Long StatusBar::GetItemOffset( sal_uInt16 nItemId ) const
 
 void StatusBar::PaintSelfAndChildrenImmediately()
 {
-    WindowImpl* pWindowImpl = ImplGetWindowImpl();
-    const bool bOrigOverlapWin = pWindowImpl->mbOverlapWin;
+    WindowClassification* pClassification = ImplGetWindowClassification();
+    const bool bOrigOverlapWin = pClassification->mbOverlapWin;
     // Temporarily set mbOverlapWin so that any parent windows of StatusBar
     // that happen to have accumulated Invalidates are not taken as the root
     // paint candidate from which to paint the paint hierarchy. So we limit the
@@ -1151,9 +1151,9 @@ void StatusBar::PaintSelfAndChildrenImmediately()
     // optimization to bundle pending paints together and suppressing any
     // unexpected side effects of entering parent window paint handlers if this
     // call is not from the primordial thread.
-    pWindowImpl->mbOverlapWin = true;
+    pClassification->mbOverlapWin = true;
     PaintImmediately();
-    pWindowImpl->mbOverlapWin = bOrigOverlapWin;
+    pClassification->mbOverlapWin = bOrigOverlapWin;
 }
 
 void StatusBar::SetItemText( sal_uInt16 nItemId, const OUString& rText, int nCharsWidth )

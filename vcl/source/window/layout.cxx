@@ -54,7 +54,7 @@
 #include <bitmaps.hlst>
 #include <messagedialog.hxx>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <boost/multi_array.hpp>
 #include <vcl/DesktopType.hxx>
 #include <vcl/toolkit/vclmedit.hxx>
@@ -1531,10 +1531,10 @@ vcl::Window *VclFrame::get_label_widget()
 const vcl::Window *VclFrame::get_child() const
 {
     //The child widget is the normally the last (of two) children
-    const WindowImpl* pWindowImpl = ImplGetWindowImpl();
+    const WindowClassification* pWindowClassification = ImplGetWindowClassification();
     const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
 
-    assert(GetChildCount() == 2 || pWindowImpl->mbInDispose);
+    assert(GetChildCount() == 2 || pWindowClassification->mbInDispose);
 
     if (!m_pLabel)
         return pHierarchy->mpLastChild;
@@ -1893,8 +1893,8 @@ IMPL_LINK_NOARG(VclScrolledWindow, ScrollBarHdl, ScrollBar*, void)
 
 const vcl::Window *VclScrolledWindow::get_child() const
 {
-    const WindowImpl* pWindowImpl = ImplGetWindowImpl();
-    assert(GetChildCount() == 4 || pWindowImpl->mbInDispose);
+    const WindowClassification* pWindowClassification = ImplGetWindowClassification();
+    assert(GetChildCount() == 4 || pWindowClassification->mbInDispose);
     return ImplGetWindowHierarchy()->mpLastChild;
 }
 

@@ -10,7 +10,7 @@
 #include <vcl/window.hxx>
 
 #include <WindowClippingState.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowHierarchy.hxx>
 #include <clipping/ClipStateBuilder.hxx>
 

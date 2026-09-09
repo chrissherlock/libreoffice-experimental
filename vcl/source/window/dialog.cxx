@@ -33,13 +33,15 @@
 #include <officecfg/Office/Common.hxx>
 #include <osl/diagnose.h>
 
+#include <window.h>
+#include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowStyleState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
 #include <ImplFrameData.hxx>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowInput.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowGeometry.hxx>
@@ -392,7 +394,7 @@ void Dialog::disposeOwnedButtons()
 
 void Dialog::ImplInitDialogData()
 {
-    mpWindowImpl->mbDialog  = true;
+    mpClassification->mbDialog  = true;
     mbInExecute             = false;
     mbInSyncExecute         = false;
     mbInClose               = false;
@@ -473,8 +475,8 @@ void Dialog::ImplInitDialog( vcl::Window* pParent, WinBits nStyle, InitFlag eFla
         }
         else
         {
-            mpWindowImpl->mbFrame         = true;
-            mpWindowImpl->mbOverlapWin    = true;
+            mpClassification->mbFrame         = true;
+            mpClassification->mbOverlapWin    = true;
             ImplInit( pParent, (nStyle & (WB_MOVEABLE | WB_SIZEABLE | WB_STANDALONE)) | WB_CLOSEABLE, nullptr );
             // Now set all style bits
             mpStyleState->mnStyle = nStyle;
@@ -1320,7 +1322,7 @@ vcl::Window* Dialog::GetFirstControlForFocus()
     vcl::Window* pFirstOverlapWindow = ImplGetFirstOverlapWindow();
 
     // find focus control, even if the dialog has focus
-    if (!HasFocus() && pFirstOverlapWindow && pFirstOverlapWindow->mpWindowImpl)
+    if (!HasFocus() && pFirstOverlapWindow && pFirstOverlapWindow->mpClassification)
     {
         // prefer a child window which had focus before
         pFocusControl = ImplGetFirstOverlapWindow()->mpInput->mpLastFocusWindow;

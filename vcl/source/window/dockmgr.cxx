@@ -23,7 +23,7 @@
 
 #include <brdwin.hxx>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
 
@@ -775,7 +775,7 @@ void ImplDockingWindowWrapper::ImplPreparePopupMode()
 
     // At least for DockingWindow, GetText() has a side effect of setting deferred
     // properties. This must be done before setting the border window (see below),
-    // so that the border width will end up in mpWindowImpl->mnBorderWidth, not in
+    // so that the border width will end up in mpClassification->mnBorderWidth, not in
     // the border window (See DockingWindow::setPosSizeOnContainee() and
     // DockingWindow::GetOptimalSize()).
     pWin->SetText( xWindow->GetText() );
@@ -924,7 +924,7 @@ void ImplDockingWindowWrapper::SetFloatingMode( bool bFloatMode )
 
         // At least for DockingWindow, GetText() has a side effect of setting deferred
         // properties. This must be done before setting the border window (see below),
-        // so that the border width will end up in mpWindowImpl->mnBorderWidth, not in
+        // so that the border width will end up in mpClassification->mnBorderWidth, not in
         // the border window (See DockingWindow::setPosSizeOnContainee() and
         // DockingWindow::GetOptimalSize()).
         pWin->SetText( GetWindow()->GetText() );

@@ -20,7 +20,6 @@
 #include <vcl/window.hxx>
 #include <vcl/outdev.hxx>
 
-#include <WindowImpl.hxx>
 #include <windowdev.hxx>
 
 namespace vcl {

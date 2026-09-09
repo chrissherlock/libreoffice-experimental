@@ -49,7 +49,7 @@
 
 #include <accel.hxx>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <toolbox.h>
 #include <spin.hxx>
 #if defined(_WIN32)
@@ -1105,7 +1105,7 @@ IMPL_LINK( ImplTBDragMgr, SelectHdl, Accelerator&, rAccel, void )
 void ToolBox::ImplInitToolBoxData()
 {
     // initialize variables
-    ImplGetWindowImpl()->mbToolBox  = true;
+    ImplGetWindowClassification()->mbToolBox  = true;
     mpData.reset(new ImplToolBoxPrivateData);
 
     mpFloatWin            = nullptr;
@@ -3014,7 +3014,7 @@ void ToolBox::MouseMove( const MouseEvent& rMEvt )
         vcl::Window *pWin = pFocusWin->GetParent();
         while (pWin)
         {
-            if(pWin->ImplGetWindowImpl() && pWin->ImplGetWindowImpl()->mbToolBox)
+            if(pWin->ImplGetWindowClassification() && pWin->ImplGetWindowClassification()->mbToolBox)
             {
                 bFocusWindowIsAToolBoxChild = true;
                 break;
@@ -3023,7 +3023,7 @@ void ToolBox::MouseMove( const MouseEvent& rMEvt )
         }
     }
 
-    if( bFocusWindowIsAToolBoxChild || (pFocusWin && pFocusWin->ImplGetWindowImpl() && pFocusWin->ImplGetWindowImpl()->mbToolBox && pFocusWin != this) )
+    if( bFocusWindowIsAToolBoxChild || (pFocusWin && pFocusWin->ImplGetWindowClassification() && pFocusWin->ImplGetWindowClassification()->mbToolBox && pFocusWin != this) )
         bDrawHotSpot = false;
 
     if ( mbDragging )

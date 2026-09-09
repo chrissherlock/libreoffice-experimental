@@ -30,7 +30,7 @@
 
 #include <ImplAccessibleInfos.hxx>
 #include <window.h>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
 #include <accessibility/floatingwindowaccessible.hxx>
@@ -80,7 +80,7 @@ rtl::Reference<comphelper::OAccessible> Window::GetAccessible(bool bCreate)
     if (!mpAccessibleData)
         return {};
 
-    if (!mpAccessibleData->mpAccessible.is() && !mpWindowImpl->mbInDispose && bCreate)
+    if (!mpAccessibleData->mpAccessible.is() && !mpClassification->mbInDispose && bCreate)
         mpAccessibleData->mpAccessible = CreateAccessible();
 
     return mpAccessibleData->mpAccessible;
@@ -131,7 +131,7 @@ void Window::SetAccessible(const rtl::Reference<comphelper::OAccessible>& rpAcce
 // skip all border windows that are not top level frames
 bool Window::ImplIsAccessibleCandidate() const
 {
-    if( !mpWindowImpl->mbBorderWin )
+    if( !mpClassification->mbBorderWin )
         return true;
 
     return IsNativeFrame();
@@ -165,7 +165,7 @@ vcl::Window* Window::GetAccessibleParentWindow() const
     // If this is a floating window which has a native border window, then that border should be reported as
     // the accessible parent
     else if( GetType() == WindowType::FLOATINGWINDOW &&
-        mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame )
+        mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpClassification->mbFrame )
     {
         pParent = mpHierarchy->mpBorderWindow;
     }
@@ -178,7 +178,7 @@ vcl::Window* Window::GetAccessibleParentWindow() const
 
 sal_uInt16 Window::GetAccessibleChildWindowCount()
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return 0;
 
     sal_uInt16 nChildren = 0;
@@ -417,14 +417,14 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
             break;
 
         case WindowType::DOCKINGWINDOW:
-            nRole = (mpWindowImpl->mbFrame) ? accessibility::AccessibleRole::FRAME
+            nRole = (mpClassification->mbFrame) ? accessibility::AccessibleRole::FRAME
                                             : accessibility::AccessibleRole::PANEL;
             break;
 
         case WindowType::FLOATINGWINDOW:
-            nRole = (mpWindowImpl->mbFrame
+            nRole = (mpClassification->mbFrame
                      || (mpHierarchy->mpBorderWindow
-                         && mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame)
+                         && mpHierarchy->mpBorderWindow->mpClassification->mbFrame)
                      || (GetStyle() & WB_OWNERDRAWDECORATION))
                         ? accessibility::AccessibleRole::FRAME
                         : accessibility::AccessibleRole::WINDOW;
@@ -697,7 +697,7 @@ vcl::Window* Window::GetAccessibleRelationLabeledBy() const
 bool Window::IsAccessibilityEventsSuppressed()
 {
     vcl::Window *pParent = this;
-    while (pParent && pParent->mpWindowImpl)
+    while (pParent && pParent->mpClassification)
     {
         if (pParent->mpAccessibleData && pParent->mpAccessibleData->mbSuppressAccessibilityEvents)
             return true;

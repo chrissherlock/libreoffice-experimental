@@ -24,9 +24,10 @@
 #include <vcl/syswin.hxx>
 #include <vcl/window.hxx>
 
+#include <window.h>
 #include <ImplFrameData.hxx>
 #include <WindowStyleState.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
@@ -58,7 +59,7 @@ static bool lcl_SetChildWindowPosSize(vcl::Window* pOriginalWindow, vcl::Window*
                                       tools::Long nX, tools::Long nY, tools::Long nWidth,
                                       tools::Long nHeight, PosSizeFlags nFlags)
 {
-    if (pBorderWindow->ImplGetWindowImpl()->mbFrame)
+    if (pBorderWindow->ImplGetWindowClassification()->mbFrame)
         return false;
 
     pBorderWindow->ImplPosSizeWindow(nX, nY, nWidth, nHeight, nFlags);
@@ -261,7 +262,7 @@ void Window::SetPosPixel(const Point& rNewPos)
 
 Size Window::GetSizePixel() const
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
     {
         SAL_WARN("vcl.layout", "WTF no windowimpl");
         return Size(0, 0);
@@ -379,8 +380,8 @@ AbsoluteScreenPixelRectangle Window::GetWindowExtentsAbsolute() const
     AbsoluteScreenPixelPoint aPos(pWin->OutputToAbsoluteScreenPixel(Point(0, 0)));
     Size aSize(pWin->GetSizePixel());
     // #104088# do not add decoration to the workwindow to be compatible to java accessibility api
-    if (mpWindowImpl->mbFrame
-        || (mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame
+    if (mpClassification->mbFrame
+        || (mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpClassification->mbFrame
             && GetType() != WindowType::WORKWINDOW))
     {
         SalFrameGeometry g = mpPlatformState->mpFrame->GetGeometry();
@@ -394,7 +395,7 @@ AbsoluteScreenPixelRectangle Window::GetWindowExtentsAbsolute() const
 
 Size Window::GetOutputSizePixel() const
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return Size();
 
     return GetOutDev()->GetOutputSizePixel();
@@ -419,7 +420,7 @@ tools::Long Window::CalcTitleWidth() const
         return mpHierarchy->mpBorderWindow->CalcTitleWidth();
     }
 
-    if (!mpWindowImpl->mbFrame || !(mpStyleState->mnStyle & WB_MOVEABLE))
+    if (!mpClassification->mbFrame || !(mpStyleState->mnStyle & WB_MOVEABLE))
         return 0;
 
     // we guess the width for frame windows as we do not know the
@@ -471,10 +472,10 @@ static bool HasParentDockingWindow(const vcl::Window* pWindow)
     return false;
 }
 
-WindowImpl* Window::ImplGetEffectiveWindowImpl() const
+WindowClassification* Window::ImplGetEffectiveWindowClassification() const
 {
-    return mpHierarchy->mpBorderWindow ? mpHierarchy->mpBorderWindow->mpWindowImpl.get()
-                                       : mpWindowImpl.get();
+    return mpHierarchy->mpBorderWindow ? mpHierarchy->mpBorderWindow->mpClassification.get()
+                                       : mpClassification.get();
 }
 
 WindowLayoutData* Window::ImplGetEffectiveWindowLayoutData() const
@@ -1010,7 +1011,7 @@ Size Window::ImplGetClientAvailableSize() const
 
 bool Window::ImplHasAntiparallelParent() const
 {
-    return mpHierarchy->mpParent && !mpHierarchy->mpParent->mpWindowImpl->mbFrame
+    return mpHierarchy->mpParent && !mpHierarchy->mpParent->mpClassification->mbFrame
            && mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel();
 }
 

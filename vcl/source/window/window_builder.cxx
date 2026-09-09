@@ -25,7 +25,6 @@
 #include <vcl/vclenum.hxx>
 #include <vcl/window.hxx>
 
-#include <WindowImpl.hxx>
 #include <WindowAccessibleData.hxx>
 
 #include <com/sun/star/accessibility/AccessibleRelation.hpp>

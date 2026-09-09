@@ -23,7 +23,7 @@
 
 #include <WindowPlatformState.hxx>
 #include <ImplFrameData.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <svdata.hxx>
 
 #include <vector>
@@ -47,7 +47,7 @@ void Window::EnableDocking(bool bEnable)
     return ImplGetTopmostFrameWindow()->mpPlatformState->mpFrameData->maOwnerDrawList;
 }
 
-bool Window::IsDockingWindow() const { return mpWindowImpl && mpWindowImpl->mbDockWin; }
+bool Window::IsDockingWindow() const { return mpClassification && mpClassification->mbDockWin; }
 } // end vcl namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -28,7 +28,7 @@
 #include <WindowPlatformState.hxx>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowStyleState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowControlAppearance.hxx>
@@ -78,7 +78,7 @@ void Window::SetExtendedStyle(WindowExtendedStyle nExtendedStyle)
     if (!pWindow)
         pWindow = this;
 
-    if (pWindow->mpWindowImpl->mbFrame)
+    if (pWindow->mpClassification->mbFrame)
         pWindow->ImplGetFrame()->SetExtendedFrameStyle(lcl_GetExtendedStyle(nExtendedStyle));
 
     mpStyleState->mnExtendedStyle = nExtendedStyle;
@@ -87,7 +87,7 @@ void Window::SetExtendedStyle(WindowExtendedStyle nExtendedStyle)
 bool Window::ImplShouldHaveBorder(WindowBorderStyle nBorderStyle)
 {
     return nBorderStyle != WindowBorderStyle::REMOVEBORDER
-           || mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame
+           || mpHierarchy->mpBorderWindow->mpClassification->mbFrame
            || !mpHierarchy->mpBorderWindow->mpHierarchy->mpParent;
 }
 
@@ -222,7 +222,7 @@ void Window::ImplEnableChildNativeWidgets(bool bEnable)
 
 bool Window::IsNativeWidgetEnabled() const
 {
-    return mpWindowImpl && ImplGetWinData()->mbEnableNativeWidget;
+    return mpClassification && ImplGetWinData()->mbEnableNativeWidget;
 }
 
 void Window::ApplySettings(vcl::RenderContext& /*rRenderContext*/) {}

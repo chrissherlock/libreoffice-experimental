@@ -27,7 +27,7 @@
 #include <ImplWinData.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowPlatformState.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowInput.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
@@ -70,7 +70,7 @@ void Window::ImplInsertWindow( vcl::Window* pParent )
     mpHierarchy->mpParent = pParent;
     mpHierarchy->mpRealParent = pParent;
 
-    if ( !pParent || mpWindowImpl->mbFrame )
+    if ( !pParent || mpClassification->mbFrame )
         return;
 
     // search frame window and set window frame data
@@ -83,7 +83,7 @@ void Window::ImplInsertWindow( vcl::Window* pParent )
             mpPlatformState->mpSysObj->Reparent(mpPlatformState->mpFrame);
     }
     mpHierarchy->mpFrameWindow   = pFrameParent;
-    mpWindowImpl->mbFrame         = false;
+    mpClassification->mbFrame         = false;
 
     // search overlap window and insert window in list
     if ( ImplIsOverlapWindow() )
@@ -126,7 +126,7 @@ void Window::ImplInsertWindow( vcl::Window* pParent )
 void Window::ImplRemoveWindow( bool bRemoveFrameData )
 {
     // Frame windows do not participate in parent/sibling tree updates
-    if ( mpWindowImpl->mbFrame )
+    if ( mpClassification->mbFrame )
     {
         if ( bRemoveFrameData )
             GetOutDev()->ReleaseGraphics();
@@ -234,7 +234,7 @@ void Window::ImplCalcToTop( ImplCalcToTopData* pPrevData )
 {
     SAL_WARN_IF( !ImplIsOverlapWindow(), "vcl", "Window::ImplCalcToTop(): Is not an OverlapWindow" );
 
-    if ( mpWindowImpl->mbFrame )
+    if ( mpClassification->mbFrame )
         return;
 
     if ( !IsReallyVisible() )
@@ -258,7 +258,7 @@ void Window::ImplToTop( ToTopFlags nFlags )
 {
     SAL_WARN_IF( !ImplIsOverlapWindow(), "vcl", "Window::ImplToTop(): Is not an OverlapWindow" );
 
-    if ( mpWindowImpl->mbFrame )
+    if ( mpClassification->mbFrame )
     {
         // on a mouse click in the external window, it is the latter's
         // responsibility to assure our frame is put in front
@@ -353,7 +353,7 @@ void Window::ImplStartToTop( ToTopFlags nFlags )
             pCurData = pCurData->mpNext.get();
         pTempOverlapWindow = pTempOverlapWindow->mpHierarchy->mpOverlapWindow;
     }
-    while ( !pTempOverlapWindow->mpWindowImpl->mbFrame );
+    while ( !pTempOverlapWindow->mpClassification->mbFrame );
     // next calculate the paint areas of the ChildOverlap windows
     pTempOverlapWindow = mpHierarchy->mpFirstOverlap;
     while ( pTempOverlapWindow )
@@ -371,7 +371,7 @@ void Window::ImplStartToTop( ToTopFlags nFlags )
         pTempOverlapWindow->ImplToTop( nFlags );
         pTempOverlapWindow = pTempOverlapWindow->mpHierarchy->mpOverlapWindow;
     }
-    while ( !pTempOverlapWindow->mpWindowImpl->mbFrame );
+    while ( !pTempOverlapWindow->mpClassification->mbFrame );
     // as last step invalidate the invalid areas
     pCurData = aStartData.mpNext.get();
     while ( pCurData )
@@ -440,7 +440,7 @@ void Window::ImplHideAllOverlaps()
 
 void Window::ToTop( ToTopFlags nFlags )
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return;
 
     ImplStartToTop( nFlags );
@@ -475,7 +475,7 @@ void Window::SetZOrder( vcl::Window* pRefWindow, ZOrderFlags nFlags )
 
     while ( pRefWindow && pRefWindow->mpHierarchy->mpBorderWindow )
         pRefWindow = pRefWindow->mpHierarchy->mpBorderWindow;
-    if (!pRefWindow || pRefWindow == this || mpWindowImpl->mbFrame)
+    if (!pRefWindow || pRefWindow == this || mpClassification->mbFrame)
         return;
 
     SAL_WARN_IF( pRefWindow->mpHierarchy->mpParent != mpHierarchy->mpParent, "vcl", "Window::SetZOrder() - pRefWindow has other parent" );
@@ -617,24 +617,24 @@ void Window::SetZOrder( vcl::Window* pRefWindow, ZOrderFlags nFlags )
 void Window::EnableAlwaysOnTop( bool bEnable )
 {
 
-    mpWindowImpl->mbAlwaysOnTop = bEnable;
+    mpClassification->mbAlwaysOnTop = bEnable;
 
     if ( mpHierarchy->mpBorderWindow )
         mpHierarchy->mpBorderWindow->EnableAlwaysOnTop( bEnable );
     else if ( bEnable && IsReallyVisible() )
         ToTop();
 
-    if ( mpWindowImpl->mbFrame )
+    if ( mpClassification->mbFrame )
         mpPlatformState->mpFrame->SetAlwaysOnTop( bEnable );
 }
 
 bool Window::IsTopWindow() const
 {
-    if ( !mpWindowImpl || mpWindowImpl->mbInDispose )
+    if ( !mpClassification || mpClassification->mbInDispose )
         return false;
 
     // topwindows must be frames or they must have a borderwindow which is a frame
-    if( !mpWindowImpl->mbFrame && (!mpHierarchy->mpBorderWindow || !mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame ) )
+    if( !mpClassification->mbFrame && (!mpHierarchy->mpBorderWindow || !mpHierarchy->mpBorderWindow->mpClassification->mbFrame ) )
         return false;
 
     ImplGetWinData();
@@ -855,7 +855,7 @@ static SystemWindow *ImplGetLastSystemWindow( vcl::Window *pWin )
 
 vcl::Window* Window::GetParent() const
 {
-    return mpWindowImpl ? mpHierarchy->mpRealParent.get() : nullptr;
+    return mpClassification ? mpHierarchy->mpRealParent.get() : nullptr;
 }
 
 void Window::SetParent( vcl::Window* pNewParent )
@@ -866,9 +866,9 @@ void Window::SetParent( vcl::Window* pNewParent )
     if( !pNewParent || pNewParent == this )
         return;
 
-    if (!mpWindowImpl)
+    if (!mpClassification)
     {
-        SAL_WARN("vcl", "Window::SetParent(): mpWindowImpl == NULL");
+        SAL_WARN("vcl", "Window::SetParent(): mpClassification == NULL");
         return;
     }
 
@@ -886,7 +886,7 @@ void Window::SetParent( vcl::Window* pNewParent )
         }
     }
     // remove ownerdraw decorated windows from list in the top-most frame window
-    if( (GetStyle() & WB_OWNERDRAWDECORATION) && mpWindowImpl->mbFrame )
+    if( (GetStyle() & WB_OWNERDRAWDECORATION) && mpClassification->mbFrame )
     {
         ::std::vector< VclPtr<vcl::Window> >& rList = ImplGetOwnerDrawList();
         auto p = ::std::find( rList.begin(), rList.end(), VclPtr<vcl::Window>(this) );
@@ -906,7 +906,7 @@ void Window::SetParent( vcl::Window* pNewParent )
     if ( mpHierarchy->mpParent.get() == pNewParent )
         return;
 
-    if ( mpWindowImpl->mbFrame )
+    if ( mpClassification->mbFrame )
         mpPlatformState->mpFrame->SetParent( pNewParent->mpPlatformState->mpFrame );
 
     bool bVisible = IsVisible();
@@ -1024,7 +1024,7 @@ void Window::SetParent( vcl::Window* pNewParent )
     if( bChangeTaskPaneList )
         pNewSysWin->GetTaskPaneList()->AddWindow( this );
 
-    if( (GetStyle() & WB_OWNERDRAWDECORATION) && mpWindowImpl->mbFrame )
+    if( (GetStyle() & WB_OWNERDRAWDECORATION) && mpClassification->mbFrame )
         ImplGetOwnerDrawList().emplace_back(this );
 
     if ( bVisible )
@@ -1033,7 +1033,7 @@ void Window::SetParent( vcl::Window* pNewParent )
 
 sal_uInt16 Window::GetChildCount() const
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return 0;
 
     sal_uInt16  nChildCount = 0;
@@ -1049,7 +1049,7 @@ sal_uInt16 Window::GetChildCount() const
 
 vcl::Window* Window::GetChild( sal_uInt16 nChild ) const
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return nullptr;
 
     sal_uInt16  nChildCount = 0;
@@ -1067,7 +1067,7 @@ vcl::Window* Window::GetChild( sal_uInt16 nChild ) const
 
 vcl::Window* Window::GetWindow( GetWindowType nType ) const
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return nullptr;
 
     switch ( nType )
@@ -1186,15 +1186,15 @@ vcl::Window* Window::ImplGetParent() const
 
 bool Window::ImplIsOverlapWindow() const
 {
-    return mpWindowImpl && mpWindowImpl->mbOverlapWin;
+    return mpClassification && mpClassification->mbOverlapWin;
 }
 
 vcl::Window* Window::ImplGetFirstOverlapWindow()
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return nullptr;
 
-    if ( mpWindowImpl->mbOverlapWin )
+    if ( mpClassification->mbOverlapWin )
         return this;
     else
         return mpHierarchy ? mpHierarchy->mpOverlapWindow : nullptr;
@@ -1202,10 +1202,10 @@ vcl::Window* Window::ImplGetFirstOverlapWindow()
 
 const vcl::Window* Window::ImplGetFirstOverlapWindow() const
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return nullptr;
 
-    if ( mpWindowImpl->mbOverlapWin )
+    if ( mpClassification->mbOverlapWin )
         return this;
     else
         return mpHierarchy ? mpHierarchy->mpOverlapWindow : nullptr;

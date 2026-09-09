@@ -20,7 +20,6 @@
 #include <vcl/window.hxx>
 
 #include <ImplFrameData.hxx>
-#include <WindowImpl.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowPlatformState.hxx>
 #include <salframe.hxx>
