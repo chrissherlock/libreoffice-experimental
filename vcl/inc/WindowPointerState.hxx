@@ -9,8 +9,11 @@
 
 #pragma once
 
+#include <sal/types.h>
+
 struct WindowPointerState
 {
+    sal_uInt16 mnWaitCount = 0;
     bool mbChildPtrOverwrite : 1 = false;
     bool mbNoPtrVisible : 1 = false;
 };

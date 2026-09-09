@@ -127,7 +127,7 @@ PointerStyle Window::ImplGetMousePointer() const
 
         if ( !bWait )
         {
-            if ( pWindow->mpWindowImpl->mnWaitCount )
+            if ( pWindow->mpPointerState->mnWaitCount )
             {
                 ePointerStyle = PointerStyle::Wait;
                 bWait = true;
@@ -634,9 +634,9 @@ bool Window::IsMouseOver() const
 void Window::EnterWait()
 {
 
-    mpWindowImpl->mnWaitCount++;
+    mpPointerState->mnWaitCount++;
 
-    if ( mpWindowImpl->mnWaitCount == 1 )
+    if ( mpPointerState->mnWaitCount == 1 )
     {
         // possibly immediately move pointer
         if ( !mpPlatformState->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
@@ -646,17 +646,17 @@ void Window::EnterWait()
 
 void Window::LeaveWait()
 {
-    if( !mpWindowImpl )
+    if( !mpPointerState )
         return;
 
-    if ( mpWindowImpl->mnWaitCount )
+    if ( mpPointerState->mnWaitCount )
     {
-        mpWindowImpl->mnWaitCount--;
+        mpPointerState->mnWaitCount--;
 
-        if ( !mpWindowImpl->mnWaitCount )
+        if ( !mpPointerState->mnWaitCount )
         {
             // possibly immediately move pointer
-            if ( !mpPlatformState->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
+            if ( mpPlatformState && !mpPlatformState->mpFrameData->mbInMouseMove && ImplTestMousePointerSet() )
                 mpPlatformState->mpFrame->SetPointer( ImplGetMousePointer() );
         }
     }

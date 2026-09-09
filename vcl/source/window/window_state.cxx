@@ -29,6 +29,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowPointerState.hxx>
 #include <WindowAccessibleData.hxx>
 #include <WindowStyleState.hxx>
 #include <WindowVisibilityState.hxx>
@@ -517,7 +518,7 @@ GetFocusFlags Window::GetGetFocusFlags() const { return mpFocusState->mnGetFocus
 
 bool Window::IsCompoundControl() const { return mpFocusState && mpFocusState->mbCompoundControl; }
 
-bool Window::IsWait() const { return (mpWindowImpl->mnWaitCount != 0); }
+bool Window::IsWait() const { return (mpPointerState->mnWaitCount != 0); }
 
 vcl::Cursor* Window::GetCursor() const
 {
