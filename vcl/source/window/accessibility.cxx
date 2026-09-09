@@ -566,7 +566,7 @@ OUString Window::getDefaultAccessibleName() const
             break;
 
         case WindowType::MOREBUTTON:
-            aAccessibleName = mpWindowImpl->maText;
+            aAccessibleName = maText;
             break;
 
         default:

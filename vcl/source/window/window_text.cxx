@@ -31,11 +31,11 @@ namespace vcl
 {
 void Window::SetText(const OUString& rStr)
 {
-    if (!mpWindowImpl || rStr == mpWindowImpl->maText)
+    if (rStr == maText)
         return;
 
-    OUString oldTitle(mpWindowImpl->maText);
-    mpWindowImpl->maText = rStr;
+    OUString oldTitle(maText);
+    maText = rStr;
 
     if (mpHierarchy->mpBorderWindow)
         mpHierarchy->mpBorderWindow->SetText(rStr);
@@ -57,7 +57,7 @@ void Window::SetText(const OUString& rStr)
     CompatStateChanged(StateChangedType::Text);
 }
 
-OUString Window::GetText() const { return mpWindowImpl->maText; }
+OUString Window::GetText() const { return maText; }
 
 OUString Window::GetDisplayText() const { return GetText(); }
 

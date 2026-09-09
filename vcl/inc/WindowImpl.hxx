@@ -64,8 +64,6 @@ public:
     WindowImpl( WindowType );
     ~WindowImpl();
 
-    OUString            maText;
-
     WindowType          meType;
     bool                mbFrame:1,
                         mbBorderWin:1,
@@ -81,8 +79,8 @@ public:
                         mbCreatedWithToolkit:1,
                         mbToolBox:1,
                         mbSplitter:1,
-                        mbMenuFloatingWindow:1;
-    bool mbIsFormControl : 1 = false;
+                        mbMenuFloatingWindow:1,
+                        mbIsFormControl:1 = false;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

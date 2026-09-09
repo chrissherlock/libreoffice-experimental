@@ -1084,6 +1084,7 @@ private:
     VclPtr<vcl::WindowOutputDevice> mxOutDev;
 
     // --- Data Members ---
+    OUString maText;
     std::unique_ptr<WindowImpl> mpWindowImpl;
     std::unique_ptr<WindowInput> mpInput;
     std::unique_ptr<WindowHierarchy> mpHierarchy;
