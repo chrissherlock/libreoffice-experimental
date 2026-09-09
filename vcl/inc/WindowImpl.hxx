@@ -65,7 +65,6 @@ public:
     ~WindowImpl();
 
     OUString            maText;
-    VCLXWindow*         mpVCLXWindow;
 
     WindowType          meType;
     sal_uInt16          mnWaitCount;

@@ -29,6 +29,7 @@
 
 #include <ImplFrameData.hxx>
 #include <WindowImpl.hxx>
+#include <WindowAccessibleData.hxx>
 #include <WindowStyleState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowFocusState.hxx>
@@ -534,7 +535,7 @@ PointerStyle Window::GetPointer() const { return mpControlAppearance->maPointer;
 
 VCLXWindow* Window::GetWindowPeer() const
 {
-    return mpWindowImpl ? mpWindowImpl->mpVCLXWindow : nullptr;
+    return mpAccessibleData ? mpAccessibleData->mpVCLXWindow : nullptr;
 }
 } /* namespace vcl */
 
