@@ -43,7 +43,6 @@
 #include <vcl/CoordinateMapper.hxx>
 
 #include <ImplFrameData.hxx>
-#include <WindowImpl.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowHierarchy.hxx>
 #include <font/EmphasisMark.hxx>

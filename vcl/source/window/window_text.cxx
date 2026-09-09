@@ -21,10 +21,11 @@
 #include <vcl/window.hxx>
 
 #include <ImplAccessibleInfos.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowAccessibleData.hxx>
+#include <WindowHelpData.hxx>
 #include <salframe.hxx>
 
 namespace vcl
@@ -39,7 +40,7 @@ void Window::SetText(const OUString& rStr)
 
     if (mpHierarchy->mpBorderWindow)
         mpHierarchy->mpBorderWindow->SetText(rStr);
-    else if (mpWindowImpl->mbFrame)
+    else if (mpClassification->mbFrame)
         mpPlatformState->mpFrame->SetTitle(rStr);
 
     CallEventListeners(VclEventId::WindowFrameTitleChanged, &oldTitle);

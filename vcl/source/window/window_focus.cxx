@@ -27,7 +27,7 @@
 #include <ImplWinData.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowFocusState.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowLOKData.hxx>
 #include <WindowInput.hxx>
@@ -103,7 +103,7 @@ vcl::Window* Window::ImplTransferFocus()
     if (!ImplContainsFocus())
         return pOverlapWindow;
 
-    if (mpWindowImpl->mbFrame)
+    if (mpClassification->mbFrame)
         return ImplResetOverlapFocusState(pOverlapWindow);
 
     ImplTransferFocusToParent();
@@ -153,7 +153,7 @@ void Window::GrabFocusToDocument() { ImplGrabFocusToDocument(GetFocusFlags::NONE
 
 VclPtr<vcl::Window> Window::GetFocusedWindow() const
 {
-    if (mpWindowImpl && mpPlatformState->mpFrameData)
+    if (mpClassification && mpPlatformState->mpFrameData)
         return mpPlatformState->mpFrameData->mpFocusWin;
     else
         return VclPtr<vcl::Window>();
@@ -176,7 +176,7 @@ bool Window::HasChildPathFocus(bool bSystemWindow) const
  */
 void Window::CompatGetFocus()
 {
-    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
+    if (!mpClassification || mpClassification->mbInDispose)
         Window::GetFocus();
     else
         GetFocus();
@@ -184,7 +184,7 @@ void Window::CompatGetFocus()
 
 void Window::CompatLoseFocus()
 {
-    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
+    if (!mpClassification || mpClassification->mbInDispose)
         Window::LoseFocus();
     else
         LoseFocus();
@@ -285,7 +285,7 @@ void Window::ShowTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags)
 
     if (!mpInvalidation->mbInPaint || !(nFlags & ShowTrackFlags::TrackWindow))
     {
-        if (mpWindowImpl->mbTrackVisible)
+        if (mpClassification->mbTrackVisible)
         {
             if ((*pWinData->mpTrackRect == rRect) && (pWinData->mnTrackFlags == nFlags))
                 return;
@@ -298,12 +298,12 @@ void Window::ShowTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags)
 
     pWinData->mpTrackRect = rRect;
     pWinData->mnTrackFlags = nFlags;
-    mpWindowImpl->mbTrackVisible = true;
+    mpClassification->mbTrackVisible = true;
 }
 
 void Window::HideTracking()
 {
-    if (!mpWindowImpl->mbTrackVisible)
+    if (!mpClassification->mbTrackVisible)
         return;
 
     ImplWinData* pWinData = ImplGetWinData();
@@ -311,7 +311,7 @@ void Window::HideTracking()
     if (!mpInvalidation->mbInPaint || !(pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
         InvertTracking(*pWinData->mpTrackRect, pWinData->mnTrackFlags);
 
-    mpWindowImpl->mbTrackVisible = false;
+    mpClassification->mbTrackVisible = false;
 }
 
 constexpr tools::Long INCLUSIVE_OFFSET = 1;
@@ -414,7 +414,7 @@ void Window::InvertTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags
 
 IMPL_LINK(Window, ImplTrackTimerHdl, Timer*, pTimer, void)
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
     {
         SAL_WARN("vcl", "ImplTrackTimerHdl has outlived dispose");
         return;
@@ -452,7 +452,7 @@ void Window::SetUseFrameData(bool bUseFrameData)
 
 void Window::StartTracking(StartTrackingFlags nFlags)
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return;
 
     ImplSVData* pSVData = ImplGetSVData();
@@ -494,7 +494,7 @@ void Window::StartTracking(StartTrackingFlags nFlags)
 
 void Window::EndTracking(TrackingEventFlags nFlags)
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return;
 
     ImplSVData* pSVData = ImplGetSVData();
@@ -532,7 +532,7 @@ void Window::EndTracking(TrackingEventFlags nFlags)
     TrackingEvent aTEvt(aMEvt, nFlags | TrackingEventFlags::End);
 
     // CompatTracking effectively
-    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
+    if (!mpClassification || mpClassification->mbInDispose)
     {
         Window::Tracking(aTEvt);
         return;
@@ -543,7 +543,7 @@ void Window::EndTracking(TrackingEventFlags nFlags)
 
 bool Window::IsTracking() const
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return false;
 
     if (mpLOKData->mbUseFrameData && mpPlatformState->mpFrameData)
@@ -734,7 +734,7 @@ void vcl::Window::ImplClearFocus()
 
     // transfer the FocusWindow
     if (vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
-        pOverlapWindow && pOverlapWindow->ImplGetWindowImpl())
+        pOverlapWindow && pOverlapWindow->ImplGetWindowInput())
         pOverlapWindow->ImplGetWindowInput()->mpLastFocusWindow = this;
 
     pSVData->mpWinData->mpFocusWin = nullptr;
@@ -746,8 +746,8 @@ void vcl::Window::ImplClearFocus()
 static bool lcl_CanDeactivateWindow(const vcl::Window* pOverlapWindow,
                                     const vcl::Window* pRealWindow)
 {
-    return pOverlapWindow && pOverlapWindow->ImplGetWindowImpl() && pRealWindow
-           && pRealWindow->ImplGetWindowImpl();
+    return pOverlapWindow && pOverlapWindow->ImplGetWindowClassification() && pRealWindow
+           && pRealWindow->ImplGetWindowClassification();
 }
 
 void vcl::Window::ImplDeactivateFocus()
@@ -785,7 +785,7 @@ void vcl::Window::ImplNotifyLostFocus()
 
 IMPL_LINK_NOARG(vcl::Window, ImplAsyncFocusHdl, void*, void)
 {
-    if (!ImplGetWindowImpl() || !ImplGetPlatformState()->mpFrameData)
+    if (!ImplGetWindowClassification() || !ImplGetPlatformState()->mpFrameData)
         return;
 
     // If the status has been preserved, because we got back the focus

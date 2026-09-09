@@ -36,6 +36,7 @@
 #include <vcl/layout.hxx>
 #include <vcl/stdtext.hxx>
 #include <vcl/uitest/uiobject.hxx>
+#include <vcl/inputctx.hxx>
 
 #include <clipping_window.hxx>
 
@@ -45,8 +46,9 @@
 #include <bitmaps.hlst>
 #include <svdata.hxx>
 #include <WindowStyleState.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowFocusState.hxx>
+#include <salwtype.hxx>
 #include <vclstatuslistener.hxx>
 #include <osl/diagnose.h>
 
@@ -587,7 +589,7 @@ IMPL_STATIC_LINK( Button, dispatchCommandHandler, Button*, pButton, void )
 
 void PushButton::ImplInitPushButtonData()
 {
-    mpWindowImpl->mbPushButton    = true;
+    mpClassification->mbPushButton    = true;
 
     meSymbol        = SymbolType::DONTKNOW;
     meState         = TRISTATE_FALSE;

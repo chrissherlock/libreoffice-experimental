@@ -36,9 +36,10 @@
 
 #include <sal/types.h>
 
+#include <window.h>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowInput.hxx>
@@ -173,7 +174,7 @@ void Window::ImplCallMouseMove( sal_uInt16 nMouseCode, bool bModChanged )
 
 void Window::ImplGenerateMouseMove()
 {
-    if ( mpWindowImpl && mpPlatformState->mpFrameData &&
+    if ( mpClassification && mpPlatformState->mpFrameData &&
          !mpPlatformState->mpFrameData->mnMouseMoveId )
         mpPlatformState->mpFrameData->mnMouseMoveId = Application::PostUserEvent( LINK( mpHierarchy->mpFrameWindow, Window, ImplGenerateMouseMoveHdl ), nullptr, true );
 }
@@ -183,7 +184,7 @@ IMPL_LINK_NOARG(Window, ImplGenerateMouseMoveHdl, void*, void)
     mpPlatformState->mpFrameData->mnMouseMoveId = nullptr;
     vcl::Window* pCaptureWin = ImplGetSVData()->mpWinData->mpCaptureWin;
     if( ! pCaptureWin ||
-        (pCaptureWin->mpWindowImpl && pCaptureWin->mpPlatformState->mpFrame == mpPlatformState->mpFrame)
+        (pCaptureWin->mpClassification && pCaptureWin->mpPlatformState->mpFrame == mpPlatformState->mpFrame)
     )
     {
         ImplCallMouseMove( mpPlatformState->mpFrameData->mnMouseCode );
@@ -217,7 +218,7 @@ static bool lcl_IsWindowFocused(const vcl::Window& rWindow)
 void Window::ImplGrabFocus( GetFocusFlags nFlags )
 {
     // #143570# no focus for destructing windows
-    if( !mpWindowImpl || mpWindowImpl->mbInDispose )
+    if( !mpClassification || mpClassification->mbInDispose )
         return;
 
     // some event listeners do really bad stuff
@@ -245,7 +246,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
             mpHierarchy->mpClientWindow->GrabFocus();
         return;
     }
-    else if ( mpWindowImpl->mbFrame )
+    else if ( mpClassification->mbFrame )
     {
         // For a lack of design we need a little hack here to
         // ensure that dialogs on close pass the focus back to
@@ -274,7 +275,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
 
     bool bAsyncFocusWaiting = false;
     vcl::Window *pFrame = pSVData->maFrameData.mpFirstFrame;
-    while( pFrame && pFrame->mpWindowImpl && pFrame->mpPlatformState->mpFrameData )
+    while( pFrame && pFrame->mpClassification && pFrame->mpPlatformState->mpFrameData )
     {
         if( pFrame != mpHierarchy->mpFrameWindow.get() && pFrame->mpPlatformState->mpFrameData->mnFocusId )
         {
@@ -297,13 +298,13 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
             bMustNotGrabFocus = true;
             break;
         }
-        if (!pParent->mpWindowImpl)
+        if (!pParent->mpClassification)
             break;
         pParent = pParent->mpHierarchy->mpParent;
     }
 
     if ( !(( pSVData->mpWinData->mpFocusWin.get() != this &&
-             !mpWindowImpl->mbInDispose ) ||
+             !mpClassification->mbInDispose ) ||
            ( bAsyncFocusWaiting && !bHasFocus && !bMustNotGrabFocus )) )
         return;
 
@@ -314,7 +315,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
 
     // mark this windows as the last FocusWindow
     vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
-    if (pOverlapWindow->mpWindowImpl)
+    if (pOverlapWindow->mpClassification)
         pOverlapWindow->mpInput->mpLastFocusWindow = this;
     mpPlatformState->mpFrameData->mpFocusWin = this;
 
@@ -337,7 +338,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
 
     pSVData->mpWinData->mpFocusWin = this;
 
-    if ( pOldFocusWindow && pOldFocusWindow->mpWindowImpl )
+    if ( pOldFocusWindow && pOldFocusWindow->mpClassification )
     {
         // Cursor hidden
         if ( pOldFocusWindow->mpControlAppearance->mpCursor )
@@ -357,12 +358,12 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
     else
     {
         vcl::Window* pNewOverlapWindow = ImplGetFirstOverlapWindow();
-        if ( pNewOverlapWindow && pNewOverlapWindow->mpWindowImpl )
+        if ( pNewOverlapWindow && pNewOverlapWindow->mpClassification )
         {
             vcl::Window* pNewRealWindow = pNewOverlapWindow->ImplGetWindow();
             pNewOverlapWindow->mpFocusState->mbActive = true;
             pNewOverlapWindow->Activate();
-            if ( pNewRealWindow != pNewOverlapWindow  && pNewRealWindow && pNewRealWindow->mpWindowImpl )
+            if ( pNewRealWindow != pNewOverlapWindow  && pNewRealWindow && pNewRealWindow->mpClassification )
             {
                 pNewRealWindow->mpFocusState->mbActive = true;
                 pNewRealWindow->Activate();
@@ -454,14 +455,14 @@ void Window::MouseMove( const MouseEvent& rMEvt )
 void Window::MouseButtonDown( const MouseEvent& rMEvt )
 {
     NotifyEvent aNEvt( NotifyEventType::MOUSEBUTTONDOWN, this, &rMEvt );
-    if (!EventNotify(aNEvt) && mpWindowImpl)
+    if (!EventNotify(aNEvt) && mpClassification)
         mpInput->mbMouseButtonDown = true;
 }
 
 void Window::MouseButtonUp( const MouseEvent& rMEvt )
 {
     NotifyEvent aNEvt( NotifyEventType::MOUSEBUTTONUP, this, &rMEvt );
-    if (!EventNotify(aNEvt) && mpWindowImpl)
+    if (!EventNotify(aNEvt) && mpClassification)
         mpInput->mbMouseButtonUp = true;
 }
 
@@ -506,7 +507,7 @@ void Window::ReleaseMouse()
     {
         ImplSVData* pSVData = ImplGetSVData();
         pSVData->mpWinData->mpCaptureWin = nullptr;
-        if (mpWindowImpl && mpPlatformState->mpFrame)
+        if (mpClassification && mpPlatformState->mpFrame)
             mpPlatformState->mpFrame->CaptureMouse( false );
         ImplGenerateMouseMove();
     }
@@ -683,7 +684,7 @@ void Window::ImplStartDnd()
 
 rtl::Reference<DNDListenerContainer> Window::GetDropTarget()
 {
-    if( !mpWindowImpl )
+    if( !mpClassification )
         return {};
 
     if( ! mpLOKData->mxDNDListenerContainer.is() )

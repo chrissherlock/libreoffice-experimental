@@ -68,7 +68,7 @@
 #include <OptionalBox.hxx>
 #include <PriorityMergedHBox.hxx>
 #include <PriorityHBox.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowInput.hxx>
 #include <xmlreader/xmlreader.hxx>
 #include <desktop/crashreport.hxx>

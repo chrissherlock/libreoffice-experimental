@@ -32,9 +32,10 @@
 #include <vcl/settings.hxx>
 #include <comphelper/lok.hxx>
 
+#include <window.h>
 #include <accel.hxx>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowLOKData.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowLayoutData.hxx>
@@ -288,7 +289,7 @@ void DockingWindow::ImplStartDocking( const Point& rPos )
 
 void DockingWindow::ImplInitDockingWindowData()
 {
-    mpWindowImpl->mbDockWin = true;
+    mpClassification->mbDockWin = true;
     mpFloatWin     = nullptr;
     mpOldBorderWin = nullptr;
     mpImplData.reset(new ImplData);
@@ -555,8 +556,8 @@ bool DockingWindow::EventNotify( NotifyEvent& rNEvt )
                 {
                     // check if window is floating standalone (IsFloating())
                     // or only partially floating and still docked with one border
-                    // ( !mpWindowImpl->mbFrame)
-                    if( ! IsFloatingMode() || ! mpFloatWin->mpWindowImpl->mbFrame )
+                    // ( !mpClassification->mbFrame)
+                    if( ! IsFloatingMode() || ! mpFloatWin->mpClassification->mbFrame )
                     {
                         Point   aPos = pMEvt->GetPosPixel();
                         vcl::Window* pWindow = rNEvt.GetWindow();
@@ -722,7 +723,7 @@ void DockingWindow::SetFloatingMode( bool bFloatMode )
     if ( bFloatMode )
     {
         // set deferred properties early, so border width will end up
-        // in our mpWindowImpl->mnBorderWidth, not in mpBorderWindow.
+        // in our mpClassification->mnBorderWidth, not in mpBorderWindow.
         // (see its usage in setPosSizeOnContainee and GetOptimalSize.)
         setDeferredProperties();
 

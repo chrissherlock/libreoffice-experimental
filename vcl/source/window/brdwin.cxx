@@ -31,7 +31,7 @@
 #include <vcl/toolbox.hxx>
 #include <vcl/ptrstyle.hxx>
 
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowGeometry.hxx>
 #include <strings.hrc>
 #include <svdata.hxx>
@@ -1530,12 +1530,12 @@ void ImplBorderWindow::ImplInit( vcl::Window* pParent,
         nTestStyle |= WB_APP;
     nStyle &= nTestStyle;
 
-    mpWindowImpl->mbBorderWin       = true;
+    mpClassification->mbBorderWin       = true;
     mbSmallOutBorder    = false;
     if ( nTypeStyle & BorderWindowStyle::Frame )
     {
-        mpWindowImpl->mbOverlapWin = true;
-        mpWindowImpl->mbFrame = true;
+        mpClassification->mbOverlapWin = true;
+        mpClassification->mbFrame = true;
 
         if( nStyle & WB_SYSTEMCHILDWINDOW )
         {
@@ -1555,7 +1555,7 @@ void ImplBorderWindow::ImplInit( vcl::Window* pParent,
     }
     else if ( nTypeStyle & BorderWindowStyle::Overlap )
     {
-        mpWindowImpl->mbOverlapWin  = true;
+        mpClassification->mbOverlapWin  = true;
         mbFrameBorder   = true;
     }
     else
@@ -1766,7 +1766,7 @@ void ImplBorderWindow::DataChanged( const DataChangedEvent& rDCEvt )
          ((rDCEvt.GetType() == DataChangedEventType::SETTINGS) &&
           (rDCEvt.GetFlags() & AllSettingsFlags::STYLE)) )
     {
-        if ( !mpWindowImpl->mbFrame || (GetStyle() & (WB_OWNERDRAWDECORATION | WB_POPUP)) )
+        if ( !mpClassification->mbFrame || (GetStyle() & (WB_OWNERDRAWDECORATION | WB_POPUP)) )
             UpdateView( true, ImplGetWindow()->GetOutputSizePixel() );
     }
 
@@ -1777,7 +1777,7 @@ void ImplBorderWindow::InitView()
 {
     if ( mbSmallOutBorder )
         mpBorderView.reset(new ImplSmallBorderWindowView( this ));
-    else if ( mpWindowImpl->mbFrame )
+    else if ( mpClassification->mbFrame )
     {
         if( mbFrameBorder )
             mpBorderView.reset(new ImplStdBorderWindowView( this ));

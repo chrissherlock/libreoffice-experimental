@@ -29,7 +29,6 @@
 #include <svdata.hxx>
 #include <salframe.hxx>
 #include <brdwin.hxx>
-#include <WindowImpl.hxx>
 #include <WindowGeometry.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowPlatformState.hxx>
@@ -56,8 +55,6 @@ void WorkWindow::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentDat
     pBorderWin->mpHierarchy->mpClientWindow = this;
     pBorderWin->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
     mpHierarchy->mpBorderWindow = pBorderWin;
-
-    // mpWindowImpl->mpRealParent    = pParent; // should actually be set, but is not set due to errors with the menubar!!
 
     if ( nStyle & WB_APP )
     {

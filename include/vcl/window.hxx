@@ -392,7 +392,7 @@ class WindowOutputDevice;
 }
 class Dialog;
 class Edit;
-class WindowImpl;
+class WindowClassification;
 struct WindowPlatformState;
 struct WindowStyleState;
 struct WindowVisibilityState;
@@ -516,7 +516,7 @@ public:
     SAL_DLLPRIVATE bool ImplIsSplitter() const;
     SAL_DLLPRIVATE bool ImplIsOverlapWindow() const;
     SAL_DLLPRIVATE void ImplIsInTaskPaneList(bool mbIsInTaskList);
-    SAL_DLLPRIVATE WindowImpl* ImplGetWindowImpl() const { return mpWindowImpl.get(); }
+    SAL_DLLPRIVATE WindowClassification* ImplGetWindowClassification() const { return mpClassification.get(); }
     SAL_DLLPRIVATE WindowLOKData* ImplGetWindowLOKData() const { return mpLOKData.get(); }
     SAL_DLLPRIVATE WindowClippingState* ImplGetClippingState() const { return mpClippingState.get(); }
     SAL_DLLPRIVATE WindowInvalidation* ImplGetWindowInvalidation() const { return mpInvalidation.get(); }
@@ -1086,7 +1086,7 @@ private:
 
     // --- Data Members ---
     OUString maText;
-    std::unique_ptr<WindowImpl> mpWindowImpl;
+    std::unique_ptr<WindowClassification> mpClassification;
     std::unique_ptr<WindowInput> mpInput;
     std::unique_ptr<WindowHierarchy> mpHierarchy;
     std::unique_ptr<ImplWinData> mpWinData;
@@ -1137,7 +1137,7 @@ private:
     SAL_DLLPRIVATE void ImplResetGlobalWindowPointers();
     SAL_DLLPRIVATE void ImplResetFrameDataPointers();
     SAL_DLLPRIVATE void ImplDeregisterTopWindowChild();
-    SAL_DLLPRIVATE WindowImpl* ImplGetEffectiveWindowImpl() const;
+    SAL_DLLPRIVATE WindowClassification* ImplGetEffectiveWindowClassification() const;
     SAL_DLLPRIVATE WindowLayoutData* ImplGetEffectiveWindowLayoutData() const;
     SAL_DLLPRIVATE bool ImplRequiresParentLayoutUpdate(const vcl::Window* pParent) const;
     SAL_DLLPRIVATE void ImplQueueResizeOnGroup() const;

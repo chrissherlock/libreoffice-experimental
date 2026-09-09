@@ -45,12 +45,13 @@
 #include <rtl/ustrbuf.hxx>
 #include <o3tl/string_view.hxx>
 
+#include <window.h>
 #include <ImplFrameData.hxx>
 #include <accel.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
 #include <brdwin.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowFocusState.hxx>
@@ -92,7 +93,7 @@ SystemWindow::SystemWindow(WindowType eType, const char* pIdleDebugName, bool tr
     , mpImplData(new ImplData)
     , maLayoutIdle( pIdleDebugName, *this, transferableIdle )
 {
-    mpWindowImpl->mbSysWin            = true;
+    mpClassification->mbSysWin            = true;
     mpFocusState->mnActivateMode      = ActivateModeFlags::GrabFocus;
 
     //To-Do, reuse maResizeTimer
@@ -120,7 +121,7 @@ void SystemWindow::dispose()
 
     // Hack to make sure code called from base ~Window does not interpret this
     // as a SystemWindow (which it no longer is by then):
-    mpWindowImpl->mbSysWin = false;
+    mpClassification->mbSysWin = false;
     disposeBuilder();
     mpDialogParent.reset();
     mpMenuBar.reset();
@@ -324,7 +325,7 @@ void SystemWindow::SetRepresentedURL( const OUString& i_rURL )
         while ( pWindow->mpHierarchy->mpBorderWindow )
             pWindow = pWindow->mpHierarchy->mpBorderWindow;
 
-        if ( pWindow->mpWindowImpl->mbFrame )
+        if ( pWindow->mpClassification->mbFrame )
             pWindow->mpPlatformState->mpFrame->SetRepresentedURL( i_rURL );
     }
 }
@@ -342,7 +343,7 @@ void SystemWindow::SetIcon( sal_uInt16 nIcon )
         while ( pWindow->mpHierarchy->mpBorderWindow )
             pWindow = pWindow->mpHierarchy->mpBorderWindow;
 
-        if ( pWindow->mpWindowImpl->mbFrame )
+        if ( pWindow->mpClassification->mbFrame )
             pWindow->mpPlatformState->mpFrame->SetIcon( nIcon );
     }
 }
@@ -390,10 +391,10 @@ void SystemWindow::SetMinOutputSizePixel( const Size& rSize )
     if ( mpHierarchy->mpBorderWindow )
     {
         static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMinOutputSize( rSize.Width(), rSize.Height() );
-        if ( mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame )
+        if ( mpHierarchy->mpBorderWindow->mpClassification->mbFrame )
             mpHierarchy->mpBorderWindow->mpPlatformState->mpFrame->SetMinClientSize( rSize.Width(), rSize.Height() );
     }
-    else if ( mpWindowImpl->mbFrame )
+    else if ( mpClassification->mbFrame )
         mpPlatformState->mpFrame->SetMinClientSize( rSize.Width(), rSize.Height() );
 }
 
@@ -409,10 +410,10 @@ void SystemWindow::SetMaxOutputSizePixel( const Size& rSize )
     if ( mpHierarchy->mpBorderWindow )
     {
         static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMaxOutputSize( aSize.Width(), aSize.Height() );
-        if ( mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame )
+        if ( mpHierarchy->mpBorderWindow->mpClassification->mbFrame )
             mpHierarchy->mpBorderWindow->mpPlatformState->mpFrame->SetMaxClientSize( aSize.Width(), aSize.Height() );
     }
-    else if ( mpWindowImpl->mbFrame )
+    else if ( mpClassification->mbFrame )
         mpPlatformState->mpFrame->SetMaxClientSize( aSize.Width(), aSize.Height() );
 }
 
@@ -648,7 +649,7 @@ void SystemWindow::SetWindowState(const vcl::WindowData& rData)
     while ( pWindow->mpHierarchy->mpBorderWindow )
         pWindow = pWindow->mpHierarchy->mpBorderWindow;
 
-    if ( pWindow->mpWindowImpl->mbFrame )
+    if ( pWindow->mpClassification->mbFrame )
     {
         const vcl::WindowState nState = rData.state();
         vcl::WindowData aState = rData;
@@ -791,7 +792,7 @@ vcl::WindowData SystemWindow::GetWindowState(vcl::WindowDataMask nMask) const
     while ( pWindow->mpHierarchy->mpBorderWindow )
         pWindow = pWindow->mpHierarchy->mpBorderWindow;
 
-    if ( pWindow->mpWindowImpl->mbFrame )
+    if ( pWindow->mpClassification->mbFrame )
     {
         vcl::WindowData aState = mpPlatformState->mpFrame->GetWindowState();
         // Limit mask only to what we've received, the rest is not set.

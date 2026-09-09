@@ -44,7 +44,7 @@
 #include <salinst.hxx>
 #include <svdata.hxx>
 #include <strings.hrc>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include <salmenu.hxx>
 #include <salframe.hxx>

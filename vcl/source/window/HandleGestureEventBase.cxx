@@ -21,7 +21,6 @@
 
 #include <WindowPlatformState.hxx>
 #include <ImplFrameData.hxx>
-#include <WindowImpl.hxx>
 #include <helpwin.hxx>
 
 #include "HandleGestureEventBase.hxx"

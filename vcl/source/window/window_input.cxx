@@ -24,9 +24,10 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/window.hxx>
 
+#include <window.h>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowInput.hxx>
 #include <WindowPlatformState.hxx>
 #include <impfontcache.hxx>
@@ -124,7 +125,7 @@ void Window::ImplNewInputContext()
     ImplSVData* pSVData = ImplGetSVData();
     vcl::Window* pFocusWin = pSVData->mpWinData->mpFocusWin;
 
-    if (!pFocusWin || !pFocusWin->mpWindowImpl || pFocusWin->isDisposed())
+    if (!pFocusWin || !pFocusWin->mpClassification || pFocusWin->isDisposed())
         return;
 
     // Is InputContext changed?

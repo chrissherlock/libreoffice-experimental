@@ -30,7 +30,7 @@
 #include <svdata.hxx>
 #include <helpwin.hxx>
 #include <ImplFrameData.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowStyleState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowFocusState.hxx>
@@ -224,7 +224,7 @@ void Window::StateChanged(StateChangedType eType)
 
 void Window::CompatStateChanged(StateChangedType nStateChange)
 {
-    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
+    if (!mpClassification || mpClassification->mbInDispose)
         Window::StateChanged(nStateChange);
     else
         StateChanged(nStateChange);
@@ -232,7 +232,7 @@ void Window::CompatStateChanged(StateChangedType nStateChange)
 
 void Window::CompatDataChanged(const DataChangedEvent& rDCEvt)
 {
-    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
+    if (!mpClassification || mpClassification->mbInDispose)
         Window::DataChanged(rDCEvt);
     else
         DataChanged(rDCEvt);
@@ -240,7 +240,7 @@ void Window::CompatDataChanged(const DataChangedEvent& rDCEvt)
 
 bool Window::CompatPreNotify(NotifyEvent& rNEvt)
 {
-    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
+    if (!mpClassification || mpClassification->mbInDispose)
         return Window::PreNotify(rNEvt);
     else
         return PreNotify(rNEvt);
@@ -248,7 +248,7 @@ bool Window::CompatPreNotify(NotifyEvent& rNEvt)
 
 bool Window::CompatNotify(NotifyEvent& rNEvt)
 {
-    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
+    if (!mpClassification || mpClassification->mbInDispose)
         return Window::EventNotify(rNEvt);
     else
         return EventNotify(rNEvt);
@@ -874,7 +874,8 @@ SalFrame* Window::ImplFindParentFrame() const
     vcl::Window* pParent = ImplGetParent();
     while (pParent)
     {
-        if (pParent->mpWindowImpl && pParent->mpPlatformState->mpFrame != mpPlatformState->mpFrame)
+        if (pParent->mpClassification
+            && pParent->mpPlatformState->mpFrame != mpPlatformState->mpFrame)
             return pParent->mpPlatformState->mpFrame;
 
         pParent = pParent->GetParent();
@@ -910,7 +911,7 @@ void Window::ImplUpdateClientWindowPos()
 
 void Window::ImplUpdateFramePosition()
 {
-    if (!mpWindowImpl->mbFrame)
+    if (!mpClassification->mbFrame)
         return;
 
     ImplUpdateFramePos(ImplFindParentFrame());
@@ -1326,12 +1327,12 @@ void Window::ImplCallDeactivateListeners(vcl::Window* pNew)
 
     VclPtr<vcl::Window> xWindow(this);
     CallEventListeners(VclEventId::WindowDeactivate, pNew);
-    if (!xWindow->mpWindowImpl)
+    if (!xWindow->mpClassification)
         return;
 
     // #100759#, avoid walking the wrong frame's hierarchy
     //           eg, undocked docking windows (ImplDockFloatWin)
-    if (ImplGetParent() && ImplGetParent()->mpWindowImpl
+    if (ImplGetParent() && ImplGetParent()->mpClassification
         && mpHierarchy->mpFrameWindow == ImplGetParent()->mpHierarchy->mpFrameWindow)
         ImplGetParent()->ImplCallDeactivateListeners(pNew);
 }
@@ -1344,7 +1345,7 @@ void Window::ImplCallActivateListeners(vcl::Window* pOld)
 
     VclPtr<vcl::Window> xWindow(this);
     CallEventListeners(VclEventId::WindowActivate, pOld);
-    if (!xWindow->mpWindowImpl)
+    if (!xWindow->mpClassification)
         return;
 
     if (ImplGetParent())

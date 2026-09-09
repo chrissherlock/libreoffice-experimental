@@ -21,7 +21,7 @@
 
 #include <vcl/window.hxx>
 
-#include <WindowImpl.hxx>
+#include <WindowHelpData.hxx>
 
 namespace vcl
 {

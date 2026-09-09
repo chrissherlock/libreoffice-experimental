@@ -34,7 +34,7 @@
 
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowClippingState.hxx>
@@ -162,7 +162,7 @@ void Window::ImplCallPaint(const vcl::Region* pRegion, ImplPaintFlags nPaintFlag
 
 void Window::ImplCallOverlapPaint()
 {
-    if (!mpWindowImpl)
+    if (!mpClassification)
         return;
 
     // emit overlapping windows first
@@ -195,7 +195,7 @@ IMPL_LINK_NOARG(Window, ImplHandlePaintHdl, Timer *, void)
     }
 
     // save paint events until resizing or initial sizing done
-    if (mpWindowImpl->mbFrame &&
+    if (mpClassification->mbFrame &&
         mpPlatformState->mpFrameData->maResizeIdle.IsActive())
     {
         mpPlatformState->mpFrameData->maPaintIdle.Start();
@@ -308,7 +308,7 @@ void Window::ImplInvalidateOverlapFrameRegion( const vcl::Region& rRegion )
 
 void Window::ImplInvalidateParentFrameRegion( const vcl::Region& rRegion )
 {
-    if ( mpWindowImpl->mbOverlapWin )
+    if ( mpClassification->mbOverlapWin )
         mpHierarchy->mpFrameWindow->ImplInvalidateOverlapFrameRegion( rRegion );
     else
     {
@@ -549,7 +549,7 @@ void Window::ImplUpdateAll()
         Point aPoint( 0, 0 );
         vcl::Region aRegion( tools::Rectangle( aPoint, GetOutputSizePixel() ) );
         ImplInvalidateOverlapFrameRegion( aRegion );
-        if ( mpWindowImpl->mbFrame || (mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame) )
+        if ( mpClassification->mbFrame || (mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpClassification->mbFrame) )
             bFlush = true;
     }
 
@@ -586,7 +586,7 @@ void Window::Paint(vcl::RenderContext& rRenderContext, const tools::Rectangle& r
 void Window::SetPaintTransparent( bool bTransparent )
 {
     // transparency is not useful for frames as the background would have to be provided by a different frame
-    if( bTransparent && mpWindowImpl->mbFrame )
+    if( bTransparent && mpClassification->mbFrame )
         return;
 
     if ( mpHierarchy->mpBorderWindow )
@@ -601,7 +601,7 @@ void Window::SetWindowRegionPixel()
     {
         mpHierarchy->mpBorderWindow->SetWindowRegionPixel();
     }
-    else if( mpWindowImpl->mbFrame )
+    else if( mpClassification->mbFrame )
     {
         mpClippingState->maWinRegion = vcl::Region(true);
         mpClippingState->mbWinRegion = false;
@@ -629,7 +629,7 @@ void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
 
     if ( mpHierarchy->mpBorderWindow )
         mpHierarchy->mpBorderWindow->SetWindowRegionPixel( rRegion );
-    else if( mpWindowImpl->mbFrame )
+    else if( mpClassification->mbFrame )
     {
         if( !rRegion.IsNull() )
         {
@@ -704,9 +704,9 @@ void Window::Invalidate( InvalidateFlags nFlags )
     if ( !comphelper::LibreOfficeKit::isActive() && (!GetOutDev()->IsDeviceOutputNecessary() || !GetOutDev()->GetOutputWidthPixel() || !GetOutDev()->GetOutputHeightPixel()) )
         return;
 
-    if (!mpWindowImpl)
+    if (!mpClassification)
     {
-        // ImplInvalidate() would dereference mpWindowImpl unconditionally.
+        // ImplInvalidate() would dereference mpClassification unconditionally.
         return;
     }
 
@@ -864,7 +864,7 @@ void Window::PaintImmediately()
         Point aPoint( 0, 0 );
         vcl::Region aRegion( tools::Rectangle( aPoint, GetOutputSizePixel() ) );
         ImplInvalidateOverlapFrameRegion( aRegion );
-        if ( mpWindowImpl->mbFrame || (mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpWindowImpl->mbFrame) )
+        if ( mpClassification->mbFrame || (mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpClassification->mbFrame) )
             bFlush = true;
     }
 
@@ -901,7 +901,7 @@ void Window::PaintImmediately()
         // trigger an update also for system windows on top of us,
         // otherwise holes would remain
         vcl::Window* pUpdateOverlapWindow = ImplGetFirstOverlapWindow();
-        if (pUpdateOverlapWindow->mpWindowImpl)
+        if (pUpdateOverlapWindow->mpClassification)
             pUpdateOverlapWindow = pUpdateOverlapWindow->mpHierarchy->mpFirstOverlap;
         else
             pUpdateOverlapWindow = nullptr;
@@ -1146,7 +1146,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 
 void Window::PaintToDevice(OutputDevice& rDev, const Point& rPos)
 {
-    if( !mpWindowImpl )
+    if( !mpClassification )
         return;
 
     SAL_WARN_IF(rDev.HasMirroredGraphics(), "vcl.window", "PaintToDevice to mirroring graphics");
@@ -1328,7 +1328,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         {
             if ( mpFocusState->mbFocusVisible )
                 ImplInvertFocus( *mpWinData->mpFocusRect );
-            if ( mpWindowImpl->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
+            if ( mpClassification->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
                 InvertTracking( *mpWinData->mpTrackRect, mpWinData->mnTrackFlags );
         }
 #ifndef IOS
@@ -1363,7 +1363,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         {
             if ( mpFocusState->mbFocusVisible )
                 ImplInvertFocus( *mpWinData->mpFocusRect );
-            if ( mpWindowImpl->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
+            if ( mpClassification->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
                 InvertTracking( *mpWinData->mpTrackRect, mpWinData->mnTrackFlags );
         }
     }

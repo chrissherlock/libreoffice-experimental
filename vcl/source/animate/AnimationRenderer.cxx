@@ -26,7 +26,6 @@
 
 #include <window.h>
 #include <PaintBufferGuard.hxx>
-#include <WindowImpl.hxx>
 #include <WindowPlatformState.hxx>
 
 #include <memory>

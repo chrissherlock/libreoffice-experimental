@@ -31,7 +31,7 @@
 #include <vcl/vclevent.hxx>
 
 #include <window.h>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowStyleState.hxx>
 #include <salframe.hxx>

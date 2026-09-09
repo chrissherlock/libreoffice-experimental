@@ -31,7 +31,6 @@
 
 #include <listbox.hxx>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
 #include <WindowFocusState.hxx>
 
 #include <com/sun/star/accessibility/AccessibleRole.hpp>

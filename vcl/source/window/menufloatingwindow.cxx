@@ -29,7 +29,7 @@
 #include <vcl/decoview.hxx>
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/settings.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 
 MenuFloatingWindow::MenuFloatingWindow(PopupMenu* pMen, vcl::Window* pParent, WinBits nStyle ) :
     FloatingWindow( pParent, nStyle ),
@@ -49,7 +49,7 @@ MenuFloatingWindow::MenuFloatingWindow(PopupMenu* pMen, vcl::Window* pParent, Wi
     bIgnoreFirstMove(true),
     bKeyInput(false)
 {
-    mpWindowImpl->mbMenuFloatingWindow= true;
+    mpClassification->mbMenuFloatingWindow= true;
 
     ApplySettings(*GetOutDev());
 

@@ -17,37 +17,27 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/dockwin.hxx>
-#include <vcl/vclptr.hxx>
-#include <vcl/window.hxx>
+#pragma once
 
-#include <WindowPlatformState.hxx>
-#include <ImplFrameData.hxx>
-#include <WindowClassification.hxx>
-#include <svdata.hxx>
+#include <vcl/wintypes.hxx>
 
-#include <vector>
-
-namespace vcl
+class WindowClassification
 {
-DockingManager* Window::GetDockingManager() { return ImplGetDockingManager(); }
+private:
+    WindowClassification(const WindowClassification&) = delete;
+    WindowClassification& operator=(const WindowClassification&) = delete;
 
-void Window::EnableDocking(bool bEnable)
-{
-    // update list of dockable windows
-    if (bEnable)
-        ImplGetDockingManager()->AddWindow(this);
-    else
-        ImplGetDockingManager()->RemoveWindow(this);
-}
+public:
+    WindowClassification(WindowType);
+    ~WindowClassification();
 
-// retrieves the list of owner draw decorated windows for this window hierarchy
-::std::vector<VclPtr<vcl::Window>>& Window::ImplGetOwnerDrawList()
-{
-    return ImplGetTopmostFrameWindow()->mpPlatformState->mpFrameData->maOwnerDrawList;
-}
-
-bool Window::IsDockingWindow() const { return mpClassification && mpClassification->mbDockWin; }
-} // end vcl namespace
+    WindowType meType;
+    bool mbFrame : 1 = false, mbBorderWin : 1 = false, mbOverlapWin : 1 = false,
+                   mbSysWin : 1 = false, mbDialog : 1 = false, mbDockWin : 1 = false,
+                   mbFloatWin : 1 = false, mbPushButton : 1 = false, mbTrackVisible : 1 = false,
+                   mbAlwaysOnTop : 1 = false, mbInDispose : 1 = false,
+                   mbCreatedWithToolkit : 1 = false, mbToolBox : 1 = false, mbSplitter : 1 = false,
+                   mbMenuFloatingWindow : 1 = false, mbIsFormControl : 1 = false;
+};
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

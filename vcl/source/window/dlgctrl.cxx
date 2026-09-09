@@ -30,8 +30,9 @@
 #include <vcl/toolbox.hxx>
 #include <vcl/settings.hxx>
 
+#include <window.h>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowInput.hxx>
 #include <WindowEventHandlers.hxx>
@@ -538,7 +539,7 @@ void Window::ImplControlFocus( GetFocusFlags nFlags )
             {
                 if ( GetType() == WindowType::CHECKBOX )
                     static_cast<CheckBox*>(this)->ImplCheck();
-                else if ( mpWindowImpl->mbPushButton )
+                else if ( mpClassification->mbPushButton )
                 {
                     static_cast<PushButton*>(this)->SetPressed( true );
                     static_cast<PushButton*>(this)->SetPressed( false );
@@ -669,7 +670,7 @@ bool Window::ImplDlgCtrl( const KeyEvent& rKEvt, bool bKeyInput )
         while ( pButtonWindow )
         {
             if ( (pButtonWindow->GetStyle() & WB_DEFBUTTON) &&
-                 pButtonWindow->mpWindowImpl->mbPushButton )
+                 pButtonWindow->mpClassification->mbPushButton )
                 break;
 
             pButtonWindow = ImplGetNextWindow( this, iButton, iButton, true );
@@ -697,7 +698,7 @@ bool Window::ImplDlgCtrl( const KeyEvent& rKEvt, bool bKeyInput )
             pTempWindow = ImplGetDlgWindow( i, nType, nFormStart, nFormEnd, &nNewIndex );
             while ( pTempWindow && (pTempWindow != pSWindow) )
             {
-                if ( !pTempWindow->mpWindowImpl->mbPushButton )
+                if ( !pTempWindow->mpClassification->mbPushButton )
                 {
                     // get Around-Flag
                     if ( nType == GetDlgWindowType::Prev )

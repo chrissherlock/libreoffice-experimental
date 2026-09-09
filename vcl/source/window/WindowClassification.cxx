@@ -1,4 +1,4 @@
-/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4; fill-column: 100 -*- */
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
 /*
  * This file is part of the LibreOffice project.
  *
@@ -17,37 +17,13 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/dockwin.hxx>
-#include <vcl/vclptr.hxx>
-#include <vcl/window.hxx>
-
-#include <WindowPlatformState.hxx>
-#include <ImplFrameData.hxx>
 #include <WindowClassification.hxx>
-#include <svdata.hxx>
 
-#include <vector>
-
-namespace vcl
+WindowClassification::WindowClassification(WindowType eType)
+    : meType(eType)
 {
-DockingManager* Window::GetDockingManager() { return ImplGetDockingManager(); }
-
-void Window::EnableDocking(bool bEnable)
-{
-    // update list of dockable windows
-    if (bEnable)
-        ImplGetDockingManager()->AddWindow(this);
-    else
-        ImplGetDockingManager()->RemoveWindow(this);
 }
 
-// retrieves the list of owner draw decorated windows for this window hierarchy
-::std::vector<VclPtr<vcl::Window>>& Window::ImplGetOwnerDrawList()
-{
-    return ImplGetTopmostFrameWindow()->mpPlatformState->mpFrameData->maOwnerDrawList;
-}
-
-bool Window::IsDockingWindow() const { return mpClassification && mpClassification->mbDockWin; }
-} // end vcl namespace
+WindowClassification::~WindowClassification() {}
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

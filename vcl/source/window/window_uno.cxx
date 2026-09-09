@@ -22,7 +22,7 @@
 #include <vcl/window.hxx>
 
 #include <ImplFrameData.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowAccessibleData.hxx>
 
@@ -35,7 +35,7 @@ namespace vcl
 void Window::SetWindowPeer(css::uno::Reference<css::awt::XVclWindowPeer> const& xPeer,
                            VCLXWindow* pVCLXWindow)
 {
-    if (!mpWindowImpl || mpWindowImpl->mbInDispose)
+    if (!mpClassification || mpClassification->mbInDispose)
         return;
 
     if (!mpAccessibleData)

@@ -23,9 +23,10 @@
 #include <vcl/window.hxx>
 #include <vcl/wintypes.hxx>
 
+#include <window.h>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowInput.hxx>
 #include <WindowGeometry.hxx>
@@ -94,7 +95,7 @@ bool Window::HasActiveChildFrame() const
 
 bool Window::ImplShouldInherit3DLook(const vcl::Window* pParent) const
 {
-    return !mpWindowImpl->mbOverlapWin && pParent && (pParent->GetStyle() & WB_3DLOOK);
+    return !mpClassification->mbOverlapWin && pParent && (pParent->GetStyle() & WB_3DLOOK);
 }
 
 WinBits Window::ImplApplyBorderAnd3DStyle(WinBits nStyle, const vcl::Window* pParent) const
@@ -110,14 +111,14 @@ WinBits Window::ImplApplyBorderAnd3DStyle(WinBits nStyle, const vcl::Window* pPa
 
 bool Window::ImplNeedsSystemChildBorder(WinBits nStyle) const
 {
-    return !mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpHierarchy->mpBorderWindow
-           && (nStyle & WB_SYSTEMCHILDWINDOW);
+    return !mpClassification->mbFrame && !mpClassification->mbBorderWin
+           && !mpHierarchy->mpBorderWindow && (nStyle & WB_SYSTEMCHILDWINDOW);
 }
 
 bool Window::ImplNeedsBorderWindow(WinBits nStyle) const
 {
-    return !mpWindowImpl->mbFrame && !mpWindowImpl->mbBorderWin && !mpHierarchy->mpBorderWindow
-           && (nStyle & WB_BORDER);
+    return !mpClassification->mbFrame && !mpClassification->mbBorderWin
+           && !mpHierarchy->mpBorderWindow && (nStyle & WB_BORDER);
 }
 
 BorderWindowStyle Window::ImplGetBorderWindowStyle(WinBits nStyle) const
@@ -152,10 +153,10 @@ vcl::Window* Window::ImplInitBorderWindow(vcl::Window* pParent, WinBits nStyle,
         return ImplCreateBorderWindow(pParent, nStyle, nBorderTypeStyle);
 
     // fallback for frameless windows with no parent
-    if (!mpWindowImpl->mbFrame && !pParent)
+    if (!mpClassification->mbFrame && !pParent)
     {
-        mpWindowImpl->mbOverlapWin = true;
-        mpWindowImpl->mbFrame = true;
+        mpClassification->mbOverlapWin = true;
+        mpClassification->mbFrame = true;
     }
 
     return pParent;
@@ -167,7 +168,7 @@ bool Window::ImplIsUndecoratedFloatingWindow(WinBits nStyle, SalFrameStyleFlags 
                                    && static_cast<const ImplBorderWindow*>(this)->mbFloatWindow;
 
     const bool bIsFloatWin
-        = mpWindowImpl->mbFloatWin || bIsBorderFloatWin || (nStyle & WB_SYSTEMFLOATWIN);
+        = mpClassification->mbFloatWin || bIsBorderFloatWin || (nStyle & WB_SYSTEMFLOATWIN);
 
     const bool bIsUndecoratedFloatWin
         = !(nFrameStyle & ~SalFrameStyleFlags::CLOSEABLE) && bIsFloatWin;
@@ -187,7 +188,7 @@ SalFrameStyleFlags Window::ImplApplyFloatWindowStyle(WinBits nStyle,
         if (nStyle & WB_OWNERDRAWDECORATION)
             nFrameStyle |= SalFrameStyleFlags::OWNERDRAWDECORATION | SalFrameStyleFlags::NOSHADOW;
     }
-    else if (mpWindowImpl->mbFloatWin)
+    else if (mpClassification->mbFloatWin)
     {
         nFrameStyle |= SalFrameStyleFlags::TOOLWINDOW;
     }
@@ -236,7 +237,7 @@ SalFrameStyleFlags Window::ImplGetExtendedFrameStyle(WinBits nStyle) const
 
 SalFrameStyleFlags Window::ImplGetDialogFrameStyle() const
 {
-    switch (mpWindowImpl->meType)
+    switch (mpClassification->meType)
     {
         case WindowType::DIALOG:
         case WindowType::TABDIALOG:
@@ -358,7 +359,7 @@ void Window::ImplInitFromParentState(vcl::Window* pParent)
 
 void Window::ImplInitResolution(vcl::Window* pParent, WinBits nStyle)
 {
-    if (mpWindowImpl->mbFrame)
+    if (mpClassification->mbFrame)
         ImplInitFrameResolution(pParent, nStyle);
     else
         ImplInitFromParentState(pParent);
@@ -371,7 +372,7 @@ static bool lcl_ShouldInitAppSettings(const ImplSVData* pSVData, WinBits nStyle)
 
 void Window::ImplInitSettings(WinBits nStyle)
 {
-    if (!mpWindowImpl->mbFrame)
+    if (!mpClassification->mbFrame)
         return;
 
     // add ownerdraw decorated frame windows to list in the top-most frame window
@@ -489,7 +490,7 @@ void Window::FlashWindow() const
 {
     vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
 
-    if (pMyParent && pMyParent->mpWindowImpl)
+    if (pMyParent && pMyParent->mpClassification)
         pMyParent->mpPlatformState->mpFrame->FlashWindow();
 }
 
@@ -497,7 +498,7 @@ void Window::SetTaskBarProgress(int nCurrentProgress)
 {
     vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
 
-    if (pMyParent && pMyParent->mpWindowImpl)
+    if (pMyParent && pMyParent->mpClassification)
         pMyParent->mpPlatformState->mpFrame->SetTaskBarProgress(nCurrentProgress);
 }
 
@@ -505,7 +506,7 @@ void Window::SetTaskBarState(VclTaskBarStates eTaskBarState)
 {
     vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
 
-    if (pMyParent && pMyParent->mpWindowImpl)
+    if (pMyParent && pMyParent->mpClassification)
         pMyParent->mpPlatformState->mpFrame->SetTaskBarState(eTaskBarState);
 }
 

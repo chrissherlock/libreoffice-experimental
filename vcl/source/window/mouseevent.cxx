@@ -51,6 +51,7 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/MappingPolicy.hxx>
 
+#include <window.h>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
 #include <clipping_window.hxx>
@@ -59,7 +60,6 @@
 #include <salframe.hxx>
 #include <accmgr.hxx>
 #include <print.h>
-#include <WindowImpl.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowLOKData.hxx>
 #include <WindowInput.hxx>

@@ -30,7 +30,7 @@
 #include <WindowPlatformState.hxx>
 #include <PaintBufferGuard.hxx>
 #include <WindowVisibilityState.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowHierarchy.hxx>
 #include <clipping_window.hxx>
@@ -67,7 +67,7 @@ PaintHelper::~PaintHelper()
         }
     }
 
-    if (pWinData && m_pWindow->ImplGetWindowImpl()->mbTrackVisible
+    if (pWinData && m_pWindow->ImplGetWindowClassification()->mbTrackVisible
         && (pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
         /* #98602# need to invert the tracking rect AFTER
          * the children have painted
@@ -113,7 +113,7 @@ void PaintHelper::PaintBuffer()
 
 void PaintHelper::DoPaint(const vcl::Region* pRegion)
 {
-    WindowImpl* pWindowImpl = m_pWindow->ImplGetWindowImpl();
+    WindowClassification* pClassification = m_pWindow->ImplGetWindowClassification();
     WindowInvalidation* pInvalidation = m_pWindow->ImplGetWindowInvalidation();
     ImplWinData* pWinData = m_pWindow->ImplGetWinData();
 
@@ -129,7 +129,7 @@ void PaintHelper::DoPaint(const vcl::Region* pRegion)
         if (pRegion)
             pInvalidation->maInvalidateRegion.Union(*pRegion);
 
-        if (pWinData && pWindowImpl->mbTrackVisible)
+        if (pWinData && pClassification->mbTrackVisible)
         {
             /* #98602# need to repaint all children within the
             * tracking rectangle, so the following invert

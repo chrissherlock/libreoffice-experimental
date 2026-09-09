@@ -49,7 +49,6 @@
 #include <accel.hxx>
 #include <svimpbox.hxx>
 #include <WindowEventHandlers.hxx>
-#include <WindowImpl.hxx>
 
 #include <set>
 #include <string.h>

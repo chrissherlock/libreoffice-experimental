@@ -19,9 +19,10 @@
 
 #include <vcl/window.hxx>
 
+#include <window.h>
 #include <ImplFrameData.hxx>
 #include <ImplWinData.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowClippingState.hxx>
@@ -37,7 +38,7 @@ namespace vcl
 {
 bool Window::ImplShouldTransferFocusOnHide(ShowFlags nFlags) const
 {
-    const bool bIsOverlapWindowAvailable = !mpWindowImpl->mbFrame
+    const bool bIsOverlapWindowAvailable = !mpClassification->mbFrame
                                            && mpHierarchy->mpOverlapWindow->IsEnabled()
                                            && mpHierarchy->mpOverlapWindow->IsInputEnabled()
                                            && !mpHierarchy->mpOverlapWindow->IsInModalMode();
@@ -97,7 +98,7 @@ std::optional<bool> Window::ImplHideWindow(ShowFlags nFlags)
     vcl::Region aInvRegion = ImplGetWinClipRegion();
 
     // initWinClipRegion can trigger re-entrant events or disposal
-    if (!xWindow->mpWindowImpl)
+    if (!xWindow->mpClassification)
         return std::nullopt;
 
     bool bRealVisibilityChanged = mpVisibilityState->mbReallyVisible;
@@ -107,7 +108,7 @@ std::optional<bool> Window::ImplHideWindow(ShowFlags nFlags)
     if (ImplShouldTransferFocusOnHide(nFlags))
         mpHierarchy->mpOverlapWindow->GrabFocus();
 
-    if (!mpWindowImpl->mbFrame)
+    if (!mpClassification->mbFrame)
         ImplInvalidateParentOnHide(aInvRegion);
 
     return bRealVisibilityChanged;
@@ -118,7 +119,7 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
     VclPtr<vcl::Window> xWindow(this);
 
     ImplHideAllOverlaps();
-    if (!xWindow->mpWindowImpl)
+    if (!xWindow->mpClassification)
         return std::nullopt;
 
     if (mpHierarchy->mpBorderWindow)
@@ -129,7 +130,7 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
         mpHierarchy->mpBorderWindow->Show(false, nFlags);
         mpHierarchy->mpBorderWindow->mpInvalidation->mbNoParentUpdate = bOldUpdate;
     }
-    else if (mpWindowImpl->mbFrame)
+    else if (mpClassification->mbFrame)
     {
         if (mpAccessibleData)
             mpAccessibleData->mbSuppressAccessibilityEvents = true;
@@ -149,7 +150,7 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
         bRealVisibilityChanged = *bResult;
     }
 
-    if (!xWindow->mpWindowImpl)
+    if (!xWindow->mpClassification)
         return std::nullopt;
 
     return bRealVisibilityChanged;
@@ -157,7 +158,7 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
 
 bool Window::ImplIsMismatchedSubControl() const
 {
-    return mpWindowImpl->mbFrame && GetParent() && !GetParent()->isDisposed()
+    return mpClassification->mbFrame && GetParent() && !GetParent()->isDisposed()
            && GetParent()->IsCompoundControl()
            && GetParent()->IsNativeWidgetEnabled() != IsNativeWidgetEnabled()
            && !(GetStyle() & WB_TOOLTIPWIN);
@@ -190,7 +191,7 @@ bool Window::ImplUpdateRealVisibility(ShowFlags nFlags)
 
     // If it's not a frame and the parent isn't actually on screen,
     // we don't need to do any real visibility rendering yet.
-    if (!mpWindowImpl->mbFrame && !pVisibilityParent->mpVisibilityState->mbReallyVisible)
+    if (!mpClassification->mbFrame && !pVisibilityParent->mpVisibilityState->mbReallyVisible)
         return false;
 
     // if a window becomes visible, send all child windows a StateChange,
@@ -205,7 +206,7 @@ bool Window::ImplUpdateRealVisibility(ShowFlags nFlags)
     // assure clip rectangles will be recalculated
     vcl::clipping::setClipFlag(*this);
 
-    if (!mpWindowImpl->mbFrame)
+    if (!mpClassification->mbFrame)
     {
         InvalidateFlags nInvalidateFlags = InvalidateFlags::Children;
 
@@ -227,7 +228,7 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
         return true;
     }
 
-    if (!mpWindowImpl->mbFrame)
+    if (!mpClassification->mbFrame)
         return true;
 
     // #106431#, hide SplashScreen
@@ -260,7 +261,7 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
     }
 
     // Check if the window was destroyed during the system Show() call
-    if (!xWindow->mpWindowImpl)
+    if (!xWindow->mpClassification)
         return false;
 
     // Query the correct size of the window, if we are waiting for
@@ -307,7 +308,7 @@ std::optional<bool> Window::ImplShowWindow(ShowFlags nFlags)
 
 void Window::Show(bool bVisible, ShowFlags nFlags)
 {
-    if (!mpWindowImpl || mpVisibilityState->mbVisible == bVisible)
+    if (!mpClassification || mpVisibilityState->mbVisible == bVisible)
         return;
 
     mpVisibilityState->mbVisible = bVisible;

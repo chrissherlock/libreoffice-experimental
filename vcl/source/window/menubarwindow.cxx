@@ -35,7 +35,7 @@
 #include <svdata.hxx>
 #include <strings.hrc>
 #include <bitmaps.hlst>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include "bufferdevice.hxx"
 #include <menubarvalue.hxx>
@@ -566,12 +566,12 @@ static int ImplGetTopDockingAreaHeight( vcl::Window const *pWindow )
     // note: dockingareas are direct children of the SystemWindow
     if( pWindow->ImplGetFrameWindow() )
     {
-        vcl::Window *pWin = pWindow->ImplGetFrameWindow()->GetWindow( GetWindowType::FirstChild ); //mpWindowImpl->mpFirstChild;
+        vcl::Window *pWin = pWindow->ImplGetFrameWindow()->GetWindow( GetWindowType::FirstChild ); //mpWindowClassification->mpFirstChild;
         while( pWin )
         {
             if( pWin->IsSystemWindow() )
             {
-                vcl::Window *pChildWin = pWin->GetWindow( GetWindowType::FirstChild ); //mpWindowImpl->mpFirstChild;
+                vcl::Window *pChildWin = pWin->GetWindow( GetWindowType::FirstChild ); //mpWindowClassification->mpFirstChild;
                 while( pChildWin )
                 {
                     DockingAreaWindow *pDockingArea = nullptr;
@@ -584,12 +584,12 @@ static int ImplGetTopDockingAreaHeight( vcl::Window const *pWindow )
                         return pDockingArea->GetOutputSizePixel().Height();
                     }
 
-                    pChildWin = pChildWin->GetWindow( GetWindowType::Next ); //mpWindowImpl->mpNext;
+                    pChildWin = pChildWin->GetWindow( GetWindowType::Next ); //mpWindowClassification->mpNext;
                 }
 
             }
 
-            pWin = pWin->GetWindow( GetWindowType::Next ); //mpWindowImpl->mpNext;
+            pWin = pWin->GetWindow( GetWindowType::Next ); //mpWindowClassification->mpNext;
         }
     }
     return 0;

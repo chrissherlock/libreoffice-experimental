@@ -25,7 +25,7 @@
 #include <WindowPlatformState.hxx>
 #include <ImplFrameData.hxx>
 #include <clipping_window.hxx>
-#include <WindowImpl.hxx>
+#include <WindowClassification.hxx>
 #include <salframe.hxx>
 #include <salinst.hxx>
 #include <salobj.hxx>
@@ -122,7 +122,7 @@ SystemChildWindow::~SystemChildWindow()
 void SystemChildWindow::dispose()
 {
     Hide();
-    if ( mpWindowImpl && mpPlatformState->mpSysObj )
+    if ( mpClassification && mpPlatformState->mpSysObj )
     {
         GetSalInstance()->DestroyObject( mpPlatformState->mpSysObj );
         mpPlatformState->mpSysObj = nullptr;

@@ -23,7 +23,6 @@
 #include <vcl/window.hxx>
 
 #include <WindowLOKData.hxx>
-#include <WindowImpl.hxx>
 
 #include <cassert>
 #include <map>

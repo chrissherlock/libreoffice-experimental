@@ -36,13 +36,13 @@
 #include <vcl/mnemonic.hxx>
 #include <vcl/toolkit/lstbox.hxx>
 #include <vcl/uitest/uiobject.hxx>
+#include <vcl/inputctx.hxx>
 
 #include <clipping.hxx>
 #include <clipping_window.hxx>
 
 #include <bitmaps.hlst>
 #include <svdata.hxx>
-#include <WindowImpl.hxx>
 #include <WindowFocusState.hxx>
 
 #include <deque>
