@@ -906,7 +906,7 @@ public:
     SAL_DLLPRIVATE void SetAccessibleRelationLabelFor(vcl::Window* pLabelFor);
     vcl::Window* GetAccessibleRelationLabelFor() const;
     vcl::Window* GetAccessibleRelationMemberOf() const;
-    bool IsAccessibilityEventsSuppressed();
+    bool AreAccessibilityEventsSuppressed();
     KeyEvent GetActivationKey() const;
 
     // --- Settings and Context ---

@@ -694,15 +694,14 @@ vcl::Window* Window::GetAccessibleRelationLabeledBy() const
     return nullptr;
 }
 
-bool Window::IsAccessibilityEventsSuppressed()
+bool Window::AreAccessibilityEventsSuppressed()
 {
     vcl::Window *pParent = this;
     while (pParent && pParent->mpClassification)
     {
-        if (pParent->mpAccessibleData && pParent->mpAccessibleData->mbSuppressAccessibilityEvents)
+        if (pParent->mpAccessibleData && pParent->mpAccessibleData->isEventsSuspended())
             return true;
-        else
-            pParent = pParent->mpHierarchy->mpParent; // do not use GetParent() to find borderwindows that are frames
+        pParent = pParent->GetParent();
     }
     return false;
 }

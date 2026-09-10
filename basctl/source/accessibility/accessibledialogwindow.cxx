@@ -282,7 +282,7 @@ void AccessibleDialogWindow::SortChildren()
 IMPL_LINK( AccessibleDialogWindow, WindowEventListener, VclWindowEvent&, rEvent, void )
 {
     DBG_ASSERT(rEvent.GetWindow(), "AccessibleDialogWindow::WindowEventListener: no window!");
-    if (!rEvent.GetWindow()->IsAccessibilityEventsSuppressed() || rEvent.GetId() == VclEventId::ObjectDying)
+    if (!rEvent.GetWindow()->AreAccessibilityEventsSuppressed() || rEvent.GetId() == VclEventId::ObjectDying)
         ProcessWindowEvent(rEvent);
 }
 
