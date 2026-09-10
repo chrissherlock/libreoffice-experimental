@@ -798,17 +798,8 @@ void Window::ImplDeInitAccessibility()
     if (pWrapper)
         pWrapper->WindowDestroyed(this);
 
-    if (!mpAccessibleData)
-        return;
-
-    if (mpAccessibleData->mpAccessible.is())
-    {
-        mpAccessibleData->mpAccessible->dispose();
-        mpAccessibleData->mpAccessible.clear();
-    }
-
-    if (mpAccessibleData->mpAccessibleInfos)
-        mpAccessibleData->mpAccessibleInfos->pAccessibleParent.clear();
+    if (mpAccessibleData)
+        mpAccessibleData->dispose();
 }
 
 void Window::ImplRemoveFromTaskPaneList()

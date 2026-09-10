@@ -24,14 +24,19 @@ struct ImplAccessibleInfos;
 
 struct WindowAccessibleData
 {
-    css::uno::Reference<css::awt::XVclWindowPeer> mxWindowPeer;
-    rtl::Reference<comphelper::OAccessible> mpAccessible;
+private:
     std::unique_ptr<ImplAccessibleInfos> mpAccessibleInfos;
     std::vector<VclPtr<FixedText>> m_aMnemonicLabels;
 
-    VCLXWindow* mpVCLXWindow = nullptr;
-
     bool mbSuppressAccessibilityEvents = false;
+
+    ImplAccessibleInfos& ensureAccessibleInfos();
+
+public:
+    css::uno::Reference<css::awt::XVclWindowPeer> mxWindowPeer;
+    rtl::Reference<comphelper::OAccessible> mpAccessible;
+
+    VCLXWindow* mpVCLXWindow = nullptr;
 
     WindowAccessibleData() = default;
     ~WindowAccessibleData() = default;
@@ -43,6 +48,22 @@ struct WindowAccessibleData
     void suspendEvents() { mbSuppressAccessibilityEvents = true; }
     void resumeEvents() { mbSuppressAccessibilityEvents = false; }
     bool isEventsSuspended() const { return mbSuppressAccessibilityEvents; }
+
+    void setAccessibleRole(sal_uInt16 nRole);
+    sal_uInt16 getAccessibleRole() const;
+    void setAccessibleName(const OUString& rName);
+    std::optional<OUString> getAccessibleName() const;
+    void setAccessibleDescription(const OUString& rDescription);
+    std::optional<OUString> getAccessibleDescription() const;
+    void setAccessibleRelationLabeledBy(vcl::Window* pWindow);
+    vcl::Window* getAccessibleRelationLabeledBy() const;
+    void setAccessibleRelationLabelFor(vcl::Window* pWindow);
+    vcl::Window* getAccessibleRelationLabelFor() const;
+    void setAccessibleParent(const rtl::Reference<comphelper::OAccessible>& rpParent);
+    rtl::Reference<comphelper::OAccessible> getAccessibleParent() const;
+    const OUString* getAccessibleDescriptionPtr() const;
+
+    void dispose();
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
