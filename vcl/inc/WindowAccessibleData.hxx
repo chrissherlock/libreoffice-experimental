@@ -27,16 +27,15 @@ struct WindowAccessibleData
 private:
     std::unique_ptr<ImplAccessibleInfos> mpAccessibleInfos;
     std::vector<VclPtr<FixedText>> m_aMnemonicLabels;
+    css::uno::Reference<css::awt::XVclWindowPeer> mxWindowPeer;
+    VCLXWindow* mpVCLXWindow = nullptr;
 
     bool mbSuppressAccessibilityEvents = false;
 
     ImplAccessibleInfos& ensureAccessibleInfos();
 
 public:
-    css::uno::Reference<css::awt::XVclWindowPeer> mxWindowPeer;
     rtl::Reference<comphelper::OAccessible> mpAccessible;
-
-    VCLXWindow* mpVCLXWindow = nullptr;
 
     WindowAccessibleData() = default;
     ~WindowAccessibleData() = default;
@@ -63,6 +62,14 @@ public:
     rtl::Reference<comphelper::OAccessible> getAccessibleParent() const;
     const OUString* getAccessibleDescriptionPtr() const;
 
+    void setWindowPeer(const css::uno::Reference<css::awt::XVclWindowPeer>& xPeer,
+                       VCLXWindow* pVCLXWindow);
+    css::uno::Reference<css::awt::XVclWindowPeer> getWindowPeer(bool bCreate, vcl::Window* pWindow);
+
+    bool hasWindowPeer() const { return mxWindowPeer.is(); }
+    VCLXWindow* getVCLXWindow() const { return mpVCLXWindow; }
+
+    void disposeWindowPeer();
     void dispose();
 };
 

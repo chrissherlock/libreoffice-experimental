@@ -642,7 +642,7 @@ bool DockingWindow::Close()
     if (xWindow->isDisposed())
         return false;
 
-    if (mpAccessibleData && mpAccessibleData->mxWindowPeer.is() && IsCreatedWithToolkit())
+    if (mpAccessibleData && mpAccessibleData->hasWindowPeer() && IsCreatedWithToolkit())
         return false;
 
     Show( false, ShowFlags::NoFocusChange );

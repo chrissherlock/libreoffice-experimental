@@ -38,39 +38,16 @@ void Window::SetWindowPeer(css::uno::Reference<css::awt::XVclWindowPeer> const& 
     if (!mpClassification || mpClassification->mbInDispose)
         return;
 
-    if (!mpAccessibleData)
-        return;
-
-    // be safe against re-entrance: first clear the old ref, then assign the new one
-    if (mpAccessibleData->mxWindowPeer)
-    {
-        // first, disconnect the peer from ourself, otherwise disposing it, will dispose us
-        UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
-        SAL_WARN_IF(!pWrapper, "vcl.window", "SetComponentInterface: No Wrapper!");
-        if (pWrapper)
-            pWrapper->SetWindowInterface(nullptr, mpAccessibleData->mxWindowPeer);
-        mpAccessibleData->mxWindowPeer->dispose();
-        mpAccessibleData->mxWindowPeer.clear();
-    }
-
-    mpAccessibleData->mxWindowPeer = xPeer;
-
-    mpAccessibleData->mpVCLXWindow = pVCLXWindow;
+    if (mpAccessibleData)
+        mpAccessibleData->setWindowPeer(xPeer, pVCLXWindow);
 }
 
 css::uno::Reference<css::awt::XVclWindowPeer> Window::GetComponentInterface(bool bCreate)
 {
-    if (!mpAccessibleData)
-        return nullptr;
+    if (mpAccessibleData)
+        return mpAccessibleData->getWindowPeer(bCreate, this);
 
-    if (!mpAccessibleData->mxWindowPeer.is() && bCreate)
-    {
-        UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
-        if (pWrapper)
-            mpAccessibleData->mxWindowPeer = pWrapper->GetWindowInterface(this);
-    }
-
-    return mpAccessibleData->mxWindowPeer;
+    return nullptr;
 }
 
 void Window::SetComponentInterface(css::uno::Reference<css::awt::XVclWindowPeer> const& xIFace)

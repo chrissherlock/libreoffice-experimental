@@ -539,8 +539,9 @@ PointerStyle Window::GetPointer() const { return mpControlAppearance->maPointer;
 
 VCLXWindow* Window::GetWindowPeer() const
 {
-    return mpAccessibleData ? mpAccessibleData->mpVCLXWindow : nullptr;
+    return mpAccessibleData ? mpAccessibleData->getVCLXWindow() : nullptr;
 }
+
 } /* namespace vcl */
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
