@@ -9,6 +9,7 @@
 
 #include <vcl/window.hxx>
 #include <vcl/toolkit/fixed.hxx>
+#include <vcl/toolkit/unowrap.hxx>
 
 #include <ImplAccessibleInfos.hxx>
 #include <WindowAccessibleData.hxx>
@@ -130,6 +131,45 @@ void WindowAccessibleData::dispose()
 
     if (mpAccessibleInfos)
         mpAccessibleInfos->pAccessibleParent.clear();
+}
+
+void WindowAccessibleData::setWindowPeer(const css::uno::Reference<css::awt::XVclWindowPeer>& xPeer,
+                                         VCLXWindow* pVCLXWindow)
+{
+    // be safe against re-entrance: first clear the old ref, then assign the new one
+    if (mxWindowPeer)
+    {
+        UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
+        SAL_WARN_IF(!pWrapper, "vcl.window", "SetComponentInterface: No Wrapper!");
+        if (pWrapper)
+            pWrapper->SetWindowInterface(nullptr, mxWindowPeer);
+        mxWindowPeer->dispose();
+        mxWindowPeer.clear();
+    }
+
+    mxWindowPeer = xPeer;
+    mpVCLXWindow = pVCLXWindow;
+}
+
+css::uno::Reference<css::awt::XVclWindowPeer>
+WindowAccessibleData::getWindowPeer(bool bCreate, vcl::Window* pWindow)
+{
+    if (!mxWindowPeer.is() && bCreate)
+    {
+        UnoWrapperBase* pWrapper = UnoWrapperBase::GetUnoWrapper();
+        if (pWrapper)
+            mxWindowPeer = pWrapper->GetWindowInterface(pWindow);
+    }
+    return mxWindowPeer;
+}
+
+void WindowAccessibleData::disposeWindowPeer()
+{
+    if (mxWindowPeer)
+    {
+        mxWindowPeer->dispose();
+        mxWindowPeer.clear();
+    }
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

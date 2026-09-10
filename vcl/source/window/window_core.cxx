@@ -225,8 +225,8 @@ void Window::dispose()
 
     ImplDisposeFrameData();
 
-    if (mpAccessibleData->mxWindowPeer)
-        mpAccessibleData->mxWindowPeer->dispose();
+    if (mpAccessibleData)
+        mpAccessibleData->disposeWindowPeer();
 
     // should be the last statements
     mpClassification.reset();
