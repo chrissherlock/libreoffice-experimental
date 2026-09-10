@@ -30,7 +30,7 @@
 #include <ImplFrameData.hxx>
 #include <WindowClassification.hxx>
 #include <WindowPointerState.hxx>
-#include <WindowAccessibleData.hxx>
+#include <WindowA11y.hxx>
 #include <WindowStyleState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowFocusState.hxx>

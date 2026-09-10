@@ -27,7 +27,7 @@
 #include <WindowVisibilityState.hxx>
 #include <WindowClippingState.hxx>
 #include <WindowHierarchy.hxx>
-#include <WindowAccessibleData.hxx>
+#include <WindowA11y.hxx>
 #include <WindowInvalidation.hxx>
 #include <WindowGeometry.hxx>
 #include <clipping_window.hxx>

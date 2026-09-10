@@ -404,7 +404,7 @@ struct WindowHierarchy;
 struct WindowHelpData;
 struct WindowEventHandlers;
 struct WindowLayoutData;
-struct WindowAccessibleData;
+struct WindowA11y;
 struct WindowControlAppearance;
 struct WindowGeometry;
 struct WindowViewport;
@@ -524,7 +524,7 @@ public:
     SAL_DLLPRIVATE WindowHierarchy* ImplGetWindowHierarchy() const { return mpHierarchy.get(); }
     SAL_DLLPRIVATE WindowEventHandlers* ImplGetEventHandlers() const { return mpEventHandlers.get(); }
     SAL_DLLPRIVATE WindowLayoutData* ImplGetLayoutData() const { return mpLayoutData.get(); }
-    SAL_DLLPRIVATE WindowAccessibleData* ImplGetAccessibleData() const { return mpAccessibleData.get(); }
+    SAL_DLLPRIVATE WindowA11y* ImplGetAccessibleData() const { return mpAccessibleData.get(); }
     SAL_DLLPRIVATE WindowControlAppearance* ImplGetControlAppearance() const { return mpControlAppearance.get(); }
     SAL_DLLPRIVATE WindowGeometry* ImplGetGeometry() const { return mpGeometry.get(); }
     SAL_DLLPRIVATE WindowViewport* ImplGetViewport() const { return mpViewport.get(); }
@@ -1093,7 +1093,7 @@ private:
     std::unique_ptr<WindowHelpData> mpHelpData;
     std::unique_ptr<WindowEventHandlers> mpEventHandlers;
     std::unique_ptr<WindowLayoutData> mpLayoutData;
-    std::unique_ptr<WindowAccessibleData> mpAccessibleData;
+    std::unique_ptr<WindowA11y> mpAccessibleData;
     std::unique_ptr<WindowControlAppearance> mpControlAppearance;
     std::unique_ptr<WindowGeometry> mpGeometry;
     std::unique_ptr<WindowViewport> mpViewport;

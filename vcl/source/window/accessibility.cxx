@@ -32,7 +32,7 @@
 #include <window.h>
 #include <WindowClassification.hxx>
 #include <WindowHierarchy.hxx>
-#include <WindowAccessibleData.hxx>
+#include <WindowA11y.hxx>
 #include <accessibility/floatingwindowaccessible.hxx>
 #include <accessibility/vclxaccessiblefixedtext.hxx>
 #include <accessibility/vclxaccessiblestatusbar.hxx>
