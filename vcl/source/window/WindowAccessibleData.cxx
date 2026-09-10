@@ -123,10 +123,10 @@ const OUString* WindowAccessibleData::getAccessibleDescriptionPtr() const
 
 void WindowAccessibleData::dispose()
 {
-    if (mpAccessible.is())
+    if (hasAccessible())
     {
         mpAccessible->dispose();
-        mpAccessible.clear();
+        clearAccessible();
     }
 
     if (mpAccessibleInfos)

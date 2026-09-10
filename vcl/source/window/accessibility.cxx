@@ -67,23 +67,13 @@ namespace vcl {
 
 rtl::Reference<comphelper::OAccessible> Window::GetAccessible(bool bCreate)
 {
-    // do not optimize hierarchy for the top level border win (ie, when there is no parent)
-    /* // do not optimize accessible hierarchy at all to better reflect real VCL hierarchy
-    if ( GetParent() && ( GetType() == WindowType::BORDERWINDOW ) && ( GetChildCount() == 1 ) )
-    //if( !ImplIsAccessibleCandidate() )
-    {
-        vcl::Window* pChild = GetAccessibleChildWindow( 0 );
-        if ( pChild )
-            return pChild->GetAccessible();
-    }
-    */
     if (!mpAccessibleData)
         return {};
 
-    if (!mpAccessibleData->mpAccessible.is() && !mpClassification->mbInDispose && bCreate)
-        mpAccessibleData->mpAccessible = CreateAccessible();
+    if (!mpAccessibleData->hasAccessible() && !mpClassification->mbInDispose && bCreate)
+        mpAccessibleData->setAccessible(CreateAccessible());
 
-    return mpAccessibleData->mpAccessible;
+    return mpAccessibleData->getAccessible();
 }
 
 namespace {
@@ -122,10 +112,8 @@ rtl::Reference<comphelper::OAccessible> Window::CreateAccessible()
 
 void Window::SetAccessible(const rtl::Reference<comphelper::OAccessible>& rpAccessible)
 {
-    if (!mpAccessibleData)
-        return;
-
-    mpAccessibleData->mpAccessible = rpAccessible;
+    if (mpAccessibleData)
+        mpAccessibleData->setAccessible(rpAccessible);
 }
 
 // skip all border windows that are not top level frames
