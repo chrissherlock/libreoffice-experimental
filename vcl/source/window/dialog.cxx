@@ -38,7 +38,7 @@
 #include <WindowPlatformState.hxx>
 #include <WindowStyleState.hxx>
 #include <WindowHierarchy.hxx>
-#include <WindowAccessibleData.hxx>
+#include <WindowA11y.hxx>
 #include <ImplFrameData.hxx>
 #include <svdata.hxx>
 #include <WindowClassification.hxx>

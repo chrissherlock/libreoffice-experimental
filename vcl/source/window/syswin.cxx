@@ -56,7 +56,7 @@
 #include <WindowVisibilityState.hxx>
 #include <WindowFocusState.hxx>
 #include <WindowHierarchy.hxx>
-#include <WindowAccessibleData.hxx>
+#include <WindowA11y.hxx>
 
 using namespace ::com::sun::star::uno;
 

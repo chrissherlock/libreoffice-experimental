@@ -24,7 +24,7 @@
 #include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
 #include <WindowHierarchy.hxx>
-#include <WindowAccessibleData.hxx>
+#include <WindowA11y.hxx>
 #include <WindowHelpData.hxx>
 #include <salframe.hxx>
 

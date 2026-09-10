@@ -12,13 +12,13 @@
 #include <vcl/toolkit/unowrap.hxx>
 
 #include <ImplAccessibleInfos.hxx>
-#include <WindowAccessibleData.hxx>
+#include <WindowA11y.hxx>
 
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
 
 #include <algorithm>
 
-void WindowAccessibleData::add_mnemonic_label(FixedText* pLabel, vcl::Window* pWidget)
+void WindowA11y::add_mnemonic_label(FixedText* pLabel, vcl::Window* pWidget)
 {
     if (std::find(m_aMnemonicLabels.begin(), m_aMnemonicLabels.end(), VclPtr<FixedText>(pLabel))
         != m_aMnemonicLabels.end())
@@ -30,7 +30,7 @@ void WindowAccessibleData::add_mnemonic_label(FixedText* pLabel, vcl::Window* pW
     pLabel->set_mnemonic_widget(pWidget);
 }
 
-void WindowAccessibleData::remove_mnemonic_label(FixedText* pLabel)
+void WindowA11y::remove_mnemonic_label(FixedText* pLabel)
 {
     auto aFind
         = std::find(m_aMnemonicLabels.begin(), m_aMnemonicLabels.end(), VclPtr<FixedText>(pLabel));
@@ -43,7 +43,7 @@ void WindowAccessibleData::remove_mnemonic_label(FixedText* pLabel)
     pLabel->set_mnemonic_widget(nullptr);
 }
 
-ImplAccessibleInfos& WindowAccessibleData::ensureAccessibleInfos()
+ImplAccessibleInfos& WindowA11y::ensureAccessibleInfos()
 {
     if (!mpAccessibleInfos)
         mpAccessibleInfos.reset(new ImplAccessibleInfos);
@@ -51,69 +51,68 @@ ImplAccessibleInfos& WindowAccessibleData::ensureAccessibleInfos()
     return *mpAccessibleInfos;
 }
 
-void WindowAccessibleData::setAccessibleRole(sal_uInt16 nRole)
+void WindowA11y::setAccessibleRole(sal_uInt16 nRole)
 {
     ensureAccessibleInfos().nAccessibleRole = nRole;
 }
 
-sal_uInt16 WindowAccessibleData::getAccessibleRole() const
+sal_uInt16 WindowA11y::getAccessibleRole() const
 {
     return mpAccessibleInfos ? mpAccessibleInfos->nAccessibleRole
                              : css::accessibility::AccessibleRole::UNKNOWN;
 }
 
-void WindowAccessibleData::setAccessibleName(const OUString& rName)
+void WindowA11y::setAccessibleName(const OUString& rName)
 {
     ensureAccessibleInfos().pAccessibleName = rName;
 }
 
-std::optional<OUString> WindowAccessibleData::getAccessibleName() const
+std::optional<OUString> WindowA11y::getAccessibleName() const
 {
     return mpAccessibleInfos ? mpAccessibleInfos->pAccessibleName : std::nullopt;
 }
 
-void WindowAccessibleData::setAccessibleDescription(const OUString& rDescription)
+void WindowA11y::setAccessibleDescription(const OUString& rDescription)
 {
     ensureAccessibleInfos().pAccessibleDescription = rDescription;
 }
 
-std::optional<OUString> WindowAccessibleData::getAccessibleDescription() const
+std::optional<OUString> WindowA11y::getAccessibleDescription() const
 {
     return mpAccessibleInfos ? mpAccessibleInfos->pAccessibleDescription : std::nullopt;
 }
 
-void WindowAccessibleData::setAccessibleRelationLabeledBy(vcl::Window* pWindow)
+void WindowA11y::setAccessibleRelationLabeledBy(vcl::Window* pWindow)
 {
     ensureAccessibleInfos().pLabeledByWindow = pWindow;
 }
 
-vcl::Window* WindowAccessibleData::getAccessibleRelationLabeledBy() const
+vcl::Window* WindowA11y::getAccessibleRelationLabeledBy() const
 {
     return mpAccessibleInfos ? mpAccessibleInfos->pLabeledByWindow : nullptr;
 }
 
-void WindowAccessibleData::setAccessibleRelationLabelFor(vcl::Window* pWindow)
+void WindowA11y::setAccessibleRelationLabelFor(vcl::Window* pWindow)
 {
     ensureAccessibleInfos().pLabelForWindow = pWindow;
 }
 
-vcl::Window* WindowAccessibleData::getAccessibleRelationLabelFor() const
+vcl::Window* WindowA11y::getAccessibleRelationLabelFor() const
 {
     return mpAccessibleInfos ? mpAccessibleInfos->pLabelForWindow : nullptr;
 }
 
-void WindowAccessibleData::setAccessibleParent(
-    const rtl::Reference<comphelper::OAccessible>& rpParent)
+void WindowA11y::setAccessibleParent(const rtl::Reference<comphelper::OAccessible>& rpParent)
 {
     ensureAccessibleInfos().pAccessibleParent = rpParent;
 }
 
-rtl::Reference<comphelper::OAccessible> WindowAccessibleData::getAccessibleParent() const
+rtl::Reference<comphelper::OAccessible> WindowA11y::getAccessibleParent() const
 {
     return mpAccessibleInfos ? mpAccessibleInfos->pAccessibleParent : nullptr;
 }
 
-const OUString* WindowAccessibleData::getAccessibleDescriptionPtr() const
+const OUString* WindowA11y::getAccessibleDescriptionPtr() const
 {
     if (mpAccessibleInfos && mpAccessibleInfos->pAccessibleDescription)
         return &(*mpAccessibleInfos->pAccessibleDescription);
@@ -121,7 +120,7 @@ const OUString* WindowAccessibleData::getAccessibleDescriptionPtr() const
     return nullptr;
 }
 
-void WindowAccessibleData::dispose()
+void WindowA11y::dispose()
 {
     if (hasAccessible())
     {
@@ -133,8 +132,8 @@ void WindowAccessibleData::dispose()
         mpAccessibleInfos->pAccessibleParent.clear();
 }
 
-void WindowAccessibleData::setWindowPeer(const css::uno::Reference<css::awt::XVclWindowPeer>& xPeer,
-                                         VCLXWindow* pVCLXWindow)
+void WindowA11y::setWindowPeer(const css::uno::Reference<css::awt::XVclWindowPeer>& xPeer,
+                               VCLXWindow* pVCLXWindow)
 {
     // be safe against re-entrance: first clear the old ref, then assign the new one
     if (mxWindowPeer)
@@ -151,8 +150,8 @@ void WindowAccessibleData::setWindowPeer(const css::uno::Reference<css::awt::XVc
     mpVCLXWindow = pVCLXWindow;
 }
 
-css::uno::Reference<css::awt::XVclWindowPeer>
-WindowAccessibleData::getWindowPeer(bool bCreate, vcl::Window* pWindow)
+css::uno::Reference<css::awt::XVclWindowPeer> WindowA11y::getWindowPeer(bool bCreate,
+                                                                        vcl::Window* pWindow)
 {
     if (!mxWindowPeer.is() && bCreate)
     {
@@ -163,7 +162,7 @@ WindowAccessibleData::getWindowPeer(bool bCreate, vcl::Window* pWindow)
     return mxWindowPeer;
 }
 
-void WindowAccessibleData::disposeWindowPeer()
+void WindowA11y::disposeWindowPeer()
 {
     if (mxWindowPeer)
     {

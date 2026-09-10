@@ -47,7 +47,7 @@
 #include <WindowInvalidation.hxx>
 #include <WindowEventHandlers.hxx>
 #include <WindowLayoutData.hxx>
-#include <WindowAccessibleData.hxx>
+#include <WindowA11y.hxx>
 #include <WindowControlAppearance.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowGeometry.hxx>
@@ -75,7 +75,7 @@ Window::Window(WindowType eType)
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
     , mpLayoutData(std::make_unique<WindowLayoutData>())
-    , mpAccessibleData(std::make_unique<WindowAccessibleData>())
+    , mpAccessibleData(std::make_unique<WindowA11y>())
     , mpControlAppearance(std::make_unique<WindowControlAppearance>())
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())
@@ -103,7 +103,7 @@ Window::Window(vcl::Window* pParent, WinBits nStyle)
     , mpHelpData(std::make_unique<WindowHelpData>())
     , mpEventHandlers(std::make_unique<WindowEventHandlers>())
     , mpLayoutData(std::make_unique<WindowLayoutData>())
-    , mpAccessibleData(std::make_unique<WindowAccessibleData>())
+    , mpAccessibleData(std::make_unique<WindowA11y>())
     , mpControlAppearance(std::make_unique<WindowControlAppearance>())
     , mpGeometry(std::make_unique<WindowGeometry>())
     , mpViewport(std::make_unique<WindowViewport>())

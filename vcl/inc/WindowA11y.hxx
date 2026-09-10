@@ -22,7 +22,7 @@ class VCLXWindow;
 class FixedText;
 struct ImplAccessibleInfos;
 
-struct WindowAccessibleData
+struct WindowA11y
 {
 private:
     std::unique_ptr<ImplAccessibleInfos> mpAccessibleInfos;
@@ -36,8 +36,8 @@ private:
     ImplAccessibleInfos& ensureAccessibleInfos();
 
 public:
-    WindowAccessibleData() = default;
-    ~WindowAccessibleData() = default;
+    WindowA11y() = default;
+    ~WindowA11y() = default;
 
     void add_mnemonic_label(FixedText* pLabel, vcl::Window* pWidget);
     void remove_mnemonic_label(FixedText* pLabel);

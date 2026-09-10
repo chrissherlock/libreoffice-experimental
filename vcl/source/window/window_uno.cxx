@@ -24,7 +24,7 @@
 #include <ImplFrameData.hxx>
 #include <WindowClassification.hxx>
 #include <WindowPlatformState.hxx>
-#include <WindowAccessibleData.hxx>
+#include <WindowA11y.hxx>
 
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
 #include <com/sun/star/datatransfer/clipboard/XClipboard.hpp>

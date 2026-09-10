@@ -40,7 +40,7 @@
 #include <WindowLOKData.hxx>
 #include <WindowHierarchy.hxx>
 #include <WindowLayoutData.hxx>
-#include <WindowAccessibleData.hxx>
+#include <WindowA11y.hxx>
 #include <WindowGeometry.hxx>
 #include <brdwin.hxx>
 
