@@ -79,14 +79,15 @@ const OUString& Window::GetHelpText() const
     }
 
     // Fallback to Window::GetAccessibleDescription without reentry to GetHelpText()
-    if (mpHelpData->maHelpText.isEmpty() && mpAccessibleData && mpAccessibleData->mpAccessibleInfos
-        && mpAccessibleData->mpAccessibleInfos->pAccessibleDescription)
+    if (mpHelpData->maHelpText.isEmpty() && mpAccessibleData)
     {
-        return *mpAccessibleData->mpAccessibleInfos->pAccessibleDescription;
+        if (const OUString* pDesc = mpAccessibleData->getAccessibleDescriptionPtr())
+            return *pDesc;
     }
 
     return mpHelpData->maHelpText;
 }
+
 } // end vcl namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

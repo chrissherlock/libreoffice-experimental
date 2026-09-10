@@ -154,25 +154,33 @@ vcl::Window* Window::GetAccessibleParentWindow() const
     }
 
     vcl::Window* pParent = mpHierarchy->mpParent;
-    if( GetType() == WindowType::MENUBARWINDOW )
+
+    if (GetType() == WindowType::MENUBARWINDOW)
     {
         // report the menubar as a child of THE workwindow
-        vcl::Window *pWorkWin = GetParent()->mpHierarchy->mpFirstChild;
-        while( pWorkWin && (pWorkWin == this) )
-            pWorkWin = pWorkWin->mpHierarchy->mpNext;
-        pParent = pWorkWin;
+        if (vcl::Window* pRealParent = GetParent())
+        {
+            vcl::Window* pWorkWin = pRealParent->GetWindow(GetWindowType::FirstChild);
+            while (pWorkWin && (pWorkWin == this))
+                pWorkWin = pWorkWin->GetWindow(GetWindowType::Next);
+
+            if (pWorkWin)
+                pParent = pWorkWin;
+        }
     }
     // If this is a floating window which has a native border window, then that border should be reported as
     // the accessible parent
-    else if( GetType() == WindowType::FLOATINGWINDOW &&
-        mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpClassification->mbFrame )
+    else if (GetType() == WindowType::FLOATINGWINDOW &&
+             mpHierarchy->mpBorderWindow &&
+             mpHierarchy->mpBorderWindow->ImplGetWindowClassification()->mbFrame)
     {
         pParent = mpHierarchy->mpBorderWindow;
     }
-    else if( pParent && !pParent->ImplIsAccessibleCandidate() )
+    else if (pParent && !pParent->ImplIsAccessibleCandidate())
     {
-        pParent = pParent->mpHierarchy->mpParent;
+        pParent = pParent->ImplGetParent();
     }
+
     return pParent;
 }
 
@@ -256,13 +264,8 @@ vcl::Window* Window::GetAccessibleChildWindow( sal_uInt16 n )
 
 void Window::SetAccessibleParent(const rtl::Reference<comphelper::OAccessible>& rpParent)
 {
-    if (!mpAccessibleData)
-        return;
-
-    if (!mpAccessibleData->mpAccessibleInfos)
-        mpAccessibleData->mpAccessibleInfos.reset(new ImplAccessibleInfos);
-
-    mpAccessibleData->mpAccessibleInfos->pAccessibleParent = rpParent;
+    if (mpAccessibleData)
+        mpAccessibleData->setAccessibleParent(rpParent);
 }
 
 rtl::Reference<comphelper::OAccessible> Window::GetAccessibleParent() const
@@ -270,8 +273,8 @@ rtl::Reference<comphelper::OAccessible> Window::GetAccessibleParent() const
     if (!mpAccessibleData)
         return nullptr;
 
-    if (mpAccessibleData->mpAccessibleInfos && mpAccessibleData->mpAccessibleInfos->pAccessibleParent.is())
-        return mpAccessibleData->mpAccessibleInfos->pAccessibleParent;
+    if (auto pParent = mpAccessibleData->getAccessibleParent())
+        return pParent;
 
     if (vcl::Window* pAccessibleParentWin = GetAccessibleParentWindow())
         return pAccessibleParentWin->GetAccessible();
@@ -281,14 +284,11 @@ rtl::Reference<comphelper::OAccessible> Window::GetAccessibleParent() const
 
 void Window::SetAccessibleRole( sal_uInt16 nRole )
 {
-    if (!mpAccessibleData)
-        return;
-
-    if (!mpAccessibleData->mpAccessibleInfos)
-        mpAccessibleData->mpAccessibleInfos.reset(new ImplAccessibleInfos);
-
-    SAL_WARN_IF( mpAccessibleData->mpAccessibleInfos->nAccessibleRole != accessibility::AccessibleRole::UNKNOWN, "vcl", "AccessibleRole already set!" );
-    mpAccessibleData->mpAccessibleInfos->nAccessibleRole = nRole;
+    if (mpAccessibleData)
+    {
+        SAL_WARN_IF( mpAccessibleData->getAccessibleRole() != accessibility::AccessibleRole::UNKNOWN, "vcl", "AccessibleRole already set!" );
+        mpAccessibleData->setAccessibleRole(nRole);
+    }
 }
 
 sal_uInt16 Window::getDefaultAccessibleRole() const
@@ -480,27 +480,21 @@ sal_uInt16 Window::GetAccessibleRole() const
     if (!mpAccessibleData)
         return accessibility::AccessibleRole::UNKNOWN;
 
-    sal_uInt16 nRole = mpAccessibleData->mpAccessibleInfos
-                           ? mpAccessibleData->mpAccessibleInfos->nAccessibleRole
-                           : accessibility::AccessibleRole::UNKNOWN;
+    sal_uInt16 nRole = mpAccessibleData->getAccessibleRole();
     if (nRole == accessibility::AccessibleRole::UNKNOWN)
         nRole = getDefaultAccessibleRole();
+
     return nRole;
 }
 
 void Window::SetAccessibleName( const OUString& rName )
 {
-    if (!mpAccessibleData)
-        return;
-
-    if (!mpAccessibleData->mpAccessibleInfos)
-        mpAccessibleData->mpAccessibleInfos.reset(new ImplAccessibleInfos);
-
-    OUString oldName = GetAccessibleName();
-
-    mpAccessibleData->mpAccessibleInfos->pAccessibleName = rName;
-
-    CallEventListeners(VclEventId::WindowFrameTitleChanged, &oldName);
+    if (mpAccessibleData)
+    {
+        OUString oldName = GetAccessibleName();
+        mpAccessibleData->setAccessibleName(rName);
+        CallEventListeners(VclEventId::WindowFrameTitleChanged, &oldName);
+    }
 }
 
 OUString Window::GetAccessibleName() const
@@ -508,8 +502,8 @@ OUString Window::GetAccessibleName() const
     if (!mpAccessibleData)
         return OUString();
 
-    if (mpAccessibleData->mpAccessibleInfos && mpAccessibleData->mpAccessibleInfos->pAccessibleName)
-        return *mpAccessibleData->mpAccessibleInfos->pAccessibleName;
+    if (auto aName = mpAccessibleData->getAccessibleName())
+        return *aName;
 
     return getDefaultAccessibleName();
 }
@@ -579,15 +573,12 @@ OUString Window::getDefaultAccessibleName() const
 
 void Window::SetAccessibleDescription( const OUString& rDescription )
 {
-    if (!mpAccessibleData)
-        return;
-
-    if (!mpAccessibleData->mpAccessibleInfos)
-        mpAccessibleData->mpAccessibleInfos.reset(new ImplAccessibleInfos);
-
-    std::optional<OUString>& rCurrentDescription = mpAccessibleData->mpAccessibleInfos->pAccessibleDescription;
-    SAL_WARN_IF(rCurrentDescription && *rCurrentDescription != rDescription, "vcl", "AccessibleDescription already set");
-    rCurrentDescription = rDescription;
+    if (mpAccessibleData)
+    {
+        std::optional<OUString> currentDesc = mpAccessibleData->getAccessibleDescription();
+        SAL_WARN_IF(currentDesc && *currentDesc != rDescription, "vcl", "AccessibleDescription already set");
+        mpAccessibleData->setAccessibleDescription(rDescription);
+    }
 }
 
 OUString Window::GetAccessibleDescription() const
@@ -595,45 +586,28 @@ OUString Window::GetAccessibleDescription() const
     if (!mpAccessibleData)
         return OUString();
 
-    OUString aAccessibleDescription;
-    if (mpAccessibleData->mpAccessibleInfos && mpAccessibleData->mpAccessibleInfos->pAccessibleDescription )
-    {
-        aAccessibleDescription = *mpAccessibleData->mpAccessibleInfos->pAccessibleDescription;
-    }
-    else
-    {
-        // Special code for help text windows. ZT asks the border window for the
-        // description so we have to forward this request to our inner window.
-        const vcl::Window* pWin = this->ImplGetWindow();
-        if (pWin->GetType() == WindowType::HELPTEXTWINDOW)
-            aAccessibleDescription = pWin->GetHelpText();
-        else
-            aAccessibleDescription = GetHelpText();
-    }
+    if (auto aDesc = mpAccessibleData->getAccessibleDescription())
+        return *aDesc;
 
-    return aAccessibleDescription;
+    // Special code for help text windows. ZT asks the border window for the
+    // description so we have to forward this request to our inner window.
+    const vcl::Window* pWin = this->ImplGetWindow();
+    if (pWin->GetType() == WindowType::HELPTEXTWINDOW)
+        return pWin->GetHelpText();
+
+    return GetHelpText();
 }
 
 void Window::SetAccessibleRelationLabeledBy( vcl::Window* pLabeledBy )
 {
-    if (!mpAccessibleData)
-        return;
-
-    if (!mpAccessibleData->mpAccessibleInfos)
-        mpAccessibleData->mpAccessibleInfos.reset(new ImplAccessibleInfos);
-
-    mpAccessibleData->mpAccessibleInfos->pLabeledByWindow = pLabeledBy;
+    if (mpAccessibleData)
+        mpAccessibleData->setAccessibleRelationLabeledBy(pLabeledBy);
 }
 
 void Window::SetAccessibleRelationLabelFor( vcl::Window* pLabelFor )
 {
-    if (!mpAccessibleData)
-        return;
-
-    if (!mpAccessibleData->mpAccessibleInfos)
-        mpAccessibleData->mpAccessibleInfos.reset(new ImplAccessibleInfos);
-
-    mpAccessibleData->mpAccessibleInfos->pLabelForWindow = pLabelFor;
+    if (mpAccessibleData)
+        mpAccessibleData->setAccessibleRelationLabelFor(pLabelFor);
 }
 
 vcl::Window* Window::GetAccessibleRelationMemberOf() const
@@ -649,10 +623,7 @@ vcl::Window* Window::getAccessibleRelationLabelFor() const
     if (!mpAccessibleData)
         return nullptr;
 
-    if (mpAccessibleData->mpAccessibleInfos && mpAccessibleData->mpAccessibleInfos->pLabelForWindow)
-        return mpAccessibleData->mpAccessibleInfos->pLabelForWindow;
-
-    return nullptr;
+    return mpAccessibleData->getAccessibleRelationLabelFor();
 }
 
 vcl::Window* Window::GetAccessibleRelationLabelFor() const
@@ -673,8 +644,8 @@ vcl::Window* Window::GetAccessibleRelationLabeledBy() const
     if (!mpAccessibleData)
         return nullptr;
 
-    if (mpAccessibleData->mpAccessibleInfos && mpAccessibleData->mpAccessibleInfos->pLabeledByWindow)
-        return mpAccessibleData->mpAccessibleInfos->pLabeledByWindow;
+    if (vcl::Window* pWin = mpAccessibleData->getAccessibleRelationLabeledBy())
+        return pWin;
 
     auto const& aMnemonicLabels = list_mnemonic_labels();
     if (!aMnemonicLabels.empty())
