@@ -281,35 +281,22 @@ bool Window::set_property(const OUString& rKey, const OUString& rValue)
 
 void Window::add_mnemonic_label(FixedText* pLabel)
 {
-    if (!mpAccessibleData)
-        return;
-
-    std::vector<VclPtr<FixedText>>& v = mpAccessibleData->m_aMnemonicLabels;
-    if (std::find(v.begin(), v.end(), VclPtr<FixedText>(pLabel)) != v.end())
-        return;
-    v.emplace_back(pLabel);
-    pLabel->set_mnemonic_widget(this);
+    if (mpAccessibleData)
+        mpAccessibleData->add_mnemonic_label(pLabel, this);
 }
 
 void Window::remove_mnemonic_label(FixedText* pLabel)
 {
-    if (!mpAccessibleData)
-        return;
-
-    std::vector<VclPtr<FixedText>>& v = mpAccessibleData->m_aMnemonicLabels;
-    auto aFind = std::find(v.begin(), v.end(), VclPtr<FixedText>(pLabel));
-    if (aFind == v.end())
-        return;
-    v.erase(aFind);
-    pLabel->set_mnemonic_widget(nullptr);
+    if (mpAccessibleData)
+        mpAccessibleData->remove_mnemonic_label(pLabel);
 }
 
 const std::vector<VclPtr<FixedText>>& Window::list_mnemonic_labels() const
 {
     assert(mpAccessibleData);
-
-    return mpAccessibleData->m_aMnemonicLabels;
+    return mpAccessibleData->list_mnemonic_labels();
 }
+
 } // end vcl namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
