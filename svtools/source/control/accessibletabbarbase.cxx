@@ -52,7 +52,7 @@ IMPL_LINK( AccessibleTabBarBase, WindowEventListener, VclWindowEvent&, rEvent, v
         return;
     }
 
-    if ( !pEventWindow->IsAccessibilityEventsSuppressed() || (rEvent.GetId() == VclEventId::ObjectDying) )
+    if ( !pEventWindow->AreAccessibilityEventsSuppressed() || (rEvent.GetId() == VclEventId::ObjectDying) )
         ProcessWindowEvent( rEvent );
 }
 

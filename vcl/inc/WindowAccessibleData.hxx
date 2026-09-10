@@ -39,6 +39,10 @@ struct WindowAccessibleData
     void add_mnemonic_label(FixedText* pLabel, vcl::Window* pWidget);
     void remove_mnemonic_label(FixedText* pLabel);
     const std::vector<VclPtr<FixedText>>& list_mnemonic_labels() const { return m_aMnemonicLabels; }
+
+    void suspendEvents() { mbSuppressAccessibilityEvents = true; }
+    void resumeEvents() { mbSuppressAccessibilityEvents = false; }
+    bool isEventsSuspended() const { return mbSuppressAccessibilityEvents; }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -133,7 +133,7 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
     else if (mpClassification->mbFrame)
     {
         if (mpAccessibleData)
-            mpAccessibleData->mbSuppressAccessibilityEvents = true;
+            mpAccessibleData->suspendEvents();
 
         mpPlatformState->mpFrame->Show(false);
     }
@@ -248,7 +248,7 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
     }
 
     if (mpAccessibleData)
-        mpAccessibleData->mbSuppressAccessibilityEvents = false;
+        mpAccessibleData->resumeEvents();
 
     mpInvalidation->mbPaintFrame = true;
 

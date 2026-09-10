@@ -75,7 +75,7 @@ IMPL_LINK( VCLXAccessibleComponent, WindowEventListener, VclWindowEvent&, rEvent
     if (m_xWindow && (rEvent.GetId() != VclEventId::WindowEndPopupMode))
     {
         DBG_ASSERT( rEvent.GetWindow(), "Window???" );
-        if( !rEvent.GetWindow()->IsAccessibilityEventsSuppressed() || ( rEvent.GetId() == VclEventId::ObjectDying ) )
+        if( !rEvent.GetWindow()->AreAccessibilityEventsSuppressed() || ( rEvent.GetId() == VclEventId::ObjectDying ) )
         {
             ProcessWindowEvent( rEvent );
         }
@@ -87,7 +87,7 @@ IMPL_LINK( VCLXAccessibleComponent, WindowChildEventListener, VclWindowEvent&, r
     if (m_xWindow)
     {
         DBG_ASSERT( rEvent.GetWindow(), "Window???" );
-        if( !rEvent.GetWindow()->IsAccessibilityEventsSuppressed() )
+        if( !rEvent.GetWindow()->AreAccessibilityEventsSuppressed() )
         {
             // #103087# to prevent an early release of the component
             uno::Reference< accessibility::XAccessibleContext > xHoldAlive = this;
