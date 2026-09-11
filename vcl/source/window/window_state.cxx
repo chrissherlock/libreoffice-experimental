@@ -334,29 +334,25 @@ void Window::SetActivateMode(ActivateModeFlags nMode)
     if (mpHierarchy->mpBorderWindow)
         mpHierarchy->mpBorderWindow->SetActivateMode(nMode);
 
-    if (mpFocusState->mnActivateMode == nMode)
+    if (!mpFocusState->setActivateMode(nMode))
         return;
 
-    mpFocusState->mnActivateMode = nMode;
-
     // possibly trigger Deactivate/Activate
-    if (mpFocusState->mnActivateMode != ActivateModeFlags::NONE)
+    if (mpFocusState->canGrabFocusOnActivate()
+        && (mpFocusState->isActive() || GetType() == WindowType::BORDERWINDOW)
+        && !HasChildPathFocus(true))
     {
-        if ((mpFocusState->mbActive || (GetType() == WindowType::BORDERWINDOW))
-            && !HasChildPathFocus(true))
-        {
-            mpFocusState->mbActive = false;
-            Deactivate();
-        }
+        mpFocusState->setActive(false);
+        Deactivate();
+
+        return;
     }
-    else
-    {
-        if (!mpFocusState->mbActive || (GetType() == WindowType::BORDERWINDOW))
-        {
-            mpFocusState->mbActive = true;
-            Activate();
-        }
-    }
+
+    if (mpFocusState->isActive() && (GetType() != WindowType::BORDERWINDOW))
+        return;
+
+    mpFocusState->setActive(true);
+    Activate();
 }
 
 void Window::SetUpdateMode(bool bUpdate)
@@ -494,8 +490,6 @@ bool Window::IsAlwaysEnableInput() const
     return mpInput->meAlwaysInputMode == AlwaysInputEnabled;
 }
 
-ActivateModeFlags Window::GetActivateMode() const { return mpFocusState->mnActivateMode; }
-
 bool Window::IsAlwaysOnTopEnabled() const { return mpClassification->mbAlwaysOnTop; }
 
 void Window::EnablePaint(bool bEnable) { mpInvalidation->mbPaintDisabled = !bEnable; }
@@ -506,11 +500,13 @@ bool Window::IsUpdateMode() const { return !mpInvalidation->mbNoUpdate; }
 
 void Window::SetParentUpdateMode(bool bUpdate) { mpInvalidation->mbNoParentUpdate = !bUpdate; }
 
-bool Window::IsActive() const { return mpFocusState->mbActive; }
+ActivateModeFlags Window::GetActivateMode() const { return mpFocusState->getActivateMode(); }
 
-GetFocusFlags Window::GetGetFocusFlags() const { return mpFocusState->mnGetFocusFlags; }
+bool Window::IsActive() const { return mpFocusState->isActive(); }
 
-bool Window::IsCompoundControl() const { return mpFocusState && mpFocusState->mbCompoundControl; }
+GetFocusFlags Window::GetGetFocusFlags() const { return mpFocusState->getFocusFlags(); }
+
+bool Window::IsCompoundControl() const { return mpFocusState->isCompoundControl(); }
 
 bool Window::IsWait() const { return (mpPointerState->mnWaitCount != 0); }
 

@@ -175,7 +175,11 @@ void TabControl::ImplInitSettings( bool bBackground )
         vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent( true );
         SetBackground();
-        ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
+
+        if (ImplGetSVData()->maNWFData.mbNoFocusRects)
+            ImplGetFocusState()->useNativeFocus();
+        else
+            ImplGetFocusState()->clearNativeFocus();
 
         return;
     }

@@ -11,22 +11,91 @@
 
 #include <vcl/focus.hxx>
 
-struct WindowFocusState
+class WindowFocusState
 {
-    GetFocusFlags mnGetFocusFlags = GetFocusFlags::NONE;
-    ActivateModeFlags mnActivateMode = ActivateModeFlags::NONE;
+private:
+    ActivateModeFlags meActivateMode = ActivateModeFlags::NONE;
+    GetFocusFlags meGetFocusFlags = GetFocusFlags::NONE;
+    bool mbActive = false;
+    bool mbCompoundControl = false;
+    bool mbCompoundControlHasFocus = false;
+    bool mbFocusVisible = false;
+    bool mbUseNativeFocus = false;
+    bool mbInShowFocus = false;
+    bool mbNativeFocusVisible = false;
+    bool mbInHideFocus = false;
 
-    bool mbActive : 1 = false;
-    bool mbFocusVisible : 1 = false;
-    bool mbUseNativeFocus : 1 = false;
-    bool mbNativeFocusVisible : 1 = false;
-    bool mbInShowFocus : 1 = false;
-    bool mbInHideFocus : 1 = false;
-    bool mbCompoundControl : 1 = false;
-    bool mbCompoundControlHasFocus : 1 = false;
+public:
+    WindowFocusState() = default;
 
-    WindowFocusState();
-    ~WindowFocusState();
+    // Compound Control
+    bool isCompoundControl() const { return mbCompoundControl; }
+    void setCompoundControl(bool bCompound) { mbCompoundControl = bCompound; }
+
+    // Compound Control has focus
+    bool compoundControlHasFocus() const { return mbCompoundControlHasFocus; }
+    void setCompoundControlHasFocus(bool bHasFocus) { mbCompoundControlHasFocus = bHasFocus; }
+
+    void activate() { mbActive = true; }
+    void deactivate() { mbActive = false; }
+
+    // FocusVisible
+    void makeFocusVisible() { mbFocusVisible = true; }
+    void hideFocusVisible() { mbFocusVisible = false; }
+
+    // Active state
+    bool isActive() const { return mbActive; }
+    void setActive(bool bActive) { mbActive = bActive; }
+
+    // GetFocusFlags
+    GetFocusFlags getFocusFlags() const { return meGetFocusFlags; }
+    void setFocusFlags(GetFocusFlags eFlags) { meGetFocusFlags = eFlags; }
+    void addFocusFlags(GetFocusFlags eFlags) { meGetFocusFlags |= eFlags; }
+    void clearFocusFlags() { meGetFocusFlags = GetFocusFlags::NONE; }
+
+    bool isFocusVisible() const { return mbFocusVisible; }
+
+    // ActivateMode
+    ActivateModeFlags getActivateMode() const { return meActivateMode; }
+
+    bool canGrabFocusOnActivate() const
+    {
+        return bool(meActivateMode & ActivateModeFlags::GrabFocus);
+    }
+
+    /**
+     * Updates activate mode.
+     * @return true if the activate mode actually changed.
+     */
+    bool setActivateMode(ActivateModeFlags eMode)
+    {
+        if (meActivateMode == eMode)
+            return false;
+
+        meActivateMode = eMode;
+
+        return true;
+    }
+
+    // UseNativeFocus
+    bool usesNativeFocus() const { return mbUseNativeFocus; }
+    void useNativeFocus() { mbUseNativeFocus = true; }
+    void clearNativeFocus() { mbUseNativeFocus = false; }
+
+    // InShowFocus
+    bool isInShowFocus() const { return mbInShowFocus; }
+    void enterShowFocus() { mbInShowFocus = true; }
+    void leaveShowFocus() { mbInShowFocus = false; }
+
+    // NativeFocusVisible
+    bool isNativeFocusVisible() const { return mbNativeFocusVisible; }
+    void makeNativeFocusVisible() { mbNativeFocusVisible = true; }
+    void hideNativeFocusVisible() { mbNativeFocusVisible = false; }
+
+    // HideFocus
+    bool isInHideFocus() const { return mbInHideFocus; }
+    void enterHideFocus() { mbInHideFocus = true; }
+    void leaveHideFocus() { mbInHideFocus = false; }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

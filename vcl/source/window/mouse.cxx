@@ -357,11 +357,11 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         if ( pNewOverlapWindow && pNewOverlapWindow->mpClassification )
         {
             vcl::Window* pNewRealWindow = pNewOverlapWindow->ImplGetWindow();
-            pNewOverlapWindow->mpFocusState->mbActive = true;
+            pNewOverlapWindow->mpFocusState->setActive(true);
             pNewOverlapWindow->Activate();
             if ( pNewRealWindow != pNewOverlapWindow  && pNewRealWindow && pNewRealWindow->mpClassification )
             {
-                pNewRealWindow->mpFocusState->mbActive = true;
+                pNewRealWindow->mpFocusState->setActive(true);
                 pNewRealWindow->Activate();
             }
         }
@@ -390,7 +390,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
             mpControlAppearance->showCursor();
 
             mpInput->mbInFocusHdl = true;
-            mpFocusState->mnGetFocusFlags = nFlags;
+            mpFocusState->setFocusFlags(nFlags);
 
             // if we're changing focus due to closing a popup floating window
             // notify the new focus window so it can restore the inner focus
@@ -399,7 +399,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
                 ! pOldFocusWindow->isDisposed() &&
                 ( pOldFocusWindow->GetDialogControlFlags() & DialogControlFlags::FloatWinPopupModeEndCancel ) )
             {
-                mpFocusState->mnGetFocusFlags |= GetFocusFlags::FloatWinPopupModeEndCancel;
+                mpFocusState->addFocusFlags(GetFocusFlags::FloatWinPopupModeEndCancel);
             }
 
             NotifyEvent aNEvt( NotifyEventType::GETFOCUS, this );
@@ -416,7 +416,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
 
             if( !xWindow->isDisposed() )
             {
-                mpFocusState->mnGetFocusFlags = GetFocusFlags::NONE;
+                mpFocusState->clearFocusFlags();
                 mpInput->mbInFocusHdl = false;
             }
         }

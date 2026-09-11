@@ -409,7 +409,7 @@ class WindowControlAppearance;
 struct WindowGeometry;
 struct WindowViewport;
 struct ImplWinData;
-struct WindowFocusState;
+class WindowFocusState;
 struct WindowPointerState;
 struct WindowControlState;
 class PaintHelper;

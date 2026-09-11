@@ -434,11 +434,7 @@ const OUString& Window::get_id() const
 
 void Window::set_id(const OUString& rID) { mpHelpData->maID = rID; }
 
-void Window::SetCompoundControl(bool bCompound)
-{
-    if (mpFocusState)
-        mpFocusState->mbCompoundControl = bCompound;
-}
+void Window::SetCompoundControl(bool bCompound) { mpFocusState->setCompoundControl(bCompound); }
 
 vcl::Window* Window::ImplGetFrameWindow() const
 {

@@ -245,7 +245,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/WindowClassification \
     vcl/source/window/PaintBufferGuard \
     vcl/source/window/PaintHelper \
-    vcl/source/window/WindowFocusState \
     vcl/source/window/WindowVisibilityState \
     vcl/source/window/WindowLOKData \
     vcl/source/window/WindowInput \

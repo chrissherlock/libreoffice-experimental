@@ -192,23 +192,23 @@ void Window::CompatLoseFocus()
 
 void Window::ShowFocus(const tools::Rectangle& rRect)
 {
-    if (mpFocusState->mbInShowFocus)
+    if (mpFocusState->isInShowFocus())
         return;
 
-    mpFocusState->mbInShowFocus = true;
+    mpFocusState->enterShowFocus();
 
     // native themeing suggest not to use focus rects
-    if (!(mpFocusState->mbUseNativeFocus && IsNativeWidgetEnabled()))
+    if (!(mpFocusState->usesNativeFocus() && IsNativeWidgetEnabled()))
         ImplShowFocusRect(rRect);
     else
         ImplShowNativeFocus();
 
-    mpFocusState->mbInShowFocus = false;
+    mpFocusState->leaveShowFocus();
 }
 
 static bool lcl_IsSameFocusRect(const vcl::Window* pWindow, const tools::Rectangle& rRect)
 {
-    return !pWindow->IsInPaint() && pWindow->ImplGetFocusState()->mbFocusVisible
+    return !pWindow->IsInPaint() && pWindow->ImplGetFocusState()->isFocusVisible()
            && *pWindow->ImplGetWinData()->mpFocusRect == rRect;
 }
 
@@ -216,7 +216,7 @@ void Window::ImplShowFocusRect(const tools::Rectangle& rRect)
 {
     if (lcl_IsSameFocusRect(this, rRect))
     {
-        mpFocusState->mbInShowFocus = false;
+        mpFocusState->leaveShowFocus();
         return;
     }
 
@@ -224,22 +224,22 @@ void Window::ImplShowFocusRect(const tools::Rectangle& rRect)
 
     if (!mpInvalidation->mbInPaint)
     {
-        if (mpFocusState->mbFocusVisible)
+        if (mpFocusState->isFocusVisible())
             ImplInvertFocus(*pWinData->mpFocusRect);
 
         ImplInvertFocus(rRect);
     }
 
     pWinData->mpFocusRect = rRect;
-    mpFocusState->mbFocusVisible = true;
+    mpFocusState->makeFocusVisible();
 }
 
 void Window::ImplShowNativeFocus()
 {
-    if (mpFocusState->mbNativeFocusVisible)
+    if (mpFocusState->isNativeFocusVisible())
         return;
 
-    mpFocusState->mbNativeFocusVisible = true;
+    mpFocusState->makeNativeFocusVisible();
 
     if (!mpInvalidation->mbInPaint)
         Invalidate();
@@ -247,36 +247,36 @@ void Window::ImplShowNativeFocus()
 
 void Window::HideFocus()
 {
-    if (mpFocusState->mbInHideFocus)
+    if (mpFocusState->isInHideFocus())
         return;
 
-    mpFocusState->mbInHideFocus = true;
+    mpFocusState->enterHideFocus();
 
     // native themeing can suggest not to use focus rects
-    if (!(mpFocusState->mbUseNativeFocus && IsNativeWidgetEnabled()))
+    if (!(mpFocusState->usesNativeFocus() && IsNativeWidgetEnabled()))
     {
-        if (!mpFocusState->mbFocusVisible)
+        if (!mpFocusState->isFocusVisible())
         {
-            mpFocusState->mbInHideFocus = false;
+            mpFocusState->leaveHideFocus();
             return;
         }
 
         if (!mpInvalidation->mbInPaint)
             ImplInvertFocus(*ImplGetWinData()->mpFocusRect);
 
-        mpFocusState->mbFocusVisible = false;
+        mpFocusState->hideFocusVisible();
     }
     else
     {
-        if (mpFocusState->mbNativeFocusVisible)
+        if (mpFocusState->isNativeFocusVisible())
         {
-            mpFocusState->mbNativeFocusVisible = false;
+            mpFocusState->hideNativeFocusVisible();
             if (!mpInvalidation->mbInPaint)
                 Invalidate();
         }
     }
 
-    mpFocusState->mbInHideFocus = false;
+    mpFocusState->leaveHideFocus();
 }
 
 void Window::ShowTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags)
@@ -758,13 +758,13 @@ void vcl::Window::ImplDeactivateFocus()
     if (!lcl_CanDeactivateWindow(pOldOverlapWindow, pOldRealWindow))
         return;
 
-    pOldOverlapWindow->ImplGetFocusState()->mbActive = false;
+    pOldOverlapWindow->ImplGetFocusState()->setActive(false);
     pOldOverlapWindow->Deactivate();
 
     if (pOldRealWindow == pOldOverlapWindow)
         return;
 
-    pOldRealWindow->ImplGetFocusState()->mbActive = false;
+    pOldRealWindow->ImplGetFocusState()->setActive(false);
     pOldRealWindow->Deactivate();
 }
 

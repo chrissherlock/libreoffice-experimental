@@ -731,14 +731,15 @@ bool Window::ImplDlgCtrl( const KeyEvent& rKEvt, bool bKeyInput )
                 if ( !ImplCallPreNotify( aNEvt1 ) )
                     pSWindow->CompatLoseFocus();
 
-                pSWindow->mpFocusState->mnGetFocusFlags = nGetFocusFlags | GetFocusFlags::Around;
+                pSWindow->mpFocusState->setFocusFlags(nGetFocusFlags);
+                pSWindow->mpFocusState->addFocusFlags(GetFocusFlags::Around);
 
                 NotifyEvent aNEvt2( NotifyEventType::GETFOCUS, pSWindow );
 
                 if ( !ImplCallPreNotify( aNEvt2 ) )
                     pSWindow->CompatGetFocus();
 
-                pSWindow->mpFocusState->mnGetFocusFlags = GetFocusFlags::NONE;
+                pSWindow->mpFocusState->clearFocusFlags();
 
                 return true;
             }
@@ -868,14 +869,14 @@ bool Window::ImplDlgCtrl( const KeyEvent& rKEvt, bool bKeyInput )
                             if ( !ImplCallPreNotify( aNEvt1 ) )
                                 pSWindow->CompatLoseFocus();
 
-                            pSWindow->mpFocusState->mnGetFocusFlags = nGetFocusFlags | GetFocusFlags::Around;
+                            pSWindow->mpFocusState->setFocusFlags(nGetFocusFlags | GetFocusFlags::Around);
 
                             NotifyEvent aNEvt2( NotifyEventType::GETFOCUS, pSWindow );
 
                             if ( !ImplCallPreNotify( aNEvt2 ) )
                                 pSWindow->CompatGetFocus();
 
-                            pSWindow->mpFocusState->mnGetFocusFlags = GetFocusFlags::NONE;
+                            pSWindow->mpFocusState->clearFocusFlags();
 
                             return true;
                         }
