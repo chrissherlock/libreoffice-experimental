@@ -14598,7 +14598,6 @@ vcl/source/window/brdwin.cxx
 vcl/source/window/bubblewindow.cxx
 vcl/source/window/builder/BuilderBase.cxx
 vcl/source/window/builder/VclBuilder.cxx
-vcl/source/window/clipping.cxx
 vcl/source/window/colorpicker.cxx
 vcl/source/window/commandevent.cxx
 vcl/source/window/cursor.cxx
@@ -14648,6 +14647,7 @@ vcl/source/window/taskpanelist.cxx
 vcl/source/window/toolbox.cxx
 vcl/source/window/toolbox2.cxx
 vcl/source/window/window.cxx
+vcl/source/window/window_clipping.cxx
 vcl/source/window/window_mouse.cxx
 vcl/source/window/window_accessibility.cxx
 vcl/source/window/window_paint.cxx
