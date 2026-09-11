@@ -110,38 +110,44 @@ vcl::Window* Window::GetAccessibleParentWindow() const
         // doesn't consider the top level its a11y child either)
         if (mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->IsNativeFrame())
             return mpHierarchy->mpBorderWindow;
+
         return nullptr;
     }
 
-    vcl::Window* pParent = mpHierarchy->mpParent;
-
     if (GetType() == WindowType::MENUBARWINDOW)
     {
+        vcl::Window* pParent = mpHierarchy->mpParent;
+
         // report the menubar as a child of THE workwindow
         if (vcl::Window* pRealParent = GetParent())
         {
             vcl::Window* pWorkWin = pRealParent->GetWindow(GetWindowType::FirstChild);
+
             while (pWorkWin && (pWorkWin == this))
+            {
                 pWorkWin = pWorkWin->GetWindow(GetWindowType::Next);
+            }
 
             if (pWorkWin)
                 pParent = pWorkWin;
         }
+
+        return pParent;
     }
+
     // If this is a floating window which has a native border window, then that border should be reported as
     // the accessible parent
-    else if (GetType() == WindowType::FLOATINGWINDOW &&
+    if (GetType() == WindowType::FLOATINGWINDOW &&
              mpHierarchy->mpBorderWindow &&
              mpHierarchy->mpBorderWindow->ImplGetWindowClassification()->mbFrame)
     {
-        pParent = mpHierarchy->mpBorderWindow;
-    }
-    else if (pParent && !pParent->ImplIsAccessibleCandidate())
-    {
-        pParent = pParent->ImplGetParent();
+        return mpHierarchy->mpBorderWindow;
     }
 
-    return pParent;
+    if (vcl::Window* pParent = mpHierarchy->mpParent; pParent && !pParent->ImplIsAccessibleCandidate())
+        return pParent->ImplGetParent();
+
+    return mpHierarchy->mpParent;
 }
 
 sal_uInt16 Window::GetAccessibleChildWindowCount()
@@ -155,6 +161,7 @@ sal_uInt16 Window::GetAccessibleChildWindowCount()
     {
         if( pChild->IsVisible() )
             nChildren++;
+
         pChild = pChild->mpHierarchy->mpNext;
     }
 
@@ -162,19 +169,19 @@ sal_uInt16 Window::GetAccessibleChildWindowCount()
     if( GetType() == WindowType::BORDERWINDOW )
     {
         ImplBorderWindow *pBorderWindow = static_cast<ImplBorderWindow*>(this);
-        if( pBorderWindow->mpMenuBarWindow &&
-            pBorderWindow->mpMenuBarWindow->IsVisible()
-            )
+        if (pBorderWindow->mpMenuBarWindow && pBorderWindow->mpMenuBarWindow->IsVisible())
             --nChildren;
     }
     else if( GetType() == WindowType::WORKWINDOW )
     {
         WorkWindow *pWorkWindow = static_cast<WorkWindow*>(this);
-        if( pWorkWindow->GetMenuBar() &&
-            pWorkWindow->GetMenuBar()->GetWindow() &&
-            pWorkWindow->GetMenuBar()->GetWindow()->IsVisible()
-            )
+
+        if (pWorkWindow->GetMenuBar()
+            && pWorkWindow->GetMenuBar()->GetWindow()
+            && pWorkWindow->GetMenuBar()->GetWindow()->IsVisible())
+        {
             ++nChildren;
+        }
     }
 
     return nChildren;
@@ -192,7 +199,9 @@ vcl::Window* Window::GetAccessibleChildWindow( sal_uInt16 n )
                 return pMenuBar->GetWindow();
         }
         else
+        {
             --n;
+        }
     }
 
     // transform n to child number including invisible children
@@ -211,14 +220,17 @@ vcl::Window* Window::GetAccessibleChildWindow( sal_uInt16 n )
 
     if( GetType() == WindowType::BORDERWINDOW && pChild && pChild->GetType() == WindowType::MENUBARWINDOW )
     {
-        do pChild = pChild->mpHierarchy->mpNext; while( pChild && ! pChild->IsVisible() );
+        do
+        {
+            pChild = pChild->mpHierarchy->mpNext;
+        } while( pChild && ! pChild->IsVisible() );
+
         SAL_WARN_IF( !pChild, "vcl", "GetAccessibleChildWindow(): wrong index in border window");
     }
 
     if ( pChild && ( pChild->GetType() == WindowType::BORDERWINDOW ) && ( pChild->GetChildCount() == 1 ) )
-    {
         pChild = pChild->GetChild( 0 );
-    }
+
     return pChild;
 }
 
@@ -244,11 +256,12 @@ rtl::Reference<comphelper::OAccessible> Window::GetAccessibleParent() const
 
 void Window::SetAccessibleRole( sal_uInt16 nRole )
 {
-    if (mpAccessibleData)
-    {
-        SAL_WARN_IF( mpAccessibleData->getAccessibleRole() != css::accessibility::AccessibleRole::UNKNOWN, "vcl", "AccessibleRole already set!" );
-        mpAccessibleData->setAccessibleRole(nRole);
-    }
+    if (!mpAccessibleData)
+        return;
+
+    SAL_WARN_IF( mpAccessibleData->getAccessibleRole() != css::accessibility::AccessibleRole::UNKNOWN, "vcl", "AccessibleRole already set!" );
+
+    mpAccessibleData->setAccessibleRole(nRole);
 }
 
 sal_uInt16 Window::getDefaultAccessibleRole() const
@@ -432,6 +445,7 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
                 //nRole = accessibility::AccessibleRole::WINDOW;
                 nRole = css::accessibility::AccessibleRole::PANEL;
     }
+
     return nRole;
 }
 
@@ -441,6 +455,7 @@ sal_uInt16 Window::GetAccessibleRole() const
         return css::accessibility::AccessibleRole::UNKNOWN;
 
     sal_uInt16 nRole = mpAccessibleData->getAccessibleRole();
+
     if (nRole == css::accessibility::AccessibleRole::UNKNOWN)
         nRole = getDefaultAccessibleRole();
 
@@ -449,12 +464,12 @@ sal_uInt16 Window::GetAccessibleRole() const
 
 void Window::SetAccessibleName( const OUString& rName )
 {
-    if (mpAccessibleData)
-    {
-        OUString oldName = GetAccessibleName();
-        mpAccessibleData->setAccessibleName(rName);
-        CallEventListeners(VclEventId::WindowFrameTitleChanged, &oldName);
-    }
+    if (!mpAccessibleData)
+        return;
+
+    OUString oldName = GetAccessibleName();
+    mpAccessibleData->setAccessibleName(rName);
+    CallEventListeners(VclEventId::WindowFrameTitleChanged, &oldName);
 }
 
 OUString Window::GetAccessibleName() const
@@ -533,12 +548,14 @@ OUString Window::getDefaultAccessibleName() const
 
 void Window::SetAccessibleDescription( const OUString& rDescription )
 {
-    if (mpAccessibleData)
-    {
-        std::optional<OUString> currentDesc = mpAccessibleData->getAccessibleDescription();
-        SAL_WARN_IF(currentDesc && *currentDesc != rDescription, "vcl", "AccessibleDescription already set");
-        mpAccessibleData->setAccessibleDescription(rDescription);
-    }
+    if (!mpAccessibleData)
+        return;
+
+    std::optional<OUString> currentDesc = mpAccessibleData->getAccessibleDescription();
+
+    SAL_WARN_IF(currentDesc && *currentDesc != rDescription, "vcl", "AccessibleDescription already set");
+
+    mpAccessibleData->setAccessibleDescription(rDescription);
 }
 
 OUString Window::GetAccessibleDescription() const
@@ -551,8 +568,7 @@ OUString Window::GetAccessibleDescription() const
 
     // Special code for help text windows. ZT asks the border window for the
     // description so we have to forward this request to our inner window.
-    const vcl::Window* pWin = this->ImplGetWindow();
-    if (pWin->GetType() == WindowType::HELPTEXTWINDOW)
+    if (const vcl::Window* pWin = this->ImplGetWindow(); pWin->GetType() == WindowType::HELPTEXTWINDOW)
         return pWin->GetHelpText();
 
     return GetHelpText();
@@ -607,16 +623,16 @@ vcl::Window* Window::GetAccessibleRelationLabeledBy() const
     if (vcl::Window* pWin = mpAccessibleData->getAccessibleRelationLabeledBy())
         return pWin;
 
-    auto const& aMnemonicLabels = list_mnemonic_labels();
-    if (!aMnemonicLabels.empty())
+    if (auto const& rMnemonicLabels = list_mnemonic_labels(); !rMnemonicLabels.empty())
     {
         //if we have multiple labels, then prefer the first that is visible
-        for (auto const & rCandidate : aMnemonicLabels)
+        for (auto const & rCandidate : rMnemonicLabels)
         {
             if (rCandidate->IsVisible())
                 return rCandidate;
         }
-        return aMnemonicLabels[0];
+
+        return rMnemonicLabels[0];
     }
 
     if (!isContainerWindow(this) && !isContainerWindow(GetParent()))
@@ -628,12 +644,15 @@ vcl::Window* Window::GetAccessibleRelationLabeledBy() const
 bool Window::AreAccessibilityEventsSuppressed()
 {
     vcl::Window *pParent = this;
+
     while (pParent && pParent->mpClassification)
     {
         if (pParent->mpAccessibleData && pParent->mpAccessibleData->isEventsSuspended())
             return true;
+
         pParent = pParent->GetParent();
     }
+
     return false;
 }
 
