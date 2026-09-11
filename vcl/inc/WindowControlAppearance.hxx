@@ -38,8 +38,6 @@ struct WindowControlAppearance
 
     WindowControlAppearance() = default;
 
-    vcl::Cursor* getCursor() const { return mpCursor; }
-
     void setPointer(PointerStyle ePointer);
 
     bool hasControlFont() const;
@@ -59,7 +57,11 @@ struct WindowControlAppearance
     bool setControlBackground();
     bool setControlBackground(const Color& rColor);
 
+    vcl::Cursor* getCursor() const { return mpCursor; }
     void setCursor(vcl::Cursor* pCursor);
+
+    bool suspendCursor();
+    void resumeCursor(bool bRestore = false);
     void hideCursor();
     void showCursor();
 };

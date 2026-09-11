@@ -41,6 +41,20 @@ void WindowControlAppearance::setCursor(vcl::Cursor* pCursor)
     showCursor();
 }
 
+void WindowControlAppearance::resumeCursor(bool bRestore)
+{
+    if (mpCursor)
+        mpCursor->ImplResume(bRestore);
+}
+
+bool WindowControlAppearance::suspendCursor()
+{
+    if (!mpCursor)
+        return false;
+
+    return mpCursor->ImplSuspend();
+}
+
 bool WindowControlAppearance::hasControlFont() const { return mpControlFont.has_value(); }
 
 vcl::Font WindowControlAppearance::getControlFont() const

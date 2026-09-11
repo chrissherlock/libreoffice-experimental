@@ -57,8 +57,8 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
 {
     pHelper->SetPop();
 
-    if ( mpControlAppearance &&  mpControlAppearance->mpCursor )
-        pHelper->SetRestoreCursor(mpControlAppearance->mpCursor->ImplSuspend());
+    if (mpControlAppearance->getCursor())
+        pHelper->SetRestoreCursor(mpControlAppearance->suspendCursor());
 
     GetOutDev()->GetClipState().Invalidate();
     mpInvalidation->mbInPaint = true;
@@ -106,8 +106,8 @@ void Window::PopPaintHelper(PaintHelper const *pHelper)
     GetOutDev()->GetClipState().Invalidate();
     mpInvalidation->mpPaintRegion = nullptr;
 
-    if (mpControlAppearance->mpCursor)
-        mpControlAppearance->mpCursor->ImplResume(pHelper->GetRestoreCursor());
+    if (mpControlAppearance->getCursor())
+        mpControlAppearance->resumeCursor(pHelper->GetRestoreCursor());
 }
 
 void Window::ImplCallPaint(const vcl::Region* pRegion, ImplPaintFlags nPaintFlags)
@@ -1244,8 +1244,8 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if ( !nHorzScroll && !nVertScroll )
         return;
 
-    if (mpControlAppearance &&  mpControlAppearance->mpCursor)
-        mpControlAppearance->mpCursor->ImplSuspend();
+    if (mpControlAppearance->getCursor())
+        mpControlAppearance->suspendCursor();
 
     ScrollFlags nOrgFlags = nFlags;
     if ( !(nFlags & (ScrollFlags::Children | ScrollFlags::NoChildren)) )
@@ -1400,8 +1400,8 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if ( nFlags & ScrollFlags::Update )
         PaintImmediately();
 
-    if (mpControlAppearance && mpControlAppearance->mpCursor)
-        mpControlAppearance->mpCursor->ImplResume();
+    if (mpControlAppearance->getCursor())
+        mpControlAppearance->resumeCursor();
 }
 
 } /* namespace vcl */
