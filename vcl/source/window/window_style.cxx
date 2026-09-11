@@ -314,34 +314,14 @@ void Window::ApplyControlFont(vcl::RenderContext& rRenderContext, const vcl::Fon
 
 void Window::SetControlForeground()
 {
-    if (mpControlAppearance && mpControlAppearance->mbControlForeground)
-    {
-        mpControlAppearance->maControlForeground = COL_TRANSPARENT;
-        mpControlAppearance->mbControlForeground = false;
+    if (mpControlAppearance->setControlForeground())
         CompatStateChanged(StateChangedType::ControlForeground);
-    }
 }
 
 void Window::SetControlForeground(const Color& rColor)
 {
-    if (rColor.IsTransparent())
-    {
-        if (mpControlAppearance && mpControlAppearance->mbControlForeground)
-        {
-            mpControlAppearance->maControlForeground = COL_TRANSPARENT;
-            mpControlAppearance->mbControlForeground = false;
-            CompatStateChanged(StateChangedType::ControlForeground);
-        }
-    }
-    else
-    {
-        if (mpControlAppearance && mpControlAppearance->maControlForeground != rColor)
-        {
-            mpControlAppearance->maControlForeground = rColor;
-            mpControlAppearance->mbControlForeground = true;
-            CompatStateChanged(StateChangedType::ControlForeground);
-        }
-    }
+    if (mpControlAppearance->setControlForeground(rColor))
+        CompatStateChanged(StateChangedType::ControlForeground);
 }
 
 void Window::ApplyControlForeground(vcl::RenderContext& rRenderContext, const Color& rDefaultColor)
@@ -354,37 +334,14 @@ void Window::ApplyControlForeground(vcl::RenderContext& rRenderContext, const Co
 
 void Window::SetControlBackground()
 {
-    if (mpControlAppearance && mpControlAppearance->mbControlBackground)
-    {
-        mpControlAppearance->maControlBackground = COL_TRANSPARENT;
-        mpControlAppearance->mbControlBackground = false;
+    if (mpControlAppearance->setControlBackground())
         CompatStateChanged(StateChangedType::ControlBackground);
-    }
 }
 
 void Window::SetControlBackground(const Color& rColor)
 {
-    if (!mpControlAppearance)
-        return;
-
-    if (rColor.IsTransparent())
-    {
-        if (mpControlAppearance->mbControlBackground)
-        {
-            mpControlAppearance->maControlBackground = COL_TRANSPARENT;
-            mpControlAppearance->mbControlBackground = false;
-            CompatStateChanged(StateChangedType::ControlBackground);
-        }
-    }
-    else
-    {
-        if (mpControlAppearance->maControlBackground != rColor)
-        {
-            mpControlAppearance->maControlBackground = rColor;
-            mpControlAppearance->mbControlBackground = true;
-            CompatStateChanged(StateChangedType::ControlBackground);
-        }
-    }
+    if (mpControlAppearance->setControlBackground(rColor))
+        CompatStateChanged(StateChangedType::ControlBackground);
 }
 
 void Window::ApplyControlBackground(vcl::RenderContext& rRenderContext, const Color& rDefaultColor)
@@ -403,6 +360,7 @@ WindowExtendedStyle Window::GetExtendedStyle() const
 {
     return mpStyleState ? mpStyleState->mnExtendedStyle : WindowExtendedStyle::NONE;
 }
+
 } // end vcl namespace
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
