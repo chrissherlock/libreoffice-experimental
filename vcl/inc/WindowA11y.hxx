@@ -22,6 +22,11 @@ class VCLXWindow;
 class FixedText;
 struct ImplAccessibleInfos;
 
+namespace vcl
+{
+class Window;
+}
+
 struct WindowA11y
 {
 private:
