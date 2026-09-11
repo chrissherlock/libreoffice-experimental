@@ -353,7 +353,7 @@ void Edit::ApplySettings(vcl::RenderContext& rRenderContext)
     Color aTextColor = rStyleSettings.GetFieldTextColor();
     ApplyControlForeground(rRenderContext, aTextColor);
 
-    if (IsControlBackground())
+    if (HasControlBackground())
     {
         rRenderContext.SetBackground(GetControlBackground());
         rRenderContext.SetFillColor(GetControlBackground());
@@ -361,7 +361,7 @@ void Edit::ApplySettings(vcl::RenderContext& rRenderContext)
         if (ImplUseNativeBorder(rRenderContext, GetStyle()))
         {
             // indicates that no non-native drawing of background should take place
-            mpControlAppearance->meNativeBackground = ControlPart::Entire;
+            mpControlAppearance->useEntireNativeBackground();
         }
     }
     else if (ImplUseNativeBorder(rRenderContext, GetStyle()))
@@ -470,7 +470,7 @@ void Edit::ImplRepaint(vcl::RenderContext& rRenderContext, const tools::Rectangl
         rRenderContext.SetTextColor(rStyleSettings.GetDisableTextColor());
 
     // Set background color of the normal text
-    if (mbForceControlBackground && IsControlBackground())
+    if (mbForceControlBackground && HasControlBackground())
     {
         // check if we need to set ControlBackground even in NWF case
         rRenderContext.Push(vcl::PushFlags::FILLCOLOR | vcl::PushFlags::LINECOLOR);
@@ -484,7 +484,7 @@ void Edit::ImplRepaint(vcl::RenderContext& rRenderContext, const tools::Rectangl
     else if (IsPaintTransparent() || ImplUseNativeBorder(rRenderContext, GetStyle()))
         rRenderContext.SetTextFillColor();
     else
-        rRenderContext.SetTextFillColor(IsControlBackground() ? GetControlBackground() : rStyleSettings.GetFieldColor());
+        rRenderContext.SetTextFillColor(HasControlBackground() ? GetControlBackground() : rStyleSettings.GetFieldColor());
 
     ImplPaintBorder(rRenderContext);
 
@@ -551,14 +551,14 @@ void Edit::ImplRepaint(vcl::RenderContext& rRenderContext, const tools::Rectangl
             // Set background color when part of the text is selected
             if (ImplUseNativeBorder(rRenderContext, GetStyle()))
             {
-                if( mbForceControlBackground && IsControlBackground() )
+                if( mbForceControlBackground && HasControlBackground() )
                     rRenderContext.SetTextFillColor(GetControlBackground());
                 else
                     rRenderContext.SetTextFillColor();
             }
             else
             {
-                rRenderContext.SetTextFillColor(IsControlBackground() ? GetControlBackground() : rStyleSettings.GetFieldColor());
+                rRenderContext.SetTextFillColor(HasControlBackground() ? GetControlBackground() : rStyleSettings.GetFieldColor());
             }
         }
         rRenderContext.DrawText(aPos, aText, 0, nLen);
@@ -581,7 +581,7 @@ void Edit::ImplRepaint(vcl::RenderContext& rRenderContext, const tools::Rectangl
                     if (IsPaintTransparent())
                         rRenderContext.SetTextFillColor();
                     else
-                        rRenderContext.SetTextFillColor(IsControlBackground() ? GetControlBackground() : rStyleSettings.GetFieldColor());
+                        rRenderContext.SetTextFillColor(HasControlBackground() ? GetControlBackground() : rStyleSettings.GetFieldColor());
                     aRegion = aNormalClipRegion;
                 }
                 else
@@ -1738,7 +1738,7 @@ void Edit::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags nFla
     rDev.SetLineColor();
     rDev.SetFillColor();
     bool bBorder = (GetStyle() & WB_BORDER);
-    bool bBackground = IsControlBackground();
+    bool bBackground = HasControlBackground();
     if ( bBorder || bBackground )
     {
         tools::Rectangle aRect( aPos, aSize );

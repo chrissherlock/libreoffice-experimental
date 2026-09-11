@@ -478,7 +478,7 @@ void OutputDevice::ImplDrawText( SalLayout& rSalLayout )
 
     rSalLayout.DrawBase() += basegfx::B2DPoint(mnTextOffX, mnTextOffY);
 
-    if( IsTextFillColor() )
+    if( HasTextFillColor() )
         ImplDrawTextBackground( rSalLayout );
 
     if( mbTextSpecial )
@@ -1489,7 +1489,7 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
         if( rStyleSettings.GetHighContrastMode() )
         {
             Color aCol;
-            if( rTargetDevice.IsBackground() )
+            if( rTargetDevice.HasBackground() )
                 aCol = rTargetDevice.GetBackground().GetColor();
             else
                 // best guess is the face color here
@@ -1502,7 +1502,7 @@ void OutputDevice::ImplDrawText( OutputDevice& rTargetDevice, const tools::Recta
         }
 
         aOldTextColor = rTargetDevice.GetTextColor();
-        if ( rTargetDevice.IsTextFillColor() )
+        if ( rTargetDevice.HasTextFillColor() )
         {
             bRestoreFillColor = true;
             aOldTextFillColor = rTargetDevice.GetTextFillColor();
@@ -2059,7 +2059,7 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
         const StyleSettings& rStyleSettings( GetSettings().GetStyleSettings() );
         if( rStyleSettings.GetHighContrastMode() )
         {
-            if( IsBackground() )
+            if( HasBackground() )
             {
                 Wallpaper aWall = GetBackground();
                 Color aCol = aWall.GetColor();
@@ -2069,7 +2069,7 @@ void OutputDevice::DrawCtrlText( const Point& rPos, const OUString& rStr,
         }
 
         oOldTextColor = GetTextColor();
-        if ( IsTextFillColor() )
+        if ( HasTextFillColor() )
             oOldTextFillColor = GetTextFillColor();
 
         if( bHighContrastBlack )

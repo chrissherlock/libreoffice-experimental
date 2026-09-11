@@ -906,7 +906,7 @@ void DbGridControl::ImplInitWindow( const InitWindowFacet _eInitWhat )
         {
             const StyleSettings& rStyleSettings = Application::GetSettings().GetStyleSettings();
             vcl::Font aFont = rStyleSettings.GetToolFont();
-            if (IsControlFont())
+            if (HasControlFont())
                 aFont.Merge(GetControlFont());
 
             m_aBar->SetPointFontAndZoom(aFont, GetZoom());
@@ -916,7 +916,7 @@ void DbGridControl::ImplInitWindow( const InitWindowFacet _eInitWhat )
     if ( !(_eInitWhat & InitWindowFacet::Background) )
         return;
 
-    if (IsControlBackground())
+    if (HasControlBackground())
     {
         GetDataWindow().SetBackground(GetControlBackground());
         GetDataWindow().SetControlBackground(GetControlBackground());

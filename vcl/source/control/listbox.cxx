@@ -345,7 +345,7 @@ void ListBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags n
     rDev.SetLineColor();
     rDev.SetFillColor();
     bool bBorder = (GetStyle() & WB_BORDER);
-    bool bBackground = IsControlBackground();
+    bool bBackground = HasControlBackground();
     if ( bBorder || bBackground )
     {
         tools::Rectangle aRect( aPos, aSize );

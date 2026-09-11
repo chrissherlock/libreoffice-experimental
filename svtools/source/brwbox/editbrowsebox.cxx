@@ -768,7 +768,7 @@ void EditBrowseBox::ImplInitSettings( bool bFont, bool bForeground, bool bBackgr
     if (bFont)
     {
         vcl::Font aFont = rStyleSettings.GetFieldFont();
-        if (IsControlFont())
+        if (HasControlFont())
         {
             GetDataWindow().SetControlFont(GetControlFont());
             aFont.Merge(GetControlFont());
@@ -782,7 +782,7 @@ void EditBrowseBox::ImplInitSettings( bool bFont, bool bForeground, bool bBackgr
     if (bFont || bForeground)
     {
         Color aTextColor = rStyleSettings.GetFieldTextColor();
-        if (IsControlForeground())
+        if (HasControlForeground())
         {
             aTextColor = GetControlForeground();
             GetDataWindow().SetControlForeground(aTextColor);
@@ -796,7 +796,7 @@ void EditBrowseBox::ImplInitSettings( bool bFont, bool bForeground, bool bBackgr
     if (!bBackground) // FIXME: Outside of Paint Hierarchy
         return;
 
-    if (GetDataWindow().IsControlBackground())
+    if (GetDataWindow().HasControlBackground())
     {
         GetDataWindow().SetControlBackground(GetControlBackground());
         GetDataWindow().SetBackground(GetDataWindow().GetControlBackground());

@@ -739,8 +739,8 @@ void vcl::Window::ImplClearFocus()
 
     pSVData->mpWinData->mpFocusWin = nullptr;
 
-    if (ImplGetControlAppearance() && ImplGetControlAppearance()->mpCursor)
-        ImplGetControlAppearance()->mpCursor->ImplHide();
+    if (ImplGetControlAppearance() && ImplGetControlAppearance()->getCursor())
+        ImplGetControlAppearance()->hideCursor();
 }
 
 static bool lcl_CanDeactivateWindow(const vcl::Window* pOverlapWindow,

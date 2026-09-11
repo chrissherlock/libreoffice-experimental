@@ -94,7 +94,7 @@ bool Window::set_font_attribute(const OUString& rKey, std::u16string_view rValue
     else if (rKey == "scale")
     {
         // if no control font was set yet, take the underlying font from the device
-        vcl::Font aFont(IsControlFont() ? GetControlFont() : GetPointFont(*GetOutDev()));
+        vcl::Font aFont(HasControlFont() ? GetControlFont() : GetPointFont(*GetOutDev()));
         aFont.SetFontHeight(aFont.GetFontHeight() * o3tl::toDouble(rValue));
         SetControlFont(aFont);
     }

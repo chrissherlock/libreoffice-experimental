@@ -760,7 +760,7 @@ void BrowseBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
     rDev.SetClipRegion(rDev.convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)));
 
     // do we have to paint the background
-    bool bBackground = pDataWin->IsControlBackground();
+    bool bBackground = pDataWin->HasControlBackground();
     if ( bBackground )
     {
         tools::Rectangle aRect( aRealPos.get(), aRealSize );

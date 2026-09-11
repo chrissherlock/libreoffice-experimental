@@ -69,13 +69,13 @@ void OutputDevice::LegacyPush(vcl::PushFlags nFlags)
     if (nFlags & vcl::PushFlags::TEXTCOLOR)
         rState.mpTextColor = GetTextColor();
 
-    if (nFlags & vcl::PushFlags::TEXTFILLCOLOR && IsTextFillColor())
+    if (nFlags & vcl::PushFlags::TEXTFILLCOLOR && HasTextFillColor())
         rState.mpTextFillColor = GetTextFillColor();
 
-    if (nFlags & vcl::PushFlags::TEXTLINECOLOR && IsTextLineColor())
+    if (nFlags & vcl::PushFlags::TEXTLINECOLOR && HasTextLineColor())
         rState.mpTextLineColor = GetTextLineColor();
 
-    if (nFlags & vcl::PushFlags::OVERLINECOLOR && IsOverlineColor())
+    if (nFlags & vcl::PushFlags::OVERLINECOLOR && HasOverlineColor())
         rState.mpOverlineColor = GetOverlineColor();
 
     if (nFlags & vcl::PushFlags::TEXTALIGN)

@@ -57,7 +57,7 @@ void OutputDevice::DrawPixel( const Point& rPt )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaPointAction( rPt ) );
 
-    if ( !IsDeviceOutputNecessary() || !IsLineColor() || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !HasLineColor() || ImplIsRecordLayout() )
     {
         std::cerr << "  ! DrawPixel skipped (Invisible/RecordLayout)" << std::endl;
         return;

@@ -474,7 +474,7 @@ Font
 Control::GetUnzoomedControlPointFont() const
 {
     Font aFont(GetCanonicalFont(GetSettings().GetStyleSettings()));
-    if (IsControlFont())
+    if (HasControlFont())
         aFont.Merge(GetControlFont());
     return aFont;
 }

@@ -249,7 +249,7 @@ void ToolBox::ImplCheckUpdate()
     // this must not be done when we're already in Paint()
 
     // this is only required for transparent toolbars (see ImplDrawTransparentBackground() )
-    if( !IsBackground() && HasPaintEvent() && !IsInPaint() )
+    if( !HasBackground() && HasPaintEvent() && !IsInPaint() )
         PaintImmediately();
 }
 
@@ -337,7 +337,7 @@ void ToolBox::ImplDrawGradientBackground(vcl::RenderContext& rRenderContext)
     g.SetStartColor(startCol);
     g.SetEndColor(endCol);
 
-    bool bLineColor = rRenderContext.IsLineColor();
+    bool bLineColor = rRenderContext.HasLineColor();
     Color aOldCol = rRenderContext.GetLineColor();
     rRenderContext.SetLineColor(rRenderContext.GetSettings().GetStyleSettings().GetShadowColor());
 
@@ -500,7 +500,7 @@ void ToolBox::ImplDrawBackground(vcl::RenderContext& rRenderContext, const tools
     if (!pWrapper)
     {
         // no gradient for ordinary toolbars (not dockable)
-        if( !IsBackground() && !IsInPaint() )
+        if( !HasBackground() && !IsInPaint() )
             ImplDrawTransparentBackground(aPaintRegion);
         else
             ImplDrawConstantBackground(rRenderContext, aPaintRegion, bIsInPopupMode);
@@ -515,7 +515,7 @@ void ToolBox::ImplDrawBackground(vcl::RenderContext& rRenderContext, const tools
             bNativeOk = ImplDrawNativeBackground(rRenderContext);
         if (!bNativeOk)
         {
-            if (!IsBackground())
+            if (!HasBackground())
             {
                 if (!IsInPaint())
                     ImplDrawTransparentBackground(aPaintRegion);
@@ -1183,7 +1183,7 @@ void ToolBox::ImplInit( vcl::Window* pParent, WinBits nStyle )
 void ToolBox::ApplyForegroundSettings(vcl::RenderContext& rRenderContext, const StyleSettings& rStyleSettings)
 {
     Color aColor;
-    if (IsControlForeground())
+    if (HasControlForeground())
         aColor = GetControlForeground();
     else if (Window::GetStyle() & WB_3DLOOK)
         aColor = rStyleSettings.GetButtonTextColor();
@@ -1195,7 +1195,7 @@ void ToolBox::ApplyForegroundSettings(vcl::RenderContext& rRenderContext, const 
 
 void ToolBox::ApplyBackgroundSettings(vcl::RenderContext& rRenderContext, const StyleSettings& rStyleSettings)
 {
-    if (IsControlBackground())
+    if (HasControlBackground())
     {
         rRenderContext.SetBackground(GetControlBackground());
         SetPaintTransparent(false);

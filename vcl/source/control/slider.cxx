@@ -75,7 +75,7 @@ Slider::~Slider()
 void Slider::ImplInitSettings()
 {
     vcl::Window* pParent = GetParent();
-    if ( pParent->IsChildTransparentModeEnabled() && !IsControlBackground() )
+    if ( pParent->IsChildTransparentModeEnabled() && !HasControlBackground() )
     {
         EnableChildTransparentMode();
         vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
@@ -89,7 +89,7 @@ void Slider::ImplInitSettings()
     vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
     SetPaintTransparent( false );
 
-    if ( IsControlBackground() )
+    if ( HasControlBackground() )
         SetBackground( GetControlBackground() );
     else
         SetBackground( pParent->GetBackground() );
@@ -191,7 +191,7 @@ void Slider::ImplUpdateRects( bool bUpdate )
         vcl::Region aInvalidRegion( aOldThumbRect );
         aInvalidRegion.Union( maThumbRect );
 
-        if( !IsBackground() && GetParent() )
+        if( !HasBackground() && GetParent() )
         {
             const Point aPos( GetPosPixel() );
             aInvalidRegion.Move( aPos.X(), aPos.Y() );

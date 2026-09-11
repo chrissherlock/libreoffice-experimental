@@ -212,12 +212,12 @@ sal_Int32 SAL_CALL AccessibleGridControlBase::getForeground(  )
     ensureAlive();
 
     Color nColor;
-    if (m_rTable.IsControlForeground())
+    if (m_rTable.HasControlForeground())
         nColor = m_rTable.GetControlForeground();
     else
     {
         vcl::Font aFont;
-        if (m_rTable.IsControlFont())
+        if (m_rTable.HasControlFont())
             aFont = m_rTable.GetControlFont();
         else
             aFont = m_rTable.GetFont();
@@ -232,7 +232,7 @@ sal_Int32 SAL_CALL AccessibleGridControlBase::getBackground(  )
 
     ensureAlive();
     Color nColor;
-    if (m_rTable.IsControlBackground())
+    if (m_rTable.HasControlBackground())
         nColor = m_rTable.GetControlBackground();
     else
         nColor = m_rTable.GetBackground().GetColor();

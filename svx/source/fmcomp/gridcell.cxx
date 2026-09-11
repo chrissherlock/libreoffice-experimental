@@ -725,7 +725,7 @@ void DbCellControl::ImplInitWindow( vcl::Window const & rParent, const InitWindo
             vcl::Font aFont = rStyleSettings.GetFieldFont();
             aFont.SetTransparent(isTransparent());
 
-            if (rParent.IsControlFont())
+            if (rParent.HasControlFont())
                 aFont.Merge(rParent.GetControlFont());
 
             if (fZoom != 1.0)
@@ -742,9 +742,9 @@ void DbCellControl::ImplInitWindow( vcl::Window const & rParent, const InitWindo
 
     if ((_eInitWhat & InitWindowFacet::Font) || (_eInitWhat & InitWindowFacet::Foreground))
     {
-        Color aTextColor(rParent.IsControlForeground() ? rParent.GetControlForeground() : rParent.GetTextColor());
+        Color aTextColor(rParent.HasControlForeground() ? rParent.GetControlForeground() : rParent.GetTextColor());
 
-        bool bTextLineColor = rParent.IsTextLineColor();
+        bool bTextLineColor = rParent.HasTextLineColor();
         Color aTextLineColor(rParent.GetTextLineColor());
 
         for (svt::ControlBase* pWindow : pWindows)
@@ -752,7 +752,7 @@ void DbCellControl::ImplInitWindow( vcl::Window const & rParent, const InitWindo
             if (pWindow)
             {
                 pWindow->SetTextColor(aTextColor);
-                if (rParent.IsControlForeground())
+                if (rParent.HasControlForeground())
                     pWindow->SetControlForeground(aTextColor);
 
                 if (bTextLineColor)
@@ -766,7 +766,7 @@ void DbCellControl::ImplInitWindow( vcl::Window const & rParent, const InitWindo
     if (!(_eInitWhat & InitWindowFacet::Background))
         return;
 
-    if (rParent.IsControlBackground())
+    if (rParent.HasControlBackground())
     {
         Color aColor(rParent.GetControlBackground());
         for (svt::ControlBase* pWindow : pWindows)

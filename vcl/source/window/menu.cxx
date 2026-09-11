@@ -1962,7 +1962,7 @@ void Menu::ImplPaint(vcl::RenderContext& rRenderContext, Size const & rSize,
                     // DrawTextFlags::Disable), temporarily set a background which
                     // hopefully matches the NWF background since it is read
                     // from the system style settings
-                    bool bSetTmpBackground = !rRenderContext.IsBackground()
+                    bool bSetTmpBackground = !rRenderContext.HasBackground()
                                            && rRenderContext.IsNativeControlSupported(ControlType::MenuPopup, ControlPart::Entire);
                     if (bSetTmpBackground)
                     {

@@ -391,7 +391,7 @@ void ScrollBar::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags
         // DecoView uses the FaceColor...
         AllSettings aSettings = rDev.GetSettings();
         StyleSettings aStyleSettings = aSettings.GetStyleSettings();
-        if ( IsControlBackground() )
+        if ( HasControlBackground() )
             aStyleSettings.SetFaceColor( GetControlBackground() );
         else
             aStyleSettings.SetFaceColor( GetSettings().GetStyleSettings().GetFaceColor() );
@@ -1519,7 +1519,7 @@ ScrollBarBox::ScrollBarBox( vcl::Window* pParent, WinBits nStyle ) :
 
 void ScrollBarBox::ApplySettings(vcl::RenderContext& rRenderContext)
 {
-    if (rRenderContext.IsBackground())
+    if (rRenderContext.HasBackground())
     {
         Color aColor = rRenderContext.GetSettings().GetStyleSettings().GetFaceColor();
         ApplyControlBackground(rRenderContext, aColor);

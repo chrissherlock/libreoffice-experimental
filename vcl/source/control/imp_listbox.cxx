@@ -502,7 +502,7 @@ void ImplListBoxWindow::ApplySettings(vcl::RenderContext& rRenderContext)
     ApplyControlFont(rRenderContext, rStyleSettings.GetFieldFont());
     ApplyControlForeground(rRenderContext, rStyleSettings.GetListBoxWindowTextColor());
 
-    if (IsControlBackground())
+    if (HasControlBackground())
         rRenderContext.SetBackground(GetControlBackground());
     else
         rRenderContext.SetBackground(rStyleSettings.GetListBoxWindowBackgroundColor());
@@ -2594,7 +2594,7 @@ void ImplWin::ImplDraw(vcl::RenderContext& rRenderContext, bool bLayout)
                 nState |= ControlState::ROLLOVER;
 
             Color aBackgroundColor = COL_AUTO;
-            if (IsControlBackground())
+            if (HasControlBackground())
                 aBackgroundColor = GetControlBackground();
 
             // if parent has no border, then nobody has drawn the background
@@ -2631,7 +2631,7 @@ void ImplWin::ImplDraw(vcl::RenderContext& rRenderContext, bool bLayout)
             else
             {
                 Color aColor;
-                if (IsControlForeground())
+                if (HasControlForeground())
                     aColor = GetControlForeground();
                 else if (ImplGetSVData()->maNWFData.mbDDListBoxNoTextArea)
                 {
@@ -2670,7 +2670,7 @@ void ImplWin::ApplySettings(vcl::RenderContext& rRenderContext)
     ApplyControlFont(rRenderContext, rStyleSettings.GetFieldFont());
     ApplyControlForeground(rRenderContext, rStyleSettings.GetFieldTextColor());
 
-    if (IsControlBackground())
+    if (HasControlBackground())
         rRenderContext.SetBackground(GetControlBackground());
     else
         rRenderContext.SetBackground(rStyleSettings.GetFieldColor());

@@ -1128,7 +1128,7 @@ void SplitWindow::ImplInitSettings()
     const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
 
     Color aColor;
-    if ( IsControlBackground() )
+    if ( HasControlBackground() )
         aColor = GetControlBackground();
     else if ( Window::GetStyle() & WB_3DLOOK )
         aColor = rStyleSettings.GetFaceColor();

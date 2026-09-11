@@ -132,7 +132,7 @@ void SpinButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlag
         // DecoView uses the FaceColor...
         AllSettings aSettings = rDev.GetSettings();
         StyleSettings aStyleSettings = aSettings.GetStyleSettings();
-        if ( IsControlBackground() )
+        if ( HasControlBackground() )
             aStyleSettings.SetFaceColor( GetControlBackground() );
         else
             aStyleSettings.SetFaceColor( GetSettings().GetStyleSettings().GetFaceColor() );

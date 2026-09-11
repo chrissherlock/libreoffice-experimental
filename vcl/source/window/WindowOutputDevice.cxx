@@ -354,8 +354,8 @@ css::awt::DeviceInfo WindowOutputDevice::GetDeviceInfo() const
 void WindowOutputDevice::ImplInitMapModeObjects()
 {
     OutputDevice::ImplInitMapModeObjects();
-    if (mxOwnerWindow->mpControlAppearance->mpCursor)
-        mxOwnerWindow->mpControlAppearance->mpCursor->ImplNew();
+    if (mxOwnerWindow->mpControlAppearance->getCursor())
+        mxOwnerWindow->mpControlAppearance->updateCursor();
 }
 
 void WindowOutputDevice::EnableRTL ( bool bEnable )

@@ -222,6 +222,8 @@ void TableControl::dispose()
     m_pDataWindow.disposeAndClear();
     m_pTableFunctionSet.reset();
     m_pSelEngine.reset();
+
+    Control::dispose();
 }
 
 void TableControl::GetFocus()
@@ -306,21 +308,21 @@ void TableControl::StateChanged(StateChangedType i_nStateChange)
             break;
 
         case StateChangedType::ControlBackground:
-            if (IsControlBackground())
+            if (HasControlBackground())
                 getDataWindow().SetControlBackground(GetControlBackground());
             else
                 getDataWindow().SetControlBackground();
             break;
 
         case StateChangedType::ControlForeground:
-            if (IsControlForeground())
+            if (HasControlForeground())
                 getDataWindow().SetControlForeground(GetControlForeground());
             else
                 getDataWindow().SetControlForeground();
             break;
 
         case StateChangedType::ControlFont:
-            if (IsControlFont())
+            if (HasControlFont())
                 getDataWindow().SetControlFont(GetControlFont());
             else
                 getDataWindow().SetControlFont();
@@ -606,23 +608,18 @@ void TableControl::impl_ni_updateCachedTableMetrics()
                             ->Height();
 
     m_nColHeaderHeightPixel = 0;
-
     if (m_pModel->hasColumnHeaders())
-    {
         m_nColHeaderHeightPixel
             = convertTo<vcl::WindowSize>(vcl::LogicSize(0, m_pModel->getColumnHeaderHeight()),
                                          MapMode(MapUnit::MapAppFont))
                   ->Height();
-    }
 
     m_nRowHeaderWidthPixel = 0;
     if (m_pModel->hasRowHeaders())
-    {
         m_nRowHeaderWidthPixel
             = convertTo<vcl::WindowSize>(vcl::LogicSize(m_pModel->getRowHeaderWidth(), 0),
                                          MapMode(MapUnit::MapAppFont))
                   ->Width();
-    }
 }
 
 void TableControl::impl_ni_updateCachedModelValues()

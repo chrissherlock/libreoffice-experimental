@@ -1159,7 +1159,7 @@ void ComboBox::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlags 
     rDev.SetLineColor();
     rDev.SetFillColor();
     const bool bBorder = (GetStyle() & WB_BORDER);
-    const bool bBackground = IsControlBackground();
+    const bool bBackground = HasControlBackground();
     if ( bBorder || bBackground )
     {
         tools::Rectangle aRect( aPos, aSize );
@@ -1334,7 +1334,7 @@ tools::Rectangle ComboBox::GetDropDownPosSizePixel() const
 
 const Wallpaper& ComboBox::GetDisplayBackground() const
 {
-    if (!m_pSubEdit->IsBackground())
+    if (!m_pSubEdit->HasBackground())
         return Control::GetDisplayBackground();
 
     const Wallpaper& rBack = m_pSubEdit->GetBackground();

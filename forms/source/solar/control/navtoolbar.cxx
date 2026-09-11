@@ -562,7 +562,7 @@ namespace frm
 
     void NavigationToolBar::setItemControlFont( sal_uInt16 /* _nItemId */, vcl::Window* _pItemWindow ) const
     {
-        if ( IsControlFont() )
+        if ( HasControlFont() )
             _pItemWindow->SetControlFont( GetControlFont() );
         else
             _pItemWindow->SetControlFont( );
@@ -570,7 +570,7 @@ namespace frm
 
     void NavigationToolBar::setItemControlForeground( sal_uInt16 /* _nItemId */, vcl::Window* _pItemWindow ) const
     {
-        if ( IsControlForeground() )
+        if ( HasControlForeground() )
             _pItemWindow->SetControlForeground( GetControlForeground() );
         else
             _pItemWindow->SetControlForeground( );

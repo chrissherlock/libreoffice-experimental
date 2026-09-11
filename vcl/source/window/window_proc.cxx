@@ -314,8 +314,8 @@ static void lcl_HandleGetFocus(vcl::Window* pWindow)
         = Application::PostUserEvent(LINK(pWindow, vcl::Window, ImplAsyncFocusHdl), nullptr, true);
 
     if (vcl::Window* pFocusWin = pWindow->ImplGetPlatformState()->mpFrameData->mpFocusWin;
-        pFocusWin && pFocusWin->ImplGetControlAppearance()->mpCursor)
-        pFocusWin->ImplGetControlAppearance()->mpCursor->ImplShow();
+        pFocusWin && pFocusWin->ImplGetControlAppearance()->getCursor())
+        pFocusWin->ImplGetControlAppearance()->showCursor();
 }
 
 static bool lcl_HasActiveTrackerForFrame(const vcl::Window* pWindow)
@@ -361,8 +361,8 @@ static void lcl_HandleLoseFocus(vcl::Window* pWindow)
         }
 
         if (vcl::Window* pFocusWin = pWindow->ImplGetPlatformState()->mpFrameData->mpFocusWin;
-            pFocusWin && pFocusWin->ImplGetControlAppearance()->mpCursor)
-            pFocusWin->ImplGetControlAppearance()->mpCursor->ImplHide();
+            pFocusWin && pFocusWin->ImplGetControlAppearance()->getCursor())
+            pFocusWin->ImplGetControlAppearance()->hideCursor();
     }
 
     // Make sure that no menu is visible when a toplevel window loses focus.

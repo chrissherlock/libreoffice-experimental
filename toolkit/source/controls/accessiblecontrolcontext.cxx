@@ -263,12 +263,12 @@ sal_Int32 SAL_CALL OAccessibleControlContext::getForeground()
     Color nColor;
     if (pWindow)
     {
-        if (pWindow->IsControlForeground())
+        if (pWindow->HasControlForeground())
             nColor = pWindow->GetControlForeground();
         else
         {
             vcl::Font aFont;
-            if (pWindow->IsControlFont())
+            if (pWindow->HasControlFont())
                 aFont = pWindow->GetControlFont();
             else
                 aFont = pWindow->GetFont();
@@ -288,7 +288,7 @@ sal_Int32 SAL_CALL OAccessibleControlContext::getBackground()
     Color nColor;
     if (pWindow)
     {
-        if (pWindow->IsControlBackground())
+        if (pWindow->HasControlBackground())
             nColor = pWindow->GetControlBackground();
         else
             nColor = pWindow->GetBackground().GetColor();

@@ -72,7 +72,7 @@ void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
     aSet.SetWheelBehavior( aOldSettings.GetMouseSettings().GetWheelBehavior() );
     mxOutDev->moSettings->SetMouseSettings( aSet );
 
-    if( (nChangeFlags & AllSettingsFlags::STYLE) && IsBackground() )
+    if( (nChangeFlags & AllSettingsFlags::STYLE) && HasBackground() )
     {
         Wallpaper aWallpaper = GetBackground();
         if( !aWallpaper.IsBitmap() && !aWallpaper.IsGradient() )

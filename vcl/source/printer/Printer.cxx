@@ -1666,7 +1666,7 @@ css::awt::DeviceInfo Printer::GetDeviceInfo() const
 
 void Printer::SetWaveLineColors(Color const& rColor, tools::Long)
 {
-    if (IsLineColor())
+    if (HasLineColor())
         SetLineColor();
 
     SetFillColor(rColor);

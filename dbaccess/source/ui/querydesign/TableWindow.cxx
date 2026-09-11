@@ -502,7 +502,7 @@ void OTableWindow::StateChanged( StateChangedType nType )
     const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
 
     vcl::Font aFont = rStyleSettings.GetGroupFont();
-    if ( IsControlFont() )
+    if ( HasControlFont() )
         aFont.Merge( GetControlFont() );
     SetZoomedPointFont(*GetOutDev(), aFont);
 
