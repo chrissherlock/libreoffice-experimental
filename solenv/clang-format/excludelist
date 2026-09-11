@@ -14630,7 +14630,6 @@ vcl/source/window/menuitemlist.hxx
 vcl/source/window/menuwindow.cxx
 vcl/source/window/menuwindow.hxx
 vcl/source/window/mnemonic.cxx
-vcl/source/window/mouse.cxx
 vcl/source/window/mouseevent.cxx
 vcl/source/window/printdlg.cxx
 vcl/source/window/scrwnd.cxx
@@ -14648,6 +14647,7 @@ vcl/source/window/taskpanelist.cxx
 vcl/source/window/toolbox.cxx
 vcl/source/window/toolbox2.cxx
 vcl/source/window/window.cxx
+vcl/source/window/window_mouse.cxx
 vcl/source/window/window_accessibility.cxx
 vcl/source/window/window_paint.cxx
 vcl/source/window/wrkwin.cxx
