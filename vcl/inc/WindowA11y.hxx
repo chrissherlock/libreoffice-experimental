@@ -27,7 +27,7 @@ namespace vcl
 class Window;
 }
 
-struct WindowA11y
+class WindowA11y
 {
 private:
     std::unique_ptr<ImplAccessibleInfos> mpAccessibleInfos;
