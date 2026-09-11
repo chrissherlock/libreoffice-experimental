@@ -17,22 +17,17 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <sal/log.hxx>
-
 #include <vcl/layout.hxx>
-#include <vcl/toolkit/fixed.hxx>
-#include <vcl/window.hxx>
 #include <vcl/menu.hxx>
 #include <vcl/mnemonic.hxx>
-#include <vcl/accessibility/vclxaccessiblecomponent.hxx>
+#include <vcl/toolkit/fixed.hxx>
 #include <vcl/vclevent.hxx>
 #include <vcl/wrkwin.hxx>
 
 #include <ImplAccessibleInfos.hxx>
-#include <window.h>
+#include <WindowA11y.hxx>
 #include <WindowClassification.hxx>
 #include <WindowHierarchy.hxx>
-#include <WindowA11y.hxx>
 #include <accessibility/floatingwindowaccessible.hxx>
 #include <accessibility/vclxaccessiblefixedtext.hxx>
 #include <accessibility/vclxaccessiblestatusbar.hxx>
@@ -40,21 +35,11 @@
 #include <accessibility/vclxaccessibletabpagewindow.hxx>
 #include <brdwin.hxx>
 
-#include <com/sun/star/accessibility/XAccessible.hpp>
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
-#include <com/sun/star/accessibility/AccessibleStateType.hpp>
-#include <com/sun/star/accessibility/XAccessibleEditableText.hpp>
-#include <com/sun/star/awt/XVclWindowPeer.hpp>
-
-using namespace ::com::sun::star::uno;
-using namespace ::com::sun::star::datatransfer::clipboard;
-using namespace ::com::sun::star::datatransfer::dnd;
-using namespace ::com::sun::star;
-
 
 ImplAccessibleInfos::ImplAccessibleInfos()
 {
-    nAccessibleRole = accessibility::AccessibleRole::UNKNOWN;
+    nAccessibleRole = css::accessibility::AccessibleRole::UNKNOWN;
     pLabeledByWindow = nullptr;
     pLabelForWindow = nullptr;
 }
@@ -274,14 +259,14 @@ void Window::SetAccessibleRole( sal_uInt16 nRole )
 {
     if (mpAccessibleData)
     {
-        SAL_WARN_IF( mpAccessibleData->getAccessibleRole() != accessibility::AccessibleRole::UNKNOWN, "vcl", "AccessibleRole already set!" );
+        SAL_WARN_IF( mpAccessibleData->getAccessibleRole() != css::accessibility::AccessibleRole::UNKNOWN, "vcl", "AccessibleRole already set!" );
         mpAccessibleData->setAccessibleRole(nRole);
     }
 }
 
 sal_uInt16 Window::getDefaultAccessibleRole() const
 {
-    sal_uInt16 nRole = accessibility::AccessibleRole::UNKNOWN;
+    sal_uInt16 nRole = css::accessibility::AccessibleRole::UNKNOWN;
     switch (GetType())
     {
         case WindowType::MESSBOX:
@@ -289,14 +274,14 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
         case WindowType::WARNINGBOX:
         case WindowType::ERRORBOX:
         case WindowType::QUERYBOX:
-            nRole = accessibility::AccessibleRole::ALERT;
+            nRole = css::accessibility::AccessibleRole::ALERT;
             break;
 
         case WindowType::MODELESSDIALOG:
         case WindowType::TABDIALOG:
         case WindowType::BUTTONDIALOG:
         case WindowType::DIALOG:
-            nRole = accessibility::AccessibleRole::DIALOG;
+            nRole = css::accessibility::AccessibleRole::DIALOG;
             break;
 
         case WindowType::PUSHBUTTON:
@@ -305,29 +290,29 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
         case WindowType::HELPBUTTON:
         case WindowType::IMAGEBUTTON:
         case WindowType::MOREBUTTON:
-            nRole = accessibility::AccessibleRole::PUSH_BUTTON;
+            nRole = css::accessibility::AccessibleRole::PUSH_BUTTON;
             break;
         case WindowType::MENUBUTTON:
-            nRole = accessibility::AccessibleRole::BUTTON_MENU;
+            nRole = css::accessibility::AccessibleRole::BUTTON_MENU;
             break;
 
         case WindowType::RADIOBUTTON:
-            nRole = accessibility::AccessibleRole::RADIO_BUTTON;
+            nRole = css::accessibility::AccessibleRole::RADIO_BUTTON;
             break;
         case WindowType::TRISTATEBOX:
         case WindowType::CHECKBOX:
-            nRole = accessibility::AccessibleRole::CHECK_BOX;
+            nRole = css::accessibility::AccessibleRole::CHECK_BOX;
             break;
 
         case WindowType::MULTILINEEDIT:
-            nRole = accessibility::AccessibleRole::SCROLL_PANE;
+            nRole = css::accessibility::AccessibleRole::SCROLL_PANE;
             break;
 
         case WindowType::PATTERNFIELD:
         case WindowType::EDIT:
             nRole = static_cast<Edit const*>(this)->IsPassword()
-                        ? accessibility::AccessibleRole::PASSWORD_TEXT
-                        : accessibility::AccessibleRole::TEXT;
+                        ? css::accessibility::AccessibleRole::PASSWORD_TEXT
+                        : css::accessibility::AccessibleRole::TEXT;
             break;
 
         case WindowType::PATTERNBOX:
@@ -336,50 +321,50 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
         case WindowType::CURRENCYBOX:
         case WindowType::LONGCURRENCYBOX:
         case WindowType::COMBOBOX:
-            nRole = accessibility::AccessibleRole::COMBO_BOX;
+            nRole = css::accessibility::AccessibleRole::COMBO_BOX;
             break;
 
         case WindowType::LISTBOX:
         case WindowType::MULTILISTBOX:
-            nRole = accessibility::AccessibleRole::LIST;
+            nRole = css::accessibility::AccessibleRole::LIST;
             break;
 
         case WindowType::TREELISTBOX:
-            nRole = accessibility::AccessibleRole::TREE;
+            nRole = css::accessibility::AccessibleRole::TREE;
             break;
 
         case WindowType::FIXEDTEXT:
-            nRole = accessibility::AccessibleRole::LABEL;
+            nRole = css::accessibility::AccessibleRole::LABEL;
             break;
         case WindowType::FIXEDLINE:
             if (!GetText().isEmpty())
-                nRole = accessibility::AccessibleRole::LABEL;
+                nRole = css::accessibility::AccessibleRole::LABEL;
             else
-                nRole = accessibility::AccessibleRole::SEPARATOR;
+                nRole = css::accessibility::AccessibleRole::SEPARATOR;
             break;
 
         case WindowType::FIXEDBITMAP:
         case WindowType::FIXEDIMAGE:
-            nRole = accessibility::AccessibleRole::ICON;
+            nRole = css::accessibility::AccessibleRole::ICON;
             break;
         case WindowType::GROUPBOX:
-            nRole = accessibility::AccessibleRole::GROUP_BOX;
+            nRole = css::accessibility::AccessibleRole::GROUP_BOX;
             break;
         case WindowType::SCROLLBAR:
-            nRole = accessibility::AccessibleRole::SCROLL_BAR;
+            nRole = css::accessibility::AccessibleRole::SCROLL_BAR;
             break;
 
         case WindowType::SLIDER:
         case WindowType::SPLITTER:
         case WindowType::SPLITWINDOW:
-            nRole = accessibility::AccessibleRole::SPLIT_PANE;
+            nRole = css::accessibility::AccessibleRole::SPLIT_PANE;
             break;
 
         case WindowType::DATEBOX:
         case WindowType::TIMEBOX:
         case WindowType::DATEFIELD:
         case WindowType::TIMEFIELD:
-            nRole = accessibility::AccessibleRole::DATE_EDITOR;
+            nRole = css::accessibility::AccessibleRole::DATE_EDITOR;
             break;
 
         case WindowType::METRICFIELD:
@@ -387,26 +372,26 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
         case WindowType::SPINBUTTON:
         case WindowType::SPINFIELD:
         case WindowType::FORMATTEDFIELD:
-            nRole = accessibility::AccessibleRole::SPIN_BOX;
+            nRole = css::accessibility::AccessibleRole::SPIN_BOX;
             break;
 
         case WindowType::TOOLBOX:
-            nRole = accessibility::AccessibleRole::TOOL_BAR;
+            nRole = css::accessibility::AccessibleRole::TOOL_BAR;
             break;
         case WindowType::STATUSBAR:
-            nRole = accessibility::AccessibleRole::STATUS_BAR;
+            nRole = css::accessibility::AccessibleRole::STATUS_BAR;
             break;
 
         case WindowType::TABPAGE:
-            nRole = accessibility::AccessibleRole::PANEL;
+            nRole = css::accessibility::AccessibleRole::PANEL;
             break;
         case WindowType::TABCONTROL:
-            nRole = accessibility::AccessibleRole::PAGE_TAB_LIST;
+            nRole = css::accessibility::AccessibleRole::PAGE_TAB_LIST;
             break;
 
         case WindowType::DOCKINGWINDOW:
-            nRole = (mpClassification->mbFrame) ? accessibility::AccessibleRole::FRAME
-                                            : accessibility::AccessibleRole::PANEL;
+            nRole = (mpClassification->mbFrame) ? css::accessibility::AccessibleRole::FRAME
+                                            : css::accessibility::AccessibleRole::PANEL;
             break;
 
         case WindowType::FLOATINGWINDOW:
@@ -414,32 +399,32 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
                      || (mpHierarchy->mpBorderWindow
                          && mpHierarchy->mpBorderWindow->mpClassification->mbFrame)
                      || (GetStyle() & WB_OWNERDRAWDECORATION))
-                        ? accessibility::AccessibleRole::FRAME
-                        : accessibility::AccessibleRole::WINDOW;
+                        ? css::accessibility::AccessibleRole::FRAME
+                        : css::accessibility::AccessibleRole::WINDOW;
             break;
 
         case WindowType::WORKWINDOW:
-            nRole = accessibility::AccessibleRole::ROOT_PANE;
+            nRole = css::accessibility::AccessibleRole::ROOT_PANE;
             break;
 
         case WindowType::SCROLLBARBOX:
-            nRole = accessibility::AccessibleRole::FILLER;
+            nRole = css::accessibility::AccessibleRole::FILLER;
             break;
 
         case WindowType::HELPTEXTWINDOW:
-            nRole = accessibility::AccessibleRole::TOOL_TIP;
+            nRole = css::accessibility::AccessibleRole::TOOL_TIP;
             break;
 
         case WindowType::PROGRESSBAR:
-            nRole = accessibility::AccessibleRole::PROGRESS_BAR;
+            nRole = css::accessibility::AccessibleRole::PROGRESS_BAR;
             break;
 
         case WindowType::RULER:
-            nRole = accessibility::AccessibleRole::RULER;
+            nRole = css::accessibility::AccessibleRole::RULER;
             break;
 
         case WindowType::SCROLLWINDOW:
-            nRole = accessibility::AccessibleRole::SCROLL_PANE;
+            nRole = css::accessibility::AccessibleRole::SCROLL_PANE;
             break;
 
         case WindowType::WINDOW:
@@ -448,17 +433,17 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
         case WindowType::SYSTEMCHILDWINDOW:
         default:
             if (IsNativeFrame())
-                nRole = accessibility::AccessibleRole::FRAME;
+                nRole = css::accessibility::AccessibleRole::FRAME;
             else if (IsScrollable())
-                nRole = accessibility::AccessibleRole::SCROLL_PANE;
+                nRole = css::accessibility::AccessibleRole::SCROLL_PANE;
             else if (this->ImplGetWindow()->IsMenuFloatingWindow())
                 // #106002#, contextmenus are windows (i.e. toplevel)
-                nRole = accessibility::AccessibleRole::WINDOW;
+                nRole = css::accessibility::AccessibleRole::WINDOW;
             else
                 // #104051# WINDOW seems to be a bad default role, use LAYEREDPANE instead
                 // a WINDOW is interpreted as a top-level window, which is typically not the case
                 //nRole = accessibility::AccessibleRole::WINDOW;
-                nRole = accessibility::AccessibleRole::PANEL;
+                nRole = css::accessibility::AccessibleRole::PANEL;
     }
     return nRole;
 }
@@ -466,10 +451,10 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
 sal_uInt16 Window::GetAccessibleRole() const
 {
     if (!mpAccessibleData)
-        return accessibility::AccessibleRole::UNKNOWN;
+        return css::accessibility::AccessibleRole::UNKNOWN;
 
     sal_uInt16 nRole = mpAccessibleData->getAccessibleRole();
-    if (nRole == accessibility::AccessibleRole::UNKNOWN)
+    if (nRole == css::accessibility::AccessibleRole::UNKNOWN)
         nRole = getDefaultAccessibleRole();
 
     return nRole;
