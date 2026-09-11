@@ -241,7 +241,7 @@ void vcl::Cursor::ImplDoShow( bool bDrawDirect, bool bRestore )
         // show the cursor, if there is an active window and the cursor
         // has been selected in this window
         pWindow = Application::GetFocusWindow();
-        if (!pWindow || !pWindow->mpClassification || (pWindow->mpControlAppearance && pWindow->mpControlAppearance->mpCursor != this)
+        if (!pWindow || !pWindow->mpClassification || pWindow->mpControlAppearance->getCursor() != this
             || pWindow->mpInvalidation->mbInPaint
             || !pWindow->mpPlatformState->mpFrameData->mbHasFocus)
             pWindow = nullptr;
