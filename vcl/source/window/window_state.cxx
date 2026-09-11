@@ -112,13 +112,16 @@ void Window::ImplEnableInputBorderAndMenuBar(bool bEnable)
 
 void Window::ImplUpdateEnableState(bool bEnable)
 {
-    if (mpInput->mbDisabled == !bEnable)
+    if (mpInput->isWindowEnabled() == bEnable)
         return;
 
-    mpInput->mbDisabled = !bEnable;
+    if (bEnable)
+        mpInput->enableWindow();
+    else
+        mpInput->disableWindow();
 
     if (mpPlatformState->mpSysObj)
-        mpPlatformState->mpSysObj->Enable(bEnable && !mpInput->mbInputDisabled);
+        mpPlatformState->mpSysObj->Enable(bEnable && mpInput->isEnabled());
 
     CompatStateChanged(StateChangedType::Enable);
 
@@ -127,13 +130,16 @@ void Window::ImplUpdateEnableState(bool bEnable)
 
 void Window::ImplUpdateInputEnableState(bool bEnable)
 {
-    if (mpInput->mbInputDisabled == !bEnable)
+    if (mpInput->isEnabled() == bEnable)
         return;
 
-    mpInput->mbInputDisabled = !bEnable;
+    if (bEnable)
+        mpInput->enable();
+    else
+        mpInput->disable();
 
     if (mpPlatformState->mpSysObj)
-        mpPlatformState->mpSysObj->Enable(!mpInput->mbDisabled && bEnable);
+        mpPlatformState->mpSysObj->Enable(mpInput->isWindowEnabled() && bEnable);
 }
 
 void Window::ImplEnableChildWindows(bool bEnable)
@@ -201,7 +207,7 @@ void Window::ImplCancelTracking()
 
 void Window::ImplSetInputState(bool bEnable)
 {
-    if (!bEnable && mpInput->meAlwaysInputMode == AlwaysInputEnabled)
+    if (!bEnable && mpInput->isAlwaysInputEnabled())
         return;
 
     if (!bEnable)
@@ -315,14 +321,14 @@ void Window::AlwaysEnableInput(bool bAlways, bool bChild)
     if (mpHierarchy->mpBorderWindow)
         mpHierarchy->mpBorderWindow->AlwaysEnableInput(bAlways, false);
 
-    if (bAlways && mpInput->meAlwaysInputMode != AlwaysInputEnabled)
+    if (bAlways && !mpInput->isAlwaysInputEnabled())
     {
-        mpInput->meAlwaysInputMode = AlwaysInputEnabled;
+        mpInput->setAlwaysInput(true);
         EnableInput(true, false);
     }
-    else if (!bAlways && mpInput->meAlwaysInputMode == AlwaysInputEnabled)
+    else if (!bAlways && mpInput->isAlwaysInputEnabled())
     {
-        mpInput->meAlwaysInputMode = AlwaysInputNone;
+        mpInput->setAlwaysInput(false);
     }
 
     if (bChild)
@@ -373,8 +379,13 @@ vcl::Window* Window::ImplGetBorderWindow() const
 
 void Window::ImplSetMouseTransparent(bool bTransparent)
 {
-    if (mpInput)
-        mpInput->mbMouseTransparent = bTransparent;
+    if (!mpInput)
+        return;
+
+    if (bTransparent)
+        mpInput->makeMouseTransparent();
+    else
+        mpInput->makeMouseOpaque();
 }
 
 bool Window::IsFormControl() const
@@ -429,7 +440,7 @@ bool Window::IsChildTransparentModeEnabled() const
     return mpInvalidation && mpInvalidation->mbChildTransparent;
 }
 
-bool Window::IsMouseTransparent() const { return mpInput && mpInput->mbMouseTransparent; }
+bool Window::IsMouseTransparent() const { return mpInput && mpInput->isMouseTransparent(); }
 
 bool Window::IsPaintTransparent() const
 {
@@ -481,14 +492,11 @@ bool Window::IsReallyShown() const { return mpVisibilityState && mpVisibilitySta
 
 bool Window::IsInInitShow() const { return mpVisibilityState->mbInInitShow; }
 
-bool Window::IsEnabled() const { return mpInput && !mpInput->mbDisabled; }
+bool Window::IsEnabled() const { return mpInput && mpInput->isWindowEnabled(); }
 
-bool Window::IsInputEnabled() const { return mpInput && !mpInput->mbInputDisabled; }
+bool Window::IsInputEnabled() const { return mpInput && mpInput->isEnabled(); }
 
-bool Window::IsAlwaysEnableInput() const
-{
-    return mpInput->meAlwaysInputMode == AlwaysInputEnabled;
-}
+bool Window::IsAlwaysEnableInput() const { return mpInput && mpInput->isAlwaysInputEnabled(); }
 
 bool Window::IsAlwaysOnTopEnabled() const { return mpClassification->mbAlwaysOnTop; }
 
