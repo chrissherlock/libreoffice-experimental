@@ -178,6 +178,8 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/printer/PrinterOptionsHelper \
     vcl/source/printer/QueueInfo \
     vcl/source/printer/SalPrinterQueueInfo \
+    vcl/source/window/builder/BuilderBase \
+    vcl/source/window/builder/VclBuilder \
     vcl/source/window/ImplWinData \
     vcl/source/window/ImplFrameData \
     vcl/source/window/bubblewindow \
@@ -194,7 +196,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/clipping \
     vcl/source/window/stacking \
     vcl/source/window/globalization \
-    vcl/source/window/builder \
     vcl/source/window/commandevent \
     vcl/source/window/cursor \
     vcl/source/window/debugevent \
@@ -220,7 +221,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/menuitemlist \
     vcl/source/window/menuwindow \
     vcl/source/window/mnemonic \
-    vcl/source/window/mouse \
     vcl/source/window/NotebookBarAddonsMerger \
     vcl/source/window/OptionalBox \
     vcl/source/window/printdlg \
@@ -252,6 +252,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/window \
     vcl/source/window/window_accessibility \
     vcl/source/window/window_core \
+    vcl/source/window/window_mouse \
     vcl/source/window/window_output \
     vcl/source/window/window_paint \
     vcl/source/window/window_help \
