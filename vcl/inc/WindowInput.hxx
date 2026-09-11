@@ -48,6 +48,26 @@ struct WindowInput
 
     WindowInput();
     ~WindowInput();
+
+    void enable() { mbInputDisabled = false; }
+    void disable() { mbInputDisabled = true; }
+    bool isEnabled() const { return !mbInputDisabled; }
+    bool isDisabled() const { return mbInputDisabled; }
+
+    void enableWindow() { mbDisabled = false; }
+    void disableWindow() { mbDisabled = true; }
+    bool isWindowEnabled() const { return !mbDisabled; }
+    bool isWindowDisabled() const { return mbDisabled; }
+
+    bool isAlwaysInputEnabled() const { return meAlwaysInputMode == AlwaysInputEnabled; }
+    void setAlwaysInput(bool bAlways)
+    {
+        meAlwaysInputMode = bAlways ? AlwaysInputEnabled : AlwaysInputNone;
+    }
+
+    bool isMouseTransparent() const { return mbMouseTransparent; }
+    void makeMouseTransparent() { mbMouseTransparent = true; }
+    void makeMouseOpaque() { mbMouseTransparent = false; }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
