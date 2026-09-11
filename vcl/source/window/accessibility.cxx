@@ -61,14 +61,11 @@ rtl::Reference<comphelper::OAccessible> Window::GetAccessible(bool bCreate)
     return mpAccessibleData->getAccessible();
 }
 
-namespace {
-
-bool hasFloatingChild(vcl::Window *pWindow)
+static bool lcl_hasFloatingChild(vcl::Window *pWindow)
 {
     vcl::Window * pChild = pWindow->GetAccessibleChildWindow(0);
     return pChild && pChild->GetType() == WindowType::FLOATINGWINDOW;
 }
-};
 
 rtl::Reference<comphelper::OAccessible> Window::CreateAccessible()
 {
@@ -86,7 +83,7 @@ rtl::Reference<comphelper::OAccessible> Window::CreateAccessible()
     if (eType == WindowType::FLOATINGWINDOW)
         return new FloatingWindowAccessible(this);
 
-    if (eType == WindowType::BORDERWINDOW && hasFloatingChild(this))
+    if (eType == WindowType::BORDERWINDOW && lcl_hasFloatingChild(this))
         return new FloatingWindowAccessible(this);
 
     if ((eType == WindowType::HELPTEXTWINDOW) || (eType == WindowType::FIXEDLINE))
