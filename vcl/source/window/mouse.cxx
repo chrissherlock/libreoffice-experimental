@@ -215,6 +215,18 @@ static bool lcl_IsWindowFocused(const vcl::Window& rWindow)
     return false;
 }
 
+static void lcl_hideCursor(WindowControlAppearance& rControlAppearance)
+{
+    if (rControlAppearance.mpCursor)
+        rControlAppearance.mpCursor->ImplHide();
+}
+
+static void lcl_showCursor(WindowControlAppearance& rControlAppearance)
+{
+    if (rControlAppearance.mpCursor)
+        rControlAppearance.mpCursor->ImplShow();
+}
+
 void Window::ImplGrabFocus( GetFocusFlags nFlags )
 {
     // #143570# no focus for destructing windows
@@ -338,12 +350,8 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
 
     pSVData->mpWinData->mpFocusWin = this;
 
-    if ( pOldFocusWindow && pOldFocusWindow->mpClassification )
-    {
-        // Cursor hidden
-        if ( pOldFocusWindow->mpControlAppearance->mpCursor )
-            pOldFocusWindow->mpControlAppearance->mpCursor->ImplHide();
-    }
+    if (pOldFocusWindow)
+        lcl_hideCursor(*pOldFocusWindow->mpControlAppearance);
 
     // !!!!! due to old SV-Office Activate/Deactivate handling
     // !!!!! first as before
@@ -391,8 +399,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
 
         if (pSVData->mpWinData->mpFocusWin.get() == this)
         {
-            if (mpControlAppearance && mpControlAppearance->mpCursor)
-                mpControlAppearance->mpCursor->ImplShow();
+            lcl_showCursor(*mpControlAppearance);
 
             mpInput->mbInFocusHdl = true;
             mpFocusState->mnGetFocusFlags = nFlags;
@@ -518,12 +525,17 @@ bool Window::IsMouseCaptured() const
     return (this == ImplGetSVData()->mpWinData->mpCaptureWin);
 }
 
-void Window::SetPointer( PointerStyle nPointer )
+static void lcl_setPointer(WindowControlAppearance& rControlAppearance, PointerStyle ePointer)
 {
-    if (mpControlAppearance->maPointer == nPointer)
+    if (rControlAppearance.mePointer == ePointer)
         return;
 
-    mpControlAppearance->maPointer = nPointer;
+    rControlAppearance.mePointer = ePointer;
+}
+
+void Window::SetPointer(PointerStyle ePointer)
+{
+    lcl_setPointer(*mpControlAppearance, ePointer);
 
     // possibly immediately move pointer
     if (!mpPlatformState->mpFrameData->mbInMouseMove && ImplTestMousePointerSet())
