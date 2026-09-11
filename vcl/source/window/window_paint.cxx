@@ -272,7 +272,7 @@ void Window::ImplInvalidateFrameRegion( const vcl::Region* pRegion, InvalidateFl
             vcl::Region *pChildRegion;
             if ( mpInvalidation->mnPaintFlags & ImplPaintFlags::PaintAll )
                 // invalidate the whole child window region in the parent
-                pChildRegion = &vcl::clipping::getWinChildClipRegion(*this);
+                pChildRegion = &ImplGetClippingState()->getWinChildClipRegion(*this);
             else
                 // invalidate the same region in the parent that has to be repainted in the child
                 pChildRegion = &mpInvalidation->maInvalidateRegion;

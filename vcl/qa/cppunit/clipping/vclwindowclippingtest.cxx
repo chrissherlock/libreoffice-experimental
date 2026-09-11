@@ -19,6 +19,7 @@
 #include <vcl/svapp.hxx>
 
 #include <window.h>
+#include <WindowClippingState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <clipping_window.hxx>
 
@@ -154,10 +155,10 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testClipChildren_Comprehensive)
     pChild->ImplGetVisibilityState()->mbVisible = true;
     pChild->ImplGetVisibilityState()->mbReallyVisible = true;
 
-    // Initialize ALL clipping states (Parent AND Child)
-    vcl::clipping::initWinClipRegion(*pRoot);
-    vcl::clipping::initWinChildClipRegion(*pRoot);
-    vcl::clipping::initWinClipRegion(*pChild);
+    // Initialize ALL clipping states (Parent AND Child) via WindowClippingState members
+    pRoot->ImplGetClippingState()->initWinClipRegion(*pRoot);
+    pRoot->ImplGetClippingState()->initWinChildClipRegion(*pRoot);
+    pRoot->ImplGetClippingState()->initWinClipRegion(*pChild);
 
     // ==========================================
     // DIAGNOSTIC ASSERTIONS (The VCL polygraph)
@@ -223,10 +224,10 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testClipSiblings_Comprehensive)
     pS2->ImplGetVisibilityState()->mbVisible = true;
     pS2->ImplGetVisibilityState()->mbReallyVisible = true;
 
-    // Initialize clipping states
-    vcl::clipping::initWinClipRegion(*pRoot);
-    vcl::clipping::initWinClipRegion(*pS1);
-    vcl::clipping::initWinClipRegion(*pS2);
+    // Initialize clipping states via the new member function
+    pRoot->ImplGetClippingState()->initWinClipRegion(*pRoot);
+    pS1->ImplGetClippingState()->initWinClipRegion(*pS1);
+    pS2->ImplGetClippingState()->initWinClipRegion(*pS2);
 
     vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
     vcl::clipping::clipSiblings(*pS2, aRegion);

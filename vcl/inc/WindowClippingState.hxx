@@ -19,12 +19,19 @@
 
 #pragma once
 
+#include <vcl/dllapi.h>
 #include <vcl/window.hxx>
 #include <vcl/region.hxx>
 
 #include <memory>
 
-struct WindowClippingState
+struct NativeSyncStatus
+{
+    bool bUpdate;
+    bool bInvalidateDevice;
+};
+
+struct VCL_DLLPUBLIC WindowClippingState
 {
     // Proper constructor ensuring no "garbage" memory patterns
     WindowClippingState()
@@ -47,6 +54,14 @@ struct WindowClippingState
 
     vcl::Region maWinRegion;
     bool mbWinRegion;
+
+    bool initChildRegion(vcl::Window& rWindow);
+    void initWinChildClipRegion(const vcl::Window& rWindow);
+    void initWinClipRegion(const vcl::Window& rWindow);
+    vcl::Region& getWinChildClipRegion(vcl::Window& rWindow);
+
+    // Functions that only need local state don't need the Window parameter
+    NativeSyncStatus processClipResult(bool bClipSuccess, bool bCurrentUpdate);
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

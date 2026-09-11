@@ -26,6 +26,7 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
+#include <WindowClippingState.hxx>
 #include <WindowInvalidation.hxx>
 #include <clipping.hxx>
 #include <clipping_window.hxx>
@@ -252,7 +253,8 @@ void initDeviceClipRegion(OutputDevice& rDevice)
             }
             else
             {
-                aRegion = getWinChildClipRegion(*rTypedDev.GetOwnerWindow());
+                vcl::Window* pOwnerWindow = rTypedDev.GetOwnerWindow();
+                aRegion = pOwnerWindow->ImplGetClippingState()->getWinChildClipRegion(*pOwnerWindow);
 
                 if (rTypedDev.ImplIsAntiparallel())
                     rTypedDev.ReMirror(aRegion);

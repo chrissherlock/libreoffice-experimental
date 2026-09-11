@@ -50,7 +50,8 @@ void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
     WindowRegion aPixRegion(rRegion);
     vcl::Region aDevPixRegion = GetOutDev()->GetMapper().ViewToDevice(aPixRegion.get());
 
-    vcl::Region aWinChildRegion = vcl::clipping::getWinChildClipRegion(*this);
+    // Call the newly migrated member function on the clipping state object
+    vcl::Region aWinChildRegion = ImplGetClippingState()->getWinChildClipRegion(*this);
 
     // only this region is in frame coordinates, so re-mirror it
     if (GetOutDev()->ImplIsAntiparallel())
@@ -73,7 +74,7 @@ vcl::Region Window::GetWindowClipRegionPixel() const
     vcl::Region aWinClipRegion;
 
     if (mpClippingState->mbInitWinClipRegion)
-        clipping::initWinClipRegion(*this);
+        mpClippingState->initWinClipRegion(*this);
 
     aWinClipRegion = mpClippingState->maWinClipRegion;
 
