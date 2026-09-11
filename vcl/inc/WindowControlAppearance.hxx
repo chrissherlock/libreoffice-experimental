@@ -28,10 +28,10 @@ struct WindowControlAppearance
     std::optional<vcl::Font> mpControlFont;
     Color maControlForeground = COL_TRANSPARENT;
     Color maControlBackground = COL_TRANSPARENT;
-    ControlPart mnNativeBackground = ControlPart::NONE;
+    ControlPart meNativeBackground = ControlPart::NONE;
 
     vcl::Cursor* mpCursor = nullptr;
-    PointerStyle maPointer = PointerStyle::Arrow;
+    PointerStyle mePointer = PointerStyle::Arrow;
 
     bool mbControlForeground = false;
     bool mbControlBackground = false;

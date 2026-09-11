@@ -1185,7 +1185,7 @@ void Window::Erase(vcl::RenderContext& rRenderContext)
 
     bool bNativeOK = false;
 
-    ControlPart aCtrlPart = ImplGetControlAppearance()->mnNativeBackground;
+    ControlPart aCtrlPart = ImplGetControlAppearance()->meNativeBackground;
 
     if (aCtrlPart == ControlPart::Entire && IsControlBackground())
     {

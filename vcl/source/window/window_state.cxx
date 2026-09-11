@@ -535,7 +535,7 @@ bool Window::IsCreatedWithToolkit() const { return mpClassification->mbCreatedWi
 
 void Window::SetCreatedWithToolkit(bool b) { mpClassification->mbCreatedWithToolkit = b; }
 
-PointerStyle Window::GetPointer() const { return mpControlAppearance->maPointer; }
+PointerStyle Window::GetPointer() const { return mpControlAppearance->mePointer; }
 
 VCLXWindow* Window::GetWindowPeer() const
 {
