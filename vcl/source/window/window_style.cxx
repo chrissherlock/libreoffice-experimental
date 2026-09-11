@@ -242,22 +242,7 @@ vcl::Font Window::GetPointFont(vcl::RenderContext const& rRenderContext) const
     return aFont;
 }
 
-void Window::SetCursor(vcl::Cursor* pCursor)
-{
-    if (!mpControlAppearance)
-        return;
-
-    if (mpControlAppearance->mpCursor == pCursor)
-        return;
-
-    if (mpControlAppearance->mpCursor)
-        mpControlAppearance->mpCursor->ImplHide();
-
-    mpControlAppearance->mpCursor = pCursor;
-
-    if (pCursor)
-        pCursor->ImplShow();
-}
+void Window::SetCursor(vcl::Cursor* pCursor) { mpControlAppearance->setCursor(pCursor); }
 
 void Window::ImplPointToLogic(vcl::RenderContext const& rRenderContext, vcl::Font& rFont,
                               bool bUseRenderContextDPI) const
