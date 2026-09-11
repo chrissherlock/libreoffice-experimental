@@ -40,6 +40,13 @@ struct WindowControlAppearance
 
     void setPointer(PointerStyle ePointer);
 
+    bool hasControlFont() const;
+    vcl::Font getControlFont() const;
+
+    // Return true if the state actually changed, false otherwise
+    bool setControlFont();
+    bool setControlFont(const vcl::Font& rFont);
+
     void setCursor(vcl::Cursor* pCursor);
     void hideCursor();
     void showCursor();

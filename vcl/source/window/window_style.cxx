@@ -290,53 +290,25 @@ void Window::ImplLogicToPoint(vcl::RenderContext const& rRenderContext, vcl::Fon
 
 void Window::SetControlFont()
 {
-    if (mpControlAppearance && mpControlAppearance->mpControlFont)
-    {
-        mpControlAppearance->mpControlFont.reset();
+    if (mpControlAppearance->setControlFont())
         CompatStateChanged(StateChangedType::ControlFont);
-    }
 }
 
 void Window::SetControlFont(const vcl::Font& rFont)
 {
-    if (rFont == vcl::Font())
-    {
-        SetControlFont();
-        return;
-    }
-
-    if (!mpControlAppearance)
-        return;
-
-    if (mpControlAppearance->mpControlFont)
-    {
-        if (*mpControlAppearance->mpControlFont == rFont)
-            return;
-
-        *mpControlAppearance->mpControlFont = rFont;
-    }
-    else
-    {
-        mpControlAppearance->mpControlFont = rFont;
-    }
-
-    CompatStateChanged(StateChangedType::ControlFont);
+    if (mpControlAppearance->setControlFont(rFont))
+        CompatStateChanged(StateChangedType::ControlFont);
 }
 
-vcl::Font Window::GetControlFont() const
-{
-    if (mpControlAppearance && mpControlAppearance->mpControlFont)
-        return *mpControlAppearance->mpControlFont;
-
-    vcl::Font aFont;
-    return aFont;
-}
+vcl::Font Window::GetControlFont() const { return mpControlAppearance->getControlFont(); }
 
 void Window::ApplyControlFont(vcl::RenderContext& rRenderContext, const vcl::Font& rFont)
 {
     vcl::Font aFont(rFont);
+
     if (IsControlFont())
-        aFont.Merge(GetControlFont());
+        aFont.Merge(mpControlAppearance->getControlFont());
+
     SetZoomedPointFont(rRenderContext, aFont);
 }
 
