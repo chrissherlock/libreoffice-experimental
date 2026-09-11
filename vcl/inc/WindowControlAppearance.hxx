@@ -47,6 +47,16 @@ struct WindowControlAppearance
     bool setControlFont();
     bool setControlFont(const vcl::Font& rFont);
 
+    bool hasControlForeground() const { return mbControlForeground; }
+    Color getControlForeground() const { return maControlForeground; }
+    bool setControlForeground();
+    bool setControlForeground(const Color& rColor);
+
+    bool hasControlBackground() const { return mbControlBackground; }
+    Color getControlBackground() const { return maControlBackground; }
+    bool setControlBackground();
+    bool setControlBackground(const Color& rColor);
+
     void setCursor(vcl::Cursor* pCursor);
     void hideCursor();
     void showCursor();
