@@ -37,6 +37,11 @@ struct WindowControlAppearance
     bool mbControlBackground = false;
 
     WindowControlAppearance() = default;
+
+    void setPointer(PointerStyle ePointer);
+
+    void hideCursor();
+    void showCursor();
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

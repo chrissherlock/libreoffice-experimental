@@ -215,18 +215,6 @@ static bool lcl_IsWindowFocused(const vcl::Window& rWindow)
     return false;
 }
 
-static void lcl_hideCursor(WindowControlAppearance& rControlAppearance)
-{
-    if (rControlAppearance.mpCursor)
-        rControlAppearance.mpCursor->ImplHide();
-}
-
-static void lcl_showCursor(WindowControlAppearance& rControlAppearance)
-{
-    if (rControlAppearance.mpCursor)
-        rControlAppearance.mpCursor->ImplShow();
-}
-
 void Window::ImplGrabFocus( GetFocusFlags nFlags )
 {
     // #143570# no focus for destructing windows
@@ -351,7 +339,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
     pSVData->mpWinData->mpFocusWin = this;
 
     if (pOldFocusWindow)
-        lcl_hideCursor(*pOldFocusWindow->mpControlAppearance);
+        pOldFocusWindow->mpControlAppearance->hideCursor();
 
     // !!!!! due to old SV-Office Activate/Deactivate handling
     // !!!!! first as before
@@ -399,7 +387,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
 
         if (pSVData->mpWinData->mpFocusWin.get() == this)
         {
-            lcl_showCursor(*mpControlAppearance);
+            mpControlAppearance->showCursor();
 
             mpInput->mbInFocusHdl = true;
             mpFocusState->mnGetFocusFlags = nFlags;
