@@ -469,15 +469,13 @@ OUString Window::GetAccessibleName() const
 
 OUString Window::getDefaultAccessibleName() const
 {
-    OUString aAccessibleName;
-    switch ( GetType() )
+    switch (GetType())
     {
         case WindowType::MULTILINEEDIT:
         case WindowType::PATTERNFIELD:
         case WindowType::METRICFIELD:
         case WindowType::CURRENCYFIELD:
         case WindowType::EDIT:
-
         case WindowType::DATEBOX:
         case WindowType::TIMEBOX:
         case WindowType::CURRENCYBOX:
@@ -486,48 +484,52 @@ OUString Window::getDefaultAccessibleName() const
         case WindowType::TIMEFIELD:
         case WindowType::SPINFIELD:
         case WindowType::FORMATTEDFIELD:
-
         case WindowType::COMBOBOX:
         case WindowType::LISTBOX:
         case WindowType::MULTILISTBOX:
         case WindowType::TREELISTBOX:
         case WindowType::METRICBOX:
         {
-            vcl::Window *pLabel = GetAccessibleRelationLabeledBy();
-            if ( pLabel && pLabel != this )
-                aAccessibleName = pLabel->GetText();
-            if (aAccessibleName.isEmpty())
-                aAccessibleName = GetQuickHelpText();
-            if (aAccessibleName.isEmpty())
-                aAccessibleName = GetText();
+            OUString aName;
+
+            if (vcl::Window* pLabel = GetAccessibleRelationLabeledBy();
+                pLabel && pLabel != this)
+            {
+                aName = pLabel->GetText();
+            }
+
+            if (aName.isEmpty())
+                aName = GetQuickHelpText();
+
+            if (aName.isEmpty())
+                aName = GetText();
+
+            return removeMnemonicFromString(aName);
         }
-        break;
 
         case WindowType::IMAGEBUTTON:
         case WindowType::PUSHBUTTON:
-            aAccessibleName = GetText();
-            if (aAccessibleName.isEmpty())
-            {
-                aAccessibleName = GetQuickHelpText();
-                if (aAccessibleName.isEmpty())
-                    aAccessibleName = GetHelpText();
-            }
-        break;
+        {
+            OUString aName = GetText();
 
-        case WindowType::TOOLBOX:
-            aAccessibleName = GetText();
-            break;
+            if (aName.isEmpty())
+            {
+                aName = GetQuickHelpText();
+
+                if (aName.isEmpty())
+                    aName = GetHelpText();
+            }
+
+            return removeMnemonicFromString(aName);
+        }
 
         case WindowType::MOREBUTTON:
-            aAccessibleName = maText;
-            break;
+            return removeMnemonicFromString(maText);
 
+        case WindowType::TOOLBOX:
         default:
-            aAccessibleName = GetText();
-            break;
+            return removeMnemonicFromString(GetText());
     }
-
-    return removeMnemonicFromString( aAccessibleName );
 }
 
 void Window::SetAccessibleDescription( const OUString& rDescription )
