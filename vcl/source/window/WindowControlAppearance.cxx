@@ -11,6 +11,22 @@
 
 #include <WindowControlAppearance.hxx>
 
+void WindowControlAppearance::useNativeDialogBackground()
+{
+    meNativeBackground = ControlPart::BackgroundDialog;
+}
+
+void WindowControlAppearance::useEntireNativeBackground()
+{
+    meNativeBackground = ControlPart::Entire;
+}
+
+void WindowControlAppearance::updateCursor()
+{
+    if (mpCursor)
+        mpCursor->ImplNew();
+}
+
 void WindowControlAppearance::hideCursor()
 {
     if (mpCursor)

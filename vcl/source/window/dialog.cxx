@@ -507,11 +507,6 @@ void Dialog::ImplInitDialog( vcl::Window* pParent, WinBits nStyle, InitFlag eFla
     ImplInitSettings();
 }
 
-static void lcl_useNativeDialogBackground(WindowControlAppearance& rControlAppearance)
-{
-    rControlAppearance.meNativeBackground = ControlPart::BackgroundDialog;
-}
-
 void Dialog::ApplySettings(vcl::RenderContext& rRenderContext)
 {
     if (IsControlBackground())
@@ -522,9 +517,7 @@ void Dialog::ApplySettings(vcl::RenderContext& rRenderContext)
     else if (rRenderContext.IsNativeControlSupported(ControlType::WindowBackground, ControlPart::BackgroundDialog))
     {
         // NWF background
-        if (mpControlAppearance)
-            lcl_useNativeDialogBackground(*mpControlAppearance);
-
+        mpControlAppearance->useNativeDialogBackground();
         EnableChildTransparentMode();
     }
     else
@@ -542,7 +535,7 @@ void Dialog::ImplInitSettings()
     // NWF background
     else if( IsNativeControlSupported(ControlType::WindowBackground, ControlPart::BackgroundDialog))
     {
-        lcl_useNativeDialogBackground(*mpControlAppearance);
+        mpControlAppearance->useNativeDialogBackground();
         EnableChildTransparentMode();
     }
     // fallback to settings color

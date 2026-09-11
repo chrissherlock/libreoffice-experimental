@@ -23,8 +23,9 @@ namespace vcl
 class Cursor;
 }
 
-struct WindowControlAppearance
+class WindowControlAppearance
 {
+private:
     std::optional<vcl::Font> mpControlFont;
     Color maControlForeground = COL_TRANSPARENT;
     Color maControlBackground = COL_TRANSPARENT;
@@ -36,8 +37,14 @@ struct WindowControlAppearance
     bool mbControlForeground = false;
     bool mbControlBackground = false;
 
+public:
     WindowControlAppearance() = default;
 
+    void useNativeDialogBackground();
+    void useEntireNativeBackground();
+    ControlPart getNativeBackground() { return meNativeBackground; }
+
+    PointerStyle getPointer() { return mePointer; }
     void setPointer(PointerStyle ePointer);
 
     bool hasControlFont() const;
@@ -48,12 +55,12 @@ struct WindowControlAppearance
     bool setControlFont(const vcl::Font& rFont);
 
     bool hasControlForeground() const { return mbControlForeground; }
-    Color getControlForeground() const { return maControlForeground; }
+    const Color& getControlForeground() const { return maControlForeground; }
     bool setControlForeground();
     bool setControlForeground(const Color& rColor);
 
     bool hasControlBackground() const { return mbControlBackground; }
-    Color getControlBackground() const { return maControlBackground; }
+    const Color& getControlBackground() const { return maControlBackground; }
     bool setControlBackground();
     bool setControlBackground(const Color& rColor);
 
@@ -62,6 +69,7 @@ struct WindowControlAppearance
 
     bool suspendCursor();
     void resumeCursor(bool bRestore = false);
+    void updateCursor();
     void hideCursor();
     void showCursor();
 };

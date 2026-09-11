@@ -359,7 +359,7 @@ void Edit::ApplySettings(vcl::RenderContext& rRenderContext)
         if (ImplUseNativeBorder(rRenderContext, GetStyle()))
         {
             // indicates that no non-native drawing of background should take place
-            mpControlAppearance->meNativeBackground = ControlPart::Entire;
+            mpControlAppearance->useEntireNativeBackground();
         }
     }
     else if (ImplUseNativeBorder(rRenderContext, GetStyle()))

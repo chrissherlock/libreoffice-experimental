@@ -405,7 +405,7 @@ struct WindowHelpData;
 struct WindowEventHandlers;
 struct WindowLayoutData;
 class WindowA11y;
-struct WindowControlAppearance;
+class WindowControlAppearance;
 struct WindowGeometry;
 struct WindowViewport;
 struct ImplWinData;

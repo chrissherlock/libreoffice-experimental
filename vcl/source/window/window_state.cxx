@@ -456,30 +456,21 @@ DialogControlFlags Window::GetDialogControlFlags() const { return mpControlState
 
 const InputContext& Window::GetInputContext() const { return mpInput->maInputContext; }
 
-bool Window::IsControlFont() const
-{
-    return bool(mpControlAppearance && mpControlAppearance->mpControlFont);
-}
+bool Window::IsControlFont() const { return mpControlAppearance->hasControlFont(); }
 
 const Color& Window::GetControlForeground() const
 {
-    return mpControlAppearance->maControlForeground;
+    return mpControlAppearance->getControlForeground();
 }
 
-bool Window::IsControlForeground() const
-{
-    return mpControlAppearance && mpControlAppearance->mbControlForeground;
-}
+bool Window::IsControlForeground() const { return mpControlAppearance->hasControlForeground(); }
 
 const Color& Window::GetControlBackground() const
 {
-    return mpControlAppearance->maControlBackground;
+    return mpControlAppearance->getControlBackground();
 }
 
-bool Window::IsControlBackground() const
-{
-    return mpControlAppearance && mpControlAppearance->mbControlBackground;
-}
+bool Window::IsControlBackground() const { return mpControlAppearance->hasControlBackground(); }
 
 bool Window::IsInPaint() const { return mpInvalidation && mpInvalidation->mbInPaint; }
 
@@ -523,19 +514,13 @@ bool Window::IsCompoundControl() const { return mpFocusState && mpFocusState->mb
 
 bool Window::IsWait() const { return (mpPointerState->mnWaitCount != 0); }
 
-vcl::Cursor* Window::GetCursor() const
-{
-    if (!mpControlAppearance)
-        return nullptr;
-
-    return mpControlAppearance->mpCursor;
-}
+vcl::Cursor* Window::GetCursor() const { return mpControlAppearance->getCursor(); }
 
 bool Window::IsCreatedWithToolkit() const { return mpClassification->mbCreatedWithToolkit; }
 
 void Window::SetCreatedWithToolkit(bool b) { mpClassification->mbCreatedWithToolkit = b; }
 
-PointerStyle Window::GetPointer() const { return mpControlAppearance->mePointer; }
+PointerStyle Window::GetPointer() const { return mpControlAppearance->getPointer(); }
 
 VCLXWindow* Window::GetWindowPeer() const
 {

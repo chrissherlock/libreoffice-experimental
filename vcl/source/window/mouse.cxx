@@ -513,17 +513,9 @@ bool Window::IsMouseCaptured() const
     return (this == ImplGetSVData()->mpWinData->mpCaptureWin);
 }
 
-static void lcl_setPointer(WindowControlAppearance& rControlAppearance, PointerStyle ePointer)
-{
-    if (rControlAppearance.mePointer == ePointer)
-        return;
-
-    rControlAppearance.mePointer = ePointer;
-}
-
 void Window::SetPointer(PointerStyle ePointer)
 {
-    lcl_setPointer(*mpControlAppearance, ePointer);
+    mpControlAppearance->setPointer(ePointer);
 
     // possibly immediately move pointer
     if (!mpPlatformState->mpFrameData->mbInMouseMove && ImplTestMousePointerSet())

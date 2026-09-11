@@ -205,7 +205,7 @@ void StatusBar::ApplySettings(vcl::RenderContext& rRenderContext)
     if (!IsControlBackground() &&
           rRenderContext.IsNativeControlSupported(ControlType::WindowBackground, ControlPart::BackgroundWindow))
     {
-        ImplGetControlAppearance()->meNativeBackground = ControlPart::BackgroundWindow;
+        ImplGetControlAppearance()->useNativeDialogBackground();
         EnableChildTransparentMode();
     }
 }
