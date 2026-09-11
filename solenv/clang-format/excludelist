@@ -14637,7 +14637,6 @@ vcl/source/window/seleng.cxx
 vcl/source/window/settings.cxx
 vcl/source/window/split.cxx
 vcl/source/window/splitwin.cxx
-vcl/source/window/stacking.cxx
 vcl/source/window/status.cxx
 vcl/source/window/syschild.cxx
 vcl/source/window/syswin.cxx
@@ -14647,10 +14646,11 @@ vcl/source/window/taskpanelist.cxx
 vcl/source/window/toolbox.cxx
 vcl/source/window/toolbox2.cxx
 vcl/source/window/window.cxx
+vcl/source/window/window_accessibility.cxx
 vcl/source/window/window_clipping.cxx
 vcl/source/window/window_mouse.cxx
-vcl/source/window/window_accessibility.cxx
 vcl/source/window/window_paint.cxx
+vcl/source/window/window_stacking.cxx
 vcl/source/window/wrkwin.cxx
 vcl/unx/generic/app/X11Helper.cxx
 vcl/unx/generic/app/gendisp.cxx
