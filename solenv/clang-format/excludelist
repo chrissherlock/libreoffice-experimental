@@ -14593,7 +14593,6 @@ vcl/source/window/EnumContext.cxx
 vcl/source/window/HandleGestureEventBase.cxx
 vcl/source/window/WindowOutputDevice.cxx
 vcl/source/window/accel.cxx
-vcl/source/window/accessibility.cxx
 vcl/source/window/accmgr.cxx
 vcl/source/window/brdwin.cxx
 vcl/source/window/bubblewindow.cxx
@@ -14649,7 +14648,7 @@ vcl/source/window/taskpanelist.cxx
 vcl/source/window/toolbox.cxx
 vcl/source/window/toolbox2.cxx
 vcl/source/window/window.cxx
-vcl/source/window/window2.cxx
+vcl/source/window/window_accessibility.cxx
 vcl/source/window/window_paint.cxx
 vcl/source/window/wrkwin.cxx
 vcl/unx/generic/app/X11Helper.cxx
