@@ -193,7 +193,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/bufferdevice \
     vcl/source/window/colorpicker \
     vcl/source/window/legacyaccessibility \
-    vcl/source/window/clipping \
     vcl/source/window/stacking \
     vcl/source/window/globalization \
     vcl/source/window/commandevent \
@@ -252,6 +251,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/window \
     vcl/source/window/window_accessibility \
     vcl/source/window/window_core \
+    vcl/source/window/window_clipping \
     vcl/source/window/window_mouse \
     vcl/source/window/window_output \
     vcl/source/window/window_paint \
