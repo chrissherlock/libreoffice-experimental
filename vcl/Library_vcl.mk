@@ -186,7 +186,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/clipping_subsystem \
     vcl/source/window/errinf \
     vcl/source/window/settings \
-    vcl/source/window/abstdlg \
     vcl/source/window/accel \
     vcl/source/window/accmgr \
     vcl/source/window/brdwin \
@@ -205,6 +204,8 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/dockingarea \
     vcl/source/window/dockmgr \
     vcl/source/window/dockwin \
+    vcl/source/window/VclAbstractDialog \
+    vcl/source/window/VclAbstractDialogFactory \
     vcl/source/window/DocWindow \
     vcl/source/window/NotifyEvent \
     vcl/source/window/floatwin \

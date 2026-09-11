@@ -17,10 +17,11 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/abstdlg.hxx>
-#include <vcl/bitmap.hxx>
-#include <com/sun/star/cui/GetCreateDialogFactoryService.hpp>
 #include <comphelper/processfactory.hxx>
+
+#include <vcl/abstdlg.hxx>
+
+#include <com/sun/star/cui/GetCreateDialogFactoryService.hpp>
 
 typedef VclAbstractDialogFactory*(SAL_CALL* FuncPtrCreateDialogFactory)();
 
@@ -29,32 +30,6 @@ VclAbstractDialogFactory* VclAbstractDialogFactory::Create()
     auto xService
         = css::cui::GetCreateDialogFactoryService::create(comphelper::getProcessComponentContext());
     return reinterpret_cast<VclAbstractDialogFactory*>(xService->getSomething({}));
-}
-
-VclAbstractDialog::~VclAbstractDialog() {}
-
-bool VclAbstractDialog::StartExecuteAsync(AsyncContext&)
-{
-    assert(false);
-    return false;
-}
-
-std::vector<OUString> VclAbstractDialog::getAllPageUIXMLDescriptions() const
-{
-    // default has no pages
-    return {};
-}
-
-bool VclAbstractDialog::selectPageByUIXMLDescription(const OUString& /*rUIXMLDescription*/)
-{
-    // default cannot select a page (which is okay, return true)
-    return true;
-}
-
-Bitmap VclAbstractDialog::createScreenshot() const
-{
-    // default returns empty bitmap
-    return Bitmap();
 }
 
 VclAbstractDialogFactory::~VclAbstractDialogFactory() {}
