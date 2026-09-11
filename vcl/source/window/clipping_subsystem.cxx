@@ -44,16 +44,6 @@ bool initChildRegion(vcl::Window& rWindow)
     return true; // Context contains children; signal the window to clip them
 }
 
-void initWinChildClipRegion(const vcl::Window& rWindow)
-{
-    WindowClippingState* pImpl = rWindow.ImplGetClippingState();
-    if (!pImpl)
-        return;
-
-    if (initChildRegion(const_cast<vcl::Window&>(rWindow)))
-        clipChildren(rWindow, *pImpl->mpChildClipRegion);
-}
-
 bool syncNativeWindow(WindowPlatformState& rImpl, WindowVisibilityState& rVisibilityState,
                       vcl::Region& rWinChildClipRegion, const vcl::Region* pOldRegion,
                       bool& rOutUpdate)
@@ -102,18 +92,6 @@ bool invalidateParentClipIfRequired(const WindowClippingState& rChildImpl,
     }
 
     return false;
-}
-
-NativeSyncStatus processClipResult(WindowClippingState& rImpl, bool bClipSuccess,
-                                   bool bCurrentUpdate)
-{
-    if (!bClipSuccess)
-    {
-        rImpl.mbInitWinClipRegion = true;
-        return { false, true }; // bUpdate = false, bInvalidateDevice = true
-    }
-
-    return { bCurrentUpdate, false }; // Unchanged state
 }
 
 /** Linearly traverses an intrusive linked list of window nodes following
@@ -172,22 +150,6 @@ std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow)
     }
 
     return aTargets;
-}
-
-Region& getWinChildClipRegion(vcl::Window& rWindow)
-{
-    WindowClippingState* pClippingState = rWindow.ImplGetClippingState();
-
-    if (pClippingState->mbInitWinClipRegion)
-        initWinClipRegion(rWindow);
-
-    if (pClippingState->mbInitChildRegion)
-        initWinChildClipRegion(rWindow);
-
-    if (pClippingState->mpChildClipRegion)
-        return *pClippingState->mpChildClipRegion;
-
-    return pClippingState->maWinClipRegion;
 }
 
 void gatherNativeSyncTargets(vcl::Window* pWindow, std::vector<vcl::Window*>& rTargets)
@@ -358,6 +320,15 @@ void excludeWindowAndOverlapRegions(vcl::Window& rWindow, vcl::Region& rRegion)
     excludeOverlapWindows(rWindow, rRegion);
 }
 
+void clipAllChildren(const vcl::Window& rWindow, vcl::Region& rRegion)
+{
+    for (vcl::Window* pChild : getChildWindows(*rWindow.ImplGetWindowHierarchy()))
+    {
+        if (pChild->ImplGetVisibilityState()->mbReallyVisible)
+            excludeWindowRegion(*pChild, rRegion);
+    }
+}
+
 static bool lcl_IsParentClipRequired(ParentClipMode nClipMode, WinBits nStyle)
 {
     return !(nClipMode & ParentClipMode::NoClip)
@@ -383,15 +354,6 @@ bool clipChildren(const vcl::Window& rWindow, vcl::Region& rRegion)
     }
 
     return bOtherClip;
-}
-
-void clipAllChildren(const vcl::Window& rWindow, vcl::Region& rRegion)
-{
-    for (vcl::Window* pChild : getChildWindows(*rWindow.ImplGetWindowHierarchy()))
-    {
-        if (pChild->ImplGetVisibilityState()->mbReallyVisible)
-            excludeWindowRegion(*pChild, rRegion);
-    }
 }
 
 void clipSiblings(const vcl::Window& rWindow, vcl::Region& rRegion)
@@ -581,7 +543,9 @@ bool nativeObjectClip(vcl::Window& rWindow, const vcl::Region* pOldRegion)
     if (!pOldRegion && !pClippingState->mbInitWinClipRegion)
         return true;
 
-    vcl::Region& rWinChildClipRegion = getWinChildClipRegion(rWindow);
+    // Call getWinChildClipRegion as a member function of WindowClippingState
+    vcl::Region& rWinChildClipRegion = pClippingState->getWinChildClipRegion(rWindow);
+
     bool bUpdate = true;
     WindowVisibilityState* pVisibilityState = rWindow.ImplGetVisibilityState();
 
@@ -661,7 +625,7 @@ bool setClipFlagChildren(vcl::Window& rWindow, bool bSysObjOnlySmaller)
 
     bool bClipSuccess = nativeObjectClip(rWindow, pOldRegion.get());
 
-    auto[bNewUpdate, bInvalidateDevice] = processClipResult(*pClippingState, bClipSuccess, bUpdate);
+    auto[bNewUpdate, bInvalidateDevice] = pClippingState->processClipResult(bClipSuccess, bUpdate);
     bUpdate = bNewUpdate;
 
     if (bInvalidateDevice)

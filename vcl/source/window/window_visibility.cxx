@@ -83,7 +83,7 @@ void Window::ImplInvalidateParentOnHide(vcl::Region& rInvRegion)
 vcl::Region Window::ImplGetWinClipRegion()
 {
     if (mpClippingState->mbInitWinClipRegion)
-        clipping::initWinClipRegion(*this);
+        mpClippingState->initWinClipRegion(*this);
 
     return mpClippingState->maWinClipRegion;
 }

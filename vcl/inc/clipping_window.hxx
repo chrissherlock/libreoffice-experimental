@@ -46,8 +46,8 @@ VCL_DLLPUBLIC bool setClipFlagOverlapWindows(vcl::Window& rWindow, bool bSysObjO
 VCL_DLLPUBLIC void calcOverlapRegion(vcl::Window& rWindow, const tools::Rectangle& rSourceRect,
                                      vcl::Region& rRegion, bool bChildren, bool bSiblings);
 
-VCL_DLLPUBLIC void initWinChildClipRegion(const vcl::Window& rWindow);
-VCL_DLLPUBLIC void initWinClipRegion(const vcl::Window& rWindow);
+//VCL_DLLPUBLIC void initWinChildClipRegion(const vcl::Window& rWindow);
+//VCL_DLLPUBLIC void initWinClipRegion(const vcl::Window& rWindow);
 
 // =========================================================================
 // GEOMETRIC ACCUMULATORS (The "Math Engines")
@@ -99,7 +99,6 @@ VCL_DLLPUBLIC void updateNativeObjectClip(vcl::Window& rWindow);
 
 VCL_DLLPUBLIC void setParentClipMode(vcl::Window* pWindow, ParentClipMode nMode);
 VCL_DLLPUBLIC ParentClipMode getParentClipMode(const vcl::Window& rWindow);
-VCL_DLLPUBLIC vcl::Region& getWinChildClipRegion(vcl::Window& rWindow);
 
 VCL_DLLPUBLIC std::vector<vcl::Window*> getChildWindows(const WindowHierarchy& rHierarchy);
 VCL_DLLPUBLIC std::vector<vcl::Window*> getOverlapWindows(const WindowHierarchy& rHierarchy);
@@ -115,8 +114,6 @@ prepareClipInvalidation(WindowImpl& rImpl, WindowClippingState& rClippingState,
 VCL_DLLPUBLIC bool invalidateParentClipIfRequired(const WindowClippingState& rClippingState,
                                                   WindowClippingState& rParentClippingState,
                                                   WinBits nParentStyle);
-VCL_DLLPUBLIC NativeSyncStatus processClipResult(WindowClippingState& rImpl, bool bClipSuccess,
-                                                 bool bCurrentUpdate);
 
 void calcOverlapRegionOverlaps(const vcl::Window& rWindow, const vcl::Region& rInterRegion,
                                vcl::Region& rRegion);

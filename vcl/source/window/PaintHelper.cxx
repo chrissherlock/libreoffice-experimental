@@ -29,6 +29,7 @@
 #include <ImplWinData.hxx>
 #include <WindowPlatformState.hxx>
 #include <PaintBufferGuard.hxx>
+#include <WindowClippingState.hxx>
 #include <WindowVisibilityState.hxx>
 #include <WindowClassification.hxx>
 #include <WindowInvalidation.hxx>
@@ -117,7 +118,9 @@ void PaintHelper::DoPaint(const vcl::Region* pRegion)
     WindowInvalidation* pInvalidation = m_pWindow->ImplGetWindowInvalidation();
     ImplWinData* pWinData = m_pWindow->ImplGetWinData();
 
-    vcl::Region& rWinChildClipRegion = vcl::clipping::getWinChildClipRegion(*m_pWindow);
+    // Call the newly migrated member function on the clipping state object
+    vcl::Region& rWinChildClipRegion
+        = m_pWindow->ImplGetClippingState()->getWinChildClipRegion(*m_pWindow);
     ImplFrameData* pFrameData = m_pWindow->mpPlatformState->mpFrameData;
 
     if (pInvalidation->mnPaintFlags & ImplPaintFlags::PaintAll || pFrameData->mbInBufferedPaint)
