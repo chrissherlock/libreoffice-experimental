@@ -659,17 +659,20 @@ void PushButton::ImplInitSettings( bool bBackground )
     // #i38498#: do not check for GetParent()->IsChildTransparentModeEnabled()
     // otherwise the formcontrol button will be overdrawn due to ParentClipMode::NoClip
     // for radio and checkbox this is ok as they should appear transparent in documents
-    if ( IsNativeControlSupported( ControlType::Pushbutton, ControlPart::Entire ) ||
-         (GetStyle() & WB_FLATBUTTON) != 0 )
+    const bool bIsFlat = (GetStyle() & WB_FLATBUTTON) != 0;
+    if ( IsNativeControlSupported( ControlType::Pushbutton, ControlPart::Entire ) || bIsFlat )
     {
         EnableChildTransparentMode();
         vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
         SetPaintTransparent( true );
 
-        if ((GetStyle() & WB_FLATBUTTON) == 0)
-            ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
+        const auto& rNWFData = ImplGetSVData()->maNWFData;
+        const bool bNativeFocus = bIsFlat ? rNWFData.mbNoFocusRectsForFlatButtons
+                                          : rNWFData.mbNoFocusRects;
+        if (bNativeFocus)
+            ImplGetFocusState()->useNativeFocus();
         else
-            ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRectsForFlatButtons;
+            ImplGetFocusState()->clearNativeFocus();
     }
     else
     {
@@ -1054,7 +1057,7 @@ void PushButton::ImplDrawPushButton(vcl::RenderContext& rRenderContext)
         aControlValue.mbSingleLine = (aInRectSize.Height() < 2 * aFontSize.Height());
 
         if (!aControlValue.m_bFlatButton || (nState & ControlState::ROLLOVER) || (nState & ControlState::PRESSED)
-            || (HasFocus() && ImplGetFocusState()->mbUseNativeFocus
+            || (HasFocus() && ImplGetFocusState()->usesNativeFocus()
                 && !IsNativeControlSupported(ControlType::Pushbutton, ControlPart::Focus)))
         {
             bNativeOK = rRenderContext.DrawNativeControl(ControlType::Pushbutton, ControlPart::Entire, aCtrlRegion, nState,
@@ -1890,7 +1893,12 @@ void RadioButton::ImplInitSettings( bool bBackground )
         SetPaintTransparent( true );
         SetBackground();
         if( IsNativeControlSupported( ControlType::Radiobutton, ControlPart::Entire ) )
-            ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
+        {
+            if (ImplGetSVData()->maNWFData.mbNoFocusRects)
+                ImplGetFocusState()->useNativeFocus();
+            else
+                ImplGetFocusState()->clearNativeFocus();
+        }
     }
     else
     {
@@ -2986,7 +2994,12 @@ void CheckBox::ImplInitSettings( bool bBackground )
         SetPaintTransparent( true );
         SetBackground();
         if( IsNativeControlSupported( ControlType::Checkbox, ControlPart::Entire ) )
-            ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
+        {
+            if (ImplGetSVData()->maNWFData.mbNoFocusRects)
+                ImplGetFocusState()->useNativeFocus();
+            else
+                ImplGetFocusState()->clearNativeFocus();
+        }
     }
     else
     {

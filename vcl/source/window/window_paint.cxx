@@ -99,7 +99,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
 
 void Window::PopPaintHelper(PaintHelper const *pHelper)
 {
-    if (mpWinData && mpFocusState->mbFocusVisible)
+    if (mpWinData && mpFocusState->isFocusVisible())
         ImplInvertFocus(*mpWinData->mpFocusRect);
 
     mpInvalidation->mbInPaint = false;
@@ -1334,7 +1334,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     {
         if ( mpWinData )
         {
-            if ( mpFocusState->mbFocusVisible )
+            if ( mpFocusState->isFocusVisible() )
                 ImplInvertFocus( *mpWinData->mpFocusRect );
             if ( mpClassification->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
                 InvertTracking( *mpWinData->mpTrackRect, mpWinData->mnTrackFlags );
@@ -1369,7 +1369,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
 #endif
         if ( mpWinData )
         {
-            if ( mpFocusState->mbFocusVisible )
+            if ( mpFocusState->isFocusVisible() )
                 ImplInvertFocus( *mpWinData->mpFocusRect );
             if ( mpClassification->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
                 InvertTracking( *mpWinData->mpTrackRect, mpWinData->mnTrackFlags );

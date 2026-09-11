@@ -278,13 +278,13 @@ bool Window::ImplDelegatePreNotifyToParent(NotifyEvent& rNEvt)
 
 bool Window::ImplIsCompoundControlGainingFocus() const
 {
-    return mpFocusState->mbCompoundControl && !mpFocusState->mbCompoundControlHasFocus
+    return mpFocusState->isCompoundControl() && !mpFocusState->compoundControlHasFocus()
            && HasChildPathFocus();
 }
 
 bool Window::ImplIsCompoundControlLosingFocus() const
 {
-    return mpFocusState->mbCompoundControl && mpFocusState->mbCompoundControlHasFocus
+    return mpFocusState->isCompoundControl() && mpFocusState->compoundControlHasFocus()
            && !HasChildPathFocus();
 }
 
@@ -292,7 +292,7 @@ bool Window::ImplUpdateCompoundControlFocusGain()
 {
     if (ImplIsCompoundControlGainingFocus())
     {
-        mpFocusState->mbCompoundControlHasFocus = true;
+        mpFocusState->setCompoundControlHasFocus(true);
         return true;
     }
 
@@ -303,7 +303,7 @@ bool Window::ImplUpdateCompoundControlFocusLoss()
 {
     if (ImplIsCompoundControlLosingFocus())
     {
-        mpFocusState->mbCompoundControlHasFocus = false;
+        mpFocusState->setCompoundControlHasFocus(false);
         return true;
     }
 
@@ -712,7 +712,7 @@ static MouseEvent ImplTranslateMouseEvent(const MouseEvent& rE, vcl::Window cons
 
 void Window::ImplDispatchCompoundControlCommand(const NotifyEvent& rNEvt, const CommandEvent* pCEvt)
 {
-    if (!mpFocusState->mbCompoundControl || rNEvt.GetWindow() == this)
+    if (!mpFocusState->isCompoundControl() || rNEvt.GetWindow() == this)
         return;
 
     CommandEvent aCommandEvent;
@@ -766,7 +766,7 @@ bool Window::ImplDispatchKeyMouseEvent(const NotifyEvent& rNEvt)
 {
     VclPtr<vcl::Window> xWindow = this;
 
-    if (mpFocusState->mbCompoundControl || (rNEvt.GetWindow() == this))
+    if (mpFocusState->isCompoundControl() || (rNEvt.GetWindow() == this))
     {
         switch (rNEvt.GetType())
         {
@@ -967,11 +967,11 @@ FocusAction Window::ImplResolveLastDeactivatedWindow(Window* pNewOverlapWindow)
     else
     {
         vcl::Window* pLastRealWindow = pLastDeacWin->ImplGetWindow();
-        pLastDeacWin->mpFocusState->mbActive = false;
+        pLastDeacWin->mpFocusState->deactivate();
         pLastDeacWin->Deactivate();
         if (pLastRealWindow != pLastDeacWin)
         {
-            pLastRealWindow->mpFocusState->mbActive = true;
+            pLastRealWindow->mpFocusState->activate();
             pLastRealWindow->Activate();
         }
     }
@@ -1002,15 +1002,15 @@ void Window::ImplDeactivateOldWindows(FocusAction eFocusAction, vcl::Window* pOl
     if (eFocusAction == FocusAction::ActivateOnly)
         return;
 
-    if (pOldOverlapWindow->mpFocusState->mbActive)
+    if (pOldOverlapWindow->mpFocusState->isActive())
     {
-        pOldOverlapWindow->mpFocusState->mbActive = false;
+        pOldOverlapWindow->mpFocusState->deactivate();
         pOldOverlapWindow->Deactivate();
     }
 
-    if (pOldRealWindow != pOldOverlapWindow && pOldRealWindow->mpFocusState->mbActive)
+    if (pOldRealWindow != pOldOverlapWindow && pOldRealWindow->mpFocusState->isActive())
     {
-        pOldRealWindow->mpFocusState->mbActive = false;
+        pOldRealWindow->mpFocusState->deactivate();
         pOldRealWindow->Deactivate();
     }
 }
@@ -1019,15 +1019,15 @@ void Window::ImplActivateNewWindows(FocusAction eFocusAction, vcl::Window* pNewO
                                     vcl::Window* pNewRealWindow)
 {
     // The early return now safely just exits the activation helper
-    if (eFocusAction == FocusAction::DeactivateOnly || pNewOverlapWindow->mpFocusState->mbActive)
+    if (eFocusAction == FocusAction::DeactivateOnly || pNewOverlapWindow->mpFocusState->isActive())
         return;
 
-    pNewOverlapWindow->mpFocusState->mbActive = true;
+    pNewOverlapWindow->mpFocusState->activate();
     pNewOverlapWindow->Activate();
 
-    if (pNewRealWindow != pNewOverlapWindow && !pNewRealWindow->mpFocusState->mbActive)
+    if (pNewRealWindow != pNewOverlapWindow && !pNewRealWindow->mpFocusState->isActive())
     {
-        pNewRealWindow->mpFocusState->mbActive = true;
+        pNewRealWindow->mpFocusState->activate();
         pNewRealWindow->Activate();
     }
 }

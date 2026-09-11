@@ -93,8 +93,8 @@ SystemWindow::SystemWindow(WindowType eType, const char* pIdleDebugName, bool tr
     , mpImplData(new ImplData)
     , maLayoutIdle( pIdleDebugName, *this, transferableIdle )
 {
-    mpClassification->mbSysWin            = true;
-    mpFocusState->mnActivateMode      = ActivateModeFlags::GrabFocus;
+    mpClassification->mbSysWin = true;
+    mpFocusState->setActivateMode(ActivateModeFlags::GrabFocus);
 
     //To-Do, reuse maResizeTimer
     maLayoutIdle.SetPriority(TaskPriority::RESIZE);

@@ -2522,7 +2522,10 @@ ImplWin::ImplWin( vcl::Window* pParent, WinBits nWinStyle ) :
     else
         SetBackground( Wallpaper( GetSettings().GetStyleSettings().GetFieldColor() ) );
 
-    ImplGetFocusState()->mbUseNativeFocus = ImplGetSVData()->maNWFData.mbNoFocusRects;
+    if (ImplGetSVData()->maNWFData.mbNoFocusRects)
+        ImplGetFocusState()->useNativeFocus();
+    else
+        ImplGetFocusState()->clearNativeFocus();
 
     mbEdgeBlending = false;
     mnItemPos = LISTBOX_ENTRY_NOTFOUND;
