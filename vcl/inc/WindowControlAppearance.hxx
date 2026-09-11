@@ -40,6 +40,7 @@ struct WindowControlAppearance
 
     void setPointer(PointerStyle ePointer);
 
+    void setCursor(vcl::Cursor* pCursor);
     void hideCursor();
     void showCursor();
 };
