@@ -37,18 +37,8 @@
 
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
 
-ImplAccessibleInfos::ImplAccessibleInfos()
+namespace vcl
 {
-    nAccessibleRole = css::accessibility::AccessibleRole::UNKNOWN;
-    pLabeledByWindow = nullptr;
-    pLabelForWindow = nullptr;
-}
-
-ImplAccessibleInfos::~ImplAccessibleInfos()
-{
-}
-
-namespace vcl {
 
 rtl::Reference<comphelper::OAccessible> Window::GetAccessible(bool bCreate)
 {

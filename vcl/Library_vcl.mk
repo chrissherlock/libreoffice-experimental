@@ -238,6 +238,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/toolbox2 \
     vcl/source/window/toolbox \
     vcl/source/window/lokwindow \
+    vcl/source/window/ImplAccessibleInfos \
     vcl/source/window/WindowA11y \
     vcl/source/window/WindowOutputDevice \
     vcl/source/window/WindowClassification \
