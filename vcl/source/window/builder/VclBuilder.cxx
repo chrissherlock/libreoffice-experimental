@@ -11,120 +11,87 @@
 #include <config_options.h>
 #include <config_vclplug.h>
 
-#include <memory>
-#include <string_view>
-#include <com/sun/star/accessibility/AccessibleRole.hpp>
-
-#include <frozen/bits/elsa_std.h>
-#include <frozen/unordered_map.h>
-
+#include <sal/log.hxx>
+#include <osl/module.hxx>
 #include <comphelper/lok.hxx>
+#include <tools/svlibrary.h>
 #include <o3tl/string_view.hxx>
 #include <officecfg/Office/Common.hxx>
-#include <osl/module.hxx>
-#include <sal/log.hxx>
-#include <unotools/resmgr.hxx>
-#include <utility>
+
 #include <vcl/builder.hxx>
-#include <vcl/dialoghelper.hxx>
-#include <vcl/menu.hxx>
-#include <vcl/toolkit/button.hxx>
-#include <vcl/toolkit/dialog.hxx>
-#include <vcl/toolkit/edit.hxx>
-#include <vcl/toolkit/field.hxx>
+#include <vcl/commandinfoprovider.hxx>
+#include <vcl/dockwin.hxx>
+#include <vcl/toolbox.hxx>
 #include <vcl/fieldvalues.hxx>
-#include <vcl/toolkit/fmtfield.hxx>
-#include <vcl/toolkit/fixed.hxx>
-#include <vcl/toolkit/fixedhyper.hxx>
 #include <vcl/headbar.hxx>
+#include <vcl/mnemonic.hxx>
 #include <vcl/notebookbar/NotebookBarAddonsItem.hxx>
 #include <vcl/notebookbar/NotebookBarAddonsMerger.hxx>
-#include <vcl/layout.hxx>
-#include <vcl/toolkit/lstbox.hxx>
-#include <vcl/toolkit/MenuButton.hxx>
-#include <vcl/mnemonic.hxx>
-#include <vcl/toolkit/prgsbar.hxx>
-#include <vcl/toolkit/scrbar.hxx>
-#include <vcl/split.hxx>
-#include <vcl/svapp.hxx>
 #include <vcl/tabctrl.hxx>
-#include <vcl/tabpage.hxx>
+#include <vcl/toolkit/field.hxx>
+#include <vcl/toolkit/fmtfield.hxx>
+#include <vcl/toolkit/fixedhyper.hxx>
+#include <vcl/toolkit/lstbox.hxx>
+#include <vcl/toolkit/prgsbar.hxx>
 #include <vcl/toolkit/throbber.hxx>
-#include <vcl/toolbox.hxx>
-#include <vcl/toolkit/treelistentry.hxx>
-#include <vcl/toolkit/vclmedit.hxx>
-#include <vcl/settings.hxx>
-#include <slider.hxx>
-#include <vcl/weld/Builder.hxx>
-#include <vcl/weld/weldutils.hxx>
-#include <vcl/commandinfoprovider.hxx>
+
+#include <calendar.hxx>
 #include <iconview.hxx>
-#include <svdata.hxx>
-#include <bitmaps.hlst>
 #include <managedmenubutton.hxx>
+#include <menutogglebutton.hxx>
 #include <messagedialog.hxx>
+#include <slider.hxx>
+#include <treeglue.hxx>
+#include <verticaltabctrl.hxx>
+#include <wizdlg.hxx>
 #include <ContextVBox.hxx>
 #include <DropdownBox.hxx>
 #include <OptionalBox.hxx>
 #include <PriorityMergedHBox.hxx>
-#include <PriorityHBox.hxx>
-#include <WindowClassification.hxx>
-#include <WindowInput.hxx>
-#include <xmlreader/xmlreader.hxx>
-#include <desktop/crashreport.hxx>
 #include <SvHeaderTabListBox.hxx>
-#include <calendar.hxx>
-#include <ivctrl.hxx>
-#include <menutogglebutton.hxx>
-#include <salinst.hxx>
-#include <strings.hrc>
-#include <svtabbx.hxx>
-#include <treeglue.hxx>
-#include <verticaltabctrl.hxx>
-#include <wizdlg.hxx>
-#include <tools/svlibrary.h>
-#include <LibreOfficeKit/LibreOfficeKitEnums.h>
 #include <WindowHierarchy.hxx>
+#include <WindowInput.hxx>
 
+#include <bitmaps.hlst>
+
+#include <frozen/bits/elsa_std.h>
+#include <frozen/unordered_map.h>
 
 #if defined(DISABLE_DYNLOADING) || defined(LINUX)
 #include <dlfcn.h>
 #endif
 
-bool toBool(std::u16string_view rValue)
-{
-    return (!rValue.empty() && (rValue[0] == 't' || rValue[0] == 'T' || rValue[0] == '1'));
-}
+#include <com/sun/star/accessibility/AccessibleRole.hpp>
 
-namespace
-{
-    const OUString & mapStockToImageResource(std::u16string_view sType)
-    {
-        if (sType == u"view-refresh")
-            return SV_RESID_BITMAP_REFRESH;
-        else if (sType == u"dialog-error")
-            return IMG_ERROR;
-        else if (sType == u"list-add")
-            return IMG_ADD;
-        else if (sType == u"list-remove")
-            return IMG_REMOVE;
-        else if (sType == u"edit-copy")
-            return IMG_COPY;
-        else if (sType == u"edit-paste")
-            return IMG_PASTE;
-        else if (sType == u"document-open")
-            return IMG_OPEN;
-        else if (sType == u"open-menu-symbolic")
-            return IMG_MENU;
-        else if (sType == u"window-close-symbolic")
-            return SV_RESID_BITMAP_CLOSEDOC;
-        else if (sType == u"x-office-calendar")
-            return IMG_CALENDAR;
-        else if (sType == u"accessories-character-map")
-            return IMG_CHARACTER_MAP;
-        return EMPTY_OUSTRING;
-    }
+#include <memory>
+#include <string_view>
+#include <utility>
 
+const OUString& mapStockToImageResource(std::u16string_view sType)
+{
+    if (sType == u"view-refresh")
+        return SV_RESID_BITMAP_REFRESH;
+    else if (sType == u"dialog-error")
+        return IMG_ERROR;
+    else if (sType == u"list-add")
+        return IMG_ADD;
+    else if (sType == u"list-remove")
+        return IMG_REMOVE;
+    else if (sType == u"edit-copy")
+        return IMG_COPY;
+    else if (sType == u"edit-paste")
+        return IMG_PASTE;
+    else if (sType == u"document-open")
+        return IMG_OPEN;
+    else if (sType == u"open-menu-symbolic")
+        return IMG_MENU;
+    else if (sType == u"window-close-symbolic")
+        return SV_RESID_BITMAP_CLOSEDOC;
+    else if (sType == u"x-office-calendar")
+        return IMG_CALENDAR;
+    else if (sType == u"accessories-character-map")
+        return IMG_CHARACTER_MAP;
+    return EMPTY_OUSTRING;
 }
 
 SymbolType VclBuilder::mapStockToSymbol(std::u16string_view sType)
@@ -167,86 +134,21 @@ SymbolType VclBuilder::mapStockToSymbol(std::u16string_view sType)
     return eRet;
 }
 
-namespace
-{
-    void setupFromActionName(Button *pButton, VclBuilder::stringmap &rMap, const css::uno::Reference<css::frame::XFrame>& rFrame);
+static void lcl_setupFromActionName(Button *pButton, VclBuilder::stringmap &rMap, const css::uno::Reference<css::frame::XFrame>& rFrame);
 
 #if defined SAL_LOG_WARN
-    bool isButtonType(WindowType eType)
-    {
-        return eType == WindowType::PUSHBUTTON ||
-               eType == WindowType::OKBUTTON ||
-               eType == WindowType::CANCELBUTTON ||
-               eType == WindowType::HELPBUTTON ||
-               eType == WindowType::IMAGEBUTTON ||
-               eType == WindowType::MENUBUTTON ||
-               eType == WindowType::MOREBUTTON ||
-               eType == WindowType::SPINBUTTON;
-    }
+bool isButtonType(WindowType eType)
+{
+    return eType == WindowType::PUSHBUTTON ||
+           eType == WindowType::OKBUTTON ||
+           eType == WindowType::CANCELBUTTON ||
+           eType == WindowType::HELPBUTTON ||
+           eType == WindowType::IMAGEBUTTON ||
+           eType == WindowType::MENUBUTTON ||
+           eType == WindowType::MOREBUTTON ||
+           eType == WindowType::SPINBUTTON;
+}
 #endif
-
-}
-
-// static
-void BuilderBase::reportException(const css::uno::Exception& rExcept)
-{
-    CrashReporter::addKeyValue(u"VclBuilderException"_ustr,
-                               "Unable to read .ui file: " + rExcept.Message, CrashReporter::Write);
-}
-
-BuilderBase::BuilderBase(std::u16string_view sUIDir, const OUString& rUIFile, bool bLegacy)
-    : m_pParserState(new ParserState)
-    , m_sUIFileUrl(sUIDir + rUIFile)
-    , m_sHelpRoot(rUIFile)
-    , m_bLegacy(bLegacy)
-{
-    const sal_Int32 nIdx = m_sHelpRoot.lastIndexOf('.');
-    if (nIdx != -1)
-        m_sHelpRoot = m_sHelpRoot.copy(0, nIdx);
-    m_sHelpRoot += "/";
-}
-
-const std::locale& BuilderBase::getResLocale() const
-{
-    assert(m_pParserState && "parser state no more valid");
-    return m_pParserState->m_aResLocale;
-}
-
-const std::vector<BuilderBase::SizeGroup>& BuilderBase::getSizeGroups() const
-{
-    assert(m_pParserState && "parser state no more valid");
-    return m_pParserState->m_aSizeGroups;
-}
-
-const std::vector<BuilderBase::MnemonicWidgetMap>& BuilderBase::getMnemonicWidgetMaps() const {
-    assert(m_pParserState && "parser state no more valid");
-    return m_pParserState->m_aMnemonicWidgetMaps;
-}
-
-const std::vector<BuilderBase::RadioButtonGroupMap>& BuilderBase::getRadioButtonGroupMaps() const {
-    assert(m_pParserState && "parser state no more valid");
-    return m_pParserState->m_aRadioButtonGroupMaps;
-}
-
-OUString BuilderBase::finalizeValue(const OString& rContext, const OString& rValue,
-                                    const bool bTranslate) const
-{
-    OUString sFinalValue;
-    if (bTranslate)
-    {
-        sFinalValue
-            = Translate::get(TranslateId{ rContext.getStr(), rValue.getStr() }, getResLocale());
-    }
-    else
-        sFinalValue = OUString::fromUtf8(rValue);
-
-    if (ResHookProc pStringReplace = Translate::GetReadStringHook())
-        sFinalValue = (*pStringReplace)(sFinalValue);
-
-    return sFinalValue;
-}
-
-void BuilderBase::resetParserState() { m_pParserState.reset(); }
 
 VclBuilder::VclBuilder(vcl::Window* pParent, std::u16string_view sUIDir, const OUString& sUIFile,
                        OUString sID, css::uno::Reference<css::frame::XFrame> xFrame,
@@ -555,249 +457,237 @@ void VclBuilder::disposeBuilder()
     m_pParent.reset();
 }
 
-namespace
+static inline OUString lcl_extractStringEntry(BuilderBase::stringmap& rMap, const OUString& rKey,
+                                   const OUString& rDefaultValue = OUString())
 {
-    inline OUString extractStringEntry(BuilderBase::stringmap& rMap, const OUString& rKey,
-                                       const OUString& rDefaultValue = OUString())
+    BuilderBase::stringmap::iterator aFind = rMap.find(rKey);
+    if (aFind != rMap.end())
     {
-        BuilderBase::stringmap::iterator aFind = rMap.find(rKey);
-        if (aFind != rMap.end())
-        {
-            const OUString sValue = aFind->second;
-            rMap.erase(aFind);
-            return sValue;
-        }
-        return rDefaultValue;
+        const OUString sValue = aFind->second;
+        rMap.erase(aFind);
+        return sValue;
     }
-
-    inline bool extractBoolEntry(BuilderBase::stringmap& rMap, const OUString& rKey, bool bDefaultValue)
-    {
-        BuilderBase::stringmap::iterator aFind = rMap.find(rKey);
-        if (aFind != rMap.end())
-        {
-            const bool bValue = toBool(aFind->second);
-            rMap.erase(aFind);
-            return bValue;
-        }
-        return bDefaultValue;
-    }
-
-    bool extractHasFrame(VclBuilder::stringmap& rMap)
-    {
-        return extractBoolEntry(rMap, u"has-frame"_ustr, true);
-    }
-
-    bool extractDrawValue(VclBuilder::stringmap& rMap)
-    {
-        return extractBoolEntry(rMap, u"draw-value"_ustr, true);
-    }
-
-    OUString extractWidgetName(VclBuilder::stringmap& rMap)
-    {
-        return extractStringEntry(rMap, u"name"_ustr);
-    }
-
-    OUString extractValuePos(VclBuilder::stringmap& rMap)
-    {
-        return extractStringEntry(rMap,u"value-pos"_ustr, u"top"_ustr);
-    }
-
-    OUString extractTypeHint(VclBuilder::stringmap &rMap)
-    {
-        return extractStringEntry(rMap, u"type-hint"_ustr, u"normal"_ustr);
-    }
-
-    bool extractModal(VclBuilder::stringmap &rMap)
-    {
-        return extractBoolEntry(rMap, u"modal"_ustr, false);
-    }
-
-    bool extractDecorated(VclBuilder::stringmap &rMap)
-    {
-        return extractBoolEntry(rMap, u"decorated"_ustr, true);
-    }
-
-    bool extractCloseable(VclBuilder::stringmap &rMap)
-    {
-        return extractBoolEntry(rMap, u"deletable"_ustr, true);
-    }
-
-    bool extractVerticalTabPos(VclBuilder::stringmap &rMap)
-    {
-        bool bVertical = false;
-
-        if (officecfg::Office::Common::Misc::UseVerticalNotebookbar::get())
-        {
-            VclBuilder::stringmap::iterator aFind = rMap.find(u"tab-pos"_ustr);
-            if (aFind != rMap.end())
-            {
-                bVertical = aFind->second.equalsIgnoreAsciiCase("left") ||
-                            aFind->second.equalsIgnoreAsciiCase("right");
-                rMap.erase(aFind);
-            }
-        }
-
-        return bVertical;
-    }
-
-    bool extractVerticalTabsWithIcons(VclBuilder::stringmap &rMap)
-    {
-        bool bWithIcons = false;
-        VclBuilder::stringmap::iterator aFind = rMap.find(u"group-name"_ustr);
-        if (aFind != rMap.end())
-        {
-            bWithIcons = aFind->second.equalsIgnoreAsciiCase("icons");
-            rMap.erase(aFind);
-        }
-        return bWithIcons;
-    }
-
-    bool extractInconsistent(VclBuilder::stringmap &rMap)
-    {
-        return extractBoolEntry(rMap, u"inconsistent"_ustr, false);
-    }
-
-    WinBits extractRelief(VclBuilder::stringmap &rMap)
-    {
-        WinBits nBits = WB_3DLOOK;
-        VclBuilder::stringmap::iterator aFind = rMap.find(u"relief"_ustr);
-        if (aFind != rMap.end())
-        {
-            assert(aFind->second != "half" && "relief of 'half' unsupported");
-            if (aFind->second == "none")
-                nBits = WB_FLATBUTTON;
-            rMap.erase(aFind);
-        }
-        return nBits;
-    }
-
-    Size extractSizeRequest(VclBuilder::stringmap &rMap)
-    {
-        OUString sWidthRequest(u"0"_ustr);
-        OUString sHeightRequest(u"0"_ustr);
-        VclBuilder::stringmap::iterator aFind = rMap.find(u"width-request"_ustr);
-        if (aFind != rMap.end())
-        {
-            sWidthRequest = aFind->second;
-            rMap.erase(aFind);
-        }
-        aFind = rMap.find(u"height-request"_ustr);
-        if (aFind != rMap.end())
-        {
-            sHeightRequest = aFind->second;
-            rMap.erase(aFind);
-        }
-        return Size(sWidthRequest.toInt32(), sHeightRequest.toInt32());
-    }
-
-    float extractAlignment(VclBuilder::stringmap &rMap)
-    {
-        float f = 0.0;
-        VclBuilder::stringmap::iterator aFind = rMap.find(u"alignment"_ustr);
-        if (aFind != rMap.end())
-        {
-            f = aFind->second.toFloat();
-            rMap.erase(aFind);
-        }
-        return f;
-    }
-
-    bool extractSortIndicator(VclBuilder::stringmap &rMap)
-    {
-        return extractBoolEntry(rMap, u"sort-indicator"_ustr, false);
-    }
-
-    bool extractClickable(VclBuilder::stringmap &rMap)
-    {
-        return extractBoolEntry(rMap, u"clickable"_ustr, false);
-    }
-
-    void setupFromActionName(Button *pButton, VclBuilder::stringmap &rMap, const css::uno::Reference<css::frame::XFrame>& rFrame)
-    {
-        if (!rFrame.is())
-            return;
-
-        OUString aCommand(BuilderBase::extractActionName(rMap));
-        if (aCommand.isEmpty())
-            return;
-
-        OUString aModuleName(vcl::CommandInfoProvider::GetModuleIdentifier(rFrame));
-        auto aProperties = vcl::CommandInfoProvider::GetCommandProperties(aCommand, aModuleName);
-        OUString aLabel(vcl::CommandInfoProvider::GetLabelForCommand(aProperties));
-        if (!aLabel.isEmpty())
-            pButton->SetText(aLabel);
-
-        OUString aTooltip(vcl::CommandInfoProvider::GetTooltipForCommand(aCommand, aProperties, rFrame));
-        if (!aTooltip.isEmpty())
-            pButton->SetQuickHelpText(aTooltip);
-
-        Image aImage(vcl::CommandInfoProvider::GetImageForCommand(aCommand, rFrame));
-        pButton->SetModeImage(aImage);
-
-        pButton->SetCommandHandler(aCommand, rFrame);
-    }
-
-    VclPtr<Button> extractStockAndBuildPushButton(vcl::Window *pParent, VclBuilder::stringmap &rMap, bool bToggle)
-    {
-        WinBits nBits = WB_CLIPCHILDREN|WB_CENTER|WB_VCENTER;
-        if (bToggle)
-            nBits |= WB_TOGGLE;
-
-        nBits |= extractRelief(rMap);
-
-        VclPtr<Button> xWindow = VclPtr<PushButton>::Create(pParent, nBits);
-        return xWindow;
-    }
-
-    VclPtr<MenuButton> extractStockAndBuildMenuButton(vcl::Window *pParent, VclBuilder::stringmap &rMap)
-    {
-        WinBits nBits = WB_CLIPCHILDREN|WB_CENTER|WB_VCENTER|WB_3DLOOK;
-
-        nBits |= extractRelief(rMap);
-
-        VclPtr<MenuButton> xWindow = VclPtr<MenuButton>::Create(pParent, nBits);
-        return xWindow;
-    }
-
-    VclPtr<MenuButton> extractStockAndBuildMenuToggleButton(vcl::Window *pParent, VclBuilder::stringmap &rMap)
-    {
-        WinBits nBits = WB_CLIPCHILDREN|WB_CENTER|WB_VCENTER|WB_3DLOOK;
-
-        nBits |= extractRelief(rMap);
-
-        VclPtr<MenuButton> xWindow = VclPtr<MenuToggleButton>::Create(pParent, nBits);
-        return xWindow;
-    }
-
-    WinBits extractDeferredBits(VclBuilder::stringmap &rMap)
-    {
-        WinBits nBits = WB_3DLOOK|WB_HIDE;
-        if (BuilderBase::extractResizable(rMap))
-            nBits |= WB_SIZEABLE;
-        if (extractCloseable(rMap))
-            nBits |= WB_CLOSEABLE;
-        if (!extractDecorated(rMap))
-            nBits |= WB_OWNERDRAWDECORATION;
-        OUString sType(extractTypeHint(rMap));
-        if (sType == "utility")
-            nBits |= WB_SYSTEMWINDOW | WB_DIALOGCONTROL | WB_MOVEABLE;
-        else if (sType == "popup-menu")
-            nBits |= WB_SYSTEMWINDOW | WB_DIALOGCONTROL | WB_POPUP;
-        else if (sType == "dock")
-            nBits |= WB_DOCKABLE | WB_MOVEABLE;
-        else
-            nBits |= WB_MOVEABLE;
-        return nBits;
-    }
+    return rDefaultValue;
 }
 
-void BuilderBase::extractRadioButtonGroup(const OUString &id, stringmap &rMap)
+static inline bool lcl_extractBoolEntry(BuilderBase::stringmap& rMap, const OUString& rKey, bool bDefaultValue)
 {
-    const OUString sGroupId = extractGroup(rMap);
-    if (sGroupId.isEmpty())
+    BuilderBase::stringmap::iterator aFind = rMap.find(rKey);
+    if (aFind != rMap.end())
+    {
+        const bool bValue = toBool(aFind->second);
+        rMap.erase(aFind);
+        return bValue;
+    }
+    return bDefaultValue;
+}
+
+static bool lcl_extractHasFrame(VclBuilder::stringmap& rMap)
+{
+    return lcl_extractBoolEntry(rMap, u"has-frame"_ustr, true);
+}
+
+static bool lcl_extractDrawValue(VclBuilder::stringmap& rMap)
+{
+    return lcl_extractBoolEntry(rMap, u"draw-value"_ustr, true);
+}
+
+static OUString lcl_extractWidgetName(VclBuilder::stringmap& rMap)
+{
+    return lcl_extractStringEntry(rMap, u"name"_ustr);
+}
+
+static OUString lcl_extractValuePos(VclBuilder::stringmap& rMap)
+{
+    return lcl_extractStringEntry(rMap,u"value-pos"_ustr, u"top"_ustr);
+}
+
+static OUString lcl_extractTypeHint(VclBuilder::stringmap &rMap)
+{
+    return lcl_extractStringEntry(rMap, u"type-hint"_ustr, u"normal"_ustr);
+}
+
+static bool lcl_extractModal(VclBuilder::stringmap &rMap)
+{
+    return lcl_extractBoolEntry(rMap, u"modal"_ustr, false);
+}
+
+static bool lcl_extractDecorated(VclBuilder::stringmap &rMap)
+{
+    return lcl_extractBoolEntry(rMap, u"decorated"_ustr, true);
+}
+
+static bool lcl_extractCloseable(VclBuilder::stringmap &rMap)
+{
+    return lcl_extractBoolEntry(rMap, u"deletable"_ustr, true);
+}
+
+static bool lcl_extractVerticalTabPos(VclBuilder::stringmap &rMap)
+{
+    bool bVertical = false;
+
+    if (officecfg::Office::Common::Misc::UseVerticalNotebookbar::get())
+    {
+        VclBuilder::stringmap::iterator aFind = rMap.find(u"tab-pos"_ustr);
+        if (aFind != rMap.end())
+        {
+            bVertical = aFind->second.equalsIgnoreAsciiCase("left") ||
+                        aFind->second.equalsIgnoreAsciiCase("right");
+            rMap.erase(aFind);
+        }
+    }
+
+    return bVertical;
+}
+
+static bool lcl_extractVerticalTabsWithIcons(VclBuilder::stringmap &rMap)
+{
+    bool bWithIcons = false;
+    VclBuilder::stringmap::iterator aFind = rMap.find(u"group-name"_ustr);
+    if (aFind != rMap.end())
+    {
+        bWithIcons = aFind->second.equalsIgnoreAsciiCase("icons");
+        rMap.erase(aFind);
+    }
+    return bWithIcons;
+}
+
+static bool lcl_extractInconsistent(VclBuilder::stringmap &rMap)
+{
+    return lcl_extractBoolEntry(rMap, u"inconsistent"_ustr, false);
+}
+
+static WinBits lcl_extractRelief(VclBuilder::stringmap &rMap)
+{
+    WinBits nBits = WB_3DLOOK;
+    VclBuilder::stringmap::iterator aFind = rMap.find(u"relief"_ustr);
+    if (aFind != rMap.end())
+    {
+        assert(aFind->second != "half" && "relief of 'half' unsupported");
+        if (aFind->second == "none")
+            nBits = WB_FLATBUTTON;
+        rMap.erase(aFind);
+    }
+    return nBits;
+}
+
+static Size lcl_extractSizeRequest(VclBuilder::stringmap &rMap)
+{
+    OUString sWidthRequest(u"0"_ustr);
+    OUString sHeightRequest(u"0"_ustr);
+    VclBuilder::stringmap::iterator aFind = rMap.find(u"width-request"_ustr);
+    if (aFind != rMap.end())
+    {
+        sWidthRequest = aFind->second;
+        rMap.erase(aFind);
+    }
+    aFind = rMap.find(u"height-request"_ustr);
+    if (aFind != rMap.end())
+    {
+        sHeightRequest = aFind->second;
+        rMap.erase(aFind);
+    }
+    return Size(sWidthRequest.toInt32(), sHeightRequest.toInt32());
+}
+
+static float lcl_extractAlignment(VclBuilder::stringmap &rMap)
+{
+    float f = 0.0;
+    VclBuilder::stringmap::iterator aFind = rMap.find(u"alignment"_ustr);
+    if (aFind != rMap.end())
+    {
+        f = aFind->second.toFloat();
+        rMap.erase(aFind);
+    }
+    return f;
+}
+
+static bool lcl_extractSortIndicator(VclBuilder::stringmap &rMap)
+{
+    return lcl_extractBoolEntry(rMap, u"sort-indicator"_ustr, false);
+}
+
+static bool lcl_extractClickable(VclBuilder::stringmap &rMap)
+{
+    return lcl_extractBoolEntry(rMap, u"clickable"_ustr, false);
+}
+
+static void lcl_setupFromActionName(Button *pButton, VclBuilder::stringmap &rMap, const css::uno::Reference<css::frame::XFrame>& rFrame)
+{
+    if (!rFrame.is())
         return;
 
-    m_pParserState->m_aRadioButtonGroupMaps.emplace_back(id, sGroupId);
+    OUString aCommand(BuilderBase::extractActionName(rMap));
+    if (aCommand.isEmpty())
+        return;
+
+    OUString aModuleName(vcl::CommandInfoProvider::GetModuleIdentifier(rFrame));
+    auto aProperties = vcl::CommandInfoProvider::GetCommandProperties(aCommand, aModuleName);
+    OUString aLabel(vcl::CommandInfoProvider::GetLabelForCommand(aProperties));
+    if (!aLabel.isEmpty())
+        pButton->SetText(aLabel);
+
+    OUString aTooltip(vcl::CommandInfoProvider::GetTooltipForCommand(aCommand, aProperties, rFrame));
+    if (!aTooltip.isEmpty())
+        pButton->SetQuickHelpText(aTooltip);
+
+    Image aImage(vcl::CommandInfoProvider::GetImageForCommand(aCommand, rFrame));
+    pButton->SetModeImage(aImage);
+
+    pButton->SetCommandHandler(aCommand, rFrame);
+}
+
+static VclPtr<Button> lcl_extractStockAndBuildPushButton(vcl::Window *pParent, VclBuilder::stringmap &rMap, bool bToggle)
+{
+    WinBits nBits = WB_CLIPCHILDREN|WB_CENTER|WB_VCENTER;
+    if (bToggle)
+        nBits |= WB_TOGGLE;
+
+    nBits |= lcl_extractRelief(rMap);
+
+    VclPtr<Button> xWindow = VclPtr<PushButton>::Create(pParent, nBits);
+    return xWindow;
+}
+
+static VclPtr<MenuButton> lcl_extractStockAndBuildMenuButton(vcl::Window *pParent, VclBuilder::stringmap &rMap)
+{
+    WinBits nBits = WB_CLIPCHILDREN|WB_CENTER|WB_VCENTER|WB_3DLOOK;
+
+    nBits |= lcl_extractRelief(rMap);
+
+    VclPtr<MenuButton> xWindow = VclPtr<MenuButton>::Create(pParent, nBits);
+    return xWindow;
+}
+
+static VclPtr<MenuButton> lcl_extractStockAndBuildMenuToggleButton(vcl::Window *pParent, VclBuilder::stringmap &rMap)
+{
+    WinBits nBits = WB_CLIPCHILDREN|WB_CENTER|WB_VCENTER|WB_3DLOOK;
+
+    nBits |= lcl_extractRelief(rMap);
+
+    VclPtr<MenuButton> xWindow = VclPtr<MenuToggleButton>::Create(pParent, nBits);
+    return xWindow;
+}
+
+static WinBits lcl_extractDeferredBits(VclBuilder::stringmap &rMap)
+{
+    WinBits nBits = WB_3DLOOK|WB_HIDE;
+    if (BuilderBase::extractResizable(rMap))
+        nBits |= WB_SIZEABLE;
+    if (lcl_extractCloseable(rMap))
+        nBits |= WB_CLOSEABLE;
+    if (!lcl_extractDecorated(rMap))
+        nBits |= WB_OWNERDRAWDECORATION;
+    OUString sType(lcl_extractTypeHint(rMap));
+    if (sType == "utility")
+        nBits |= WB_SYSTEMWINDOW | WB_DIALOGCONTROL | WB_MOVEABLE;
+    else if (sType == "popup-menu")
+        nBits |= WB_SYSTEMWINDOW | WB_DIALOGCONTROL | WB_POPUP;
+    else if (sType == "dock")
+        nBits |= WB_DOCKABLE | WB_MOVEABLE;
+    else
+        nBits |= WB_MOVEABLE;
+    return nBits;
 }
 
 void VclBuilder::connectNumericFormatterAdjustment(const OUString &id, const OUString &rAdjustment)
@@ -828,7 +718,7 @@ namespace
 {
     bool extractSelectable(VclBuilder::stringmap &rMap)
     {
-        return extractBoolEntry(rMap, u"selectable"_ustr, false);
+        return lcl_extractBoolEntry(rMap, u"selectable"_ustr, false);
     }
 
     OUString extractAdjustment(VclBuilder::stringmap &rMap)
@@ -846,7 +736,7 @@ namespace
 
     bool extractDrawIndicator(VclBuilder::stringmap &rMap)
     {
-        return extractBoolEntry(rMap, u"draw-indicator"_ustr, false);
+        return lcl_extractBoolEntry(rMap, u"draw-indicator"_ustr, false);
     }
 }
 
@@ -875,20 +765,6 @@ void VclBuilder::extractButtonImage(const OUString &id, stringmap &rMap, bool bR
     if (aFind != rMap.end())
     {
         m_pVclParserState->m_aButtonImageWidgetMaps.emplace_back(id, aFind->second, bRadio);
-        rMap.erase(aFind);
-    }
-}
-
-void BuilderBase::extractMnemonicWidget(const OUString &rLabelID, stringmap &rMap)
-{
-    VclBuilder::stringmap::iterator aFind = rMap.find(u"mnemonic-widget"_ustr);
-    if (aFind != rMap.end())
-    {
-        OUString sID = aFind->second;
-        sal_Int32 nDelim = sID.indexOf(':');
-        if (nDelim != -1)
-            sID = sID.copy(0, nDelim);
-        m_pParserState->m_aMnemonicWidgetMaps.emplace_back(rLabelID, sID);
         rMap.erase(aFind);
     }
 }
@@ -1152,7 +1028,7 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
         WinBits nBits = WB_MOVEABLE|WB_3DLOOK|WB_ALLOWMENUBAR;
         if (extractResizable(rMap))
             nBits |= WB_SIZEABLE;
-        if (extractCloseable(rMap))
+        if (lcl_extractCloseable(rMap))
             nBits |= WB_CLOSEABLE;
         Dialog::InitFlag eInit = !pParent ? Dialog::InitFlag::NoParent : Dialog::InitFlag::Default;
         if (name == "GtkAssistant")
@@ -1160,7 +1036,7 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
         else
             xWindow = VclPtr<Dialog>::Create(pParent, nBits, eInit);
 #if HAVE_FEATURE_DESKTOP
-        if (!extractModal(rMap))
+        if (!lcl_extractModal(rMap))
             xWindow->SetType(WindowType::MODELESSDIALOG);
 #endif
     }
@@ -1228,15 +1104,15 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
         VclPtr<Button> xButton;
         OUString sMenu = BuilderUtils::extractCustomProperty(rMap);
         if (sMenu.isEmpty())
-            xButton = extractStockAndBuildPushButton(pParent, rMap, name == "GtkToggleButton");
+            xButton = lcl_extractStockAndBuildPushButton(pParent, rMap, name == "GtkToggleButton");
         else
         {
             assert(isLegacy() && "use GtkMenuButton");
-            xButton = extractStockAndBuildMenuButton(pParent, rMap);
+            xButton = lcl_extractStockAndBuildMenuButton(pParent, rMap);
             m_pVclParserState->m_aButtonMenuMaps.emplace_back(id, sMenu);
         }
         xButton->SetImageAlign(ImageAlign::Left); //default to left
-        setupFromActionName(xButton, rMap, m_xFrame);
+        lcl_setupFromActionName(xButton, rMap, m_xFrame);
         xWindow = xButton;
     }
     else if (name == "GtkMenuButton")
@@ -1247,15 +1123,15 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
         if (!sMenu.isEmpty())
             m_pVclParserState->m_aButtonMenuMaps.emplace_back(id, sMenu);
 
-        OUString sType = extractWidgetName(rMap);
+        OUString sType = lcl_extractWidgetName(rMap);
         if (sType.isEmpty())
         {
-            xButton = extractStockAndBuildMenuButton(pParent, rMap);
+            xButton = lcl_extractStockAndBuildMenuButton(pParent, rMap);
             xButton->SetAccessibleRole(css::accessibility::AccessibleRole::BUTTON_MENU);
         }
         else
         {
-            xButton = extractStockAndBuildMenuToggleButton(pParent, rMap);
+            xButton = lcl_extractStockAndBuildMenuToggleButton(pParent, rMap);
         }
 
         xButton->SetImageAlign(ImageAlign::Left); //default to left
@@ -1263,7 +1139,7 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
         if (!extractDrawIndicator(rMap))
             xButton->SetDropDown(PushButtonDropdownStyle::NONE);
 
-        setupFromActionName(xButton, rMap, m_xFrame);
+        lcl_setupFromActionName(xButton, rMap, m_xFrame);
         xWindow = xButton;
     }
     else if (name == "GtkToggleButton" && isLegacy())
@@ -1271,10 +1147,10 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
         VclPtr<Button> xButton;
         OUString sMenu = BuilderUtils::extractCustomProperty(rMap);
         assert(sMenu.getLength() && "not implemented yet");
-        xButton = extractStockAndBuildMenuToggleButton(pParent, rMap);
+        xButton = lcl_extractStockAndBuildMenuToggleButton(pParent, rMap);
         m_pVclParserState->m_aButtonMenuMaps.emplace_back(id, sMenu);
         xButton->SetImageAlign(ImageAlign::Left); //default to left
-        setupFromActionName(xButton, rMap, m_xFrame);
+        lcl_setupFromActionName(xButton, rMap, m_xFrame);
         xWindow = xButton;
     }
     else if (name == "GtkRadioButton")
@@ -1288,7 +1164,7 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
     else if (name == "GtkCheckButton")
     {
         WinBits nBits = WB_CLIPCHILDREN|WB_LEFT|WB_VCENTER|WB_3DLOOK;
-        bool bIsTriState = extractInconsistent(rMap);
+        bool bIsTriState = lcl_extractInconsistent(rMap);
         VclPtr<CheckBox> xCheckBox = VclPtr<CheckBox>::Create(pParent, nBits);
         if (bIsTriState)
         {
@@ -1304,7 +1180,7 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
         OUString sAdjustment = extractAdjustment(rMap);
 
         WinBits nBits = WB_CLIPCHILDREN|WB_LEFT|WB_3DLOOK|WB_SPIN|WB_REPEAT;
-        if (extractHasFrame(rMap))
+        if (lcl_extractHasFrame(rMap))
             nBits |= WB_BORDER;
 
         connectFormattedFormatterAdjustment(id, sAdjustment);
@@ -1348,7 +1224,7 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
         OUString sMenu = BuilderUtils::extractCustomProperty(rMap);
         if (!sMenu.isEmpty())
             m_pVclParserState->m_aButtonMenuMaps.emplace_back(id, sMenu);
-        setupFromActionName(static_cast<Button*>(xWindow.get()), rMap, m_xFrame);
+        lcl_setupFromActionName(static_cast<Button*>(xWindow.get()), rMap, m_xFrame);
     }
     else if (name == "sfxlo-PriorityMergedHBox")
     {
@@ -1471,11 +1347,11 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
             if (HeaderBar* pHeaderBar = pTreeView ? pTreeView->GetHeaderBar() : nullptr)
             {
                 HeaderBarItemBits nBits = HeaderBarItemBits::LEFTIMAGE;
-                if (extractClickable(rMap))
+                if (lcl_extractClickable(rMap))
                     nBits |= HeaderBarItemBits::CLICKABLE;
-                if (extractSortIndicator(rMap))
+                if (lcl_extractSortIndicator(rMap))
                     nBits |= HeaderBarItemBits::DOWNARROW;
-                float fAlign = extractAlignment(rMap);
+                float fAlign = lcl_extractAlignment(rMap);
                 if (fAlign == 0.0)
                     nBits |= HeaderBarItemBits::LEFT;
                 else if (fAlign == 1.0)
@@ -1551,17 +1427,17 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
     else if (name == "GtkEntry")
     {
         WinBits nWinStyle = WB_LEFT|WB_VCENTER|WB_3DLOOK;
-        if (extractHasFrame(rMap))
+        if (lcl_extractHasFrame(rMap))
             nWinStyle |= WB_BORDER;
         xWindow = VclPtr<Edit>::Create(pParent, nWinStyle);
         BuilderUtils::ensureDefaultWidthChars(rMap);
     }
     else if (name == "GtkNotebook")
     {
-        if (!extractVerticalTabPos(rMap))
+        if (!lcl_extractVerticalTabPos(rMap))
             xWindow = VclPtr<TabControl>::Create(pParent, WB_STDTABCONTROL|WB_3DLOOK);
         else
-            xWindow = VclPtr<VerticalTabControl>::Create(pParent, extractVerticalTabsWithIcons(rMap));
+            xWindow = VclPtr<VerticalTabControl>::Create(pParent, lcl_extractVerticalTabsWithIcons(rMap));
     }
     else if (name == "GtkDrawingArea")
     {
@@ -1585,10 +1461,10 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
     else if (name == "GtkScale")
     {
         extractAdjustmentToMap(id, rMap, m_pVclParserState->m_aSliderAdjustmentMaps);
-        bool bDrawValue = extractDrawValue(rMap);
+        bool bDrawValue = lcl_extractDrawValue(rMap);
         if (bDrawValue)
         {
-            OUString sValuePos = extractValuePos(rMap);
+            OUString sValuePos = lcl_extractValuePos(rMap);
             (void)sValuePos;
         }
         bVertical = hasOrientationVertical(rMap);
@@ -1625,7 +1501,7 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
 
             if (!aCommand.isEmpty() && m_xFrame.is())
             {
-                pToolBox->InsertItem(aCommand, m_xFrame, nBits, extractSizeRequest(rMap));
+                pToolBox->InsertItem(aCommand, m_xFrame, nBits, lcl_extractSizeRequest(rMap));
                 nItemId = pToolBox->GetItemId(aCommand);
             }
             else
@@ -1664,7 +1540,7 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
     }
     else if (name == "GtkWindow")
     {
-        WinBits nBits = extractDeferredBits(rMap);
+        WinBits nBits = lcl_extractDeferredBits(rMap);
         if (nBits & WB_DOCKABLE)
             xWindow = VclPtr<DockingWindow>::Create(pParent, nBits|WB_MOVEABLE);
         else
@@ -1672,15 +1548,15 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
     }
     else if (name == "GtkPopover")
     {
-        WinBits nBits = extractDeferredBits(rMap);
+        WinBits nBits = lcl_extractDeferredBits(rMap);
         // If a Popover is not modal don't grab focus when it pops up
-        if (!extractModal(rMap))
+        if (!lcl_extractModal(rMap))
             nBits |= WB_NOPOINTERFOCUS;
         xWindow = VclPtr<DockingWindow>::Create(pParent, nBits|WB_DOCKABLE|WB_MOVEABLE);
     }
     else if (name == "GtkCalendar")
     {
-        WinBits nBits = extractDeferredBits(rMap);
+        WinBits nBits = lcl_extractDeferredBits(rMap);
         xWindow = VclPtr<Calendar>::Create(pParent, nBits);
     }
     else
@@ -1689,13 +1565,13 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
         {
             pFunction(xWindow, pParent, rMap);
             if (xWindow->GetType() == WindowType::PUSHBUTTON)
-                setupFromActionName(static_cast<Button*>(xWindow.get()), rMap, m_xFrame);
+                lcl_setupFromActionName(static_cast<Button*>(xWindow.get()), rMap, m_xFrame);
             else if (xWindow->GetType() == WindowType::MENUBUTTON)
             {
                 OUString sMenu = BuilderUtils::extractCustomProperty(rMap);
                 if (!sMenu.isEmpty())
                     m_pVclParserState->m_aButtonMenuMaps.emplace_back(id, sMenu);
-                setupFromActionName(static_cast<Button*>(xWindow.get()), rMap, m_xFrame);
+                lcl_setupFromActionName(static_cast<Button*>(xWindow.get()), rMap, m_xFrame);
             }
         }
     }
@@ -1778,7 +1654,7 @@ namespace BuilderUtils
 
     OUString extractCustomProperty(VclBuilder::stringmap &rMap)
     {
-        return extractStringEntry(rMap, u"customproperty"_ustr);
+        return lcl_extractStringEntry(rMap, u"customproperty"_ustr);
     }
 
     void ensureDefaultWidthChars(VclBuilder::stringmap &rMap)
@@ -1791,7 +1667,7 @@ namespace BuilderUtils
 
     bool extractDropdown(VclBuilder::stringmap &rMap)
     {
-        return extractBoolEntry(rMap, u"dropdown"_ustr, true);
+        return lcl_extractBoolEntry(rMap, u"dropdown"_ustr, true);
     }
 
     void reorderWithinParent(vcl::Window &rWindow, sal_uInt16 nNewPosition)
@@ -1981,13 +1857,13 @@ VclPtr<vcl::Window> VclBuilder::insertObject(vcl::Window* pParent, const OUStrin
         if (pParent && pParent->IsSystemWindow())
         {
             SystemWindow *pSysWin = static_cast<SystemWindow*>(pCurrentChild.get());
-            pSysWin->doDeferredInit(extractDeferredBits(rProps));
+            pSysWin->doDeferredInit(lcl_extractDeferredBits(rProps));
             m_bToplevelHasDeferredInit = false;
         }
         else if (pParent && pParent->IsDockingWindow())
         {
             DockingWindow *pDockWin = static_cast<DockingWindow*>(pCurrentChild.get());
-            pDockWin->doDeferredInit(extractDeferredBits(rProps));
+            pDockWin->doDeferredInit(lcl_extractDeferredBits(rProps));
             m_bToplevelHasDeferredInit = false;
         }
 
@@ -2218,148 +2094,6 @@ void VclBuilder::tweakInsertedChild(vcl::Window *pParent, vcl::Window* pCurrentC
     }
 }
 
-void BuilderBase::collectPangoAttribute(xmlreader::XmlReader& reader, stringmap& rMap)
-{
-    xmlreader::Span span;
-    int nsId;
-
-    OUString sProperty;
-    OUString sValue;
-
-    while (reader.nextAttribute(&nsId, &span))
-    {
-        if (span == "name")
-        {
-            span = reader.getAttributeValue(false);
-            sProperty = OUString(span.begin, span.length, RTL_TEXTENCODING_UTF8);
-        }
-        else if (span == "value")
-        {
-            span = reader.getAttributeValue(false);
-            sValue = OUString(span.begin, span.length, RTL_TEXTENCODING_UTF8);
-        }
-    }
-
-    if (!sProperty.isEmpty())
-        rMap[sProperty] = sValue;
-}
-
-void BuilderBase::collectAtkRelationAttribute(xmlreader::XmlReader& reader, stringmap& rMap)
-{
-    xmlreader::Span span;
-    int nsId;
-
-    OUString sProperty;
-    OUString sValue;
-
-    while (reader.nextAttribute(&nsId, &span))
-    {
-        if (span == "type")
-        {
-            span = reader.getAttributeValue(false);
-            sProperty = OUString(span.begin, span.length, RTL_TEXTENCODING_UTF8);
-        }
-        else if (span == "target")
-        {
-            span = reader.getAttributeValue(false);
-            sValue = OUString(span.begin, span.length, RTL_TEXTENCODING_UTF8);
-            sal_Int32 nDelim = sValue.indexOf(':');
-            if (nDelim != -1)
-                sValue = sValue.copy(0, nDelim);
-        }
-    }
-
-    if (!sProperty.isEmpty())
-        rMap[sProperty] = sValue;
-}
-
-void BuilderBase::collectAtkRoleAttribute(xmlreader::XmlReader& reader, stringmap& rMap)
-{
-    xmlreader::Span span;
-    int nsId;
-
-    OUString sProperty;
-
-    while (reader.nextAttribute(&nsId, &span))
-    {
-        if (span == "type")
-        {
-            span = reader.getAttributeValue(false);
-            sProperty = OUString(span.begin, span.length, RTL_TEXTENCODING_UTF8);
-        }
-    }
-
-    if (!sProperty.isEmpty())
-        rMap[u"role"_ustr] = sProperty;
-}
-
-void BuilderBase::handleListStore(xmlreader::XmlReader& reader)
-{
-    int nLevel = 1;
-
-    while(true)
-    {
-        xmlreader::Span name;
-        int nsId;
-
-        xmlreader::XmlReader::Result res = reader.nextItem(
-            xmlreader::XmlReader::Text::NONE, &name, &nsId);
-
-        if (res == xmlreader::XmlReader::Result::Done)
-            break;
-
-        if (res == xmlreader::XmlReader::Result::Begin)
-        {
-            assert(name != "row" && "Defining model data in UI files is not supported");
-            ++nLevel;
-        }
-
-        if (res == xmlreader::XmlReader::Result::End)
-        {
-            --nLevel;
-        }
-
-        if (!nLevel)
-            break;
-    }
-}
-
-BuilderBase::stringmap BuilderBase::handleAtkObject(xmlreader::XmlReader& reader) const
-{
-    int nLevel = 1;
-
-    stringmap aProperties;
-
-    while (true)
-    {
-        xmlreader::Span name;
-        int nsId;
-
-        xmlreader::XmlReader::Result res = reader.nextItem(
-            xmlreader::XmlReader::Text::NONE, &name, &nsId);
-
-        if (res == xmlreader::XmlReader::Result::Done)
-            break;
-
-        if (res == xmlreader::XmlReader::Result::Begin)
-        {
-            ++nLevel;
-            if (name == "property")
-                collectProperty(reader, aProperties);
-        }
-
-        if (res == xmlreader::XmlReader::Result::End)
-        {
-            --nLevel;
-        }
-
-        if (!nLevel)
-            break;
-    }
-
-    return aProperties;
-}
-
 void VclBuilder::applyAtkProperties(vcl::Window *pWindow, const stringmap& rProperties, bool bToolbarItem)
 {
     assert(pWindow);
@@ -2418,6 +2152,7 @@ void VclBuilder::setPriority(vcl::Window* pWindow, int nPriority)
     if (pPrioritable)
         pPrioritable->SetPriority(nPriority);
 }
+
 void VclBuilder::setContext(vcl::Window* pWindow, std::vector<vcl::EnumContext::Context>&& aContext)
 {
     vcl::IContext* pContextControl = dynamic_cast<vcl::IContext*>(pWindow);
@@ -2436,124 +2171,6 @@ VclPtr<PopupMenu> VclBuilder::createMenu(const OUString& rID)
     VclPtr<PopupMenu> pMenu = VclPtr<PopupMenu>::Create();
     pMenu->set_id(rID);
     return pMenu;
-}
-
-std::vector<ComboBoxTextItem> BuilderBase::handleItems(xmlreader::XmlReader& reader) const
-{
-    int nLevel = 1;
-
-    std::vector<ComboBoxTextItem> aItems;
-
-    while(true)
-    {
-        xmlreader::Span name;
-        int nsId;
-
-        xmlreader::XmlReader::Result res = reader.nextItem(
-            xmlreader::XmlReader::Text::NONE, &name, &nsId);
-
-        if (res == xmlreader::XmlReader::Result::Done)
-            break;
-
-        if (res == xmlreader::XmlReader::Result::Begin)
-        {
-            ++nLevel;
-            if (name == "item")
-            {
-                bool bTranslated = false;
-                OString sContext;
-                OUString sId;
-
-                while (reader.nextAttribute(&nsId, &name))
-                {
-                    if (name == "translatable" && reader.getAttributeValue(false) == "yes")
-                    {
-                        bTranslated = true;
-                    }
-                    else if (name == "context")
-                    {
-                        name = reader.getAttributeValue(false);
-                        sContext = OString(name.begin, name.length);
-                    }
-                    else if (name == "id")
-                    {
-                        name = reader.getAttributeValue(false);
-                        sId = OUString(name.begin, name.length, RTL_TEXTENCODING_UTF8);
-                    }
-                }
-
-                (void)reader.nextItem(
-                    xmlreader::XmlReader::Text::Raw, &name, &nsId);
-
-                OString sValue(name.begin, name.length);
-                const OUString sFinalValue = finalizeValue(sContext, sValue, bTranslated);
-                aItems.emplace_back(sFinalValue, sId);
-            }
-        }
-
-        if (res == xmlreader::XmlReader::Result::End)
-        {
-            --nLevel;
-        }
-
-        if (!nLevel)
-            break;
-    }
-
-    return aItems;
-}
-
-void BuilderBase::handleSizeGroup(xmlreader::XmlReader& reader)
-{
-    m_pParserState->m_aSizeGroups.emplace_back();
-    SizeGroup &rSizeGroup = m_pParserState->m_aSizeGroups.back();
-
-    int nLevel = 1;
-
-    while(true)
-    {
-        xmlreader::Span name;
-        int nsId;
-
-        xmlreader::XmlReader::Result res = reader.nextItem(
-            xmlreader::XmlReader::Text::NONE, &name, &nsId);
-
-        if (res == xmlreader::XmlReader::Result::Done)
-            break;
-
-        if (res == xmlreader::XmlReader::Result::Begin)
-        {
-            ++nLevel;
-            if (name == "widget")
-            {
-                while (reader.nextAttribute(&nsId, &name))
-                {
-                    if (name == "name")
-                    {
-                        name = reader.getAttributeValue(false);
-                        OUString sWidget(name.begin, name.length, RTL_TEXTENCODING_UTF8);
-                        sal_Int32 nDelim = sWidget.indexOf(':');
-                        if (nDelim != -1)
-                            sWidget = sWidget.copy(0, nDelim);
-                        rSizeGroup.m_aWidgets.push_back(sWidget);
-                    }
-                }
-            }
-            else
-            {
-                if (name == "property")
-                    collectProperty(reader, rSizeGroup.m_aProperties);
-            }
-        }
-
-        if (res == xmlreader::XmlReader::Result::End)
-        {
-            --nLevel;
-        }
-
-        if (!nLevel)
-            break;
-    }
 }
 
 namespace
@@ -2685,109 +2302,6 @@ void VclBuilder::insertMenuObject(PopupMenu* pParent, PopupMenu* pSubMenu, const
     rProps.clear();
 }
 
-/// Insert items to a ComboBox or a ListBox.
-/// They have no common ancestor that would have 'InsertEntry()', so use a template.
-template <typename T>
-static bool insertItems(vcl::Window* pWindow, std::vector<std::unique_ptr<OUString>>& rUserData,
-                        const std::vector<ComboBoxTextItem>& rItems, sal_Int32 nActiveIndex)
-{
-    T *pContainer = dynamic_cast<T*>(pWindow);
-    if (!pContainer)
-        return false;
-
-    for (auto const& item : rItems)
-    {
-        sal_Int32 nPos = pContainer->InsertEntry(item.m_sItem);
-        if (!item.m_sId.isEmpty())
-        {
-            rUserData.emplace_back(std::make_unique<OUString>(item.m_sId));
-            pContainer->SetEntryData(nPos, rUserData.back().get());
-        }
-    }
-    if (o3tl::make_unsigned(nActiveIndex) < rItems.size())
-        pContainer->SelectEntryPos(nActiveIndex);
-
-    return true;
-}
-
-void BuilderBase::extractClassAndIdAndCustomProperty(xmlreader::XmlReader& reader, OUString& rClass,
-                                                     OUString& rId, OUString& rCustomProperty)
-{
-    xmlreader::Span name;
-    int nsId;
-
-    while (reader.nextAttribute(&nsId, &name))
-    {
-        if (name == "class")
-        {
-            name = reader.getAttributeValue(false);
-            rClass = OUString(name.begin, name.length, RTL_TEXTENCODING_UTF8);
-        }
-        else if (name == "id")
-        {
-            name = reader.getAttributeValue(false);
-            rId = OUString(name.begin, name.length, RTL_TEXTENCODING_UTF8);
-            if (isLegacy())
-            {
-                sal_Int32 nDelim = rId.indexOf(':');
-                if (nDelim != -1)
-                {
-                    rCustomProperty = rId.subView(nDelim+1);
-                    rId = rId.copy(0, nDelim);
-                }
-            }
-        }
-    }
-}
-
-
-Image BuilderBase::loadThemeImage(const OUString& rFileName)
-{
-    return Image(StockImage::Yes, rFileName);
-}
-
-void BuilderBase::handleInterfaceDomain(xmlreader::XmlReader& rReader)
-{
-    xmlreader::Span name = rReader.getAttributeValue(false);
-    const OString sPrefixName(name.begin, name.length);
-    m_pParserState->m_aResLocale = Translate::Create(sPrefixName);
-}
-
-BuilderBase::stringmap BuilderBase::collectPackingProperties(xmlreader::XmlReader& reader)
-{
-    int nLevel = 1;
-    stringmap aPackingProperties;
-
-    while(true)
-    {
-        xmlreader::Span name;
-        int nsId;
-
-        xmlreader::XmlReader::Result res = reader.nextItem(
-            xmlreader::XmlReader::Text::NONE, &name, &nsId);
-
-        if (res == xmlreader::XmlReader::Result::Done)
-            break;
-
-        if (res == xmlreader::XmlReader::Result::Begin)
-        {
-            ++nLevel;
-            if (name == "property")
-                collectProperty(reader, aPackingProperties);
-        }
-
-        if (res == xmlreader::XmlReader::Result::End)
-        {
-            --nLevel;
-        }
-
-        if (!nLevel)
-            break;
-    }
-
-    return aPackingProperties;
-}
-
 void VclBuilder::applyPackingProperties(vcl::Window* pCurrent, vcl::Window* pParent,
                                         const stringmap& rPackingProperties)
 {
@@ -2875,349 +2389,6 @@ void VclBuilder::applyPackingProperties(vcl::Window* pCurrent, vcl::Window* pPar
             SAL_WARN_IF(rKey != u"shrink", "vcl.builder", "unknown packing: " << rKey);
         }
     }
-}
-
-std::vector<vcl::EnumContext::Context> BuilderBase::handleStyle(xmlreader::XmlReader &reader, int &nPriority)
-{
-    std::vector<vcl::EnumContext::Context> aContext;
-
-    xmlreader::Span name;
-    int nsId;
-
-    int nLevel = 1;
-
-    while(true)
-    {
-        xmlreader::XmlReader::Result res = reader.nextItem(
-            xmlreader::XmlReader::Text::NONE, &name, &nsId);
-
-        if (res == xmlreader::XmlReader::Result::Done)
-            break;
-
-        if (res == xmlreader::XmlReader::Result::Begin)
-        {
-            ++nLevel;
-            if (name == "class")
-            {
-                OUString classStyle = getStyleClass(reader);
-                std::u16string_view rest;
-
-                if (classStyle.startsWith("context-", &rest))
-                {
-                    aContext.push_back(vcl::EnumContext::GetContextEnum(OUString(rest)));
-                }
-                else if (classStyle.startsWith("priority-", &rest))
-                {
-                    nPriority = o3tl::toInt32(rest);
-                }
-                else if (classStyle != "small-button" && classStyle != "destructive-action" &&
-                         classStyle != "suggested-action" && classStyle != "novertpad")
-                {
-                    SAL_WARN("vcl.builder", "unknown class: " << classStyle);
-                }
-            }
-        }
-
-        if (res == xmlreader::XmlReader::Result::End)
-        {
-            --nLevel;
-        }
-
-        if (!nLevel)
-            break;
-    }
-
-    return aContext;
-}
-
-OUString BuilderBase::getStyleClass(xmlreader::XmlReader &reader)
-{
-    xmlreader::Span name;
-    int nsId;
-    OUString aRet;
-
-    while (reader.nextAttribute(&nsId, &name))
-    {
-        if (name == "name")
-        {
-            name = reader.getAttributeValue(false);
-            aRet = OUString (name.begin, name.length, RTL_TEXTENCODING_UTF8);
-        }
-    }
-
-    return aRet;
-}
-
-bool BuilderBase::hasOrientationVertical(VclBuilder::stringmap &rMap)
-{
-    bool bVertical = false;
-    VclBuilder::stringmap::iterator aFind = rMap.find(u"orientation"_ustr);
-    if (aFind != rMap.end())
-    {
-        bVertical = aFind->second.equalsIgnoreAsciiCase("vertical");
-        rMap.erase(aFind);
-    }
-    return bVertical;
-}
-
-OUString BuilderBase::extractActionName(stringmap& rMap)
-{
-    return extractStringEntry(rMap, u"action-name"_ustr);
-}
-
-sal_Int32 BuilderBase::extractActive(VclBuilder::stringmap& rMap)
-{
-    sal_Int32 nActiveId = 0;
-    VclBuilder::stringmap::iterator aFind = rMap.find(u"active"_ustr);
-    if (aFind != rMap.end())
-    {
-        nActiveId = aFind->second.toInt32();
-        rMap.erase(aFind);
-    }
-    return nActiveId;
-}
-
-bool BuilderBase::extractEntry(VclBuilder::stringmap &rMap)
-{
-    return extractBoolEntry(rMap, u"has-entry"_ustr, false);
-}
-
-OUString BuilderBase::extractGroup(stringmap& rMap)
-{
-    OUString sGroup = extractStringEntry(rMap, u"group"_ustr);
-    sal_Int32 nDelim = sGroup.indexOf(':');
-    if (nDelim != -1)
-        sGroup = sGroup.copy(0, nDelim);
-
-    return sGroup;
-}
-
-bool BuilderBase::extractHeadersVisible(VclBuilder::stringmap& rMap)
-{
-    return extractBoolEntry(rMap, u"headers-visible"_ustr, true);
-}
-
-OUString BuilderBase::extractIconName(VclBuilder::stringmap &rMap)
-{
-    OUString sIconName;
-    // allow pixbuf, but prefer icon-name
-    {
-        VclBuilder::stringmap::iterator aFind = rMap.find(u"pixbuf"_ustr);
-        if (aFind != rMap.end())
-        {
-            sIconName = aFind->second;
-            rMap.erase(aFind);
-        }
-    }
-    {
-        VclBuilder::stringmap::iterator aFind = rMap.find(u"icon-name"_ustr);
-        if (aFind != rMap.end())
-        {
-            sIconName = aFind->second;
-            rMap.erase(aFind);
-        }
-    }
-    if (sIconName == "missing-image")
-        return OUString();
-    OUString sReplace = mapStockToImageResource(sIconName);
-    return !sReplace.isEmpty() ? sReplace : sIconName;
-}
-
-OUString BuilderBase::extractLabel(VclBuilder::stringmap& rMap)
-{
-    return extractStringEntry(rMap, u"label"_ustr);
-}
-
-OUString BuilderBase::extractPopupMenu(stringmap& rMap)
-{
-    return extractStringEntry(rMap, u"popup"_ustr);
-}
-
-bool BuilderBase::extractResizable(stringmap& rMap)
-{
-    return extractBoolEntry(rMap, u"resizable"_ustr, true);
-}
-
-bool BuilderBase::extractShowExpanders(VclBuilder::stringmap& rMap)
-{
-    return extractBoolEntry(rMap, u"show-expanders"_ustr, true);
-}
-
-OUString BuilderBase::extractTitle(VclBuilder::stringmap &rMap)
-{
-    return extractStringEntry(rMap, u"title"_ustr);
-}
-
-OUString BuilderBase::extractTooltipText(stringmap& rMap)
-{
-    OUString sTooltipText;
-    VclBuilder::stringmap::iterator aFind = rMap.find(u"tooltip-text"_ustr);
-    if (aFind == rMap.end())
-        aFind = rMap.find(u"tooltip-markup"_ustr);
-    if (aFind != rMap.end())
-    {
-        sTooltipText = aFind->second;
-        rMap.erase(aFind);
-    }
-    return sTooltipText;
-}
-
-bool BuilderBase::extractVisible(VclBuilder::stringmap& rMap)
-{
-    return extractBoolEntry(rMap, u"visible"_ustr, false);
-}
-
-void BuilderBase::collectProperty(xmlreader::XmlReader& reader, stringmap& rMap) const
-{
-    xmlreader::Span name;
-    int nsId;
-
-    OUString sProperty;
-    OString sContext;
-
-    bool bTranslated = false;
-
-    while (reader.nextAttribute(&nsId, &name))
-    {
-        if (name == "name")
-        {
-            name = reader.getAttributeValue(false);
-            sProperty = OUString(name.begin, name.length, RTL_TEXTENCODING_UTF8);
-        }
-        else if (name == "context")
-        {
-            name = reader.getAttributeValue(false);
-            sContext = OString(name.begin, name.length);
-        }
-        else if (name == "translatable" && reader.getAttributeValue(false) == "yes")
-        {
-            bTranslated = true;
-        }
-    }
-
-    (void)reader.nextItem(xmlreader::XmlReader::Text::Raw, &name, &nsId);
-
-    if (!sProperty.isEmpty())
-    {
-        OString sValue(name.begin, name.length);
-        const OUString sFinalValue = finalizeValue(sContext, sValue, bTranslated);
-        sProperty = sProperty.replace('_', '-');
-        rMap[sProperty] = sFinalValue;
-    }
-}
-
-void BuilderBase::handleActionWidget(xmlreader::XmlReader &reader)
-{
-    xmlreader::Span name;
-    int nsId;
-
-    OString sResponse;
-
-    while (reader.nextAttribute(&nsId, &name))
-    {
-        if (name == "response")
-        {
-            name = reader.getAttributeValue(false);
-            sResponse = OString(name.begin, name.length);
-        }
-    }
-
-    (void)reader.nextItem(xmlreader::XmlReader::Text::Raw, &name, &nsId);
-    OUString sID(name.begin, name.length, RTL_TEXTENCODING_UTF8);
-    sal_Int32 nDelim = sID.indexOf(':');
-    if (nDelim != -1)
-        sID = sID.copy(0, nDelim);
-
-    int nResponse = sResponse.toInt32();
-    switch (nResponse)
-    {
-        case -5:
-            nResponse = RET_OK;
-            break;
-        case -6:
-            nResponse = RET_CANCEL;
-            break;
-        case -7:
-            nResponse = RET_CLOSE;
-            break;
-        case -8:
-            nResponse = RET_YES;
-            break;
-        case -9:
-            nResponse = RET_NO;
-            break;
-        case -11:
-            nResponse = RET_HELP;
-            break;
-        case RET_RESET:
-            break;
-        default:
-            assert(nResponse >= 100 && "keep non-canned responses in range 100+ to avoid collision with vcl RET_*");
-            break;
-    }
-
-    set_response(sID, nResponse);
-}
-
-void BuilderBase::collectAccelerator(xmlreader::XmlReader& reader, accelmap& rMap)
-{
-    xmlreader::Span name;
-    int nsId;
-
-    OUString sProperty;
-    OUString sValue;
-    OUString sModifiers;
-
-    while (reader.nextAttribute(&nsId, &name))
-    {
-        if (name == "key")
-        {
-            name = reader.getAttributeValue(false);
-            sValue = OUString(name.begin, name.length, RTL_TEXTENCODING_UTF8);
-        }
-        else if (name == "signal")
-        {
-            name = reader.getAttributeValue(false);
-            sProperty = OUString(name.begin, name.length, RTL_TEXTENCODING_UTF8);
-        }
-        else if (name == "modifiers")
-        {
-            name = reader.getAttributeValue(false);
-            sModifiers = OUString(name.begin, name.length, RTL_TEXTENCODING_UTF8);
-        }
-    }
-
-    if (!sProperty.isEmpty() && !sValue.isEmpty())
-    {
-        rMap[sProperty] = std::make_pair(sValue, sModifiers);
-    }
-}
-
-
-VclButtonsType BuilderBase::mapGtkToVclButtonsType(std::u16string_view sGtkButtons)
-{
-    if (sGtkButtons == u"none")
-        return VclButtonsType::NONE;
-    if (sGtkButtons == u"ok")
-        return VclButtonsType::Ok;
-    if (sGtkButtons == u"cancel")
-        return VclButtonsType::Cancel;
-    if (sGtkButtons == u"close")
-        return VclButtonsType::Close;
-    else if (sGtkButtons == u"yes-no")
-        return VclButtonsType::YesNo;
-    else if (sGtkButtons == u"ok-cancel")
-        return VclButtonsType::OkCancel;
-
-    assert(false && "unknown buttons type mode");
-    return VclButtonsType::NONE;
-}
-
-bool BuilderBase::isToolbarItemClass(std::u16string_view sClass)
-{
-    return sClass == u"GtkToolButton" || sClass == u"GtkMenuToolButton"
-           || sClass == u"GtkToggleToolButton" || sClass == u"GtkRadioToolButton"
-           || sClass == u"GtkToolItem";
 }
 
 vcl::Window *VclBuilder::get_widget_root()
@@ -3314,30 +2485,29 @@ void VclBuilder::set_window_packing_position(const vcl::Window *pWindow, sal_Int
     }
 }
 
-void BuilderBase::addTextBuffer(const OUString& sID, TextBuffer&& rTextBuffer)
+/// Insert items to a ComboBox or a ListBox.
+/// They have no common ancestor that would have 'InsertEntry()', so use a template.
+template <typename T>
+static bool lcl_insertItems(vcl::Window* pWindow, std::vector<std::unique_ptr<OUString>>& rUserData,
+                        const std::vector<ComboBoxTextItem>& rItems, sal_Int32 nActiveIndex)
 {
-    m_pParserState->m_aTextBuffers[sID] = std::move(rTextBuffer);
-}
+    T *pContainer = dynamic_cast<T*>(pWindow);
+    if (!pContainer)
+        return false;
 
-const BuilderBase::TextBuffer* BuilderBase::get_buffer_by_name(const OUString& sID) const
-{
-    const auto aI = m_pParserState->m_aTextBuffers.find(sID);
-    if (aI != m_pParserState->m_aTextBuffers.end())
-        return &(aI->second);
-    return nullptr;
-}
+    for (auto const& item : rItems)
+    {
+        sal_Int32 nPos = pContainer->InsertEntry(item.m_sItem);
+        if (!item.m_sId.isEmpty())
+        {
+            rUserData.emplace_back(std::make_unique<OUString>(item.m_sId));
+            pContainer->SetEntryData(nPos, rUserData.back().get());
+        }
+    }
+    if (o3tl::make_unsigned(nActiveIndex) < rItems.size())
+        pContainer->SelectEntryPos(nActiveIndex);
 
-void BuilderBase::addAdjustment(const OUString& sID, Adjustment&& rAdjustment)
-{
-    m_pParserState->m_aAdjustments[sID] = std::move(rAdjustment);
-}
-
-const BuilderBase::Adjustment* BuilderBase::get_adjustment_by_name(const OUString& sID) const
-{
-    const auto aI = m_pParserState->m_aAdjustments.find(sID);
-    if (aI != m_pParserState->m_aAdjustments.end())
-        return &(aI->second);
-    return nullptr;
+    return true;
 }
 
 void VclBuilder::insertComboBoxOrListBoxItems(vcl::Window* pWindow,
@@ -3345,8 +2515,8 @@ void VclBuilder::insertComboBoxOrListBoxItems(vcl::Window* pWindow,
                                               sal_Int32 nActiveIndex)
 {
     // try to fill-in the items
-    if (!insertItems<ComboBox>(pWindow, m_aUserData, rItems, nActiveIndex))
-        insertItems<ListBox>(pWindow, m_aUserData, rItems, nActiveIndex);
+    if (!lcl_insertItems<ComboBox>(pWindow, m_aUserData, rItems, nActiveIndex))
+        lcl_insertItems<ListBox>(pWindow, m_aUserData, rItems, nActiveIndex);
 }
 
 void VclBuilder::mungeAdjustment(NumericFormatter &rTarget, const Adjustment &rAdjustment)

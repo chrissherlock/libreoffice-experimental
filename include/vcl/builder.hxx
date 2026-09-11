@@ -43,6 +43,15 @@ class VclExpander;
 class VclMultiLineEdit;
 namespace com::sun::star::frame { class XFrame; }
 
+namespace vcl
+{
+    VCL_DLLPUBLIC void VclBuilderPreload();
+}
+
+bool isButtonType(WindowType eType);
+
+const OUString& mapStockToImageResource(std::u16string_view sType);
+
 /// Creates a hierarchy of vcl::Windows (widgets) from a .ui file for dialogs, sidebar, etc.
 class VCL_DLLPUBLIC VclBuilder final : public WidgetBuilder<vcl::Window, VclPtr<vcl::Window>, PopupMenu, VclPtr<PopupMenu>>
 {

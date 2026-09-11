@@ -178,6 +178,8 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/printer/PrinterOptionsHelper \
     vcl/source/printer/QueueInfo \
     vcl/source/printer/SalPrinterQueueInfo \
+    vcl/source/window/builder/BuilderBase \
+    vcl/source/window/builder/VclBuilder \
     vcl/source/window/ImplWinData \
     vcl/source/window/ImplFrameData \
     vcl/source/window/bubblewindow \
@@ -194,7 +196,6 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/clipping \
     vcl/source/window/stacking \
     vcl/source/window/globalization \
-    vcl/source/window/builder \
     vcl/source/window/commandevent \
     vcl/source/window/cursor \
     vcl/source/window/debugevent \

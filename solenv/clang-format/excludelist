@@ -14596,7 +14596,8 @@ vcl/source/window/accel.cxx
 vcl/source/window/accmgr.cxx
 vcl/source/window/brdwin.cxx
 vcl/source/window/bubblewindow.cxx
-vcl/source/window/builder.cxx
+vcl/source/window/builder/BuilderBase.cxx
+vcl/source/window/builder/VclBuilder.cxx
 vcl/source/window/clipping.cxx
 vcl/source/window/colorpicker.cxx
 vcl/source/window/commandevent.cxx
