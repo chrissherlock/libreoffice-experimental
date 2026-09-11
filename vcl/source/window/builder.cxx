@@ -187,32 +187,6 @@ namespace
 
 }
 
-std::unique_ptr<weld::Builder> Application::CreateBuilder(weld::Widget* pParent, const OUString &rUIFile)
-{
-    SalInstance* pSalInstance = GetSalInstance();
-    return pSalInstance->CreateBuilder(pParent, AllSettings::GetUIRootDir(), rUIFile);
-}
-
-std::unique_ptr<weld::Builder> Application::CreateInterimBuilder(vcl::Window* pParent,
-                                                                 const OUString& rUIFile,
-                                                                 bool bAllowCycleFocusOut)
-{
-    SalInstance* pSalInstance = GetSalInstance();
-    return pSalInstance->CreateInterimBuilder(pParent, AllSettings::GetUIRootDir(), rUIFile,
-                                              bAllowCycleFocusOut);
-}
-
-weld::MessageDialog* Application::CreateMessageDialog(weld::Widget* pParent, VclMessageType eMessageType,
-                                                      VclButtonsType eButtonType, const OUString& rPrimaryMessage)
-{
-    return GetSalInstance()->CreateMessageDialog(pParent, eMessageType, eButtonType, rPrimaryMessage);
-}
-
-weld::Window* Application::GetFrameWeld(const css::uno::Reference<css::awt::XWindow>& rWindow)
-{
-    return GetSalInstance()->GetFrameWeld(rWindow);
-}
-
 // static
 void BuilderBase::reportException(const css::uno::Exception& rExcept)
 {
