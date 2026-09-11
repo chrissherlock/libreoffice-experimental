@@ -173,7 +173,7 @@ void OutputDevice::SetWaveLineColors(Color const& rColor, tools::Long nLineWidth
     // On printers that output pixel via DrawRect()
     if (nLineWidth > 1)
     {
-        if (IsLineColor())
+        if (HasLineColor())
         {
             // Reset line color in backend for this specific operation
             // Note: If you want this to persist, use SetLineColor(COL_TRANSPARENT)
@@ -459,7 +459,7 @@ void OutputDevice::ImplDrawStraightTextLine( tools::Long nBaseX, tools::Long nBa
     if ( !nLineHeight )
         return;
 
-    if (IsLineColor())
+    if (HasLineColor())
         SetLineColor(COL_TRANSPARENT);
 
     SetFillColor(aColor);
@@ -665,7 +665,7 @@ void OutputDevice::ImplDrawStrikeoutLine( tools::Long nBaseX, tools::Long nBaseY
     if ( !nLineHeight )
         return;
 
-    if (IsLineColor())
+    if (HasLineColor())
         SetLineColor(COL_TRANSPARENT);
 
     SetFillColor(aColor);
@@ -811,10 +811,10 @@ void OutputDevice::ImplDrawTextLine( tools::Long nX, tools::Long nY,
         nX += nXAdd - 1;
     }
 
-    if ( !IsTextLineColor() )
+    if ( !HasTextLineColor() )
         aUnderlineColor = GetTextColor();
 
-    if ( !IsOverlineColor() )
+    if ( !HasOverlineColor() )
         aOverlineColor = GetTextColor();
 
     if ( (eUnderline == LINESTYLE_SMALLWAVE) ||

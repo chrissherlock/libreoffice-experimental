@@ -40,7 +40,7 @@ void OutputDevice::DrawPolyLine( const tools::Polygon& rPoly )
 
     sal_uInt16 nPoints = rPoly.GetSize();
 
-    if ( !IsDeviceOutputNecessary() || !IsLineColor() || (nPoints < 2) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !HasLineColor() || (nPoints < 2) || ImplIsRecordLayout() )
         return;
 
     // we need a graphics
@@ -252,7 +252,7 @@ void OutputDevice::drawPolyLine(const tools::Polygon& rPoly, const LineInfo& rLi
 {
     sal_uInt16 nPoints(rPoly.GetSize());
 
-    if ( !IsDeviceOutputNecessary() || !IsLineColor() || ( nPoints < 2 ) || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || !HasLineColor() || ( nPoints < 2 ) || ( LineStyle::NONE == rLineInfo.GetStyle() ) || ImplIsRecordLayout() )
         return;
 
     // we need a graphics
@@ -356,7 +356,7 @@ bool OutputDevice::DrawPolyLineDirectInternal(
     if (GetClipState().IsClippedOut())
         return true;
 
-    const bool bTryB2d(RasterOp::OverPaint == GetRasterOp() && IsLineColor());
+    const bool bTryB2d(RasterOp::OverPaint == GetRasterOp() && HasLineColor());
 
     if(bTryB2d)
     {

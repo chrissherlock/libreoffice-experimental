@@ -45,8 +45,8 @@ PaintBufferGuard::PaintBufferGuard(ImplFrameData* pFrameData, vcl::Window* pWind
     // FIXME: this must disappear as we move to RenderContext only,
     // the painting must become state-less, so that no actual
     // vcl::Window setting affects this
-    mbBackground = pFrameData->mpBuffer->IsBackground();
-    if (pWindow->IsBackground())
+    mbBackground = pFrameData->mpBuffer->HasBackground();
+    if (pWindow->HasBackground())
     {
         maBackground = pFrameData->mpBuffer->GetBackground();
         pFrameData->mpBuffer->SetBackground(pWindow->GetBackground());

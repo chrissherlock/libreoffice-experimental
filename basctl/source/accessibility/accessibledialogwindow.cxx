@@ -684,12 +684,12 @@ sal_Int32 AccessibleDialogWindow::getForeground(  )
     Color nColor;
     if ( m_pDialogWindow )
     {
-        if ( m_pDialogWindow->IsControlForeground() )
+        if ( m_pDialogWindow->HasControlForeground() )
             nColor = m_pDialogWindow->GetControlForeground();
         else
         {
             vcl::Font aFont;
-            if ( m_pDialogWindow->IsControlFont() )
+            if ( m_pDialogWindow->HasControlFont() )
                 aFont = m_pDialogWindow->GetControlFont();
             else
                 aFont = m_pDialogWindow->GetFont();
@@ -708,7 +708,7 @@ sal_Int32 AccessibleDialogWindow::getBackground(  )
     Color nColor;
     if ( m_pDialogWindow )
     {
-        if ( m_pDialogWindow->IsControlBackground() )
+        if ( m_pDialogWindow->HasControlBackground() )
             nColor = m_pDialogWindow->GetControlBackground();
         else
             nColor = m_pDialogWindow->GetBackground().GetColor();

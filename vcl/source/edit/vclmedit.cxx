@@ -936,7 +936,7 @@ void VclMultiLineEdit::ApplySettings(vcl::RenderContext& rRenderContext)
     // TextColor/Background
 
     Color aTextColor = rStyleSettings.GetFieldTextColor();
-    if (IsControlForeground())
+    if (HasControlForeground())
         aTextColor = GetControlForeground();
 
     if (!IsEnabled())
@@ -951,7 +951,7 @@ void VclMultiLineEdit::ApplySettings(vcl::RenderContext& rRenderContext)
     if (IsPaintTransparent())
         theFont.SetFillColor(COL_TRANSPARENT);
     else
-        theFont.SetFillColor(IsControlBackground() ? GetControlBackground() : rStyleSettings.GetFieldColor());
+        theFont.SetFillColor(HasControlBackground() ? GetControlBackground() : rStyleSettings.GetFieldColor());
 
     pImpVclMEdit->GetTextWindow()->SetFont(theFont);
     // FIXME: next call causes infinite invalidation loop, rethink how to properly fix this situation
@@ -968,7 +968,7 @@ void VclMultiLineEdit::ApplySettings(vcl::RenderContext& rRenderContext)
     }
     else
     {
-        if (IsControlBackground())
+        if (HasControlBackground())
             pImpVclMEdit->GetTextWindow()->SetBackground(GetControlBackground());
         else
             pImpVclMEdit->GetTextWindow()->SetBackground(rStyleSettings.GetFieldColor());
@@ -985,7 +985,7 @@ void VclMultiLineEdit::ImplInitSettings(bool bBackground)
     // TextColor/Background
 
     Color aTextColor = rStyleSettings.GetFieldTextColor();
-    if (IsControlForeground())
+    if (HasControlForeground())
         aTextColor = GetControlForeground();
     if (!IsEnabled())
         aTextColor = rStyleSettings.GetDisableColor();
@@ -999,7 +999,7 @@ void VclMultiLineEdit::ImplInitSettings(bool bBackground)
     if (IsPaintTransparent())
         TheFont.SetFillColor(COL_TRANSPARENT);
     else
-        TheFont.SetFillColor(IsControlBackground() ? GetControlBackground() : rStyleSettings.GetFieldColor());
+        TheFont.SetFillColor(HasControlBackground() ? GetControlBackground() : rStyleSettings.GetFieldColor());
     pImpVclMEdit->GetTextWindow()->SetFont(TheFont);
     pImpVclMEdit->GetTextWindow()->GetTextEngine()->SetFont(TheFont);
     pImpVclMEdit->GetTextWindow()->SetTextColor(aTextColor);
@@ -1017,7 +1017,7 @@ void VclMultiLineEdit::ImplInitSettings(bool bBackground)
     }
     else
     {
-        if (IsControlBackground())
+        if (HasControlBackground())
             pImpVclMEdit->GetTextWindow()->SetBackground(GetControlBackground());
         else
             pImpVclMEdit->GetTextWindow()->SetBackground(rStyleSettings.GetFieldColor());
@@ -1296,7 +1296,7 @@ void VclMultiLineEdit::Draw(OutputDevice& rDev, const Point& rPos, SystemTextCol
     rDev.SetLineColor();
     rDev.SetFillColor();
     bool bBorder = (GetStyle() & WB_BORDER);
-    bool bBackground = IsControlBackground();
+    bool bBackground = HasControlBackground();
     if ( bBorder || bBackground )
     {
         tools::Rectangle aRect( aPos, aSize );

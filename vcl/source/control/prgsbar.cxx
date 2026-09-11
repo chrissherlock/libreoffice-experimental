@@ -80,7 +80,7 @@ void ProgressBar::ImplInitSettings( bool bFont,
 
     if ( bBackground )
     {
-        if (!IsControlBackground()
+        if (!HasControlBackground()
             && IsNativeControlSupported(meBarStyle == BarStyle::Progress ? ControlType::Progress
                                                                          : ControlType::LevelBar,
                                         ControlPart::Entire))
@@ -95,7 +95,7 @@ void ProgressBar::ImplInitSettings( bool bFont,
         else
         {
             Color aColor;
-            if ( IsControlBackground() )
+            if ( HasControlBackground() )
                 aColor = GetControlBackground();
             else
                 aColor = rStyleSettings.GetFaceColor();
@@ -107,7 +107,7 @@ void ProgressBar::ImplInitSettings( bool bFont,
         return;
 
     Color aColor = rStyleSettings.GetHighlightColor();
-    if ( IsControlForeground() )
+    if ( HasControlForeground() )
         aColor = GetControlForeground();
     if ( aColor.IsRGBEqual( GetBackground().GetColor() ) )
     {

@@ -456,21 +456,21 @@ DialogControlFlags Window::GetDialogControlFlags() const { return mpControlState
 
 const InputContext& Window::GetInputContext() const { return mpInput->maInputContext; }
 
-bool Window::IsControlFont() const { return mpControlAppearance->hasControlFont(); }
+bool Window::HasControlFont() const { return mpControlAppearance->hasControlFont(); }
 
 const Color& Window::GetControlForeground() const
 {
     return mpControlAppearance->getControlForeground();
 }
 
-bool Window::IsControlForeground() const { return mpControlAppearance->hasControlForeground(); }
+bool Window::HasControlForeground() const { return mpControlAppearance->hasControlForeground(); }
 
 const Color& Window::GetControlBackground() const
 {
     return mpControlAppearance->getControlBackground();
 }
 
-bool Window::IsControlBackground() const { return mpControlAppearance->hasControlBackground(); }
+bool Window::HasControlBackground() const { return mpControlAppearance->hasControlBackground(); }
 
 bool Window::IsInPaint() const { return mpInvalidation && mpInvalidation->mbInPaint; }
 

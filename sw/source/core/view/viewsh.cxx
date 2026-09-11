@@ -491,11 +491,11 @@ void SwViewShell::ImplUnlockPaint(std::vector<LockPaintReason>& rReasons, bool b
                 GetWin()->Validate();
 
                 Imp()->UnlockPaint();
-                if (mpOut->IsLineColor())
+                if (mpOut->HasLineColor())
                     pVout->SetLineColor( mpOut->GetLineColor() );
                 else
                     pVout->SetLineColor();
-                if (mpOut->IsFillColor())
+                if (mpOut->HasFillColor())
                     pVout->SetFillColor( mpOut->GetFillColor() );
                 else
                     pVout->SetFillColor();

@@ -560,7 +560,7 @@ void ImpSdrPdfImport::SetAttributes(SdrObject* pObj, bool bForceTextAttr)
             mpLineAttr->Put(XLineWidthItem(0));
         }
 
-        if (mpVD->IsLineColor())
+        if (mpVD->HasLineColor())
         {
             mpLineAttr->Put(XLineStyleItem(drawing::LineStyle_SOLID)); //TODO support dashed lines.
             mpLineAttr->Put(XLineColorItem(OUString(), mpVD->GetLineColor()));

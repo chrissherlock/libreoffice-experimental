@@ -81,9 +81,9 @@ void OutputDevice::DrawColorWallpaper(tools::Long nX, tools::Long nY,
     assert(!is_double_buffered_window());
 
     const Color aOldLineColor = GetLineColor();
-    const bool bOldIsLineColor = IsLineColor();
+    const bool bOldHasLineColor = HasLineColor();
     const Color aOldFillColor = GetFillColor();
-    const bool bOldIsFillColor = IsFillColor();
+    const bool bOldHasFillColor = HasFillColor();
     const vcl::MappingPolicy eOldPolicy = GetMappingPolicy();
 
     SetLineColor();
@@ -98,12 +98,12 @@ void OutputDevice::DrawColorWallpaper(tools::Long nX, tools::Long nY,
 
     SetMappingPolicy(eOldPolicy);
 
-    if (bOldIsFillColor)
+    if (bOldHasFillColor)
         SetFillColor(aOldFillColor);
     else
         SetFillColor();
 
-    if (bOldIsLineColor)
+    if (bOldHasLineColor)
         SetLineColor(aOldLineColor);
     else
         SetLineColor();

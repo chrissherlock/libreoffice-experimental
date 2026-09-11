@@ -170,7 +170,7 @@ const Wallpaper& Window::GetDisplayBackground() const
     if (const ToolBox* pTB = dynamic_cast<const ToolBox*>(this); pTB && IsNativeWidgetEnabled())
         return pTB->ImplGetToolBoxPrivateData()->maDisplayBackground;
 
-    if (!IsBackground() && mpHierarchy->mpParent)
+    if (!HasBackground() && mpHierarchy->mpParent)
         return mpHierarchy->mpParent->GetDisplayBackground();
 
     const Wallpaper& rBack = GetBackground();
@@ -306,7 +306,7 @@ void Window::ApplyControlFont(vcl::RenderContext& rRenderContext, const vcl::Fon
 {
     vcl::Font aFont(rFont);
 
-    if (IsControlFont())
+    if (HasControlFont())
         aFont.Merge(mpControlAppearance->getControlFont());
 
     SetZoomedPointFont(rRenderContext, aFont);

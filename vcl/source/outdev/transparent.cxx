@@ -133,7 +133,7 @@ void OutputDevice::DrawTransparent(
         // TODO: this must not drop transparency for mpAlphaVDev case, but instead use premultiplied
         // alpha... but that requires using premultiplied alpha also for already drawn data
 
-        if (IsFillColor())
+        if (HasFillColor())
         {
             mpGraphics->DrawPolyPolygon(
                 aFullTransform,
@@ -142,7 +142,7 @@ void OutputDevice::DrawTransparent(
                 *this);
         }
 
-        if (IsLineColor())
+        if (HasLineColor())
         {
             const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
@@ -216,7 +216,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
         const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(GetMappingPolicy()));
 
         const double fTransparency = 0.01 * nTransparencePercent;
-        if( IsFillColor() )
+        if( HasFillColor() )
         {
             // #i121591#
             // CAUTION: Only non printing (pixel-renderer) VCL commands from OutputDevices
@@ -235,7 +235,7 @@ bool OutputDevice::DrawTransparentNatively ( const tools::PolyPolygon& rPolyPoly
             bDrawn = true;
         }
 
-        if( IsLineColor() )
+        if( HasLineColor() )
         {
             // disable the fill color for now
             mpGraphics->SetFillColor();
@@ -405,7 +405,7 @@ void OutputDevice::EmulateDrawTransparent ( const tools::PolyPolygon& rPolyPoly,
 
                     SetMappingPolicy(eOldPolicy);
 
-                    if( IsLineColor() )
+                    if( HasLineColor() )
                     {
                         auto popIt = ScopedPush(vcl::PushFlags::FILLCOLOR);
                         SetFillColor();
@@ -436,7 +436,7 @@ void OutputDevice::DrawTransparent( const tools::PolyPolygon& rPolyPoly,
     }
 
     // short circuit for drawing an invisible polygon
-    if( (!IsFillColor() && !IsLineColor()) || (nTransparencePercent >= 100) )
+    if( (!HasFillColor() && !HasLineColor()) || (nTransparencePercent >= 100) )
         return; // tdf#84294: do not record it in metafile
 
     // handle metafile recording
@@ -693,7 +693,7 @@ bool doesRectCoverWithUniformColor(
     // color
     auto currRect = rMapModeVDev.convertTo<vcl::WindowRect>(vcl::LogicRect(rCurrRect), rMapModeVDev.GetMapMode());
 
-    return (currRect->Contains(rPrevRect) && rMapModeVDev.IsFillColor());
+    return (currRect->Contains(rPrevRect) && rMapModeVDev.HasFillColor());
 }
 
 /** Check whether rCurrRect rectangle fully covers io_rPrevRect - if
@@ -819,8 +819,8 @@ void ImplConvertTransparentAction( GDIMetaFile&        o_rMtf,
 // Returns true, if given action creates visible (i.e. non-transparent) output
 bool ImplIsNotTransparent( const MetaAction& rAct, const OutputDevice& rOut )
 {
-    const bool  bLineTransparency( !rOut.IsLineColor() || rOut.GetLineColor().IsFullyTransparent() );
-    const bool  bFillTransparency( !rOut.IsFillColor() || rOut.GetFillColor().IsFullyTransparent() );
+    const bool  bLineTransparency( !rOut.HasLineColor() || rOut.GetLineColor().IsFullyTransparent() );
+    const bool  bFillTransparency( !rOut.HasFillColor() || rOut.GetFillColor().IsFullyTransparent() );
     bool        bRet( false );
 
     switch( rAct.GetType() )

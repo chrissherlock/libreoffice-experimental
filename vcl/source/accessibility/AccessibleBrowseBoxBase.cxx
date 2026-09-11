@@ -306,12 +306,12 @@ sal_Int32 SAL_CALL AccessibleBrowseBoxBase::getForeground(  )
     vcl::Window* pInst = mpBrowseBox->GetWindowInstance();
     if ( pInst )
     {
-        if ( pInst->IsControlForeground() )
+        if ( pInst->HasControlForeground() )
             nColor = pInst->GetControlForeground();
         else
         {
             vcl::Font aFont;
-            if ( pInst->IsControlFont() )
+            if ( pInst->HasControlFont() )
                 aFont = pInst->GetControlFont();
             else
                 aFont = pInst->GetFont();
@@ -331,7 +331,7 @@ sal_Int32 SAL_CALL AccessibleBrowseBoxBase::getBackground(  )
     vcl::Window* pInst = mpBrowseBox->GetWindowInstance();
     if ( pInst )
     {
-        if ( pInst->IsControlBackground() )
+        if ( pInst->HasControlBackground() )
             nColor = pInst->GetControlBackground();
         else
             nColor = pInst->GetBackground().GetColor();

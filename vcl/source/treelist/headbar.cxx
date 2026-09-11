@@ -341,7 +341,7 @@ void HeaderBar::ImplDrawItem(vcl::RenderContext& rRenderContext, sal_uInt16 nPos
 
         // draw ButtonStyle
         // avoid 3D borders
-        Color const *aWinControlForeground = IsControlBackground() ? &GetControlForeground() : nullptr;
+        Color const *aWinControlForeground = HasControlBackground() ? &GetControlForeground() : nullptr;
         if (bHigh) {
             aSelectionTextColor = rRenderContext.DrawSelectionBackground(aRect, GetBackgroundColor(),
                                                     1, true, false, false, aWinControlForeground);

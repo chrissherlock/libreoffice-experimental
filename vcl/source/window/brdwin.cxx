@@ -519,7 +519,7 @@ void ImplSmallBorderWindowView::Init( OutputDevice* pDev, tools::Long nWidth, to
 
                         mpBorderWindow->SetPaintTransparent( true );
                         mpBorderWindow->SetBackground();
-                        if (!pCtrl->IsControlBackground())
+                        if (!pCtrl->HasControlBackground())
                         {
                             pCtrl->SetPaintTransparent(true);
                             if (pSubEdit)
@@ -718,7 +718,7 @@ void ImplSmallBorderWindowView::DrawWindow(vcl::RenderContext& rRenderContext, c
         }
 
         Color aBackgroundColor = COL_AUTO;
-        if (pCtrl->IsControlBackground())
+        if (pCtrl->HasControlBackground())
             aBackgroundColor = pCtrl->GetBackgroundColor();
         bNativeOK = rRenderContext.DrawNativeControl(aCtrlType, aCtrlPart, aCtrlRegion, nState, aControlValue, OUString(), aBackgroundColor);
 

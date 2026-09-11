@@ -163,7 +163,7 @@ void TabControl::ImplInitSettings( bool bBackground )
         return;
 
     vcl::Window* pParent = GetParent();
-    if ( !IsControlBackground() &&
+    if ( !HasControlBackground() &&
         (pParent->IsChildTransparentModeEnabled()
         || IsNativeControlSupported(ControlType::TabPane, ControlPart::Entire)
         || IsNativeControlSupported(ControlType::TabItem, ControlPart::Entire) ) )
@@ -184,7 +184,7 @@ void TabControl::ImplInitSettings( bool bBackground )
     vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
     SetPaintTransparent( false );
 
-    if ( IsControlBackground() )
+    if ( HasControlBackground() )
         SetBackground( GetControlBackground() );
     else
         SetBackground( pParent->GetBackground() );

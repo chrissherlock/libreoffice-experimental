@@ -200,7 +200,7 @@ public:
 
     void Start()
     {
-        m_bOrigControlBackground = m_xWidget->IsControlBackground();
+        m_bOrigControlBackground = m_xWidget->HasControlBackground();
         if (m_bOrigControlBackground)
             m_aOrigControlBackground = m_xWidget->GetControlBackground();
         m_aFlashTimer.Start();

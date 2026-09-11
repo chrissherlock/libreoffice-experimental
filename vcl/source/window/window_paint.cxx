@@ -78,7 +78,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
     mpInvalidation->mpPaintRegion = &rPaintRegion;
     mpInvalidation->maInvalidateRegion.SetEmpty();
 
-    if ((pHelper->GetPaintFlags() & ImplPaintFlags::Erase) && rRenderContext.IsBackground())
+    if ((pHelper->GetPaintFlags() & ImplPaintFlags::Erase) && rRenderContext.HasBackground())
     {
         if (rRenderContext.IsClipRegion())
         {
@@ -942,27 +942,27 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
         pDevice->SetFont(aCopyFont);
 
         pDevice->SetTextColor(GetTextColor());
-        if (GetOutDev()->IsLineColor())
+        if (GetOutDev()->HasLineColor())
             pDevice->SetLineColor(GetOutDev()->GetLineColor());
         else
             pDevice->SetLineColor();
 
-        if (GetOutDev()->IsFillColor())
+        if (GetOutDev()->HasFillColor())
             pDevice->SetFillColor(GetOutDev()->GetFillColor());
         else
             pDevice->SetFillColor();
 
-        if (IsTextLineColor())
+        if (HasTextLineColor())
             pDevice->SetTextLineColor(GetTextLineColor());
         else
             pDevice->SetTextLineColor();
 
-        if (IsOverlineColor())
+        if (HasOverlineColor())
             pDevice->SetOverlineColor(GetOverlineColor());
         else
             pDevice->SetOverlineColor();
 
-        if (IsTextFillColor())
+        if (HasTextFillColor())
             pDevice->SetTextFillColor(GetTextFillColor());
         else
             pDevice->SetTextFillColor();
@@ -977,7 +977,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
         aClipRegion.Intersect(aPaintRect);
         pDevice->SetClipRegion(aClipRegion);
 
-        if (!IsPaintTransparent() && IsBackground() && ! (vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip))
+        if (!IsPaintTransparent() && HasBackground() && ! (vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip))
             Erase(*pDevice);
 
         pDevice->SetMapMode(GetMapMode());
@@ -1051,32 +1051,40 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
     }
     SetFont( aCopyFont );
     SetTextColor( GetTextColor() );
-    if( GetOutDev()->IsLineColor() )
+
+    if (GetOutDev()->HasLineColor())
         GetOutDev()->SetLineColor( GetOutDev()->GetLineColor() );
     else
         GetOutDev()->SetLineColor();
-    if( GetOutDev()->IsFillColor() )
+
+    if (GetOutDev()->HasFillColor())
         GetOutDev()->SetFillColor( GetOutDev()->GetFillColor() );
     else
         GetOutDev()->SetFillColor();
-    if( IsTextLineColor() )
+
+    if (HasTextLineColor())
         SetTextLineColor( GetTextLineColor() );
     else
         SetTextLineColor();
-    if( IsOverlineColor() )
+
+    if (HasOverlineColor())
         SetOverlineColor( GetOverlineColor() );
     else
         SetOverlineColor();
-    if( IsTextFillColor() )
+
+    if (HasTextFillColor())
         SetTextFillColor( GetTextFillColor() );
     else
         SetTextFillColor();
+
     SetTextAlign( GetTextAlign() );
     GetOutDev()->SetRasterOp( GetOutDev()->GetRasterOp() );
+
     if( GetOutDev()->IsReferencePoint() )
         GetOutDev()->SetReferencePoint( GetOutDev()->GetReferencePoint() );
     else
         GetOutDev()->SetReferencePoint();
+
     GetOutDev()->SetLayoutMode( GetOutDev()->GetLayoutMode() );
 
     GetOutDev()->SetDigitLanguage( GetOutDev()->GetDigitLanguage() );
@@ -1087,7 +1095,7 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
     // do the actual paint
 
     // background
-    if( ! IsPaintTransparent() && IsBackground() && ! (vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip ) )
+    if( ! IsPaintTransparent() && HasBackground() && ! (vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip ) )
     {
         Erase(*GetOutDev());
     }
@@ -1187,12 +1195,12 @@ void Window::Erase(vcl::RenderContext& rRenderContext)
 
     ControlPart aCtrlPart = ImplGetControlAppearance()->getNativeBackground();
 
-    if (aCtrlPart == ControlPart::Entire && IsControlBackground())
+    if (aCtrlPart == ControlPart::Entire && HasControlBackground())
     {
         // nothing to do here; background is drawn in corresponding drawNativeControl implementation
         bNativeOK = true;
     }
-    else if (aCtrlPart != ControlPart::NONE && ! IsControlBackground())
+    else if (aCtrlPart != ControlPart::NONE && ! HasControlBackground())
     {
         tools::Rectangle aCtrlRegion(Point(), GetOutputSizePixel());
         ControlState nState = ControlState::NONE;

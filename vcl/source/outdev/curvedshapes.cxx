@@ -33,7 +33,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaEllipseAction( rRect ) );
 
-    if  ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || ImplIsRecordLayout() )
+    if  ( !IsDeviceOutputNecessary() || (!HasLineColor() && !HasFillColor()) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
@@ -58,7 +58,7 @@ void OutputDevice::DrawEllipse( const tools::Rectangle& rRect )
     {
         Point* pPtAry = aRectPoly.GetPointAry();
 
-        if (!IsFillColor())
+        if (!HasFillColor())
         {
             mpGraphics->DrawPolyLine(aRectPoly.GetSize(), pPtAry, *this);
         }
@@ -77,7 +77,7 @@ void OutputDevice::DrawArc( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaArcAction( rRect, rStartPt, rEndPt ) );
 
-    if (!IsDeviceOutputNecessary() || !IsLineColor() || ImplIsRecordLayout() )
+    if (!IsDeviceOutputNecessary() || !HasLineColor() || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
@@ -116,7 +116,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaPieAction( rRect, rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!HasLineColor() && !HasFillColor()) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
@@ -144,7 +144,7 @@ void OutputDevice::DrawPie( const tools::Rectangle& rRect,
     {
         Point* pPtAry = aPiePoly.GetPointAry();
 
-        if ( !IsFillColor() )
+        if ( !HasFillColor() )
         {
             mpGraphics->DrawPolyLine( aPiePoly.GetSize(), pPtAry, *this );
         }
@@ -163,7 +163,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaChordAction( rRect, rStartPt, rEndPt ) );
 
-    if ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!HasLineColor() && !HasFillColor()) || ImplIsRecordLayout() )
         return;
 
     tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
@@ -191,7 +191,7 @@ void OutputDevice::DrawChord( const tools::Rectangle& rRect,
     {
         Point* pPtAry = aChordPoly.GetPointAry();
 
-        if (!IsFillColor())
+        if (!HasFillColor())
         {
             mpGraphics->DrawPolyLine(aChordPoly.GetSize(), pPtAry, *this);
         }

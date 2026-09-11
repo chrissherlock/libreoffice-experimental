@@ -280,7 +280,7 @@ void SVTXGridControl::setProperty( const OUString& PropertyName, const Any& aVal
             // let the base class handle this for the TableControl
             VCLXWindow::setProperty( PropertyName, aValue );
             // and forward to the grid control's data window
-            if ( pTable->IsBackground() )
+            if ( pTable->HasBackground() )
                 pTable->getDataWindow().SetBackground( pTable->GetBackground() );
             else
                 pTable->getDataWindow().SetBackground();

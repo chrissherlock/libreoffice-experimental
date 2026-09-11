@@ -509,7 +509,7 @@ void Dialog::ImplInitDialog( vcl::Window* pParent, WinBits nStyle, InitFlag eFla
 
 void Dialog::ApplySettings(vcl::RenderContext& rRenderContext)
 {
-    if (IsControlBackground())
+    if (HasControlBackground())
     {
         // user override
         SetBackground(GetControlBackground());
@@ -530,8 +530,10 @@ void Dialog::ApplySettings(vcl::RenderContext& rRenderContext)
 void Dialog::ImplInitSettings()
 {
     // user override
-    if (IsControlBackground())
+    if (HasControlBackground())
+    {
         SetBackground(GetControlBackground());
+    }
     // NWF background
     else if( IsNativeControlSupported(ControlType::WindowBackground, ControlPart::BackgroundDialog))
     {
@@ -540,7 +542,9 @@ void Dialog::ImplInitSettings()
     }
     // fallback to settings color
     else
+    {
         SetBackground(GetSettings().GetStyleSettings().GetDialogColor());
+    }
 }
 
 void Dialog::ImplLOKNotifier(vcl::Window* pParent)

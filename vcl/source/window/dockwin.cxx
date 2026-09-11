@@ -338,13 +338,13 @@ void DockingWindow::ImplInitSettings()
 {
     // Hack: to be able to build DockingWindows w/o background before switching
     // TODO: Hack
-    if ( !IsBackground() )
+    if ( !HasBackground() )
         return;
 
     const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
 
     Color aColor;
-    if ( IsControlBackground() )
+    if ( HasControlBackground() )
         aColor = GetControlBackground();
     else if ( Window::GetStyle() & WB_3DLOOK )
         aColor = rStyleSettings.GetFaceColor();

@@ -349,12 +349,12 @@ sal_Int32 AccessibleTabBar::getForeground(  )
     Color nColor;
     if ( m_pTabBar )
     {
-        if ( m_pTabBar->IsControlForeground() )
+        if ( m_pTabBar->HasControlForeground() )
             nColor = m_pTabBar->GetControlForeground();
         else
         {
             vcl::Font aFont;
-            if ( m_pTabBar->IsControlFont() )
+            if ( m_pTabBar->HasControlFont() )
                 aFont = m_pTabBar->GetControlFont();
             else
                 aFont = m_pTabBar->GetFont();
@@ -373,7 +373,7 @@ sal_Int32 AccessibleTabBar::getBackground(  )
     Color nColor;
     if ( m_pTabBar )
     {
-        if ( m_pTabBar->IsControlBackground() )
+        if ( m_pTabBar->HasControlBackground() )
             nColor = m_pTabBar->GetControlBackground();
         else
             nColor = m_pTabBar->GetBackground().GetColor();

@@ -638,14 +638,16 @@ void TabBar::ImplGetColors(const StyleSettings& rStyleSettings,
                            Color& rFaceColor, Color& rFaceTextColor,
                            Color& rSelectColor, Color& rSelectTextColor)
 {
-    if (IsControlBackground())
+    if (HasControlBackground())
         rFaceColor = GetControlBackground();
     else
         rFaceColor = rStyleSettings.GetInactiveTabColor();
-    if (IsControlForeground())
+
+    if (HasControlForeground())
         rFaceTextColor = GetControlForeground();
     else
         rFaceTextColor = rStyleSettings.GetButtonTextColor();
+
     rSelectColor = rStyleSettings.GetActiveTabColor();
     rSelectTextColor = rStyleSettings.GetWindowTextColor();
 }

@@ -44,7 +44,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
 
     sal_uInt16 nPoly = rPolyPoly.Count();
 
-    if ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || !nPoly || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!HasLineColor() && !HasFillColor()) || !nPoly || ImplIsRecordLayout() )
         return;
 
     // we need a graphics
@@ -61,7 +61,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
         return;
 
     // use b2dpolygon drawing if possible
-    if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
+    if (RasterOp::OverPaint == GetRasterOp() && (HasLineColor() || HasFillColor()))
     {
         const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(GetMappingPolicy()));
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rPolyPoly.getB2DPolyPolygon());
@@ -72,7 +72,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
             aB2DPolyPolygon.setClosed(true);
         }
 
-        if (IsFillColor())
+        if (HasFillColor())
         {
             mpGraphics->DrawPolyPolygon(
                 aTransform,
@@ -82,7 +82,7 @@ void OutputDevice::DrawPolyPolygon( const tools::PolyPolygon& rPolyPoly )
         }
 
         bool bSuccess(true);
-        if (IsLineColor())
+        if (HasLineColor())
         {
             const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
@@ -152,7 +152,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
 
     sal_uInt16 nPoints = rPoly.GetSize();
 
-    if ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || (nPoints < 2) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!HasLineColor() && !HasFillColor()) || (nPoints < 2) || ImplIsRecordLayout() )
         return;
 
     // we need a graphics
@@ -169,7 +169,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
         return;
 
     // use b2dpolygon drawing if possible
-    if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
+    if (RasterOp::OverPaint == GetRasterOp() && (HasLineColor() || HasFillColor()))
     {
         const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(GetMappingPolicy()));
         basegfx::B2DPolygon aB2DPolygon(rPoly.getB2DPolygon());
@@ -180,7 +180,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
             aB2DPolygon.setClosed(true);
         }
 
-        if (IsFillColor())
+        if (HasFillColor())
         {
             mpGraphics->DrawPolyPolygon(
                 aTransform,
@@ -190,7 +190,7 @@ void OutputDevice::DrawPolygon( const tools::Polygon& rPoly )
         }
 
         bool bSuccess(true);
-        if (IsLineColor())
+        if (HasLineColor())
         {
             const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 
@@ -267,7 +267,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
 
     bool bSuccess(false);
 
-    if (RasterOp::OverPaint == GetRasterOp() && (IsLineColor() || IsFillColor()))
+    if (RasterOp::OverPaint == GetRasterOp() && (HasLineColor() || HasFillColor()))
     {
         const basegfx::B2DHomMatrix aTransform(mpMapper->GetDeviceTransformation(GetMappingPolicy()));
         basegfx::B2DPolyPolygon aB2DPolyPolygon(rB2DPolyPoly);
@@ -279,7 +279,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
             aB2DPolyPolygon.setClosed(true);
         }
 
-        if (IsFillColor())
+        if (HasFillColor())
         {
             mpGraphics->DrawPolyPolygon(
                 aTransform,
@@ -288,7 +288,7 @@ void OutputDevice::ImplDrawPolyPolygonWithB2DPolyPolygon(const basegfx::B2DPolyP
                 *this);
         }
 
-        if (IsLineColor())
+        if (HasLineColor())
         {
             const bool bPixelSnapHairline(mnAntialiasing & AntialiasingFlags::PixelSnapHairline);
 

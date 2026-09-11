@@ -56,7 +56,7 @@ void OutputDevice::DrawRect(const tools::Rectangle& rRect)
     if (mpMetaFile)
         mpMetaFile->AddAction(new MetaRectAction(rRect));
 
-    if (!IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || ImplIsRecordLayout())
+    if (!IsDeviceOutputNecessary() || (!HasLineColor() && !HasFillColor()) || ImplIsRecordLayout())
          return;
 
     if (!mpGraphics && !AcquireGraphics())
@@ -90,7 +90,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
     if ( mpMetaFile )
         mpMetaFile->AddAction( new MetaRoundRectAction( rRect, nHorzRound, nVertRound ) );
 
-    if ( !IsDeviceOutputNecessary() || (!IsLineColor() && !IsFillColor()) || ImplIsRecordLayout() )
+    if ( !IsDeviceOutputNecessary() || (!HasLineColor() && !HasFillColor()) || ImplIsRecordLayout() )
         return;
 
     const tools::Rectangle aRect(mpMapper->LogicToDevicePixel(rRect, GetMappingPolicy()));
@@ -126,7 +126,7 @@ void OutputDevice::DrawRect( const tools::Rectangle& rRect,
         {
             Point* pPtAry = aRoundRectPoly.GetPointAry();
 
-            if (!IsFillColor())
+            if (!HasFillColor())
                 mpGraphics->DrawPolyLine( aRoundRectPoly.GetSize(), pPtAry, *this );
             else
                 mpGraphics->DrawPolygon( aRoundRectPoly.GetSize(), pPtAry, *this );
@@ -326,7 +326,7 @@ void OutputDevice::DrawGridOfCrosses(const tools::Rectangle& rGridArea, const Si
 {
     assert(!is_double_buffered_window());
 
-    if (!IsLineColor() || ImplIsRecordLayout())
+    if (!HasLineColor() || ImplIsRecordLayout())
         return;
 
     if (!mpGraphics && !AcquireGraphics())

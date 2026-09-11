@@ -54,9 +54,9 @@ void ScDDComboBoxButton::Draw( const Point& rAt,
         return;
 
     // save old state
-    bool        bHadFill   = pOut->IsFillColor();
+    bool        bHadFill   = pOut->HasFillColor();
     Color       aOldFill   = pOut->GetFillColor();
-    bool        bHadLine   = pOut->IsLineColor();
+    bool        bHadLine   = pOut->HasLineColor();
     Color       aOldLine   = pOut->GetLineColor();
     vcl::MappingPolicy bOldEnable = pOut->GetMappingPolicy();
 

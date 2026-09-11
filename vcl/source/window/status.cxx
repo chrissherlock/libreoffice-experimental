@@ -183,7 +183,7 @@ void StatusBar::ApplySettings(vcl::RenderContext& rRenderContext)
     ApplyControlFont(rRenderContext, rStyleSettings.GetToolFont());
 
     Color aColor;
-    if (IsControlForeground())
+    if (HasControlForeground())
         aColor = GetControlForeground();
     else if (GetStyle() & WB_3DLOOK)
         aColor = rStyleSettings.GetButtonTextColor();
@@ -193,7 +193,7 @@ void StatusBar::ApplySettings(vcl::RenderContext& rRenderContext)
 
     rRenderContext.SetTextFillColor();
 
-    if (IsControlBackground())
+    if (HasControlBackground())
         aColor = GetControlBackground();
     else if (GetStyle() & WB_3DLOOK)
         aColor = rStyleSettings.GetFaceColor();
@@ -202,7 +202,7 @@ void StatusBar::ApplySettings(vcl::RenderContext& rRenderContext)
     rRenderContext.SetBackground(aColor);
 
     // NWF background
-    if (!IsControlBackground() &&
+    if (!HasControlBackground() &&
           rRenderContext.IsNativeControlSupported(ControlType::WindowBackground, ControlPart::BackgroundWindow))
     {
         ImplGetControlAppearance()->useNativeDialogBackground();

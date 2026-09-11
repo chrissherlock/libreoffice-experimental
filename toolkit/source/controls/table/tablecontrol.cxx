@@ -153,21 +153,21 @@ void TableControl::StateChanged(StateChangedType i_nStateChange)
             break;
 
         case StateChangedType::ControlBackground:
-            if (IsControlBackground())
+            if (HasControlBackground())
                 getDataWindow().SetControlBackground(GetControlBackground());
             else
                 getDataWindow().SetControlBackground();
             break;
 
         case StateChangedType::ControlForeground:
-            if (IsControlForeground())
+            if (HasControlForeground())
                 getDataWindow().SetControlForeground(GetControlForeground());
             else
                 getDataWindow().SetControlForeground();
             break;
 
         case StateChangedType::ControlFont:
-            if (IsControlFont())
+            if (HasControlFont())
                 getDataWindow().SetControlFont(GetControlFont());
             else
                 getDataWindow().SetControlFont();

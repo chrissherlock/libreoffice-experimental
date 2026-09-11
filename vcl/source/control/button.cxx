@@ -685,12 +685,12 @@ void PushButton::ImplDrawPushButtonFrame(vcl::RenderContext& rRenderContext,
     if (!(GetStyle() & (WB_RECTSTYLE | WB_SMALLSTYLE)))
     {
         StyleSettings aStyleSettings = rRenderContext.GetSettings().GetStyleSettings();
-        if (IsControlBackground())
+        if (HasControlBackground())
             aStyleSettings.Set3DColors(GetControlBackground());
     }
 
     DecorationView aDecoView(&rRenderContext);
-    if (IsControlBackground())
+    if (HasControlBackground())
     {
         AllSettings aSettings = rRenderContext.GetSettings();
         AllSettings aOldSettings = aSettings;
@@ -784,7 +784,7 @@ void PushButton::ImplDrawPushButtonContent(OutputDevice *pDev, SystemTextColorFl
     if (nSystemTextColorFlags & SystemTextColorFlags::Mono)
         aColor = COL_BLACK;
 
-    else if (IsControlForeground())
+    else if (HasControlForeground())
         aColor = GetControlForeground();
 
     // Button types with possibly different text coloring are flat buttons and regular buttons. Regular buttons may be action
@@ -835,7 +835,7 @@ void PushButton::ImplDrawPushButtonContent(OutputDevice *pDev, SystemTextColorFl
     vcl::Window* pParent = GetParent();
     if (pParent->get_id() == "ExtraButton")
     {
-        while (pParent && !pParent->IsControlBackground())
+        while (pParent && !pParent->HasControlBackground())
             pParent = pParent->GetParent();
         if (pParent)
         {
@@ -1002,7 +1002,7 @@ void PushButton::ImplDrawPushButton(vcl::RenderContext& rRenderContext)
     if (bRollOver)
         nButtonStyle |= DrawButtonFlags::Highlight;
     // tdf#123175 if there is a custom control bg set, draw the button without outsourcing to the NWF
-    bNativeOK = !IsControlBackground() && rRenderContext.IsNativeControlSupported(ControlType::Pushbutton, ControlPart::Entire);
+    bNativeOK = !HasControlBackground() && rRenderContext.IsNativeControlSupported(ControlType::Pushbutton, ControlPart::Entire);
     if (bNativeOK)
     {
         PushButtonValue aControlValue;
@@ -1361,7 +1361,7 @@ void PushButton::Draw(OutputDevice& rDev, const Point& rPos, SystemTextColorFlag
         AllSettings aSettings = rDev.GetSettings();
         StyleSettings aStyleSettings = aSettings.GetStyleSettings();
         oOrigDevStyleSettings = aStyleSettings;
-        if ( IsControlBackground() )
+        if ( HasControlBackground() )
             aStyleSettings.SetFaceColor( GetControlBackground() );
         else
             aStyleSettings.SetFaceColor( GetSettings().GetStyleSettings().GetFaceColor() );
@@ -1882,7 +1882,7 @@ void RadioButton::ImplInitSettings( bool bBackground )
         return;
 
     vcl::Window* pParent = GetParent();
-    if ( !IsControlBackground() &&
+    if ( !HasControlBackground() &&
         (pParent->IsChildTransparentModeEnabled() || IsNativeControlSupported( ControlType::Radiobutton, ControlPart::Entire ) ) )
     {
         EnableChildTransparentMode();
@@ -1898,7 +1898,7 @@ void RadioButton::ImplInitSettings( bool bBackground )
         vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
         SetPaintTransparent( false );
 
-        if ( IsControlBackground() )
+        if ( HasControlBackground() )
             SetBackground( GetControlBackground() );
         else
             SetBackground( pParent->GetBackground() );
@@ -2978,7 +2978,7 @@ void CheckBox::ImplInitSettings( bool bBackground )
         return;
 
     vcl::Window* pParent = GetParent();
-    if ( !IsControlBackground() &&
+    if ( !HasControlBackground() &&
         (pParent->IsChildTransparentModeEnabled() || IsNativeControlSupported( ControlType::Checkbox, ControlPart::Entire ) ) )
     {
         EnableChildTransparentMode();
@@ -2994,7 +2994,7 @@ void CheckBox::ImplInitSettings( bool bBackground )
         vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
         SetPaintTransparent( false );
 
-        if ( IsControlBackground() )
+        if ( HasControlBackground() )
             SetBackground( GetControlBackground() );
         else
             SetBackground( pParent->GetBackground() );

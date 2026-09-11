@@ -526,11 +526,11 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDefaultFillColor)
     GDIMetaFile aMtf;
     aMtf.Record(pVDev.get());
 
-    CPPUNIT_ASSERT(pVDev->IsFillColor());
+    CPPUNIT_ASSERT(pVDev->HasFillColor());
     CPPUNIT_ASSERT_EQUAL(COL_WHITE, pVDev->GetFillColor());
 
     pVDev->SetFillColor();
-    CPPUNIT_ASSERT(!pVDev->IsFillColor());
+    CPPUNIT_ASSERT(!pVDev->HasFillColor());
     CPPUNIT_ASSERT_EQUAL(COL_TRANSPARENT, pVDev->GetFillColor());
     MetaAction* pAction = aMtf.GetAction(0);
     CPPUNIT_ASSERT_EQUAL(MetaActionType::FILLCOLOR, pAction->GetType());
@@ -547,11 +547,11 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testTransparentFillColor)
     GDIMetaFile aMtf;
     aMtf.Record(pVDev.get());
 
-    CPPUNIT_ASSERT(pVDev->IsFillColor());
+    CPPUNIT_ASSERT(pVDev->HasFillColor());
     CPPUNIT_ASSERT_EQUAL(COL_WHITE, pVDev->GetFillColor());
 
     pVDev->SetFillColor(COL_TRANSPARENT);
-    CPPUNIT_ASSERT(pVDev->IsFillColor());
+    CPPUNIT_ASSERT(pVDev->HasFillColor());
     CPPUNIT_ASSERT_EQUAL(COL_TRANSPARENT, pVDev->GetFillColor());
     MetaAction* pAction = aMtf.GetAction(0);
     CPPUNIT_ASSERT_EQUAL(MetaActionType::FILLCOLOR, pAction->GetType());
@@ -568,11 +568,11 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testFillColor)
     GDIMetaFile aMtf;
     aMtf.Record(pVDev.get());
 
-    CPPUNIT_ASSERT(pVDev->IsFillColor());
+    CPPUNIT_ASSERT(pVDev->HasFillColor());
     CPPUNIT_ASSERT_EQUAL(COL_WHITE, pVDev->GetFillColor());
 
     pVDev->SetFillColor(COL_RED);
-    CPPUNIT_ASSERT(pVDev->IsFillColor());
+    CPPUNIT_ASSERT(pVDev->HasFillColor());
     CPPUNIT_ASSERT_EQUAL(COL_RED, pVDev->GetFillColor());
     MetaAction* pAction = aMtf.GetAction(0);
     CPPUNIT_ASSERT_EQUAL(MetaActionType::FILLCOLOR, pAction->GetType());
@@ -589,11 +589,11 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testDefaultLineColor)
     GDIMetaFile aMtf;
     aMtf.Record(pVDev.get());
 
-    CPPUNIT_ASSERT(pVDev->IsLineColor());
+    CPPUNIT_ASSERT(pVDev->HasLineColor());
     CPPUNIT_ASSERT_EQUAL(COL_BLACK, pVDev->GetLineColor());
 
     pVDev->SetLineColor();
-    CPPUNIT_ASSERT(!pVDev->IsLineColor());
+    CPPUNIT_ASSERT(!pVDev->HasLineColor());
     CPPUNIT_ASSERT_EQUAL(COL_TRANSPARENT, pVDev->GetLineColor());
     MetaAction* pAction = aMtf.GetAction(0);
     CPPUNIT_ASSERT_EQUAL(MetaActionType::LINECOLOR, pAction->GetType());
@@ -610,11 +610,11 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testLineColor)
     GDIMetaFile aMtf;
     aMtf.Record(pVDev.get());
 
-    CPPUNIT_ASSERT(pVDev->IsLineColor());
+    CPPUNIT_ASSERT(pVDev->HasLineColor());
     CPPUNIT_ASSERT_EQUAL(COL_BLACK, pVDev->GetLineColor());
 
     pVDev->SetLineColor(COL_RED);
-    CPPUNIT_ASSERT(pVDev->IsLineColor());
+    CPPUNIT_ASSERT(pVDev->HasLineColor());
     CPPUNIT_ASSERT_EQUAL(COL_RED, pVDev->GetLineColor());
     MetaAction* pAction = aMtf.GetAction(0);
     CPPUNIT_ASSERT_EQUAL(MetaActionType::LINECOLOR, pAction->GetType());
@@ -738,8 +738,8 @@ CPPUNIT_TEST_FIXTURE(VclOutdevTest, testRasterOp)
     pVDev->SetRasterOp(RasterOp::Invert);
 
     CPPUNIT_ASSERT_EQUAL(RasterOp::Invert, pVDev->GetRasterOp());
-    CPPUNIT_ASSERT(pVDev->IsLineColor());
-    CPPUNIT_ASSERT(pVDev->IsFillColor());
+    CPPUNIT_ASSERT(pVDev->HasLineColor());
+    CPPUNIT_ASSERT(pVDev->HasFillColor());
 
     MetaAction* pAction = aMtf.GetAction(0);
     CPPUNIT_ASSERT_EQUAL(MetaActionType::RASTEROP, pAction->GetType());

@@ -56,7 +56,7 @@ void Window::SetFont(Font const& font) { return GetOutDev()->SetFont(font); }
 float Window::approximate_char_width() const { return GetOutDev()->approximate_char_width(); }
 
 const Wallpaper& Window::GetBackground() const { return GetOutDev()->GetBackground(); }
-bool Window::IsBackground() const { return GetOutDev()->IsBackground(); }
+bool Window::HasBackground() const { return GetOutDev()->HasBackground(); }
 tools::Long Window::GetTextHeight() const { return GetOutDev()->GetTextHeight(); }
 tools::Long Window::GetTextWidth(const OUString& rStr, sal_Int32 nIndex, sal_Int32 nLen,
                                  vcl::text::TextLayoutCache const* pCache,
@@ -115,15 +115,15 @@ const Color& Window::GetTextColor() const { return GetOutDev()->GetTextColor(); 
 
 const Color& Window::GetTextLineColor() const { return GetOutDev()->GetTextLineColor(); }
 
-bool Window::IsTextLineColor() const { return GetOutDev()->IsTextLineColor(); }
+bool Window::HasTextLineColor() const { return GetOutDev()->HasTextLineColor(); }
 
 Color Window::GetTextFillColor() const { return GetOutDev()->GetTextFillColor(); }
 
-bool Window::IsTextFillColor() const { return GetOutDev()->IsTextFillColor(); }
+bool Window::HasTextFillColor() const { return GetOutDev()->HasTextFillColor(); }
 
 const Color& Window::GetOverlineColor() const { return GetOutDev()->GetOverlineColor(); }
 
-bool Window::IsOverlineColor() const { return GetOutDev()->IsOverlineColor(); }
+bool Window::HasOverlineColor() const { return GetOutDev()->HasOverlineColor(); }
 
 void Window::SetTextAlign(TextAlign eAlign) { GetOutDev()->SetTextAlign(eAlign); }
 

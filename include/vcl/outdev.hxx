@@ -504,13 +504,13 @@ public:
     void                        SetLineColor();
     void                        SetLineColor( const Color& rColor );
     Color GetLineColor() const { return m_aRenderState.lineColor; }
-    bool IsLineColor() const { return m_aRenderState.bLineColorSet; }
+    bool HasLineColor() const { return m_aRenderState.bLineColorSet; }
 
 
     void                        SetFillColor();
     void                        SetFillColor( const Color& rColor );
     Color GetFillColor() const { return m_aRenderState.fillColor; }
-    bool IsFillColor() const { return m_aRenderState.bFillColorSet; }
+    bool HasFillColor() const { return m_aRenderState.bFillColorSet; }
 
     void                        SetBackground();
     void                        SetBackground( const Wallpaper& rBackground );
@@ -520,7 +520,7 @@ public:
     const Wallpaper&            GetBackground() const { return maBackground; }
     virtual Color               GetBackgroundColor() const;
     virtual Color               GetReadableFontColor(const Color& rFontColor, const Color& rBgColor) const;
-    bool                        IsBackground() const { return mbBackground; }
+    bool                        HasBackground() const { return mbBackground; }
 
     void                        SetFont( const vcl::Font& rNewFont );
     const vcl::Font&            GetFont() const { return maFont; }
@@ -649,7 +649,7 @@ public:
      @param bDrawBorder                If true, draw the exterior border of the selection
      @param bDrawExtBorderOnly         If true, only draw the exterior border of the selection
      @param pWinControlForegroundColor If the window that owns this output device is a
-                                       control background (eg, IsControlBackground() returns
+                                       control background (eg, HasControlBackground() returns
                                        true) this value should be the window's control
                                        foreground color
      @param nCornerRadius              If > 0, round the corners of the drawn background
@@ -1098,17 +1098,17 @@ public:
     void                        SetTextFillColor();
     void                        SetTextFillColor( const Color& rColor );
     Color                       GetTextFillColor() const;
-    bool                        IsTextFillColor() const { return !maFont.IsTransparent(); }
+    bool                        HasTextFillColor() const { return !maFont.IsTransparent(); }
 
     void                        SetTextLineColor();
     void                        SetTextLineColor( const Color& rColor );
     const Color&                GetTextLineColor() const { return maTextLineColor; }
-    bool                        IsTextLineColor() const { return !maTextLineColor.IsTransparent(); }
+    bool                        HasTextLineColor() const { return !maTextLineColor.IsTransparent(); }
 
     void                        SetOverlineColor();
     void                        SetOverlineColor( const Color& rColor );
     const Color&                GetOverlineColor() const { return maOverlineColor; }
-    bool                        IsOverlineColor() const { return !maOverlineColor.IsTransparent(); }
+    bool                        HasOverlineColor() const { return !maOverlineColor.IsTransparent(); }
 
     void                        SetTextAlign( TextAlign eAlign );
     TextAlign                   GetTextAlign() const { return maFont.GetAlignment(); }
