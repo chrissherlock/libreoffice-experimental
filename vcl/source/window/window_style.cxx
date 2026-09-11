@@ -326,9 +326,10 @@ void Window::SetControlForeground(const Color& rColor)
 
 void Window::ApplyControlForeground(vcl::RenderContext& rRenderContext, const Color& rDefaultColor)
 {
-    Color aTextColor(rDefaultColor);
-    if (IsControlForeground())
-        aTextColor = GetControlForeground();
+    Color aTextColor = mpControlAppearance->hasControlForeground()
+                           ? mpControlAppearance->getControlForeground()
+                           : rDefaultColor;
+
     rRenderContext.SetTextColor(aTextColor);
 }
 
@@ -346,9 +347,10 @@ void Window::SetControlBackground(const Color& rColor)
 
 void Window::ApplyControlBackground(vcl::RenderContext& rRenderContext, const Color& rDefaultColor)
 {
-    Color aColor(rDefaultColor);
-    if (IsControlBackground())
-        aColor = GetControlBackground();
+    Color aColor = mpControlAppearance->hasControlBackground()
+                       ? mpControlAppearance->getControlBackground()
+                       : rDefaultColor;
+
     rRenderContext.SetBackground(aColor);
 }
 
