@@ -629,14 +629,10 @@ vcl::Window* Window::GetAccessibleRelationLabeledBy() const
 
 bool Window::AreAccessibilityEventsSuppressed()
 {
-    vcl::Window *pParent = this;
-
-    while (pParent && pParent->mpClassification)
+    for (vcl::Window* pWin = this; pWin && pWin->mpClassification; pWin = pWin->GetParent())
     {
-        if (pParent->mpAccessibleData && pParent->mpAccessibleData->isEventsSuspended())
+        if (pWin->mpAccessibleData && pWin->mpAccessibleData->isEventsSuspended())
             return true;
-
-        pParent = pParent->GetParent();
     }
 
     return false;
