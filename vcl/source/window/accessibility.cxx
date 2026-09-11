@@ -264,6 +264,16 @@ void Window::SetAccessibleRole( sal_uInt16 nRole )
     mpAccessibleData->setAccessibleRole(nRole);
 }
 
+static bool lcl_actsAsAccessibleFrame(const vcl::Window* pWindow)
+{
+    const vcl::Window* pBorder = pWindow->ImplGetWindowHierarchy()->mpBorderWindow;
+    bool bBorderIsFrame = pBorder && pBorder->ImplGetWindowClassification()->mbFrame;
+
+    return pWindow->ImplGetWindowClassification()->mbFrame
+        || bBorderIsFrame
+        || (pWindow->GetStyle() & WB_OWNERDRAWDECORATION);
+}
+
 sal_uInt16 Window::getDefaultAccessibleRole() const
 {
     switch (GetType())
@@ -377,12 +387,9 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
                                                : css::accessibility::AccessibleRole::PANEL;
 
         case WindowType::FLOATINGWINDOW:
-            return (mpClassification->mbFrame
-                     || (mpHierarchy->mpBorderWindow
-                         && mpHierarchy->mpBorderWindow->mpClassification->mbFrame)
-                     || (GetStyle() & WB_OWNERDRAWDECORATION))
-                        ? css::accessibility::AccessibleRole::FRAME
-                        : css::accessibility::AccessibleRole::WINDOW;
+            return lcl_actsAsAccessibleFrame(this)
+                       ? css::accessibility::AccessibleRole::FRAME
+                       : css::accessibility::AccessibleRole::WINDOW;
 
         case WindowType::WORKWINDOW:
             return css::accessibility::AccessibleRole::ROOT_PANE;
