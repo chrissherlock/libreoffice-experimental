@@ -66,15 +66,16 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
     // restore Paint-Region
     vcl::Region &rPaintRegion = pHelper->GetPaintRegion();
     rPaintRegion = mpInvalidation->maInvalidateRegion;
-    tools::Rectangle aPaintRect = rPaintRegion.GetBoundRect();
+    tools::Rectangle aPaintDeviceRect = rPaintRegion.GetBoundRect();
 
     // RTL: re-mirror paint rect and region at this window
     if (GetOutDev()->ImplIsAntiparallel())
     {
-        rRenderContext.ReMirror(aPaintRect);
+        rRenderContext.ReMirror(aPaintDeviceRect);
         rRenderContext.ReMirror(rPaintRegion);
     }
-    aPaintRect = GetOutDev()->GetMapper().DevicePixelToLogic(aPaintRect, GetOutDev()->GetMappingPolicy());
+
+    auto aPaintRect = convertTo<vcl::LogicRect>(vcl::DeviceRect(aPaintDeviceRect));
     mpInvalidation->mpPaintRegion = &rPaintRegion;
     mpInvalidation->maInvalidateRegion.SetEmpty();
 
@@ -93,8 +94,8 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
 
     // #98943# trigger drawing of toolbox selection after all children are painted
     if (mpInvalidation->mbDrawSelectionBackground)
-        pHelper->SetSelectionRect(aPaintRect);
-    pHelper->SetPaintRect(aPaintRect);
+        pHelper->SetSelectionRect(aPaintRect.get());
+    pHelper->SetPaintRect(aPaintRect.get());
 }
 
 void Window::PopPaintHelper(PaintHelper const *pHelper)

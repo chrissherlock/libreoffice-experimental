@@ -179,6 +179,26 @@ vcl::LogicSize CoordinateCastTraits<vcl::LogicSize, vcl::WindowSize>::cast(
 }
 
 // RECTANGLES
+vcl::LogicRect CoordinateCastTraits<vcl::LogicRect, vcl::DeviceRect>::cast(
+    const OutputDevice& rDev, const vcl::DeviceRect& rSrc, const MapMode* pMapOverride)
+{
+    if (pMapOverride)
+    {
+        const auto& rMapper = rDev.GetMapper();
+        auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
+        basegfx::B2DHomMatrix aMat = rMapper.GetViewTransformation(aConv);
+        aMat.translate(static_cast<double>(rMapper.GetDeviceToWindowOffsetX()),
+                       static_cast<double>(rMapper.GetDeviceToWindowOffsetY()));
+
+        if (aMat.isInvertible())
+            aMat.invert();
+
+        return vcl::LogicRect(vcl::TransformCompiler::Compile(aMat).apply(rSrc.get()));
+    }
+
+    return vcl::LogicRect(rDev.GetMapper().DevicePixelToLogic(rSrc.get(), rDev.GetMappingPolicy()));
+}
+
 vcl::DeviceRect CoordinateCastTraits<vcl::DeviceRect, vcl::LogicRect>::cast(
     const OutputDevice& rDev, const vcl::LogicRect& rSrc, const MapMode* pMapOverride)
 {

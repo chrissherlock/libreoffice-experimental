@@ -298,6 +298,12 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRect, vcl::Logic
                                const MapMode* pSrc = nullptr, const MapMode* pDst = nullptr);
 };
 
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRect, vcl::DeviceRect>
+{
+    static vcl::LogicRect cast(const OutputDevice& rDev, const vcl::DeviceRect& rSrc,
+                               const MapMode* pMapOverride = nullptr);
+};
+
 // Polygons
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowPolygon, vcl::LogicPolygon>
 {
