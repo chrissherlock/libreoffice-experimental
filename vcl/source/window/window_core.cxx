@@ -206,8 +206,8 @@ void Window::dispose()
 
     vcl::Window* pOverlapWindow = ImplTransferFocus();
 
-    if (pOverlapWindow != nullptr && pOverlapWindow->mpInput->mpLastFocusWindow == this)
-        pOverlapWindow->mpInput->mpLastFocusWindow = nullptr;
+    if (pOverlapWindow && pOverlapWindow->mpInput->getLastFocusWindow() == this)
+        pOverlapWindow->mpInput->clearLastFocusWindow();
 
     ImplResetGlobalWindowPointers();
     ImplResetFrameDataPointers();

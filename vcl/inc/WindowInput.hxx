@@ -81,6 +81,13 @@ struct WindowInput
 
     bool hasExtendedTextInput() const { return mbExtTextInput; }
     void setExtendedTextInput(bool bActive) { mbExtTextInput = bActive; }
+
+    void inheritFrom(const WindowInput& rParentInput)
+    {
+        mbDisabled = rParentInput.mbDisabled;
+        mbInputDisabled = rParentInput.mbInputDisabled;
+        meAlwaysInputMode = rParentInput.meAlwaysInputMode;
+    }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
