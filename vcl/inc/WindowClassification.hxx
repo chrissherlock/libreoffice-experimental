@@ -38,6 +38,9 @@ public:
                    mbAlwaysOnTop : 1 = false, mbInDispose : 1 = false,
                    mbCreatedWithToolkit : 1 = false, mbToolBox : 1 = false, mbSplitter : 1 = false,
                    mbMenuFloatingWindow : 1 = false, mbIsFormControl : 1 = false;
+
+    bool isInDispose() const { return mbInDispose; }
+    bool isFrame() const { return mbFrame; }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

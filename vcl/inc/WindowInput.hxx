@@ -68,6 +68,13 @@ struct WindowInput
     bool isMouseTransparent() const { return mbMouseTransparent; }
     void makeMouseTransparent() { mbMouseTransparent = true; }
     void makeMouseOpaque() { mbMouseTransparent = false; }
+
+    vcl::Window* getLastFocusWindow() const { return mpLastFocusWindow; }
+    void setLastFocusWindow(vcl::Window* pWin) { mpLastFocusWindow = pWin; }
+    void clearLastFocusWindow() { mpLastFocusWindow = nullptr; }
+
+    bool isInFocusHdl() const { return mbInFocusHdl; }
+    void setInFocusHdl(bool bInFocus) { mbInFocusHdl = bInFocus; }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

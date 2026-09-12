@@ -71,27 +71,27 @@ namespace vcl {
 WindowHitTest Window::ImplHitTest( const Point& rFramePos )
 {
     Point aFramePos( rFramePos );
-    if( GetOutDev()->ImplIsAntiparallel() )
+    if ( GetOutDev()->ImplIsAntiparallel() )
     {
-        const OutputDevice *pOutDev = GetOutDev();
+        const OutputDevice* pOutDev = GetOutDev();
         pOutDev->ReMirror( aFramePos );
     }
 
     if ( !GetOutputRectPixel().Contains( aFramePos ) )
         return WindowHitTest::NONE;
 
-    if ( mpClippingState->mbWinRegion )
+    if ( mpClippingState->hasWindowRegion() )
     {
         Point aTempPos = aFramePos;
         aTempPos.AdjustX( -GetOutDev()->GetDeviceOriginX() );
         aTempPos.AdjustY( -GetOutDev()->GetDeviceOriginY() );
 
-        if ( !mpClippingState->maWinRegion.Contains( aTempPos ) )
+        if ( !mpClippingState->containsWindowRegionPoint( aTempPos ) )
             return WindowHitTest::NONE;
     }
 
     WindowHitTest nHitTest = WindowHitTest::Inside;
-    if ( mpInput->mbMouseTransparent )
+    if ( mpInput->isMouseTransparent() )
         nHitTest |= WindowHitTest::Transparent;
 
     return nHitTest;
@@ -218,7 +218,7 @@ static bool lcl_IsWindowFocused(const vcl::Window& rWindow)
 void Window::ImplGrabFocus( GetFocusFlags nFlags )
 {
     // #143570# no focus for destructing windows
-    if( !mpClassification || mpClassification->mbInDispose )
+    if ( !mpClassification || mpClassification->isInDispose() )
         return;
 
     // some event listeners do really bad stuff
@@ -235,30 +235,34 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         // For a lack of design we need a little hack here to
         // ensure that dialogs on close pass the focus back to
         // the correct window
-        if ( mpInput->mpLastFocusWindow && (mpInput->mpLastFocusWindow.get() != this) &&
+        vcl::Window* pLastFocus = mpInput->getLastFocusWindow();
+        if ( pLastFocus && (pLastFocus != this) &&
              !(mpControlState->mnDlgCtrlFlags & DialogControlFlags::WantFocus) &&
-             mpInput->mpLastFocusWindow->IsEnabled() &&
-             mpInput->mpLastFocusWindow->IsInputEnabled() &&
-             ! mpInput->mpLastFocusWindow->IsInModalMode()
-             )
-            mpInput->mpLastFocusWindow->GrabFocus();
+             pLastFocus->IsEnabled() &&
+             pLastFocus->IsInputEnabled() &&
+             !pLastFocus->IsInModalMode() )
+        {
+            pLastFocus->GrabFocus();
+        }
         else
+        {
             mpHierarchy->mpClientWindow->GrabFocus();
+        }
         return;
     }
-    else if ( mpClassification->mbFrame )
+    else if ( mpClassification->isFrame() )
     {
         // For a lack of design we need a little hack here to
         // ensure that dialogs on close pass the focus back to
         // the correct window
-        if ( mpInput->mpLastFocusWindow && (mpInput->mpLastFocusWindow.get() != this) &&
+        vcl::Window* pLastFocus = mpInput->getLastFocusWindow();
+        if ( pLastFocus && (pLastFocus != this) &&
              !(mpControlState->mnDlgCtrlFlags & DialogControlFlags::WantFocus) &&
-             mpInput->mpLastFocusWindow->IsEnabled() &&
-             mpInput->mpLastFocusWindow->IsInputEnabled() &&
-             ! mpInput->mpLastFocusWindow->IsInModalMode()
-             )
+             pLastFocus->IsEnabled() &&
+             pLastFocus->IsInputEnabled() &&
+             !pLastFocus->IsInModalMode() )
         {
-            mpInput->mpLastFocusWindow->GrabFocus();
+            pLastFocus->GrabFocus();
             return;
         }
     }
@@ -274,10 +278,10 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
     ImplSVData* pSVData = ImplGetSVData();
 
     bool bAsyncFocusWaiting = false;
-    vcl::Window *pFrame = pSVData->maFrameData.mpFirstFrame;
-    while( pFrame && pFrame->mpClassification && pFrame->mpPlatformState->mpFrameData )
+    vcl::Window* pFrame = pSVData->maFrameData.mpFirstFrame;
+    while ( pFrame && pFrame->mpClassification && pFrame->mpPlatformState->mpFrameData )
     {
-        if( pFrame != mpHierarchy->mpFrameWindow.get() && pFrame->mpPlatformState->mpFrameData->mnFocusId )
+        if ( pFrame != mpHierarchy->mpFrameWindow.get() && pFrame->mpPlatformState->mpFrameData->mnFocusId )
         {
             bAsyncFocusWaiting = true;
             break;
@@ -290,40 +294,41 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
     bool bMustNotGrabFocus = false;
     // #100242#, check parent hierarchy if some floater prohibits grab focus
 
-    vcl::Window *pParent = this;
-    while( pParent )
+    vcl::Window* pParent = this;
+    while ( pParent )
     {
-        if ((pParent->GetStyle() & WB_SYSTEMFLOATWIN) && !(pParent->GetStyle() & WB_MOVEABLE))
+        if ( (pParent->GetStyle() & WB_SYSTEMFLOATWIN) && !(pParent->GetStyle() & WB_MOVEABLE) )
         {
             bMustNotGrabFocus = true;
             break;
         }
-        if (!pParent->mpClassification)
+        if ( !pParent->mpClassification )
             break;
         pParent = pParent->mpHierarchy->mpParent;
     }
 
     if ( !(( pSVData->mpWinData->mpFocusWin.get() != this &&
-             !mpClassification->mbInDispose ) ||
+             !mpClassification->isInDispose() ) ||
            ( bAsyncFocusWaiting && !bHasFocus && !bMustNotGrabFocus )) )
         return;
 
     // EndExtTextInput if it is not the same window
-    if (pSVData->mpWinData->mpExtTextInputWin
-        && (pSVData->mpWinData->mpExtTextInputWin.get() != this))
+    if ( pSVData->mpWinData->mpExtTextInputWin
+         && (pSVData->mpWinData->mpExtTextInputWin.get() != this) )
         pSVData->mpWinData->mpExtTextInputWin->EndExtTextInput();
 
     // mark this windows as the last FocusWindow
     vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
-    if (pOverlapWindow->mpClassification)
-        pOverlapWindow->mpInput->mpLastFocusWindow = this;
+    if ( pOverlapWindow->mpClassification )
+        pOverlapWindow->mpInput->setLastFocusWindow( this );
+
     mpPlatformState->mpFrameData->mpFocusWin = this;
 
-    if( !bHasFocus )
+    if ( !bHasFocus )
     {
         // menu windows never get the system focus
         // the application will keep the focus
-        if( bMustNotGrabFocus )
+        if ( bMustNotGrabFocus )
             return;
         else
         {
@@ -338,7 +343,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
 
     pSVData->mpWinData->mpFocusWin = this;
 
-    if (pOldFocusWindow)
+    if ( pOldFocusWindow )
         pOldFocusWindow->mpControlAppearance->hideCursor();
 
     // !!!!! due to old SV-Office Activate/Deactivate handling
@@ -359,7 +364,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
             vcl::Window* pNewRealWindow = pNewOverlapWindow->ImplGetWindow();
             pNewOverlapWindow->mpFocusState->setActive(true);
             pNewOverlapWindow->Activate();
-            if ( pNewRealWindow != pNewOverlapWindow  && pNewRealWindow && pNewRealWindow->mpClassification )
+            if ( pNewRealWindow != pNewOverlapWindow && pNewRealWindow && pNewRealWindow->mpClassification )
             {
                 pNewRealWindow->mpFocusState->setActive(true);
                 pNewRealWindow->Activate();
@@ -368,7 +373,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
     }
 
     // call Get- and LoseFocus
-    if ( pOldFocusWindow && ! pOldFocusWindow->isDisposed() )
+    if ( pOldFocusWindow && !pOldFocusWindow->isDisposed() )
     {
         NotifyEvent aNEvt( NotifyEventType::LOSEFOCUS, pOldFocusWindow );
         if ( !ImplCallPreNotify( aNEvt ) )
@@ -376,7 +381,7 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
         pOldFocusWindow->ImplCallDeactivateListeners( this );
     }
 
-    if (pSVData->mpWinData->mpFocusWin.get() == this)
+    if ( pSVData->mpWinData->mpFocusWin.get() == this )
     {
         if ( mpPlatformState->mpSysObj )
         {
@@ -385,19 +390,19 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
                 mpPlatformState->mpSysObj->GrabFocus();
         }
 
-        if (pSVData->mpWinData->mpFocusWin.get() == this)
+        if ( pSVData->mpWinData->mpFocusWin.get() == this )
         {
             mpControlAppearance->showCursor();
 
-            mpInput->mbInFocusHdl = true;
+            mpInput->setInFocusHdl(true);
             mpFocusState->setFocusFlags(nFlags);
 
             // if we're changing focus due to closing a popup floating window
             // notify the new focus window so it can restore the inner focus
             // eg, toolboxes can select their recent active item
-            if( pOldFocusWindow &&
-                ! pOldFocusWindow->isDisposed() &&
-                ( pOldFocusWindow->GetDialogControlFlags() & DialogControlFlags::FloatWinPopupModeEndCancel ) )
+            if ( pOldFocusWindow &&
+                 !pOldFocusWindow->isDisposed() &&
+                 ( pOldFocusWindow->GetDialogControlFlags() & DialogControlFlags::FloatWinPopupModeEndCancel ) )
             {
                 mpFocusState->addFocusFlags(GetFocusFlags::FloatWinPopupModeEndCancel);
             }
@@ -407,23 +412,22 @@ void Window::ImplGrabFocus( GetFocusFlags nFlags )
             if ( !ImplCallPreNotify( aNEvt ) && !xWindow->isDisposed() )
                 CompatGetFocus();
 
-            if( !xWindow->isDisposed() )
+            if ( !xWindow->isDisposed() )
             {
-                if (pOldFocusWindow && pOldFocusWindow->isDisposed())
+                if ( pOldFocusWindow && pOldFocusWindow->isDisposed() )
                     pOldFocusWindow = nullptr;
                 ImplCallActivateListeners(pOldFocusWindow);
             }
 
-            if( !xWindow->isDisposed() )
+            if ( !xWindow->isDisposed() )
             {
                 mpFocusState->clearFocusFlags();
-                mpInput->mbInFocusHdl = false;
+                mpInput->setInFocusHdl(false);
             }
         }
     }
 
     ImplNewInputContext();
-
 }
 
 void Window::ImplGrabFocusToDocument( GetFocusFlags nFlags )
@@ -463,14 +467,16 @@ void Window::MouseButtonUp( const MouseEvent& rMEvt )
 
 void Window::SetMouseTransparent( bool bTransparent )
 {
-
     if ( mpHierarchy->mpBorderWindow )
         mpHierarchy->mpBorderWindow->SetMouseTransparent( bTransparent );
 
-    if( mpPlatformState->mpSysObj )
+    if ( mpPlatformState->mpSysObj )
         mpPlatformState->mpSysObj->SetMouseTransparent( bTransparent );
 
-    mpInput->mbMouseTransparent = bTransparent;
+    if (bTransparent)
+        mpInput->makeMouseTransparent();
+    else
+        mpInput->makeMouseOpaque();
 }
 
 void Window::LocalStartDrag()

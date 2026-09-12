@@ -62,6 +62,9 @@ struct VCL_DLLPUBLIC WindowClippingState
 
     // Functions that only need local state don't need the Window parameter
     NativeSyncStatus processClipResult(bool bClipSuccess, bool bCurrentUpdate);
+
+    bool hasWindowRegion() const { return mbWinRegion; }
+    bool containsWindowRegionPoint(const Point& rPos) const { return maWinRegion.Contains(rPos); }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

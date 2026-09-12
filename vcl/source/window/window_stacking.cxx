@@ -975,23 +975,22 @@ void Window::SetParent( vcl::Window* pNewParent )
     else if ( pOldOverlapWindow )
     {
         // reset Focus-Save
-        if ( bFocusWin ||
-             (pOldOverlapWindow->mpInput->mpLastFocusWindow &&
-              IsWindowOrChild( pOldOverlapWindow->mpInput->mpLastFocusWindow )) )
-            pOldOverlapWindow->mpInput->mpLastFocusWindow = nullptr;
+        vcl::Window* pLastFocus = pOldOverlapWindow->mpInput->getLastFocusWindow();
+        if (bFocusWin || (pLastFocus && IsWindowOrChild(pLastFocus)))
+            pOldOverlapWindow->mpInput->clearLastFocusWindow();
 
-        vcl::Window* pOverlapWindow = pOldOverlapWindow->mpHierarchy->mpFirstOverlap;
-        while ( pOverlapWindow )
+        vcl::Window* pOverlapWindow = pOldOverlapWindow->mpHierarchy->getFirstOverlap();
+        while (pOverlapWindow)
         {
-            vcl::Window* pNextOverlapWindow = pOverlapWindow->mpHierarchy->mpNext;
-            if ( IsAncestorOf( *pOverlapWindow->ImplGetWindow() ) )
-                pOverlapWindow->ImplUpdateOverlapWindowPtr( bNewFrame );
+            vcl::Window* pNextOverlapWindow = pOverlapWindow->mpHierarchy->getNext();
+            if (IsAncestorOf(*pOverlapWindow->ImplGetWindow()))
+                pOverlapWindow->ImplUpdateOverlapWindowPtr(bNewFrame);
             pOverlapWindow = pNextOverlapWindow;
         }
 
         // update activate-status at next overlap window
-        if ( HasChildPathFocus( true ) )
-            ImplCallFocusChangeActivate( pNewOverlapWindow, pOldOverlapWindow );
+        if (HasChildPathFocus(true))
+            ImplCallFocusChangeActivate(pNewOverlapWindow, pOldOverlapWindow);
     }
 
     // also convert Activate-Status
