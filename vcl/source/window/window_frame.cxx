@@ -343,7 +343,7 @@ void Window::ImplInitFromParentState(vcl::Window* pParent)
         return;
 
     if (!ImplIsOverlapWindow())
-        mpInput->inheritFrom(*pParent->mpInput);
+        mpInput->inheritFrom(*pParent->ImplGetWindowInput());
 
     if (!comphelper::IsFuzzing())
     {

@@ -209,7 +209,7 @@ static bool lcl_IsWindowFocused(const vcl::Window& rWindow)
         return true;
 
     WindowInput* pInput = rWindow.ImplGetWindowInput();
-    if (pInput && pInput->mbFakeFocusSet)
+    if (pInput && pInput->hasFakeFocus())
         return true;
 
     return false;
@@ -454,15 +454,17 @@ void Window::MouseMove( const MouseEvent& rMEvt )
 void Window::MouseButtonDown( const MouseEvent& rMEvt )
 {
     NotifyEvent aNEvt( NotifyEventType::MOUSEBUTTONDOWN, this, &rMEvt );
+
     if (!EventNotify(aNEvt) && mpClassification)
-        mpInput->mbMouseButtonDown = true;
+        mpInput->setMouseButtonDown();
 }
 
 void Window::MouseButtonUp( const MouseEvent& rMEvt )
 {
     NotifyEvent aNEvt( NotifyEventType::MOUSEBUTTONUP, this, &rMEvt );
+
     if (!EventNotify(aNEvt) && mpClassification)
-        mpInput->mbMouseButtonUp = true;
+        mpInput->setMouseButtonUp();
 }
 
 void Window::SetMouseTransparent( bool bTransparent )
@@ -627,7 +629,7 @@ Window::PointerState Window::GetPointerState()
 
 bool Window::IsMouseOver() const
 {
-    return ImplGetWinData()->mbMouseOver;
+    return mpInput->isMouseOver();
 }
 
 void Window::EnterWait()

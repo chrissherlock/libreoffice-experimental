@@ -66,16 +66,13 @@ bool HandleWheelEvent::CallCommand(vcl::Window* pWindow, const Point& rMousePos)
     if (bPreNotify)
         return false;
 
-    pWindow->ImplGetWindowInput()->mbCommand = false;
+    pWindow->ImplGetWindowInput()->clearCommand();
     pWindow->Command(aCEvt);
 
     if (pWindow->isDisposed())
         return false;
 
-    if (pWindow->ImplGetWindowInput()->mbCommand)
-        return true;
-
-    return false;
+    return pWindow->ImplGetWindowInput()->hasCommand();
 }
 
 // If the last event at the same absolute screen position was handled by a

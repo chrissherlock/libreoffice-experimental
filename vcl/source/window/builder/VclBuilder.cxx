@@ -1580,15 +1580,17 @@ VclPtr<vcl::Window> VclBuilder::makeObject(vcl::Window *pParent, const OUString 
     if (xWindow)
     {
         // child windows of disabled windows are made disabled by vcl by default, we don't want that
-        WindowInput *pWindowInput = xWindow->ImplGetWindowInput();
-        pWindowInput->mbDisabled = false;
+        WindowInput* pWindowInput = xWindow->ImplGetWindowInput();
+        pWindowInput->enableWindow();
+
+        WindowHierarchy* pWindowHierarchy = xWindow->ImplGetWindowHierarchy();
 
         xWindow->SetHelpId(getHelpRoot() + id);
         SAL_INFO("vcl.builder", "for name '" << name << "' and id '" << id <<
             "', created " << xWindow.get() << " child of " <<
-            pParent << "(" << xWindow->ImplGetWindowHierarchy()->mpParent.get() << "/" <<
-            xWindow->ImplGetWindowHierarchy()->mpRealParent.get() << "/" <<
-            xWindow->ImplGetWindowHierarchy()->mpBorderWindow.get() << ") with helpid " <<
+            pParent << "(" << pWindowHierarchy->getParent() << "/" <<
+            pWindowHierarchy->getRealParent() << "/" <<
+            pWindowHierarchy->getBorderWindow() << ") with helpid " <<
             xWindow->GetHelpId());
         m_aChildren.emplace_back(id, xWindow, bVertical);
 

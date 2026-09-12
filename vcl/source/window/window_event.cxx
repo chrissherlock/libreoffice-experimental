@@ -54,7 +54,7 @@ void Window::SimulateKeyPress(sal_uInt16 nKeyCode) const
 
 void Window::KeyInput(const KeyEvent& rKEvt)
 {
-#ifndef _WIN32 // On Windows, dialogs react to accelerators  without Alt (tdf#157649)
+#ifndef _WIN32 // On Windows, dialogs react to accelerators without Alt (tdf#157649)
     KeyCode cod = rKEvt.GetKeyCode();
 
     // do not respond to accelerators unless Alt or Ctrl is held
@@ -68,14 +68,14 @@ void Window::KeyInput(const KeyEvent& rKEvt)
 
     NotifyEvent aNEvt(NotifyEventType::KEYINPUT, this, &rKEvt);
     if (!CompatNotify(aNEvt))
-        mpInput->mbKeyInput = true;
+        mpInput->setKeyInput();
 }
 
 void Window::KeyUp(const KeyEvent& rKEvt)
 {
     NotifyEvent aNEvt(NotifyEventType::KEYUP, this, &rKEvt);
     if (!CompatNotify(aNEvt))
-        mpInput->mbKeyUp = true;
+        mpInput->setKeyUp();
 }
 
 void Window::Draw(OutputDevice&, const Point&, SystemTextColorFlags) {}
@@ -190,7 +190,7 @@ void Window::Command(const CommandEvent& rCEvt)
 
     NotifyEvent aNEvt(NotifyEventType::COMMAND, this, &rCEvt);
     if (!CompatNotify(aNEvt))
-        mpInput->mbCommand = true;
+        mpInput->setCommand();
 }
 
 void Window::Tracking(const TrackingEvent& rTEvt)

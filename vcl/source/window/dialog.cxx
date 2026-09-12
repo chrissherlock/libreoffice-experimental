@@ -1334,7 +1334,7 @@ vcl::Window* Dialog::GetFirstControlForFocus()
     if (!HasFocus() && pFirstOverlapWindow && pFirstOverlapWindow->mpClassification)
     {
         // prefer a child window which had focus before
-        pFocusControl = ImplGetFirstOverlapWindow()->mpInput->mpLastFocusWindow;
+        pFocusControl = pFirstOverlapWindow->mpInput->getLastFocusWindow();
         // find the control out of the dialog control
         if ( pFocusControl )
             pFocusControl = ImplFindDlgCtrlWindow( pFocusControl );

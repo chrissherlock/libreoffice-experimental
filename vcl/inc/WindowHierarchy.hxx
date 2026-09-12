@@ -50,6 +50,10 @@ struct WindowHierarchy
 
     vcl::Window* getFirstOverlap() const { return mpFirstOverlap; }
     vcl::Window* getNext() const { return mpNext; }
+
+    vcl::Window* getParent() const { return mpParent.get(); }
+    vcl::Window* getRealParent() const { return mpRealParent.get(); }
+    vcl::Window* getBorderWindow() const { return mpBorderWindow.get(); }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
