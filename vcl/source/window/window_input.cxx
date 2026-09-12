@@ -174,9 +174,9 @@ void Window::ImplNewInputContext()
 
 void Window::SetInputContext(const InputContext& rInputContext)
 {
-    mpInput->maInputContext = rInputContext;
+    mpInput->setInputContext(rInputContext);
 
-    if (!mpInput->mbInFocusHdl && HasFocus())
+    if (!mpInput->isInFocusHdl() && HasFocus())
         ImplNewInputContext();
 }
 
@@ -208,7 +208,7 @@ void Window::PostExtTextInputEvent(VclEventId nType, const OUString& rText)
 
 void Window::EndExtTextInput()
 {
-    if (mpInput->mbExtTextInput)
+    if (mpInput->hasExtendedTextInput())
         ImplGetFrame()->EndExtTextInput(EndExtTextInputFlags::Complete);
 }
 

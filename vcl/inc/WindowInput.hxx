@@ -75,6 +75,12 @@ struct WindowInput
 
     bool isInFocusHdl() const { return mbInFocusHdl; }
     void setInFocusHdl(bool bInFocus) { mbInFocusHdl = bInFocus; }
+
+    const InputContext& getInputContext() const { return maInputContext; }
+    void setInputContext(const InputContext& rContext) { maInputContext = rContext; }
+
+    bool hasExtendedTextInput() const { return mbExtTextInput; }
+    void setExtendedTextInput(bool bActive) { mbExtTextInput = bActive; }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
