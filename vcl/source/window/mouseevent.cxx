@@ -615,7 +615,7 @@ static bool lcl_CheckAndDeliverMouseLeave(ImplFrameData* pWinFrameData, VclPtr<v
         pMouseMoveWin && pChild != pMouseMoveWin)
     {
         pWinFrameData->mbInMouseMove = true;
-        pMouseMoveWin->ImplGetWinData()->mbMouseOver = false;
+        pMouseMoveWin->ImplGetWindowInput()->setMouseOver(false);
 
         lcl_DeliverMouseLeaveEvent(pMouseMoveWin, rAction, pWinFrameData->mnClickCount);
 
@@ -662,7 +662,7 @@ static MouseEventRouting lcl_RouteMouseMove(const VclPtr<vcl::Window>& xWindow, 
     pWinFrameData->mpMouseMoveWin = pChild;
 
     if (pChild)
-        pChild->ImplGetWinData()->mbMouseOver = true;
+        pChild->ImplGetWindowInput()->setMouseOver(true);
 
     // MouseLeave
     if (!pChild)
@@ -734,12 +734,12 @@ static bool lcl_InvokeStandardMouseEvent(const VclPtr<vcl::Window>& pChild, Noti
     }
     else if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
     {
-        pChild->ImplGetWindowInput()->mbMouseButtonDown = false;
+        pChild->ImplGetWindowInput()->clearMouseButtonDown();
         pChild->MouseButtonDown(rMEvt);
     }
     else // MouseButtonUp
     {
-        pChild->ImplGetWindowInput()->mbMouseButtonUp = false;
+        pChild->ImplGetWindowInput()->clearMouseButtonUp();
         pChild->MouseButtonUp(rMEvt);
     }
 
@@ -793,9 +793,9 @@ static bool lcl_CheckButtonConsumption(const VclPtr<vcl::Window>& pChild, Notify
     // Check if the button flags were reset by the event invocation,
     // which indicates the event was consumed.
     if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
-        return !pChild->ImplGetWindowInput()->mbMouseButtonDown;
+        return !pChild->ImplGetWindowInput()->isMouseButtonDown();
     else
-        return !pChild->ImplGetWindowInput()->mbMouseButtonUp;
+        return !pChild->ImplGetWindowInput()->isMouseButtonUp();
 }
 
 static bool lcl_DispatchCommandEvents(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,

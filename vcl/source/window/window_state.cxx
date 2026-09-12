@@ -461,7 +461,7 @@ void Window::SetDialogControlFlags(DialogControlFlags nFlags)
 
 DialogControlFlags Window::GetDialogControlFlags() const { return mpControlState->mnDlgCtrlFlags; }
 
-const InputContext& Window::GetInputContext() const { return mpInput->maInputContext; }
+const InputContext& Window::GetInputContext() const { return mpInput->getInputContext(); }
 
 bool Window::HasControlFont() const { return mpControlAppearance->hasControlFont(); }
 

@@ -760,13 +760,16 @@ bool Window::ImplDlgCtrl( const KeyEvent& rKEvt, bool bKeyInput )
                 pButtonWindow = nullptr;
         }
 
-        if ( bKeyInput && mpInput->mpDlgCtrlDownWindow )
+        if ( bKeyInput )
         {
-            if ( mpInput->mpDlgCtrlDownWindow.get() != pButtonWindow )
+            if ( PushButton* pDownBtn = mpInput->getDialogControlDownWindow() )
             {
-                mpInput->mpDlgCtrlDownWindow->SetPressed( false );
-                mpInput->mpDlgCtrlDownWindow = nullptr;
-                return true;
+                if ( pDownBtn != pButtonWindow )
+                {
+                    pDownBtn->SetPressed( false );
+                    mpInput->clearDialogControlDownWindow();
+                    return true;
+                }
             }
         }
     }
@@ -986,22 +989,25 @@ bool Window::ImplDlgCtrl( const KeyEvent& rKEvt, bool bKeyInput )
 
     if (isSuitableDestination(pButtonWindow))
     {
+        auto* pPushButton = static_cast<PushButton*>(pButtonWindow);
+
         if ( bKeyInput )
         {
-            if ( mpInput->mpDlgCtrlDownWindow && (mpInput->mpDlgCtrlDownWindow.get() != pButtonWindow) )
+            PushButton* pCurrentDown = mpInput->getDialogControlDownWindow();
+            if ( pCurrentDown && (pCurrentDown != pButtonWindow) )
             {
-                mpInput->mpDlgCtrlDownWindow->SetPressed( false );
-                mpInput->mpDlgCtrlDownWindow = nullptr;
+                pCurrentDown->SetPressed( false );
+                mpInput->clearDialogControlDownWindow();
             }
 
-            static_cast<PushButton*>(pButtonWindow)->SetPressed( true );
-            mpInput->mpDlgCtrlDownWindow = static_cast<PushButton*>(pButtonWindow);
+            pPushButton->SetPressed( true );
+            mpInput->setDialogControlDownWindow( pPushButton );
         }
-        else if ( mpInput->mpDlgCtrlDownWindow.get() == pButtonWindow )
+        else if ( mpInput->getDialogControlDownWindow() == pButtonWindow )
         {
-            mpInput->mpDlgCtrlDownWindow = nullptr;
-            static_cast<PushButton*>(pButtonWindow)->SetPressed( false );
-            static_cast<PushButton*>(pButtonWindow)->Click();
+            mpInput->clearDialogControlDownWindow();
+            pPushButton->SetPressed( false );
+            pPushButton->Click();
         }
 
         return true;
@@ -1115,10 +1121,10 @@ static void ImplDlgCtrlUpdateDefButton( vcl::Window* pParent, const vcl::Window*
 
 void Window::ImplDlgCtrlFocusChanged( const vcl::Window* pWindow, bool bGetFocus )
 {
-    if ( mpInput->mpDlgCtrlDownWindow && !bGetFocus )
+    if ( mpInput->getDialogControlDownWindow() && !bGetFocus )
     {
-        mpInput->mpDlgCtrlDownWindow->SetPressed( false );
-        mpInput->mpDlgCtrlDownWindow = nullptr;
+        mpInput->getDialogControlDownWindow()->SetPressed( false );
+        mpInput->clearDialogControlDownWindow();
     }
 
     ImplDlgCtrlUpdateDefButton( this, pWindow, bGetFocus );

@@ -71,7 +71,7 @@ vcl::Window* Window::ImplResetOverlapFocusState(vcl::Window* pOverlapWindow)
     ImplSVData* pSVData = ImplGetSVData();
 
     pSVData->mpWinData->mpFocusWin = nullptr;
-    pOverlapWindow->mpInput->mpLastFocusWindow = nullptr;
+    pOverlapWindow->mpInput->clearLastFocusWindow();
     return pOverlapWindow;
 }
 
@@ -116,7 +116,7 @@ vcl::Window* Window::ImplTransferFocus()
 
 bool Window::ImplShouldPassFocusToLastWindow() const
 {
-    return HasFocus() && mpInput->mpLastFocusWindow
+    return HasFocus() && mpInput->hasLastFocusWindow()
            && !(mpControlState->mnDlgCtrlFlags & DialogControlFlags::WantFocus);
 }
 
@@ -129,7 +129,7 @@ void Window::GetFocus()
         // destroy this parent window during the focus transfer. If that happens,
         // we must bail out immediately to avoid a use-after-free crash.
         VclPtr<vcl::Window> xWindow(this);
-        mpInput->mpLastFocusWindow->GrabFocus();
+        mpInput->grabFocusToLastWindow();
 
         if (xWindow->isDisposed())
             return;
@@ -159,7 +159,7 @@ VclPtr<vcl::Window> Window::GetFocusedWindow() const
         return VclPtr<vcl::Window>();
 }
 
-void Window::SetFakeFocus(bool bFocus) { ImplGetWindowInput()->mbFakeFocusSet = bFocus; }
+void Window::SetFakeFocus(bool bFocus) { ImplGetWindowInput()->setFakeFocus(bFocus); }
 
 bool Window::HasChildPathFocus(bool bSystemWindow) const
 {
@@ -733,9 +733,11 @@ void vcl::Window::ImplClearFocus()
     ImplSVData* pSVData = ImplGetSVData();
 
     // transfer the FocusWindow
-    if (vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow();
-        pOverlapWindow && pOverlapWindow->ImplGetWindowInput())
-        pOverlapWindow->ImplGetWindowInput()->mpLastFocusWindow = this;
+    if (vcl::Window* pOverlapWindow = ImplGetFirstOverlapWindow())
+    {
+        if (WindowInput* pOverlapInput = pOverlapWindow->ImplGetWindowInput())
+            pOverlapInput->setLastFocusWindow(this);
+    }
 
     pSVData->mpWinData->mpFocusWin = nullptr;
 

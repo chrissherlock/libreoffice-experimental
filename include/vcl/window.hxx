@@ -398,7 +398,7 @@ struct WindowStyleState;
 struct WindowVisibilityState;
 struct WindowClippingState;
 struct WindowInvalidation;
-struct WindowInput;
+class WindowInput;
 struct WindowLOKData;
 struct WindowHierarchy;
 struct WindowHelpData;

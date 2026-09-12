@@ -48,7 +48,6 @@ struct ImplWinData
     std::optional<tools::Rectangle> mpTrackRect;
     ShowTrackFlags mnTrackFlags;
     sal_uInt16 mnIsTopWindow;
-    bool mbMouseOver; //< tracks mouse over for native widget paint effect
     bool mbEnableNativeWidget; //< toggle native widget rendering
     ::std::list<VclPtr<vcl::Window>> maTopWindowChildren;
 
