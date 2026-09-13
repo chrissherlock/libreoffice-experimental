@@ -39,7 +39,6 @@
 
 namespace vcl
 {
-
 rtl::Reference<comphelper::OAccessible> Window::GetAccessible(bool bCreate)
 {
     if (!mpAccessibleData)
@@ -51,9 +50,9 @@ rtl::Reference<comphelper::OAccessible> Window::GetAccessible(bool bCreate)
     return mpAccessibleData->getAccessible();
 }
 
-static bool lcl_hasFloatingChild(vcl::Window *pWindow)
+static bool lcl_hasFloatingChild(vcl::Window* pWindow)
 {
-    vcl::Window * pChild = pWindow->GetAccessibleChildWindow(0);
+    vcl::Window* pChild = pWindow->GetAccessibleChildWindow(0);
     return pChild && pChild->GetType() == WindowType::FLOATINGWINDOW;
 }
 
@@ -67,7 +66,8 @@ rtl::Reference<comphelper::OAccessible> Window::CreateAccessible()
     if (eType == WindowType::TABCONTROL)
         return new VCLXAccessibleTabControl(this);
 
-    if (eType == WindowType::TABPAGE && GetAccessibleParentWindow() && GetAccessibleParentWindow()->GetType() == WindowType::TABCONTROL)
+    if (eType == WindowType::TABPAGE && GetAccessibleParentWindow()
+        && GetAccessibleParentWindow()->GetType() == WindowType::TABCONTROL)
         return new VCLXAccessibleTabPageWindow(this);
 
     if (eType == WindowType::FLOATINGWINDOW)
@@ -91,7 +91,7 @@ void Window::SetAccessible(const rtl::Reference<comphelper::OAccessible>& rpAcce
 // skip all border windows that are not top level frames
 bool Window::ImplIsAccessibleCandidate() const
 {
-    if( !mpClassification->mbBorderWin )
+    if (!mpClassification->mbBorderWin)
         return true;
 
     return IsNativeFrame();
@@ -137,14 +137,14 @@ vcl::Window* Window::GetAccessibleParentWindow() const
 
     // If this is a floating window which has a native border window, then that border should be reported as
     // the accessible parent
-    if (GetType() == WindowType::FLOATINGWINDOW &&
-             mpHierarchy->mpBorderWindow &&
-             mpHierarchy->mpBorderWindow->ImplGetWindowClassification()->mbFrame)
+    if (GetType() == WindowType::FLOATINGWINDOW && mpHierarchy->mpBorderWindow
+        && mpHierarchy->mpBorderWindow->ImplGetWindowClassification()->mbFrame)
     {
         return mpHierarchy->mpBorderWindow;
     }
 
-    if (vcl::Window* pParent = mpHierarchy->mpParent; pParent && !pParent->ImplIsAccessibleCandidate())
+    if (vcl::Window* pParent = mpHierarchy->mpParent;
+        pParent && !pParent->ImplIsAccessibleCandidate())
         return pParent->ImplGetParent();
 
     return mpHierarchy->mpParent;
@@ -157,45 +157,48 @@ sal_uInt16 Window::GetAccessibleChildWindowCount()
 
     sal_uInt16 nChildren = 0;
     vcl::Window* pChild = mpHierarchy->mpFirstChild;
-    while( pChild )
+    while (pChild)
     {
-        if( pChild->IsVisible() )
+        if (pChild->IsVisible())
             nChildren++;
 
         pChild = pChild->mpHierarchy->mpNext;
     }
 
     // report the menubarwindow as a child of THE workwindow
-    if( GetType() == WindowType::BORDERWINDOW )
+    if (GetType() == WindowType::BORDERWINDOW)
     {
-        ImplBorderWindow *pBorderWindow = static_cast<ImplBorderWindow*>(this);
+        ImplBorderWindow* pBorderWindow = static_cast<ImplBorderWindow*>(this);
         if (pBorderWindow->mpMenuBarWindow && pBorderWindow->mpMenuBarWindow->IsVisible())
             --nChildren;
-    }
-    else if( GetType() == WindowType::WORKWINDOW )
-    {
-        WorkWindow *pWorkWindow = static_cast<WorkWindow*>(this);
 
-        if (pWorkWindow->GetMenuBar()
-            && pWorkWindow->GetMenuBar()->GetWindow()
-            && pWorkWindow->GetMenuBar()->GetWindow()->IsVisible())
-        {
-            ++nChildren;
-        }
+        return nChildren;
+    }
+
+    if (GetType() != WindowType::WORKWINDOW)
+        return nChildren;
+
+    WorkWindow* pWorkWindow = static_cast<WorkWindow*>(this);
+
+    if (pWorkWindow->GetMenuBar() && pWorkWindow->GetMenuBar()->GetWindow()
+        && pWorkWindow->GetMenuBar()->GetWindow()->IsVisible())
+    {
+        ++nChildren;
     }
 
     return nChildren;
 }
 
-vcl::Window* Window::GetAccessibleChildWindow( sal_uInt16 n )
+vcl::Window* Window::GetAccessibleChildWindow(sal_uInt16 n)
 {
     // report the menubarwindow as the first child of THE workwindow
-    if( GetType() == WindowType::WORKWINDOW && static_cast<WorkWindow *>(this)->GetMenuBar() )
+    if (GetType() == WindowType::WORKWINDOW && static_cast<WorkWindow*>(this)->GetMenuBar())
     {
-        if( n == 0 )
+        if (n == 0)
         {
-            MenuBar *pMenuBar = static_cast<WorkWindow *>(this)->GetMenuBar();
-            if( pMenuBar->GetWindow() && pMenuBar->GetWindow()->IsVisible() )
+            MenuBar* pMenuBar = static_cast<WorkWindow*>(this)->GetMenuBar();
+
+            if (pMenuBar->GetWindow() && pMenuBar->GetWindow()->IsVisible())
                 return pMenuBar->GetWindow();
         }
         else
@@ -207,29 +210,32 @@ vcl::Window* Window::GetAccessibleChildWindow( sal_uInt16 n )
     // transform n to child number including invisible children
     sal_uInt16 nChildren = n;
     vcl::Window* pChild = mpHierarchy->mpFirstChild;
-    while( pChild )
+    while (pChild)
     {
-        if( pChild->IsVisible() )
+        if (pChild->IsVisible())
         {
-            if( ! nChildren )
+            if (!nChildren)
                 break;
+
             nChildren--;
         }
+
         pChild = pChild->mpHierarchy->mpNext;
     }
 
-    if( GetType() == WindowType::BORDERWINDOW && pChild && pChild->GetType() == WindowType::MENUBARWINDOW )
+    if (GetType() == WindowType::BORDERWINDOW && pChild
+        && pChild->GetType() == WindowType::MENUBARWINDOW)
     {
         do
         {
             pChild = pChild->mpHierarchy->mpNext;
-        } while( pChild && ! pChild->IsVisible() );
+        } while (pChild && !pChild->IsVisible());
 
-        SAL_WARN_IF( !pChild, "vcl", "GetAccessibleChildWindow(): wrong index in border window");
+        SAL_WARN_IF(!pChild, "vcl", "GetAccessibleChildWindow(): wrong index in border window");
     }
 
-    if ( pChild && ( pChild->GetType() == WindowType::BORDERWINDOW ) && ( pChild->GetChildCount() == 1 ) )
-        pChild = pChild->GetChild( 0 );
+    if (pChild && (pChild->GetType() == WindowType::BORDERWINDOW) && (pChild->GetChildCount() == 1))
+        pChild = pChild->GetChild(0);
 
     return pChild;
 }
@@ -254,12 +260,14 @@ rtl::Reference<comphelper::OAccessible> Window::GetAccessibleParent() const
     return nullptr;
 }
 
-void Window::SetAccessibleRole( sal_uInt16 nRole )
+void Window::SetAccessibleRole(sal_uInt16 nRole)
 {
     if (!mpAccessibleData)
         return;
 
-    SAL_WARN_IF( mpAccessibleData->getAccessibleRole() != css::accessibility::AccessibleRole::UNKNOWN, "vcl", "AccessibleRole already set!" );
+    SAL_WARN_IF(mpAccessibleData->getAccessibleRole()
+                    != css::accessibility::AccessibleRole::UNKNOWN,
+                "vcl", "AccessibleRole already set!");
 
     mpAccessibleData->setAccessibleRole(nRole);
 }
@@ -269,9 +277,8 @@ static bool lcl_actsAsAccessibleFrame(const vcl::Window* pWindow)
     const vcl::Window* pBorder = pWindow->ImplGetWindowHierarchy()->mpBorderWindow;
     bool bBorderIsFrame = pBorder && pBorder->ImplGetWindowClassification()->mbFrame;
 
-    return pWindow->ImplGetWindowClassification()->mbFrame
-        || bBorderIsFrame
-        || (pWindow->GetStyle() & WB_OWNERDRAWDECORATION);
+    return pWindow->ImplGetWindowClassification()->mbFrame || bBorderIsFrame
+           || (pWindow->GetStyle() & WB_OWNERDRAWDECORATION);
 }
 
 sal_uInt16 Window::getDefaultAccessibleRole() const
@@ -315,8 +322,8 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
         case WindowType::PATTERNFIELD:
         case WindowType::EDIT:
             return static_cast<Edit const*>(this)->IsPassword()
-                        ? css::accessibility::AccessibleRole::PASSWORD_TEXT
-                        : css::accessibility::AccessibleRole::TEXT;
+                       ? css::accessibility::AccessibleRole::PASSWORD_TEXT
+                       : css::accessibility::AccessibleRole::TEXT;
 
         case WindowType::PATTERNBOX:
         case WindowType::NUMERICBOX:
@@ -387,9 +394,8 @@ sal_uInt16 Window::getDefaultAccessibleRole() const
                                                : css::accessibility::AccessibleRole::PANEL;
 
         case WindowType::FLOATINGWINDOW:
-            return lcl_actsAsAccessibleFrame(this)
-                       ? css::accessibility::AccessibleRole::FRAME
-                       : css::accessibility::AccessibleRole::WINDOW;
+            return lcl_actsAsAccessibleFrame(this) ? css::accessibility::AccessibleRole::FRAME
+                                                   : css::accessibility::AccessibleRole::WINDOW;
 
         case WindowType::WORKWINDOW:
             return css::accessibility::AccessibleRole::ROOT_PANE;
@@ -446,7 +452,7 @@ sal_uInt16 Window::GetAccessibleRole() const
     return nRole;
 }
 
-void Window::SetAccessibleName( const OUString& rName )
+void Window::SetAccessibleName(const OUString& rName)
 {
     if (!mpAccessibleData)
         return;
@@ -492,8 +498,7 @@ OUString Window::getDefaultAccessibleName() const
         {
             OUString aName;
 
-            if (vcl::Window* pLabel = GetAccessibleRelationLabeledBy();
-                pLabel && pLabel != this)
+            if (vcl::Window* pLabel = GetAccessibleRelationLabeledBy(); pLabel && pLabel != this)
             {
                 aName = pLabel->GetText();
             }
@@ -532,14 +537,15 @@ OUString Window::getDefaultAccessibleName() const
     }
 }
 
-void Window::SetAccessibleDescription( const OUString& rDescription )
+void Window::SetAccessibleDescription(const OUString& rDescription)
 {
     if (!mpAccessibleData)
         return;
 
     std::optional<OUString> currentDesc = mpAccessibleData->getAccessibleDescription();
 
-    SAL_WARN_IF(currentDesc && *currentDesc != rDescription, "vcl", "AccessibleDescription already set");
+    SAL_WARN_IF(currentDesc && *currentDesc != rDescription, "vcl",
+                "AccessibleDescription already set");
 
     mpAccessibleData->setAccessibleDescription(rDescription);
 }
@@ -554,19 +560,20 @@ OUString Window::GetAccessibleDescription() const
 
     // Special code for help text windows. ZT asks the border window for the
     // description so we have to forward this request to our inner window.
-    if (const vcl::Window* pWin = this->ImplGetWindow(); pWin->GetType() == WindowType::HELPTEXTWINDOW)
+    if (const vcl::Window* pWin = this->ImplGetWindow();
+        pWin->GetType() == WindowType::HELPTEXTWINDOW)
         return pWin->GetHelpText();
 
     return GetHelpText();
 }
 
-void Window::SetAccessibleRelationLabeledBy( vcl::Window* pLabeledBy )
+void Window::SetAccessibleRelationLabeledBy(vcl::Window* pLabeledBy)
 {
     if (mpAccessibleData)
         mpAccessibleData->setAccessibleRelationLabeledBy(pLabeledBy);
 }
 
-void Window::SetAccessibleRelationLabelFor( vcl::Window* pLabelFor )
+void Window::SetAccessibleRelationLabelFor(vcl::Window* pLabelFor)
 {
     if (mpAccessibleData)
         mpAccessibleData->setAccessibleRelationLabelFor(pLabelFor);
@@ -612,7 +619,7 @@ vcl::Window* Window::GetAccessibleRelationLabeledBy() const
     if (auto const& rMnemonicLabels = list_mnemonic_labels(); !rMnemonicLabels.empty())
     {
         //if we have multiple labels, then prefer the first that is visible
-        for (auto const & rCandidate : rMnemonicLabels)
+        for (auto const& rCandidate : rMnemonicLabels)
         {
             if (rCandidate->IsVisible())
                 return rCandidate;
