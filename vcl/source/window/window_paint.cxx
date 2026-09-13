@@ -320,35 +320,70 @@ void Window::ImplInvalidateParentFrameRegion( const vcl::Region& rRegion )
     }
 }
 
+static vcl::Window* lcl_FindOpaqueTarget(vcl::Window& rWindow,
+                                         const WindowInvalidation& rInvalidation,
+                                         InvalidateFlags nFlags)
+{
+    const bool bNeedsTransparent = (rInvalidation.isPaintTransparent() && !(nFlags & InvalidateFlags::NoTransparent))
+                                || (nFlags & InvalidateFlags::Transparent);
+
+    if (!bNeedsTransparent)
+        return &rWindow;
+
+    vcl::Window* pTempWindow = rWindow.ImplGetParent();
+    while (pTempWindow)
+    {
+        if (!pTempWindow->IsPaintTransparent())
+            return pTempWindow;
+
+        if (pTempWindow->ImplIsOverlapWindow())
+            break;
+
+        pTempWindow = pTempWindow->ImplGetParent();
+    }
+
+    return &rWindow;
+}
+
+static vcl::Region lcl_CalculateBaseInvalidateRegion(vcl::Window& rWindow, const vcl::Region* pRegion)
+{
+    vcl::Region aRegion(rWindow.GetOutputRectPixel());
+
+    if (pRegion)
+    {
+        // RTL: remirror region before intersecting it
+        const OutputDevice* pOutDev = rWindow.GetOutDev();
+        if (pOutDev->ImplIsAntiparallel())
+        {
+            vcl::Region aRgn(*pRegion);
+            pOutDev->ReMirror(aRgn);
+            aRegion.Intersect(aRgn);
+        }
+        else
+        {
+            aRegion.Intersect(*pRegion);
+        }
+    }
+
+    vcl::clipping::clipBoundaries(rWindow, aRegion, true, true);
+    return aRegion;
+}
+
 void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags )
 {
     // check what has to be redrawn
     bool bInvalidateAll = !pRegion;
 
     // take Transparent-Invalidate into account
-    vcl::Window* pOpaqueWindow = this;
-    if ( (mpInvalidation->isPaintTransparent() && !(nFlags & InvalidateFlags::NoTransparent)) || (nFlags & InvalidateFlags::Transparent) )
+    vcl::Window* pOpaqueWindow = lcl_FindOpaqueTarget(*this, *mpInvalidation, nFlags);
+    if (pOpaqueWindow != this)
     {
-        vcl::Window* pTempWindow = pOpaqueWindow->ImplGetParent();
-        while ( pTempWindow )
-        {
-            if ( !pTempWindow->IsPaintTransparent() )
-            {
-                pOpaqueWindow = pTempWindow;
-                nFlags |= InvalidateFlags::Children;
-                bInvalidateAll = false;
-                break;
-            }
-
-            if ( pTempWindow->ImplIsOverlapWindow() )
-                break;
-
-            pTempWindow = pTempWindow->ImplGetParent();
-        }
+        nFlags |= InvalidateFlags::Children;
+        bInvalidateAll = false;
     }
 
     // assemble region
-    InvalidateFlags nOrgFlags = nFlags;
+    const InvalidateFlags nOrgFlags = nFlags;
     if ( !(nFlags & (InvalidateFlags::Children | InvalidateFlags::NoChildren)) )
     {
         if ( GetStyle() & WB_CLIPCHILDREN )
@@ -366,23 +401,7 @@ void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags 
     }
     else
     {
-        vcl::Region      aRegion( GetOutputRectPixel() );
-        if ( pRegion )
-        {
-            // RTL: remirror region before intersecting it
-            if ( GetOutDev()->ImplIsAntiparallel() )
-            {
-                const OutputDevice *pOutDev = GetOutDev();
-
-                vcl::Region aRgn( *pRegion );
-                pOutDev->ReMirror( aRgn );
-                aRegion.Intersect( aRgn );
-            }
-            else
-                aRegion.Intersect( *pRegion );
-        }
-
-        vcl::clipping::clipBoundaries(*this, aRegion, true, true);
+        vcl::Region aRegion = lcl_CalculateBaseInvalidateRegion(*this, pRegion);
 
         if ( nFlags & InvalidateFlags::NoChildren )
         {
@@ -390,14 +409,16 @@ void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags 
             if ( !(nFlags & InvalidateFlags::NoClipChildren) )
             {
                 if ( nOrgFlags & InvalidateFlags::NoChildren )
-                    vcl::clipping::clipAllChildren(*this, aRegion);
-                else
                 {
-                    if (vcl::clipping::clipChildren(*this, aRegion))
-                        nFlags |= InvalidateFlags::Children;
+                    vcl::clipping::clipAllChildren(*this, aRegion);
+                }
+                else if (vcl::clipping::clipChildren(*this, aRegion))
+                {
+                    nFlags |= InvalidateFlags::Children;
                 }
             }
         }
+
         if ( !aRegion.IsEmpty() )
             ImplInvalidateFrameRegion( &aRegion, nFlags );  // transparency is handled here, pOpaqueWindow not required
     }
