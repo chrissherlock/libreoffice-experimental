@@ -22,20 +22,9 @@ namespace vcl
 class Window;
 }
 
-struct WindowEventHandlers
+class WindowEventHandlers
 {
-    std::vector<Link<VclWindowEvent&, void>> maEventListeners;
-    int mnEventListenersIteratingCount = 0;
-    std::set<Link<VclWindowEvent&, void>> maEventListenersDeleted;
-
-    std::vector<Link<VclWindowEvent&, void>> maChildEventListeners;
-    int mnChildEventListenersIteratingCount = 0;
-    std::set<Link<VclWindowEvent&, void>> maChildEventListenersDeleted;
-
-    Link<const CommandEvent&, bool> maCommandHdl;
-    Link<vcl::Window&, bool> maHelpRequestHdl;
-    Link<vcl::Window&, bool> maMnemonicActivateHdl;
-
+public:
     WindowEventHandlers() = default;
 
     void notifyEventListeners(VclWindowEvent& rEvent, const VclPtr<vcl::Window>& xWindow,
@@ -50,6 +39,40 @@ struct WindowEventHandlers
 
     void addChildEventListener(const Link<VclWindowEvent&, void>& rEventListener);
     void removeChildEventListener(const Link<VclWindowEvent&, void>& rEventListener);
+
+    void setMnemonicActivateHdl(const Link<vcl::Window&, bool>& rLink)
+    {
+        maMnemonicActivateHdl = rLink;
+    }
+
+    bool callMnemonicActivateHdl(vcl::Window& rWindow)
+    {
+        return maMnemonicActivateHdl.Call(rWindow);
+    }
+
+    void setCommandHdl(const Link<const CommandEvent&, bool>& rLink) { maCommandHdl = rLink; }
+
+    bool callCommandHdl(const CommandEvent& rCEvt) { return maCommandHdl.Call(rCEvt); }
+
+    void setHelpRequestHdl(const Link<vcl::Window&, bool>& rLink) { maHelpRequestHdl = rLink; }
+
+    bool callHelpRequestHdl(vcl::Window& rWindow)
+    {
+        return !maHelpRequestHdl.IsSet() || maHelpRequestHdl.Call(rWindow);
+    }
+
+private:
+    std::vector<Link<VclWindowEvent&, void>> maEventListeners;
+    int mnEventListenersIteratingCount = 0;
+    std::set<Link<VclWindowEvent&, void>> maEventListenersDeleted;
+
+    std::vector<Link<VclWindowEvent&, void>> maChildEventListeners;
+    int mnChildEventListenersIteratingCount = 0;
+    std::set<Link<VclWindowEvent&, void>> maChildEventListenersDeleted;
+
+    Link<const CommandEvent&, bool> maCommandHdl;
+    Link<vcl::Window&, bool> maHelpRequestHdl;
+    Link<vcl::Window&, bool> maMnemonicActivateHdl;
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

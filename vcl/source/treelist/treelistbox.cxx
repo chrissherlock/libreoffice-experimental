@@ -3382,9 +3382,10 @@ void SvTreeListBox::SetHighlightRange( sal_uInt16 nStart, sal_uInt16 nEnd)
 
 void SvTreeListBox::Command(const CommandEvent& rCEvt)
 {
-    if (!ImplGetEventHandlers()->maCommandHdl.Call(rCEvt))
+    if (!ImplGetEventHandlers()->callCommandHdl(rCEvt))
         m_pImpl->Command(rCEvt);
-    //pass at least alt press/release to parent impl
+
+    // pass at least alt press/release to parent impl
     if (rCEvt.GetCommand() == CommandEventId::ModKeyChange)
         Control::Command(rCEvt);
 }

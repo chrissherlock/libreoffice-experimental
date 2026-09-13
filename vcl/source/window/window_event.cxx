@@ -91,13 +91,13 @@ void Window::Deactivate() {}
 void Window::SetCommandHdl(const Link<const CommandEvent&, bool>& rLink)
 {
     if (mpEventHandlers)
-        mpEventHandlers->maCommandHdl = rLink;
+        mpEventHandlers->setCommandHdl(rLink);
 }
 
 void Window::SetHelpHdl(const Link<vcl::Window&, bool>& rLink)
 {
     if (mpEventHandlers) // may be called after dispose
-        mpEventHandlers->maHelpRequestHdl = rLink;
+        mpEventHandlers->setHelpRequestHdl(rLink);
 }
 
 tools::Rectangle Window::ImplGetHelpScreenRect() const
@@ -175,15 +175,13 @@ void Window::RequestHelp(const HelpEvent& rHEvt)
         return;
     }
 
-    if (mpEventHandlers
-        && (!mpEventHandlers->maHelpRequestHdl.IsSet()
-            || mpEventHandlers->maHelpRequestHdl.Call(*this)))
+    if (mpEventHandlers && mpEventHandlers->callHelpRequestHdl(*this))
         ImplStartHelp(rHEvt);
 }
 
 void Window::Command(const CommandEvent& rCEvt)
 {
-    if (mpEventHandlers && mpEventHandlers->maCommandHdl.Call(rCEvt))
+    if (mpEventHandlers && mpEventHandlers->callCommandHdl(rCEvt))
         return;
 
     CallEventListeners(VclEventId::WindowCommand, const_cast<CommandEvent*>(&rCEvt));
@@ -597,18 +595,13 @@ void Window::RemoveEventListener(const Link<VclWindowEvent&, void>& rEventListen
 void Window::AddChildEventListener(const Link<VclWindowEvent&, void>& rEventListener)
 {
     if (mpEventHandlers)
-        mpEventHandlers->maChildEventListeners.push_back(rEventListener);
+        mpEventHandlers->addChildEventListener(rEventListener);
 }
 
 void Window::RemoveChildEventListener(const Link<VclWindowEvent&, void>& rEventListener)
 {
     if (mpEventHandlers)
-    {
-        auto& rListeners = mpEventHandlers->maChildEventListeners;
-        std::erase(rListeners, rEventListener);
-        if (mpEventHandlers->mnChildEventListenersIteratingCount)
-            mpEventHandlers->maChildEventListenersDeleted.insert(rEventListener);
-    }
+        mpEventHandlers->removeChildEventListener(rEventListener);
 }
 
 ImplSVEvent* Window::PostUserEvent(const Link<void*, void>& rLink, void* pCaller,

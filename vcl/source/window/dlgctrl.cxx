@@ -513,22 +513,23 @@ namespace vcl {
 void Window::SetMnemonicActivateHdl(const Link<vcl::Window&, bool>& rLink)
 {
     if (mpEventHandlers) // may be called after dispose
-        mpEventHandlers->maMnemonicActivateHdl = rLink;
+        mpEventHandlers->setMnemonicActivateHdl(rLink);
 }
 
 void Window::ImplControlFocus( GetFocusFlags nFlags )
 {
     if ( nFlags & GetFocusFlags::Mnemonic )
     {
-        if (mpEventHandlers->maMnemonicActivateHdl.Call(*this))
+        if (mpEventHandlers && mpEventHandlers->callMnemonicActivateHdl(*this))
             return;
 
-        const bool bUniqueMnemonic(nFlags & GetFocusFlags::UniqueMnemonic);
+        const bool bUniqueMnemonic = bool(nFlags & GetFocusFlags::UniqueMnemonic);
 
         if ( GetType() == WindowType::RADIOBUTTON )
         {
-            if (bUniqueMnemonic && !static_cast<RadioButton*>(this)->IsChecked())
-                static_cast<RadioButton*>(this)->ImplCallClick( true, nFlags );
+            auto* pRadio = static_cast<RadioButton*>(this);
+            if (bUniqueMnemonic && !pRadio->IsChecked())
+                pRadio->ImplCallClick( true, nFlags );
             else
                 ImplGrabFocus( nFlags );
         }
@@ -538,12 +539,16 @@ void Window::ImplControlFocus( GetFocusFlags nFlags )
             if (bUniqueMnemonic)
             {
                 if ( GetType() == WindowType::CHECKBOX )
-                    static_cast<CheckBox*>(this)->ImplCheck();
+                {
+                    auto* pCheckBox = static_cast<CheckBox*>(this);
+                    pCheckBox->ImplCheck();
+                }
                 else if ( mpClassification->mbPushButton )
                 {
-                    static_cast<PushButton*>(this)->SetPressed( true );
-                    static_cast<PushButton*>(this)->SetPressed( false );
-                    static_cast<PushButton*>(this)->Click();
+                    auto* pBtn = static_cast<PushButton*>(this);
+                    pBtn->SetPressed( true );
+                    pBtn->SetPressed( false );
+                    pBtn->Click();
                 }
             }
         }
@@ -552,13 +557,16 @@ void Window::ImplControlFocus( GetFocusFlags nFlags )
     {
         if ( GetType() == WindowType::RADIOBUTTON )
         {
-            if ( !static_cast<RadioButton*>(this)->IsChecked() )
-                static_cast<RadioButton*>(this)->ImplCallClick( true, nFlags );
+            auto* pRadio = static_cast<RadioButton*>(this);
+            if ( !pRadio->IsChecked() )
+                pRadio->ImplCallClick( true, nFlags );
             else
                 ImplGrabFocus( nFlags );
         }
         else
+        {
             ImplGrabFocus( nFlags );
+        }
     }
 }
 
