@@ -10,6 +10,7 @@
 #pragma once
 
 #include <tools/link.hxx>
+
 #include <vector>
 #include <set>
 
@@ -36,6 +37,19 @@ struct WindowEventHandlers
     Link<vcl::Window&, bool> maMnemonicActivateHdl;
 
     WindowEventHandlers() = default;
+
+    void notifyEventListeners(VclWindowEvent& rEvent, const VclPtr<vcl::Window>& xWindow,
+                              bool bIgnoreDisposed);
+
+    void notifyChildEventListeners(VclWindowEvent& rEvent, const VclPtr<vcl::Window>& xWindow,
+                                   bool bIgnoreDisposed);
+
+    bool hasEventListeners() const { return !maEventListeners.empty(); }
+    void addEventListener(const Link<VclWindowEvent&, void>& rEventListener);
+    void removeEventListener(const Link<VclWindowEvent&, void>& rEventListener);
+
+    void addChildEventListener(const Link<VclWindowEvent&, void>& rEventListener);
+    void removeChildEventListener(const Link<VclWindowEvent&, void>& rEventListener);
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
