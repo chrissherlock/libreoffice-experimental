@@ -214,6 +214,13 @@ public:
 
     // Legacy Window Management Helper
     vcl::Region ViewToDevice(const vcl::Region& rRegion) const;
+    vcl::Region DeviceToView(const vcl::Region& rRegion) const;
+
+    vcl::Region WindowToDevice(const vcl::Region& rRegion) const;
+    vcl::Region DeviceToWindow(const vcl::Region& rRegion) const;
+
+    vcl::Region ViewToWindow(const vcl::Region& rRegion) const;
+    vcl::Region WindowToView(const vcl::Region& rRegion) const;
 
     const vcl::TransformPlan& Compile(vcl::MappingPolicy ePolicy) const;
 

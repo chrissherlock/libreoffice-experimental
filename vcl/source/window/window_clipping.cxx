@@ -48,7 +48,7 @@ void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
         return;
 
     WindowRegion aPixRegion(rRegion);
-    vcl::Region aDevPixRegion = GetOutDev()->GetMapper().ViewToDevice(aPixRegion.get());
+    vcl::Region aDevPixRegion = convertTo<vcl::DeviceRegion>(aPixRegion).get();
 
     // Call the newly migrated member function on the clipping state object
     vcl::Region aWinChildRegion = ImplGetClippingState()->getWinChildClipRegion(*this);

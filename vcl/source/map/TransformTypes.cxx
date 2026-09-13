@@ -293,24 +293,61 @@ vcl::LogicPolyPolygon CoordinateCastTraits<vcl::LogicPolyPolygon, vcl::WindowPol
 }
 
 // REGIONS
-vcl::DeviceRegion CoordinateCastTraits<vcl::DeviceRegion, vcl::LogicRegion>::cast(
-    const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)
+
+// ========================================================================
+// 1. PHYSICAL SPACE CASTS (Direct delegation to CoordinateMapper offsets)
+// ========================================================================
+
+// Device <-> Window
+vcl::DeviceRegion CoordinateCastTraits<vcl::DeviceRegion, vcl::WindowRegion>::cast(
+    const OutputDevice& rDev, const vcl::WindowRegion& rSrc, const MapMode*)
 {
-    const MapMode& rMapMode = pMapOverride ? *pMapOverride : rDev.GetMapMode();
-    return rDev.GetMapper().MapToDevice(rSrc, rMapMode);
+    return vcl::DeviceRegion(rDev.GetMapper().WindowToDevice(rSrc.get()));
+}
+vcl::WindowRegion CoordinateCastTraits<vcl::WindowRegion, vcl::DeviceRegion>::cast(
+    const OutputDevice& rDev, const vcl::DeviceRegion& rSrc, const MapMode*)
+{
+    return vcl::WindowRegion(rDev.GetMapper().DeviceToWindow(rSrc.get()));
 }
 
+// View <-> Window
+vcl::ViewRegion CoordinateCastTraits<vcl::ViewRegion, vcl::WindowRegion>::cast(
+    const OutputDevice& rDev, const vcl::WindowRegion& rSrc, const MapMode*)
+{
+    return vcl::ViewRegion(rDev.GetMapper().WindowToView(rSrc.get()));
+}
+vcl::WindowRegion CoordinateCastTraits<vcl::WindowRegion, vcl::ViewRegion>::cast(
+    const OutputDevice& rDev, const vcl::ViewRegion& rSrc, const MapMode*)
+{
+    return vcl::WindowRegion(rDev.GetMapper().ViewToWindow(rSrc.get()));
+}
+
+// Device <-> View
+vcl::DeviceRegion CoordinateCastTraits<vcl::DeviceRegion, vcl::ViewRegion>::cast(
+    const OutputDevice& rDev, const vcl::ViewRegion& rSrc, const MapMode*)
+{
+    return vcl::DeviceRegion(rDev.GetMapper().ViewToDevice(rSrc.get()));
+}
+vcl::ViewRegion CoordinateCastTraits<vcl::ViewRegion, vcl::DeviceRegion>::cast(
+    const OutputDevice& rDev, const vcl::DeviceRegion& rSrc, const MapMode*)
+{
+    return vcl::ViewRegion(rDev.GetMapper().DeviceToView(rSrc.get()));
+}
+
+// ========================================================================
+// 2. LOGIC CORE CASTS (Requires scaling + mapping policy)
+// ========================================================================
+
+// Logic <-> Window
 vcl::WindowRegion CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>::cast(
     const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)
 {
     const auto& rMapper = rDev.GetMapper();
-
     if (pMapOverride)
     {
         auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
         return vcl::WindowRegion(rMapper.LogicToWindowUnits(rSrc.get(), aConv));
     }
-
     return vcl::WindowRegion(rMapper.LogicToWindowUnits(rSrc.get(), rDev.GetMappingPolicy()));
 }
 
@@ -318,14 +355,50 @@ vcl::LogicRegion CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>::cast
     const OutputDevice& rDev, const vcl::WindowRegion& rSrc, const MapMode* pMapOverride)
 {
     const auto& rMapper = rDev.GetMapper();
-
     if (pMapOverride)
     {
         auto aConv = rMapper.ResolveMap(MapMode(), *pMapOverride, rDev.GetMappingPolicy());
         return vcl::LogicRegion(rMapper.WindowToLogicUnits(rSrc.get(), aConv));
     }
-
     return vcl::LogicRegion(rMapper.WindowToLogicUnits(rSrc.get(), rDev.GetMappingPolicy()));
+}
+
+// ========================================================================
+// 3. LOGIC COMPOSITIONAL CASTS (Safely routes through Window Space)
+// ========================================================================
+
+// Logic <-> Device
+vcl::DeviceRegion CoordinateCastTraits<vcl::DeviceRegion, vcl::LogicRegion>::cast(
+    const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)
+{
+    vcl::WindowRegion aWindowReg
+        = CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>::cast(rDev, rSrc, pMapOverride);
+    return CoordinateCastTraits<vcl::DeviceRegion, vcl::WindowRegion>::cast(rDev, aWindowReg);
+}
+vcl::LogicRegion CoordinateCastTraits<vcl::LogicRegion, vcl::DeviceRegion>::cast(
+    const OutputDevice& rDev, const vcl::DeviceRegion& rSrc, const MapMode* pMapOverride)
+{
+    vcl::WindowRegion aWindowReg
+        = CoordinateCastTraits<vcl::WindowRegion, vcl::DeviceRegion>::cast(rDev, rSrc);
+    return CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>::cast(rDev, aWindowReg,
+                                                                           pMapOverride);
+}
+
+// Logic <-> View
+vcl::ViewRegion CoordinateCastTraits<vcl::ViewRegion, vcl::LogicRegion>::cast(
+    const OutputDevice& rDev, const vcl::LogicRegion& rSrc, const MapMode* pMapOverride)
+{
+    vcl::WindowRegion aWindowReg
+        = CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>::cast(rDev, rSrc, pMapOverride);
+    return CoordinateCastTraits<vcl::ViewRegion, vcl::WindowRegion>::cast(rDev, aWindowReg);
+}
+vcl::LogicRegion CoordinateCastTraits<vcl::LogicRegion, vcl::ViewRegion>::cast(
+    const OutputDevice& rDev, const vcl::ViewRegion& rSrc, const MapMode* pMapOverride)
+{
+    vcl::WindowRegion aWindowReg
+        = CoordinateCastTraits<vcl::WindowRegion, vcl::ViewRegion>::cast(rDev, rSrc);
+    return CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>::cast(rDev, aWindowReg,
+                                                                           pMapOverride);
 }
 
 // ========================================================================
