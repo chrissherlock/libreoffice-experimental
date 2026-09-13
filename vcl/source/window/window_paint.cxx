@@ -516,14 +516,19 @@ void Window::ImplValidate()
     // assemble region
     bool    bValidateAll = true;
     ValidateFlags nFlags = ValidateFlags::NONE;
+
     if ( GetStyle() & WB_CLIPCHILDREN )
         nFlags |= ValidateFlags::NoChildren;
     else
         nFlags |= ValidateFlags::Children;
+
     if ( (nFlags & ValidateFlags::NoChildren) && mpHierarchy->mpFirstChild )
         bValidateAll = false;
+
     if ( bValidateAll )
+    {
         ImplValidateFrameRegion( nullptr, nFlags );
+    }
     else
     {
         vcl::Region      aRegion( GetOutputRectPixel() );
@@ -535,6 +540,7 @@ void Window::ImplValidate()
             if (vcl::clipping::clipChildren(*this, aRegion))
                 nFlags |= ValidateFlags::Children;
         }
+
         if ( !aRegion.IsEmpty() )
             ImplValidateFrameRegion( &aRegion, nFlags );
     }
