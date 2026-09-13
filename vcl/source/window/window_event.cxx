@@ -1047,13 +1047,12 @@ bool Window::ImplTriggerAutoScroll(Scrollable* pHScrl, Scrollable* pVScrl)
     if (pVScrl && pVScrl->GetVisibleSize() < pVScrl->GetRangeMax() && !pVScrl->Inactive())
         nFlags |= StartAutoScrollFlags::Vert;
 
-    if (nFlags != StartAutoScrollFlags::NONE)
-    {
-        StartAutoScroll(nFlags);
-        return true;
-    }
+    if (nFlags == StartAutoScrollFlags::NONE)
+        return false;
 
-    return false;
+    StartAutoScroll(nFlags);
+
+    return true;
 }
 
 double Window::ImplCalculateWheelScrollLines(const CommandWheelData* pData)
