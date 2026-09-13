@@ -365,7 +365,7 @@ void Window::SetUpdateMode(bool bUpdate)
 {
     if (mpClassification)
     {
-        mpInvalidation->mbNoUpdate = !bUpdate;
+        mpInvalidation->suppressUpdates(!bUpdate);
         CompatStateChanged(StateChangedType::UpdateMode);
     }
 }
@@ -432,20 +432,14 @@ void Window::EnableAllResize() { mpGeometry->mbAllResize = true; }
 
 void Window::EnableChildTransparentMode(bool bEnable)
 {
-    mpInvalidation->mbChildTransparent = bEnable;
+    mpInvalidation->setChildTransparent(bEnable);
 }
 
-bool Window::IsChildTransparentModeEnabled() const
-{
-    return mpInvalidation && mpInvalidation->mbChildTransparent;
-}
+bool Window::IsChildTransparentModeEnabled() const { return mpInvalidation->isChildTransparent(); }
 
 bool Window::IsMouseTransparent() const { return mpInput && mpInput->isMouseTransparent(); }
 
-bool Window::IsPaintTransparent() const
-{
-    return mpInvalidation && mpInvalidation->mbPaintTransparent;
-}
+bool Window::IsPaintTransparent() const { return mpInvalidation->isPaintTransparent(); }
 
 void Window::SetDialogControlStart(bool bStart) { mpControlState->mbDlgCtrlStart = bStart; }
 
@@ -479,7 +473,7 @@ const Color& Window::GetControlBackground() const
 
 bool Window::HasControlBackground() const { return mpControlAppearance->hasControlBackground(); }
 
-bool Window::IsInPaint() const { return mpInvalidation && mpInvalidation->mbInPaint; }
+bool Window::IsInPaint() const { return mpInvalidation->isInPaint(); }
 
 bool Window::IsVisible() const { return mpVisibilityState && mpVisibilityState->mbVisible; }
 
@@ -500,13 +494,19 @@ bool Window::IsAlwaysEnableInput() const { return mpInput && mpInput->isAlwaysIn
 
 bool Window::IsAlwaysOnTopEnabled() const { return mpClassification->mbAlwaysOnTop; }
 
-void Window::EnablePaint(bool bEnable) { mpInvalidation->mbPaintDisabled = !bEnable; }
+void Window::EnablePaint(bool bEnable)
+{
+    if (bEnable)
+        mpInvalidation->enablePaint();
+    else
+        mpInvalidation->disablePaint();
+}
 
-bool Window::IsPaintEnabled() const { return !mpInvalidation->mbPaintDisabled; }
+bool Window::IsPaintEnabled() const { return !mpInvalidation->isPaintDisabled(); }
 
-bool Window::IsUpdateMode() const { return !mpInvalidation->mbNoUpdate; }
+bool Window::IsUpdateMode() const { return !mpInvalidation->isUpdateSuppressed(); }
 
-void Window::SetParentUpdateMode(bool bUpdate) { mpInvalidation->mbNoParentUpdate = !bUpdate; }
+void Window::SetParentUpdateMode(bool bUpdate) { mpInvalidation->suppressParentUpdates(!bUpdate); }
 
 ActivateModeFlags Window::GetActivateMode() const { return mpFocusState->getActivateMode(); }
 

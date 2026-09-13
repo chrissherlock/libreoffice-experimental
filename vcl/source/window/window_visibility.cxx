@@ -74,7 +74,7 @@ void Window::ImplInvalidateParentOnHide(vcl::Region& rInvRegion)
 {
     ImplExpandInvalidationForNativeWidget(rInvRegion);
 
-    if (!mpInvalidation->mbNoParentUpdate && !rInvRegion.IsEmpty())
+    if (!mpInvalidation->isParentUpdateSuppressed() && !rInvRegion.IsEmpty())
         ImplInvalidateParentFrameRegion(rInvRegion);
 
     ImplGenerateMouseMove();
@@ -124,11 +124,14 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
 
     if (mpHierarchy->mpBorderWindow)
     {
-        bool bOldUpdate = mpHierarchy->mpBorderWindow->mpInvalidation->mbNoParentUpdate;
-        if (mpInvalidation->mbNoParentUpdate)
-            mpHierarchy->mpBorderWindow->mpInvalidation->mbNoParentUpdate = true;
-        mpHierarchy->mpBorderWindow->Show(false, nFlags);
-        mpHierarchy->mpBorderWindow->mpInvalidation->mbNoParentUpdate = bOldUpdate;
+        vcl::Window* pBorderWin = mpHierarchy->mpBorderWindow;
+        const bool bOldUpdate = pBorderWin->mpInvalidation->isParentUpdateSuppressed();
+
+        if (mpInvalidation->isParentUpdateSuppressed())
+            pBorderWin->mpInvalidation->suppressParentUpdates(true);
+
+        pBorderWin->Show(false, nFlags);
+        pBorderWin->mpInvalidation->suppressParentUpdates(bOldUpdate);
     }
     else if (mpClassification->mbFrame)
     {
@@ -250,7 +253,7 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
     if (mpAccessibleData)
         mpAccessibleData->resumeEvents();
 
-    mpInvalidation->mbPaintFrame = true;
+    mpInvalidation->setPaintFrame(true);
 
     VclPtr<vcl::Window> xWindow(this);
 
