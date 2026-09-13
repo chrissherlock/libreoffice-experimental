@@ -34,17 +34,19 @@ namespace vcl
 {
 static VclAlign toAlign(std::u16string_view rValue)
 {
-    VclAlign eRet = VclAlign::Fill;
-
     if (rValue == u"fill")
-        eRet = VclAlign::Fill;
-    else if (rValue == u"start")
-        eRet = VclAlign::Start;
+        return VclAlign::Fill;
+
+    if (rValue == u"start")
+        return VclAlign::Start;
+
     else if (rValue == u"end")
-        eRet = VclAlign::End;
+        return VclAlign::End;
+
     else if (rValue == u"center")
-        eRet = VclAlign::Center;
-    return eRet;
+        return VclAlign::Center;
+
+    return VclAlign::Fill;
 }
 
 bool Window::set_font_attribute(const OUString& rKey, std::u16string_view rValue)
@@ -52,6 +54,7 @@ bool Window::set_font_attribute(const OUString& rKey, std::u16string_view rValue
     if (rKey == "weight")
     {
         vcl::Font aFont(GetControlFont());
+
         if (rValue == u"thin")
             aFont.SetWeight(WEIGHT_THIN);
         else if (rValue == u"ultralight")
@@ -72,17 +75,20 @@ bool Window::set_font_attribute(const OUString& rKey, std::u16string_view rValue
             aFont.SetWeight(WEIGHT_ULTRABOLD);
         else
             aFont.SetWeight(WEIGHT_BLACK);
+
         SetControlFont(aFont);
     }
     else if (rKey == "style")
     {
         vcl::Font aFont(GetControlFont());
+
         if (rValue == u"normal")
             aFont.SetItalic(ITALIC_NONE);
         else if (rValue == u"oblique")
             aFont.SetItalic(ITALIC_OBLIQUE);
         else if (rValue == u"italic")
             aFont.SetItalic(ITALIC_NORMAL);
+
         SetControlFont(aFont);
     }
     else if (rKey == "underline")
@@ -110,6 +116,7 @@ bool Window::set_font_attribute(const OUString& rKey, std::u16string_view rValue
         SAL_INFO("vcl.layout", "unhandled font attribute: " << rKey);
         return false;
     }
+
     return true;
 }
 
@@ -120,15 +127,21 @@ bool Window::set_property(const OUString& rKey, const OUString& rValue)
         SetText(BuilderUtils::convertMnemonicMarkup(rValue));
     }
     else if (rKey == "visible")
+    {
         Show(toBool(rValue));
+    }
     else if (rKey == "sensitive")
+    {
         Enable(toBool(rValue));
+    }
     else if (rKey == "resizable")
     {
         WinBits nBits = GetStyle();
         nBits &= ~WB_SIZEABLE;
+
         if (toBool(rValue))
             nBits |= WB_SIZEABLE;
+
         SetStyle(nBits);
     }
     else if (rKey == "xalign")
@@ -138,6 +151,7 @@ bool Window::set_property(const OUString& rKey, const OUString& rValue)
 
         float f = rValue.toFloat();
         assert(f == 0.0 || f == 1.0 || f == 0.5);
+
         if (f == 0.0)
             nBits |= WB_LEFT;
         else if (f == 1.0)
@@ -168,6 +182,7 @@ bool Window::set_property(const OUString& rKey, const OUString& rValue)
 
         float f = rValue.toFloat();
         assert(f == 0.0 || f == 1.0 || f == 0.5);
+
         if (f == 0.0)
             nBits |= WB_TOP;
         else if (f == 1.0)
@@ -181,28 +196,48 @@ bool Window::set_property(const OUString& rKey, const OUString& rValue)
     {
         WinBits nBits = GetStyle();
         nBits &= ~WB_WORDBREAK;
+
         if (toBool(rValue))
             nBits |= WB_WORDBREAK;
+
         SetStyle(nBits);
     }
     else if (rKey == "height-request")
+    {
         set_height_request(rValue.toInt32());
+    }
     else if (rKey == "width-request")
+    {
         set_width_request(rValue.toInt32());
+    }
     else if (rKey == "hexpand")
+    {
         set_hexpand(toBool(rValue));
+    }
     else if (rKey == "vexpand")
+    {
         set_vexpand(toBool(rValue));
+    }
     else if (rKey == "halign")
+    {
         set_halign(toAlign(rValue));
+    }
     else if (rKey == "valign")
+    {
         set_valign(toAlign(rValue));
+    }
     else if (rKey == "tooltip-markup")
+    {
         SetQuickHelpText(rValue);
+    }
     else if (rKey == "tooltip-text")
+    {
         SetQuickHelpText(rValue);
+    }
     else if (rKey == "border-width")
+    {
         set_border_width(rValue.toInt32());
+    }
     else if (rKey == "margin-start" || rKey == "margin-left")
     {
         assert(rKey == "margin-start" && "margin-left deprecated in favor of margin-start");
@@ -214,27 +249,35 @@ bool Window::set_property(const OUString& rKey, const OUString& rValue)
         set_margin_end(rValue.toInt32());
     }
     else if (rKey == "margin-top")
+    {
         set_margin_top(rValue.toInt32());
+    }
     else if (rKey == "margin-bottom")
+    {
         set_margin_bottom(rValue.toInt32());
+    }
     else if (rKey == "hscrollbar-policy")
     {
         WinBits nBits = GetStyle();
         nBits &= ~(WB_AUTOHSCROLL | WB_HSCROLL);
+
         if (rValue == "always")
             nBits |= WB_HSCROLL;
         else if (rValue == "automatic")
             nBits |= WB_AUTOHSCROLL;
+
         SetStyle(nBits);
     }
     else if (rKey == "vscrollbar-policy")
     {
         WinBits nBits = GetStyle();
         nBits &= ~(WB_AUTOVSCROLL | WB_VSCROLL);
+
         if (rValue == "always")
             nBits |= WB_VSCROLL;
         else if (rValue == "automatic")
             nBits |= WB_AUTOVSCROLL;
+
         SetStyle(nBits);
     }
     else if (rKey == "accessible-name")
@@ -248,6 +291,7 @@ bool Window::set_property(const OUString& rKey, const OUString& rValue)
     else if (rKey == "accessible-role")
     {
         sal_Int16 role = BuilderUtils::getRoleFromName(rValue);
+
         if (role != css::accessibility::AccessibleRole::UNKNOWN)
             SetAccessibleRole(role);
     }
@@ -265,10 +309,12 @@ bool Window::set_property(const OUString& rKey, const OUString& rValue)
     {
         WinBits nBits = GetStyle();
         nBits &= ~(WB_TABSTOP | WB_NOTABSTOP);
+
         if (toBool(rValue))
             nBits |= WB_TABSTOP;
         else
             nBits |= WB_NOTABSTOP;
+
         SetStyle(nBits);
     }
     else
@@ -276,6 +322,7 @@ bool Window::set_property(const OUString& rKey, const OUString& rValue)
         SAL_INFO("vcl.layout", "unhandled property: " << rKey);
         return false;
     }
+
     return true;
 }
 
