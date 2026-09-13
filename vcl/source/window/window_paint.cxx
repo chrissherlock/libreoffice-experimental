@@ -612,36 +612,41 @@ void Window::SetWindowRegionPixel()
     if ( mpHierarchy->mpBorderWindow )
     {
         mpHierarchy->mpBorderWindow->SetWindowRegionPixel();
+        return;
     }
-    else if( mpClassification->mbFrame )
+
+    if( mpClassification->mbFrame )
     {
         mpClippingState->maWinRegion = vcl::Region(true);
         mpClippingState->mbWinRegion = false;
         mpPlatformState->mpFrame->ResetClipRegion();
+        return;
     }
-    else
-    {
-        if ( mpClippingState->mbWinRegion )
-        {
-            mpClippingState->maWinRegion = vcl::Region(true);
-            mpClippingState->mbWinRegion = false;
-            vcl::clipping::setClipFlag(*this);
 
-            if ( IsReallyVisible() )
-            {
-                vcl::Region      aRegion( GetOutputRectPixel() );
-                ImplInvalidateParentFrameRegion( aRegion );
-            }
-        }
-    }
+    if (!mpClippingState->mbWinRegion)
+        return;
+
+    mpClippingState->maWinRegion = vcl::Region(true);
+    mpClippingState->mbWinRegion = false;
+    vcl::clipping::setClipFlag(*this);
+
+    if (!IsReallyVisible())
+        return;
+
+    vcl::Region      aRegion( GetOutputRectPixel() );
+    ImplInvalidateParentFrameRegion( aRegion );
 }
 
 void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
 {
 
-    if ( mpHierarchy->mpBorderWindow )
+    if (mpHierarchy->mpBorderWindow)
+    {
         mpHierarchy->mpBorderWindow->SetWindowRegionPixel( rRegion );
-    else if( mpClassification->mbFrame )
+        return;
+    }
+
+    if( mpClassification->mbFrame )
     {
         if( !rRegion.IsNull() )
         {
@@ -670,32 +675,34 @@ void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
                 SetWindowRegionPixel();
         }
         else
+        {
             SetWindowRegionPixel();
+        }
+
+        return;
+    }
+
+    if ( rRegion.IsNull() )
+    {
+        if ( mpClippingState->mbWinRegion )
+        {
+            mpClippingState->maWinRegion = vcl::Region(true);
+            mpClippingState->mbWinRegion = false;
+            vcl::clipping::setClipFlag(*this);
+        }
     }
     else
     {
-        if ( rRegion.IsNull() )
-        {
-            if ( mpClippingState->mbWinRegion )
-            {
-                mpClippingState->maWinRegion = vcl::Region(true);
-                mpClippingState->mbWinRegion = false;
-                vcl::clipping::setClipFlag(*this);
-            }
-        }
-        else
-        {
-            mpClippingState->maWinRegion = rRegion;
-            mpClippingState->mbWinRegion = true;
-            vcl::clipping::setClipFlag(*this);
-        }
-
-        if ( IsReallyVisible() )
-        {
-            vcl::Region      aRegion( GetOutputRectPixel() );
-            ImplInvalidateParentFrameRegion( aRegion );
-        }
+        mpClippingState->maWinRegion = rRegion;
+        mpClippingState->mbWinRegion = true;
+        vcl::clipping::setClipFlag(*this);
     }
+
+    if (!IsReallyVisible())
+        return;
+
+    vcl::Region      aRegion( GetOutputRectPixel() );
+    ImplInvalidateParentFrameRegion( aRegion );
 }
 
 vcl::Region Window::GetPaintRegion() const
@@ -707,20 +714,16 @@ vcl::Region Window::GetPaintRegion() const
         return convertTo<vcl::LogicRegion>(vcl::WindowRegion(aRegion)).get();
     }
 
-    vcl::Region aPaintRegion(true);
-    return aPaintRegion;
+    return vcl::Region(true);
 }
 
 void Window::Invalidate( InvalidateFlags nFlags )
 {
-    if ( !comphelper::LibreOfficeKit::isActive() && (!GetOutDev()->IsDeviceOutputNecessary() || !GetOutDev()->GetOutputWidthPixel() || !GetOutDev()->GetOutputHeightPixel()) )
+    if (!comphelper::LibreOfficeKit::isActive() && (!GetOutDev()->IsDeviceOutputNecessary() || !GetOutDev()->GetOutputWidthPixel() || !GetOutDev()->GetOutputHeightPixel()) )
         return;
 
     if (!mpClassification)
-    {
-        // ImplInvalidate() would dereference mpClassification unconditionally.
-        return;
-    }
+        return; // ImplInvalidate() would dereference mpClassification unconditionally.
 
     ImplInvalidate( nullptr, nFlags );
     LogicInvalidate(nullptr);
@@ -733,13 +736,14 @@ void Window::Invalidate( const tools::Rectangle& rRect, InvalidateFlags nFlags )
 
     OutputDevice *pOutDev = GetOutDev();
     tools::Rectangle aRect = pOutDev->GetMapper().LogicToDevicePixel(rRect, pOutDev->GetMappingPolicy());
-    if ( !aRect.IsEmpty() )
-    {
-        vcl::Region aRegion( aRect );
-        ImplInvalidate( &aRegion, nFlags );
-        tools::Rectangle aLogicRectangle(rRect);
-        LogicInvalidate(&aLogicRectangle);
-    }
+
+    if (aRect.IsEmpty())
+        return;
+
+    vcl::Region aRegion( aRect );
+    ImplInvalidate( &aRegion, nFlags );
+    tools::Rectangle aLogicRectangle(rRect);
+    LogicInvalidate(&aLogicRectangle);
 }
 
 void Window::Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags )
@@ -751,29 +755,29 @@ void Window::Invalidate( const vcl::Region& rRegion, InvalidateFlags nFlags )
     {
         ImplInvalidate( nullptr, nFlags );
         LogicInvalidate(nullptr);
+        return;
     }
-    else
-    {
-        auto aRegion = convertTo<vcl::DeviceRegion>(vcl::LogicRegion(rRegion), GetMapMode());
 
-        if (!aRegion->IsEmpty())
-        {
-            ImplInvalidate(&aRegion.get(), nFlags);
-            tools::Rectangle aLogicRectangle = rRegion.GetBoundRect();
-            LogicInvalidate(&aLogicRectangle);
-        }
-    }
+    auto aRegion = convertTo<vcl::DeviceRegion>(vcl::LogicRegion(rRegion), GetMapMode());
+
+    if (aRegion->IsEmpty())
+        return;
+
+    ImplInvalidate(&aRegion.get(), nFlags);
+    tools::Rectangle aLogicRectangle = rRegion.GetBoundRect();
+    LogicInvalidate(&aLogicRectangle);
 }
 
 void Window::LogicInvalidate(const tools::Rectangle* pRectangle)
 {
-    if(pRectangle)
+    if (pRectangle)
     {
         const auto aRect = convertTo<vcl::DeviceRect>(vcl::LogicRect(*pRectangle), GetOutDev()->GetMapMode());
         PixelInvalidate(&aRect.get());
+        return;
     }
-    else
-        PixelInvalidate(nullptr);
+
+    PixelInvalidate(nullptr);
 }
 
 bool Window::InvalidateByForeignEditView(EditView* )
@@ -842,18 +846,19 @@ bool Window::HasPaintEvent() const
     if (mpInvalidation->isPaintNeeded())
         return true;
 
-    if (!ImplIsOverlapWindow())
+    if (ImplIsOverlapWindow())
+        return false;
+
+    const vcl::Window* pTempWindow = this;
+
+    do
     {
-        const vcl::Window* pTempWindow = this;
-        do
-        {
-            pTempWindow = pTempWindow->ImplGetParent();
-            const WindowInvalidation* pInvalidation = pTempWindow->ImplGetWindowInvalidation();
-            if (pInvalidation->shouldPaintAnyChildren())
-                return true;
-        }
-        while (!pTempWindow->ImplIsOverlapWindow());
+        pTempWindow = pTempWindow->ImplGetParent();
+        const WindowInvalidation* pInvalidation = pTempWindow->ImplGetWindowInvalidation();
+        if (pInvalidation->shouldPaintAnyChildren())
+            return true;
     }
+    while (!pTempWindow->ImplIsOverlapWindow());
 
     return false;
 }
@@ -1435,6 +1440,5 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
 }
 
 } /* namespace vcl */
-
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */
