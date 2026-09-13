@@ -1528,7 +1528,7 @@ static bool lcl_HandleGestureRotateEvent(vcl::Window* pWindow, const SalGestureR
 static void lcl_HandlePaint(vcl::Window* pWindow, const tools::Rectangle& rBoundRect,
                             bool bImmediateUpdate)
 {
-    pWindow->ImplGetWindowInvalidation()->mnPaintFlags |= ImplPaintFlags::CheckRtl;
+    pWindow->ImplGetWindowInvalidation()->setCheckRtl();
 
     const vcl::Region aRegion(rBoundRect);
     pWindow->ImplInvalidateOverlapFrameRegion(aRegion);

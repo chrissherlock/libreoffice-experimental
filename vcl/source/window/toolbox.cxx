@@ -4752,13 +4752,17 @@ bool ToolBox::ImplChangeHighlightUpDn( bool bUp, bool bNoCycle )
 
 void ToolBox::ImplShowFocus()
 {
-    if( mnHighItemId && HasFocus() )
+    if (mnHighItemId && HasFocus())
     {
-        ImplToolItem* pItem = ImplGetItem( mnHighItemId );
+        ImplToolItem* pItem = ImplGetItem(mnHighItemId);
         if (pItem && pItem->mpWindow && !pItem->mpWindow->isDisposed())
         {
-            vcl::Window *pWin = pItem->mpWindow->ImplGetWindowHierarchy()->mpBorderWindow ? pItem->mpWindow->ImplGetWindowHierarchy()->mpBorderWindow.get() : pItem->mpWindow.get();
-            pWin->ImplGetWindowInvalidation()->mbDrawSelectionBackground = true;
+            WindowHierarchy* pHierarchy = pItem->mpWindow->ImplGetWindowHierarchy();
+            vcl::Window* pWin = pHierarchy->hasBorderWindow()
+                                    ? pHierarchy->getBorderWindow()
+                                    : pItem->mpWindow.get();
+
+            pWin->ImplGetWindowInvalidation()->setDrawSelectionBackground(true);
             pWin->Invalidate();
         }
     }
@@ -4772,8 +4776,12 @@ void ToolBox::ImplHideFocus()
         ImplToolItem* pItem = ImplGetItem( mnHighItemId );
         if( pItem && pItem->mpWindow )
         {
-            vcl::Window *pWin = pItem->mpWindow->ImplGetWindowHierarchy()->mpBorderWindow ? pItem->mpWindow->ImplGetWindowHierarchy()->mpBorderWindow.get() : pItem->mpWindow.get();
-            pWin->ImplGetWindowInvalidation()->mbDrawSelectionBackground = false;
+            WindowHierarchy* pHierarchy = pItem->mpWindow->ImplGetWindowHierarchy();
+            vcl::Window* pWin = pHierarchy->hasBorderWindow()
+                                    ? pHierarchy->getBorderWindow()
+                                    : pItem->mpWindow.get();
+
+            pWin->ImplGetWindowInvalidation()->setDrawSelectionBackground(false);
             pWin->Invalidate();
         }
     }
