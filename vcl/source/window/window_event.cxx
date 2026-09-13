@@ -924,14 +924,13 @@ FocusAction Window::ImplResolveFocusAction(vcl::Window* pOldRealWindow,
                                            vcl::Window* pNewRealWindow,
                                            vcl::Window* pNewOverlapWindow)
 {
-    FocusAction eFocusAction = FocusAction::Both;
-
     if (pOldRealWindow->ImplIsActivatable())
-        eFocusAction = ImplCheckNonActivatableNewWindow(pNewRealWindow, pOldOverlapWindow);
-    else if (pNewRealWindow->ImplIsActivatable())
-        eFocusAction = ImplResolveLastDeactivatedWindow(pNewOverlapWindow);
+        return ImplCheckNonActivatableNewWindow(pNewRealWindow, pOldOverlapWindow);
 
-    return eFocusAction;
+    if (pNewRealWindow->ImplIsActivatable())
+        return ImplResolveLastDeactivatedWindow(pNewOverlapWindow);
+
+    return FocusAction::Both;
 }
 
 void Window::ImplDeactivateOldWindows(FocusAction eFocusAction, vcl::Window* pOldOverlapWindow,
