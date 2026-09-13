@@ -331,22 +331,76 @@ template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicPolyPolygon, vcl
 };
 
 // Regions
-template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::DeviceRegion, vcl::LogicRegion>
+// Device <-> Window
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::DeviceRegion, vcl::WindowRegion>
 {
-    static vcl::DeviceRegion cast(const OutputDevice& rDev, const vcl::LogicRegion& rSrc,
-                                  const MapMode* pMapOverride = nullptr);
+    static vcl::DeviceRegion cast(const OutputDevice& rDev, const vcl::WindowRegion& rSrc,
+                                  const MapMode* = nullptr);
+};
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRegion, vcl::DeviceRegion>
+{
+    static vcl::WindowRegion cast(const OutputDevice& rDev, const vcl::DeviceRegion& rSrc,
+                                  const MapMode* = nullptr);
 };
 
+// View <-> Window
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::ViewRegion, vcl::WindowRegion>
+{
+    static vcl::ViewRegion cast(const OutputDevice& rDev, const vcl::WindowRegion& rSrc,
+                                const MapMode* = nullptr);
+};
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRegion, vcl::ViewRegion>
+{
+    static vcl::WindowRegion cast(const OutputDevice& rDev, const vcl::ViewRegion& rSrc,
+                                  const MapMode* = nullptr);
+};
+
+// Device <-> View
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::DeviceRegion, vcl::ViewRegion>
+{
+    static vcl::DeviceRegion cast(const OutputDevice& rDev, const vcl::ViewRegion& rSrc,
+                                  const MapMode* = nullptr);
+};
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::ViewRegion, vcl::DeviceRegion>
+{
+    static vcl::ViewRegion cast(const OutputDevice& rDev, const vcl::DeviceRegion& rSrc,
+                                const MapMode* = nullptr);
+};
+
+// Logic <-> Window
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>
+{
+    static vcl::LogicRegion cast(const OutputDevice& rDev, const vcl::WindowRegion& rSrc,
+                                 const MapMode* pMapOverride = nullptr);
+};
 template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::WindowRegion, vcl::LogicRegion>
 {
     static vcl::WindowRegion cast(const OutputDevice& rDev, const vcl::LogicRegion& rSrc,
                                   const MapMode* pMapOverride = nullptr);
 };
 
-template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRegion, vcl::WindowRegion>
+// Logic <-> Device
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRegion, vcl::DeviceRegion>
 {
-    static vcl::LogicRegion cast(const OutputDevice& rDev, const vcl::WindowRegion& rSrc,
+    static vcl::LogicRegion cast(const OutputDevice& rDev, const vcl::DeviceRegion& rSrc,
                                  const MapMode* pMapOverride = nullptr);
+};
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::DeviceRegion, vcl::LogicRegion>
+{
+    static vcl::DeviceRegion cast(const OutputDevice& rDev, const vcl::LogicRegion& rSrc,
+                                  const MapMode* pMapOverride = nullptr);
+};
+
+// Logic <-> View
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::LogicRegion, vcl::ViewRegion>
+{
+    static vcl::LogicRegion cast(const OutputDevice& rDev, const vcl::ViewRegion& rSrc,
+                                 const MapMode* pMapOverride = nullptr);
+};
+template <> struct VCL_DLLPUBLIC CoordinateCastTraits<vcl::ViewRegion, vcl::LogicRegion>
+{
+    static vcl::ViewRegion cast(const OutputDevice& rDev, const vcl::LogicRegion& rSrc,
+                                const MapMode* pMapOverride = nullptr);
 };
 
 // Basegfx Points (Logic <-> Device)

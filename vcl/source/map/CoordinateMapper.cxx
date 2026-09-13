@@ -149,16 +149,72 @@ Size CoordinateMapper::LogicToViewDistance(const Size& rLogicSize, vcl::MappingP
                 vcl::detail::RoundToLong(rLogicSize.Height() * sy));
 }
 
+// --- View <-> Device (Uses DeviceToView offset) ---
 vcl::Region CoordinateMapper::ViewToDevice(const vcl::Region& rRegion) const
 {
     tools::Long nDeltaX = GetDeviceToViewOffsetX();
     tools::Long nDeltaY = GetDeviceToViewOffsetY();
-
     if (nDeltaX == 0 && nDeltaY == 0)
         return rRegion;
-
     vcl::Region aRegion(rRegion);
     aRegion.Move(nDeltaX, nDeltaY);
+    return aRegion;
+}
+
+vcl::Region CoordinateMapper::DeviceToView(const vcl::Region& rRegion) const
+{
+    tools::Long nDeltaX = GetDeviceToViewOffsetX();
+    tools::Long nDeltaY = GetDeviceToViewOffsetY();
+    if (nDeltaX == 0 && nDeltaY == 0)
+        return rRegion;
+    vcl::Region aRegion(rRegion);
+    aRegion.Move(-nDeltaX, -nDeltaY);
+    return aRegion;
+}
+
+// --- Window <-> Device (Uses DeviceToWindow offset) ---
+vcl::Region CoordinateMapper::WindowToDevice(const vcl::Region& rRegion) const
+{
+    tools::Long nDeltaX = GetDeviceToWindowOffsetX();
+    tools::Long nDeltaY = GetDeviceToWindowOffsetY();
+    if (nDeltaX == 0 && nDeltaY == 0)
+        return rRegion;
+    vcl::Region aRegion(rRegion);
+    aRegion.Move(nDeltaX, nDeltaY);
+    return aRegion;
+}
+
+vcl::Region CoordinateMapper::DeviceToWindow(const vcl::Region& rRegion) const
+{
+    tools::Long nDeltaX = GetDeviceToWindowOffsetX();
+    tools::Long nDeltaY = GetDeviceToWindowOffsetY();
+    if (nDeltaX == 0 && nDeltaY == 0)
+        return rRegion;
+    vcl::Region aRegion(rRegion);
+    aRegion.Move(-nDeltaX, -nDeltaY);
+    return aRegion;
+}
+
+// --- View <-> Window (Uses WindowToView offset) ---
+vcl::Region CoordinateMapper::ViewToWindow(const vcl::Region& rRegion) const
+{
+    tools::Long nDeltaX = GetWindowToViewOffsetX();
+    tools::Long nDeltaY = GetWindowToViewOffsetY();
+    if (nDeltaX == 0 && nDeltaY == 0)
+        return rRegion;
+    vcl::Region aRegion(rRegion);
+    aRegion.Move(nDeltaX, nDeltaY);
+    return aRegion;
+}
+
+vcl::Region CoordinateMapper::WindowToView(const vcl::Region& rRegion) const
+{
+    tools::Long nDeltaX = GetWindowToViewOffsetX();
+    tools::Long nDeltaY = GetWindowToViewOffsetY();
+    if (nDeltaX == 0 && nDeltaY == 0)
+        return rRegion;
+    vcl::Region aRegion(rRegion);
+    aRegion.Move(-nDeltaX, -nDeltaY);
     return aRegion;
 }
 
