@@ -372,24 +372,21 @@ static vcl::Region lcl_CalculateBaseInvalidateRegion(vcl::Window& rWindow, const
 static std::tuple<vcl::Region, InvalidateFlags> lcl_ClipInvalidateRegion(
     vcl::Window& rWindow,
     const vcl::Region* pRegion,
-    InvalidateFlags nEffectiveFlags,
-    InvalidateFlags nFlags)
+    InvalidateFlags nFlags,
+    bool bExplicitNoChildren)
 {
     vcl::Region aRegion = lcl_CalculateBaseInvalidateRegion(rWindow, pRegion);
 
     if (nFlags & InvalidateFlags::NoChildren)
     {
         nFlags &= ~InvalidateFlags::Children;
+
         if (!(nFlags & InvalidateFlags::NoClipChildren))
         {
-            if (nEffectiveFlags & InvalidateFlags::NoChildren)
-            {
+            if (bExplicitNoChildren)
                 vcl::clipping::clipAllChildren(rWindow, aRegion);
-            }
             else if (vcl::clipping::clipChildren(rWindow, aRegion))
-            {
                 nFlags |= InvalidateFlags::Children;
-            }
         }
     }
 
@@ -398,7 +395,6 @@ static std::tuple<vcl::Region, InvalidateFlags> lcl_ClipInvalidateRegion(
 
 void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags )
 {
-    // check what has to be redrawn
     bool bInvalidateAll = !pRegion;
 
     // take Transparent-Invalidate into account
@@ -409,32 +405,29 @@ void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags 
         bInvalidateAll = false;
     }
 
-    // assemble region
-    InvalidateFlags nEffectiveFlags = nFlags;
-    if ( !(nFlags & (InvalidateFlags::Children | InvalidateFlags::NoChildren)) )
-    {
-        if ( GetStyle() & WB_CLIPCHILDREN )
-            nEffectiveFlags |= InvalidateFlags::NoChildren;
-        else
-            nEffectiveFlags |= InvalidateFlags::Children;
-    }
+    // Capture caller's explicit intent before we apply window styles
+    const bool bExplicitNoChildren = bool(nFlags & InvalidateFlags::NoChildren);
 
-    if ( (nEffectiveFlags & InvalidateFlags::NoChildren) && mpHierarchy->hasChildren() )
+    // apply implicit flags if neither was specified
+    if (!(nFlags & (InvalidateFlags::Children | InvalidateFlags::NoChildren)))
+        nFlags |= (GetStyle() & WB_CLIPCHILDREN) ? InvalidateFlags::NoChildren : InvalidateFlags::Children;
+
+    if ((nFlags & InvalidateFlags::NoChildren) && mpHierarchy->hasChildren())
         bInvalidateAll = false;
 
-    if ( bInvalidateAll )
+    if (bInvalidateAll)
     {
-        ImplInvalidateFrameRegion( nullptr, nEffectiveFlags );
+        ImplInvalidateFrameRegion(nullptr, nFlags);
     }
     else
     {
-        auto [aRegion, nAdjustedFlags] = lcl_ClipInvalidateRegion(*this, pRegion, nFlags, nEffectiveFlags);
+        auto [aRegion, nAdjustedFlags] = lcl_ClipInvalidateRegion(*this, pRegion, nFlags, bExplicitNoChildren);
 
-        if ( !aRegion.IsEmpty() )
-            ImplInvalidateFrameRegion( &aRegion, nAdjustedFlags ); // transparency is handled here, pOpaqueWindow not required
+        if (!aRegion.IsEmpty())
+            ImplInvalidateFrameRegion(&aRegion, nAdjustedFlags); // transparency is handled here, pOpaqueWindow not required
     }
 
-    if ( nFlags & InvalidateFlags::Update )
+    if (nFlags & InvalidateFlags::Update)
         pOpaqueWindow->PaintImmediately();        // start painting at the opaque parent
 }
 
@@ -444,14 +437,14 @@ void Window::ImplMoveInvalidateRegion( const tools::Rectangle& rRect,
 {
     mpInvalidation->moveInvalidateRegion( rRect, nHorzScroll, nVertScroll );
 
-    if ( bChildren && mpInvalidation->shouldPaintChildren() )
+    if (!bChildren || !mpInvalidation->shouldPaintChildren())
+        return;
+
+    vcl::Window* pWindow = mpHierarchy->getFirstChild();
+    while ( pWindow )
     {
-        vcl::Window* pWindow = mpHierarchy->getFirstChild();
-        while ( pWindow )
-        {
-            pWindow->ImplMoveInvalidateRegion( rRect, nHorzScroll, nVertScroll, true );
-            pWindow = pWindow->ImplGetWindowHierarchy()->getNextSibling();
-        }
+        pWindow->ImplMoveInvalidateRegion( rRect, nHorzScroll, nVertScroll, true );
+        pWindow = pWindow->ImplGetWindowHierarchy()->getNextSibling();
     }
 }
 
