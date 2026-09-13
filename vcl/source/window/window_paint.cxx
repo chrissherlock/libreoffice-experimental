@@ -224,55 +224,67 @@ IMPL_LINK_NOARG(Window, ImplHandleResizeTimerHdl, Timer *, void)
     }
 }
 
+static void lcl_PropagatePaintChildrenToOverlap(vcl::Window& rWindow)
+{
+    if (rWindow.ImplIsOverlapWindow())
+        return;
+
+    vcl::Window* pTempWindow = &rWindow;
+    ImplPaintFlags nTranspPaint = rWindow.IsPaintTransparent() ? ImplPaintFlags::Paint : ImplPaintFlags::NONE;
+
+    do
+    {
+        pTempWindow = pTempWindow->ImplGetParent();
+        WindowInvalidation* pInvalidation = pTempWindow->ImplGetWindowInvalidation();
+        if (pInvalidation->shouldPaintChildren())
+            break;
+
+        pInvalidation->addPaintFlags(ImplPaintFlags::PaintChildren | nTranspPaint);
+        if (!pTempWindow->IsPaintTransparent())
+            nTranspPaint = ImplPaintFlags::NONE;
+    }
+    while (!pTempWindow->ImplIsOverlapWindow());
+}
+
+static void lcl_InvalidateOpaqueParent(vcl::Window& rWindow,
+                                      const WindowInvalidation& rInvalidation,
+                                      InvalidateFlags nFlags)
+{
+    const bool bNeedsTransparent = (rWindow.IsPaintTransparent() && !(nFlags & InvalidateFlags::NoTransparent))
+                                || (nFlags & InvalidateFlags::Transparent);
+
+    if (!bNeedsTransparent || !rWindow.ImplGetParent())
+        return;
+
+    vcl::Window* pParent = rWindow.ImplGetParent();
+    while (pParent && pParent->IsPaintTransparent())
+    {
+        pParent = pParent->ImplGetParent();
+    }
+
+    if (!pParent)
+        return;
+
+    const vcl::Region* pChildRegion = rInvalidation.shouldPaintAll()
+        ? &rWindow.ImplGetClippingState()->getWinChildClipRegion(rWindow)
+        : &rInvalidation.getInvalidateRegion();
+
+    nFlags |= InvalidateFlags::Children; // paint should also be done on all children
+    nFlags &= ~InvalidateFlags::NoErase; // parent should paint and erase to create proper background
+
+    pParent->ImplInvalidateFrameRegion(pChildRegion, nFlags);
+}
+
 void Window::ImplInvalidateFrameRegion( const vcl::Region* pRegion, InvalidateFlags nFlags )
 {
     // set PAINTCHILDREN for all parent windows till the first OverlapWindow
-    if (!ImplIsOverlapWindow())
-    {
-        vcl::Window* pTempWindow = this;
-        ImplPaintFlags nTranspPaint = IsPaintTransparent() ? ImplPaintFlags::Paint : ImplPaintFlags::NONE;
-        do
-        {
-            pTempWindow = pTempWindow->ImplGetParent();
-            WindowInvalidation* pInvalidation = pTempWindow->ImplGetWindowInvalidation();
-            if (pInvalidation->shouldPaintChildren())
-                break;
-
-            pInvalidation->addPaintFlags(ImplPaintFlags::PaintChildren | nTranspPaint);
-            if (!pTempWindow->IsPaintTransparent())
-                nTranspPaint = ImplPaintFlags::NONE;
-        }
-        while (!pTempWindow->ImplIsOverlapWindow());
-    }
+    lcl_PropagatePaintChildrenToOverlap(*this);
 
     // set Paint-Flags and update invalidate region
     mpInvalidation->invalidate(pRegion, nFlags);
 
-    // Handle transparent windows correctly: invalidate must be done on the first opaque parent
-    if (((IsPaintTransparent() && !(nFlags & InvalidateFlags::NoTransparent)) || (nFlags & InvalidateFlags::Transparent))
-        && ImplGetParent())
-    {
-        vcl::Window* pParent = ImplGetParent();
-        while (pParent && pParent->IsPaintTransparent())
-        {
-            pParent = pParent->ImplGetParent();
-        }
-
-        if (pParent)
-        {
-            const vcl::Region* pChildRegion;
-            if (mpInvalidation->shouldPaintAll())
-                // invalidate the whole child window region in the parent
-                pChildRegion = &ImplGetClippingState()->getWinChildClipRegion(*this);
-            else
-                // invalidate the same region in the parent that has to be repainted in the child
-                pChildRegion = &mpInvalidation->getInvalidateRegion();
-
-            nFlags |= InvalidateFlags::Children;  // paint should also be done on all children
-            nFlags &= ~InvalidateFlags::NoErase;  // parent should paint and erase to create proper background
-            pParent->ImplInvalidateFrameRegion(pChildRegion, nFlags);
-        }
-    }
+    // Invalidate transparent regions on the first opaque parent
+    lcl_InvalidateOpaqueParent(*this, *mpInvalidation, nFlags);
 
     if (!mpPlatformState->mpFrameData->maPaintIdle.IsActive())
         mpPlatformState->mpFrameData->maPaintIdle.Start();
