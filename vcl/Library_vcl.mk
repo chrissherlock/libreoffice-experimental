@@ -242,6 +242,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/WindowClippingState \
     vcl/source/window/WindowOutputDevice \
     vcl/source/window/WindowClassification \
+    vcl/source/window/WindowEventHandlers \
     vcl/source/window/PaintBufferGuard \
     vcl/source/window/PaintHelper \
     vcl/source/window/WindowVisibilityState \
