@@ -53,6 +53,49 @@
 namespace vcl
 {
 
+static tools::Rectangle lcl_SetupPaintRegion(PaintHelper& rHelper,
+                                             WindowInvalidation& rInvalidation,
+                                             OutputDevice& rOutDev,
+                                             vcl::RenderContext& rRenderContext)
+{
+    rOutDev.GetClipState().Invalidate();
+    rInvalidation.setInPaint(true);
+
+    vcl::Region& rPaintRegion = rHelper.GetPaintRegion();
+    rPaintRegion = rInvalidation.getInvalidateRegion();
+    tools::Rectangle aPaintDeviceRect = rPaintRegion.GetBoundRect();
+
+    if (rOutDev.ImplIsAntiparallel())
+    {
+        rRenderContext.ReMirror(aPaintDeviceRect);
+        rRenderContext.ReMirror(rPaintRegion);
+    }
+
+    rInvalidation.setPaintRegion(&rPaintRegion);
+    rInvalidation.clearInvalidateRegion();
+
+    return rOutDev.convertTo<vcl::LogicRect>(vcl::DeviceRect(aPaintDeviceRect)).get();
+}
+
+static void lcl_EraseBackground(vcl::Window& rWindow,
+                                const PaintHelper& rHelper,
+                                vcl::RenderContext& rRenderContext)
+{
+    if (!(rHelper.GetPaintFlags() & ImplPaintFlags::Erase) || !rRenderContext.HasBackground())
+        return;
+
+    if (!rRenderContext.IsClipRegion())
+    {
+        rWindow.Erase(rRenderContext);
+        return;
+    }
+
+    const vcl::Region aOldRegion = rRenderContext.GetClipRegion();
+    rRenderContext.SetClipRegion();
+    rWindow.Erase(rRenderContext);
+    rRenderContext.SetClipRegion(aOldRegion);
+}
+
 void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderContext)
 {
     pHelper->SetPop();
@@ -60,42 +103,16 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
     if (mpControlAppearance->getCursor())
         pHelper->SetRestoreCursor(mpControlAppearance->suspendCursor());
 
-    GetOutDev()->GetClipState().Invalidate();
-    mpInvalidation->setInPaint(true);
+    const tools::Rectangle aPaintRect = lcl_SetupPaintRegion(
+        *pHelper, *mpInvalidation, *GetOutDev(), rRenderContext);
 
-    // restore Paint-Region
-    vcl::Region &rPaintRegion = pHelper->GetPaintRegion();
-    rPaintRegion = mpInvalidation->getInvalidateRegion();
-    tools::Rectangle aPaintDeviceRect = rPaintRegion.GetBoundRect();
-
-    // RTL: re-mirror paint rect and region at this window
-    if (GetOutDev()->ImplIsAntiparallel())
-    {
-        rRenderContext.ReMirror(aPaintDeviceRect);
-        rRenderContext.ReMirror(rPaintRegion);
-    }
-
-    auto aPaintRect = convertTo<vcl::LogicRect>(vcl::DeviceRect(aPaintDeviceRect));
-    mpInvalidation->setPaintRegion(&rPaintRegion);
-    mpInvalidation->clearInvalidateRegion();
-
-    if ((pHelper->GetPaintFlags() & ImplPaintFlags::Erase) && rRenderContext.HasBackground())
-    {
-        if (rRenderContext.IsClipRegion())
-        {
-            vcl::Region aOldRegion = rRenderContext.GetClipRegion();
-            rRenderContext.SetClipRegion();
-            Erase(rRenderContext);
-            rRenderContext.SetClipRegion(aOldRegion);
-        }
-        else
-            Erase(rRenderContext);
-    }
+    lcl_EraseBackground(*this, *pHelper, rRenderContext);
 
     // #98943# trigger drawing of toolbox selection after all children are painted
     if (mpInvalidation->isDrawSelectionBackground())
-        pHelper->SetSelectionRect(aPaintRect.get());
-    pHelper->SetPaintRect(aPaintRect.get());
+        pHelper->SetSelectionRect(aPaintRect);
+
+    pHelper->SetPaintRect(aPaintRect);
 }
 
 void Window::PopPaintHelper(PaintHelper const *pHelper)
