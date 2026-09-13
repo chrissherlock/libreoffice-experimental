@@ -402,7 +402,7 @@ class WindowInput;
 struct WindowLOKData;
 struct WindowHierarchy;
 struct WindowHelpData;
-struct WindowEventHandlers;
+class WindowEventHandlers;
 struct WindowLayoutData;
 class WindowA11y;
 class WindowControlAppearance;
