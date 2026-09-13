@@ -21,4 +21,28 @@ WindowInvalidation::WindowInvalidation()
 
 WindowInvalidation::~WindowInvalidation() = default;
 
+ImplPaintFlags WindowInvalidation::accumulatePaintFlags(ImplPaintFlags nIncomingFlags,
+                                                        bool bHasChildren)
+{
+    mbPaintFrame = false;
+
+    if (nIncomingFlags & ImplPaintFlags::PaintAllChildren)
+        mnPaintFlags |= ImplPaintFlags::Paint | ImplPaintFlags::PaintAllChildren
+                        | (nIncomingFlags & ImplPaintFlags::PaintAll);
+
+    if (nIncomingFlags & ImplPaintFlags::PaintChildren)
+        mnPaintFlags |= ImplPaintFlags::PaintChildren;
+
+    if (nIncomingFlags & ImplPaintFlags::Erase)
+        mnPaintFlags |= ImplPaintFlags::Erase;
+
+    if (nIncomingFlags & ImplPaintFlags::CheckRtl)
+        mnPaintFlags |= ImplPaintFlags::CheckRtl;
+
+    if (!bHasChildren)
+        mnPaintFlags &= ~ImplPaintFlags::PaintAllChildren;
+
+    return mnPaintFlags & ~ImplPaintFlags::Paint;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
