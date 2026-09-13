@@ -369,6 +369,33 @@ static vcl::Region lcl_CalculateBaseInvalidateRegion(vcl::Window& rWindow, const
     return aRegion;
 }
 
+static std::tuple<vcl::Region, InvalidateFlags> lcl_ClipInvalidateRegion(
+    vcl::Window& rWindow,
+    const vcl::Region* pRegion,
+    InvalidateFlags nEffectiveFlags,
+    InvalidateFlags nFlags)
+{
+    vcl::Region aRegion = lcl_CalculateBaseInvalidateRegion(rWindow, pRegion);
+
+    if (nFlags & InvalidateFlags::NoChildren)
+    {
+        nFlags &= ~InvalidateFlags::Children;
+        if (!(nFlags & InvalidateFlags::NoClipChildren))
+        {
+            if (nEffectiveFlags & InvalidateFlags::NoChildren)
+            {
+                vcl::clipping::clipAllChildren(rWindow, aRegion);
+            }
+            else if (vcl::clipping::clipChildren(rWindow, aRegion))
+            {
+                nFlags |= InvalidateFlags::Children;
+            }
+        }
+    }
+
+    return { aRegion, nFlags };
+}
+
 void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags )
 {
     // check what has to be redrawn
@@ -383,44 +410,28 @@ void Window::ImplInvalidate( const vcl::Region* pRegion, InvalidateFlags nFlags 
     }
 
     // assemble region
-    const InvalidateFlags nOrgFlags = nFlags;
+    InvalidateFlags nEffectiveFlags = nFlags;
     if ( !(nFlags & (InvalidateFlags::Children | InvalidateFlags::NoChildren)) )
     {
         if ( GetStyle() & WB_CLIPCHILDREN )
-            nFlags |= InvalidateFlags::NoChildren;
+            nEffectiveFlags |= InvalidateFlags::NoChildren;
         else
-            nFlags |= InvalidateFlags::Children;
+            nEffectiveFlags |= InvalidateFlags::Children;
     }
 
-    if ( (nFlags & InvalidateFlags::NoChildren) && mpHierarchy->hasChildren() )
+    if ( (nEffectiveFlags & InvalidateFlags::NoChildren) && mpHierarchy->hasChildren() )
         bInvalidateAll = false;
 
     if ( bInvalidateAll )
     {
-        ImplInvalidateFrameRegion( nullptr, nFlags );
+        ImplInvalidateFrameRegion( nullptr, nEffectiveFlags );
     }
     else
     {
-        vcl::Region aRegion = lcl_CalculateBaseInvalidateRegion(*this, pRegion);
-
-        if ( nFlags & InvalidateFlags::NoChildren )
-        {
-            nFlags &= ~InvalidateFlags::Children;
-            if ( !(nFlags & InvalidateFlags::NoClipChildren) )
-            {
-                if ( nOrgFlags & InvalidateFlags::NoChildren )
-                {
-                    vcl::clipping::clipAllChildren(*this, aRegion);
-                }
-                else if (vcl::clipping::clipChildren(*this, aRegion))
-                {
-                    nFlags |= InvalidateFlags::Children;
-                }
-            }
-        }
+        auto [aRegion, nAdjustedFlags] = lcl_ClipInvalidateRegion(*this, pRegion, nFlags, nEffectiveFlags);
 
         if ( !aRegion.IsEmpty() )
-            ImplInvalidateFrameRegion( &aRegion, nFlags );  // transparency is handled here, pOpaqueWindow not required
+            ImplInvalidateFrameRegion( &aRegion, nAdjustedFlags ); // transparency is handled here, pOpaqueWindow not required
     }
 
     if ( nFlags & InvalidateFlags::Update )
@@ -1266,7 +1277,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     if (mpControlAppearance->getCursor())
         mpControlAppearance->suspendCursor();
 
-    ScrollFlags nOrgFlags = nFlags;
+    ScrollFlags nEffectiveFlags = nFlags;
     if ( !(nFlags & (ScrollFlags::Children | ScrollFlags::NoChildren)) )
     {
         if ( GetStyle() & WB_CLIPCHILDREN )
@@ -1331,7 +1342,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
     vcl::clipping::clipBoundaries(*this, aRegion, false, true);
     if ( !bScrollChildren )
     {
-        if ( nOrgFlags & ScrollFlags::NoChildren )
+        if ( nEffectiveFlags & ScrollFlags::NoChildren )
             vcl::clipping::clipAllChildren(*this, aRegion);
         else
             vcl::clipping::clipChildren(*this, aRegion);
@@ -1395,7 +1406,7 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
 
         if ( !bScrollChildren )
         {
-            if ( nOrgFlags & ScrollFlags::NoChildren )
+            if ( nEffectiveFlags & ScrollFlags::NoChildren )
                 vcl::clipping::clipAllChildren(*this, aInvalidateRegion);
             else
                 vcl::clipping::clipChildren(*this, aInvalidateRegion);
