@@ -61,11 +61,11 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
         pHelper->SetRestoreCursor(mpControlAppearance->suspendCursor());
 
     GetOutDev()->GetClipState().Invalidate();
-    mpInvalidation->mbInPaint = true;
+    mpInvalidation->setInPaint(true);
 
     // restore Paint-Region
     vcl::Region &rPaintRegion = pHelper->GetPaintRegion();
-    rPaintRegion = mpInvalidation->maInvalidateRegion;
+    rPaintRegion = mpInvalidation->getInvalidateRegion();
     tools::Rectangle aPaintDeviceRect = rPaintRegion.GetBoundRect();
 
     // RTL: re-mirror paint rect and region at this window
@@ -76,8 +76,8 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
     }
 
     auto aPaintRect = convertTo<vcl::LogicRect>(vcl::DeviceRect(aPaintDeviceRect));
-    mpInvalidation->mpPaintRegion = &rPaintRegion;
-    mpInvalidation->maInvalidateRegion.SetEmpty();
+    mpInvalidation->setPaintRegion(&rPaintRegion);
+    mpInvalidation->clearInvalidateRegion();
 
     if ((pHelper->GetPaintFlags() & ImplPaintFlags::Erase) && rRenderContext.HasBackground())
     {
@@ -93,7 +93,7 @@ void Window::PushPaintHelper(PaintHelper *pHelper, vcl::RenderContext& rRenderCo
     }
 
     // #98943# trigger drawing of toolbox selection after all children are painted
-    if (mpInvalidation->mbDrawSelectionBackground)
+    if (mpInvalidation->isDrawSelectionBackground())
         pHelper->SetSelectionRect(aPaintRect.get());
     pHelper->SetPaintRect(aPaintRect.get());
 }
@@ -103,9 +103,9 @@ void Window::PopPaintHelper(PaintHelper const *pHelper)
     if (mpWinData && mpFocusState->isFocusVisible())
         ImplInvertFocus(*mpWinData->mpFocusRect);
 
-    mpInvalidation->mbInPaint = false;
+    mpInvalidation->setInPaint(false);
     GetOutDev()->GetClipState().Invalidate();
-    mpInvalidation->mpPaintRegion = nullptr;
+    mpInvalidation->resetPaintRegion();
 
     if (mpControlAppearance->getCursor())
         mpControlAppearance->resumeCursor(pHelper->GetRestoreCursor());

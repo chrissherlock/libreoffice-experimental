@@ -222,7 +222,7 @@ void Window::ImplShowFocusRect(const tools::Rectangle& rRect)
 
     ImplWinData* pWinData = ImplGetWinData();
 
-    if (!mpInvalidation->mbInPaint)
+    if (!mpInvalidation->isInPaint())
     {
         if (mpFocusState->isFocusVisible())
             ImplInvertFocus(*pWinData->mpFocusRect);
@@ -241,7 +241,7 @@ void Window::ImplShowNativeFocus()
 
     mpFocusState->makeNativeFocusVisible();
 
-    if (!mpInvalidation->mbInPaint)
+    if (!mpInvalidation->isInPaint())
         Invalidate();
 }
 
@@ -261,7 +261,7 @@ void Window::HideFocus()
             return;
         }
 
-        if (!mpInvalidation->mbInPaint)
+        if (!mpInvalidation->isInPaint())
             ImplInvertFocus(*ImplGetWinData()->mpFocusRect);
 
         mpFocusState->hideFocusVisible();
@@ -271,7 +271,7 @@ void Window::HideFocus()
         if (mpFocusState->isNativeFocusVisible())
         {
             mpFocusState->hideNativeFocusVisible();
-            if (!mpInvalidation->mbInPaint)
+            if (!mpInvalidation->isInPaint())
                 Invalidate();
         }
     }
@@ -283,7 +283,7 @@ void Window::ShowTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags)
 {
     ImplWinData* pWinData = ImplGetWinData();
 
-    if (!mpInvalidation->mbInPaint || !(nFlags & ShowTrackFlags::TrackWindow))
+    if (!mpInvalidation->isInPaint() || !(nFlags & ShowTrackFlags::TrackWindow))
     {
         if (mpClassification->mbTrackVisible)
         {
@@ -308,7 +308,7 @@ void Window::HideTracking()
 
     ImplWinData* pWinData = ImplGetWinData();
 
-    if (!mpInvalidation->mbInPaint || !(pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
+    if (!mpInvalidation->isInPaint() || !(pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
         InvertTracking(*pWinData->mpTrackRect, pWinData->mnTrackFlags);
 
     mpClassification->mbTrackVisible = false;

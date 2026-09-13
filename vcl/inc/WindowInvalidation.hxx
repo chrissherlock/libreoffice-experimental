@@ -52,6 +52,49 @@ struct WindowInvalidation
 
     WindowInvalidation();
     ~WindowInvalidation();
+
+    bool isUpdateSuppressed() const { return mbNoUpdate; }
+    void suppressUpdates(bool bSuppress = true) { mbNoUpdate = bSuppress; }
+
+    bool isChildTransparent() const { return mbChildTransparent; }
+    void setChildTransparent(bool bEnable = true) { mbChildTransparent = bEnable; }
+
+    bool isPaintTransparent() const { return mbPaintTransparent; }
+    void makePaintTransparent() { mbPaintTransparent = true; }
+    void makePaintOpaque() { mbPaintTransparent = false; }
+
+    bool isInPaint() const { return mbInPaint; }
+    void setInPaint(bool bInPaint) { mbInPaint = bInPaint; }
+
+    bool isPaintFrame() const { return mbPaintFrame; }
+    void setPaintFrame(bool bPaint = true) { mbPaintFrame = bPaint; }
+
+    bool isPaintDisabled() const { return mbPaintDisabled; }
+    void enablePaint() { mbPaintDisabled = false; }
+    void disablePaint() { mbPaintDisabled = true; }
+
+    bool isParentUpdateSuppressed() const { return mbNoParentUpdate; }
+    void suppressParentUpdates(bool bSuppress = true) { mbNoParentUpdate = bSuppress; }
+
+    bool isDoubleBufferingRequested() const { return mbDoubleBufferingRequested; }
+    void requestDoubleBuffering(bool bRequest = true) { mbDoubleBufferingRequested = bRequest; }
+
+    bool hasPaintRegion() const { return mpPaintRegion != nullptr; }
+    vcl::Region* getPaintRegion() { return mpPaintRegion; }
+    const vcl::Region* getPaintRegion() const { return mpPaintRegion; }
+    void setPaintRegion(vcl::Region* pRegion) { mpPaintRegion = pRegion; }
+    void resetPaintRegion() { mpPaintRegion = nullptr; }
+
+    void expandPaintRegion(const vcl::Region& rRegion)
+    {
+        if (mpPaintRegion)
+            mpPaintRegion->Union(rRegion);
+    }
+
+    bool isDrawSelectionBackground() const { return mbDrawSelectionBackground; }
+
+    const vcl::Region& getInvalidateRegion() const { return maInvalidateRegion; }
+    void clearInvalidateRegion() { maInvalidateRegion.SetEmpty(); }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

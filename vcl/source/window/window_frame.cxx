@@ -297,7 +297,7 @@ void Window::ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInit
     mpHierarchy->mpOverlapWindow = this;
 
     auto shouldDoubleBuffer = [nStyle, this]() {
-        return !(nStyle & WB_DEFAULTWIN) && mpInvalidation->mbDoubleBufferingRequested;
+        return !(nStyle & WB_DEFAULTWIN) && mpInvalidation->isDoubleBufferingRequested();
     };
 
     if (shouldDoubleBuffer())

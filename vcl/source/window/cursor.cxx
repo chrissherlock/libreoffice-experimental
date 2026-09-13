@@ -242,7 +242,7 @@ void vcl::Cursor::ImplDoShow( bool bDrawDirect, bool bRestore )
         // has been selected in this window
         pWindow = Application::GetFocusWindow();
         if (!pWindow || !pWindow->mpClassification || pWindow->mpControlAppearance->getCursor() != this
-            || pWindow->mpInvalidation->mbInPaint
+            || pWindow->mpInvalidation->isInPaint()
             || !pWindow->mpPlatformState->mpFrameData->mbHasFocus)
             pWindow = nullptr;
     }

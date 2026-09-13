@@ -44,7 +44,7 @@ ParentClipMode Window::GetParentClipMode() const
 
 void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
 {
-    if (!mpInvalidation->mpPaintRegion)
+    if (!mpInvalidation->hasPaintRegion())
         return;
 
     WindowRegion aPixRegion(rRegion);
@@ -65,7 +65,7 @@ void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)
     if (aDevPixRegion.IsEmpty())
         return;
 
-    mpInvalidation->mpPaintRegion->Union(aDevPixRegion);
+    mpInvalidation->expandPaintRegion(aDevPixRegion);
     GetOutDev()->GetClipState().Invalidate();
 }
 

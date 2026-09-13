@@ -963,8 +963,8 @@ void Window::ImplAdjustNWFSizes()
 
 bool Window::ImplHasValidClippingRegion() const
 {
-    return !mpInvalidation->mbPaintTransparent && !mpClippingState->mbInitWinClipRegion
-           && !mpClippingState->maWinClipRegion.IsEmpty();
+    return !mpInvalidation->isPaintTransparent() && !mpClippingState->isInitNeeded()
+           && mpClippingState->hasClipRegion();
 }
 
 bool Window::ImplShouldPaintImmediately() const
@@ -1263,7 +1263,7 @@ void Window::ImplInvalidateWindowContent(bool bNewPos, bool bCopyBits,
 void Window::ImplInvalidateParentOrOverlaps(const vcl::Region& rInitialRegion)
 {
     vcl::Region aRegion(rInitialRegion);
-    if (!mpInvalidation->mbPaintTransparent)
+    if (!mpInvalidation->isPaintTransparent())
         vcl::clipping::excludeWindowRegion(*this, aRegion);
 
     vcl::clipping::clipBoundaries(*this, aRegion, false, true);
