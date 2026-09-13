@@ -95,6 +95,8 @@ struct WindowInvalidation
 
     const vcl::Region& getInvalidateRegion() const { return maInvalidateRegion; }
     void clearInvalidateRegion() { maInvalidateRegion.SetEmpty(); }
+
+    ImplPaintFlags accumulatePaintFlags(ImplPaintFlags nIncomingFlags, bool bHasChildren);
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

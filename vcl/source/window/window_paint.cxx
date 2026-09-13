@@ -117,22 +117,7 @@ void Window::ImplCallPaint(const vcl::Region* pRegion, ImplPaintFlags nPaintFlag
     // other parameters used below.
     PrePaint(*GetOutDev());
 
-    mpInvalidation->mbPaintFrame = false;
-
-    if (nPaintFlags & ImplPaintFlags::PaintAllChildren)
-        mpInvalidation->mnPaintFlags |= ImplPaintFlags::Paint | ImplPaintFlags::PaintAllChildren | (nPaintFlags & ImplPaintFlags::PaintAll);
-
-    if (nPaintFlags & ImplPaintFlags::PaintChildren)
-        mpInvalidation->mnPaintFlags |= ImplPaintFlags::PaintChildren;
-
-    if (nPaintFlags & ImplPaintFlags::Erase)
-        mpInvalidation->mnPaintFlags |= ImplPaintFlags::Erase;
-
-    if (nPaintFlags & ImplPaintFlags::CheckRtl)
-        mpInvalidation->mnPaintFlags |= ImplPaintFlags::CheckRtl;
-
-    if (!mpHierarchy->mpFirstChild)
-        mpInvalidation->mnPaintFlags &= ~ImplPaintFlags::PaintAllChildren;
+    const ImplPaintFlags nFlagsNoPaint = mpInvalidation->accumulatePaintFlags(nPaintFlags, mpHierarchy->hasChildren());
 
     // If tiled rendering is used, windows are only invalidated, never painted to.
     if (mpInvalidation->mbPaintDisabled || comphelper::LibreOfficeKit::isActive())
@@ -148,9 +133,7 @@ void Window::ImplCallPaint(const vcl::Region* pRegion, ImplPaintFlags nPaintFlag
         return;
     }
 
-    nPaintFlags = mpInvalidation->mnPaintFlags & ~ImplPaintFlags::Paint;
-
-    PaintHelper aHelper(this, nPaintFlags);
+    PaintHelper aHelper(this, nFlagsNoPaint);
 
     if (mpInvalidation->mnPaintFlags & ImplPaintFlags::Paint)
         aHelper.DoPaint(pRegion);

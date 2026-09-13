@@ -51,6 +51,8 @@ struct WindowHierarchy
     vcl::Window* getFirstOverlap() const { return mpFirstOverlap; }
     vcl::Window* getNext() const { return mpNext; }
 
+    bool hasChildren() const { return mpFirstChild != nullptr; }
+
     vcl::Window* getParent() const { return mpParent.get(); }
     vcl::Window* getRealParent() const { return mpRealParent.get(); }
     vcl::Window* getBorderWindow() const { return mpBorderWindow.get(); }
