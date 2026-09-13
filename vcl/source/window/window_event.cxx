@@ -542,6 +542,41 @@ bool Window::EventNotify(NotifyEvent& rNEvt)
     return mpHierarchy->mpParent->CompatNotify(rNEvt);
 }
 
+static void lcl_NotifyEventListeners(WindowEventHandlers& rEventHdlrs, VclWindowEvent& rEvent,
+                                     const VclPtr<vcl::Window>& xWindow, bool bIgnoreDisposed)
+{
+    if (rEventHdlrs.maEventListeners.empty())
+        return;
+
+    // Copy the list, because this can be destroyed when calling a Link...
+    std::vector<Link<VclWindowEvent&, void>> aCopy(rEventHdlrs.maEventListeners);
+
+    // we use an iterating counter/flag and a set of deleted Link's to avoid O(n^2) behaviour
+    rEventHdlrs.mnEventListenersIteratingCount++;
+
+    comphelper::ScopeGuard aGuard([&rEventHdlrs, &xWindow, bIgnoreDisposed]() {
+        if (bIgnoreDisposed || !xWindow->isDisposed())
+        {
+            rEventHdlrs.mnEventListenersIteratingCount--;
+            if (rEventHdlrs.mnEventListenersIteratingCount == 0)
+                rEventHdlrs.maEventListenersDeleted.clear();
+        }
+    });
+
+    for (const Link<VclWindowEvent&, void>& rLink : aCopy)
+    {
+        if (!bIgnoreDisposed && xWindow->isDisposed())
+            break;
+
+        // check this hasn't been removed in some re-entrancy scenario fdo#47368
+        if (rEventHdlrs.maEventListenersDeleted.find(rLink)
+            == rEventHdlrs.maEventListenersDeleted.end())
+        {
+            rLink.Call(rEvent);
+        }
+    }
+}
+
 void Window::CallEventListeners(VclEventId nEvent, void* pData)
 {
     VclWindowEvent aEvent(this, nEvent, pData);
@@ -559,37 +594,10 @@ void Window::CallEventListeners(VclEventId nEvent, void* pData)
 
     // If maEventListeners is empty, the XVCLWindow has not yet been initialized.
     // Calling GetComponentInterface will do that.
-    if (mpEventHandlers && mpEventHandlers->maEventListeners.empty() && pData)
+    if (mpEventHandlers->maEventListeners.empty() && pData)
         xWindow->GetComponentInterface();
 
-    if (mpEventHandlers && !mpEventHandlers->maEventListeners.empty())
-    {
-        // Copy the list, because this can be destroyed when calling a Link...
-        std::vector<Link<VclWindowEvent&, void>> aCopy(mpEventHandlers->maEventListeners);
-
-        // we use an iterating counter/flag and a set of deleted Link's to avoid O(n^2) behaviour
-        mpEventHandlers->mnEventListenersIteratingCount++;
-        auto& rEventHdlrs = *mpEventHandlers;
-
-        comphelper::ScopeGuard aGuard([&rEventHdlrs, &xWindow, &bIgnoreDisposed]() {
-            if (bIgnoreDisposed || !xWindow->isDisposed())
-            {
-                rEventHdlrs.mnEventListenersIteratingCount--;
-                if (rEventHdlrs.mnEventListenersIteratingCount == 0)
-                    rEventHdlrs.maEventListenersDeleted.clear();
-            }
-        });
-
-        for (const Link<VclWindowEvent&, void>& rLink : aCopy)
-        {
-            if (!bIgnoreDisposed && xWindow->isDisposed())
-                break;
-            // check this hasn't been removed in some re-enterancy scenario fdo#47368
-            if (rEventHdlrs.maEventListenersDeleted.find(rLink)
-                == rEventHdlrs.maEventListenersDeleted.end())
-                rLink.Call(aEvent);
-        }
-    }
+    lcl_NotifyEventListeners(*mpEventHandlers, aEvent, xWindow, bIgnoreDisposed);
 
     while (xWindow)
     {
