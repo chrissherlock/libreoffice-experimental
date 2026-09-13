@@ -384,15 +384,15 @@ void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point&
 {
     comphelper::ScopeGuard aResetMapMode([&rSaveDevice]() { rSaveDevice.SetMapMode(MapMode()); });
 
-    WindowInvalidation* pInvalidation = mxOwnerWindow ? mxOwnerWindow->ImplGetWindowInvalidation() : nullptr;
+    const WindowInvalidation* pInvalidation = mxOwnerWindow ? mxOwnerWindow->ImplGetWindowInvalidation() : nullptr;
 
-    if (!pInvalidation || !pInvalidation->mpPaintRegion)
+    if (!pInvalidation || !pInvalidation->hasPaintRegion())
     {
         rSaveDevice.DrawOutDev(Point(), rSize, rPos, rSize, *this);
         return;
     }
 
-    vcl::Region aClip(*pInvalidation->mpPaintRegion);
+    vcl::Region aClip(*pInvalidation->getPaintRegion());
     aClip.Move(-GetDeviceOriginX(), -GetDeviceOriginY());
 
     const auto boundRect = convertTo<vcl::WindowRect>(vcl::LogicRect(tools::Rectangle(rPos, rSize)), GetMapMode());

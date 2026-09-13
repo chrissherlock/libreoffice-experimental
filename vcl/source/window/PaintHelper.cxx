@@ -123,34 +123,34 @@ void PaintHelper::DoPaint(const vcl::Region* pRegion)
         = m_pWindow->ImplGetClippingState()->getWinChildClipRegion(*m_pWindow);
     ImplFrameData* pFrameData = m_pWindow->mpPlatformState->mpFrameData;
 
-    if (pInvalidation->mnPaintFlags & ImplPaintFlags::PaintAll || pFrameData->mbInBufferedPaint)
+    if (pInvalidation->shouldPaintAll() || pFrameData->mbInBufferedPaint)
     {
-        pInvalidation->maInvalidateRegion = rWinChildClipRegion;
+        pInvalidation->setInvalidateRegion(rWinChildClipRegion);
     }
     else
     {
         if (pRegion)
-            pInvalidation->maInvalidateRegion.Union(*pRegion);
+            pInvalidation->unionInvalidateRegion(*pRegion);
 
         if (pWinData && pClassification->mbTrackVisible)
         {
             /* #98602# need to repaint all children within the
-            * tracking rectangle, so the following invert
-            * operation takes places without traces of the previous
-            * one.
-            */
-            pInvalidation->maInvalidateRegion.Union(*pWinData->mpTrackRect);
+             * tracking rectangle, so the following invert
+             * operation takes places without traces of the previous
+             * one.
+             */
+            pInvalidation->unionInvalidateRegion(*pWinData->mpTrackRect);
         }
 
-        if (pInvalidation->mnPaintFlags & ImplPaintFlags::PaintAllChildren)
-            m_pChildRegion.reset(new vcl::Region(pInvalidation->maInvalidateRegion));
+        if (pInvalidation->shouldPaintAllChildren())
+            m_pChildRegion = std::make_unique<vcl::Region>(pInvalidation->getInvalidateRegion());
 
-        pInvalidation->maInvalidateRegion.Intersect(rWinChildClipRegion);
+        pInvalidation->intersectInvalidateRegion(rWinChildClipRegion);
     }
 
-    pInvalidation->mnPaintFlags = ImplPaintFlags::NONE;
+    pInvalidation->clearPaintFlags();
 
-    if (pInvalidation->maInvalidateRegion.IsEmpty())
+    if (!pInvalidation->hasInvalidateRegion())
         return;
 
 #if HAVE_FEATURE_OPENGL

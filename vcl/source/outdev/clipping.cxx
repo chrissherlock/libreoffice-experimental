@@ -196,11 +196,11 @@ void clipToPaintRegion(OutputDevice& rDevice, tools::Rectangle& rDstRect)
 static vcl::Region lcl_getWindowActiveClip(const WindowOutputDevice& rWinDev)
 {
     vcl::Region aRegion(true);
-    WindowInvalidation* pInvalidation = rWinDev.GetOwnerWindow()->ImplGetWindowInvalidation();
+    const WindowInvalidation* pInvalidation = rWinDev.GetOwnerWindow()->ImplGetWindowInvalidation();
 
-    if (pInvalidation->mbInPaint && pInvalidation->mpPaintRegion)
+    if (pInvalidation->isInPaint() && pInvalidation->hasPaintRegion())
     {
-        aRegion = *(pInvalidation->mpPaintRegion);
+        aRegion = *pInvalidation->getPaintRegion();
         aRegion.Move(-rWinDev.GetDeviceOriginX(), -rWinDev.GetDeviceOriginY());
     }
 
@@ -246,10 +246,10 @@ void initDeviceClipRegion(OutputDevice& rDevice)
             vcl::Region aRegion;
             WindowInvalidation* pInvalidation = rTypedDev.GetOwnerWindow()->ImplGetWindowInvalidation();
 
-            if (pInvalidation->mbInPaint)
+            if (pInvalidation->isInPaint())
             {
-                if (pInvalidation->mpPaintRegion)
-                    aRegion = *(pInvalidation->mpPaintRegion);
+                if (pInvalidation->hasPaintRegion())
+                    aRegion = *(pInvalidation->getPaintRegion());
             }
             else
             {

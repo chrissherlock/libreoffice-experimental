@@ -56,6 +56,11 @@ struct WindowHierarchy
     vcl::Window* getParent() const { return mpParent.get(); }
     vcl::Window* getRealParent() const { return mpRealParent.get(); }
     vcl::Window* getBorderWindow() const { return mpBorderWindow.get(); }
+    vcl::Window* getFrameWindow() const { return mpFrameWindow; }
+    bool hasBorderWindow() const { return mpBorderWindow != nullptr; }
+
+    vcl::Window* getFirstChild() const { return mpFirstChild; }
+    vcl::Window* getNextSibling() const { return mpNext; }
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

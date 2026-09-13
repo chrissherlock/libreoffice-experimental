@@ -45,4 +45,97 @@ ImplPaintFlags WindowInvalidation::accumulatePaintFlags(ImplPaintFlags nIncoming
     return mnPaintFlags & ~ImplPaintFlags::Paint;
 }
 
+void WindowInvalidation::invalidate(const vcl::Region* pRegion, InvalidateFlags nFlags)
+{
+    mnPaintFlags |= ImplPaintFlags::Paint;
+
+    if (nFlags & InvalidateFlags::Children)
+        mnPaintFlags |= ImplPaintFlags::PaintAllChildren;
+
+    if (!(nFlags & InvalidateFlags::NoErase))
+        mnPaintFlags |= ImplPaintFlags::Erase;
+
+    if (!pRegion)
+    {
+        mnPaintFlags |= ImplPaintFlags::PaintAll;
+    }
+    else if (!shouldPaintAll())
+    {
+        // if not everything has to be redrawn, add the region to it
+        maInvalidateRegion.Union(*pRegion);
+    }
+}
+
+bool WindowInvalidation::isPartialPaintNeeded() const
+{
+    return (mnPaintFlags & (ImplPaintFlags::Paint | ImplPaintFlags::PaintAll))
+           == ImplPaintFlags::Paint;
+}
+
+void WindowInvalidation::scrollInvalidateRegion(const tools::Rectangle& rRect,
+                                                tools::Long nHorzScroll, tools::Long nVertScroll)
+{
+    vcl::Region aTempRegion = maInvalidateRegion;
+    aTempRegion.Intersect(rRect);
+    aTempRegion.Move(nHorzScroll, nVertScroll);
+    maInvalidateRegion.Union(aTempRegion);
+}
+
+void WindowInvalidation::moveInvalidateRegion(const tools::Rectangle& rRect,
+                                              tools::Long nHorzScroll, tools::Long nVertScroll)
+{
+    if (isPartialPaintNeeded())
+    {
+        vcl::Region aTempRegion = maInvalidateRegion;
+        aTempRegion.Intersect(rRect);
+        aTempRegion.Move(nHorzScroll, nVertScroll);
+        maInvalidateRegion.Union(aTempRegion);
+    }
+}
+
+/**
+ * Accumulates child invalidate regions from this window.
+ * Returns false if painting all (signaling that accumulation should stop),
+ * or true to continue traversal.
+ */
+bool WindowInvalidation::accumulatePaintAllRegion(vcl::Region& rPaintAllRegion) const
+{
+    if (!shouldPaintAllChildren())
+        return true;
+
+    if (shouldPaintAll())
+    {
+        rPaintAllRegion.SetEmpty();
+        return false;
+    }
+
+    rPaintAllRegion.Union(maInvalidateRegion);
+
+    return true;
+}
+
+vcl::Region
+WindowInvalidation::determineChildInvalidateRegion(const tools::Rectangle& rOutputRectPixel) const
+{
+    if (shouldPaintAll())
+        return vcl::Region(rOutputRectPixel);
+
+    return maInvalidateRegion;
+}
+
+void WindowInvalidation::validateRegion(const vcl::Region* pRegion,
+                                        const tools::Rectangle& rOutputRectPixel)
+{
+    if (!pRegion)
+    {
+        clearInvalidateRegion();
+        return;
+    }
+
+    if (shouldPaintAll())
+        maInvalidateRegion = rOutputRectPixel;
+
+    maInvalidateRegion.Exclude(*pRegion);
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
