@@ -14646,7 +14646,6 @@ vcl/source/window/taskpanelist.cxx
 vcl/source/window/toolbox.cxx
 vcl/source/window/toolbox2.cxx
 vcl/source/window/window.cxx
-vcl/source/window/window_accessibility.cxx
 vcl/source/window/window_clipping.cxx
 vcl/source/window/window_mouse.cxx
 vcl/source/window/window_paint.cxx
