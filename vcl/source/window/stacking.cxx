@@ -321,57 +321,60 @@ void Window::ImplToTop( ToTopFlags nFlags )
                 mpPlatformState->mpFrame->ToTop( nSysFlags );
             }
         }
+
+        return;
+    }
+
+    if ( mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap.get() == this )
+        return;
+
+    // remove window from the list
+    mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
+    if ( mpHierarchy->mpNext )
+    {
+        mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
     }
     else
     {
-        if ( mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap.get() != this )
+        // coverity[copy_paste_error : FALSE] - this is correct mpLastOverlap, not mpPrev
+        mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap = mpHierarchy->mpPrev;
+    }
+
+    // take AlwaysOnTop into account
+    bool    bOnTop = IsAlwaysOnTopEnabled();
+    vcl::Window* pNextWin = mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap;
+
+    if ( !bOnTop )
+    {
+        while ( pNextWin )
         {
-            // remove window from the list
-            mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
-            if ( mpHierarchy->mpNext )
-                mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
-            else
-            {
-                // coverity[copy_paste_error : FALSE] - this is correct mpLastOverlap, not mpPrev
-                mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap = mpHierarchy->mpPrev;
-            }
-
-            // take AlwaysOnTop into account
-            bool    bOnTop = IsAlwaysOnTopEnabled();
-            vcl::Window* pNextWin = mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap;
-            if ( !bOnTop )
-            {
-                while ( pNextWin )
-                {
-                    if ( !pNextWin->IsAlwaysOnTopEnabled() )
-                        break;
-                    pNextWin = pNextWin->mpHierarchy->mpNext;
-                }
-            }
-
-            // add the window to the list again
-            mpHierarchy->mpNext = pNextWin;
-            if ( pNextWin )
-            {
-                mpHierarchy->mpPrev = pNextWin->mpHierarchy->mpPrev;
-                pNextWin->mpHierarchy->mpPrev = this;
-            }
-            else
-            {
-                mpHierarchy->mpPrev = mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap;
-                mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap = this;
-            }
-
-            if ( mpHierarchy->mpPrev )
-                mpHierarchy->mpPrev->mpHierarchy->mpNext = this;
-            else
-                mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap = this;
-
-            // recalculate ClipRegion of this and all overlapping windows
-            if ( IsReallyVisible() )
-                vcl::clipping::setClipFlagOverlapWindows(*mpHierarchy->mpOverlapWindow);
+            if ( !pNextWin->IsAlwaysOnTopEnabled() )
+                break;
+            pNextWin = pNextWin->mpHierarchy->mpNext;
         }
     }
+
+    // add the window to the list again
+    mpHierarchy->mpNext = pNextWin;
+    if ( pNextWin )
+    {
+        mpHierarchy->mpPrev = pNextWin->mpHierarchy->mpPrev;
+        pNextWin->mpHierarchy->mpPrev = this;
+    }
+    else
+    {
+        mpHierarchy->mpPrev = mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap;
+        mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap = this;
+    }
+
+    if ( mpHierarchy->mpPrev )
+        mpHierarchy->mpPrev->mpHierarchy->mpNext = this;
+    else
+        mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap = this;
+
+    // recalculate ClipRegion of this and all overlapping windows
+    if ( IsReallyVisible() )
+        vcl::clipping::setClipFlagOverlapWindows(*mpHierarchy->mpOverlapWindow);
 }
 
 void Window::ImplStartToTop( ToTopFlags nFlags )
@@ -688,7 +691,6 @@ void Window::SetZOrder( vcl::Window* pRefWindow, ZOrderFlags nFlags )
 
 void Window::EnableAlwaysOnTop( bool bEnable )
 {
-
     mpClassification->mbAlwaysOnTop = bEnable;
 
     if ( mpHierarchy->mpBorderWindow )
@@ -723,11 +725,10 @@ bool Window::IsTopWindow() const
 
 vcl::Window* Window::ImplFindWindow( const Point& rFramePos )
 {
-    vcl::Window* pTempWindow;
     vcl::Window* pFindWindow;
 
     // first check all overlapping windows
-    pTempWindow = mpHierarchy->mpFirstOverlap;
+    vcl::Window* pTempWindow = mpHierarchy->mpFirstOverlap;
     while ( pTempWindow )
     {
         pFindWindow = pTempWindow->ImplFindWindow( rFramePos );
@@ -743,26 +744,26 @@ vcl::Window* Window::ImplFindWindow( const Point& rFramePos )
 
     WindowHitTest nHitTest = ImplHitTest( rFramePos );
 
-    if ( nHitTest & WindowHitTest::Inside )
+    if (!(nHitTest & WindowHitTest::Inside))
+        return nullptr;
+
+    // and then we check all child windows
+    pTempWindow = mpHierarchy->mpFirstChild;
+
+    while ( pTempWindow )
     {
-        // and then we check all child windows
-        pTempWindow = mpHierarchy->mpFirstChild;
+        pFindWindow = pTempWindow->ImplFindWindow( rFramePos );
 
-        while ( pTempWindow )
-        {
-            pFindWindow = pTempWindow->ImplFindWindow( rFramePos );
-            if ( pFindWindow )
-                return pFindWindow;
-            pTempWindow = pTempWindow->mpHierarchy->mpNext;
-        }
+        if ( pFindWindow )
+            return pFindWindow;
 
-        if ( nHitTest & WindowHitTest::Transparent )
-            return nullptr;
-        else
-            return this;
+        pTempWindow = pTempWindow->mpHierarchy->mpNext;
     }
 
-    return nullptr;
+    if ( nHitTest & WindowHitTest::Transparent )
+        return nullptr;
+
+    return this;
 }
 
 bool Window::IsAncestorOf(const vcl::Window& rWindow) const
@@ -826,6 +827,7 @@ void Window::ImplResetReallyVisible()
     {
         if ( pWindow->mpVisibilityState->mbReallyVisible )
             pWindow->ImplResetReallyVisible();
+
         pWindow = pWindow->mpHierarchy->mpNext;
     }
 
@@ -834,6 +836,7 @@ void Window::ImplResetReallyVisible()
     {
         if ( pWindow->mpVisibilityState->mbReallyVisible )
             pWindow->ImplResetReallyVisible();
+
         pWindow = pWindow->mpHierarchy->mpNext;
     }
 }
@@ -856,6 +859,7 @@ void Window::ImplUpdateWindowPtr( vcl::Window* pWindow )
         if (mpPlatformState->mpSysObj)
             mpPlatformState->mpSysObj->Reparent(mpPlatformState->mpFrame);
     }
+
     mpHierarchy->mpFrameWindow   = pWindow->mpHierarchy->mpFrameWindow;
 
     if ( pWindow->ImplIsOverlapWindow() )
@@ -911,7 +915,6 @@ void Window::ImplUpdateOverlapWindowPtr( bool bNewFrame )
 
 SystemWindow* Window::GetSystemWindow() const
 {
-
     const vcl::Window* pWin = this;
     while ( pWin && !pWin->IsSystemWindow() )
     {
@@ -1299,8 +1302,8 @@ vcl::Window* Window::ImplGetFirstOverlapWindow()
 
     if ( mpClassification->mbOverlapWin )
         return this;
-    else
-        return mpHierarchy ? mpHierarchy->mpOverlapWindow : nullptr;
+
+    return mpHierarchy ? mpHierarchy->mpOverlapWindow : nullptr;
 }
 
 const vcl::Window* Window::ImplGetFirstOverlapWindow() const
@@ -1310,8 +1313,8 @@ const vcl::Window* Window::ImplGetFirstOverlapWindow() const
 
     if ( mpClassification->mbOverlapWin )
         return this;
-    else
-        return mpHierarchy ? mpHierarchy->mpOverlapWindow : nullptr;
+
+    return mpHierarchy ? mpHierarchy->mpOverlapWindow : nullptr;
 }
 
 } /* namespace vcl */
