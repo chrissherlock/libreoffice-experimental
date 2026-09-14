@@ -38,7 +38,7 @@
 #include <vcl/weld/Builder.hxx>
 #include <vcl/weld/MessageDialog.hxx>
 
-#include <printdlg.hxx>
+#include <window/subclasses/dialogs/printdlg.hxx>
 #include <salinst.hxx>
 #include <salprn.hxx>
 #include <strings.hrc>

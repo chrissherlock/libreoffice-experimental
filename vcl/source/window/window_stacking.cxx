@@ -23,20 +23,20 @@
 #include <vcl/taskpanelist.hxx>
 #include <sal/log.hxx>
 
-#include <ImplFrameData.hxx>
-#include <ImplWinData.hxx>
-#include <WindowVisibilityState.hxx>
-#include <WindowPlatformState.hxx>
-#include <WindowClassification.hxx>
-#include <WindowInput.hxx>
-#include <WindowClippingState.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowFocusState.hxx>
-#include <clipping_window.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/ImplWinData.hxx>
+#include <window/WindowVisibilityState.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowInput.hxx>
+#include <window/WindowClippingState.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowFocusState.hxx>
+#include <window/clipping_window.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
 #include <svdata.hxx>
-#include <brdwin.hxx>
+#include <window/subclasses/decorations/brdwin.hxx>
 
 #include <com/sun/star/awt/XTopWindow.hpp>
 #include <com/sun/star/awt/XVclWindowPeer.hpp>

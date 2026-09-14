@@ -24,10 +24,10 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <WindowClippingState.hxx>
-#include <WindowInvalidation.hxx>
-#include <WindowHierarchy.hxx>
-#include <clipping_window.hxx>
+#include <window/WindowClippingState.hxx>
+#include <window/WindowInvalidation.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/clipping_window.hxx>
 #include <salobj.hxx>
 
 namespace vcl {

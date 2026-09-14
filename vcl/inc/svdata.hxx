@@ -47,7 +47,7 @@
 #include "vcleventlisteners.hxx"
 #include "print.h"
 #include "salwtype.hxx"
-#include "windowdev.hxx"
+#include "window/windowdev.hxx"
 #include "displayconnectiondispatch.hxx"
 
 #include <atomic>

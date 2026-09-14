@@ -9,7 +9,7 @@
 
 #include <memory>
 #include <vcl/uitest/uiobject.hxx>
-#include "wizdlg.hxx"
+#include "window/subclasses/dialogs/wizdlg.hxx"
 
 class RoadmapWizardUIObject final : public WindowUIObject
 {

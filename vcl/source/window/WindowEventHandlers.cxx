@@ -12,7 +12,7 @@
 #include <vcl/event.hxx>
 #include <vcl/window.hxx>
 
-#include <WindowEventHandlers.hxx>
+#include <window/WindowEventHandlers.hxx>
 
 void WindowEventHandlers::notifyEventListeners(VclWindowEvent& rEvent,
                                                const VclPtr<vcl::Window>& xWindow,

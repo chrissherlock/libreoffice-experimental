@@ -24,12 +24,12 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/window.hxx>
 
-#include <window.h>
-#include <ImplFrameData.hxx>
-#include <ImplWinData.hxx>
-#include <WindowClassification.hxx>
-#include <WindowInput.hxx>
-#include <WindowPlatformState.hxx>
+#include <window/window.h>
+#include <window/ImplFrameData.hxx>
+#include <window/ImplWinData.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowInput.hxx>
+#include <window/WindowPlatformState.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>

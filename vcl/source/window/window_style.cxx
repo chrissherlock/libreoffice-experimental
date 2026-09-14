@@ -24,16 +24,16 @@
 #include <vcl/toolbox.hxx>
 #include <vcl/window.hxx>
 
-#include <toolbox.h>
-#include <WindowPlatformState.hxx>
-#include <ImplFrameData.hxx>
-#include <ImplWinData.hxx>
-#include <WindowClassification.hxx>
-#include <WindowStyleState.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowControlAppearance.hxx>
-#include <WindowGeometry.hxx>
-#include <brdwin.hxx>
+#include <window/subclasses/controls/toolbox.h>
+#include <window/WindowPlatformState.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/ImplWinData.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowStyleState.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowControlAppearance.hxx>
+#include <window/WindowGeometry.hxx>
+#include <window/subclasses/decorations/brdwin.hxx>
 #include <salframe.hxx>
 
 namespace vcl

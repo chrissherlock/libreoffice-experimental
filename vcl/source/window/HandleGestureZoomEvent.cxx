@@ -19,7 +19,7 @@
 
 #include <vcl/window.hxx>
 
-#include "HandleGestureZoomEvent.hxx"
+#include "window/HandleGestureZoomEvent.hxx"
 
 HandleGestureZoomEvent::HandleGestureZoomEvent(vcl::Window* pWindow,
                                                const SalGestureZoomEvent& rEvent)

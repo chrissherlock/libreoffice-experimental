@@ -23,22 +23,22 @@
 #include <vcl/toolkit/dialog.hxx>
 #include <vcl/window.hxx>
 
-#include <ImplFrameData.hxx>
-#include <ImplWinData.hxx>
-#include <WindowPlatformState.hxx>
-#include <WindowFocusState.hxx>
-#include <WindowClassification.hxx>
-#include <WindowInvalidation.hxx>
-#include <WindowLOKData.hxx>
-#include <WindowInput.hxx>
-#include <WindowControlAppearance.hxx>
-#include <WindowControlState.hxx>
-#include <WindowHierarchy.hxx>
-#include <brdwin.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/ImplWinData.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/WindowFocusState.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowInvalidation.hxx>
+#include <window/WindowLOKData.hxx>
+#include <window/WindowInput.hxx>
+#include <window/WindowControlAppearance.hxx>
+#include <window/WindowControlState.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/subclasses/decorations/brdwin.hxx>
 #include <clipping.hxx>
-#include <clipping_window.hxx>
+#include <window/clipping_window.hxx>
 #include <salgdi.hxx>
-#include <scrwnd.hxx>
+#include <window/subclasses/controls/scrwnd.hxx>
 #include <svdata.hxx>
 
 namespace vcl

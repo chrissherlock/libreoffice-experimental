@@ -30,13 +30,13 @@
 #include <vcl/settings.hxx>
 #include <vcl/vclevent.hxx>
 
-#include <window.h>
-#include <WindowClassification.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowStyleState.hxx>
+#include <window/window.h>
+#include <window/WindowClassification.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowStyleState.hxx>
 #include <salframe.hxx>
-#include <brdwin.hxx>
-#include <windowdev.hxx>
+#include <window/subclasses/decorations/brdwin.hxx>
+#include <window/windowdev.hxx>
 
 namespace vcl {
 

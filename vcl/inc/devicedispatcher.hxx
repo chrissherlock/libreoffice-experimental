@@ -13,7 +13,7 @@
 #include <vcl/print.hxx>
 #include <vcl/virdev.hxx>
 
-#include <windowdev.hxx>
+#include <window/windowdev.hxx>
 #include <pdf/pdfwriter_impl.hxx>
 
 #include <utility>

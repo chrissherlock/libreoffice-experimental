@@ -19,7 +19,7 @@
 
 #include <vcl/window.hxx>
 
-#include <WindowViewport.hxx>
+#include <window/WindowViewport.hxx>
 
 namespace vcl
 {

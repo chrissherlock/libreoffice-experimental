@@ -9,7 +9,7 @@
 
 #include <vcl/window.hxx>
 
-#include <ImplAccessibleInfos.hxx>
+#include <window/ImplAccessibleInfos.hxx>
 
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
 

@@ -57,19 +57,19 @@
 #include <vcl/scheduler.hxx>
 #include <vcl/skia/SkiaHelper.hxx>
 
-#include <window.h>
+#include <window/window.h>
 #include <dbggui.hxx>
 #include <salinst.hxx>
 #include <graphic/Manager.hxx>
 #include <salframe.hxx>
 #include <salsys.hxx>
 #include <svdata.hxx>
-#include <ImplFrameData.hxx>
-#include <WindowPlatformState.hxx>
-#include <WindowClassification.hxx>
-#include <WindowStyleState.hxx>
-#include <WindowVisibilityState.hxx>
-#include <WindowHierarchy.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowStyleState.hxx>
+#include <window/WindowVisibilityState.hxx>
+#include <window/WindowHierarchy.hxx>
 #include <accmgr.hxx>
 #include <strings.hrc>
 #include <strings.hxx>

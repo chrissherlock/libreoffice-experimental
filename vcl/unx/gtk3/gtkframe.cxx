@@ -47,7 +47,7 @@
 #include <unx/gtk/gtkbackend.hxx>
 
 #include <strings.hrc>
-#include <window.h>
+#include <window/window.h>
 
 #include <basegfx/vector/b2ivector.hxx>
 #include <officecfg/Office/Common.hxx>

@@ -36,27 +36,27 @@
 
 #include <sal/types.h>
 
-#include <window.h>
-#include <ImplFrameData.hxx>
-#include <ImplWinData.hxx>
-#include <WindowClassification.hxx>
-#include <WindowPlatformState.hxx>
-#include <WindowVisibilityState.hxx>
-#include <WindowInput.hxx>
-#include <WindowLOKData.hxx>
-#include <WindowControlAppearance.hxx>
-#include <WindowClippingState.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowFocusState.hxx>
-#include <WindowPointerState.hxx>
-#include <WindowControlState.hxx>
+#include <window/window.h>
+#include <window/ImplFrameData.hxx>
+#include <window/ImplWinData.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/WindowVisibilityState.hxx>
+#include <window/WindowInput.hxx>
+#include <window/WindowLOKData.hxx>
+#include <window/WindowControlAppearance.hxx>
+#include <window/WindowClippingState.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowFocusState.hxx>
+#include <window/WindowPointerState.hxx>
+#include <window/WindowControlState.hxx>
 #include <svdata.hxx>
 #include <salobj.hxx>
 #include <salgdi.hxx>
 #include <salframe.hxx>
 #include <salinst.hxx>
 
-#include <dndeventdispatcher.hxx>
+#include <window/dndeventdispatcher.hxx>
 
 #include <com/sun/star/datatransfer/dnd/XDragSource.hpp>
 #include <com/sun/star/datatransfer/dnd/XDropTarget.hpp>

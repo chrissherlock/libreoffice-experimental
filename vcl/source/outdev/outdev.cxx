@@ -40,7 +40,7 @@
 #include <ImplOutDevData.hxx>
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <salgdi.hxx>
-#include <window.h>
+#include <window/window.h>
 
 #include <com/sun/star/awt/DeviceCapability.hpp>
 #include <com/sun/star/awt/DeviceInfo.hpp>

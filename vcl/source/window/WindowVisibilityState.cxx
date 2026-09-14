@@ -7,7 +7,7 @@
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-#include <WindowVisibilityState.hxx>
+#include <window/WindowVisibilityState.hxx>
 
 WindowVisibilityState::WindowVisibilityState() = default;
 

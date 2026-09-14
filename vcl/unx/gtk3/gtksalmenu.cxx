@@ -21,7 +21,7 @@
 #include <o3tl/string_view.hxx>
 #include <sal/log.hxx>
 #include <tools/stream.hxx>
-#include <window.h>
+#include <window/window.h>
 #include <strings.hrc>
 
 static bool bUnityMode = false;

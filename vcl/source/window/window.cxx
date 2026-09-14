@@ -22,13 +22,13 @@
 #include <vcl/vclevent.hxx>
 #include <vcl/window.hxx>
 
-#include <ImplFrameData.hxx>
+#include <window/ImplFrameData.hxx>
 #include <ImplOutDevData.hxx>
-#include <WindowPlatformState.hxx>
+#include <window/WindowPlatformState.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
-#include <WindowHierarchy.hxx>
-#include <helpwin.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/subclasses/floating/helpwin.hxx>
 
 #ifdef _WIN32 // see #140456#
 #include <win/salframe.h>

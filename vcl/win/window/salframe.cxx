@@ -71,8 +71,8 @@
 #include <win/salobj.h>
 #include <win/saltimer.h>
 
-#include <helpwin.hxx>
-#include <window.h>
+#include <window/subclasses/floating/helpwin.hxx>
+#include <window/window.h>
 #include <sallayout.hxx>
 
 #include <vector>

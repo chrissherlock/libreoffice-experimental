@@ -10,7 +10,7 @@
 #include <vcl/window.hxx>
 #include <vcl/toolkit/button.hxx>
 
-#include <WindowInput.hxx>
+#include <window/WindowInput.hxx>
 
 WindowInput::WindowInput() = default;
 WindowInput::~WindowInput() = default;

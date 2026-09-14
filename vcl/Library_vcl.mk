@@ -77,16 +77,16 @@ $(eval $(call gb_Library_use_libraries,vcl,\
     ucbhelper \
     utl \
     xmlreader \
-	$(if $(filter WNT-TRUE,$(OS)-$(USE_HEADLESS_CODE)), \
+    $(if $(filter WNT-TRUE,$(OS)-$(USE_HEADLESS_CODE)), \
         cairo \
-	) \
+    ) \
 ))
 
 $(if $(filter WNT-TRUE,$(OS)-$(USE_HEADLESS_CODE)), \
-	$(eval $(call gb_Library_use_static_libraries,vcl,\
+    $(eval $(call gb_Library_use_static_libraries,vcl,\
         fontconfig \
         freetype \
-	)) \
+    )) \
 )
 
 $(eval $(call gb_Library_use_externals,vcl,\
@@ -182,59 +182,35 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/builder/VclBuilder \
     vcl/source/window/ImplWinData \
     vcl/source/window/ImplFrameData \
-    vcl/source/window/bubblewindow \
     vcl/source/window/clipping_subsystem \
     vcl/source/window/errinf \
     vcl/source/window/settings \
     vcl/source/window/accel \
     vcl/source/window/accmgr \
-    vcl/source/window/brdwin \
     vcl/source/window/bufferdevice \
-    vcl/source/window/colorpicker \
     vcl/source/window/legacyaccessibility \
     vcl/source/window/globalization \
     vcl/source/window/commandevent \
     vcl/source/window/cursor \
     vcl/source/window/debugevent \
     vcl/source/window/decoview \
-    vcl/source/window/dialog \
     vcl/source/window/dlgctrl \
     vcl/source/window/dndeventdispatcher \
     vcl/source/window/dndlistenercontainer \
-    vcl/source/window/dockingarea \
     vcl/source/window/dockmgr \
-    vcl/source/window/dockwin \
     vcl/source/window/VclAbstractDialog \
     vcl/source/window/VclAbstractDialogFactory \
-    vcl/source/window/DocWindow \
     vcl/source/window/NotifyEvent \
-    vcl/source/window/floatwin \
     vcl/source/window/hexcolorcontrol \
-    $(if $(ENABLE_WASM_STRIP_SPLASH),,vcl/source/window/introwin) \
     vcl/source/window/keycod \
     vcl/source/window/keyevent \
     vcl/source/window/layout \
     vcl/source/window/menu \
-    vcl/source/window/menubarwindow \
-    vcl/source/window/menufloatingwindow \
     vcl/source/window/menuitemlist \
-    vcl/source/window/menuwindow \
     vcl/source/window/mnemonic \
     vcl/source/window/NotebookBarAddonsMerger \
-    vcl/source/window/OptionalBox \
-    vcl/source/window/printdlg \
-    vcl/source/window/scrwnd \
     vcl/source/window/seleng \
-    vcl/source/window/split \
-    vcl/source/window/splitwin \
-    vcl/source/window/status \
-    vcl/source/window/syschild \
-    vcl/source/window/syswin \
-    vcl/source/window/tabdlg \
-    vcl/source/window/tabpage \
     vcl/source/window/taskpanelist \
-    vcl/source/window/toolbox2 \
-    vcl/source/window/toolbox \
     vcl/source/window/lokwindow \
     vcl/source/window/ImplAccessibleInfos \
     vcl/source/window/WindowA11y \
@@ -282,8 +258,32 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/HandleGestureRotateEvent \
     vcl/source/window/HandleGestureZoomEvent \
     vcl/source/window/HandleWheelEvent \
-    vcl/source/window/wrkwin \
     vcl/source/window/EnumContext \
+    vcl/source/window/subclasses/system/syswin \
+    vcl/source/window/subclasses/system/wrkwin \
+    vcl/source/window/subclasses/system/syschild \
+    $(if $(ENABLE_WASM_STRIP_SPLASH),,vcl/source/window/subclasses/system/introwin) \
+    vcl/source/window/subclasses/system/DocWindow \
+    vcl/source/window/subclasses/dialogs/dialog \
+    vcl/source/window/subclasses/dialogs/tabdlg \
+    vcl/source/window/subclasses/dialogs/tabpage \
+    vcl/source/window/subclasses/dialogs/printdlg \
+    vcl/source/window/subclasses/floating/floatwin \
+    vcl/source/window/subclasses/floating/bubblewindow \
+    vcl/source/window/subclasses/floating/menufloatingwindow \
+    vcl/source/window/subclasses/docking/dockwin \
+    vcl/source/window/subclasses/docking/dockingarea \
+    vcl/source/window/subclasses/docking/splitwin \
+    vcl/source/window/subclasses/docking/split \
+    vcl/source/window/subclasses/decorations/brdwin \
+    vcl/source/window/subclasses/decorations/menubarwindow \
+    vcl/source/window/subclasses/decorations/menuwindow \
+    vcl/source/window/subclasses/controls/toolbox \
+    vcl/source/window/subclasses/controls/toolbox2 \
+    vcl/source/window/subclasses/controls/status \
+    vcl/source/window/subclasses/controls/scrwnd \
+    vcl/source/window/subclasses/controls/colorpicker \
+    vcl/source/window/subclasses/controls/OptionalBox \
     vcl/source/control/button \
     vcl/source/control/calendar \
     vcl/source/control/combobox \
@@ -763,7 +763,7 @@ endif # USING_X11
 
 ifeq ($(OS), $(filter LINUX %BSD SOLARIS, $(OS)))
 $(eval $(call gb_Library_add_libs,vcl,\
-	-lm $(UNIX_DLAPI_LIBS) \
+    -lm $(UNIX_DLAPI_LIBS) \
 ))
 endif
 
@@ -783,7 +783,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
         vcl/skia/gdiimpl \
     ) \
     $(if $(filter LINUX SOLARIS %BSD,$(OS)), \
-	vcl/unx/generic/window/sessioninhibitor \
+    vcl/unx/generic/window/sessioninhibitor \
     ) \
 ))
 
@@ -802,8 +802,8 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     $(if $(USE_HEADLESS_CODE), \
         $(if $(ENABLE_CUPS), \
             vcl/unx/generic/printer/cupsmgr \
-	) \
-	$(if $(filter TRUE,$(ENABLE_CPDB) $(ENABLE_CUPS)),\
+    ) \
+    $(if $(filter TRUE,$(ENABLE_CPDB) $(ENABLE_CUPS)),\
             vcl/unx/generic/printer/printerinfomanager \
         , \
             vcl/null/printerinfomanager \

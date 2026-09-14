@@ -29,7 +29,7 @@
 #include <vcl/vclenum.hxx>
 #include <vcl/toolbox.hxx>
 #include <IPrioritable.hxx>
-#include <OptionalBox.hxx>
+#include <window/subclasses/controls/OptionalBox.hxx>
 
 // #tdf146101: For getting the app context
 #include <com/sun/star/frame/XFrame.hpp>

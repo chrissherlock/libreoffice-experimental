@@ -20,12 +20,12 @@
 #include <vcl/vclevent.hxx>
 #include <vcl/window.hxx>
 
-#include <ImplAccessibleInfos.hxx>
-#include <WindowClassification.hxx>
-#include <WindowPlatformState.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowA11y.hxx>
-#include <WindowHelpData.hxx>
+#include <window/ImplAccessibleInfos.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowA11y.hxx>
+#include <window/WindowHelpData.hxx>
 #include <salframe.hxx>
 
 namespace vcl

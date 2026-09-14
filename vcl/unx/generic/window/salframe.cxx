@@ -51,7 +51,7 @@
 #include <opengl/zone.hxx>
 
 #include <unx/X11Helper.hxx>
-#include <window.h>
+#include <window/window.h>
 
 #include <sal/macros.h>
 #include <sal/log.hxx>

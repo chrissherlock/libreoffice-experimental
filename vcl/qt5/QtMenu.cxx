@@ -18,7 +18,7 @@
 #include <QtTools.hxx>
 #include <bitmaps.hlst>
 #include <strings.hrc>
-#include <window.h>
+#include <window/window.h>
 
 #include <o3tl/safeint.hxx>
 #include <vcl/qt/QtUtils.hxx>

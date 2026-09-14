@@ -27,12 +27,12 @@
 #include <vcl/window.hxx>
 #include <vcl/cursor.hxx>
 
-#include <PaintBufferGuard.hxx>
-#include <ImplFrameData.hxx>
-#include <WindowPlatformState.hxx>
-#include <WindowClassification.hxx>
-#include <WindowInvalidation.hxx>
-#include <WindowControlAppearance.hxx>
+#include <window/PaintBufferGuard.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowInvalidation.hxx>
+#include <window/WindowControlAppearance.hxx>
 
 #include <memory>
 

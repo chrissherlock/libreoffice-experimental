@@ -26,7 +26,7 @@
 
 #include <unotools/localedatawrapper.hxx>
 
-#include <dndeventdispatcher.hxx>
+#include <window/dndeventdispatcher.hxx>
 #include <comphelper/lok.hxx>
 #include <vcl/QueueInfo.hxx>
 #include <vcl/dndlistenercontainer.hxx>
@@ -51,20 +51,20 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/MappingPolicy.hxx>
 
-#include <window.h>
-#include <ImplFrameData.hxx>
-#include <ImplWinData.hxx>
-#include <clipping_window.hxx>
+#include <window/window.h>
+#include <window/ImplFrameData.hxx>
+#include <window/ImplWinData.hxx>
+#include <window/clipping_window.hxx>
 #include <svdata.hxx>
 #include <salwtype.hxx>
 #include <salframe.hxx>
 #include <accmgr.hxx>
 #include <print.h>
-#include <WindowPlatformState.hxx>
-#include <WindowLOKData.hxx>
-#include <WindowInput.hxx>
-#include <helpwin.hxx>
-#include <brdwin.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/WindowLOKData.hxx>
+#include <window/WindowInput.hxx>
+#include <window/subclasses/floating/helpwin.hxx>
+#include <window/subclasses/decorations/brdwin.hxx>
 
 #include "GenericDropTargetDropContext.hxx"
 #include "GenericDropTargetDragContext.hxx"

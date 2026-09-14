@@ -17,7 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <WindowClassification.hxx>
+#include <window/WindowClassification.hxx>
 
 WindowClassification::WindowClassification(WindowType eType)
     : meType(eType)

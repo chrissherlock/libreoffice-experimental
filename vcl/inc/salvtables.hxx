@@ -72,9 +72,9 @@
 
 #include "SvLBoxButton.hxx"
 #include "calendar.hxx"
-#include "colorpicker.hxx"
+#include "window/subclasses/controls/colorpicker.hxx"
 #include "iconview.hxx"
-#include "messagedialog.hxx"
+#include "window/subclasses/dialogs/messagedialog.hxx"
 #include "svtabbx.hxx"
 #include "verticaltabctrl.hxx"
 

@@ -22,7 +22,7 @@
 #include <vcl/taskpanelist.hxx>
 
 #include <svdata.hxx>
-#include "menubarwindow.hxx"
+#include "window/subclasses/decorations/menubarwindow.hxx"
 
 #include <algorithm>
 

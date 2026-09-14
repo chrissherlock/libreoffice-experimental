@@ -20,9 +20,9 @@
 #include <vcl/event.hxx>
 #include <vcl/window.hxx>
 
-#include <WindowInput.hxx>
+#include <window/WindowInput.hxx>
 
-#include "HandleWheelEvent.hxx"
+#include "window/HandleWheelEvent.hxx"
 
 HandleWheelEvent::HandleWheelEvent(vcl::Window* pWindow, const SalWheelMouseEvent& rEvt)
     : HandleGestureEventBase(pWindow, Point(rEvt.mnX, rEvt.mnY))

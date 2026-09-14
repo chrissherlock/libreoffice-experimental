@@ -19,9 +19,9 @@
 
 #include <vcl/window.hxx>
 
-#include <ImplFrameData.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowPlatformState.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowPlatformState.hxx>
 #include <salframe.hxx>
 
 namespace vcl

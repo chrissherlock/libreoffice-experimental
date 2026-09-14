@@ -22,7 +22,7 @@
 #include <vcl/IDialogRenderable.hxx>
 #include <vcl/window.hxx>
 
-#include <WindowLOKData.hxx>
+#include <window/WindowLOKData.hxx>
 
 #include <cassert>
 #include <map>

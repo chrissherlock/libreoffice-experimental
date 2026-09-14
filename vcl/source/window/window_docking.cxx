@@ -21,9 +21,9 @@
 #include <vcl/vclptr.hxx>
 #include <vcl/window.hxx>
 
-#include <WindowPlatformState.hxx>
-#include <ImplFrameData.hxx>
-#include <WindowClassification.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/WindowClassification.hxx>
 #include <svdata.hxx>
 
 #include <vector>

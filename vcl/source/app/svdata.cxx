@@ -40,15 +40,15 @@
 
 #include <bitmap/BlendFrameCache.hxx>
 #include <salframe.hxx>
-#include <scrwnd.hxx>
-#include <helpwin.hxx>
+#include <window/subclasses/controls/scrwnd.hxx>
+#include <window/subclasses/floating/helpwin.hxx>
 #include <vcl/toolkit/dialog.hxx>
 #include <salinst.hxx>
 #include <salgdi.hxx>
 #include <svcache.hxx>
 #include <svdata.hxx>
 #include <salsys.hxx>
-#include <windowdev.hxx>
+#include <window/windowdev.hxx>
 #include <units.hrc>
 #include <print.h>
 

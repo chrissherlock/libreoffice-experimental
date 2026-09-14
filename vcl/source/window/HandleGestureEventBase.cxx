@@ -19,11 +19,11 @@
 
 #include <sal/config.h>
 
-#include <WindowPlatformState.hxx>
-#include <ImplFrameData.hxx>
-#include <helpwin.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/subclasses/floating/helpwin.hxx>
 
-#include "HandleGestureEventBase.hxx"
+#include "window/HandleGestureEventBase.hxx"
 
 bool HandleGestureEventBase::Setup()
 {

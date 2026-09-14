@@ -9,7 +9,7 @@
 
 #include <vcl/dndlistenercontainer.hxx>
 
-#include <WindowLOKData.hxx>
+#include <window/WindowLOKData.hxx>
 
 WindowLOKData::WindowLOKData()
     : mpLOKNotifier(nullptr)

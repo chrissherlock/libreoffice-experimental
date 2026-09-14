@@ -21,10 +21,10 @@
 #include <vcl/transfer.hxx>
 #include <vcl/window.hxx>
 
-#include <ImplFrameData.hxx>
-#include <WindowClassification.hxx>
-#include <WindowPlatformState.hxx>
-#include <WindowA11y.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/WindowA11y.hxx>
 
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
 #include <com/sun/star/datatransfer/clipboard/XClipboard.hpp>

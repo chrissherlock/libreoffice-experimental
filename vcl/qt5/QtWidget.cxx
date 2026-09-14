@@ -26,7 +26,7 @@
 #include <QtWidget.hxx>
 #include <QtWidget.moc>
 
-#include <window.h>
+#include <window/window.h>
 
 #include <comphelper/OAccessible.hxx>
 #include <comphelper/diagnose_ex.hxx>

@@ -141,7 +141,7 @@
 #include <vcl/wrkwin.hxx>
 #include "customcellrenderer.hxx"
 #include <strings.hrc>
-#include <window.h>
+#include <window/window.h>
 #include <numeric>
 #include <boost/property_tree/ptree.hpp>
 #include <opengl/zone.hxx>

@@ -32,7 +32,7 @@
 #include <accessibility/vclxaccessiblelistbox.hxx>
 #include <svdata.hxx>
 #include <listbox.hxx>
-#include <dndeventdispatcher.hxx>
+#include <window/dndeventdispatcher.hxx>
 #include <comphelper/lok.hxx>
 
 #include <boost/property_tree/ptree.hpp>

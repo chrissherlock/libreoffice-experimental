@@ -25,18 +25,18 @@
 #include <vcl/opengl/OpenGLHelper.hxx>
 #endif
 
-#include <ImplFrameData.hxx>
-#include <ImplWinData.hxx>
-#include <WindowPlatformState.hxx>
-#include <PaintBufferGuard.hxx>
-#include <WindowClippingState.hxx>
-#include <WindowVisibilityState.hxx>
-#include <WindowClassification.hxx>
-#include <WindowInvalidation.hxx>
-#include <WindowHierarchy.hxx>
-#include <clipping_window.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/ImplWinData.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/PaintBufferGuard.hxx>
+#include <window/WindowClippingState.hxx>
+#include <window/WindowVisibilityState.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowInvalidation.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/clipping_window.hxx>
 
-#include "PaintHelper.hxx"
+#include "window/PaintHelper.hxx"
 
 PaintHelper::PaintHelper(vcl::Window* pWindow, ImplPaintFlags nPaintFlags)
     : m_pWindow(pWindow)

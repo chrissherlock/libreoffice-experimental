@@ -19,8 +19,8 @@
 
 #include <vcl/event.hxx>
 
-#include <ImplFrameData.hxx>
-#include <dndeventdispatcher.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/dndeventdispatcher.hxx>
 #include <svdata.hxx>
 
 #include <cassert>

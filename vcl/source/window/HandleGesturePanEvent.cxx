@@ -19,7 +19,7 @@
 
 #include <vcl/window.hxx>
 
-#include "HandleGesturePanEvent.hxx"
+#include "window/HandleGesturePanEvent.hxx"
 
 HandleGesturePanEvent::HandleGesturePanEvent(vcl::Window* pWindow, const SalGestureEvent& rEvent)
     : HandleGestureEvent(pWindow, Point(rEvent.mnX, rEvent.mnY))
