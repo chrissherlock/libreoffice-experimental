@@ -25,9 +25,9 @@
 #include <vcl/opengl/OpenGLHelper.hxx>
 #endif
 
-#include <window.h>
-#include <ImplFrameData.hxx>
-#include <PaintBufferGuard.hxx>
+#include <window/window.h>
+#include <window/ImplFrameData.hxx>
+#include <window/PaintBufferGuard.hxx>
 
 namespace vcl
 {

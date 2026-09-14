@@ -44,13 +44,13 @@
 #include <salinst.hxx>
 #include <svdata.hxx>
 #include <strings.hrc>
-#include <WindowClassification.hxx>
-#include <WindowPlatformState.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowPlatformState.hxx>
 #include <salmenu.hxx>
 #include <salframe.hxx>
 
-#include "menubarwindow.hxx"
-#include "menufloatingwindow.hxx"
+#include "window/subclasses/decorations/menubarwindow.hxx"
+#include "window/subclasses/floating/menufloatingwindow.hxx"
 #include "menuitemlist.hxx"
 
 #include <com/sun/star/uno/Reference.h>

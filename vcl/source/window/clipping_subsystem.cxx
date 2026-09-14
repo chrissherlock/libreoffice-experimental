@@ -11,13 +11,13 @@
 #include <vcl/window.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <window.h>
-#include <clipping_window.hxx>
-#include <WindowClassification.hxx>
-#include <WindowVisibilityState.hxx>
-#include <WindowClippingState.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowPlatformState.hxx>
+#include <window/window.h>
+#include <window/clipping_window.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowVisibilityState.hxx>
+#include <window/WindowClippingState.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowPlatformState.hxx>
 #include <salobj.hxx>
 
 namespace vcl::clipping

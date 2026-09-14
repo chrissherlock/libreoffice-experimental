@@ -26,7 +26,7 @@
 
 #include <strings.hrc>
 #include <svdata.hxx>
-#include <wizdlg.hxx>
+#include <window/subclasses/dialogs/wizdlg.hxx>
 
 #include <vector>
 

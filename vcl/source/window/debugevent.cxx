@@ -15,8 +15,8 @@
 #include <vcl/svapp.hxx>
 #include <vcl/wrkwin.hxx>
 #include <vcl/menu.hxx>
-#include <debugevent.hxx>
-#include <window.h>
+#include <window/debugevent.hxx>
+#include <window/window.h>
 #include <salwtype.hxx>
 
 DebugEventInjector::DebugEventInjector( sal_uInt32 nMaxEvents) :

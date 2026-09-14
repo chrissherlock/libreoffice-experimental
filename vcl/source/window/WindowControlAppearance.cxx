@@ -9,7 +9,7 @@
 
 #include <vcl/cursor.hxx>
 
-#include <WindowControlAppearance.hxx>
+#include <window/WindowControlAppearance.hxx>
 
 void WindowControlAppearance::useNativeDialogBackground()
 {

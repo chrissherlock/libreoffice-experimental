@@ -19,7 +19,7 @@
 
 #include <vcl/window.hxx>
 
-#include <ImplWinData.hxx>
+#include <window/ImplWinData.hxx>
 
 ImplWinData::ImplWinData()
     : mnCursorExtWidth(0)

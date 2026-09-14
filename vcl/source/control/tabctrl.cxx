@@ -39,11 +39,11 @@
 #include <vcl/inputctx.hxx>
 
 #include <clipping.hxx>
-#include <clipping_window.hxx>
+#include <window/clipping_window.hxx>
 
 #include <bitmaps.hlst>
 #include <svdata.hxx>
-#include <WindowFocusState.hxx>
+#include <window/WindowFocusState.hxx>
 
 #include <deque>
 #include <unordered_map>

@@ -32,23 +32,23 @@
 #include <vcl/opengl/OpenGLHelper.hxx>
 #endif
 
-#include <ImplFrameData.hxx>
-#include <ImplWinData.hxx>
-#include <WindowClassification.hxx>
-#include <WindowPlatformState.hxx>
-#include <WindowVisibilityState.hxx>
-#include <WindowClippingState.hxx>
-#include <WindowControlAppearance.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowInvalidation.hxx>
-#include <WindowFocusState.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/ImplWinData.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/WindowVisibilityState.hxx>
+#include <window/WindowClippingState.hxx>
+#include <window/WindowControlAppearance.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowInvalidation.hxx>
+#include <window/WindowFocusState.hxx>
 #include <clipping/ClippingBridge.hxx>
 #include <clipping/ClipStateBuilder.hxx>
-#include <clipping_window.hxx>
+#include <window/clipping_window.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
 
-#include "PaintHelper.hxx"
+#include "window/PaintHelper.hxx"
 
 namespace vcl
 {

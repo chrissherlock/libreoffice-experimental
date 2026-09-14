@@ -282,7 +282,7 @@
 #if PCH_LEVEL >= 4
 #include <ImplOutDevData.hxx>
 #include <accel.hxx>
-#include <brdwin.hxx>
+#include <window/subclasses/decorations/brdwin.hxx>
 #include <drawmode.hxx>
 #include <fontattributes.hxx>
 #include <impfontcache.hxx>
@@ -393,7 +393,7 @@
 #include <vcl/weld/weldutils.hxx>
 #include <vcl/window.hxx>
 #include <vcl/wrkwin.hxx>
-#include <window.h>
+#include <window/window.h>
 #endif // PCH_LEVEL >= 4
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab: */

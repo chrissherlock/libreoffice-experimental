@@ -28,21 +28,21 @@
 
 #include <salframe.hxx>
 #include <svdata.hxx>
-#include <helpwin.hxx>
-#include <ImplFrameData.hxx>
-#include <WindowClassification.hxx>
-#include <WindowStyleState.hxx>
-#include <WindowVisibilityState.hxx>
-#include <WindowFocusState.hxx>
-#include <WindowInput.hxx>
-#include <WindowEventHandlers.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowGeometry.hxx>
-#include <WindowViewport.hxx>
-#include <WindowControlState.hxx>
-#include <WindowPlatformState.hxx>
+#include <window/subclasses/floating/helpwin.hxx>
+#include <window/ImplFrameData.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowStyleState.hxx>
+#include <window/WindowVisibilityState.hxx>
+#include <window/WindowFocusState.hxx>
+#include <window/WindowInput.hxx>
+#include <window/WindowEventHandlers.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowGeometry.hxx>
+#include <window/WindowViewport.hxx>
+#include <window/WindowControlState.hxx>
+#include <window/WindowPlatformState.hxx>
 
-#include "impldockingwrapper.hxx"
+#include "window/subclasses/docking/impldockingwrapper.hxx"
 
 namespace vcl
 {

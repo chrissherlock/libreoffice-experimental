@@ -50,7 +50,7 @@
 #include <font/PhysicalFontFaceCollection.hxx>
 #include <font/fontsubstitution.hxx>
 #include <impfontcache.hxx>
-#include <printdlg.hxx>
+#include <window/subclasses/dialogs/printdlg.hxx>
 #include <print.hrc>
 #include <salgdi.hxx>
 #include <salinst.hxx>

@@ -25,7 +25,7 @@
 #include <com/sun/star/accessibility/AccessibleRelationType.hpp>
 #include <com/sun/star/awt/XWindow.hpp>
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
-#include <colorpicker.hxx>
+#include <window/subclasses/controls/colorpicker.hxx>
 #include <o3tl/safeint.hxx>
 #include <o3tl/sorted_vector.hxx>
 #include <o3tl/string_view.hxx>
@@ -46,7 +46,7 @@
 #include <svdata.hxx>
 #include <svimpbox.hxx>
 #include <svtabbx.hxx>
-#include <messagedialog.hxx>
+#include <window/subclasses/dialogs/messagedialog.hxx>
 #include <treeglue.hxx>
 #include <unotools/accessiblerelationsethelper.hxx>
 #include <unotools/configmgr.hxx>
@@ -82,9 +82,9 @@
 #include <vcl/virdev.hxx>
 #include <bitmaps.hlst>
 #include <listbox.hxx>
-#include <WindowClippingState.hxx>
-#include <WindowVisibilityState.hxx>
-#include <wizdlg.hxx>
+#include <window/WindowClippingState.hxx>
+#include <window/WindowVisibilityState.hxx>
+#include <window/subclasses/dialogs/wizdlg.hxx>
 #include <salvtables.hxx>
 #include <comphelper/lok.hxx>
 

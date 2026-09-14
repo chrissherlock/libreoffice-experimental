@@ -39,18 +39,18 @@
 #include <iconview.hxx>
 #include <managedmenubutton.hxx>
 #include <menutogglebutton.hxx>
-#include <messagedialog.hxx>
+#include <window/subclasses/dialogs/messagedialog.hxx>
 #include <slider.hxx>
 #include <treeglue.hxx>
 #include <verticaltabctrl.hxx>
-#include <wizdlg.hxx>
+#include <window/subclasses/dialogs/wizdlg.hxx>
 #include <ContextVBox.hxx>
 #include <DropdownBox.hxx>
-#include <OptionalBox.hxx>
+#include <window/subclasses/controls/OptionalBox.hxx>
 #include <PriorityMergedHBox.hxx>
 #include <SvHeaderTabListBox.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowInput.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowInput.hxx>
 
 #include <bitmaps.hlst>
 

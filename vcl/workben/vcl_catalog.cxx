@@ -28,7 +28,7 @@
 #include <vcl/layout.hxx>
 #include <vcl/virdev.hxx>
 
-#include <wizdlg.hxx>
+#include <window/subclasses/dialogs/wizdlg.hxx>
 
 #include <com/sun/star/uno/XComponentContext.hpp>
 #include <com/sun/star/lang/XMultiServiceFactory.hpp>

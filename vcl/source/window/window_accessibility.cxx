@@ -24,16 +24,16 @@
 #include <vcl/vclevent.hxx>
 #include <vcl/wrkwin.hxx>
 
-#include <ImplAccessibleInfos.hxx>
-#include <WindowA11y.hxx>
-#include <WindowClassification.hxx>
-#include <WindowHierarchy.hxx>
+#include <window/ImplAccessibleInfos.hxx>
+#include <window/WindowA11y.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowHierarchy.hxx>
 #include <accessibility/floatingwindowaccessible.hxx>
 #include <accessibility/vclxaccessiblefixedtext.hxx>
 #include <accessibility/vclxaccessiblestatusbar.hxx>
 #include <accessibility/vclxaccessibletabcontrol.hxx>
 #include <accessibility/vclxaccessibletabpagewindow.hxx>
-#include <brdwin.hxx>
+#include <window/subclasses/decorations/brdwin.hxx>
 
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
 

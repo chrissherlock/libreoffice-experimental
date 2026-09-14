@@ -19,7 +19,7 @@
 
 #include <vcl/window.hxx>
 
-#include "HandleGestureLongPressEvent.hxx"
+#include "window/HandleGestureLongPressEvent.hxx"
 
 HandleGestureLongPressEvent::HandleGestureLongPressEvent(vcl::Window* pWindow,
                                                          const SalGestureLongPressEvent& rEvt)

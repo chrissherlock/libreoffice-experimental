@@ -30,14 +30,14 @@
 #include <vcl/toolbox.hxx>
 #include <vcl/settings.hxx>
 
-#include <window.h>
+#include <window/window.h>
 #include <svdata.hxx>
-#include <WindowClassification.hxx>
-#include <WindowFocusState.hxx>
-#include <WindowInput.hxx>
-#include <WindowEventHandlers.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowFocusState.hxx>
+#include <window/WindowInput.hxx>
+#include <window/WindowEventHandlers.hxx>
 
-#include "dlgctrl.hxx"
+#include "window/dlgctrl.hxx"
 
 #include <com/sun/star/i18n/XCharacterClassification.hpp>
 

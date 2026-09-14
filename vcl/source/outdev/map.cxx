@@ -37,7 +37,7 @@
 #include <TransformCompiler.hxx>
 #include <ImplOutDevData.hxx>
 #include <svdata.hxx>
-#include <window.h>
+#include <window/window.h>
 
 #include <basegfx/matrix/b2dhommatrix.hxx>
 #include <tools/UnitConversion.hxx>

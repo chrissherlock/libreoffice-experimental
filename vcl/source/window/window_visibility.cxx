@@ -19,18 +19,18 @@
 
 #include <vcl/window.hxx>
 
-#include <window.h>
-#include <ImplFrameData.hxx>
-#include <ImplWinData.hxx>
-#include <WindowClassification.hxx>
-#include <WindowPlatformState.hxx>
-#include <WindowVisibilityState.hxx>
-#include <WindowClippingState.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowA11y.hxx>
-#include <WindowInvalidation.hxx>
-#include <WindowGeometry.hxx>
-#include <clipping_window.hxx>
+#include <window/window.h>
+#include <window/ImplFrameData.hxx>
+#include <window/ImplWinData.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/WindowVisibilityState.hxx>
+#include <window/WindowClippingState.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowA11y.hxx>
+#include <window/WindowInvalidation.hxx>
+#include <window/WindowGeometry.hxx>
+#include <window/clipping_window.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
 

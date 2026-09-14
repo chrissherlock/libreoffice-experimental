@@ -38,9 +38,9 @@
 #include <bufferdevice.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <svdata.hxx>
-#include <WindowPlatformState.hxx>
-#include <PaintBufferGuard.hxx>
-#include <window.h>
+#include <window/WindowPlatformState.hxx>
+#include <window/PaintBufferGuard.hxx>
+#include <window/window.h>
 
 const size_t INITIAL_SETUP_ACTION_COUNT = 5;
 

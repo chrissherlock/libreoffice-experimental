@@ -17,7 +17,7 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <colorpicker.hxx>
+#include <window/subclasses/controls/colorpicker.hxx>
 #include <salinst.hxx>
 #include <svdata.hxx>
 

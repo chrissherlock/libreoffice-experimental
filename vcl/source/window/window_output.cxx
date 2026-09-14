@@ -24,7 +24,7 @@
 #include <vcl/outdev.hxx>
 #include <vcl/window.hxx>
 
-#include <windowdev.hxx>
+#include <window/windowdev.hxx>
 
 namespace vcl
 {

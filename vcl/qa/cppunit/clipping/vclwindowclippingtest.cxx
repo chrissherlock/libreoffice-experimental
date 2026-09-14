@@ -18,10 +18,10 @@
 #include <vcl/region.hxx>
 #include <vcl/svapp.hxx>
 
-#include <window.h>
-#include <WindowClippingState.hxx>
-#include <WindowVisibilityState.hxx>
-#include <clipping_window.hxx>
+#include <window/window.h>
+#include <window/WindowClippingState.hxx>
+#include <window/WindowVisibilityState.hxx>
+#include <window/clipping_window.hxx>
 
 namespace
 {

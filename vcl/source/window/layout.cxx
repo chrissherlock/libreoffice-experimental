@@ -52,17 +52,17 @@
 #include <vcl/settings.hxx>
 #include <vcl/virdev.hxx>
 #include <bitmaps.hlst>
-#include <messagedialog.hxx>
+#include <window/subclasses/dialogs/messagedialog.hxx>
 #include <svdata.hxx>
-#include <WindowClassification.hxx>
+#include <window/WindowClassification.hxx>
 #include <boost/multi_array.hpp>
 #include <vcl/DesktopType.hxx>
 #include <vcl/toolkit/vclmedit.hxx>
 #include <vcl/uitest/uiobject.hxx>
 #include <sal/log.hxx>
 #include <tools/json_writer.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowGeometry.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowGeometry.hxx>
 
 VclContainer::VclContainer(vcl::Window *pParent, WinBits nStyle)
     : Window(WindowType::CONTAINER)

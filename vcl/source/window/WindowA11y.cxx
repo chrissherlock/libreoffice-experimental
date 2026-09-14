@@ -11,8 +11,8 @@
 #include <vcl/toolkit/fixed.hxx>
 #include <vcl/toolkit/unowrap.hxx>
 
-#include <ImplAccessibleInfos.hxx>
-#include <WindowA11y.hxx>
+#include <window/ImplAccessibleInfos.hxx>
+#include <window/WindowA11y.hxx>
 
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
 

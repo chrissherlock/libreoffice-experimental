@@ -52,23 +52,23 @@
 #include <vcl/CoordinateMapper.hxx>
 #include <vcl/MappingPolicy.hxx>
 
-#include <WindowPlatformState.hxx>
-#include <WindowInvalidation.hxx>
-#include <WindowHierarchy.hxx>
-#include <WindowControlAppearance.hxx>
+#include <window/WindowPlatformState.hxx>
+#include <window/WindowInvalidation.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/WindowControlAppearance.hxx>
 #include <ImplOutDevData.hxx>
-#include <clipping_window.hxx>
+#include <window/clipping_window.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>
 #include <salinst.hxx>
 #include <salgdi.hxx>
 #include <svdata.hxx>
-#include <WindowClassification.hxx>
-#include <toolbox.h>
-#include <brdwin.hxx>
-#include <helpwin.hxx>
-#include <dndeventdispatcher.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/subclasses/controls/toolbox.h>
+#include <window/subclasses/decorations/brdwin.hxx>
+#include <window/subclasses/floating/helpwin.hxx>
+#include <window/dndeventdispatcher.hxx>
 
 #include <com/sun/star/accessibility/AccessibleRelation.hpp>
 #include <com/sun/star/accessibility/AccessibleRole.hpp>
@@ -97,7 +97,7 @@
 #include <win/salframe.h>
 #endif
 
-#include "impldockingwrapper.hxx"
+#include "window/subclasses/docking/impldockingwrapper.hxx"
 
 using namespace ::com::sun::star::uno;
 using namespace ::com::sun::star::lang;

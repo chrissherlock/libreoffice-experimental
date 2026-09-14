@@ -25,7 +25,7 @@
 #include <vcl/vclenum.hxx>
 #include <vcl/window.hxx>
 
-#include <WindowA11y.hxx>
+#include <window/WindowA11y.hxx>
 
 #include <com/sun/star/accessibility/AccessibleRelation.hpp>
 #include <com/sun/star/accessibility/AccessibleRole.hpp>

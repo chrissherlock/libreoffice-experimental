@@ -21,11 +21,11 @@
 #include <sal/log.hxx>
 #include <o3tl/deleter.hxx>
 
-#include <brdwin.hxx>
+#include <window/subclasses/decorations/brdwin.hxx>
 #include <svdata.hxx>
-#include <WindowClassification.hxx>
-#include <WindowGeometry.hxx>
-#include <WindowHierarchy.hxx>
+#include <window/WindowClassification.hxx>
+#include <window/WindowGeometry.hxx>
+#include <window/WindowHierarchy.hxx>
 
 #include <comphelper/OAccessible.hxx>
 
@@ -37,7 +37,7 @@
 #include <vcl/timer.hxx>
 #include <vcl/settings.hxx>
 
-#include "impldockingwrapper.hxx"
+#include "window/subclasses/docking/impldockingwrapper.hxx"
 
 #define DOCKWIN_FLOATSTYLES         (WB_SIZEABLE | WB_MOVEABLE | WB_CLOSEABLE | WB_STANDALONE)
 

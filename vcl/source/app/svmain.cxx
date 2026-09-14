@@ -54,9 +54,9 @@
 #include <vcl/print.hxx>
 
 #include <bitmap/BlendFrameCache.hxx>
-#include <debugevent.hxx>
-#include <scrwnd.hxx>
-#include <windowdev.hxx>
+#include <window/debugevent.hxx>
+#include <window/subclasses/controls/scrwnd.hxx>
+#include <window/windowdev.hxx>
 #include <svdata.hxx>
 
 #ifdef _WIN32

@@ -31,7 +31,7 @@
 #if CHECK_ANY_QT_USING_X11
 #include <QtX11Support.hxx>
 #endif
-#include <window.h>
+#include <window/window.h>
 
 #include <vcl/qt/QtUtils.hxx>
 

@@ -19,7 +19,7 @@
 
 #include <vcl/window.hxx>
 
-#include "HandleGestureSwipeEvent.hxx"
+#include "window/HandleGestureSwipeEvent.hxx"
 
 HandleGestureSwipeEvent::HandleGestureSwipeEvent(vcl::Window* pWindow,
                                                  const SalGestureSwipeEvent& rEvt)

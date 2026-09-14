@@ -19,7 +19,7 @@
 
 #include <vcl/window.hxx>
 
-#include "HandleGestureRotateEvent.hxx"
+#include "window/HandleGestureRotateEvent.hxx"
 
 HandleGestureRotateEvent::HandleGestureRotateEvent(vcl::Window* pWindow,
                                                    const SalGestureRotateEvent& rEvent)

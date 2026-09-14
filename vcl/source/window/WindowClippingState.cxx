@@ -11,9 +11,9 @@
 #include <vcl/region.hxx>
 #include <vcl/window.hxx>
 
-#include <WindowClippingState.hxx>
-#include <WindowHierarchy.hxx>
-#include <clipping_window.hxx>
+#include <window/WindowClippingState.hxx>
+#include <window/WindowHierarchy.hxx>
+#include <window/clipping_window.hxx>
 
 void WindowClippingState::initWinClipRegion(const vcl::Window& rWindow)
 {

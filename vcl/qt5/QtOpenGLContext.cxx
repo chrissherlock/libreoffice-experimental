@@ -23,7 +23,7 @@
 #include <QtOpenGLContext.hxx>
 
 #include <opengl/zone.hxx>
-#include <window.h>
+#include <window/window.h>
 
 #include <sal/log.hxx>
 #include <vcl/sysdata.hxx>
