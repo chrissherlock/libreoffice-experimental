@@ -1134,6 +1134,10 @@ private:
     SAL_DLLPRIVATE void ImplCalcToTop(ImplCalcToTopData* pPrevData);
     SAL_DLLPRIVATE void ImplToTop(ToTopFlags nFlags);
     SAL_DLLPRIVATE void ImplStartToTop(ToTopFlags nFlags);
+    SAL_DLLPRIVATE void ImplCollectToTopPaintAreas(vcl::Window* pOverlapWindow, ImplCalcToTopData& rStartData);
+    SAL_DLLPRIVATE void ImplReorderOverlapChain(vcl::Window* pOverlapWindow, ToTopFlags nFlags);
+    SAL_DLLPRIVATE void ImplInvalidateToTopRegions(const ImplCalcToTopData* pCurData);
+
     SAL_DLLPRIVATE void ImplFocusToTop(ToTopFlags nFlags, bool bReallyVisible);
     SAL_DLLPRIVATE void ImplShowAllOverlaps();
     SAL_DLLPRIVATE void ImplHideAllOverlaps();

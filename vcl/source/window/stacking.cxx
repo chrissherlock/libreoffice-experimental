@@ -377,60 +377,64 @@ void Window::ImplToTop( ToTopFlags nFlags )
         vcl::clipping::setClipFlagOverlapWindows(*mpHierarchy->mpOverlapWindow);
 }
 
-void Window::ImplStartToTop( ToTopFlags nFlags )
+void Window::ImplStartToTop(ToTopFlags nFlags)
 {
-    ImplCalcToTopData   aStartData;
-    ImplCalcToTopData*  pCurData;
-    vcl::Window* pOverlapWindow;
+    vcl::Window* pOverlapWindow = ImplIsOverlapWindow() ? this : mpHierarchy->mpOverlapWindow.get();
 
-    if ( ImplIsOverlapWindow() )
-        pOverlapWindow = this;
-    else
-        pOverlapWindow = mpHierarchy->mpOverlapWindow;
-
-    // first calculate paint areas
-    vcl::Window* pTempOverlapWindow = pOverlapWindow;
+    ImplCalcToTopData aStartData;
     aStartData.mpNext = nullptr;
-    pCurData = &aStartData;
 
+    ImplCollectToTopPaintAreas(pOverlapWindow, aStartData);
+    ImplReorderOverlapChain(pOverlapWindow, nFlags);
+    ImplInvalidateToTopRegions(aStartData.mpNext.get());
+}
+
+void Window::ImplCollectToTopPaintAreas(vcl::Window* pOverlapWindow, ImplCalcToTopData& rStartData)
+{
+    ImplCalcToTopData* pCurData = &rStartData;
+
+    // Calculate paint areas along ancestor overlap chain up to frame
+    vcl::Window* pTempOverlapWindow = pOverlapWindow;
     do
     {
-        pTempOverlapWindow->ImplCalcToTop( pCurData );
+        pTempOverlapWindow->ImplCalcToTop(pCurData);
 
-        if ( pCurData->mpNext )
+        if (pCurData->mpNext)
             pCurData = pCurData->mpNext.get();
 
         pTempOverlapWindow = pTempOverlapWindow->mpHierarchy->mpOverlapWindow;
     }
-    while ( !pTempOverlapWindow->mpClassification->mbFrame );
+    while (!pTempOverlapWindow->mpClassification->mbFrame);
 
-    // next calculate the paint areas of the ChildOverlap windows
+    // Calculate paint areas of child overlap windows
     pTempOverlapWindow = mpHierarchy->mpFirstOverlap;
-    while ( pTempOverlapWindow )
+    while (pTempOverlapWindow)
     {
-        pTempOverlapWindow->ImplCalcToTop( pCurData );
+        pTempOverlapWindow->ImplCalcToTop(pCurData);
 
-        if ( pCurData->mpNext )
+        if (pCurData->mpNext)
             pCurData = pCurData->mpNext.get();
 
         pTempOverlapWindow = pTempOverlapWindow->mpHierarchy->mpNext;
     }
+}
 
-    // and next change the windows list
-    pTempOverlapWindow = pOverlapWindow;
+void Window::ImplReorderOverlapChain(vcl::Window* pOverlapWindow, ToTopFlags nFlags)
+{
+    vcl::Window* pTempOverlapWindow = pOverlapWindow;
     do
     {
-        pTempOverlapWindow->ImplToTop( nFlags );
+        pTempOverlapWindow->ImplToTop(nFlags);
         pTempOverlapWindow = pTempOverlapWindow->mpHierarchy->mpOverlapWindow;
     }
-    while ( !pTempOverlapWindow->mpClassification->mbFrame );
+    while (!pTempOverlapWindow->mpClassification->mbFrame);
+}
 
-    // as last step invalidate the invalid areas
-    pCurData = aStartData.mpNext.get();
-
-    while ( pCurData )
+void Window::ImplInvalidateToTopRegions(const ImplCalcToTopData* pCurData)
+{
+    while (pCurData)
     {
-        pCurData->mpWindow->ImplInvalidateFrameRegion( pCurData->mpInvalidateRegion.get(), InvalidateFlags::Children );
+        pCurData->mpWindow->ImplInvalidateFrameRegion(pCurData->mpInvalidateRegion.get(), InvalidateFlags::Children);
         pCurData = pCurData->mpNext.get();
     }
 }
