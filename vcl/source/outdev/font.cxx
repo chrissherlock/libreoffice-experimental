@@ -42,9 +42,9 @@
 #include <vcl/virdev.hxx>
 #include <vcl/CoordinateMapper.hxx>
 
-#include <window/ImplFrameData.hxx>
-#include <window/WindowPlatformState.hxx>
-#include <window/WindowHierarchy.hxx>
+#include <window/state/ImplFrameData.hxx>
+#include <window/state/WindowPlatformState.hxx>
+#include <window/state/WindowHierarchy.hxx>
 #include <font/EmphasisMark.hxx>
 
 #include <ImplLayoutArgs.hxx>

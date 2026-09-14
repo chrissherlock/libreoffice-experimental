@@ -9,9 +9,9 @@
 
 #include <vcl/window.hxx>
 
-#include <window/WindowClippingState.hxx>
-#include <window/WindowClassification.hxx>
-#include <window/WindowHierarchy.hxx>
+#include <window/state/WindowClippingState.hxx>
+#include <window/state/WindowClassification.hxx>
+#include <window/state/WindowHierarchy.hxx>
 #include <clipping/ClipStateBuilder.hxx>
 
 namespace vcl::clipping

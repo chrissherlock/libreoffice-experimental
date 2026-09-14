@@ -65,13 +65,13 @@
 #include <salframe.hxx>
 #include <salsys.hxx>
 #include <svdata.hxx>
-#include <window/ImplFrameData.hxx>
-#include <window/WindowPlatformState.hxx>
-#include <window/WindowClassification.hxx>
-#include <window/WindowStyleState.hxx>
-#include <window/WindowVisibilityState.hxx>
-#include <window/WindowHierarchy.hxx>
-#include <accmgr.hxx>
+#include <window/state/ImplFrameData.hxx>
+#include <window/state/WindowPlatformState.hxx>
+#include <window/state/WindowClassification.hxx>
+#include <window/state/WindowStyleState.hxx>
+#include <window/state/WindowVisibilityState.hxx>
+#include <window/state/WindowHierarchy.hxx>
+#include <window/accessibility/accmgr.hxx>
 #include <strings.hrc>
 #include <strings.hxx>
 #if OSL_DEBUG_LEVEL > 0

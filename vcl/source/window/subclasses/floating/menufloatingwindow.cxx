@@ -24,10 +24,10 @@
 #include <vcl/salnativewidgets.hxx>
 #include <vcl/settings.hxx>
 
-#include <window/WindowClassification.hxx>
-#include <bufferdevice.hxx>
+#include <window/state/WindowClassification.hxx>
+#include <window/paint/bufferdevice.hxx>
 #include <window/subclasses/floating/menufloatingwindow.hxx>
-#include <menuitemlist.hxx>
+#include <window/menu/menuitemlist.hxx>
 #include <window/subclasses/decorations/menubarwindow.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>

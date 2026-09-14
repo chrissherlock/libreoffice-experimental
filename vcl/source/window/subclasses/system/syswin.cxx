@@ -46,17 +46,17 @@
 #include <o3tl/string_view.hxx>
 
 #include <window/window.h>
-#include <window/ImplFrameData.hxx>
-#include <accel.hxx>
+#include <window/state/ImplFrameData.hxx>
+#include <window/events/accel.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
 #include <window/subclasses/decorations/brdwin.hxx>
-#include <window/WindowClassification.hxx>
-#include <window/WindowPlatformState.hxx>
-#include <window/WindowVisibilityState.hxx>
-#include <window/WindowFocusState.hxx>
-#include <window/WindowHierarchy.hxx>
-#include <window/WindowA11y.hxx>
+#include <window/state/WindowClassification.hxx>
+#include <window/state/WindowPlatformState.hxx>
+#include <window/state/WindowVisibilityState.hxx>
+#include <window/state/WindowFocusState.hxx>
+#include <window/state/WindowHierarchy.hxx>
+#include <window/state/WindowA11y.hxx>
 
 using namespace ::com::sun::star::uno;
 

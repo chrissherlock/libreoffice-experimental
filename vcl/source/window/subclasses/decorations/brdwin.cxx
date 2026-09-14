@@ -31,9 +31,9 @@
 #include <vcl/toolbox.hxx>
 #include <vcl/ptrstyle.hxx>
 
-#include <window/WindowClassification.hxx>
-#include <window/WindowGeometry.hxx>
-#include <window/WindowPlatformState.hxx>
+#include <window/state/WindowClassification.hxx>
+#include <window/state/WindowGeometry.hxx>
+#include <window/state/WindowPlatformState.hxx>
 #include <strings.hrc>
 #include <svdata.hxx>
 #include <window/subclasses/decorations/brdwin.hxx>

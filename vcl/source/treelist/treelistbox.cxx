@@ -46,9 +46,9 @@
 #include <vcl/toolkit/viewdataentry.hxx>
 
 #include <SvLBoxButton.hxx>
-#include <accel.hxx>
+#include <window/events/accel.hxx>
 #include <svimpbox.hxx>
-#include <window/WindowEventHandlers.hxx>
+#include <window/state/WindowEventHandlers.hxx>
 
 #include <set>
 #include <string.h>

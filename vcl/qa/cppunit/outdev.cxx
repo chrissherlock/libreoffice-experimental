@@ -35,11 +35,11 @@
 #include <vcl/metaactiontypes.hxx>
 
 #include <vcl/BitmapWriteAccess.hxx>
-#include <bufferdevice.hxx>
+#include <window/paint/bufferdevice.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <svdata.hxx>
-#include <window/WindowPlatformState.hxx>
-#include <window/PaintBufferGuard.hxx>
+#include <window/state/WindowPlatformState.hxx>
+#include <window/paint/PaintBufferGuard.hxx>
 #include <window/window.h>
 
 const size_t INITIAL_SETUP_ACTION_COUNT = 5;

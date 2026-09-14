@@ -1,0 +1,1201 @@
+/* -*- Mode: C++; tab-width: 4; indent-tabs-mode: nil; c-basic-offset: 4 -*- */
+/*
+ * This file is part of the LibreOffice project.
+ *
+ * This Source Code Form is subject to the terms of the Mozilla Public
+ * License, v. 2.0. If a copy of the MPL was not distributed with this
+ * file, You can obtain one at http://mozilla.org/MPL/2.0/.
+ *
+ * This file incorporates work covered by the following license notice:
+ *
+ *   Licensed to the Apache Software Foundation (ASF) under one or more
+ *   contributor license agreements. See the NOTICE file distributed
+ *   with this work for additional information regarding copyright
+ *   ownership. The ASF licenses this file to you under the Apache
+ *   License, Version 2.0 (the "License"); you may not use this file
+ *   except in compliance with the License. You may obtain a copy of
+ *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
+ */
+
+#include <sal/config.h>
+
+#include <o3tl/safeint.hxx>
+#include <tools/debug.hxx>
+#include <tools/time.hxx>
+#include <sal/log.hxx>
+
+#include <unotools/localedatawrapper.hxx>
+
+#include <window/dnd/dndeventdispatcher.hxx>
+#include <comphelper/lok.hxx>
+#include <vcl/QueueInfo.hxx>
+#include <vcl/dndlistenercontainer.hxx>
+#include <vcl/timer.hxx>
+#include <vcl/event.hxx>
+#include <vcl/GestureEventPan.hxx>
+#include <vcl/GestureEventZoom.hxx>
+#include <vcl/GestureEventRotate.hxx>
+#include <vcl/settings.hxx>
+#include <vcl/svapp.hxx>
+#include <vcl/cursor.hxx>
+#include <vcl/wrkwin.hxx>
+#include <vcl/toolkit/floatwin.hxx>
+#include <vcl/toolkit/dialog.hxx>
+#include <vcl/toolkit/edit.hxx>
+#include <vcl/help.hxx>
+#include <vcl/dockwin.hxx>
+#include <vcl/menu.hxx>
+#include <vcl/virdev.hxx>
+#include <vcl/uitest/logger.hxx>
+#include <vcl/ptrstyle.hxx>
+#include <vcl/CoordinateMapper.hxx>
+#include <vcl/MappingPolicy.hxx>
+
+#include <window/window.h>
+#include <window/state/ImplFrameData.hxx>
+#include <window/state/ImplWinData.hxx>
+#include <window/state/clipping_window.hxx>
+#include <svdata.hxx>
+#include <salwtype.hxx>
+#include <salframe.hxx>
+#include <window/accessibility/accmgr.hxx>
+#include <print.h>
+#include <window/state/WindowPlatformState.hxx>
+#include <window/state/WindowLOKData.hxx>
+#include <window/state/WindowInput.hxx>
+#include <window/subclasses/floating/helpwin.hxx>
+#include <window/subclasses/decorations/brdwin.hxx>
+
+#include "GenericDropTargetDropContext.hxx"
+#include "GenericDropTargetDragContext.hxx"
+
+#include <com/sun/star/datatransfer/dnd/DNDConstants.hpp>
+#include <com/sun/star/datatransfer/dnd/XDragSource.hpp>
+#include <com/sun/star/awt/MouseEvent.hpp>
+
+#include <algorithm>
+#include <memory>
+
+static bool lcl_IsFloatPopupModeWindow(const vcl::Window* pChild)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    return !pSVData->mpWinData->mpFirstFloat
+           || pSVData->mpWinData->mpCaptureWin
+           || pSVData->mpWinData->mpFirstFloat->ImplIsFloatPopupModeWindow(pChild);
+}
+
+static bool lcl_HandleFloatMouseMove(vcl::Window* pChild, bool bMouseLeave,
+                                     const FloatingWindow* pFloat, bool bHitTestInsideRect)
+{
+    if (bMouseLeave)
+        return true;
+
+    if (pFloat && !bHitTestInsideRect)
+        return false;
+
+    if (ImplGetSVHelpData().mpHelpWin && !ImplGetSVHelpData().mbKeyboardHelp)
+        ImplDestroyHelpWindow(true);
+
+    pChild->ImplGetFrame()->SetPointer(PointerStyle::Arrow);
+
+    return true;
+}
+
+static bool lcl_HandleFloatMouseLeftButton(FloatingWindow* pFloat, NotifyEventType nSVEvent, bool bHitTestInsideRect)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
+    {
+        if (!pFloat)
+        {
+            FloatingWindow* pLastLevelFloat = pSVData->mpWinData->mpFirstFloat->ImplFindLastLevelFloat();
+            pLastLevelFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel | FloatWinPopupEndFlags::CloseAll);
+            return true;
+        }
+
+        if (bHitTestInsideRect)
+        {
+            pFloat->ImplSetMouseDown();
+            return true;
+        }
+    }
+    else
+    {
+        if (pFloat)
+        {
+            if (bHitTestInsideRect)
+            {
+                if (pFloat->ImplIsMouseDown())
+                    pFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel);
+                return true;
+            }
+        }
+        else
+        {
+            FloatingWindow* pLastLevelFloat = pSVData->mpWinData->mpFirstFloat->ImplFindLastLevelFloat();
+            if (!(pLastLevelFloat->GetPopupModeFlags() & FloatWinPopupFlags::NoMouseUpClose))
+            {
+                pLastLevelFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel | FloatWinPopupEndFlags::CloseAll);
+                return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+static bool lcl_ClosesOnAnyClick(FloatWinPopupFlags nPopupFlags)
+{
+    return bool(nPopupFlags & FloatWinPopupFlags::AllMouseButtonClose);
+}
+
+static bool lcl_ShouldIgnoreMouseUp(FloatWinPopupFlags nPopupFlags, NotifyEventType nSVEvent)
+{
+    return (nPopupFlags & FloatWinPopupFlags::NoMouseUpClose) &&
+           (nSVEvent == NotifyEventType::MOUSEBUTTONUP);
+}
+
+static bool lcl_EndPopupOnAnyClick(FloatingWindow* pLastLevelFloat, NotifyEventType nSVEvent)
+{
+    FloatWinPopupFlags nPopupFlags = pLastLevelFloat->GetPopupModeFlags();
+
+    if (lcl_ClosesOnAnyClick(nPopupFlags))
+    {
+        if (lcl_ShouldIgnoreMouseUp(nPopupFlags, nSVEvent))
+            return true;
+
+        pLastLevelFloat->EndPopupMode(FloatWinPopupEndFlags::Cancel | FloatWinPopupEndFlags::CloseAll);
+    }
+
+    return true;
+}
+
+static bool lcl_DispatchFloatMouseEvent(vcl::Window* pChild, const MouseAction& rAction,
+                                        NotifyEventType nSVEvent, bool bMouseLeave)
+{
+    if (lcl_IsFloatPopupModeWindow(pChild))
+        return false;
+
+    bool bHitTestInsideRect = false;
+    ImplSVData* pSVData = ImplGetSVData();
+    FloatingWindow* pFloat = pSVData->mpWinData->mpFirstFloat->ImplFloatHitTest(pChild, rAction.aPos, bHitTestInsideRect);
+
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+        return lcl_HandleFloatMouseMove(pChild, bMouseLeave, pFloat, bHitTestInsideRect);
+
+    if (rAction.nCode & MOUSE_LEFT)
+        return lcl_HandleFloatMouseLeftButton(pFloat, nSVEvent, bHitTestInsideRect);
+
+    if (pFloat)
+        return false;
+
+    FloatingWindow* pLastLevelFloat = pSVData->mpWinData->mpFirstFloat->ImplFindLastLevelFloat();
+    return lcl_EndPopupOnAnyClick(pLastLevelFloat, nSVEvent);
+}
+
+static bool lcl_IsPartOfHelpWindowHierarchy(const vcl::Window* pChild)
+{
+    const ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+    const vcl::Window* pHelpWin = aHelpData.mpHelpWin;
+
+    if (!pHelpWin)
+        return false;
+
+    return pHelpWin->IsWindowOrChild(pChild) || pChild->IsWindowOrChild(pHelpWin);
+}
+
+static HelpEventMode lcl_GetHelpEventMode()
+{
+    const ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+    HelpEventMode nHelpMode = HelpEventMode::NONE;
+
+    if (aHelpData.mbQuickHelp)
+        nHelpMode = HelpEventMode::QUICK;
+
+    if (aHelpData.mbBalloonHelp)
+        nHelpMode |= HelpEventMode::BALLOON;
+
+    return nHelpMode;
+}
+
+static void lcl_InvokeHelpRequest(vcl::Window* pChild, const Point& rMousePos, HelpEventMode nHelpMode)
+{
+    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+    HelpEvent aHelpEvent(rMousePos, nHelpMode);
+
+    aHelpData.mbRequestingHelp = true;
+    pChild->RequestHelp(aHelpEvent);
+    aHelpData.mbRequestingHelp = false;
+}
+
+static bool lcl_IsKillableTooltip()
+{
+    const ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+    return aHelpData.mpHelpWin && !aHelpData.mbKeyboardHelp;
+}
+
+static bool lcl_ConsumeHelpRequest(vcl::Window* pChild, const Point& rMousePos)
+{
+    const HelpEventMode nHelpMode = lcl_GetHelpEventMode();
+
+    if (nHelpMode == HelpEventMode::NONE)
+        return true;
+
+    if (pChild->IsInputEnabled() && !pChild->IsInModalMode())
+    {
+        lcl_InvokeHelpRequest(pChild, rMousePos, nHelpMode);
+        return true;
+    }
+
+    return false;
+}
+
+static void lcl_HandleMouseHelpRequest( vcl::Window* pChild, const Point& rMousePos )
+{
+    if (lcl_IsPartOfHelpWindowHierarchy(pChild))
+        return;
+
+    if (lcl_ConsumeHelpRequest(pChild, rMousePos))
+        return;
+
+    if (lcl_IsKillableTooltip())
+        ImplDestroyHelpWindow(true);
+}
+
+static void lcl_SetMousePointer( vcl::Window const * pChild )
+{
+    if ( ImplGetSVHelpData().mbExtHelpMode )
+        pChild->ImplGetFrame()->SetPointer( PointerStyle::Help );
+    else
+        pChild->ImplGetFrame()->SetPointer( pChild->ImplGetMousePointer() );
+}
+
+/*  #i34277# delayed context menu activation;
+*   necessary if there already was a popup menu running.
+*/
+
+namespace {
+
+struct ContextMenuEvent
+{
+    VclPtr<vcl::Window>  pWindow;
+    Point           aChildPos;
+};
+
+}
+
+static void lcl_ContextMenuEventLink(void* pCEvent, void*)
+{
+    std::unique_ptr<ContextMenuEvent> pEv(static_cast<ContextMenuEvent*>(pCEvent));
+
+    if (!pEv->pWindow->isDisposed())
+        ImplCallCommand(pEv->pWindow, CommandEventId::ContextMenu, nullptr, true, &pEv->aChildPos);
+}
+
+static bool lcl_NeedsLOKRemirroring(const VclPtr<vcl::Window>& xWindow)
+{
+    return comphelper::LibreOfficeKit::isActive() &&
+           AllSettings::GetLayoutRTL() &&
+           xWindow->GetOutDev() &&
+           !xWindow->GetOutDev()->ImplIsAntiparallel();
+}
+
+static bool lcl_EnforceMouseMoveBeforeClick(const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent,
+                                            const MouseAction& rAction)
+{
+    if (nSVEvent != NotifyEventType::MOUSEBUTTONDOWN && nSVEvent != NotifyEventType::MOUSEBUTTONUP)
+        return false;
+
+    ImplSVHelpData& aHelpData = ImplGetSVHelpData();
+
+    if ((nSVEvent == NotifyEventType::MOUSEBUTTONUP) && aHelpData.mbExtHelpMode)
+        Help::EndExtHelp();
+
+    if (aHelpData.mpHelpWin)
+    {
+        if (xWindow->ImplGetWindow() == aHelpData.mpHelpWin)
+        {
+            ImplDestroyHelpWindow(false);
+            return true; // xWindow is dead now - avoid crash!
+        }
+        else
+        {
+            ImplDestroyHelpWindow(true);
+        }
+    }
+
+    if (ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
+        pWinFrameData->mnLastMouseX != rAction.aPos.X() || pWinFrameData->mnLastMouseY != rAction.aPos.Y())
+    {
+        sal_uInt16 nMoveCode = rAction.nCode & ~(MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE);
+        ImplHandleMouseEvent(xWindow, NotifyEventType::MOUSEMOVE, false, rAction.aPos, rAction.nMsgTime, nMoveCode, rAction.nModifiers);
+    }
+
+    return false;
+}
+
+static sal_uInt16 lcl_UpdateFrameMouseState(ImplFrameData* pWinFrameData, const MouseAction& rAction)
+{
+    const sal_uInt16 nOldCode = pWinFrameData->mnMouseCode;
+
+    // update frame data
+    pWinFrameData->mnBeforeLastMouseX = pWinFrameData->mnLastMouseX;
+    pWinFrameData->mnBeforeLastMouseY = pWinFrameData->mnLastMouseY;
+    pWinFrameData->mnLastMouseX = rAction.aPos.X();
+    pWinFrameData->mnLastMouseY = rAction.aPos.Y();
+    pWinFrameData->mnMouseCode  = rAction.nCode;
+
+    const MouseEventModifiers nTmpMask = MouseEventModifiers::SYNTHETIC | MouseEventModifiers::MODIFIERCHANGED;
+    pWinFrameData->mnMouseMode  = rAction.nModifiers & ~nTmpMask;
+
+    return nOldCode;
+}
+
+static bool lcl_TeardownKillableTooltip(const VclPtr<vcl::Window>& xWindow)
+{
+    if (!lcl_IsKillableTooltip())
+        return false;
+
+    ImplDestroyHelpWindow(true);
+
+    if (xWindow->isDisposed())
+        return true; // xWindow is dead now - avoid crash! (#122045#)
+
+    return false;
+}
+
+static std::optional<VclPtr<vcl::Window>> lcl_FindMouseWindow(const VclPtr<vcl::Window>& xWindow,
+                                                              bool bMouseLeave,
+                                                              Point aMousePos)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+    VclPtr<vcl::Window> pChild;
+
+    // find mouse window
+    if (pSVData->mpWinData->mpCaptureWin)
+    {
+        pChild = pSVData->mpWinData->mpCaptureWin;
+
+        SAL_WARN_IF(xWindow != pChild->ImplGetFrameWindow(), "vcl",
+                    "ImplHandleMouseEvent: mouse event is not sent to capture window");
+
+        // java client cannot capture mouse correctly
+        if (xWindow != pChild->ImplGetFrameWindow() || bMouseLeave)
+            return std::nullopt; // Signal caller to abort (return false)
+    }
+    else
+    {
+        if (bMouseLeave)
+            pChild = nullptr;
+        else
+            pChild = xWindow->ImplFindWindow(aMousePos);
+    }
+
+    // test this because mouse events are buffered in the remote version
+    // and size may not be in sync
+    if (!pChild && !bMouseLeave)
+        return std::nullopt; // Signal caller to abort (return false)
+
+    return pChild; // Success, implicitly wraps the VclPtr in the std::optional
+}
+
+static bool lcl_IsMouseInputBlocked(const VclPtr<vcl::Window>& pChild)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    return pSVData->mpWinData->mpCaptureWin.get() != pChild
+        && (!pChild->IsEnabled() || !pChild->IsInputEnabled() || pChild->IsInModalMode());
+}
+
+static bool lcl_TryConsumeBlockedEvent(const VclPtr<vcl::Window>& pChild, const MouseAction& rAction,
+                                       NotifyEventType nSVEvent, bool bMouseLeave)
+{
+    lcl_DispatchFloatMouseEvent(pChild, rAction, nSVEvent, bMouseLeave);
+
+    if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
+        return true;
+
+    // Set normal MousePointer for disabled windows
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+    {
+        lcl_HandleMouseHelpRequest(pChild, rAction.aPos);
+        lcl_SetMousePointer(pChild);
+    }
+
+    return false;
+}
+
+static bool lcl_IsClickDuringExtTextInput(NotifyEventType nSVEvent)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    return pSVData->mpWinData->mpExtTextInputWin != nullptr
+        && (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN || nSVEvent == NotifyEventType::MOUSEBUTTONUP);
+}
+
+static bool lcl_ExceedsDragTolerance(long nMouseX, long nMouseY,
+                                     long nDragW, long nDragH,
+                                     const ImplFrameData* pFrameData)
+{
+    return std::abs(nMouseX - pFrameData->mnFirstMouseX) > nDragW ||
+           std::abs(nMouseY - pFrameData->mnFirstMouseY) > nDragH;
+}
+
+static bool lcl_IsRedundantMouseMove(bool bMouseLeave,
+                                     const VclPtr<vcl::Window>& pChild,
+                                     const ImplFrameData* pWinFrameData,
+                                     const Point& aChildMousePos,
+                                     sal_uInt16 nOldCode)
+{
+    return !bMouseLeave &&
+           (pChild == pWinFrameData->mpMouseMoveWin) &&
+           (aChildMousePos.X() == pWinFrameData->mnLastMouseWinX) &&
+           (aChildMousePos.Y() == pWinFrameData->mnLastMouseWinY) &&
+           (nOldCode == pWinFrameData->mnMouseCode);
+}
+
+static bool lcl_IsWithinDoubleClickTolerance(long nMouseX, long nMouseY,
+                                             long nDblClkW, long nDblClkH,
+                                             const ImplFrameData* pFrameData)
+{
+    return std::abs(nMouseX - pFrameData->mnFirstMouseX) <= nDblClkW &&
+           std::abs(nMouseY - pFrameData->mnFirstMouseY) <= nDblClkH;
+}
+
+static bool lcl_IsSameTargetAsFirstClick(const VclPtr<vcl::Window>& pChild, sal_uInt16 nCode)
+{
+    const ImplFrameData* pFrameData = pChild->ImplGetFrameData();
+    return (pChild == pFrameData->mpMouseDownWin) &&
+           (nCode == pFrameData->mnFirstMouseCode);
+}
+
+static bool lcl_IsWithinDoubleClickTime(sal_uInt64 nMsgTime, sal_uInt64 nDblClkTime,
+                                        const ImplFrameData* pFrameData)
+{
+    return (nMsgTime - pFrameData->mnMouseDownTime) < nDblClkTime;
+}
+
+static void lcl_FireDragGesture(vcl::Window* pMouseDownWin, const MouseAction& rAction,
+                                sal_Int32 nClicks)
+{
+    rtl::Reference< DNDListenerContainer > xDragGestureRecognizer(
+        pMouseDownWin->ImplGetWindowLOKData()->mxDNDListenerContainer);
+
+    if (!xDragGestureRecognizer.is())
+        return;
+
+    // retrieve mouse position relative to mouse down window
+    Point relLoc = pMouseDownWin->ScreenToOutputPixel(Point(
+        pMouseDownWin->ImplGetFrameData()->mnFirstMouseX,
+        pMouseDownWin->ImplGetFrameData()->mnFirstMouseY));
+
+    // create a UNO mouse event out of the available data
+    css::awt::MouseEvent aMouseEvent(static_cast<css::uno::XInterface *>(nullptr),
+#ifdef MACOSX
+        rAction.nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3),
+#else
+        rAction.nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2),
+#endif
+        rAction.nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE),
+        rAction.aPos.X(),
+        rAction.aPos.Y(),
+        nClicks,
+        false);
+
+    SolarMutexReleaser aReleaser;
+
+    // FIXME: where do I get Action from ?
+    if (css::uno::Reference<css::datatransfer::dnd::XDragSource> xDragSource = pMouseDownWin->GetDragSource();
+        xDragSource.is())
+    {
+        xDragGestureRecognizer->fireDragGestureEvent( 0,
+            relLoc.X(), relLoc.Y(), xDragSource, css::uno::Any( aMouseEvent ) );
+    }
+}
+
+static void lcl_CheckAndInitiateStartDrag(vcl::Window* pMouseDownWin, const MouseAction& rAction,
+                                          sal_Int32 nClicks)
+{
+    const MouseSettings& rMSettings = pMouseDownWin->GetSettings().GetMouseSettings();
+
+    tools::Long nDragW  = rMSettings.GetStartDragWidth();
+    tools::Long nDragH  = rMSettings.GetStartDragHeight();
+    tools::Long nMouseX = rAction.aPos.X(); // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
+    tools::Long nMouseY = rAction.aPos.Y();
+
+    if (!lcl_ExceedsDragTolerance(nMouseX, nMouseY, nDragW, nDragH, pMouseDownWin->ImplGetFrameData()))
+        return;
+
+    pMouseDownWin->ImplGetFrameData()->mbStartDragCalled  = true;
+
+    // Check if drag source provides its own recognizer
+    if( pMouseDownWin->ImplGetFrameData()->mbInternalDragGestureRecognizer)
+        lcl_FireDragGesture(pMouseDownWin, { Point(nMouseX, nMouseY), rAction.nMsgTime, rAction.nCode, rAction.nModifiers }, nClicks);
+}
+
+static void lcl_DeliverMouseLeaveEvent(const VclPtr<vcl::Window>& pMouseMoveWin,
+                                       const MouseAction& rAction, sal_Int32 nClicks)
+{
+    const Point aLeaveMousePos = pMouseMoveWin->ScreenToOutputPixel(rAction.aPos);
+    MouseEvent aMLeaveEvt(aLeaveMousePos, nClicks, rAction.nModifiers | MouseEventModifiers::LEAVEWINDOW, rAction.nCode, rAction.nCode);
+    NotifyEvent aNLeaveEvt(NotifyEventType::MOUSEMOVE, pMouseMoveWin, &aMLeaveEvt);
+
+    // A MouseLeave can destroy this window
+    if (ImplCallPreNotify(aNLeaveEvt))
+        return;
+
+    pMouseMoveWin->MouseMove(aMLeaveEvt);
+
+    if (!pMouseMoveWin->isDisposed())
+        aNLeaveEvt.GetWindow()->ImplNotifyKeyMouseCommandEventListeners(aNLeaveEvt);
+}
+
+static void lcl_UpdateClickSequence(const VclPtr<vcl::Window>& pChild, const MouseAction& rAction,
+                                    ImplFrameData* pWinFrameData)
+{
+    if (!pChild)
+        return;
+
+    const MouseSettings& rMSettings = pChild->GetSettings().GetMouseSettings();
+    const sal_uInt64 nDblClkTime = rMSettings.GetDoubleClickTime();
+    const tools::Long nDblClkW = rMSettings.GetDoubleClickWidth();
+    const tools::Long nDblClkH = rMSettings.GetDoubleClickHeight();
+    const tools::Long nMouseX = rAction.aPos.X();   // #106074# use the possibly re-mirrored coordinates (RTL) ! nX,nY are unmodified !
+    const tools::Long nMouseY = rAction.aPos.Y();
+
+    if (lcl_IsSameTargetAsFirstClick(pChild, rAction.nCode)
+        && lcl_IsWithinDoubleClickTime(rAction.nMsgTime, nDblClkTime, pWinFrameData)
+        && lcl_IsWithinDoubleClickTolerance(nMouseX, nMouseY, nDblClkW, nDblClkH, pWinFrameData))
+    {
+        pChild->ImplGetFrameData()->mnClickCount++;
+        pChild->ImplGetFrameData()->mbStartDragCalled  = true;
+    }
+    else
+    {
+        pChild->ImplGetFrameData()->mpMouseDownWin = pChild;
+        pChild->ImplGetFrameData()->mnClickCount = 1;
+        pChild->ImplGetFrameData()->mnFirstMouseX = nMouseX;
+        pChild->ImplGetFrameData()->mnFirstMouseY = nMouseY;
+        pChild->ImplGetFrameData()->mnFirstMouseCode = rAction.nCode;
+        pChild->ImplGetFrameData()->mbStartDragCalled = (rAction.nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) !=
+                                                        (MouseSettings::GetStartDragCode() & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE));
+    }
+
+    pChild->ImplGetFrameData()->mnMouseDownTime = rAction.nMsgTime;
+}
+
+static bool lcl_CheckRedundantMouseMove(bool bMouseLeave, const VclPtr<vcl::Window>& pChild,
+                                       ImplFrameData* pWinFrameData, const Point& aMousePos,
+                                       sal_uInt16 nOldCode)
+{
+    if (!pChild)
+        return false;
+
+    Point aChildMousePos = pChild->ScreenToOutputPixel(aMousePos);
+    if (lcl_IsRedundantMouseMove(bMouseLeave, pChild, pWinFrameData, aChildMousePos, nOldCode))
+    {
+        // set mouse pointer anew, as it could have changed
+        // due to the mode switch
+        lcl_SetMousePointer(pChild);
+        return true;
+    }
+
+    pWinFrameData->mnLastMouseWinX = aChildMousePos.X();
+    pWinFrameData->mnLastMouseWinY = aChildMousePos.Y();
+
+    return false;
+}
+
+static bool lcl_CheckAndDeliverMouseLeave(ImplFrameData* pWinFrameData, VclPtr<vcl::Window>& pChild,
+                                      const MouseAction& rAction)
+{
+    if (VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
+        pMouseMoveWin && pChild != pMouseMoveWin)
+    {
+        pWinFrameData->mbInMouseMove = true;
+        pMouseMoveWin->ImplGetWindowInput()->setMouseOver(false);
+
+        lcl_DeliverMouseLeaveEvent(pMouseMoveWin, rAction, pWinFrameData->mnClickCount);
+
+        pWinFrameData->mpMouseMoveWin = nullptr;
+        pWinFrameData->mbInMouseMove = false;
+
+        if ( pChild && pChild->isDisposed() )
+            pChild = nullptr;
+
+        if ( pMouseMoveWin->isDisposed() )
+            return true;
+    }
+
+    return false;
+}
+
+enum class MouseEventRouting
+{
+    Proceed,
+    Consumed,
+    Ignored
+};
+
+static MouseEventRouting lcl_RouteMouseMove(const VclPtr<vcl::Window>& xWindow, VclPtr<vcl::Window>& pChild,
+                                            ImplFrameData* pWinFrameData, const MouseAction& rAction)
+{
+    sal_uInt16 nClicks = pWinFrameData->mnClickCount;
+
+    // call Start-Drag handler if required
+    if (vcl::Window* pMouseDownWin = pWinFrameData->mpMouseDownWin)
+        lcl_CheckAndInitiateStartDrag(pMouseDownWin, rAction, nClicks);
+
+    if (xWindow->isDisposed())
+        return MouseEventRouting::Consumed;
+
+    if (lcl_CheckAndDeliverMouseLeave(pWinFrameData, pChild, rAction))
+        return MouseEventRouting::Consumed;
+
+    // Re-evaluate pMouseMoveWin after potential changes
+    VclPtr<vcl::Window> pMouseMoveWin = pWinFrameData->mpMouseMoveWin;
+    if (pChild != pMouseMoveWin)
+        const_cast<MouseEventModifiers&>(rAction.nModifiers) |= MouseEventModifiers::ENTERWINDOW;
+
+    pWinFrameData->mpMouseMoveWin = pChild;
+
+    if (pChild)
+        pChild->ImplGetWindowInput()->setMouseOver(true);
+
+    // MouseLeave
+    if (!pChild)
+        return MouseEventRouting::Ignored;
+
+    return MouseEventRouting::Proceed;
+}
+
+static bool lcl_RaiseWindow(const VclPtr<vcl::Window>& pChild)
+{
+    ImplSVData* pSVData = ImplGetSVData();
+
+    if (!pSVData->mpWinData->mpFirstFloat
+        && !(pChild->ImplGetFrameWindow()->GetStyle() & WB_OWNERDRAWDECORATION))
+    {
+        pChild->ToTop();
+    }
+
+    return pChild->isDisposed();
+}
+
+static bool lcl_InvokeTrackingEvent(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                    const MouseEvent& rMEvt, bool& rCallHelpRequest)
+{
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+    {
+        TrackingEvent aTEvt(rMEvt);
+        pChild->Tracking(aTEvt);
+
+        ImplSVData* pSVData = ImplGetSVData();
+
+        // When ScrollRepeat, we restart the timer
+        if (!pChild->isDisposed() && pSVData->mpWinData->mpTrackTimer &&
+            (pSVData->mpWinData->mnTrackFlags & StartTrackingFlags::ScrollRepeat))
+        {
+            pSVData->mpWinData->mpTrackTimer->Start();
+        }
+
+        rCallHelpRequest = false;
+    }
+    else if (nSVEvent != NotifyEventType::MOUSEBUTTONDOWN) // MouseButtonUp
+    {
+        pChild->EndTracking();
+    }
+
+    // Tracking events always return true
+    return true;
+}
+
+static bool lcl_InvokeStandardMouseEvent(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                         const MouseEvent& rMEvt, bool& rCallHelpRequest)
+{
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+    {
+        if (pChild->isDisposed())
+        {
+            rCallHelpRequest = false;
+        }
+        else
+        {
+            // if the MouseMove changes the help window's visibility,
+            // the HelpRequest should not be called anymore
+            vcl::Window* pOldHelpTextWin = ImplGetSVHelpData().mpHelpWin;
+            pChild->MouseMove(rMEvt);
+
+            if (pOldHelpTextWin != ImplGetSVHelpData().mpHelpWin)
+                rCallHelpRequest = false;
+        }
+    }
+    else if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
+    {
+        pChild->ImplGetWindowInput()->clearMouseButtonDown();
+        pChild->MouseButtonDown(rMEvt);
+    }
+    else // MouseButtonUp
+    {
+        pChild->ImplGetWindowInput()->clearMouseButtonUp();
+        pChild->MouseButtonUp(rMEvt);
+    }
+
+    // Standard core events return false at this stage
+    return false;
+}
+
+static bool lcl_DispatchMouseEvent(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                   NotifyEvent& rNEvt, const MouseEvent& rMEvt,
+                                   bool& rCallHelpRequest)
+{
+    if (ImplCallPreNotify(rNEvt) || pChild->isDisposed())
+        return true;
+
+    bool bEventConsumed;
+    ImplSVData* pSVData = ImplGetSVData();
+
+    // Route based on active tracking mode
+    if (pSVData->mpWinData->mpTrackWin)
+        bEventConsumed = lcl_InvokeTrackingEvent(pChild, nSVEvent, rMEvt, rCallHelpRequest);
+    else
+        bEventConsumed = lcl_InvokeStandardMouseEvent(pChild, nSVEvent, rMEvt, rCallHelpRequest);
+
+    assert(rNEvt.GetWindow() == pChild);
+
+    if (!pChild->isDisposed())
+        pChild->ImplNotifyKeyMouseCommandEventListeners(rNEvt);
+
+    return bEventConsumed;
+}
+
+static void lcl_UpdateMouseMoveState(const VclPtr<vcl::Window>& pChild, const MouseEvent& rMEvt,
+                                     bool bCallHelpRequest, bool bMouseLeave)
+{
+    pChild->ImplGetPlatformState()->mpFrameData->mbInMouseMove = false;
+
+    if (bCallHelpRequest && !ImplGetSVHelpData().mbKeyboardHelp)
+        lcl_HandleMouseHelpRequest(pChild, pChild->OutputToScreenPixel(rMEvt.GetPosPixel()));
+
+    // set new mouse pointer
+    if (!bMouseLeave)
+        lcl_SetMousePointer(pChild);
+}
+
+static bool lcl_CheckButtonConsumption(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                       bool bEventConsumed)
+{
+    if (bEventConsumed)
+        return true;
+
+    // Check if the button flags were reset by the event invocation,
+    // which indicates the event was consumed.
+    if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
+        return !pChild->ImplGetWindowInput()->isMouseButtonDown();
+    else
+        return !pChild->ImplGetWindowInput()->isMouseButtonUp();
+}
+
+static bool lcl_DispatchCommandEvents(const VclPtr<vcl::Window>& pChild, NotifyEventType nSVEvent,
+                                      sal_uInt16 nClicks, sal_uInt16 nCode,
+                                      const Point& rChildPos, bool bRet)
+{
+    if ((nSVEvent != NotifyEventType::MOUSEBUTTONDOWN) && (nSVEvent != NotifyEventType::MOUSEBUTTONUP))
+        return bRet;
+
+    // Command-Events
+    if (/*!bRet &&*/ (nClicks == 1) && (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN) &&
+        (nCode == MOUSE_MIDDLE))
+    {
+        MouseMiddleButtonAction nMiddleAction = pChild->GetSettings().GetMouseSettings().GetMiddleButtonAction();
+        if (nMiddleAction == MouseMiddleButtonAction::AutoScroll)
+            bRet = !ImplCallCommand(pChild, CommandEventId::StartAutoScroll, nullptr, true, &rChildPos);
+        else if (nMiddleAction == MouseMiddleButtonAction::PasteSelection)
+            bRet = !ImplCallCommand(pChild, CommandEventId::PasteSelection, nullptr, true, &rChildPos);
+
+        return bRet;
+    }
+
+    // ContextMenu
+    if ((nCode != MouseSettings::GetContextMenuCode()) ||
+        (nClicks != MouseSettings::GetContextMenuClicks()))
+    {
+        return bRet;
+    }
+
+    bool bContextMenu = (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN);
+    if (!bContextMenu)
+        return bRet;
+
+    ImplSVData* pSVData = ImplGetSVData();
+    if (!pSVData->maAppData.mpActivePopupMenu)
+        return !ImplCallCommand(pChild, CommandEventId::ContextMenu, nullptr, true, &rChildPos);
+
+    /*  #i34277# there already is a context menu open
+     *  that was probably just closed with EndPopupMode.
+     *  We need to give the eventual corresponding
+     *  PopupMenu::Execute a chance to end properly.
+     *  Therefore delay context menu command and
+     *  issue only after popping one frame of the
+     *  Yield stack.
+     */
+    ContextMenuEvent* pEv = new ContextMenuEvent;
+    pEv->pWindow = pChild;
+    pEv->aChildPos = rChildPos;
+    Application::PostUserEvent(LINK_NONMEMBER(pEv, lcl_ContextMenuEventLink));
+
+    return bRet;
+}
+
+bool ImplHandleMouseEvent( const VclPtr<vcl::Window>& xWindow, NotifyEventType nSVEvent, bool bMouseLeave,
+                           Point aMousePos, sal_uInt64 nMsgTime,
+                           sal_uInt16 nCode, MouseEventModifiers nModifiers )
+{
+    SAL_INFO( "vcl.debugevent",
+              "mouse event "
+               "(NotifyEventType " << static_cast<sal_uInt16>(nSVEvent) << ") "
+               "(MouseLeave " << bMouseLeave << ") "
+               "(X, Y " << aMousePos.X() << ", " << aMousePos.Y() << ") "
+               "(Code " << nCode << ") "
+               "(Modifiers " << static_cast<sal_uInt16>(nModifiers) << ")");
+
+    if (lcl_NeedsLOKRemirroring(xWindow))
+        xWindow->GetOutDev()->ReMirror(aMousePos);
+
+    MouseAction aAction { aMousePos, nMsgTime, nCode, nModifiers };
+
+    // we need a mousemove event, before we get a mousebuttondown or a mousebuttonup event
+    if (lcl_EnforceMouseMoveBeforeClick(xWindow, nSVEvent, aAction))
+        return true;
+
+    ImplFrameData* pWinFrameData = xWindow->ImplGetFrameData();
+    const sal_uInt16 nOldCode = lcl_UpdateFrameMouseState(pWinFrameData, aAction);
+
+    pWinFrameData->mbMouseIn = !bMouseLeave;
+
+    if (bMouseLeave && lcl_TeardownKillableTooltip(xWindow))
+        return true;
+
+    ImplSVData* pSVData = ImplGetSVData();
+
+    DBG_ASSERT(!pSVData->mpWinData->mpTrackWin
+                   || (pSVData->mpWinData->mpTrackWin == pSVData->mpWinData->mpCaptureWin),
+               "ImplHandleMouseEvent: TrackWin != CaptureWin");
+
+    // AutoScrollMode
+    if (pSVData->mpWinData->mpAutoScrollWin && (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN))
+    {
+        pSVData->mpWinData->mpAutoScrollWin->EndAutoScroll();
+        return true;
+    }
+
+    std::optional<VclPtr<vcl::Window>> oChild = lcl_FindMouseWindow(xWindow, bMouseLeave, aMousePos);
+    if (!oChild)
+        return false;
+
+    VclPtr<vcl::Window> pChild = *oChild;
+
+    // execute a few tests and catch the message or implement the status
+    if (pChild)
+    {
+        if (const OutputDevice *pChildWinOutDev = pChild->GetOutDev();
+            pChildWinOutDev->ImplIsAntiparallel())
+        {
+            pChildWinOutDev->ReMirror(aMousePos);
+            aAction = { aMousePos, nMsgTime, nCode, nModifiers };
+        }
+
+        if (lcl_IsMouseInputBlocked(pChild))
+            return lcl_TryConsumeBlockedEvent(pChild, aAction, nSVEvent, bMouseLeave);
+
+        // End ExtTextInput-Mode, if the user click in the same TopLevel Window
+        if (lcl_IsClickDuringExtTextInput(nSVEvent))
+            pSVData->mpWinData->mpExtTextInputWin->EndExtTextInput();
+    }
+
+    sal_uInt16 nClicks = 0;
+
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+    {
+        nClicks = pWinFrameData->mnClickCount;
+
+        if (lcl_CheckRedundantMouseMove(bMouseLeave, pChild, pWinFrameData, aMousePos, nOldCode))
+            return false;
+
+        MouseEventRouting eRoute = lcl_RouteMouseMove(xWindow, pChild, pWinFrameData, aAction);
+
+        if (eRoute == MouseEventRouting::Consumed)
+            return true;
+        if (eRoute == MouseEventRouting::Ignored)
+            return false;
+    }
+    else
+    {
+        lcl_UpdateClickSequence(pChild, aAction, pWinFrameData);
+        pSVData->maAppData.mnLastInputTime = tools::Time::GetSystemTicks();
+    }
+
+    SAL_WARN_IF( !pChild, "vcl", "ImplHandleMouseEvent: pChild == NULL" );
+
+    if (!pChild)
+        return false;
+
+    // create mouse event
+    Point aChildPos = pChild->ScreenToOutputPixel( aMousePos );
+    MouseEvent aMEvt( aChildPos, nClicks, nModifiers, nCode, nCode );
+
+    // tracking window gets the mouse events
+    if (pSVData->mpWinData->mpTrackWin)
+        pChild = pSVData->mpWinData->mpTrackWin;
+
+    // handle FloatingMode
+    if (!pSVData->mpWinData->mpTrackWin && pSVData->mpWinData->mpFirstFloat
+        && lcl_DispatchFloatMouseEvent(pChild, aAction, nSVEvent, bMouseLeave))
+    {
+        if ( !pChild->isDisposed() )
+            pChild->ImplGetFrameData()->mbStartDragCalled = true;
+
+        return true;
+    }
+
+    // call handler
+    bool bCallHelpRequest = true;
+    SAL_WARN_IF( !pChild, "vcl", "ImplHandleMouseEvent: pChild is NULL" );
+
+    if (!pChild)
+        return false;
+
+    NotifyEvent aNEvt( nSVEvent, pChild, &aMEvt );
+    if ( nSVEvent == NotifyEventType::MOUSEMOVE )
+        pChild->ImplGetFrameData()->mbInMouseMove = true;
+
+    // bring window into foreground on mouseclick
+    if (nSVEvent == NotifyEventType::MOUSEBUTTONDOWN)
+    {
+        if (lcl_RaiseWindow(pChild))
+            return true;
+    }
+
+    bool bEventConsumed = lcl_DispatchMouseEvent(pChild, nSVEvent, aNEvt, aMEvt, bCallHelpRequest);
+
+    if (pChild->isDisposed())
+        return true;
+
+    // Route final state updates based on event type
+    if (nSVEvent == NotifyEventType::MOUSEMOVE)
+    {
+        lcl_UpdateMouseMoveState(pChild, aMEvt, bCallHelpRequest, bMouseLeave);
+        return true; // Mouse moves do not generate the command events below
+    }
+
+    // Update consumption state for button events
+    bEventConsumed = lcl_CheckButtonConsumption(pChild, nSVEvent, bEventConsumed);
+
+    return lcl_DispatchCommandEvents(pChild, nSVEvent, nClicks, nCode, aChildPos, bEventConsumed);
+}
+
+static bool lcl_ExecuteLOKDragOver(ImplFrameData* pFrameData, vcl::Window* pDragWin,
+                                   sal_uInt16 nCode, const Point& aWinPos)
+{
+    css::uno::Reference<css::datatransfer::dnd::XDropTargetDragContext> xDropTargetDragContext =
+        new GenericDropTargetDragContext();
+    rtl::Reference<DNDListenerContainer> xDropTarget(
+        pDragWin->ImplGetWindowLOKData()->mxDNDListenerContainer);
+
+    if (!xDropTarget.is() ||
+        !xDropTargetDragContext.is() ||
+        (nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) !=
+        (MouseSettings::GetStartDragCode() & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)))
+    {
+        pFrameData->mbStartDragCalled = pFrameData->mbDragging = false;
+        return false;
+    }
+
+    xDropTarget->fireDragOverEvent(
+        xDropTargetDragContext,
+        css::datatransfer::dnd::DNDConstants::ACTION_MOVE,
+        aWinPos.X(),
+        aWinPos.Y(),
+        (css::datatransfer::dnd::DNDConstants::ACTION_COPY |
+         css::datatransfer::dnd::DNDConstants::ACTION_MOVE |
+         css::datatransfer::dnd::DNDConstants::ACTION_LINK));
+
+    return true;
+}
+
+static bool lcl_ExecuteLOKDrop(ImplFrameData* pFrameData, vcl::Window* pDragWin,
+                               const Point& aMousePos)
+{
+    css::uno::Reference<css::datatransfer::XTransferable> xTransfer;
+    css::uno::Reference<css::datatransfer::dnd::XDropTargetDropContext> xDropTargetDropContext =
+        new GenericDropTargetDropContext();
+    rtl::Reference<DNDListenerContainer> xDropTarget(
+        pDragWin->ImplGetWindowLOKData()->mxDNDListenerContainer);
+
+    if (!xDropTarget.is() || !xDropTargetDropContext.is())
+    {
+        pFrameData->mbStartDragCalled = pFrameData->mbDragging = false;
+        return false;
+    }
+
+    Point dragOverPos = pDragWin->ScreenToOutputPixel(aMousePos);
+    xDropTarget->fireDropEvent(
+        xDropTargetDropContext,
+        css::datatransfer::dnd::DNDConstants::ACTION_MOVE,
+        dragOverPos.X(),
+        dragOverPos.Y(),
+        (css::datatransfer::dnd::DNDConstants::ACTION_COPY |
+         css::datatransfer::dnd::DNDConstants::ACTION_MOVE |
+         css::datatransfer::dnd::DNDConstants::ACTION_LINK),
+        xTransfer);
+
+    pFrameData->mbStartDragCalled = pFrameData->mbDragging = false;
+    return true;
+}
+
+static void lcl_CheckLOKDragGesture(ImplFrameData* pFrameData, vcl::Window* pDownWin,
+                                    sal_uInt16 nCode, sal_uInt16 nClicks,
+                                    const Point& aMousePos, const Point& aWinPos)
+{
+    const MouseSettings& aSettings = pDownWin->GetSettings().GetMouseSettings();
+    if ((nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)) !=
+        (MouseSettings::GetStartDragCode() & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE)))
+    {
+        return;
+    }
+
+    if (pFrameData->mbStartDragCalled)
+        return;
+
+    tools::Long nDragWidth = aSettings.GetStartDragWidth();
+    tools::Long nDragHeight = aSettings.GetStartDragHeight();
+    tools::Long nMouseX = aMousePos.X();
+    tools::Long nMouseY = aMousePos.Y();
+
+    if (((nMouseX - nDragWidth) > pFrameData->mnFirstMouseX ||
+         (nMouseX + nDragWidth) < pFrameData->mnFirstMouseX) ||
+        ((nMouseY - nDragHeight) > pFrameData->mnFirstMouseY ||
+         (nMouseY + nDragHeight) < pFrameData->mnFirstMouseY))
+    {
+        pFrameData->mbStartDragCalled = true;
+
+        if (!pFrameData->mbInternalDragGestureRecognizer)
+            return;
+
+        rtl::Reference<DNDListenerContainer> xDragGestureRecognizer(
+            pDownWin->ImplGetWindowLOKData()->mxDNDListenerContainer);
+
+        if (!xDragGestureRecognizer.is())
+            return;
+
+        css::awt::MouseEvent aEvent(
+            static_cast<css::uno::XInterface*>(nullptr),
+#ifdef MACOSX
+            nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2 | KEY_MOD3),
+#else
+            nCode & (KEY_SHIFT | KEY_MOD1 | KEY_MOD2),
+#endif
+            nCode & (MOUSE_LEFT | MOUSE_RIGHT | MOUSE_MIDDLE),
+            nMouseX, nMouseY, nClicks, false);
+
+        css::uno::Reference<css::datatransfer::dnd::XDragSource> xDragSource =
+            pDownWin->GetDragSource();
+
+        if (xDragSource.is())
+        {
+            xDragGestureRecognizer->fireDragGestureEvent(
+                0, aWinPos.X(), aWinPos.Y(), xDragSource, css::uno::Any(aEvent));
+        }
+    }
+}
+
+bool ImplLOKHandleMouseEvent(const VclPtr<vcl::Window>& xWindow, NotifyEventType nEvent, bool /*bMouseLeave*/,
+                           tools::Long nX, tools::Long nY, sal_uInt64 /*nMsgTime*/,
+                           sal_uInt16 nCode, MouseEventModifiers nModifiers, sal_uInt16 nClicks)
+{
+    Point aMousePos(nX, nY);
+
+    if (!xWindow || xWindow->isDisposed())
+        return false;
+
+    ImplFrameData* pFrameData = xWindow->ImplGetFrameData();
+    if (!pFrameData)
+        return false;
+
+    Point aWinPos = xWindow->ScreenToOutputPixel(aMousePos);
+
+    pFrameData->mnLastMouseX = nX;
+    pFrameData->mnLastMouseY = nY;
+    pFrameData->mnClickCount = nClicks;
+    pFrameData->mnMouseCode = nCode;
+    pFrameData->mbMouseIn = false;
+
+    vcl::Window* pDragWin = pFrameData->mpMouseDownWin;
+    if (pDragWin && pFrameData->mbDragging)
+    {
+        if (nEvent == NotifyEventType::MOUSEMOVE)
+            return lcl_ExecuteLOKDragOver(pFrameData, pDragWin, nCode, aWinPos);
+        if (nEvent == NotifyEventType::MOUSEBUTTONUP)
+            return lcl_ExecuteLOKDrop(pFrameData, pDragWin, aMousePos);
+    }
+
+    if (pFrameData->mbDragging)
+    {
+        pFrameData->mbStartDragCalled = pFrameData->mbDragging = false;
+        return false;
+    }
+
+    vcl::Window* pDownWin = pFrameData->mpMouseDownWin;
+    if (pDownWin && nEvent == NotifyEventType::MOUSEMOVE)
+    {
+        lcl_CheckLOKDragGesture(pFrameData, pDownWin, nCode, nClicks, aMousePos, aWinPos);
+    }
+
+    MouseEvent aMouseEvent(aWinPos, nClicks, nModifiers, nCode, nCode);
+    if (nEvent == NotifyEventType::MOUSEMOVE)
+    {
+        if (pFrameData->mpTrackWin)
+        {
+            TrackingEvent aTrackingEvent(aMouseEvent);
+            pFrameData->mpTrackWin->Tracking(aTrackingEvent);
+        }
+        else
+        {
+            xWindow->MouseMove(aMouseEvent);
+        }
+    }
+    else if (nEvent == NotifyEventType::MOUSEBUTTONDOWN && !pFrameData->mpTrackWin)
+    {
+        pFrameData->mpMouseDownWin = xWindow;
+        pFrameData->mnFirstMouseX = aMousePos.X();
+        pFrameData->mnFirstMouseY = aMousePos.Y();
+
+        xWindow->MouseButtonDown(aMouseEvent);
+    }
+    else
+    {
+        if (pFrameData->mpTrackWin)
+            pFrameData->mpTrackWin->EndTracking();
+
+        pFrameData->mpMouseDownWin = nullptr;
+        pFrameData->mpMouseMoveWin = nullptr;
+        pFrameData->mbStartDragCalled = false;
+        xWindow->MouseButtonUp(aMouseEvent);
+    }
+
+    if (nEvent != NotifyEventType::MOUSEBUTTONDOWN)
+        return true;
+
+    // ContextMenu
+    if ((nCode == MouseSettings::GetContextMenuCode()) &&
+        (nClicks == MouseSettings::GetContextMenuClicks()))
+    {
+        ImplCallCommand(xWindow, CommandEventId::ContextMenu, nullptr, true, &aWinPos);
+    }
+
+    return true;
+}
+
+/* vim:set shiftwidth=4 softtabstop=4 expandtab: */

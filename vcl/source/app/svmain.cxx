@@ -54,9 +54,9 @@
 #include <vcl/print.hxx>
 
 #include <bitmap/BlendFrameCache.hxx>
-#include <window/debugevent.hxx>
+#include <window/events/debugevent.hxx>
 #include <window/subclasses/controls/scrwnd.hxx>
-#include <window/windowdev.hxx>
+#include <window/state/windowdev.hxx>
 #include <svdata.hxx>
 
 #ifdef _WIN32
@@ -76,7 +76,7 @@
 #include <salinst.hxx>
 #include <vcl/svmain.hxx>
 #include <dbggui.hxx>
-#include <accmgr.hxx>
+#include <window/accessibility/accmgr.hxx>
 #include <font/PhysicalFontCollection.hxx>
 #include <print.h>
 #include <salsys.hxx>

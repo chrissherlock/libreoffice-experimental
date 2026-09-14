@@ -38,16 +38,16 @@
 #include <vcl/uitest/uiobject.hxx>
 #include <vcl/inputctx.hxx>
 
-#include <window/clipping_window.hxx>
+#include <window/state/clipping_window.hxx>
 
 #include <accessibility/vclxaccessiblebutton.hxx>
 #include <accessibility/vclxaccessiblecheckbox.hxx>
 #include <accessibility/vclxaccessibleradiobutton.hxx>
 #include <bitmaps.hlst>
 #include <svdata.hxx>
-#include <window/WindowStyleState.hxx>
-#include <window/WindowClassification.hxx>
-#include <window/WindowFocusState.hxx>
+#include <window/state/WindowStyleState.hxx>
+#include <window/state/WindowClassification.hxx>
+#include <window/state/WindowFocusState.hxx>
 #include <salwtype.hxx>
 #include <vclstatuslistener.hxx>
 #include <osl/diagnose.h>

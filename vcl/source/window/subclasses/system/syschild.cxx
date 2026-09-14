@@ -22,10 +22,10 @@
 #include <vcl/svapp.hxx>
 #include <vcl/syschild.hxx>
 
-#include <window/WindowPlatformState.hxx>
-#include <window/ImplFrameData.hxx>
-#include <window/clipping_window.hxx>
-#include <window/WindowClassification.hxx>
+#include <window/state/WindowPlatformState.hxx>
+#include <window/state/ImplFrameData.hxx>
+#include <window/state/clipping_window.hxx>
+#include <window/state/WindowClassification.hxx>
 #include <salframe.hxx>
 #include <salinst.hxx>
 #include <salobj.hxx>

@@ -31,11 +31,11 @@
 #include <vcl/settings.hxx>
 #include <vcl/ptrstyle.hxx>
 
-#include <window/WindowStyleState.hxx>
-#include <window/WindowHierarchy.hxx>
-#include <window/WindowInvalidation.hxx>
+#include <window/state/WindowStyleState.hxx>
+#include <window/state/WindowHierarchy.hxx>
+#include <window/state/WindowInvalidation.hxx>
 #include <clipping.hxx>
-#include <window/clipping_window.hxx>
+#include <window/state/clipping_window.hxx>
 #include <bitmaps.hlst>
 #include <toolbarvalue.hxx>
 
@@ -47,9 +47,9 @@
 
 #include <com/sun/star/awt/GradientStyle.hpp>
 
-#include <accel.hxx>
+#include <window/events/accel.hxx>
 #include <svdata.hxx>
-#include <window/WindowClassification.hxx>
+#include <window/state/WindowClassification.hxx>
 #include <window/subclasses/controls/toolbox.h>
 #include <spin.hxx>
 #if defined(_WIN32)

@@ -32,9 +32,9 @@
 #include <vcl/settings.hxx>
 #include <config_features.h>
 #include <svdata.hxx>
-#include <window/WindowClassification.hxx>
-#include <window/WindowControlAppearance.hxx>
-#include <window/WindowHierarchy.hxx>
+#include <window/state/WindowClassification.hxx>
+#include <window/state/WindowControlAppearance.hxx>
+#include <window/state/WindowHierarchy.hxx>
 
 #define STATUSBAR_OFFSET_X      STATUSBAR_OFFSET
 #define STATUSBAR_OFFSET_Y      2

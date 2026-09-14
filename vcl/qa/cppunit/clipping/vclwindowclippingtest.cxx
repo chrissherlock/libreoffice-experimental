@@ -19,9 +19,9 @@
 #include <vcl/svapp.hxx>
 
 #include <window/window.h>
-#include <window/WindowClippingState.hxx>
-#include <window/WindowVisibilityState.hxx>
-#include <window/clipping_window.hxx>
+#include <window/state/WindowClippingState.hxx>
+#include <window/state/WindowVisibilityState.hxx>
+#include <window/state/clipping_window.hxx>
 
 namespace
 {

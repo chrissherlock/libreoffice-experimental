@@ -39,11 +39,11 @@
 #include <vcl/uitest/uiobject.hxx>
 #include <vcl/weld/MessageDialog.hxx>
 #include <vcl/inputctx.hxx>
-#include <window/WindowPlatformState.hxx>
+#include <window/state/WindowPlatformState.hxx>
 
 #include <accessibility/vclxaccessibleedit.hxx>
-#include <window/PaintBufferGuard.hxx>
-#include <window/WindowControlAppearance.hxx>
+#include <window/paint/PaintBufferGuard.hxx>
+#include <window/state/WindowControlAppearance.hxx>
 #include <svdata.hxx>
 #include <strings.hrc>
 #include <bitmaps.hlst>

@@ -31,7 +31,7 @@
 #include <vcl/help.hxx>
 #include <vcl/settings.hxx>
 
-#include <window/clipping_window.hxx>
+#include <window/state/clipping_window.hxx>
 #include <window/subclasses/floating/helpwin.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>

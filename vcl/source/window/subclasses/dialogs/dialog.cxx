@@ -34,18 +34,18 @@
 #include <osl/diagnose.h>
 
 #include <window/window.h>
-#include <window/WindowClassification.hxx>
-#include <window/WindowPlatformState.hxx>
-#include <window/WindowStyleState.hxx>
-#include <window/WindowHierarchy.hxx>
-#include <window/WindowA11y.hxx>
-#include <window/ImplFrameData.hxx>
+#include <window/state/WindowClassification.hxx>
+#include <window/state/WindowPlatformState.hxx>
+#include <window/state/WindowStyleState.hxx>
+#include <window/state/WindowHierarchy.hxx>
+#include <window/state/WindowA11y.hxx>
+#include <window/state/ImplFrameData.hxx>
 #include <svdata.hxx>
-#include <window/WindowClassification.hxx>
-#include <window/WindowInput.hxx>
-#include <window/WindowControlAppearance.hxx>
-#include <window/WindowGeometry.hxx>
-#include <accel.hxx>
+#include <window/state/WindowClassification.hxx>
+#include <window/state/WindowInput.hxx>
+#include <window/state/WindowControlAppearance.hxx>
+#include <window/state/WindowGeometry.hxx>
+#include <window/events/accel.hxx>
 #include <window/subclasses/decorations/brdwin.hxx>
 #include <salinst.hxx>
 

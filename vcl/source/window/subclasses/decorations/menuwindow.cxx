@@ -24,7 +24,7 @@
 #include <vcl/window.hxx>
 
 #include <window/subclasses/decorations/menuwindow.hxx>
-#include <menuitemlist.hxx>
+#include <window/menu/menuitemlist.hxx>
 
 static sal_uLong ImplChangeTipTimeout( sal_uLong nTimeout, vcl::Window *pWindow )
 {

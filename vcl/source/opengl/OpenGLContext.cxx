@@ -19,7 +19,7 @@
 #include <osl/thread.hxx>
 #include <sal/log.hxx>
 
-#include <window/clipping_window.hxx>
+#include <window/state/clipping_window.hxx>
 #include <svdata.hxx>
 #include <salgdi.hxx>
 #include <salinst.hxx>

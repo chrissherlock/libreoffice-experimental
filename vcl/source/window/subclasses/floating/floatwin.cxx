@@ -17,14 +17,14 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <window/ImplFrameData.hxx>
+#include <window/state/ImplFrameData.hxx>
 #include <svdata.hxx>
 #include <window/subclasses/decorations/brdwin.hxx>
-#include <window/WindowClassification.hxx>
-#include <window/WindowPlatformState.hxx>
-#include <window/WindowGeometry.hxx>
-#include <window/WindowHierarchy.hxx>
-#include <window/WindowStyleState.hxx>
+#include <window/state/WindowClassification.hxx>
+#include <window/state/WindowPlatformState.hxx>
+#include <window/state/WindowGeometry.hxx>
+#include <window/state/WindowHierarchy.hxx>
+#include <window/state/WindowStyleState.hxx>
 #include <salframe.hxx>
 #include <window/subclasses/floating/helpwin.hxx>
 

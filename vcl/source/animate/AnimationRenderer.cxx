@@ -25,8 +25,8 @@
 #include <animate/AnimationRenderer.hxx>
 
 #include <window/window.h>
-#include <window/PaintBufferGuard.hxx>
-#include <window/WindowPlatformState.hxx>
+#include <window/paint/PaintBufferGuard.hxx>
+#include <window/state/WindowPlatformState.hxx>
 
 #include <memory>
 

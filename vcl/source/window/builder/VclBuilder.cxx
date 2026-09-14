@@ -49,8 +49,8 @@
 #include <window/subclasses/controls/OptionalBox.hxx>
 #include <PriorityMergedHBox.hxx>
 #include <SvHeaderTabListBox.hxx>
-#include <window/WindowHierarchy.hxx>
-#include <window/WindowInput.hxx>
+#include <window/state/WindowHierarchy.hxx>
+#include <window/state/WindowInput.hxx>
 
 #include <bitmaps.hlst>
 

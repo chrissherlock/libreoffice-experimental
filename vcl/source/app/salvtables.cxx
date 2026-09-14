@@ -82,8 +82,8 @@
 #include <vcl/virdev.hxx>
 #include <bitmaps.hlst>
 #include <listbox.hxx>
-#include <window/WindowClippingState.hxx>
-#include <window/WindowVisibilityState.hxx>
+#include <window/state/WindowClippingState.hxx>
+#include <window/state/WindowVisibilityState.hxx>
 #include <window/subclasses/dialogs/wizdlg.hxx>
 #include <salvtables.hxx>
 #include <comphelper/lok.hxx>

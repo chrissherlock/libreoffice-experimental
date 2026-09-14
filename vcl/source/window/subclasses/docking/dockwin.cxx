@@ -34,14 +34,14 @@
 #include <officecfg/Office/Common.hxx>
 
 #include <window/window.h>
-#include <accel.hxx>
+#include <window/events/accel.hxx>
 #include <svdata.hxx>
-#include <window/WindowClassification.hxx>
-#include <window/WindowLOKData.hxx>
-#include <window/WindowHierarchy.hxx>
-#include <window/WindowLayoutData.hxx>
-#include <window/WindowA11y.hxx>
-#include <window/WindowGeometry.hxx>
+#include <window/state/WindowClassification.hxx>
+#include <window/state/WindowLOKData.hxx>
+#include <window/state/WindowHierarchy.hxx>
+#include <window/state/WindowLayoutData.hxx>
+#include <window/state/WindowA11y.hxx>
+#include <window/state/WindowGeometry.hxx>
 #include <window/subclasses/decorations/brdwin.hxx>
 
 #include "window/subclasses/docking/impldockingwrapper.hxx"

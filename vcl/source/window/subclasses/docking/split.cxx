@@ -30,7 +30,7 @@
 #include <tools/lazydelete.hxx>
 #include <tools/mapunit.hxx>
 
-#include <window/WindowClassification.hxx>
+#include <window/state/WindowClassification.hxx>
 
 namespace
 {

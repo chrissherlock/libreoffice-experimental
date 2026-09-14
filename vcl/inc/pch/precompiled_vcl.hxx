@@ -281,7 +281,7 @@
 #endif // PCH_LEVEL >= 3
 #if PCH_LEVEL >= 4
 #include <ImplOutDevData.hxx>
-#include <accel.hxx>
+#include <window/events/accel.hxx>
 #include <window/subclasses/decorations/brdwin.hxx>
 #include <drawmode.hxx>
 #include <fontattributes.hxx>

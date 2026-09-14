@@ -26,7 +26,7 @@
 #include <vcl/toolkit/fixed.hxx>
 #include <vcl/settings.hxx>
 
-#include <window/clipping_window.hxx>
+#include <window/state/clipping_window.hxx>
 
 #include <comphelper/base64.hxx>
 #include <comphelper/string.hxx>

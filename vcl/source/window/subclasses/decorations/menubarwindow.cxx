@@ -18,7 +18,7 @@
  */
 
 #include "window/subclasses/decorations/menubarwindow.hxx"
-#include "menuitemlist.hxx"
+#include "window/menu/menuitemlist.hxx"
 #include "window/subclasses/floating/menufloatingwindow.hxx"
 
 #include <comphelper/OAccessible.hxx>
@@ -28,16 +28,16 @@
 #include <vcl/taskpanelist.hxx>
 #include <sal/log.hxx>
 
-#include <window/ImplFrameData.hxx>
-#include <window/clipping_window.hxx>
+#include <window/state/ImplFrameData.hxx>
+#include <window/state/clipping_window.hxx>
 #include <salframe.hxx>
 #include <salmenu.hxx>
 #include <svdata.hxx>
 #include <strings.hrc>
 #include <bitmaps.hlst>
-#include <window/WindowClassification.hxx>
-#include <window/WindowPlatformState.hxx>
-#include "bufferdevice.hxx"
+#include <window/state/WindowClassification.hxx>
+#include <window/state/WindowPlatformState.hxx>
+#include "window/paint/bufferdevice.hxx"
 #include <menubarvalue.hxx>
 
 // document closing button

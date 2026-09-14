@@ -29,9 +29,9 @@
 #include <svdata.hxx>
 #include <salframe.hxx>
 #include <window/subclasses/decorations/brdwin.hxx>
-#include <window/WindowGeometry.hxx>
-#include <window/WindowHierarchy.hxx>
-#include <window/WindowPlatformState.hxx>
+#include <window/state/WindowGeometry.hxx>
+#include <window/state/WindowHierarchy.hxx>
+#include <window/state/WindowPlatformState.hxx>
 
 void WorkWindow::ImplInitWorkWindowData()
 {
