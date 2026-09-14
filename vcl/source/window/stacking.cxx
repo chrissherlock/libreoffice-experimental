@@ -68,121 +68,149 @@ vcl::Window* Window::ImplGetTopmostFrameWindow() const
     return pTopmostParent->mpHierarchy->mpFrameWindow;
 }
 
-void Window::ImplInsertWindow( vcl::Window* pParent )
+void Window::ImplInsertWindow(vcl::Window* pParent)
 {
     mpHierarchy->mpParent = pParent;
     mpHierarchy->mpRealParent = pParent;
 
-    if ( !pParent || mpClassification->mbFrame )
+    if (!pParent || mpClassification->mbFrame)
         return;
 
-    // search frame window and set window frame data
+    ImplAttachToFrame(pParent);
+
+    if (ImplIsOverlapWindow())
+        ImplInsertOverlapWindow(pParent);
+    else
+        ImplInsertChildWindow(pParent);
+}
+
+void Window::ImplAttachToFrame(vcl::Window* pParent)
+{
     vcl::Window* pFrameParent = pParent->mpHierarchy->mpFrameWindow;
     mpPlatformState->mpFrameData = pFrameParent->mpPlatformState->mpFrameData;
+
     if (mpPlatformState->mpFrame != pFrameParent->mpPlatformState->mpFrame)
     {
         mpPlatformState->mpFrame = pFrameParent->mpPlatformState->mpFrame;
+
         if (mpPlatformState->mpSysObj)
             mpPlatformState->mpSysObj->Reparent(mpPlatformState->mpFrame);
     }
 
-    mpHierarchy->mpFrameWindow   = pFrameParent;
-    mpClassification->mbFrame         = false;
-
-    // search overlap window and insert window in list
-    if ( ImplIsOverlapWindow() )
-    {
-        vcl::Window* pFirstOverlapParent = pParent;
-        while ( !pFirstOverlapParent->ImplIsOverlapWindow() )
-        {
-            pFirstOverlapParent = pFirstOverlapParent->ImplGetParent();
-        }
-
-        mpHierarchy->mpOverlapWindow = pFirstOverlapParent;
-
-        // --- Update global frame overlap list pointers ---
-        mpHierarchy->mpNextOverlap = mpPlatformState->mpFrameData->mpFirstOverlap;
-        if ( mpHierarchy->mpNextOverlap )
-            mpHierarchy->mpNextOverlap->mpHierarchy->mpPrevOverlap = this; // Set backward link
-
-        mpPlatformState->mpFrameData->mpFirstOverlap = this;
-        mpHierarchy->mpPrevOverlap = nullptr; // New head node has no previous node
-
-        // Overlap-Windows are by default the uppermost
-        mpHierarchy->mpNext = pFirstOverlapParent->mpHierarchy->mpFirstOverlap;
-        pFirstOverlapParent->mpHierarchy->mpFirstOverlap = this;
-
-        if ( !pFirstOverlapParent->mpHierarchy->mpLastOverlap )
-            pFirstOverlapParent->mpHierarchy->mpLastOverlap = this;
-        else
-            mpHierarchy->mpNext->mpHierarchy->mpPrev = this;
-    }
-    else
-    {
-        if ( pParent->ImplIsOverlapWindow() )
-            mpHierarchy->mpOverlapWindow = pParent;
-        else
-            mpHierarchy->mpOverlapWindow = pParent->mpHierarchy->mpOverlapWindow;
-
-        mpHierarchy->mpPrev = pParent->mpHierarchy->mpLastChild;
-        pParent->mpHierarchy->mpLastChild = this;
-
-        if ( !pParent->mpHierarchy->mpFirstChild )
-            pParent->mpHierarchy->mpFirstChild = this;
-        else
-            mpHierarchy->mpPrev->mpHierarchy->mpNext = this;
-    }
+    mpHierarchy->mpFrameWindow = pFrameParent;
+    mpClassification->mbFrame = false;
 }
 
-void Window::ImplRemoveWindow( bool bRemoveFrameData )
+void Window::ImplInsertOverlapWindow(vcl::Window* pParent)
+{
+    vcl::Window* pFirstOverlapParent = pParent;
+    while (!pFirstOverlapParent->ImplIsOverlapWindow())
+    {
+        pFirstOverlapParent = pFirstOverlapParent->ImplGetParent();
+    }
+
+    mpHierarchy->mpOverlapWindow = pFirstOverlapParent;
+
+    // --- Update global frame overlap list pointers ---
+    mpHierarchy->mpNextOverlap = mpPlatformState->mpFrameData->mpFirstOverlap;
+    if (mpHierarchy->mpNextOverlap)
+        mpHierarchy->mpNextOverlap->mpHierarchy->mpPrevOverlap = this;
+
+    mpPlatformState->mpFrameData->mpFirstOverlap = this;
+    mpHierarchy->mpPrevOverlap = nullptr;
+
+    // Overlap-Windows are by default the uppermost
+    mpHierarchy->mpNext = pFirstOverlapParent->mpHierarchy->mpFirstOverlap;
+    pFirstOverlapParent->mpHierarchy->mpFirstOverlap = this;
+
+    if (!pFirstOverlapParent->mpHierarchy->mpLastOverlap)
+        pFirstOverlapParent->mpHierarchy->mpLastOverlap = this;
+    else
+        mpHierarchy->mpNext->mpHierarchy->mpPrev = this;
+}
+
+void Window::ImplInsertChildWindow(vcl::Window* pParent)
+{
+    if (pParent->ImplIsOverlapWindow())
+        mpHierarchy->mpOverlapWindow = pParent;
+    else
+        mpHierarchy->mpOverlapWindow = pParent->mpHierarchy->mpOverlapWindow;
+
+    mpHierarchy->mpPrev = pParent->mpHierarchy->mpLastChild;
+    pParent->mpHierarchy->mpLastChild = this;
+
+    if (!pParent->mpHierarchy->mpFirstChild)
+        pParent->mpHierarchy->mpFirstChild = this;
+    else
+        mpHierarchy->mpPrev->mpHierarchy->mpNext = this;
+}
+
+void Window::ImplRemoveWindow(bool bRemoveFrameData)
 {
     // Frame windows do not participate in parent/sibling tree updates
-    if ( mpClassification->mbFrame )
+    if (!mpClassification->mbFrame)
     {
-        if ( bRemoveFrameData )
-            GetOutDev()->ReleaseGraphics();
-
-        return;
-    }
-
-    // Unlink from the absolute FrameData global overlap collection
-    if ( ImplIsOverlapWindow() )
-    {
-        // True O(1) extraction utilizing our new mpPrevOverlap pointer
-        if ( mpHierarchy->mpPrevOverlap )
-            mpHierarchy->mpPrevOverlap->mpHierarchy->mpNextOverlap = mpHierarchy->mpNextOverlap;
+        if (ImplIsOverlapWindow())
+            ImplUnlinkOverlapWindow();
         else
-            mpPlatformState->mpFrameData->mpFirstOverlap = mpHierarchy->mpNextOverlap;
-
-        if ( mpHierarchy->mpNextOverlap )
-            mpHierarchy->mpNextOverlap->mpHierarchy->mpPrevOverlap = mpHierarchy->mpPrevOverlap;
-
-        mpHierarchy->mpPrevOverlap = nullptr;
-        mpHierarchy->mpNextOverlap = nullptr;
+            ImplUnlinkChildWindow();
     }
 
-    // Unlink from the forward sibling chains (Adjusting heads)
-    if ( mpHierarchy->mpPrev )
+    if (bRemoveFrameData)
+        GetOutDev()->ReleaseGraphics();
+}
+
+void Window::ImplUnlinkGlobalOverlap()
+{
+    // True O(1) extraction utilizing mpPrevOverlap pointer
+    if (mpHierarchy->mpPrevOverlap)
+        mpHierarchy->mpPrevOverlap->mpHierarchy->mpNextOverlap = mpHierarchy->mpNextOverlap;
+    else
+        mpPlatformState->mpFrameData->mpFirstOverlap = mpHierarchy->mpNextOverlap;
+
+    if (mpHierarchy->mpNextOverlap)
+        mpHierarchy->mpNextOverlap->mpHierarchy->mpPrevOverlap = mpHierarchy->mpPrevOverlap;
+
+    mpHierarchy->mpPrevOverlap = nullptr;
+    mpHierarchy->mpNextOverlap = nullptr;
+}
+
+void Window::ImplUnlinkOverlapWindow()
+{
+    ImplUnlinkGlobalOverlap();
+
+    // Unlink from the forward sibling chain (adjust head)
+    if (mpHierarchy->mpPrev)
         mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
-    else if ( ImplIsOverlapWindow() )
+    else if (mpHierarchy->mpOverlapWindow)
         mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap = mpHierarchy->mpNext;
-    else if ( mpHierarchy->mpParent )
-        mpHierarchy->mpParent->mpHierarchy->mpFirstChild = mpHierarchy->mpNext;
 
-    // Unlink from the backward sibling chains (Adjusting tails)
-    if ( mpHierarchy->mpNext )
+    // Unlink from the backward sibling chain (adjust tail)
+    if (mpHierarchy->mpNext)
         mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
-    else if ( ImplIsOverlapWindow() )
+    else if (mpHierarchy->mpOverlapWindow)
         mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap = mpHierarchy->mpPrev;
-    else if ( mpHierarchy->mpParent )
-        mpHierarchy->mpParent->mpHierarchy->mpLastChild = mpHierarchy->mpPrev;
 
-    // Isolate this specific window node instance completely
     mpHierarchy->mpPrev = nullptr;
     mpHierarchy->mpNext = nullptr;
+}
 
-    if ( bRemoveFrameData )
-        GetOutDev()->ReleaseGraphics();
+void Window::ImplUnlinkChildWindow()
+{
+    // Unlink from the forward sibling chain (adjust head)
+    if (mpHierarchy->mpPrev)
+        mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
+    else if (mpHierarchy->mpParent)
+        mpHierarchy->mpParent->mpHierarchy->mpFirstChild = mpHierarchy->mpNext;
+
+    // Unlink from the backward sibling chain (adjust tail)
+    if (mpHierarchy->mpNext)
+        mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
+    else if (mpHierarchy->mpParent)
+        mpHierarchy->mpParent->mpHierarchy->mpLastChild = mpHierarchy->mpPrev;
+
+    mpHierarchy->mpPrev = nullptr;
+    mpHierarchy->mpNext = nullptr;
 }
 
 void Window::reorderWithinParent(sal_uInt16 nNewPosition)
