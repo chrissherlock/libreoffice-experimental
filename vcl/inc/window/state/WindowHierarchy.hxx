@@ -62,6 +62,8 @@ struct WindowHierarchy
     vcl::Window* getFirstChild() const { return mpFirstChild; }
     vcl::Window* getNextSibling() const { return mpNext; }
 
+    vcl::Window* getTopmostFrameWindow() const;
+
     void linkIntoOverlapChain(vcl::Window* pWindow, vcl::Window* pOverlapParent);
     void linkIntoChildChain(vcl::Window* pWindow, vcl::Window* pParent);
 

@@ -53,13 +53,7 @@ namespace vcl {
 
 vcl::Window* Window::ImplGetTopmostFrameWindow() const
 {
-    const vcl::Window *pTopmostParent = this;
-    while( pTopmostParent->ImplGetParent() )
-    {
-        pTopmostParent = pTopmostParent->ImplGetParent();
-    }
-
-    return pTopmostParent->mpHierarchy->mpFrameWindow;
+    return mpHierarchy ? mpHierarchy->getTopmostFrameWindow() : nullptr;
 }
 
 void Window::ImplInsertWindow(vcl::Window* pParent)

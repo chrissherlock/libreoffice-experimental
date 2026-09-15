@@ -67,7 +67,8 @@ void WindowHierarchy::unlinkFromOverlapChain()
 
 void WindowHierarchy::unlinkFromChildChain()
 {
-    WindowHierarchy* pParentHierarchy = mpParent ? mpParent->ImplGetWindowHierarchy() : nullptr;
+    vcl::Window* pParent = getParent();
+    WindowHierarchy* pParentHierarchy = pParent ? pParent->ImplGetWindowHierarchy() : nullptr;
 
     // Unlink from the forward sibling chain (adjust head)
     if (mpPrev)
@@ -83,6 +84,20 @@ void WindowHierarchy::unlinkFromChildChain()
 
     mpPrev = nullptr;
     mpNext = nullptr;
+}
+
+vcl::Window* WindowHierarchy::getTopmostFrameWindow() const
+{
+    const WindowHierarchy* pHierarchy = this;
+    while (vcl::Window* pParent = pHierarchy->getParent())
+    {
+        WindowHierarchy* pParentHierarchy = pParent->ImplGetWindowHierarchy();
+        if (!pParentHierarchy)
+            break;
+        pHierarchy = pParentHierarchy;
+    }
+
+    return pHierarchy->mpFrameWindow;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
