@@ -108,25 +108,11 @@ void Window::reorderWithinParent(sal_uInt16 nNewPosition)
 
 void Window::ImplToBottomChild()
 {
-    if ( ImplIsOverlapWindow() || mpVisibilityState->mbReallyVisible || (mpHierarchy->mpParent->mpHierarchy->mpLastChild.get() == this) )
+    if (ImplIsOverlapWindow() || mpVisibilityState->mbReallyVisible)
         return;
 
-    // put the window to the end of the list
-    if ( mpHierarchy->mpPrev )
-    {
-        mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
-    }
-    else
-    {
-        // coverity[copy_paste_error : FALSE] - this is correct mpFirstChild, not mpNext
-        mpHierarchy->mpParent->mpHierarchy->mpFirstChild = mpHierarchy->mpNext;
-    }
-
-    mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
-    mpHierarchy->mpPrev = mpHierarchy->mpParent->mpHierarchy->mpLastChild;
-    mpHierarchy->mpParent->mpHierarchy->mpLastChild = this;
-    mpHierarchy->mpPrev->mpHierarchy->mpNext = this;
-    mpHierarchy->mpNext = nullptr;
+    if (mpHierarchy)
+        mpHierarchy->toBottomChild(this);
 }
 
 void Window::ImplCalcToTop( ImplCalcToTopData* pPrevData )

@@ -183,4 +183,24 @@ void WindowHierarchy::reorderWithinParent(vcl::Window* pWindow, sal_uInt16 nNewP
         pParentHierarchy->mpFirstChild = pWindow;
 }
 
+void WindowHierarchy::toBottomChild(vcl::Window* pWindow)
+{
+    WindowHierarchy* pParentHierarchy = mpParent ? mpParent->ImplGetWindowHierarchy() : nullptr;
+    if (!pParentHierarchy || pParentHierarchy->mpLastChild.get() == pWindow)
+        return;
+
+    unlinkFromChildChain();
+
+    // Reattach to the tail of the parent's child chain
+    mpPrev = pParentHierarchy->mpLastChild;
+    pParentHierarchy->mpLastChild = pWindow;
+
+    if (mpPrev)
+        mpPrev->ImplGetWindowHierarchy()->mpNext = pWindow;
+    else
+        pParentHierarchy->mpFirstChild = pWindow;
+
+    mpNext = nullptr;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
