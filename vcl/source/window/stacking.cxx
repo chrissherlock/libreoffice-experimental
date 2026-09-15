@@ -156,6 +156,22 @@ void Window::ImplToTop(ToTopFlags nFlags)
     }
 }
 
+static SalFrameToTop lcl_toSalFrameToTop(ToTopFlags nFlags)
+{
+    SalFrameToTop nSysFlags = SalFrameToTop::NONE;
+
+    if (nFlags & ToTopFlags::RestoreWhenMin)
+        nSysFlags |= SalFrameToTop::RestoreWhenMin;
+
+    if (nFlags & ToTopFlags::ForegroundTask)
+        nSysFlags |= SalFrameToTop::ForegroundTask;
+
+    if (nFlags & ToTopFlags::GrabFocusOnly)
+        nSysFlags |= SalFrameToTop::GrabFocusOnly;
+
+    return nSysFlags;
+}
+
 void Window::ImplBringFrameToTop(ToTopFlags nFlags)
 {
     // On a mouse click in the external window, it is the latter's
@@ -172,18 +188,7 @@ void Window::ImplBringFrameToTop(ToTopFlags nFlags)
     if (ImplGetClientWindow() && (ImplGetClientWindow()->GetStyle() & WB_SYSTEMFLOATWIN))
         return;
 
-    SalFrameToTop nSysFlags = SalFrameToTop::NONE;
-
-    if (nFlags & ToTopFlags::RestoreWhenMin)
-        nSysFlags |= SalFrameToTop::RestoreWhenMin;
-
-    if (nFlags & ToTopFlags::ForegroundTask)
-        nSysFlags |= SalFrameToTop::ForegroundTask;
-
-    if (nFlags & ToTopFlags::GrabFocusOnly)
-        nSysFlags |= SalFrameToTop::GrabFocusOnly;
-
-    mpPlatformState->mpFrame->ToTop(nSysFlags);
+    mpPlatformState->mpFrame->ToTop(lcl_toSalFrameToTop(nFlags));
 }
 
 void Window::ImplStartToTop(ToTopFlags nFlags)
