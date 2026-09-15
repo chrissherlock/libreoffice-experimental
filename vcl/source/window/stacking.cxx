@@ -102,37 +102,8 @@ void Window::ImplRemoveWindow(bool bRemoveFrameData)
 
 void Window::reorderWithinParent(sal_uInt16 nNewPosition)
 {
-    sal_uInt16 nChildCount = 0;
-    vcl::Window *pSource = mpHierarchy->mpParent->mpHierarchy->mpFirstChild;
-
-    while (pSource)
-    {
-        if (nChildCount == nNewPosition)
-            break;
-        pSource = pSource->mpHierarchy->mpNext;
-        nChildCount++;
-    }
-
-    if (pSource == this) //already at the right place
-        return;
-
-    ImplRemoveWindow(false);
-
-    if (pSource)
-    {
-        mpHierarchy->mpNext = pSource;
-        mpHierarchy->mpPrev = pSource->mpHierarchy->mpPrev;
-        pSource->mpHierarchy->mpPrev = this;
-    }
-    else
-    {
-        mpHierarchy->mpParent->mpHierarchy->mpLastChild = this;
-    }
-
-    if (mpHierarchy->mpPrev)
-        mpHierarchy->mpPrev->mpHierarchy->mpNext = this;
-    else
-        mpHierarchy->mpParent->mpHierarchy->mpFirstChild = this;
+    if (mpHierarchy)
+        mpHierarchy->reorderWithinParent(this, nNewPosition);
 }
 
 void Window::ImplToBottomChild()

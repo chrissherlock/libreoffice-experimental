@@ -142,4 +142,45 @@ void WindowHierarchy::insertOverlapWindow(vcl::Window* pWindow, vcl::Window* pPa
     linkIntoOverlapChain(pWindow, pFirstOverlapParent);
 }
 
+void WindowHierarchy::reorderWithinParent(vcl::Window* pWindow, sal_uInt16 nNewPosition)
+{
+    WindowHierarchy* pParentHierarchy = mpParent ? mpParent->ImplGetWindowHierarchy() : nullptr;
+    if (!pParentHierarchy)
+        return;
+
+    sal_uInt16 nChildCount = 0;
+    vcl::Window* pSource = pParentHierarchy->mpFirstChild;
+
+    while (pSource)
+    {
+        if (nChildCount == nNewPosition)
+            break;
+        pSource = pSource->ImplGetWindowHierarchy()->mpNext;
+        nChildCount++;
+    }
+
+    if (pSource == pWindow) // already at the right place
+        return;
+
+    unlinkFromChildChain();
+
+    if (pSource)
+    {
+        mpNext = pSource;
+        mpPrev = pSource->ImplGetWindowHierarchy()->mpPrev;
+        pSource->ImplGetWindowHierarchy()->mpPrev = pWindow;
+    }
+    else
+    {
+        // Appending to the end: link after the current tail
+        mpPrev = pParentHierarchy->mpLastChild;
+        pParentHierarchy->mpLastChild = pWindow;
+    }
+
+    if (mpPrev)
+        mpPrev->ImplGetWindowHierarchy()->mpNext = pWindow;
+    else
+        pParentHierarchy->mpFirstChild = pWindow;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -71,6 +71,8 @@ struct WindowHierarchy
     void unlinkOverlapWindow(ImplFrameData& rFrameData);
     void unlinkFromChildChain();
 
+    void reorderWithinParent(vcl::Window* pWindow, sal_uInt16 nNewPosition);
+
 private:
     void unlinkFromGlobalOverlapChain(ImplFrameData& rFrameData);
     void unlinkFromOverlapChain();
