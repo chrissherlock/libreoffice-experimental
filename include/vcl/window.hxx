@@ -1133,6 +1133,8 @@ private:
 
     SAL_DLLPRIVATE void ImplRemoveWindow(bool bRemoveFrameData);
 
+    SAL_DLLPRIVATE vcl::Window* ImplResolveZOrderReference(vcl::Window* pRefWindow, ZOrderFlags& rFlags) const;
+    SAL_DLLPRIVATE void ImplInvalidateZOrderPeers();
     SAL_DLLPRIVATE void ImplBringFrameToTop(ToTopFlags nFlags);
     SAL_DLLPRIVATE bool ImplIsRealParentPath(const vcl::Window* pWindow) const;
     SAL_DLLPRIVATE void ImplUpdateWindowPtr(vcl::Window* pWindow);

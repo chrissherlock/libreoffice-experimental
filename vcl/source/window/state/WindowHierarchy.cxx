@@ -246,4 +246,61 @@ bool WindowHierarchy::toTopOverlap(vcl::Window* pWindow, bool bOnTop)
     return true;
 }
 
+bool WindowHierarchy::reorderRelativeTo(vcl::Window* pWindow, vcl::Window* pRefWindow,
+                                        ZOrderFlags nFlags, bool bOverlap)
+{
+    WindowHierarchy* pRefHierarchy = pRefWindow->ImplGetWindowHierarchy();
+    if (!pRefHierarchy)
+        return false;
+
+    if (nFlags & ZOrderFlags::Before)
+    {
+        if (pRefHierarchy->mpPrev.get() == pWindow)
+            return false;
+
+        if (bOverlap)
+            unlinkFromOverlapChain();
+        else
+            unlinkFromChildChain();
+
+        mpPrev = pRefHierarchy->mpPrev;
+        mpNext = pRefWindow;
+
+        if (mpPrev)
+            mpPrev->ImplGetWindowHierarchy()->mpNext = pWindow;
+        else if (bOverlap)
+            mpOverlapWindow->ImplGetWindowHierarchy()->mpFirstOverlap = pWindow;
+        else
+            mpParent->ImplGetWindowHierarchy()->mpFirstChild = pWindow;
+
+        pRefHierarchy->mpPrev = pWindow;
+        return true;
+    }
+    else if (nFlags & ZOrderFlags::Behind)
+    {
+        if (pRefHierarchy->mpNext.get() == pWindow)
+            return false;
+
+        if (bOverlap)
+            unlinkFromOverlapChain();
+        else
+            unlinkFromChildChain();
+
+        mpPrev = pRefWindow;
+        mpNext = pRefHierarchy->mpNext;
+
+        if (mpNext)
+            mpNext->ImplGetWindowHierarchy()->mpPrev = pWindow;
+        else if (bOverlap)
+            mpOverlapWindow->ImplGetWindowHierarchy()->mpLastOverlap = pWindow;
+        else
+            mpParent->ImplGetWindowHierarchy()->mpLastChild = pWindow;
+
+        pRefHierarchy->mpNext = pWindow;
+        return true;
+    }
+
+    return false;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

@@ -317,188 +317,104 @@ void Window::ToTop( ToTopFlags nFlags )
     ImplFocusToTop( nFlags, IsReallyVisible() );
 }
 
-void Window::SetZOrder( vcl::Window* pRefWindow, ZOrderFlags nFlags )
+void Window::SetZOrder(vcl::Window* pRefWindow, ZOrderFlags nFlags)
 {
-    if ( mpHierarchy->mpBorderWindow )
+    if (mpHierarchy->mpBorderWindow)
     {
-        mpHierarchy->mpBorderWindow->SetZOrder( pRefWindow, nFlags );
+        mpHierarchy->mpBorderWindow->SetZOrder(pRefWindow, nFlags);
         return;
     }
 
-    if ( nFlags & ZOrderFlags::First )
-    {
-        if ( ImplIsOverlapWindow() )
-            pRefWindow = mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap;
-        else
-            pRefWindow = mpHierarchy->mpParent->mpHierarchy->mpFirstChild;
-
-        nFlags |= ZOrderFlags::Before;
-    }
-    else if ( nFlags & ZOrderFlags::Last )
-    {
-        if ( ImplIsOverlapWindow() )
-            pRefWindow = mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap;
-        else
-            pRefWindow = mpHierarchy->mpParent->mpHierarchy->mpLastChild;
-
-        nFlags |= ZOrderFlags::Behind;
-    }
-
-    while ( pRefWindow && pRefWindow->mpHierarchy->mpBorderWindow )
-    {
-        pRefWindow = pRefWindow->mpHierarchy->mpBorderWindow;
-    }
+    pRefWindow = ImplResolveZOrderReference(pRefWindow, nFlags);
 
     if (!pRefWindow || pRefWindow == this || mpClassification->mbFrame)
         return;
 
-    SAL_WARN_IF( pRefWindow->mpHierarchy->mpParent != mpHierarchy->mpParent, "vcl", "Window::SetZOrder() - pRefWindow has other parent" );
-    if ( nFlags & ZOrderFlags::Before )
+    SAL_WARN_IF(pRefWindow->mpHierarchy->mpParent != mpHierarchy->mpParent,
+                "vcl", "Window::SetZOrder() - pRefWindow has other parent");
+
+    if (mpHierarchy && mpHierarchy->reorderRelativeTo(this, pRefWindow, nFlags, ImplIsOverlapWindow()))
+        ImplInvalidateZOrderPeers();
+}
+
+vcl::Window* Window::ImplResolveZOrderReference(vcl::Window* pRefWindow, ZOrderFlags& rFlags) const
+{
+    if (rFlags & ZOrderFlags::First)
     {
-        if ( pRefWindow->mpHierarchy->mpPrev.get() == this )
-            return;
-
-        if ( ImplIsOverlapWindow() )
-        {
-            if ( mpHierarchy->mpPrev )
-                mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
-            else
-                mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap = mpHierarchy->mpNext;
-
-            if ( mpHierarchy->mpNext )
-                mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
-            else
-                mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap = mpHierarchy->mpPrev;
-
-            if ( !pRefWindow->mpHierarchy->mpPrev )
-                mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap = this;
-        }
+        if (ImplIsOverlapWindow())
+            pRefWindow = mpHierarchy->mpOverlapWindow ? mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap : nullptr;
         else
-        {
-            if ( mpHierarchy->mpPrev )
-                mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
-            else
-                mpHierarchy->mpParent->mpHierarchy->mpFirstChild = mpHierarchy->mpNext;
+            pRefWindow = mpHierarchy->mpParent ? mpHierarchy->mpParent->mpHierarchy->mpFirstChild : nullptr;
 
-            if ( mpHierarchy->mpNext )
-                mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
-            else
-                mpHierarchy->mpParent->mpHierarchy->mpLastChild = mpHierarchy->mpPrev;
-
-            if ( !pRefWindow->mpHierarchy->mpPrev )
-                mpHierarchy->mpParent->mpHierarchy->mpFirstChild = this;
-        }
-
-        mpHierarchy->mpPrev = pRefWindow->mpHierarchy->mpPrev;
-        mpHierarchy->mpNext = pRefWindow;
-
-        if ( mpHierarchy->mpPrev )
-            mpHierarchy->mpPrev->mpHierarchy->mpNext = this;
-
-        mpHierarchy->mpNext->mpHierarchy->mpPrev = this;
+        rFlags |= ZOrderFlags::Before;
     }
-    else if ( nFlags & ZOrderFlags::Behind )
+    else if (rFlags & ZOrderFlags::Last)
     {
-        if ( pRefWindow->mpHierarchy->mpNext.get() == this )
-            return;
-
-        if ( ImplIsOverlapWindow() )
-        {
-            if ( mpHierarchy->mpPrev )
-                mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
-            else
-                mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap = mpHierarchy->mpNext;
-
-            if ( mpHierarchy->mpNext )
-                mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
-            else
-                mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap = mpHierarchy->mpPrev;
-
-            if ( !pRefWindow->mpHierarchy->mpNext )
-                mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap = this;
-        }
+        if (ImplIsOverlapWindow())
+            pRefWindow = mpHierarchy->mpOverlapWindow ? mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap : nullptr;
         else
-        {
-            if ( mpHierarchy->mpPrev )
-                mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
-            else
-                mpHierarchy->mpParent->mpHierarchy->mpFirstChild = mpHierarchy->mpNext;
+            pRefWindow = mpHierarchy->mpParent ? mpHierarchy->mpParent->mpHierarchy->mpLastChild : nullptr;
 
-            if ( mpHierarchy->mpNext )
-                mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
-            else
-                mpHierarchy->mpParent->mpHierarchy->mpLastChild = mpHierarchy->mpPrev;
-
-            if ( !pRefWindow->mpHierarchy->mpNext )
-                mpHierarchy->mpParent->mpHierarchy->mpLastChild = this;
-        }
-
-        mpHierarchy->mpPrev = pRefWindow;
-        mpHierarchy->mpNext = pRefWindow->mpHierarchy->mpNext;
-
-        if ( mpHierarchy->mpNext )
-            mpHierarchy->mpNext->mpHierarchy->mpPrev = this;
-
-        mpHierarchy->mpPrev->mpHierarchy->mpNext = this;
+        rFlags |= ZOrderFlags::Behind;
     }
 
-    if ( !IsReallyVisible() )
+    while (pRefWindow && pRefWindow->mpHierarchy->mpBorderWindow)
+    {
+        pRefWindow = pRefWindow->mpHierarchy->mpBorderWindow;
+    }
+
+    return pRefWindow;
+}
+
+void Window::ImplInvalidateZOrderPeers()
+{
+    if (!IsReallyVisible())
         return;
 
-    if ( !mpClippingState->mbInitWinClipRegion && mpClippingState->maWinClipRegion.IsEmpty() )
+    if (!mpClippingState->mbInitWinClipRegion && mpClippingState->maWinClipRegion.IsEmpty())
         return;
 
     bool bInitWinClipRegion = mpClippingState->mbInitWinClipRegion;
     vcl::clipping::setClipFlag(*this);
 
-    // When ClipRegion was not initialised, assume
-    // the window has not been sent, therefore do not
-    // trigger any Invalidates. This is an optimization
-    // for HTML documents with many controls. If this
-    // check gives problems, a flag should be introduced
-    // which tracks whether the window has already been
-    // emitted after Show
-    if ( bInitWinClipRegion )
+    if (bInitWinClipRegion)
         return;
 
-    // Invalidate all windows which are next to each other
-    // Is INCOMPLETE !!!
-    tools::Rectangle   aWinRect = GetOutputRectPixel();
-    vcl::Window*     pWindow = nullptr;
-    if ( ImplIsOverlapWindow() )
+    tools::Rectangle aWinRect = GetOutputRectPixel();
+    vcl::Window* pWindow = nullptr;
+
+    if (ImplIsOverlapWindow())
     {
-        if ( mpHierarchy->mpOverlapWindow )
+        if (mpHierarchy->mpOverlapWindow)
             pWindow = mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap;
     }
-    else
+    else if (ImplGetParent())
     {
         pWindow = ImplGetParent()->mpHierarchy->mpFirstChild;
     }
 
-    // Invalidate all windows in front of us and which are covered by us
-    while ( pWindow )
+    // Invalidate windows in front of us that are covered by us
+    while (pWindow)
     {
-        if ( pWindow == this )
+        if (pWindow == this)
             break;
 
         tools::Rectangle aCompRect = pWindow->GetOutputRectPixel();
-
-        if ( aWinRect.Overlaps( aCompRect ) )
-            pWindow->Invalidate( InvalidateFlags::Children | InvalidateFlags::NoTransparent );
+        if (aWinRect.Overlaps(aCompRect))
+            pWindow->Invalidate(InvalidateFlags::Children | InvalidateFlags::NoTransparent);
 
         pWindow = pWindow->mpHierarchy->mpNext;
     }
 
-    // If we are covered by a window in the background
-    // we should redraw it
-    while ( pWindow )
+    // Invalidate ourselves if covered by a window in the background
+    while (pWindow)
     {
-        if ( pWindow != this )
+        if (pWindow != this)
         {
             tools::Rectangle aCompRect = pWindow->GetOutputRectPixel();
-            if ( aWinRect.Overlaps( aCompRect ) )
+            if (aWinRect.Overlaps(aCompRect))
             {
-                Invalidate( InvalidateFlags::Children | InvalidateFlags::NoTransparent );
+                Invalidate(InvalidateFlags::Children | InvalidateFlags::NoTransparent);
                 break;
             }
         }
