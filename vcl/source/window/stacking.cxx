@@ -372,50 +372,34 @@ void Window::ImplInvalidateZOrderPeers()
     bool bInitWinClipRegion = mpClippingState->mbInitWinClipRegion;
     vcl::clipping::setClipFlag(*this);
 
-    if (bInitWinClipRegion)
+    if (bInitWinClipRegion || !mpHierarchy)
         return;
 
-    tools::Rectangle aWinRect = GetOutputRectPixel();
-    vcl::Window* pWindow = nullptr;
+    const tools::Rectangle aWinRect = GetOutputRectPixel();
+    bool bBehindThis = false;
 
-    if (ImplIsOverlapWindow())
-    {
-        if (mpHierarchy->mpOverlapWindow)
-            pWindow = mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap;
-    }
-    else if (ImplGetParent())
-    {
-        pWindow = ImplGetParent()->mpHierarchy->mpFirstChild;
-    }
-
-    // Invalidate windows in front of us that are covered by us
-    while (pWindow)
-    {
-        if (pWindow == this)
-            break;
-
-        tools::Rectangle aCompRect = pWindow->GetOutputRectPixel();
-        if (aWinRect.Overlaps(aCompRect))
-            pWindow->Invalidate(InvalidateFlags::Children | InvalidateFlags::NoTransparent);
-
-        pWindow = pWindow->mpHierarchy->mpNext;
-    }
-
-    // Invalidate ourselves if covered by a window in the background
-    while (pWindow)
-    {
-        if (pWindow != this)
+    mpHierarchy->forEachSibling(ImplIsOverlapWindow(), [&](vcl::Window& rPeer) -> bool {
+        if (&rPeer == this)
         {
-            tools::Rectangle aCompRect = pWindow->GetOutputRectPixel();
-            if (aWinRect.Overlaps(aCompRect))
-            {
-                Invalidate(InvalidateFlags::Children | InvalidateFlags::NoTransparent);
-                break;
-            }
+            bBehindThis = true;
+            return true; // Continue to windows behind us
         }
 
-        pWindow = pWindow->mpHierarchy->mpNext;
-    }
+        const tools::Rectangle aCompRect = rPeer.GetOutputRectPixel();
+        if (!aWinRect.Overlaps(aCompRect))
+            return true;
+
+        if (!bBehindThis)
+        {
+            // Invalidate windows in front of us that are covered by us
+            rPeer.Invalidate(InvalidateFlags::Children | InvalidateFlags::NoTransparent);
+            return true;
+        }
+
+        // Invalidate ourselves if covered by a window in the background and stop
+        Invalidate(InvalidateFlags::Children | InvalidateFlags::NoTransparent);
+        return false;
+    });
 }
 
 void Window::EnableAlwaysOnTop( bool bEnable )

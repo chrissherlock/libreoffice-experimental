@@ -81,6 +81,37 @@ struct WindowHierarchy
     vcl::Window* getBoundarySibling(ZOrderFlags nFlags, bool bOverlap) const;
     static vcl::Window* findOutermostBorderWindow(vcl::Window* pWindow);
 
+    template <typename Func> static void forEachSibling(vcl::Window* pStart, Func&& rVisitor)
+    {
+        vcl::Window* pCurrent = pStart;
+        while (pCurrent)
+        {
+            WindowHierarchy* pHierarchy = pCurrent->ImplGetWindowHierarchy();
+            vcl::Window* pNext = pHierarchy ? pHierarchy->mpNext : nullptr;
+
+            if constexpr (std::is_same_v<std::invoke_result_t<Func, vcl::Window&>, void>)
+            {
+                rVisitor(*pCurrent);
+            }
+            else
+            {
+                if (!rVisitor(*pCurrent))
+                    break;
+            }
+
+            pCurrent = pNext;
+        }
+    }
+
+    /**
+     * Walks the full sibling chain starting from the first child or first overlap window.
+     */
+    template <typename Func> void forEachSibling(bool bOverlap, Func&& rVisitor) const
+    {
+        forEachSibling(getBoundarySibling(ZOrderFlags::First, bOverlap),
+                       std::forward<Func>(rVisitor));
+    }
+
 private:
     void unlinkFromGlobalOverlapChain(ImplFrameData& rFrameData);
     void unlinkFromOverlapChain();
