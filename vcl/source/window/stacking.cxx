@@ -957,7 +957,7 @@ static SystemWindow *ImplGetLastSystemWindow( vcl::Window *pWin )
 
 vcl::Window* Window::GetParent() const
 {
-    return mpClassification ? mpHierarchy->mpRealParent.get() : nullptr;
+    return mpHierarchy ? mpHierarchy->mpRealParent.get() : nullptr;
 }
 
 void Window::SetParent( vcl::Window* pNewParent )
