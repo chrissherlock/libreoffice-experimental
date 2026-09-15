@@ -974,9 +974,9 @@ void Window::SetParent( vcl::Window* pNewParent )
         return;
     }
 
-    // check if the taskpanelist would change and move the window pointer accordingly
-    SystemWindow *pSysWin = ImplGetLastSystemWindow(this);
-    SystemWindow *pNewSysWin = nullptr;
+    // Check if the taskpane list changes and move the window pointer accordingly
+    SystemWindow* pSysWin = ImplGetLastSystemWindow(this);
+    SystemWindow* pNewSysWin = nullptr;
     bool bChangeTaskPaneList = false;
 
     if( pSysWin && pSysWin->ImplIsInTaskPaneList( this ) )
@@ -990,11 +990,11 @@ void Window::SetParent( vcl::Window* pNewParent )
         }
     }
 
-    // remove ownerdraw decorated windows from list in the top-most frame window
+    // Remove ownerdraw decorated windows from list in the top-most frame window
     if( (GetStyle() & WB_OWNERDRAWDECORATION) && mpClassification->mbFrame )
     {
-        ::std::vector< VclPtr<vcl::Window> >& rList = ImplGetOwnerDrawList();
-        auto p = ::std::find( rList.begin(), rList.end(), VclPtr<vcl::Window>(this) );
+        std::vector< VclPtr<vcl::Window> >& rList = ImplGetOwnerDrawList();
+        auto p = std::find( rList.begin(), rList.end(), VclPtr<vcl::Window>(this) );
 
         if( p != rList.end() )
             rList.erase( p );
@@ -1018,49 +1018,24 @@ void Window::SetParent( vcl::Window* pNewParent )
     bool bVisible = IsVisible();
     Show( false, ShowFlags::NoFocusChange );
 
-    // check if the overlap window changes
-    vcl::Window* pOldOverlapWindow;
+    // Check if the overlap window changes
+    vcl::Window* pOldOverlapWindow = nullptr;
     vcl::Window* pNewOverlapWindow = nullptr;
 
-    if ( ImplIsOverlapWindow() )
-    {
-        pOldOverlapWindow = nullptr;
-    }
-    else
+    if ( !ImplIsOverlapWindow() )
     {
         pNewOverlapWindow = pNewParent->ImplGetFirstOverlapWindow();
 
         if ( mpHierarchy->mpOverlapWindow.get() != pNewOverlapWindow )
-            pOldOverlapWindow = mpHierarchy->mpOverlapWindow;
-        else
-            pOldOverlapWindow = nullptr;
+            pOldOverlapWindow = mpHierarchy->mpOverlapWindow.get();
     }
 
-    // convert windows in the hierarchy
     bool bFocusOverlapWin = HasChildPathFocus( true );
     bool bFocusWin = HasChildPathFocus();
     bool bNewFrame = pNewParent->mpHierarchy->mpFrameWindow != mpHierarchy->mpFrameWindow;
 
     if ( bNewFrame )
-    {
-        if ( mpPlatformState->mpFrameData->mpFocusWin )
-        {
-            if ( IsWindowOrChild( mpPlatformState->mpFrameData->mpFocusWin ) )
-                mpPlatformState->mpFrameData->mpFocusWin = nullptr;
-        }
-
-        if ( mpPlatformState->mpFrameData->mpMouseMoveWin )
-        {
-            if ( IsWindowOrChild( mpPlatformState->mpFrameData->mpMouseMoveWin ) )
-                mpPlatformState->mpFrameData->mpMouseMoveWin = nullptr;
-        }
-
-        if ( mpPlatformState->mpFrameData->mpMouseDownWin )
-        {
-            if ( IsWindowOrChild( mpPlatformState->mpFrameData->mpMouseDownWin ) )
-                mpPlatformState->mpFrameData->mpMouseDownWin = nullptr;
-        }
-    }
+        ImplClearFrameTracking();
 
     ImplRemoveWindow( bNewFrame );
     ImplInsertWindow( pNewParent );
@@ -1072,75 +1047,94 @@ void Window::SetParent( vcl::Window* pNewParent )
     if ( ImplUpdatePos() )
         ImplUpdateNativeObjectPos();
 
-    // If the Overlap-Window has changed, we need to test whether
-    // OverlapWindows that had the Child window as their parent
-    // need to be put into the window hierarchy.
     if ( ImplIsOverlapWindow() )
-    {
-        if ( bNewFrame )
-        {
-            vcl::Window* pOverlapWindow = mpHierarchy->mpFirstOverlap;
-            while ( pOverlapWindow )
-            {
-                vcl::Window* pNextOverlapWindow = pOverlapWindow->mpHierarchy->mpNext;
-                pOverlapWindow->ImplUpdateOverlapWindowPtr( bNewFrame );
-                pOverlapWindow = pNextOverlapWindow;
-            }
-        }
-    }
+        ImplUpdateChildOverlapWindows( bNewFrame );
     else if ( pOldOverlapWindow )
-    {
-        // reset Focus-Save
-        vcl::Window* pLastFocus = pOldOverlapWindow->mpInput->getLastFocusWindow();
+        ImplUpdateFormerOverlapWindow( pOldOverlapWindow, pNewOverlapWindow, bFocusWin, bNewFrame );
 
-        if (bFocusWin || (pLastFocus && IsWindowOrChild(pLastFocus)))
-            pOldOverlapWindow->mpInput->clearLastFocusWindow();
-
-        vcl::Window* pOverlapWindow = pOldOverlapWindow->mpHierarchy->getFirstOverlap();
-
-        while (pOverlapWindow)
-        {
-            vcl::Window* pNextOverlapWindow = pOverlapWindow->mpHierarchy->getNext();
-            if (IsAncestorOf(*pOverlapWindow->ImplGetWindow()))
-                pOverlapWindow->ImplUpdateOverlapWindowPtr(bNewFrame);
-            pOverlapWindow = pNextOverlapWindow;
-        }
-
-        // update activate-status at next overlap window
-        if (HasChildPathFocus(true))
-            ImplCallFocusChangeActivate(pNewOverlapWindow, pOldOverlapWindow);
-    }
-
-    // also convert Activate-Status
-    if ( bNewFrame )
-    {
-        if ( (GetType() == WindowType::BORDERWINDOW) &&
-             (ImplGetWindow()->GetType() == WindowType::FLOATINGWINDOW) )
-            static_cast<ImplBorderWindow*>(this)->SetDisplayActive( mpPlatformState->mpFrameData->mbHasFocus );
-    }
-
-    // when required give focus to new frame if
-    // FocusWindow is changed with SetParent()
-    if ( bFocusOverlapWin )
-    {
-        mpPlatformState->mpFrameData->mpFocusWin = Application::GetFocusWindow();
-
-        if ( !mpPlatformState->mpFrameData->mbHasFocus )
-            mpPlatformState->mpFrame->ToTop( SalFrameToTop::NONE );
-    }
-
-    // Assure DragSource and DropTarget members are created
-    if ( bNewFrame )
-        GetDropTarget();
+    ImplUpdateFrameActivation( bNewFrame, bFocusOverlapWin );
 
     if( bChangeTaskPaneList )
         pNewSysWin->GetTaskPaneList()->AddWindow( this );
 
     if( (GetStyle() & WB_OWNERDRAWDECORATION) && mpClassification->mbFrame )
-        ImplGetOwnerDrawList().emplace_back(this );
+        ImplGetOwnerDrawList().emplace_back( this );
 
     if ( bVisible )
         Show( true, ShowFlags::NoFocusChange | ShowFlags::NoActivate );
+}
+
+void Window::ImplClearFrameTracking()
+{
+    if (mpPlatformState->mpFrameData->mpFocusWin && IsWindowOrChild(mpPlatformState->mpFrameData->mpFocusWin))
+        mpPlatformState->mpFrameData->mpFocusWin = nullptr;
+
+    if (mpPlatformState->mpFrameData->mpMouseMoveWin && IsWindowOrChild(mpPlatformState->mpFrameData->mpMouseMoveWin))
+        mpPlatformState->mpFrameData->mpMouseMoveWin = nullptr;
+
+    if (mpPlatformState->mpFrameData->mpMouseDownWin && IsWindowOrChild(mpPlatformState->mpFrameData->mpMouseDownWin))
+        mpPlatformState->mpFrameData->mpMouseDownWin = nullptr;
+}
+
+void Window::ImplUpdateChildOverlapWindows(bool bNewFrame)
+{
+    if (!bNewFrame)
+        return;
+
+    vcl::Window* pOverlapWindow = mpHierarchy->mpFirstOverlap;
+    while (pOverlapWindow)
+    {
+        vcl::Window* pNextOverlapWindow = pOverlapWindow->mpHierarchy->mpNext;
+        pOverlapWindow->ImplUpdateOverlapWindowPtr(bNewFrame);
+        pOverlapWindow = pNextOverlapWindow;
+    }
+}
+
+void Window::ImplUpdateFormerOverlapWindow(vcl::Window* pOldOverlapWindow,
+                                          vcl::Window* pNewOverlapWindow,
+                                          bool bFocusWin,
+                                          bool bNewFrame)
+{
+    // Reset saved focus on the old overlap window
+    vcl::Window* pLastFocus = pOldOverlapWindow->mpInput->getLastFocusWindow();
+    if (bFocusWin || (pLastFocus && IsWindowOrChild(pLastFocus)))
+        pOldOverlapWindow->mpInput->clearLastFocusWindow();
+
+    vcl::Window* pOverlapWindow = pOldOverlapWindow->mpHierarchy->getFirstOverlap();
+    while (pOverlapWindow)
+    {
+        vcl::Window* pNextOverlapWindow = pOverlapWindow->mpHierarchy->getNext();
+        if (IsAncestorOf(*pOverlapWindow->ImplGetWindow()))
+            pOverlapWindow->ImplUpdateOverlapWindowPtr(bNewFrame);
+        pOverlapWindow = pNextOverlapWindow;
+    }
+
+    // Update activate status at next overlap window
+    if (HasChildPathFocus(true))
+        ImplCallFocusChangeActivate(pNewOverlapWindow, pOldOverlapWindow);
+}
+
+void Window::ImplUpdateFrameActivation(bool bNewFrame, bool bFocusOverlapWin)
+{
+    if (bNewFrame)
+    {
+        if (GetType() == WindowType::BORDERWINDOW &&
+            ImplGetWindow()->GetType() == WindowType::FLOATINGWINDOW)
+        {
+            static_cast<ImplBorderWindow*>(this)->SetDisplayActive(mpPlatformState->mpFrameData->mbHasFocus);
+        }
+    }
+
+    if (bFocusOverlapWin)
+    {
+        mpPlatformState->mpFrameData->mpFocusWin = Application::GetFocusWindow();
+
+        if (!mpPlatformState->mpFrameData->mbHasFocus)
+            mpPlatformState->mpFrame->ToTop(SalFrameToTop::NONE);
+    }
+
+    if (bNewFrame)
+        GetDropTarget();
 }
 
 sal_uInt16 Window::GetChildCount() const

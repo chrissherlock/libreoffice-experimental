@@ -507,6 +507,15 @@ public:
                                                  sal_uInt16 nStart = 0, sal_uInt16 nEnd = 0xFFFF,
                                                  sal_uInt16* pIndex = nullptr);
     SAL_DLLPRIVATE vcl::Window* ImplGetParent() const;
+
+    SAL_DLLPRIVATE void ImplClearFrameTracking();
+    SAL_DLLPRIVATE void ImplUpdateChildOverlapWindows(bool bNewFrame);
+    SAL_DLLPRIVATE void ImplUpdateFormerOverlapWindow(vcl::Window* pOldOverlapWindow,
+                                                     vcl::Window* pNewOverlapWindow,
+                                                     bool bFocusWin,
+                                                     bool bNewFrame);
+    SAL_DLLPRIVATE void ImplUpdateFrameActivation(bool bNewFrame, bool bFocusOverlapWin);
+
     SAL_DLLPRIVATE vcl::Window* ImplFindWindow(const Point& rFramePos);
     SAL_DLLPRIVATE vcl::Window* ImplFindOverlapWindow(const Point& rFramePos);
     SAL_DLLPRIVATE vcl::Window* ImplFindChildWindow(const Point& rFramePos);
