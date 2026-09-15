@@ -21,6 +21,9 @@
 
 #include <vcl/vclptr.hxx>
 
+#include <type_traits>
+#include <utility>
+
 namespace vcl
 {
 class Window;
@@ -110,6 +113,94 @@ struct WindowHierarchy
     {
         forEachSibling(getBoundarySibling(ZOrderFlags::First, bOverlap),
                        std::forward<Func>(rVisitor));
+    }
+
+    /**
+     * Walks upward through the parent chain starting at pStart (inclusive)
+     * until reaching the root or until rVisitor returns false.
+     */
+    template <typename Func> static void forEachAncestor(vcl::Window* pStart, Func&& rVisitor)
+    {
+        vcl::Window* pCurrent = pStart;
+        while (pCurrent)
+        {
+            WindowHierarchy* pHierarchy = pCurrent->ImplGetWindowHierarchy();
+            vcl::Window* pNext = pHierarchy ? pHierarchy->getParent() : nullptr;
+
+            if constexpr (std::is_same_v<std::invoke_result_t<Func, vcl::Window&>, void>)
+            {
+                rVisitor(*pCurrent);
+            }
+            else
+            {
+                if (!rVisitor(*pCurrent))
+                    break;
+            }
+
+            pCurrent = pNext;
+        }
+    }
+
+    /**
+     * Walks upward through the ancestor chain starting from this window's parent.
+     */
+    template <typename Func> void forEachAncestor(Func&& rVisitor) const
+    {
+        forEachAncestor(mpParent, std::forward<Func>(rVisitor));
+    }
+
+    /**
+     * Traverses all descendants of pRoot recursively in pre-order.
+     * Returning false stops traversal down that branch and halts the search.
+     */
+    template <typename Func> static bool forEachDescendant(vcl::Window* pRoot, Func&& rVisitor)
+    {
+        if (!pRoot)
+            return true;
+
+        WindowHierarchy* pHierarchy = pRoot->ImplGetWindowHierarchy();
+        if (!pHierarchy)
+            return true;
+
+        bool bContinue = true;
+        forEachSibling(pHierarchy->mpFirstChild, [&](vcl::Window& rChild) -> bool {
+            if constexpr (std::is_same_v<std::invoke_result_t<Func, vcl::Window&>, void>)
+            {
+                rVisitor(rChild);
+                forEachDescendant(&rChild, rVisitor);
+                return true;
+            }
+            else
+            {
+                if (!rVisitor(rChild) || !forEachDescendant(&rChild, rVisitor))
+                {
+                    bContinue = false;
+                    return false; // Break sibling loop
+                }
+                return true;
+            }
+        });
+
+        return bContinue;
+    }
+
+    template <typename Func> static void forEachBorderWindow(vcl::Window* pStart, Func&& rVisitor)
+    {
+        vcl::Window* pCurrent = pStart;
+        while (pCurrent)
+        {
+            WindowHierarchy* pHierarchy = pCurrent->ImplGetWindowHierarchy();
+            vcl::Window* pBorder = pHierarchy ? pHierarchy->mpBorderWindow.get() : nullptr;
+            if (!pBorder)
+                break;
+
+            if constexpr (std::is_same_v<std::invoke_result_t<Func, vcl::Window&>, void>)
+                rVisitor(*pBorder);
+            else if (!rVisitor(*pBorder))
+                break;
+
+            pCurrent = pBorder;
+        }
     }
 
 private:

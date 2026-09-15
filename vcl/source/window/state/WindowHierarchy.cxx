@@ -12,6 +12,8 @@
 #include <window/state/ImplFrameData.hxx>
 #include <window/state/WindowHierarchy.hxx>
 
+#include <cassert>
+
 void WindowHierarchy::linkIntoOverlapChain(vcl::Window* pWindow, vcl::Window* pOverlapParent)
 {
     mpOverlapWindow = pOverlapParent;
@@ -110,26 +112,32 @@ void WindowHierarchy::unlinkFromChildChain()
 
 vcl::Window* WindowHierarchy::getTopmostFrameWindow() const
 {
-    const WindowHierarchy* pHierarchy = this;
-    while (vcl::Window* pParent = pHierarchy->getParent())
-    {
-        WindowHierarchy* pParentHierarchy = pParent->ImplGetWindowHierarchy();
-        if (!pParentHierarchy)
-            break;
-        pHierarchy = pParentHierarchy;
-    }
+    const WindowHierarchy* pTopHierarchy = this;
 
-    return pHierarchy->mpFrameWindow;
+    forEachAncestor([&](vcl::Window& rAncestor) {
+        if (WindowHierarchy* pHierarchy = rAncestor.ImplGetWindowHierarchy())
+            pTopHierarchy = pHierarchy;
+    });
+
+    return pTopHierarchy->mpFrameWindow;
 }
 
 void WindowHierarchy::insertOverlapWindow(vcl::Window* pWindow, vcl::Window* pParent,
                                           ImplFrameData& rFrameData)
 {
-    vcl::Window* pFirstOverlapParent = pParent;
-    while (!pFirstOverlapParent->ImplIsOverlapWindow())
-    {
-        pFirstOverlapParent = pFirstOverlapParent->ImplGetParent();
-    }
+    vcl::Window* pFirstOverlapParent = nullptr;
+
+    forEachAncestor(pParent, [&](vcl::Window& rAncestor) -> bool {
+        if (rAncestor.ImplIsOverlapWindow())
+        {
+            pFirstOverlapParent = &rAncestor;
+            return false;
+        }
+        return true;
+    });
+
+    assert(pFirstOverlapParent
+           && "insertOverlapWindow: overlap parent not found in ancestor chain");
 
     // Link into global frame overlap list
     mpNextOverlap = rFrameData.mpFirstOverlap;
@@ -328,15 +336,9 @@ vcl::Window* WindowHierarchy::getBoundarySibling(ZOrderFlags nFlags, bool bOverl
 
 vcl::Window* WindowHierarchy::findOutermostBorderWindow(vcl::Window* pWindow)
 {
-    while (pWindow)
-    {
-        WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy();
-        if (!pHierarchy || !pHierarchy->mpBorderWindow)
-            break;
-        pWindow = pHierarchy->mpBorderWindow;
-    }
-
-    return pWindow;
+    vcl::Window* pOuter = pWindow;
+    forEachBorderWindow(pWindow, [&](vcl::Window& rBorder) { pOuter = &rBorder; });
+    return pOuter;
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
