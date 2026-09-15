@@ -91,34 +91,13 @@ void Window::ImplRemoveWindow(bool bRemoveFrameData)
     if (!mpClassification->mbFrame)
     {
         if (ImplIsOverlapWindow())
-            ImplUnlinkOverlapWindow();
+            mpHierarchy->unlinkOverlapWindow(*mpPlatformState->mpFrameData);
         else
             mpHierarchy->unlinkFromChildChain();
     }
 
     if (bRemoveFrameData)
         GetOutDev()->ReleaseGraphics();
-}
-
-void Window::ImplUnlinkGlobalOverlap()
-{
-    // True O(1) extraction utilizing mpPrevOverlap pointer
-    if (mpHierarchy->mpPrevOverlap)
-        mpHierarchy->mpPrevOverlap->mpHierarchy->mpNextOverlap = mpHierarchy->mpNextOverlap;
-    else
-        mpPlatformState->mpFrameData->mpFirstOverlap = mpHierarchy->mpNextOverlap;
-
-    if (mpHierarchy->mpNextOverlap)
-        mpHierarchy->mpNextOverlap->mpHierarchy->mpPrevOverlap = mpHierarchy->mpPrevOverlap;
-
-    mpHierarchy->mpPrevOverlap = nullptr;
-    mpHierarchy->mpNextOverlap = nullptr;
-}
-
-void Window::ImplUnlinkOverlapWindow()
-{
-    ImplUnlinkGlobalOverlap();
-    mpHierarchy->unlinkFromOverlapChain();
 }
 
 void Window::reorderWithinParent(sal_uInt16 nNewPosition)

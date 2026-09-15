@@ -1132,8 +1132,6 @@ private:
     SAL_DLLPRIVATE void ImplAttachToFrame(vcl::Window* pParent);
 
     SAL_DLLPRIVATE void ImplRemoveWindow(bool bRemoveFrameData);
-    SAL_DLLPRIVATE void ImplUnlinkGlobalOverlap();
-    SAL_DLLPRIVATE void ImplUnlinkOverlapWindow();
 
     SAL_DLLPRIVATE bool ImplIsRealParentPath(const vcl::Window* pWindow) const;
     SAL_DLLPRIVATE void ImplUpdateWindowPtr(vcl::Window* pWindow);

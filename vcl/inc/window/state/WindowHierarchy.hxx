@@ -68,8 +68,12 @@ struct WindowHierarchy
     void linkIntoOverlapChain(vcl::Window* pWindow, vcl::Window* pOverlapParent);
     void linkIntoChildChain(vcl::Window* pWindow, vcl::Window* pParent);
 
-    void unlinkFromOverlapChain();
+    void unlinkOverlapWindow(ImplFrameData& rFrameData);
     void unlinkFromChildChain();
+
+private:
+    void unlinkFromGlobalOverlapChain(ImplFrameData& rFrameData);
+    void unlinkFromOverlapChain();
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

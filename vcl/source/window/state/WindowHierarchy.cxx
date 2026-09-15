@@ -45,6 +45,27 @@ void WindowHierarchy::linkIntoChildChain(vcl::Window* pWindow, vcl::Window* pPar
         mpPrev->ImplGetWindowHierarchy()->mpNext = pWindow;
 }
 
+void WindowHierarchy::unlinkOverlapWindow(ImplFrameData& rFrameData)
+{
+    unlinkFromGlobalOverlapChain(rFrameData);
+    unlinkFromOverlapChain();
+}
+
+void WindowHierarchy::unlinkFromGlobalOverlapChain(ImplFrameData& rFrameData)
+{
+    // True O(1) extraction utilizing mpPrevOverlap pointer
+    if (mpPrevOverlap)
+        mpPrevOverlap->ImplGetWindowHierarchy()->mpNextOverlap = mpNextOverlap;
+    else
+        rFrameData.mpFirstOverlap = mpNextOverlap;
+
+    if (mpNextOverlap)
+        mpNextOverlap->ImplGetWindowHierarchy()->mpPrevOverlap = mpPrevOverlap;
+
+    mpPrevOverlap = nullptr;
+    mpNextOverlap = nullptr;
+}
+
 void WindowHierarchy::unlinkFromOverlapChain()
 {
     WindowHierarchy* pOverlapHierarchy
