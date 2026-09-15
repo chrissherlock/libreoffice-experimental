@@ -49,12 +49,8 @@ struct ImplCalcToTopData
     std::unique_ptr<vcl::Region>       mpInvalidateRegion;
 };
 
-namespace vcl {
-
-vcl::Window* Window::ImplGetTopmostFrameWindow() const
+namespace vcl
 {
-    return mpHierarchy ? mpHierarchy->getTopmostFrameWindow() : nullptr;
-}
 
 void Window::ImplInsertWindow(vcl::Window* pParent)
 {
@@ -69,7 +65,7 @@ void Window::ImplInsertWindow(vcl::Window* pParent)
     if (ImplIsOverlapWindow())
         ImplInsertOverlapWindow(pParent);
     else
-        ImplInsertChildWindow(pParent);
+        mpHierarchy->linkIntoChildChain(this, pParent);
 }
 
 void Window::ImplAttachToFrame(vcl::Window* pParent)
@@ -107,11 +103,6 @@ void Window::ImplInsertOverlapWindow(vcl::Window* pParent)
     mpHierarchy->linkIntoOverlapChain(this, pFirstOverlapParent);
 }
 
-void Window::ImplInsertChildWindow(vcl::Window* pParent)
-{
-    mpHierarchy->linkIntoChildChain(this, pParent);
-}
-
 void Window::ImplRemoveWindow(bool bRemoveFrameData)
 {
     // Frame windows do not participate in parent/sibling tree updates
@@ -120,7 +111,7 @@ void Window::ImplRemoveWindow(bool bRemoveFrameData)
         if (ImplIsOverlapWindow())
             ImplUnlinkOverlapWindow();
         else
-            ImplUnlinkChildWindow();
+            mpHierarchy->unlinkFromChildChain();
     }
 
     if (bRemoveFrameData)
@@ -146,11 +137,6 @@ void Window::ImplUnlinkOverlapWindow()
 {
     ImplUnlinkGlobalOverlap();
     mpHierarchy->unlinkFromOverlapChain();
-}
-
-void Window::ImplUnlinkChildWindow()
-{
-    mpHierarchy->unlinkFromChildChain();
 }
 
 void Window::reorderWithinParent(sal_uInt16 nNewPosition)

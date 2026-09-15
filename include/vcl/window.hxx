@@ -1131,12 +1131,10 @@ private:
     SAL_DLLPRIVATE void ImplInsertWindow(vcl::Window* pParent);
     SAL_DLLPRIVATE void ImplAttachToFrame(vcl::Window* pParent);
     SAL_DLLPRIVATE void ImplInsertOverlapWindow(vcl::Window* pParent);
-    SAL_DLLPRIVATE void ImplInsertChildWindow(vcl::Window* pParent);
 
     SAL_DLLPRIVATE void ImplRemoveWindow(bool bRemoveFrameData);
     SAL_DLLPRIVATE void ImplUnlinkGlobalOverlap();
     SAL_DLLPRIVATE void ImplUnlinkOverlapWindow();
-    SAL_DLLPRIVATE void ImplUnlinkChildWindow();
 
     SAL_DLLPRIVATE bool ImplIsRealParentPath(const vcl::Window* pWindow) const;
     SAL_DLLPRIVATE void ImplUpdateWindowPtr(vcl::Window* pWindow);
@@ -1154,7 +1152,6 @@ private:
     SAL_DLLPRIVATE void ImplShowAllOverlaps();
     SAL_DLLPRIVATE void ImplHideAllOverlaps();
     SAL_DLLPRIVATE ::std::vector<VclPtr<vcl::Window>>& ImplGetOwnerDrawList();
-    SAL_DLLPRIVATE vcl::Window* ImplGetTopmostFrameWindow() const;
     SAL_DLLPRIVATE void ImplRemoveFromTaskPaneList();
     SAL_DLLPRIVATE void ImplRemoveOwnerDrawDecoratedFrame();
     SAL_DLLPRIVATE void ImplResetGlobalWindowPointers();

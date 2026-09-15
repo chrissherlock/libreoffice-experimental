@@ -484,7 +484,7 @@ const SystemEnvData* Window::GetSystemData() const
 
 void Window::FlashWindow() const
 {
-    vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
+    vcl::Window* pMyParent = mpHierarchy->getTopmostFrameWindow();
 
     if (pMyParent && pMyParent->mpClassification)
         pMyParent->mpPlatformState->mpFrame->FlashWindow();
@@ -492,7 +492,7 @@ void Window::FlashWindow() const
 
 void Window::SetTaskBarProgress(int nCurrentProgress)
 {
-    vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
+    vcl::Window* pMyParent = mpHierarchy->getTopmostFrameWindow();
 
     if (pMyParent && pMyParent->mpClassification)
         pMyParent->mpPlatformState->mpFrame->SetTaskBarProgress(nCurrentProgress);
@@ -500,7 +500,7 @@ void Window::SetTaskBarProgress(int nCurrentProgress)
 
 void Window::SetTaskBarState(VclTaskBarStates eTaskBarState)
 {
-    vcl::Window* pMyParent = ImplGetTopmostFrameWindow();
+    vcl::Window* pMyParent = mpHierarchy->getTopmostFrameWindow();
 
     if (pMyParent && pMyParent->mpClassification)
         pMyParent->mpPlatformState->mpFrame->SetTaskBarState(eTaskBarState);
