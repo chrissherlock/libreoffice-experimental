@@ -61,6 +61,9 @@ struct WindowHierarchy
 
     vcl::Window* getFirstChild() const { return mpFirstChild; }
     vcl::Window* getNextSibling() const { return mpNext; }
+
+    void linkIntoOverlapChain(vcl::Window* pWindow, vcl::Window* pOverlapParent);
+    void linkIntoChildChain(vcl::Window* pWindow, vcl::Window* pParent);
 };
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

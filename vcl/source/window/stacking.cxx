@@ -103,9 +103,6 @@ void Window::ImplInsertOverlapWindow(vcl::Window* pParent)
         pFirstOverlapParent = pFirstOverlapParent->ImplGetParent();
     }
 
-    mpHierarchy->mpOverlapWindow = pFirstOverlapParent;
-
-    // --- Update global frame overlap list pointers ---
     mpHierarchy->mpNextOverlap = mpPlatformState->mpFrameData->mpFirstOverlap;
     if (mpHierarchy->mpNextOverlap)
         mpHierarchy->mpNextOverlap->mpHierarchy->mpPrevOverlap = this;
@@ -113,30 +110,12 @@ void Window::ImplInsertOverlapWindow(vcl::Window* pParent)
     mpPlatformState->mpFrameData->mpFirstOverlap = this;
     mpHierarchy->mpPrevOverlap = nullptr;
 
-    // Overlap-Windows are by default the uppermost
-    mpHierarchy->mpNext = pFirstOverlapParent->mpHierarchy->mpFirstOverlap;
-    pFirstOverlapParent->mpHierarchy->mpFirstOverlap = this;
-
-    if (!pFirstOverlapParent->mpHierarchy->mpLastOverlap)
-        pFirstOverlapParent->mpHierarchy->mpLastOverlap = this;
-    else
-        mpHierarchy->mpNext->mpHierarchy->mpPrev = this;
+    mpHierarchy->linkIntoOverlapChain(this, pFirstOverlapParent);
 }
 
 void Window::ImplInsertChildWindow(vcl::Window* pParent)
 {
-    if (pParent->ImplIsOverlapWindow())
-        mpHierarchy->mpOverlapWindow = pParent;
-    else
-        mpHierarchy->mpOverlapWindow = pParent->mpHierarchy->mpOverlapWindow;
-
-    mpHierarchy->mpPrev = pParent->mpHierarchy->mpLastChild;
-    pParent->mpHierarchy->mpLastChild = this;
-
-    if (!pParent->mpHierarchy->mpFirstChild)
-        pParent->mpHierarchy->mpFirstChild = this;
-    else
-        mpHierarchy->mpPrev->mpHierarchy->mpNext = this;
+    mpHierarchy->linkIntoChildChain(this, pParent);
 }
 
 void Window::ImplRemoveWindow(bool bRemoveFrameData)
