@@ -44,4 +44,45 @@ void WindowHierarchy::linkIntoChildChain(vcl::Window* pWindow, vcl::Window* pPar
         mpPrev->ImplGetWindowHierarchy()->mpNext = pWindow;
 }
 
+void WindowHierarchy::unlinkFromOverlapChain()
+{
+    WindowHierarchy* pOverlapHierarchy
+        = mpOverlapWindow ? mpOverlapWindow->ImplGetWindowHierarchy() : nullptr;
+
+    // Unlink from the forward sibling chain (adjust head)
+    if (mpPrev)
+        mpPrev->ImplGetWindowHierarchy()->mpNext = mpNext;
+    else if (pOverlapHierarchy)
+        pOverlapHierarchy->mpFirstOverlap = mpNext;
+
+    // Unlink from the backward sibling chain (adjust tail)
+    if (mpNext)
+        mpNext->ImplGetWindowHierarchy()->mpPrev = mpPrev;
+    else if (pOverlapHierarchy)
+        pOverlapHierarchy->mpLastOverlap = mpPrev;
+
+    mpPrev = nullptr;
+    mpNext = nullptr;
+}
+
+void WindowHierarchy::unlinkFromChildChain()
+{
+    WindowHierarchy* pParentHierarchy = mpParent ? mpParent->ImplGetWindowHierarchy() : nullptr;
+
+    // Unlink from the forward sibling chain (adjust head)
+    if (mpPrev)
+        mpPrev->ImplGetWindowHierarchy()->mpNext = mpNext;
+    else if (pParentHierarchy)
+        pParentHierarchy->mpFirstChild = mpNext;
+
+    // Unlink from the backward sibling chain (adjust tail)
+    if (mpNext)
+        mpNext->ImplGetWindowHierarchy()->mpPrev = mpPrev;
+    else if (pParentHierarchy)
+        pParentHierarchy->mpLastChild = mpPrev;
+
+    mpPrev = nullptr;
+    mpNext = nullptr;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

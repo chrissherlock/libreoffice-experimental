@@ -151,39 +151,12 @@ void Window::ImplUnlinkGlobalOverlap()
 void Window::ImplUnlinkOverlapWindow()
 {
     ImplUnlinkGlobalOverlap();
-
-    // Unlink from the forward sibling chain (adjust head)
-    if (mpHierarchy->mpPrev)
-        mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
-    else if (mpHierarchy->mpOverlapWindow)
-        mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap = mpHierarchy->mpNext;
-
-    // Unlink from the backward sibling chain (adjust tail)
-    if (mpHierarchy->mpNext)
-        mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
-    else if (mpHierarchy->mpOverlapWindow)
-        mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap = mpHierarchy->mpPrev;
-
-    mpHierarchy->mpPrev = nullptr;
-    mpHierarchy->mpNext = nullptr;
+    mpHierarchy->unlinkFromOverlapChain();
 }
 
 void Window::ImplUnlinkChildWindow()
 {
-    // Unlink from the forward sibling chain (adjust head)
-    if (mpHierarchy->mpPrev)
-        mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
-    else if (mpHierarchy->mpParent)
-        mpHierarchy->mpParent->mpHierarchy->mpFirstChild = mpHierarchy->mpNext;
-
-    // Unlink from the backward sibling chain (adjust tail)
-    if (mpHierarchy->mpNext)
-        mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
-    else if (mpHierarchy->mpParent)
-        mpHierarchy->mpParent->mpHierarchy->mpLastChild = mpHierarchy->mpPrev;
-
-    mpHierarchy->mpPrev = nullptr;
-    mpHierarchy->mpNext = nullptr;
+    mpHierarchy->unlinkFromChildChain();
 }
 
 void Window::reorderWithinParent(sal_uInt16 nNewPosition)
