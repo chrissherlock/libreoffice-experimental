@@ -74,6 +74,7 @@ struct WindowHierarchy
     void reorderWithinParent(vcl::Window* pWindow, sal_uInt16 nNewPosition);
 
     void toBottomChild(vcl::Window* pWindow);
+    bool toTopOverlap(vcl::Window* pWindow, bool bOnTop);
 
 private:
     void unlinkFromGlobalOverlapChain(ImplFrameData& rFrameData);

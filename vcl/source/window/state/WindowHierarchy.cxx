@@ -203,4 +203,47 @@ void WindowHierarchy::toBottomChild(vcl::Window* pWindow)
     mpNext = nullptr;
 }
 
+bool WindowHierarchy::toTopOverlap(vcl::Window* pWindow, bool bOnTop)
+{
+    WindowHierarchy* pOverlapHierarchy
+        = mpOverlapWindow ? mpOverlapWindow->ImplGetWindowHierarchy() : nullptr;
+    if (!pOverlapHierarchy || pOverlapHierarchy->mpFirstOverlap.get() == pWindow)
+        return false;
+
+    // Remove window from the overlap chain
+    unlinkFromOverlapChain();
+
+    // Respect AlwaysOnTop: if not on top, skip past existing AlwaysOnTop windows
+    vcl::Window* pNextWin = pOverlapHierarchy->mpFirstOverlap;
+    if (!bOnTop)
+    {
+        while (pNextWin)
+        {
+            if (!pNextWin->IsAlwaysOnTopEnabled())
+                break;
+            pNextWin = pNextWin->ImplGetWindowHierarchy()->mpNext;
+        }
+    }
+
+    // Reinsert window before pNextWin
+    mpNext = pNextWin;
+    if (pNextWin)
+    {
+        mpPrev = pNextWin->ImplGetWindowHierarchy()->mpPrev;
+        pNextWin->ImplGetWindowHierarchy()->mpPrev = pWindow;
+    }
+    else
+    {
+        mpPrev = pOverlapHierarchy->mpLastOverlap;
+        pOverlapHierarchy->mpLastOverlap = pWindow;
+    }
+
+    if (mpPrev)
+        mpPrev->ImplGetWindowHierarchy()->mpNext = pWindow;
+    else
+        pOverlapHierarchy->mpFirstOverlap = pWindow;
+
+    return true;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */

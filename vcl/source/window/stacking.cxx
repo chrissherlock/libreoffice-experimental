@@ -139,86 +139,51 @@ void Window::ImplCalcToTop( ImplCalcToTopData* pPrevData )
     }
 }
 
-void Window::ImplToTop( ToTopFlags nFlags )
+void Window::ImplToTop(ToTopFlags nFlags)
 {
-    SAL_WARN_IF( !ImplIsOverlapWindow(), "vcl", "Window::ImplToTop(): Is not an OverlapWindow" );
+    SAL_WARN_IF(!ImplIsOverlapWindow(), "vcl", "Window::ImplToTop(): Is not an OverlapWindow");
 
-    if ( mpClassification->mbFrame )
+    if (mpClassification->mbFrame)
     {
-        // on a mouse click in the external window, it is the latter's
-        // responsibility to assure our frame is put in front
-        if ( !mpPlatformState->mpFrameData->mbHasFocus &&
-             !mpPlatformState->mpFrameData->mbSysObjFocus &&
-             !mpPlatformState->mpFrameData->mbInSysObjFocusHdl &&
-             !mpPlatformState->mpFrameData->mbInSysObjToTopHdl )
-        {
-            // do not bring floating windows on the client to top
-            if( !ImplGetClientWindow() || !(ImplGetClientWindow()->GetStyle() & WB_SYSTEMFLOATWIN) )
-            {
-                SalFrameToTop nSysFlags = SalFrameToTop::NONE;
-                if ( nFlags & ToTopFlags::RestoreWhenMin )
-                    nSysFlags |= SalFrameToTop::RestoreWhenMin;
-                if ( nFlags & ToTopFlags::ForegroundTask )
-                    nSysFlags |= SalFrameToTop::ForegroundTask;
-                if ( nFlags & ToTopFlags::GrabFocusOnly )
-                    nSysFlags |= SalFrameToTop::GrabFocusOnly;
-                mpPlatformState->mpFrame->ToTop( nSysFlags );
-            }
-        }
-
+        ImplBringFrameToTop(nFlags);
         return;
     }
 
-    if ( mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap.get() == this )
+    if (mpHierarchy && mpHierarchy->toTopOverlap(this, IsAlwaysOnTopEnabled()))
+    {
+        if (IsReallyVisible() && mpHierarchy->mpOverlapWindow)
+            vcl::clipping::setClipFlagOverlapWindows(*mpHierarchy->mpOverlapWindow);
+    }
+}
+
+void Window::ImplBringFrameToTop(ToTopFlags nFlags)
+{
+    // On a mouse click in the external window, it is the latter's
+    // responsibility to ensure our frame is put in front
+    if (mpPlatformState->mpFrameData->mbHasFocus ||
+        mpPlatformState->mpFrameData->mbSysObjFocus ||
+        mpPlatformState->mpFrameData->mbInSysObjFocusHdl ||
+        mpPlatformState->mpFrameData->mbInSysObjToTopHdl)
+    {
+        return;
+    }
+
+    // Do not bring floating windows on the client to top
+    if (ImplGetClientWindow() && (ImplGetClientWindow()->GetStyle() & WB_SYSTEMFLOATWIN))
         return;
 
-    // remove window from the list
-    mpHierarchy->mpPrev->mpHierarchy->mpNext = mpHierarchy->mpNext;
-    if ( mpHierarchy->mpNext )
-    {
-        mpHierarchy->mpNext->mpHierarchy->mpPrev = mpHierarchy->mpPrev;
-    }
-    else
-    {
-        // coverity[copy_paste_error : FALSE] - this is correct mpLastOverlap, not mpPrev
-        mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap = mpHierarchy->mpPrev;
-    }
+    SalFrameToTop nSysFlags = SalFrameToTop::NONE;
 
-    // take AlwaysOnTop into account
-    bool    bOnTop = IsAlwaysOnTopEnabled();
-    vcl::Window* pNextWin = mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap;
+    if (nFlags & ToTopFlags::RestoreWhenMin)
+        nSysFlags |= SalFrameToTop::RestoreWhenMin;
 
-    if ( !bOnTop )
-    {
-        while ( pNextWin )
-        {
-            if ( !pNextWin->IsAlwaysOnTopEnabled() )
-                break;
-            pNextWin = pNextWin->mpHierarchy->mpNext;
-        }
-    }
+    if (nFlags & ToTopFlags::ForegroundTask)
+        nSysFlags |= SalFrameToTop::ForegroundTask;
 
-    // add the window to the list again
-    mpHierarchy->mpNext = pNextWin;
-    if ( pNextWin )
-    {
-        mpHierarchy->mpPrev = pNextWin->mpHierarchy->mpPrev;
-        pNextWin->mpHierarchy->mpPrev = this;
-    }
-    else
-    {
-        mpHierarchy->mpPrev = mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap;
-        mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap = this;
-    }
+    if (nFlags & ToTopFlags::GrabFocusOnly)
+        nSysFlags |= SalFrameToTop::GrabFocusOnly;
 
-    if ( mpHierarchy->mpPrev )
-        mpHierarchy->mpPrev->mpHierarchy->mpNext = this;
-    else
-        mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap = this;
-
-    // recalculate ClipRegion of this and all overlapping windows
-    if ( IsReallyVisible() )
-        vcl::clipping::setClipFlagOverlapWindows(*mpHierarchy->mpOverlapWindow);
+    mpPlatformState->mpFrame->ToTop(nSysFlags);
 }
 
 void Window::ImplStartToTop(ToTopFlags nFlags)
