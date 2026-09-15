@@ -17,12 +17,17 @@
  *   the License at http://www.apache.org/licenses/LICENSE-2.0 .
  */
 
-#include <vcl/dndlistenercontainer.hxx>
-#include <vcl/syswin.hxx>
-#include <vcl/window.hxx>
-#include <vcl/taskpanelist.hxx>
 #include <sal/log.hxx>
 
+#include <vcl/dndlistenercontainer.hxx>
+#include <vcl/taskpanelist.hxx>
+#include <vcl/syswin.hxx>
+#include <vcl/window.hxx>
+
+#include <salframe.hxx>
+#include <salobj.hxx>
+#include <svdata.hxx>
+#include <window/subclasses/decorations/brdwin.hxx>
 #include <window/state/ImplFrameData.hxx>
 #include <window/state/ImplWinData.hxx>
 #include <window/state/WindowVisibilityState.hxx>
@@ -33,20 +38,9 @@
 #include <window/state/WindowHierarchy.hxx>
 #include <window/state/WindowFocusState.hxx>
 #include <window/state/clipping_window.hxx>
-#include <salframe.hxx>
-#include <salobj.hxx>
-#include <svdata.hxx>
-#include <window/subclasses/decorations/brdwin.hxx>
 
 #include <com/sun/star/awt/XTopWindow.hpp>
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
-
-using namespace ::com::sun::star::uno;
-using namespace ::com::sun::star::datatransfer::clipboard;
-using namespace ::com::sun::star::datatransfer::dnd;
-using namespace ::com::sun::star;
-
-using ::com::sun::star::awt::XTopWindow;
 
 struct ImplCalcToTopData
 {
@@ -720,7 +714,7 @@ bool Window::IsTopWindow() const
     {
         // #113722#, cache result of expensive queryInterface call
         vcl::Window *pThisWin = const_cast<vcl::Window*>(this);
-        uno::Reference< XTopWindow > xTopWindow( pThisWin->GetComponentInterface(), UNO_QUERY );
+        css::uno::Reference< css::awt::XTopWindow > xTopWindow( pThisWin->GetComponentInterface(), css::uno::UNO_QUERY );
         pThisWin->mpWinData->mnIsTopWindow = xTopWindow.is() ? 1 : 0;
     }
 
