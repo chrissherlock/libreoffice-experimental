@@ -1217,6 +1217,10 @@ private:
 
     // --- Visibility and Show/Hide ---
     SAL_DLLPRIVATE void ImplResetReallyVisible();
+    SAL_DLLPRIVATE void ImplClearReallyVisibleState();
+    SAL_DLLPRIVATE void ImplResetOverlapWindowsReallyVisible();
+    SAL_DLLPRIVATE void ImplResetChildWindowsReallyVisible();
+
     SAL_DLLPRIVATE void ImplSetReallyVisible();
     SAL_DLLPRIVATE void ImplCallInitShow();
     SAL_DLLPRIVATE std::optional<bool> ImplHideWindow(ShowFlags nFlags);

@@ -819,33 +819,44 @@ bool Window::ImplIsWindowOrChild( const vcl::Window* pWindow, bool bSystemWindow
 
 void Window::ImplResetReallyVisible()
 {
+    ImplClearReallyVisibleState();
+    ImplResetOverlapWindowsReallyVisible();
+    ImplResetChildWindowsReallyVisible();
+}
+
+void Window::ImplClearReallyVisibleState()
+{
     bool bBecameReallyInvisible = mpVisibilityState->mbReallyVisible;
 
-    GetOutDev()->mbDevOutput     = false;
+    GetOutDev()->mbDevOutput = false;
     mpVisibilityState->mbReallyVisible = false;
-    mpVisibilityState->mbReallyShown   = false;
+    mpVisibilityState->mbReallyShown = false;
 
-    // the SHOW/HIDE events serve as indicators to send child creation/destroy events to the access bridge.
+    // The SHOW/HIDE events serve as indicators to send child creation/destroy events to the access bridge.
     // For this, the data member of the event must not be NULL.
     // Previously, we did this in Window::Show, but there some events got lost in certain situations.
-    if( bBecameReallyInvisible && ImplIsAccessibleCandidate() )
-        CallEventListeners( VclEventId::WindowHide, this );
-        // TODO. It's kind of a hack that we're re-using the VclEventId::WindowHide. Normally, we should
-        // introduce another event which explicitly triggers the Accessibility implementations.
+    if (bBecameReallyInvisible && ImplIsAccessibleCandidate())
+        CallEventListeners(VclEventId::WindowHide, this);
+}
 
+void Window::ImplResetOverlapWindowsReallyVisible()
+{
     vcl::Window* pWindow = mpHierarchy->mpFirstOverlap;
-    while ( pWindow )
+    while (pWindow)
     {
-        if ( pWindow->mpVisibilityState->mbReallyVisible )
+        if (pWindow->mpVisibilityState->mbReallyVisible)
             pWindow->ImplResetReallyVisible();
 
         pWindow = pWindow->mpHierarchy->mpNext;
     }
+}
 
-    pWindow = mpHierarchy->mpFirstChild;
-    while ( pWindow )
+void Window::ImplResetChildWindowsReallyVisible()
+{
+    vcl::Window* pWindow = mpHierarchy->mpFirstChild;
+    while (pWindow)
     {
-        if ( pWindow->mpVisibilityState->mbReallyVisible )
+        if (pWindow->mpVisibilityState->mbReallyVisible)
             pWindow->ImplResetReallyVisible();
 
         pWindow = pWindow->mpHierarchy->mpNext;
