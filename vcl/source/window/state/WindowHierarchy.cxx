@@ -149,15 +149,17 @@ void WindowHierarchy::reorderWithinParent(vcl::Window* pWindow, sal_uInt16 nNewP
         return;
 
     sal_uInt16 nChildCount = 0;
-    vcl::Window* pSource = pParentHierarchy->mpFirstChild;
+    vcl::Window* pSource = nullptr;
 
-    while (pSource)
-    {
+    forEachSibling(pParentHierarchy->mpFirstChild, [&](vcl::Window& rChild) -> bool {
         if (nChildCount == nNewPosition)
-            break;
-        pSource = pSource->ImplGetWindowHierarchy()->mpNext;
+        {
+            pSource = &rChild;
+            return false; // Found target position; stop traversal
+        }
         nChildCount++;
-    }
+        return true;
+    });
 
     if (pSource == pWindow) // already at the right place
         return;
@@ -217,12 +219,15 @@ bool WindowHierarchy::toTopOverlap(vcl::Window* pWindow, bool bOnTop)
     vcl::Window* pNextWin = pOverlapHierarchy->mpFirstOverlap;
     if (!bOnTop)
     {
-        while (pNextWin)
-        {
-            if (!pNextWin->IsAlwaysOnTopEnabled())
-                break;
-            pNextWin = pNextWin->ImplGetWindowHierarchy()->mpNext;
-        }
+        pNextWin = nullptr;
+        forEachSibling(pOverlapHierarchy->mpFirstOverlap, [&](vcl::Window& rSibling) -> bool {
+            if (!rSibling.IsAlwaysOnTopEnabled())
+            {
+                pNextWin = &rSibling;
+                return false; // Found first non-AlwaysOnTop window; stop traversal
+            }
+            return true;
+        });
     }
 
     // Reinsert window before pNextWin
