@@ -727,47 +727,54 @@ bool Window::IsTopWindow() const
     return mpWinData->mnIsTopWindow == 1;
 }
 
-vcl::Window* Window::ImplFindWindow( const Point& rFramePos )
+vcl::Window* Window::ImplFindOverlapWindow(const Point& rFramePos)
 {
-    vcl::Window* pFindWindow;
-
-    // first check all overlapping windows
     vcl::Window* pTempWindow = mpHierarchy->mpFirstOverlap;
-    while ( pTempWindow )
+    while (pTempWindow)
     {
-        pFindWindow = pTempWindow->ImplFindWindow( rFramePos );
-        if ( pFindWindow )
+        if (vcl::Window* pFindWindow = pTempWindow->ImplFindWindow(rFramePos))
             return pFindWindow;
 
         pTempWindow = pTempWindow->mpHierarchy->mpNext;
     }
+    return nullptr;
+}
 
-    // then we check our window
-    if ( !mpVisibilityState->mbVisible )
+vcl::Window* Window::ImplFindWindow(const Point& rFramePos)
+{
+    // First check all overlapping windows
+    if (vcl::Window* pFindWindow = ImplFindOverlapWindow(rFramePos))
+        return pFindWindow;
+
+    // Check visibility and hit test for this window
+    if (!mpVisibilityState->mbVisible)
         return nullptr;
 
-    WindowHitTest nHitTest = ImplHitTest( rFramePos );
-
+    WindowHitTest nHitTest = ImplHitTest(rFramePos);
     if (!(nHitTest & WindowHitTest::Inside))
         return nullptr;
 
-    // and then we check all child windows
-    pTempWindow = mpHierarchy->mpFirstChild;
+    // Check all child windows
+    if (vcl::Window* pFindWindow = ImplFindChildWindow(rFramePos))
+        return pFindWindow;
 
-    while ( pTempWindow )
+    if (nHitTest & WindowHitTest::Transparent)
+        return nullptr;
+
+    return this;
+}
+
+vcl::Window* Window::ImplFindChildWindow(const Point& rFramePos)
+{
+    vcl::Window* pTempWindow = mpHierarchy->mpFirstChild;
+    while (pTempWindow)
     {
-        pFindWindow = pTempWindow->ImplFindWindow( rFramePos );
-
-        if ( pFindWindow )
+        if (vcl::Window* pFindWindow = pTempWindow->ImplFindWindow(rFramePos))
             return pFindWindow;
 
         pTempWindow = pTempWindow->mpHierarchy->mpNext;
     }
-
-    if ( nHitTest & WindowHitTest::Transparent )
-        return nullptr;
-
-    return this;
+    return nullptr;
 }
 
 bool Window::IsAncestorOf(const vcl::Window& rWindow) const

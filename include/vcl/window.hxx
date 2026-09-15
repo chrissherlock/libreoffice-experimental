@@ -508,6 +508,9 @@ public:
                                                  sal_uInt16* pIndex = nullptr);
     SAL_DLLPRIVATE vcl::Window* ImplGetParent() const;
     SAL_DLLPRIVATE vcl::Window* ImplFindWindow(const Point& rFramePos);
+    SAL_DLLPRIVATE vcl::Window* ImplFindOverlapWindow(const Point& rFramePos);
+    SAL_DLLPRIVATE vcl::Window* ImplFindChildWindow(const Point& rFramePos);
+
     SAL_DLLPRIVATE bool ImplIsWindowOrChild(const vcl::Window* pWindow,
                                             bool bSystemWindow = false) const;
     SAL_DLLPRIVATE bool ImplIsChild(const vcl::Window* pWindow, bool bSystemWindow = false) const;
