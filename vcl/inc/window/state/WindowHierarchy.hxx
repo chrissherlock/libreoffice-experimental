@@ -78,6 +78,9 @@ struct WindowHierarchy
     void toBottomChild(vcl::Window* pWindow);
     bool toTopOverlap(vcl::Window* pWindow, bool bOnTop);
 
+    vcl::Window* getBoundarySibling(ZOrderFlags nFlags, bool bOverlap) const;
+    static vcl::Window* findOutermostBorderWindow(vcl::Window* pWindow);
+
 private:
     void unlinkFromGlobalOverlapChain(ImplFrameData& rFrameData);
     void unlinkFromOverlapChain();

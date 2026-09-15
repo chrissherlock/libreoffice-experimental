@@ -337,33 +337,28 @@ void Window::SetZOrder(vcl::Window* pRefWindow, ZOrderFlags nFlags)
         ImplInvalidateZOrderPeers();
 }
 
+static ZOrderFlags lcl_normalizeZOrderFlags(ZOrderFlags nFlags)
+{
+    if (nFlags & ZOrderFlags::First)
+        return nFlags | ZOrderFlags::Before;
+
+    if (nFlags & ZOrderFlags::Last)
+        return nFlags | ZOrderFlags::Behind;
+
+    return nFlags;
+}
+
 vcl::Window* Window::ImplResolveZOrderReference(vcl::Window* pRefWindow, ZOrderFlags& rFlags) const
 {
-    if (rFlags & ZOrderFlags::First)
+    if (rFlags & (ZOrderFlags::First | ZOrderFlags::Last))
     {
-        if (ImplIsOverlapWindow())
-            pRefWindow = mpHierarchy->mpOverlapWindow ? mpHierarchy->mpOverlapWindow->mpHierarchy->mpFirstOverlap : nullptr;
-        else
-            pRefWindow = mpHierarchy->mpParent ? mpHierarchy->mpParent->mpHierarchy->mpFirstChild : nullptr;
+        if (mpHierarchy)
+            pRefWindow = mpHierarchy->getBoundarySibling(rFlags, ImplIsOverlapWindow());
 
-        rFlags |= ZOrderFlags::Before;
-    }
-    else if (rFlags & ZOrderFlags::Last)
-    {
-        if (ImplIsOverlapWindow())
-            pRefWindow = mpHierarchy->mpOverlapWindow ? mpHierarchy->mpOverlapWindow->mpHierarchy->mpLastOverlap : nullptr;
-        else
-            pRefWindow = mpHierarchy->mpParent ? mpHierarchy->mpParent->mpHierarchy->mpLastChild : nullptr;
+        rFlags = lcl_normalizeZOrderFlags(rFlags);
+   }
 
-        rFlags |= ZOrderFlags::Behind;
-    }
-
-    while (pRefWindow && pRefWindow->mpHierarchy->mpBorderWindow)
-    {
-        pRefWindow = pRefWindow->mpHierarchy->mpBorderWindow;
-    }
-
-    return pRefWindow;
+    return WindowHierarchy::findOutermostBorderWindow(pRefWindow);
 }
 
 void Window::ImplInvalidateZOrderPeers()

@@ -303,4 +303,35 @@ bool WindowHierarchy::reorderRelativeTo(vcl::Window* pWindow, vcl::Window* pRefW
     return false;
 }
 
+vcl::Window* WindowHierarchy::getBoundarySibling(ZOrderFlags nFlags, bool bOverlap) const
+{
+    WindowHierarchy* pContainer
+        = bOverlap ? (mpOverlapWindow ? mpOverlapWindow->ImplGetWindowHierarchy() : nullptr)
+                   : (mpParent ? mpParent->ImplGetWindowHierarchy() : nullptr);
+
+    if (!pContainer)
+        return nullptr;
+
+    if (nFlags & ZOrderFlags::First)
+        return bOverlap ? pContainer->mpFirstOverlap : pContainer->mpFirstChild;
+
+    if (nFlags & ZOrderFlags::Last)
+        return bOverlap ? pContainer->mpLastOverlap : pContainer->mpLastChild;
+
+    return nullptr;
+}
+
+vcl::Window* WindowHierarchy::findOutermostBorderWindow(vcl::Window* pWindow)
+{
+    while (pWindow)
+    {
+        WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy();
+        if (!pHierarchy || !pHierarchy->mpBorderWindow)
+            break;
+        pWindow = pHierarchy->mpBorderWindow;
+    }
+
+    return pWindow;
+}
+
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
