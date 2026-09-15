@@ -64,6 +64,7 @@ struct WindowHierarchy
 
     vcl::Window* getTopmostFrameWindow() const;
 
+    void insertOverlapWindow(vcl::Window* pWindow, vcl::Window* pParent, ImplFrameData& rFrameData);
     void linkIntoOverlapChain(vcl::Window* pWindow, vcl::Window* pOverlapParent);
     void linkIntoChildChain(vcl::Window* pWindow, vcl::Window* pParent);
 

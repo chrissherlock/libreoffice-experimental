@@ -63,7 +63,7 @@ void Window::ImplInsertWindow(vcl::Window* pParent)
     ImplAttachToFrame(pParent);
 
     if (ImplIsOverlapWindow())
-        ImplInsertOverlapWindow(pParent);
+        mpHierarchy->insertOverlapWindow(this, pParent, *mpPlatformState->mpFrameData);
     else
         mpHierarchy->linkIntoChildChain(this, pParent);
 }
@@ -83,24 +83,6 @@ void Window::ImplAttachToFrame(vcl::Window* pParent)
 
     mpHierarchy->mpFrameWindow = pFrameParent;
     mpClassification->mbFrame = false;
-}
-
-void Window::ImplInsertOverlapWindow(vcl::Window* pParent)
-{
-    vcl::Window* pFirstOverlapParent = pParent;
-    while (!pFirstOverlapParent->ImplIsOverlapWindow())
-    {
-        pFirstOverlapParent = pFirstOverlapParent->ImplGetParent();
-    }
-
-    mpHierarchy->mpNextOverlap = mpPlatformState->mpFrameData->mpFirstOverlap;
-    if (mpHierarchy->mpNextOverlap)
-        mpHierarchy->mpNextOverlap->mpHierarchy->mpPrevOverlap = this;
-
-    mpPlatformState->mpFrameData->mpFirstOverlap = this;
-    mpHierarchy->mpPrevOverlap = nullptr;
-
-    mpHierarchy->linkIntoOverlapChain(this, pFirstOverlapParent);
 }
 
 void Window::ImplRemoveWindow(bool bRemoveFrameData)

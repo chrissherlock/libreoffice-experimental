@@ -9,6 +9,7 @@
 
 #include <vcl/window.hxx>
 
+#include <window/state/ImplFrameData.hxx>
 #include <window/state/WindowHierarchy.hxx>
 
 void WindowHierarchy::linkIntoOverlapChain(vcl::Window* pWindow, vcl::Window* pOverlapParent)
@@ -98,6 +99,26 @@ vcl::Window* WindowHierarchy::getTopmostFrameWindow() const
     }
 
     return pHierarchy->mpFrameWindow;
+}
+
+void WindowHierarchy::insertOverlapWindow(vcl::Window* pWindow, vcl::Window* pParent,
+                                          ImplFrameData& rFrameData)
+{
+    vcl::Window* pFirstOverlapParent = pParent;
+    while (!pFirstOverlapParent->ImplIsOverlapWindow())
+    {
+        pFirstOverlapParent = pFirstOverlapParent->ImplGetParent();
+    }
+
+    // Link into global frame overlap list
+    mpNextOverlap = rFrameData.mpFirstOverlap;
+    if (mpNextOverlap)
+        mpNextOverlap->ImplGetWindowHierarchy()->mpPrevOverlap = pWindow;
+
+    rFrameData.mpFirstOverlap = pWindow;
+    mpPrevOverlap = nullptr;
+
+    linkIntoOverlapChain(pWindow, pFirstOverlapParent);
 }
 
 /* vim:set shiftwidth=4 softtabstop=4 expandtab cinoptions=b1,g0,N-s cinkeys+=0=break: */
