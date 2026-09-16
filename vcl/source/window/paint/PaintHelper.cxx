@@ -49,6 +49,9 @@ PaintHelper::PaintHelper(vcl::Window* pWindow, ImplPaintFlags nPaintFlags)
 
 PaintHelper::~PaintHelper()
 {
+    if (!m_pWindow)
+        return;
+
     WindowPlatformState* pPlatformState = m_pWindow->ImplGetPlatformState();
     ImplWinData* pWinData = m_pWindow->ImplGetWinData();
 
@@ -58,22 +61,27 @@ PaintHelper::~PaintHelper()
     ImplFrameData* pFrameData = pPlatformState ? pPlatformState->mpFrameData : nullptr;
     if (m_nPaintFlags & (ImplPaintFlags::PaintAllChildren | ImplPaintFlags::PaintChildren))
     {
-        // Paint from the bottom child window and frontward.
-        vcl::Window* pTempWindow = m_pWindow->ImplGetWindowHierarchy()->mpLastChild;
-        while (pTempWindow)
+        // Paint from the bottom child window and frontward
+        const WindowHierarchy* pHierarchy = m_pWindow->ImplGetWindowHierarchy();
+        if (pHierarchy)
         {
-            if (pTempWindow->ImplGetVisibilityState()->mbVisible)
-                pTempWindow->ImplCallPaint(m_pChildRegion.get(), m_nPaintFlags);
-            pTempWindow = pTempWindow->ImplGetWindowHierarchy()->mpPrev;
+            WindowHierarchy::forEachPreviousSibling(pHierarchy->getLastChild(), [this](vcl::Window& rChild) {
+                const WindowVisibilityState* pVisibility = rChild.ImplGetVisibilityState();
+                if (pVisibility && pVisibility->mbVisible)
+                    rChild.ImplCallPaint(m_pChildRegion.get(), m_nPaintFlags);
+            });
         }
     }
 
-    if (pWinData && m_pWindow->ImplGetWindowClassification()->mbTrackVisible
+    const WindowClassification* pClassification = m_pWindow->ImplGetWindowClassification();
+    if (pWinData && pWinData->mpTrackRect && pClassification && pClassification->mbTrackVisible
         && (pWinData->mnTrackFlags & ShowTrackFlags::TrackWindow))
+    {
         /* #98602# need to invert the tracking rect AFTER
          * the children have painted
          */
         m_pWindow->InvertTracking(*pWinData->mpTrackRect, pWinData->mnTrackFlags);
+    }
 
     // double-buffering: paint in case we created the buffer, the children are
     // already painted inside
@@ -87,8 +95,11 @@ PaintHelper::~PaintHelper()
     // #98943# draw toolbox selection
     if (!m_aSelectionRect.IsEmpty())
     {
-        m_pWindow->GetOutDev()->DrawSelectionBackground(
-            m_aSelectionRect, m_pWindow->GetBackgroundColor(), 3, false, true);
+        if (OutputDevice* pOutDev = m_pWindow->GetOutDev())
+        {
+            pOutDev->DrawSelectionBackground(
+                m_aSelectionRect, m_pWindow->GetBackgroundColor(), 3, false, true);
+        }
     }
 }
 

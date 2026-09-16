@@ -164,18 +164,18 @@ void Window::ImplCallOverlapPaint()
     if (!mpClassification)
         return;
 
-    // emit overlapping windows first
-    vcl::Window* pTempWindow = mpHierarchy->mpFirstOverlap;
-    while ( pTempWindow )
+    // Emit overlapping windows first
+    if (vcl::Window* pFirstOverlap = mpHierarchy ? mpHierarchy->getFirstOverlap() : nullptr)
     {
-        if ( pTempWindow->mpVisibilityState->mbReallyVisible )
-            pTempWindow->ImplCallOverlapPaint();
-
-        pTempWindow = pTempWindow->mpHierarchy->mpNext;
+        WindowHierarchy::forEachSibling(pFirstOverlap, [](vcl::Window& rOverlapWin) {
+            const WindowVisibilityState* pVisibility = rOverlapWin.ImplGetVisibilityState();
+            if (pVisibility && pVisibility->mbReallyVisible)
+                rOverlapWin.ImplCallOverlapPaint();
+        });
     }
 
-    // only then ourself
-    if (mpInvalidation->hasPendingPaint())
+    // Only then ourself
+    if (mpInvalidation && mpInvalidation->hasPendingPaint())
     {
         // RTL: notify ImplCallPaint to check for re-mirroring
         // because we were called from the Sal layer
@@ -290,33 +290,37 @@ void Window::ImplInvalidateFrameRegion( const vcl::Region* pRegion, InvalidateFl
         mpPlatformState->mpFrameData->maPaintIdle.Start();
 }
 
-void Window::ImplInvalidateOverlapFrameRegion( const vcl::Region& rRegion )
+void Window::ImplInvalidateOverlapFrameRegion(const vcl::Region& rRegion)
 {
     vcl::Region aRegion = rRegion;
 
     vcl::clipping::clipBoundaries(*this, aRegion, true, true);
-    if ( !aRegion.IsEmpty() )
-        ImplInvalidateFrameRegion( &aRegion, InvalidateFlags::Children );
+    if (!aRegion.IsEmpty())
+        ImplInvalidateFrameRegion(&aRegion, InvalidateFlags::Children);
 
-    // now we invalidate the overlapping windows
-    vcl::Window* pTempWindow = mpHierarchy->mpFirstOverlap;
-    while ( pTempWindow )
+    // Invalidate the overlapping windows
+    if (vcl::Window* pFirstOverlap = mpHierarchy ? mpHierarchy->getFirstOverlap() : nullptr)
     {
-        if ( pTempWindow->IsVisible() )
-            pTempWindow->ImplInvalidateOverlapFrameRegion( rRegion );
-
-        pTempWindow = pTempWindow->mpHierarchy->mpNext;
+        WindowHierarchy::forEachSibling(pFirstOverlap, [&rRegion](vcl::Window& rOverlapWin) {
+            if (rOverlapWin.IsVisible())
+                rOverlapWin.ImplInvalidateOverlapFrameRegion(rRegion);
+        });
     }
 }
 
-void Window::ImplInvalidateParentFrameRegion( const vcl::Region& rRegion )
+void Window::ImplInvalidateParentFrameRegion(const vcl::Region& rRegion)
 {
-    if ( mpClassification->mbOverlapWin )
-        mpHierarchy->mpFrameWindow->ImplInvalidateOverlapFrameRegion( rRegion );
-    else
+    if (!mpClassification)
+        return;
+
+    if (mpClassification->mbOverlapWin)
     {
-        if( ImplGetParent() )
-            ImplGetParent()->ImplInvalidateFrameRegion( &rRegion, InvalidateFlags::Children );
+        if (vcl::Window* pFrameWindow = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr)
+            pFrameWindow->ImplInvalidateOverlapFrameRegion(rRegion);
+    }
+    else if (vcl::Window* pParent = ImplGetParent())
+    {
+        pParent->ImplInvalidateFrameRegion(&rRegion, InvalidateFlags::Children);
     }
 }
 
@@ -513,37 +517,32 @@ void Window::ImplValidateFrameRegion( const vcl::Region* pRegion, ValidateFlags 
 
 void Window::ImplValidate()
 {
-    // assemble region
-    bool    bValidateAll = true;
-    ValidateFlags nFlags = ValidateFlags::NONE;
+    // Assemble region
+    ValidateFlags nFlags = (GetStyle() & WB_CLIPCHILDREN)
+                               ? ValidateFlags::NoChildren
+                               : ValidateFlags::Children;
 
-    if ( GetStyle() & WB_CLIPCHILDREN )
-        nFlags |= ValidateFlags::NoChildren;
-    else
-        nFlags |= ValidateFlags::Children;
+    const bool bHasChildren = mpHierarchy && (mpHierarchy->getFirstChild() != nullptr);
+    const bool bValidateAll = !(nFlags & ValidateFlags::NoChildren) || !bHasChildren;
 
-    if ( (nFlags & ValidateFlags::NoChildren) && mpHierarchy->mpFirstChild )
-        bValidateAll = false;
-
-    if ( bValidateAll )
+    if (bValidateAll)
     {
-        ImplValidateFrameRegion( nullptr, nFlags );
+        ImplValidateFrameRegion(nullptr, nFlags);
+        return;
     }
-    else
+
+    vcl::Region aRegion(GetOutputRectPixel());
+    vcl::clipping::clipBoundaries(*this, aRegion, true, true);
+
+    if (nFlags & ValidateFlags::NoChildren)
     {
-        vcl::Region      aRegion( GetOutputRectPixel() );
-        vcl::clipping::clipBoundaries(*this, aRegion, true, true);
-
-        if ( nFlags & ValidateFlags::NoChildren )
-        {
-            nFlags &= ~ValidateFlags::Children;
-            if (vcl::clipping::clipChildren(*this, aRegion))
-                nFlags |= ValidateFlags::Children;
-        }
-
-        if ( !aRegion.IsEmpty() )
-            ImplValidateFrameRegion( &aRegion, nFlags );
+        nFlags &= ~ValidateFlags::Children;
+        if (vcl::clipping::clipChildren(*this, aRegion))
+            nFlags |= ValidateFlags::Children;
     }
+
+    if (!aRegion.IsEmpty())
+        ImplValidateFrameRegion(&aRegion, nFlags);
 }
 
 void Window::ImplUpdateAll()
@@ -609,17 +608,21 @@ void Window::SetPaintTransparent( bool bTransparent )
 
 void Window::SetWindowRegionPixel()
 {
-    if ( mpHierarchy->mpBorderWindow )
+    if (vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr)
     {
-        mpHierarchy->mpBorderWindow->SetWindowRegionPixel();
+        pBorderWindow->SetWindowRegionPixel();
         return;
     }
 
-    if( mpClassification->mbFrame )
+    if (!mpClassification || !mpClippingState)
+        return;
+
+    if (mpClassification->mbFrame)
     {
         mpClippingState->maWinRegion = vcl::Region(true);
         mpClippingState->mbWinRegion = false;
-        mpPlatformState->mpFrame->ResetClipRegion();
+        if (mpPlatformState && mpPlatformState->mpFrame)
+            mpPlatformState->mpFrame->ResetClipRegion();
         return;
     }
 
@@ -633,46 +636,47 @@ void Window::SetWindowRegionPixel()
     if (!IsReallyVisible())
         return;
 
-    vcl::Region      aRegion( GetOutputRectPixel() );
-    ImplInvalidateParentFrameRegion( aRegion );
+    vcl::Region aRegion(GetOutputRectPixel());
+    ImplInvalidateParentFrameRegion(aRegion);
 }
 
-void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
+void Window::SetWindowRegionPixel(const vcl::Region& rRegion)
 {
-
-    if (mpHierarchy->mpBorderWindow)
+    if (vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr)
     {
-        mpHierarchy->mpBorderWindow->SetWindowRegionPixel( rRegion );
+        pBorderWindow->SetWindowRegionPixel(rRegion);
         return;
     }
 
-    if( mpClassification->mbFrame )
+    if (!mpClassification || !mpClippingState)
+        return;
+
+    if (mpClassification->mbFrame)
     {
-        if( !rRegion.IsNull() )
+        if (!rRegion.IsNull() && !rRegion.IsEmpty())
         {
             mpClippingState->maWinRegion = rRegion;
-            mpClippingState->mbWinRegion = ! rRegion.IsEmpty();
+            mpClippingState->mbWinRegion = true;
 
-            if( mpClippingState->mbWinRegion )
+            // Set/update ClipRegion
+            SalFrame* pFrame = mpPlatformState ? mpPlatformState->mpFrame : nullptr;
+            if (pFrame)
             {
-                // set/update ClipRegion
                 RectangleVector aRectangles;
                 mpClippingState->maWinRegion.GetRegionRectangles(aRectangles);
-                mpPlatformState->mpFrame->BeginSetClipRegion(aRectangles.size());
+                pFrame->BeginSetClipRegion(aRectangles.size());
 
-                for (auto const& rectangle : aRectangles)
+                for (const auto& rRectangle : aRectangles)
                 {
-                    mpPlatformState->mpFrame->UnionClipRegion(
-                        rectangle.Left(),
-                        rectangle.Top(),
-                        rectangle.GetWidth(),       // orig nWidth was ((R - L) + 1), same as GetWidth does
-                        rectangle.GetHeight());     // same for height
+                    pFrame->UnionClipRegion(
+                        rRectangle.Left(),
+                        rRectangle.Top(),
+                        rRectangle.GetWidth(),
+                        rRectangle.GetHeight());
                 }
 
-                mpPlatformState->mpFrame->EndSetClipRegion();
+                pFrame->EndSetClipRegion();
             }
-            else
-                SetWindowRegionPixel();
         }
         else
         {
@@ -682,9 +686,9 @@ void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
         return;
     }
 
-    if ( rRegion.IsNull() )
+    if (rRegion.IsNull())
     {
-        if ( mpClippingState->mbWinRegion )
+        if (mpClippingState->mbWinRegion)
         {
             mpClippingState->maWinRegion = vcl::Region(true);
             mpClippingState->mbWinRegion = false;
@@ -701,8 +705,8 @@ void Window::SetWindowRegionPixel( const vcl::Region& rRegion )
     if (!IsReallyVisible())
         return;
 
-    vcl::Region      aRegion( GetOutputRectPixel() );
-    ImplInvalidateParentFrameRegion( aRegion );
+    vcl::Region aRegion(GetOutputRectPixel());
+    ImplInvalidateParentFrameRegion(aRegion);
 }
 
 vcl::Region Window::GetPaintRegion() const
@@ -954,6 +958,12 @@ void Window::PaintImmediately()
 
 void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 {
+    OutputDevice* pOutDev = GetOutDev();
+    if (!pOutDev)
+        return;
+
+    SalFrame* pFrame = mpPlatformState ? mpPlatformState->mpFrame : nullptr;
+
     // Special drawing when called through LOKit
     // TODO: Move to its own method
     if (comphelper::LibreOfficeKit::isActive())
@@ -968,13 +978,13 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
         pDevice->SetFont(aCopyFont);
 
         pDevice->SetTextColor(GetTextColor());
-        if (GetOutDev()->HasLineColor())
-            pDevice->SetLineColor(GetOutDev()->GetLineColor());
+        if (pOutDev->HasLineColor())
+            pDevice->SetLineColor(pOutDev->GetLineColor());
         else
             pDevice->SetLineColor();
 
-        if (GetOutDev()->HasFillColor())
-            pDevice->SetFillColor(GetOutDev()->GetFillColor());
+        if (pOutDev->HasFillColor())
+            pDevice->SetFillColor(pOutDev->GetFillColor());
         else
             pDevice->SetFillColor();
 
@@ -994,16 +1004,16 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
             pDevice->SetTextFillColor();
 
         pDevice->SetTextAlign(GetTextAlign());
-        pDevice->SetRasterOp(GetOutDev()->GetRasterOp());
+        pDevice->SetRasterOp(pOutDev->GetRasterOp());
 
         tools::Rectangle aPaintRect(Point(), GetOutputSizePixel());
 
-        vcl::Region aClipRegion(GetOutDev()->GetClipRegion());
+        vcl::Region aClipRegion(pOutDev->GetClipRegion());
         pDevice->SetClipRegion();
         aClipRegion.Intersect(aPaintRect);
         pDevice->SetClipRegion(aClipRegion);
 
-        if (!IsPaintTransparent() && HasBackground() && ! (vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip))
+        if (!IsPaintTransparent() && HasBackground() && !(vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip))
             Erase(*pDevice);
 
         pDevice->SetMapMode(GetMapMode());
@@ -1012,198 +1022,219 @@ void Window::ImplPaintToDevice(OutputDevice& rTargetOutDev, const Point& i_rPos)
 
         rTargetOutDev.DrawOutDev(i_rPos, aSize, Point(), pDevice->convertTo<vcl::LogicSize>(vcl::WindowSize(aSize)), *pDevice);
 
-        bool bHasMirroredGraphics = pDevice->HasMirroredGraphics();
+        const bool bHasMirroredGraphics = pDevice->HasMirroredGraphics();
 
-        // get rid of virtual device now so they don't pile up during recursive calls
+        // Get rid of virtual device now so they don't pile up during recursive calls
         pDevice.disposeAndClear();
 
-
-        for( vcl::Window* pChild = mpHierarchy->mpFirstChild; pChild; pChild = pChild->mpHierarchy->mpNext )
+        if (vcl::Window* pFirstChild = mpHierarchy ? mpHierarchy->getFirstChild() : nullptr)
         {
-            if( pChild->mpPlatformState->mpFrame == mpPlatformState->mpFrame && pChild->IsVisible() )
-            {
-                tools::Long nDeltaX = pChild->GetOutDev()->GetDeviceOriginX() - GetOutDev()->GetDeviceOriginX();
-                if( bHasMirroredGraphics )
-                    nDeltaX = GetOutDev()->GetOutputWidthPixel() - nDeltaX - pChild->GetOutDev()->GetOutputWidthPixel();
+            WindowHierarchy::forEachSibling(pFirstChild, [&](vcl::Window& rChild) {
+                WindowPlatformState* pChildPlatform = rChild.ImplGetPlatformState();
+                SalFrame* pChildFrame = pChildPlatform ? pChildPlatform->mpFrame : nullptr;
 
-                tools::Long nDeltaY = pChild->GetDeviceOriginY() - GetDeviceOriginY();
+                if (pChildFrame == pFrame && rChild.IsVisible())
+                {
+                    OutputDevice* pChildOutDev = rChild.GetOutDev();
+                    tools::Long nDeltaX = (pChildOutDev ? pChildOutDev->GetDeviceOriginX() : 0) - pOutDev->GetDeviceOriginX();
+                    if (bHasMirroredGraphics)
+                        nDeltaX = pOutDev->GetOutputWidthPixel() - nDeltaX - (pChildOutDev ? pChildOutDev->GetOutputWidthPixel() : 0);
 
-                Point aPos( i_rPos );
-                aPos += Point(nDeltaX, nDeltaY);
+                    tools::Long nDeltaY = rChild.GetDeviceOriginY() - GetDeviceOriginY();
 
-                pChild->ImplPaintToDevice(rTargetOutDev, aPos);
-            }
+                    Point aPos(i_rPos);
+                    aPos += Point(nDeltaX, nDeltaY);
+
+                    rChild.ImplPaintToDevice(rTargetOutDev, aPos);
+                }
+            });
         }
         return;
     }
 
-
-    bool bRVisible = mpVisibilityState->mbReallyVisible;
-    mpVisibilityState->mbReallyVisible = mpVisibilityState->mbVisible;
-    bool bDevOutput = GetOutDev()->mbDevOutput;
-    GetOutDev()->mbDevOutput = true;
-
-    const OutputDevice *pOutDev = GetOutDev();
-    tools::Long nOldDPIX = pOutDev->GetDPIX();
-    tools::Long nOldDPIY = pOutDev->GetDPIY();
-
-    GetOutDev()->SetDPIX(rTargetOutDev.GetDPIX());
-    GetOutDev()->SetDPIY(rTargetOutDev.GetDPIY());
-
-    bool bOutput = GetOutDev()->IsOutputEnabled();
-    GetOutDev()->EnableOutput();
-
-    SAL_WARN_IF( GetMapMode().GetMapUnit() != MapUnit::MapPixel, "vcl.window", "MapMode must be PIXEL based" );
-    if ( GetMapMode().GetMapUnit() != MapUnit::MapPixel )
+    if (!mpVisibilityState)
         return;
 
-    // preserve graphicsstate
-    GetOutDev()->Push();
-    vcl::Region aClipRegion( GetOutDev()->GetClipRegion() );
-    GetOutDev()->SetClipRegion();
+    const bool bRVisible = mpVisibilityState->mbReallyVisible;
+    mpVisibilityState->mbReallyVisible = mpVisibilityState->mbVisible;
+    const bool bDevOutput = pOutDev->mbDevOutput;
+    pOutDev->mbDevOutput = true;
 
-    GDIMetaFile* pOldMtf = GetOutDev()->GetConnectMetaFile();
+    const tools::Long nOldDPIX = pOutDev->GetDPIX();
+    const tools::Long nOldDPIY = pOutDev->GetDPIY();
+
+    pOutDev->SetDPIX(rTargetOutDev.GetDPIX());
+    pOutDev->SetDPIY(rTargetOutDev.GetDPIY());
+
+    const bool bOutput = pOutDev->IsOutputEnabled();
+    pOutDev->EnableOutput();
+
+    SAL_WARN_IF(GetMapMode().GetMapUnit() != MapUnit::MapPixel, "vcl.window", "MapMode must be PIXEL based");
+    if (GetMapMode().GetMapUnit() != MapUnit::MapPixel)
+        return;
+
+    // Preserve graphics state
+    pOutDev->Push();
+    vcl::Region aClipRegion(pOutDev->GetClipRegion());
+    pOutDev->SetClipRegion();
+
+    GDIMetaFile* pOldMtf = pOutDev->GetConnectMetaFile();
     GDIMetaFile aMtf;
-    GetOutDev()->SetConnectMetaFile( &aMtf );
+    pOutDev->SetConnectMetaFile(&aMtf);
 
-    // put a push action to metafile
-    GetOutDev()->Push();
-    // copy graphics state to metafile
+    // Put a push action to metafile
+    pOutDev->Push();
+    // Copy graphics state to metafile
     vcl::Font aCopyFont = GetFont();
-    if( nOldDPIX != GetOutDev()->GetDPIX() || nOldDPIY != GetOutDev()->GetDPIY() )
+    if (nOldDPIX != pOutDev->GetDPIX() || nOldDPIY != pOutDev->GetDPIY())
     {
-        aCopyFont.SetFontHeight( aCopyFont.GetFontHeight() * GetOutDev()->GetDPIY() / nOldDPIY );
-        aCopyFont.SetFontWidth( aCopyFont.GetFontWidth() * GetOutDev()->GetDPIX() / nOldDPIX );
+        aCopyFont.SetFontHeight(aCopyFont.GetFontHeight() * pOutDev->GetDPIY() / nOldDPIY);
+        aCopyFont.SetFontWidth(aCopyFont.GetFontWidth() * pOutDev->GetDPIX() / nOldDPIX);
     }
-    SetFont( aCopyFont );
-    SetTextColor( GetTextColor() );
+    SetFont(aCopyFont);
+    SetTextColor(GetTextColor());
 
-    if (GetOutDev()->HasLineColor())
-        GetOutDev()->SetLineColor( GetOutDev()->GetLineColor() );
+    if (pOutDev->HasLineColor())
+        pOutDev->SetLineColor(pOutDev->GetLineColor());
     else
-        GetOutDev()->SetLineColor();
+        pOutDev->SetLineColor();
 
-    if (GetOutDev()->HasFillColor())
-        GetOutDev()->SetFillColor( GetOutDev()->GetFillColor() );
+    if (pOutDev->HasFillColor())
+        pOutDev->SetFillColor(pOutDev->GetFillColor());
     else
-        GetOutDev()->SetFillColor();
+        pOutDev->SetFillColor();
 
     if (HasTextLineColor())
-        SetTextLineColor( GetTextLineColor() );
+        SetTextLineColor(GetTextLineColor());
     else
         SetTextLineColor();
 
     if (HasOverlineColor())
-        SetOverlineColor( GetOverlineColor() );
+        SetOverlineColor(GetOverlineColor());
     else
         SetOverlineColor();
 
     if (HasTextFillColor())
-        SetTextFillColor( GetTextFillColor() );
+        SetTextFillColor(GetTextFillColor());
     else
         SetTextFillColor();
 
-    SetTextAlign( GetTextAlign() );
-    GetOutDev()->SetRasterOp( GetOutDev()->GetRasterOp() );
+    SetTextAlign(GetTextAlign());
+    pOutDev->SetRasterOp(pOutDev->GetRasterOp());
 
-    if( GetOutDev()->IsReferencePoint() )
-        GetOutDev()->SetReferencePoint( GetOutDev()->GetReferencePoint() );
+    if (pOutDev->IsReferencePoint())
+        pOutDev->SetReferencePoint(pOutDev->GetReferencePoint());
     else
-        GetOutDev()->SetReferencePoint();
+        pOutDev->SetReferencePoint();
 
-    GetOutDev()->SetLayoutMode( GetOutDev()->GetLayoutMode() );
+    pOutDev->SetLayoutMode(pOutDev->GetLayoutMode());
 
-    GetOutDev()->SetDigitLanguage( GetOutDev()->GetDigitLanguage() );
+    pOutDev->SetDigitLanguage(pOutDev->GetDigitLanguage());
     tools::Rectangle aPaintRect(Point(0, 0), GetOutputSizePixel());
-    aClipRegion.Intersect( aPaintRect );
-    GetOutDev()->SetClipRegion( aClipRegion );
+    aClipRegion.Intersect(aPaintRect);
+    pOutDev->SetClipRegion(aClipRegion);
 
-    // do the actual paint
+    // Do the actual paint
 
-    // background
-    if( ! IsPaintTransparent() && HasBackground() && ! (vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip ) )
+    // Background
+    if (!IsPaintTransparent() && HasBackground() && !(vcl::clipping::getParentClipMode(*this) & ParentClipMode::NoClip))
     {
-        Erase(*GetOutDev());
+        Erase(*pOutDev);
     }
-    // foreground
-    Paint(*GetOutDev(), aPaintRect);
-    // put a pop action to metafile
-    GetOutDev()->Pop();
+    // Foreground
+    Paint(*pOutDev, aPaintRect);
+    // Put a pop action to metafile
+    pOutDev->Pop();
 
-    GetOutDev()->SetConnectMetaFile( pOldMtf );
-    GetOutDev()->EnableOutput( bOutput );
+    pOutDev->SetConnectMetaFile(pOldMtf);
+    pOutDev->EnableOutput(bOutput);
     mpVisibilityState->mbReallyVisible = bRVisible;
 
-    // paint metafile to VDev
+    // Paint metafile to VDev
     VclPtrInstance<VirtualDevice> pMaskedDevice(rTargetOutDev, DeviceFormat::WITH_ALPHA);
 
-    pMaskedDevice->SetOutputSizePixel( GetOutputSizePixel(), true, true );
-    pMaskedDevice->EnableRTL( IsRTLEnabled() );
+    pMaskedDevice->SetOutputSizePixel(GetOutputSizePixel(), true, true);
+    pMaskedDevice->EnableRTL(IsRTLEnabled());
     aMtf.WindStart();
     aMtf.Play(*pMaskedDevice);
-    Bitmap aBmpEx( pMaskedDevice->GetBitmap( Point( 0, 0 ), aPaintRect.GetSize() ) );
+    Bitmap aBmpEx(pMaskedDevice->GetBitmap(Point(0, 0), aPaintRect.GetSize()));
     rTargetOutDev.DrawBitmap(i_rPos, aBmpEx);
-    // get rid of virtual device now so they don't pile up during recursive calls
+    // Get rid of virtual device now so they don't pile up during recursive calls
     pMaskedDevice.disposeAndClear();
 
-    for( vcl::Window* pChild = mpHierarchy->mpFirstChild; pChild; pChild = pChild->mpHierarchy->mpNext )
+    if (vcl::Window* pFirstChild = mpHierarchy ? mpHierarchy->getFirstChild() : nullptr)
     {
-        if( pChild->mpPlatformState->mpFrame == mpPlatformState->mpFrame && pChild->IsVisible() )
-        {
-            tools::Long nDeltaX = pChild->GetOutDev()->GetDeviceOriginX() - GetOutDev()->GetDeviceOriginX();
+        WindowHierarchy::forEachSibling(pFirstChild, [&](vcl::Window& rChild) {
+            WindowPlatformState* pChildPlatform = rChild.ImplGetPlatformState();
+            SalFrame* pChildFrame = pChildPlatform ? pChildPlatform->mpFrame : nullptr;
 
-            if( pOutDev->HasMirroredGraphics() )
-                nDeltaX = GetOutDev()->GetOutputWidthPixel() - nDeltaX - pChild->GetOutDev()->GetOutputWidthPixel();
-            tools::Long nDeltaY = pChild->GetDeviceOriginY() - GetDeviceOriginY();
-            Point aPos( i_rPos );
-            Point aDelta( nDeltaX, nDeltaY );
-            aPos += aDelta;
-            pChild->ImplPaintToDevice(rTargetOutDev, aPos);
-        }
+            if (pChildFrame == pFrame && rChild.IsVisible())
+            {
+                OutputDevice* pChildOutDev = rChild.GetOutDev();
+                tools::Long nDeltaX = (pChildOutDev ? pChildOutDev->GetDeviceOriginX() : 0) - pOutDev->GetDeviceOriginX();
+
+                if (pOutDev->HasMirroredGraphics())
+                    nDeltaX = pOutDev->GetOutputWidthPixel() - nDeltaX - (pChildOutDev ? pChildOutDev->GetOutputWidthPixel() : 0);
+                tools::Long nDeltaY = rChild.GetDeviceOriginY() - GetDeviceOriginY();
+                Point aPos(i_rPos);
+                // tdf#165706 those delta values are in pixels, but aPos copied from
+                // i_rPos *may* be in logical coordinates if a MapMode is set at
+                // i_pTargetOutDev. To not mix values of different coordinate systems
+                // it *needs* to be converted (which does nothing if no MapMode)
+                Point aDelta = rTargetOutDev.convertTo<vcl::LogicPoint>(
+                    vcl::WindowPoint(nDeltaX, nDeltaY)
+                );
+                aPos += aDelta;
+                rChild.ImplPaintToDevice(rTargetOutDev, aPos);
+            }
+        });
     }
 
-    // restore graphics state
-    GetOutDev()->Pop();
+    // Restore graphics state
+    pOutDev->Pop();
 
-    GetOutDev()->EnableOutput( bOutput );
+    pOutDev->EnableOutput(bOutput);
     mpVisibilityState->mbReallyVisible = bRVisible;
-    GetOutDev()->mbDevOutput = bDevOutput;
-    GetOutDev()->SetDPIX(nOldDPIX);
-    GetOutDev()->SetDPIY(nOldDPIY);
+    pOutDev->mbDevOutput = bDevOutput;
+    pOutDev->SetDPIX(nOldDPIX);
+    pOutDev->SetDPIY(nOldDPIY);
 }
 
 void Window::PaintToDevice(OutputDevice& rDev, const Point& rPos)
 {
-    if( !mpClassification )
+    if (!mpClassification || !mpVisibilityState)
         return;
 
     SAL_WARN_IF(rDev.HasMirroredGraphics(), "vcl.window", "PaintToDevice to mirroring graphics");
     SAL_WARN_IF(rDev.IsRTLEnabled(), "vcl.window", "PaintToDevice to mirroring device");
 
     vcl::Window* pRealParent = nullptr;
-    if( ! mpVisibilityState->mbVisible )
+    if (!mpVisibilityState->mbVisible)
     {
         vcl::Window* pTempParent = ImplGetDefaultWindow();
-        pTempParent->EnableChildTransparentMode();
+        if (pTempParent)
+            pTempParent->EnableChildTransparentMode();
         pRealParent = GetParent();
-        SetParent( pTempParent );
-        // trigger correct visibility flags for children
+        if (pTempParent)
+            SetParent(pTempParent);
+        // Trigger correct visibility flags for children
         Show();
         Hide();
     }
 
-    bool bVisible = mpVisibilityState->mbVisible;
+    const bool bVisible = mpVisibilityState->mbVisible;
     mpVisibilityState->mbVisible = true;
 
-    if( mpHierarchy->mpBorderWindow )
-        mpHierarchy->mpBorderWindow->ImplPaintToDevice(rDev, rPos);
+    vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (pBorderWindow)
+        pBorderWindow->ImplPaintToDevice(rDev, rPos);
     else
         ImplPaintToDevice(rDev, rPos);
 
     mpVisibilityState->mbVisible = bVisible;
 
-    if( pRealParent )
-        SetParent( pRealParent );
+    if (pRealParent)
+        SetParent(pRealParent);
 }
 
 void Window::Erase(vcl::RenderContext& rRenderContext)
@@ -1260,55 +1291,52 @@ void Window::Scroll( tools::Long nHorzScroll, tools::Long nVertScroll,
         ImplScroll( aRect, nHorzScroll, nVertScroll, nFlags );
 }
 
-void Window::ImplScroll( const tools::Rectangle& rRect,
-                         tools::Long nHorzScroll, tools::Long nVertScroll, ScrollFlags nFlags )
+void Window::ImplScroll(const tools::Rectangle& rRect,
+                        tools::Long nHorzScroll, tools::Long nVertScroll, ScrollFlags nFlags)
 {
-    if ( !GetOutDev()->IsDeviceOutputNecessary() )
+    OutputDevice* pOutDev = GetOutDev();
+    if (!pOutDev || !pOutDev->IsDeviceOutputNecessary())
         return;
 
-    nHorzScroll = GetOutDev()->LogicWidthToDevicePixel(nHorzScroll);
-    nVertScroll = GetOutDev()->LogicHeightToDevicePixel(nVertScroll);
+    nHorzScroll = pOutDev->LogicWidthToDevicePixel(nHorzScroll);
+    nVertScroll = pOutDev->LogicHeightToDevicePixel(nVertScroll);
 
-    if ( !nHorzScroll && !nVertScroll )
+    if (!nHorzScroll && !nVertScroll)
         return;
 
-    if (mpControlAppearance->getCursor())
+    if (mpControlAppearance && mpControlAppearance->getCursor())
         mpControlAppearance->suspendCursor();
 
     ScrollFlags nEffectiveFlags = nFlags;
-    if ( !(nFlags & (ScrollFlags::Children | ScrollFlags::NoChildren)) )
+    if (!(nFlags & (ScrollFlags::Children | ScrollFlags::NoChildren)))
     {
-        if ( GetStyle() & WB_CLIPCHILDREN )
+        if (GetStyle() & WB_CLIPCHILDREN)
             nFlags |= ScrollFlags::NoChildren;
         else
             nFlags |= ScrollFlags::Children;
     }
 
-    vcl::Region  aInvalidateRegion;
-    bool    bScrollChildren(nFlags & ScrollFlags::Children);
-
-    if ( !mpHierarchy->mpFirstChild )
-        bScrollChildren = false;
-
-    OutputDevice *pOutDev = GetOutDev();
+    vcl::Region aInvalidateRegion;
+    vcl::Window* pFirstChild = mpHierarchy ? mpHierarchy->getFirstChild() : nullptr;
+    const bool bScrollChildren = (nFlags & ScrollFlags::Children) && (pFirstChild != nullptr);
 
     // RTL: check if this window requires special action
-    bool bReMirror = GetOutDev()->ImplIsAntiparallel();
+    const bool bReMirror = pOutDev->ImplIsAntiparallel();
 
-    tools::Rectangle aRectMirror( rRect );
-    if( bReMirror )
+    tools::Rectangle aRectMirror(rRect);
+    if (bReMirror)
     {
-        //  make sure the invalidate region of this window is
+        // Make sure the invalidate region of this window is
         // computed in the same coordinate space as the one from the overlap windows
-        pOutDev->ReMirror( aRectMirror );
+        pOutDev->ReMirror(aRectMirror);
     }
 
-    // adapt paint areas
-    ImplMoveAllInvalidateRegions( aRectMirror, nHorzScroll, nVertScroll, bScrollChildren );
+    // Adapt paint areas
+    ImplMoveAllInvalidateRegions(aRectMirror, nHorzScroll, nVertScroll, bScrollChildren);
 
     vcl::clipping::calcOverlapRegion(*this, aRectMirror, aInvalidateRegion, !bScrollChildren, false);
 
-    // if the scrolling on the device is performed in the opposite direction
+    // If the scrolling on the device is performed in the opposite direction
     // then move the overlaps in that direction to compute the invalidate region
     // on the correct side, i.e., revert nHorzScroll
     if (!aInvalidateRegion.IsEmpty())
@@ -1329,35 +1357,35 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
 
     aInvalidateRegion.Union(aWinInvalidateRegion);
 
-    vcl::Region aRegion( GetOutputRectPixel() );
-    if ( nFlags & ScrollFlags::Clip )
-        aRegion.Intersect( rRect );
-    if ( mpClippingState->mbWinRegion )
-        aRegion.Intersect( GetOutDev()->GetMapper().ViewToDevice( mpClippingState->maWinRegion ) );
+    vcl::Region aRegion(GetOutputRectPixel());
+    if (nFlags & ScrollFlags::Clip)
+        aRegion.Intersect(rRect);
+    if (mpClippingState && mpClippingState->mbWinRegion)
+        aRegion.Intersect(pOutDev->GetMapper().ViewToDevice(mpClippingState->maWinRegion));
 
-    aRegion.Exclude( aInvalidateRegion );
+    aRegion.Exclude(aInvalidateRegion);
 
     vcl::clipping::clipBoundaries(*this, aRegion, false, true);
-    if ( !bScrollChildren )
+    if (!bScrollChildren)
     {
-        if ( nEffectiveFlags & ScrollFlags::NoChildren )
+        if (nEffectiveFlags & ScrollFlags::NoChildren)
             vcl::clipping::clipAllChildren(*this, aRegion);
         else
             vcl::clipping::clipChildren(*this, aRegion);
     }
 
-    const auto& rClipState = GetOutDev()->GetClipState();
+    const auto& rClipState = pOutDev->GetClipState();
     if (rClipState.mbHasCustomClip && (nFlags & ScrollFlags::UseClipRegion))
         aRegion.Intersect(rClipState.maRegion);
 
-    if ( !aRegion.IsEmpty() )
+    if (!aRegion.IsEmpty())
     {
-        if ( mpWinData )
+        if (mpWinData)
         {
-            if ( mpFocusState->isFocusVisible() )
-                ImplInvertFocus( *mpWinData->mpFocusRect );
-            if ( mpClassification->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
-                InvertTracking( *mpWinData->mpTrackRect, mpWinData->mnTrackFlags );
+            if (mpFocusState && mpFocusState->isFocusVisible() && mpWinData->mpFocusRect)
+                ImplInvertFocus(*mpWinData->mpFocusRect);
+            if (mpClassification && mpClassification->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) && mpWinData->mpTrackRect)
+                InvertTracking(*mpWinData->mpTrackRect, mpWinData->mnTrackFlags);
         }
 #ifndef IOS
         // This seems completely unnecessary with tiled rendering, and
@@ -1375,61 +1403,58 @@ void Window::ImplScroll( const tools::Rectangle& rRect,
         // so avoid copying in case of double buffering.
         if (pGraphics && !SupportsDoubleBuffering())
         {
-            if( bReMirror )
+            if (bReMirror)
             {
-                pOutDev->ReMirror( aRegion );
+                pOutDev->ReMirror(aRegion);
             }
 
-            pOutDev->SelectClipRegion( aRegion, pGraphics );
-            pGraphics->CopyArea( rRect.Left()+nHorzScroll, rRect.Top()+nVertScroll,
-                                 rRect.Left(), rRect.Top(),
-                                 rRect.GetWidth(), rRect.GetHeight(),
-                                 *GetOutDev() );
+            pOutDev->SelectClipRegion(aRegion, pGraphics);
+            pGraphics->CopyArea(rRect.Left() + nHorzScroll, rRect.Top() + nVertScroll,
+                                rRect.Left(), rRect.Top(),
+                                rRect.GetWidth(), rRect.GetHeight(),
+                                *pOutDev);
         }
 #endif
-        if ( mpWinData )
+        if (mpWinData)
         {
-            if ( mpFocusState->isFocusVisible() )
-                ImplInvertFocus( *mpWinData->mpFocusRect );
-            if ( mpClassification->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) )
-                InvertTracking( *mpWinData->mpTrackRect, mpWinData->mnTrackFlags );
+            if (mpFocusState && mpFocusState->isFocusVisible() && mpWinData->mpFocusRect)
+                ImplInvertFocus(*mpWinData->mpFocusRect);
+            if (mpClassification && mpClassification->mbTrackVisible && (mpWinData->mnTrackFlags & ShowTrackFlags::TrackWindow) && mpWinData->mpTrackRect)
+                InvertTracking(*mpWinData->mpTrackRect, mpWinData->mnTrackFlags);
         }
     }
 
-    if ( !aInvalidateRegion.IsEmpty() )
+    if (!aInvalidateRegion.IsEmpty())
     {
-        // RTL: the invalidate region for this windows is already computed in frame coordinates
+        // RTL: the invalidate region for this window is already computed in frame coordinates
         // so it has to be re-mirrored before calling the Paint-handler
-        mpInvalidation->setCheckRtl();
+        if (mpInvalidation)
+            mpInvalidation->setCheckRtl();
 
-        if ( !bScrollChildren )
+        if (!bScrollChildren)
         {
-            if ( nEffectiveFlags & ScrollFlags::NoChildren )
+            if (nEffectiveFlags & ScrollFlags::NoChildren)
                 vcl::clipping::clipAllChildren(*this, aInvalidateRegion);
             else
                 vcl::clipping::clipChildren(*this, aInvalidateRegion);
         }
 
-        ImplInvalidateFrameRegion( &aInvalidateRegion, InvalidateFlags::Children );
+        ImplInvalidateFrameRegion(&aInvalidateRegion, InvalidateFlags::Children);
     }
 
-    if ( bScrollChildren )
+    if (bScrollChildren && pFirstChild)
     {
-        vcl::Window* pWindow = mpHierarchy->mpFirstChild;
-        while ( pWindow )
-        {
-            Point aPos = pWindow->GetPosPixel();
-            aPos += Point( nHorzScroll, nVertScroll );
-            pWindow->SetPosPixel( aPos );
-
-            pWindow = pWindow->mpHierarchy->mpNext;
-        }
+        WindowHierarchy::forEachSibling(pFirstChild, [nHorzScroll, nVertScroll](vcl::Window& rChild) {
+            Point aPos = rChild.GetPosPixel();
+            aPos += Point(nHorzScroll, nVertScroll);
+            rChild.SetPosPixel(aPos);
+        });
     }
 
-    if ( nFlags & ScrollFlags::Update )
+    if (nFlags & ScrollFlags::Update)
         PaintImmediately();
 
-    if (mpControlAppearance->getCursor())
+    if (mpControlAppearance && mpControlAppearance->getCursor())
         mpControlAppearance->resumeCursor();
 }
 

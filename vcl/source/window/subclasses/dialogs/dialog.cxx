@@ -432,15 +432,27 @@ vcl::Window* Dialog::GetDefaultParent(WinBits nStyle)
 
 VclPtr<vcl::Window> Dialog::AddBorderWindow(vcl::Window* pParent, WinBits nStyle)
 {
-    VclPtrInstance<ImplBorderWindow> pBorderWin( pParent, nStyle, BorderWindowStyle::Frame );
-    ImplInit( pBorderWin, nStyle & ~WB_BORDER, nullptr );
+    VclPtrInstance<ImplBorderWindow> pBorderWin(pParent, nStyle, BorderWindowStyle::Frame);
+    ImplInit(pBorderWin, nStyle & ~WB_BORDER, nullptr);
 
-    pBorderWin->mpHierarchy->mpClientWindow = this;
+    WindowHierarchy* pBorderHierarchy = pBorderWin ? pBorderWin->ImplGetWindowHierarchy() : nullptr;
+    if (pBorderHierarchy)
+    {
+        pBorderHierarchy->setClientWindow(this);
+    }
 
-    pBorderWin->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
+    if (mpGeometry)
+    {
+        pBorderWin->GetBorder(mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder,
+                              mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder);
+    }
 
-    mpHierarchy->mpBorderWindow = pBorderWin;
-    mpHierarchy->mpRealParent = pParent;
+    WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+    if (pHierarchy)
+    {
+        pHierarchy->setBorderWindow(pBorderWin);
+        pHierarchy->setRealParent(pParent);
+    }
 
     return pBorderWin;
 }
@@ -484,15 +496,25 @@ void Dialog::ImplInitDialog( vcl::Window* pParent, WinBits nStyle, InitFlag eFla
     }
     else
     {
-        VclPtrInstance<ImplBorderWindow> pBorderWin( pParent, nStyle, BorderWindowStyle::Overlap );
-        ImplInit( pBorderWin, nStyle & ~WB_BORDER, nullptr );
+        VclPtrInstance<ImplBorderWindow> pBorderWin(pParent, nStyle, BorderWindowStyle::Overlap);
+        ImplInit(pBorderWin, nStyle & ~WB_BORDER, nullptr);
 
-        pBorderWin->mpHierarchy->mpClientWindow = this;
+        WindowHierarchy* pBorderHierarchy = pBorderWin ? pBorderWin->ImplGetWindowHierarchy() : nullptr;
+        if (pBorderHierarchy)
+            pBorderHierarchy->setClientWindow(this);
 
-        pBorderWin->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
+        if (mpGeometry)
+        {
+            pBorderWin->GetBorder(mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder,
+                                  mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder);
+        }
 
-        mpHierarchy->mpBorderWindow = pBorderWin;
-        mpHierarchy->mpRealParent = pParent;
+        WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+        if (pHierarchy)
+        {
+            pHierarchy->setBorderWindow(pBorderWin);
+            pHierarchy->setRealParent(pParent);
+        }
     }
 
     SetActivateMode( ActivateModeFlags::GrabFocus );
@@ -1271,7 +1293,7 @@ void Dialog::ImplSetModalInputMode( bool bModal )
         pPrevious = rExecuteDialogs[rExecuteDialogs.size() - 2];
 
     mbModalMode = bModal;
-    if ( bModal )
+    if (bModal)
     {
         // Disable the prev Modal Dialog, because our dialog must close at first,
         // before the other dialog can be closed (because the other dialog
@@ -1281,13 +1303,15 @@ void Dialog::ImplSetModalInputMode( bool bModal )
 
         // determine next overlap dialog parent
         vcl::Window* pParent = GetParent();
-        if ( pParent )
+        if (pParent)
         {
             // #103716# dialogs should always be modal to the whole frame window
             // #115933# disable the whole frame hierarchy, useful if our parent
             // is a modeless dialog
-            mpDialogParent = pParent->mpHierarchy->mpFrameWindow;
-            mpDialogParent->IncModalCount();
+            const WindowHierarchy* pParentHierarchy = pParent->ImplGetWindowHierarchy();
+            mpDialogParent = pParentHierarchy ? pParentHierarchy->getFrameWindow() : nullptr;
+            if (mpDialogParent)
+                mpDialogParent->IncModalCount();
         }
     }
     else

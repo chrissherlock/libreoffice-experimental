@@ -91,18 +91,19 @@ namespace vcl {
 Window* Window::getLegacyNonLayoutAccessibleRelationLabelFor() const
 {
     Window* pFrameWindow = ImplGetFrameWindow();
-
-    WinBits nFrameStyle = pFrameWindow->GetStyle();
-    if( ! ( nFrameStyle & WB_DIALOGCONTROL )
-        || ( nFrameStyle & WB_NODIALOGCONTROL )
-        )
+    if (!pFrameWindow)
         return nullptr;
 
-    sal_Unicode nAccel = getAccel( GetText() );
+    const WinBits nFrameStyle = pFrameWindow->GetStyle();
+    if (!(nFrameStyle & WB_DIALOGCONTROL) || (nFrameStyle & WB_NODIALOGCONTROL))
+        return nullptr;
+
+    const sal_Unicode nAccel = getAccel(GetText());
 
     Window* pWindow = ImplGetLabelFor(pFrameWindow, GetType(), this, nAccel);
-    if( ! pWindow && mpHierarchy->mpRealParent )
-        pWindow = ImplGetLabelFor(mpHierarchy->mpRealParent, GetType(), this, nAccel);
+    if (!pWindow && mpHierarchy && mpHierarchy->getRealParent())
+        pWindow = ImplGetLabelFor(mpHierarchy->getRealParent(), GetType(), this, nAccel);
+
     return pWindow;
 }
 
@@ -163,21 +164,18 @@ static Window* ImplGetLabeledBy(Window* pFrameWindow, WindowType nMyType, const 
 
 Window* Window::getLegacyNonLayoutAccessibleRelationLabeledBy() const
 {
-    Window* pFrameWindow = ImplGetFrameWindow();
-
     // #i62723#, #104191# checkboxes and radiobuttons are not supposed to have labels
-    if( GetType() == WindowType::CHECKBOX || GetType() == WindowType::RADIOBUTTON )
+    const WindowType nType = GetType();
+    if (nType == WindowType::CHECKBOX || nType == WindowType::RADIOBUTTON)
         return nullptr;
 
-//    if( ! ( GetType() == WindowType::FIXEDTEXT     ||
-//            GetType() == WindowType::FIXEDLINE     ||
-//            GetType() == WindowType::GROUPBOX ) )
+    Window* pFrameWindow = ImplGetFrameWindow();
+
     // #i100833# MT 2010/02: Group box and fixed lines can also label a fixed text.
     // See tools/options/print for example.
-
-    Window* pWindow = ImplGetLabeledBy(pFrameWindow, GetType(), this);
-    if( ! pWindow && mpHierarchy->mpRealParent )
-        pWindow = ImplGetLabeledBy(mpHierarchy->mpRealParent, GetType(), this);
+    Window* pWindow = ImplGetLabeledBy(pFrameWindow, nType, this);
+    if (!pWindow && mpHierarchy && mpHierarchy->getRealParent())
+        pWindow = ImplGetLabeledBy(mpHierarchy->getRealParent(), nType, this);
 
     return pWindow;
 }

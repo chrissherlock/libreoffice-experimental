@@ -40,14 +40,15 @@
 
 namespace vcl {
 
-void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
+void Window::UpdateSettings(const AllSettings& rSettings, bool bChild)
 {
-    if ( mpHierarchy->mpBorderWindow )
+    if (mpHierarchy && mpHierarchy->hasBorderWindow())
     {
-        mpHierarchy->mpBorderWindow->UpdateSettings( rSettings );
-        if (mpHierarchy->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
+        vcl::Window* pBorderWindow = mpHierarchy->getBorderWindow();
+        pBorderWindow->UpdateSettings(rSettings);
+        if (pBorderWindow->GetType() == WindowType::BORDERWINDOW)
         {
-            ImplBorderWindow* pImpl = static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get());
+            auto* pImpl = static_cast<ImplBorderWindow*>(pBorderWindow);
             if (pImpl->mpMenuBarWindow)
                 pImpl->mpMenuBarWindow->UpdateSettings(rSettings, true);
             if (pImpl->mpNotebookBar)
@@ -56,56 +57,53 @@ void Window::UpdateSettings( const AllSettings& rSettings, bool bChild )
     }
 
     AllSettings aOldSettings(*mxOutDev->moSettings);
-    AllSettingsFlags nChangeFlags = mxOutDev->moSettings->Update( AllSettings::GetWindowUpdate(), rSettings );
+    AllSettingsFlags nChangeFlags = mxOutDev->moSettings->Update(AllSettings::GetWindowUpdate(), rSettings);
 
     // recalculate AppFont-resolution and DPI-resolution
     ImplInitResolutionSettings();
 
     /* #i73785#
-    *  do not overwrite a WheelBehavior with false
-    *  this looks kind of a hack, but WheelBehavior
-    *  is always a local change, not a system property,
-    *  so we can spare all our users the hassle of reacting on
-    *  this in their respective DataChanged.
-    */
-    MouseSettings aSet( mxOutDev->moSettings->GetMouseSettings() );
-    aSet.SetWheelBehavior( aOldSettings.GetMouseSettings().GetWheelBehavior() );
-    mxOutDev->moSettings->SetMouseSettings( aSet );
+     * do not overwrite a WheelBehavior with false
+     * this looks kind of a hack, but WheelBehavior
+     * is always a local change, not a system property,
+     * so we can spare all our users the hassle of reacting on
+     * this in their respective DataChanged.
+     */
+    MouseSettings aSet(mxOutDev->moSettings->GetMouseSettings());
+    aSet.SetWheelBehavior(aOldSettings.GetMouseSettings().GetWheelBehavior());
+    mxOutDev->moSettings->SetMouseSettings(aSet);
 
-    if( (nChangeFlags & AllSettingsFlags::STYLE) && HasBackground() )
+    if ((nChangeFlags & AllSettingsFlags::STYLE) && HasBackground())
     {
         Wallpaper aWallpaper = GetBackground();
-        if( !aWallpaper.IsBitmap() && !aWallpaper.IsGradient() )
+        if (!aWallpaper.IsBitmap() && !aWallpaper.IsGradient())
         {
-            if ( mpStyleState->mnStyle & WB_3DLOOK )
+            if (mpStyleState->mnStyle & WB_3DLOOK)
             {
                 if (aOldSettings.GetStyleSettings().GetFaceColor() != rSettings.GetStyleSettings().GetFaceColor())
-                    SetBackground( Wallpaper( rSettings.GetStyleSettings().GetFaceColor() ) );
+                    SetBackground(Wallpaper(rSettings.GetStyleSettings().GetFaceColor()));
             }
             else
             {
                 if (aOldSettings.GetStyleSettings().GetWindowColor() != rSettings.GetStyleSettings().GetWindowColor())
-                    SetBackground( Wallpaper( rSettings.GetStyleSettings().GetWindowColor() ) );
+                    SetBackground(Wallpaper(rSettings.GetStyleSettings().GetWindowColor()));
             }
         }
     }
 
-    if ( bool(nChangeFlags) )
+    if (bool(nChangeFlags))
     {
-        DataChangedEvent aDCEvt( DataChangedEventType::SETTINGS, &aOldSettings, nChangeFlags );
-        DataChanged( aDCEvt );
+        DataChangedEvent aDCEvt(DataChangedEventType::SETTINGS, &aOldSettings, nChangeFlags);
+        DataChanged(aDCEvt);
         // notify data change handler
-        CallEventListeners( VclEventId::WindowDataChanged, &aDCEvt);
+        CallEventListeners(VclEventId::WindowDataChanged, &aDCEvt);
     }
 
-    if ( bChild )
+    if (bChild && mpHierarchy)
     {
-        vcl::Window* pChild = mpHierarchy->mpFirstChild;
-        while ( pChild )
-        {
-            pChild->UpdateSettings( rSettings, bChild );
-            pChild = pChild->mpHierarchy->mpNext;
-        }
+        WindowHierarchy::forEachSibling(mpHierarchy->getFirstChild(), [&rSettings, bChild](vcl::Window& rChild) {
+            rChild.UpdateSettings(rSettings, bChild);
+        });
     }
 }
 

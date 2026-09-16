@@ -481,6 +481,9 @@ void DrawProgress(vcl::Window* pWindow, vcl::RenderContext& rRenderContext, cons
                   sal_uInt16 nPercent1, sal_uInt16 nPercent2, sal_uInt16 nPercentCount,
                   const tools::Rectangle& rFramePosSize, ControlType eControlType)
 {
+    if (!pWindow)
+        return;
+
     if (rRenderContext.IsNativeControlSupported(eControlType, ControlPart::Entire))
     {
         bool bNeedErase = ImplGetSVData()->maNWFData.mbProgressNeedsErase;
@@ -491,12 +494,20 @@ void DrawProgress(vcl::Window* pWindow, vcl::RenderContext& rRenderContext, cons
         tools::Rectangle aDrawRect(rPos, Size(nFullWidth, nPrgsHeight));
         tools::Rectangle aControlRegion(aDrawRect);
 
-        if(bNeedErase)
+        if (bNeedErase)
         {
             vcl::Window* pEraseWindow = pWindow;
-            while (pEraseWindow->IsPaintTransparent() && !pEraseWindow->ImplGetWindowClassification()->mbFrame)
+            while (pEraseWindow && pEraseWindow->IsPaintTransparent())
             {
-                pEraseWindow = pEraseWindow->ImplGetWindowHierarchy()->mpParent;
+                const auto* pClassification = pEraseWindow->ImplGetWindowClassification();
+                if (pClassification && pClassification->mbFrame)
+                    break;
+
+                const WindowHierarchy* pHierarchy = pEraseWindow->ImplGetWindowHierarchy();
+                vcl::Window* pParent = pHierarchy ? pHierarchy->getParent() : nullptr;
+                if (!pParent)
+                    break;
+                pEraseWindow = pParent;
             }
 
             if (pEraseWindow == pWindow)
@@ -510,7 +521,7 @@ void DrawProgress(vcl::Window* pWindow, vcl::RenderContext& rRenderContext, cons
                 AbsoluteScreenPixelPoint aTL1(pWindow->OutputToAbsoluteScreenPixel(rFramePosSize.TopLeft()));
                 Point aTL = pEraseWindow->AbsoluteScreenToOutputPixel(aTL1);
                 tools::Rectangle aRect(aTL, rFramePosSize.GetSize());
-                pEraseWindow->Invalidate(aRect, InvalidateFlags::NoChildren     |
+                pEraseWindow->Invalidate(aRect, InvalidateFlags::NoChildren      |
                                                 InvalidateFlags::NoClipChildren |
                                                 InvalidateFlags::Transparent);
                 pEraseWindow->PaintImmediately();
@@ -520,7 +531,7 @@ void DrawProgress(vcl::Window* pWindow, vcl::RenderContext& rRenderContext, cons
         }
 
         bool bNativeOK = rRenderContext.DrawNativeControl(eControlType, ControlPart::Entire, aControlRegion,
-                                                          ControlState::ENABLED, aValue, OUString());
+                                                         ControlState::ENABLED, aValue, OUString());
         if (bNeedErase)
             rRenderContext.Pop();
         if (bNativeOK)

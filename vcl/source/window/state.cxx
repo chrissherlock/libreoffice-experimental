@@ -50,9 +50,9 @@ namespace vcl
 {
 vcl::Window* Window::ImplGetMenuBarWindow() const
 {
-    if (mpHierarchy->mpBorderWindow
-        && mpHierarchy->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
-        return static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->mpMenuBarWindow;
+    const vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (pBorderWindow && pBorderWindow->GetType() == WindowType::BORDERWINDOW)
+        return static_cast<const ImplBorderWindow*>(pBorderWindow)->mpMenuBarWindow;
 
     return nullptr;
 }
@@ -90,9 +90,9 @@ void Window::ImplCancelTrackingAndPassFocus()
 
 void Window::ImplEnableBorderAndMenuBar(bool bEnable)
 {
-    if (mpHierarchy->mpBorderWindow)
+    if (vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr)
     {
-        mpHierarchy->mpBorderWindow->Enable(bEnable, false);
+        pBorderWindow->Enable(bEnable, false);
 
         if (vcl::Window* pMenuBarWindow = ImplGetMenuBarWindow())
             pMenuBarWindow->Enable(bEnable);
@@ -101,9 +101,9 @@ void Window::ImplEnableBorderAndMenuBar(bool bEnable)
 
 void Window::ImplEnableInputBorderAndMenuBar(bool bEnable)
 {
-    if (mpHierarchy->mpBorderWindow)
+    if (vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr)
     {
-        mpHierarchy->mpBorderWindow->EnableInput(bEnable, false);
+        pBorderWindow->EnableInput(bEnable, false);
 
         if (vcl::Window* pMenuBarWindow = ImplGetMenuBarWindow())
             pMenuBarWindow->EnableInput(bEnable);
@@ -144,31 +144,31 @@ void Window::ImplUpdateInputEnableState(bool bEnable)
 
 void Window::ImplEnableChildWindows(bool bEnable)
 {
-    VclPtr<vcl::Window> pChild = mpHierarchy->mpFirstChild;
-    while (pChild)
+    if (vcl::Window* pFirstChild = mpHierarchy ? mpHierarchy->getFirstChild() : nullptr)
     {
-        pChild->Enable(bEnable, true);
-        pChild = pChild->mpHierarchy->mpNext;
+        WindowHierarchy::forEachSibling(pFirstChild, [bEnable](vcl::Window& rChild) {
+            rChild.Enable(bEnable, true);
+        });
     }
 }
 
 void Window::ImplEnableInputChildWindows(bool bEnable)
 {
-    VclPtr<vcl::Window> pChild = mpHierarchy->mpFirstChild;
-    while (pChild)
+    if (vcl::Window* pFirstChild = mpHierarchy ? mpHierarchy->getFirstChild() : nullptr)
     {
-        pChild->EnableInput(bEnable, true);
-        pChild = pChild->mpHierarchy->mpNext;
+        WindowHierarchy::forEachSibling(pFirstChild, [bEnable](vcl::Window& rChild) {
+            rChild.EnableInput(bEnable, true);
+        });
     }
 }
 
 void Window::ImplAlwaysEnableInputChildWindows(bool bAlways)
 {
-    VclPtr<vcl::Window> pChild = mpHierarchy->mpFirstChild;
-    while (pChild)
+    if (vcl::Window* pFirstChild = mpHierarchy ? mpHierarchy->getFirstChild() : nullptr)
     {
-        pChild->AlwaysEnableInput(bAlways, true);
-        pChild = pChild->mpHierarchy->mpNext;
+        WindowHierarchy::forEachSibling(pFirstChild, [bAlways](vcl::Window& rChild) {
+            rChild.AlwaysEnableInput(bAlways, true);
+        });
     }
 }
 
@@ -238,21 +238,27 @@ void Window::EnableInput(bool bEnable, bool bChild)
 void Window::ImplEnableOverlapWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow)
 {
     vcl::Window* pFirstOverlap = ImplGetFirstOverlapWindow();
+    if (!pFirstOverlap)
+        return;
 
-    for (vcl::Window* pSysWin
-         = mpHierarchy->mpFrameWindow->mpPlatformState->mpFrameData->mpFirstOverlap;
-         pSysWin != nullptr; pSysWin = pSysWin->mpHierarchy->mpNextOverlap)
-    {
+    vcl::Window* pFrameWindow = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr;
+    WindowPlatformState* pPlatformState = pFrameWindow ? pFrameWindow->ImplGetPlatformState() : nullptr;
+    ImplFrameData* pFrameData = pPlatformState ? pPlatformState->mpFrameData : nullptr;
+
+    if (!pFrameData)
+        return;
+
+    WindowHierarchy::forEachOverlap(pFrameData->mpFirstOverlap, [&](vcl::Window& rSysWin) {
         // Skip if Window is not in the path from this window
-        if (!pFirstOverlap->ImplIsWindowOrChild(pSysWin, true))
-            continue;
+        if (!pFirstOverlap->ImplIsWindowOrChild(&rSysWin, true))
+            return;
 
         // Skip if Window is in the exclude window path
-        if (pExcludeWindow && pExcludeWindow->ImplIsWindowOrChild(pSysWin, true))
-            continue;
+        if (pExcludeWindow && pExcludeWindow->ImplIsWindowOrChild(&rSysWin, true))
+            return;
 
-        pSysWin->EnableInput(bEnable);
-    }
+        rSysWin.EnableInput(bEnable);
+    });
 }
 
 void Window::ImplEnableFloatingWindowsInput(bool bEnable, const vcl::Window* pExcludeWindow)
@@ -318,17 +324,20 @@ void Window::EnableInput(bool bEnable, const vcl::Window* pExcludeWindow)
 
 void Window::AlwaysEnableInput(bool bAlways, bool bChild)
 {
-    if (mpHierarchy->mpBorderWindow)
-        mpHierarchy->mpBorderWindow->AlwaysEnableInput(bAlways, false);
+    if (vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr)
+        pBorderWindow->AlwaysEnableInput(bAlways, false);
 
-    if (bAlways && !mpInput->isAlwaysInputEnabled())
+    if (mpInput)
     {
-        mpInput->setAlwaysInput(true);
-        EnableInput(true, false);
-    }
-    else if (!bAlways && mpInput->isAlwaysInputEnabled())
-    {
-        mpInput->setAlwaysInput(false);
+        if (bAlways && !mpInput->isAlwaysInputEnabled())
+        {
+            mpInput->setAlwaysInput(true);
+            EnableInput(true, false);
+        }
+        else if (!bAlways && mpInput->isAlwaysInputEnabled())
+        {
+            mpInput->setAlwaysInput(false);
+        }
     }
 
     if (bChild)
@@ -337,20 +346,19 @@ void Window::AlwaysEnableInput(bool bAlways, bool bChild)
 
 void Window::SetActivateMode(ActivateModeFlags nMode)
 {
-    if (mpHierarchy->mpBorderWindow)
-        mpHierarchy->mpBorderWindow->SetActivateMode(nMode);
+    if (vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr)
+        pBorderWindow->SetActivateMode(nMode);
 
-    if (!mpFocusState->setActivateMode(nMode))
+    if (!mpFocusState || !mpFocusState->setActivateMode(nMode))
         return;
 
-    // possibly trigger Deactivate/Activate
+    // Possibly trigger Deactivate/Activate
     if (mpFocusState->canGrabFocusOnActivate()
         && (mpFocusState->isActive() || GetType() == WindowType::BORDERWINDOW)
         && !HasChildPathFocus(true))
     {
         mpFocusState->setActive(false);
         Deactivate();
-
         return;
     }
 
@@ -374,7 +382,7 @@ void Window::SetUpdateMode(bool bUpdate)
 
 vcl::Window* Window::ImplGetBorderWindow() const
 {
-    return mpClassification ? mpHierarchy->mpBorderWindow.get() : nullptr;
+    return mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
 }
 
 void Window::ImplSetMouseTransparent(bool bTransparent)

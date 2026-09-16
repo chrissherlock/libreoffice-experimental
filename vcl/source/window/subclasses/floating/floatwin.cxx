@@ -115,14 +115,27 @@ void FloatingWindow::ImplInitFloating( vcl::Window* pParent, WinBits nStyle )
                 nBorderStyle |= BorderWindowStyle::Frame;
                 nStyle |= WB_CLOSEABLE; // make undecorated floaters closeable
             }
-            pBorderWin  = VclPtr<ImplBorderWindow>::Create(pParent, nStyle, nBorderStyle);
+            pBorderWin = VclPtr<ImplBorderWindow>::Create(pParent, nStyle, nBorderStyle);
             ImplInit(pBorderWin, nStyle & ~WB_BORDER, nullptr);
-            pBorderWin->mpHierarchy->mpClientWindow = this;
-            pBorderWin->GetBorder(mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder,
-                                  mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder);
+
+            WindowHierarchy* pBorderHierarchy = pBorderWin ? pBorderWin->ImplGetWindowHierarchy() : nullptr;
+            if (pBorderHierarchy)
+                pBorderHierarchy->setClientWindow(this);
+
+            if (mpGeometry)
+            {
+                pBorderWin->GetBorder(mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder,
+                                      mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder);
+            }
+
             pBorderWin->SetDisplayActive(true);
-            mpHierarchy->mpBorderWindow = pBorderWin;
-            mpHierarchy->mpRealParent = pParent;
+
+            WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+            if (pHierarchy)
+            {
+                pHierarchy->setBorderWindow(pBorderWin);
+                pHierarchy->setRealParent(pParent);
+            }
         }
     }
     SetActivateMode( ActivateModeFlags::NONE );
@@ -233,110 +246,118 @@ void FloatingWindow::dispose()
 }
 
 Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
-                                  const tools::Rectangle& rRect, FloatWinPopupFlags nFlags,
-                                  sal_uInt16& rArrangeIndex, Point* pLOKTwipsPos)
+                                const tools::Rectangle& rRect, FloatWinPopupFlags nFlags,
+                                sal_uInt16& rArrangeIndex, Point* pLOKTwipsPos)
 {
+    if (!pWindow)
+        return Point();
+
     // get window position
     AbsoluteScreenPixelPoint aPos;
-    Size        aSize = ::isLayoutEnabled(pWindow) ? pWindow->get_preferred_size() : pWindow->GetSizePixel();
-    AbsoluteScreenPixelRectangle aScreenRect = pWindow->ImplGetFrameWindow()->GetDesktopRectPixel();
-    FloatingWindow *pFloatingWindow = dynamic_cast<FloatingWindow*>( pWindow );
+    Size aSize = ::isLayoutEnabled(pWindow) ? pWindow->get_preferred_size() : pWindow->GetSizePixel();
+
+    vcl::Window* pFrameWindow = pWindow->ImplGetFrameWindow();
+    AbsoluteScreenPixelRectangle aScreenRect = pFrameWindow ? pFrameWindow->GetDesktopRectPixel() : AbsoluteScreenPixelRectangle();
+
+    FloatingWindow *pFloatingWindow = dynamic_cast<FloatingWindow*>(pWindow);
 
     // convert...
     vcl::Window* pW = pWindow;
-    if ( pW->mpHierarchy->mpRealParent )
-        pW = pW->mpHierarchy->mpRealParent;
+    const WindowHierarchy* pWindowHierarchy = pW->ImplGetWindowHierarchy();
+    vcl::Window* pRealParent = pWindowHierarchy ? pWindowHierarchy->getRealParent() : nullptr;
+    if (pRealParent)
+        pW = pRealParent;
 
-    tools::Rectangle normRect( rRect );  // rRect is already relative to top-level window
-    normRect.SetPos( pW->ScreenToOutputPixel( normRect.TopLeft() ) );
+    tools::Rectangle normRect(rRect); // rRect is already relative to top-level window
+    normRect.SetPos(pW->ScreenToOutputPixel(normRect.TopLeft()));
 
     bool bRTL = AllSettings::GetLayoutRTL();
 
-    AbsoluteScreenPixelRectangle devRect(  pW->OutputToAbsoluteScreenPixel( normRect.TopLeft() ),
-                        pW->OutputToAbsoluteScreenPixel( normRect.BottomRight() ) );
+    AbsoluteScreenPixelRectangle devRect(pW->OutputToAbsoluteScreenPixel(normRect.TopLeft()),
+                                       pW->OutputToAbsoluteScreenPixel(normRect.BottomRight()));
 
-    AbsoluteScreenPixelRectangle devRectRTL( devRect );
-    if( bRTL )
+    AbsoluteScreenPixelRectangle devRectRTL(devRect);
+    if (bRTL)
         // create a rect that can be compared to desktop coordinates
-        devRectRTL = pW->ImplOutputToUnmirroredAbsoluteScreenPixel( normRect );
-    if( Application::GetScreenCount() > 1 )
+        devRectRTL = pW->ImplOutputToUnmirroredAbsoluteScreenPixel(normRect);
+    if (Application::GetScreenCount() > 1)
         aScreenRect = Application::GetScreenPosSizePixel(
-            Application::GetBestScreen( bRTL ? devRectRTL : devRect ) );
+            Application::GetBestScreen(bRTL ? devRectRTL : devRect));
 
     FloatWinPopupFlags nArrangeAry[5];
     sal_uInt16 nArrangeAttempts = 5;
-    AbsoluteScreenPixelPoint e1,e2;  // the common edge between the item rect and the floating window
+    AbsoluteScreenPixelPoint e1, e2; // the common edge between the item rect and the floating window
 
-    if ( nFlags & FloatWinPopupFlags::Left )
+    if (nFlags & FloatWinPopupFlags::Left)
     {
-        nArrangeAry[0]  = FloatWinPopupFlags::Left;
-        nArrangeAry[1]  = FloatWinPopupFlags::Right;
-        nArrangeAry[2]  = FloatWinPopupFlags::Up;
-        nArrangeAry[3]  = FloatWinPopupFlags::Down;
-        nArrangeAry[4]  = FloatWinPopupFlags::Left;
+        nArrangeAry[0] = FloatWinPopupFlags::Left;
+        nArrangeAry[1] = FloatWinPopupFlags::Right;
+        nArrangeAry[2] = FloatWinPopupFlags::Up;
+        nArrangeAry[3] = FloatWinPopupFlags::Down;
+        nArrangeAry[4] = FloatWinPopupFlags::Left;
     }
-    else if ( nFlags & FloatWinPopupFlags::Right )
+    else if (nFlags & FloatWinPopupFlags::Right)
     {
-        nArrangeAry[0]  = FloatWinPopupFlags::Right;
-        nArrangeAry[1]  = FloatWinPopupFlags::Left;
-        nArrangeAry[2]  = FloatWinPopupFlags::Up;
-        nArrangeAry[3]  = FloatWinPopupFlags::Down;
-        nArrangeAry[4]  = FloatWinPopupFlags::Right;
+        nArrangeAry[0] = FloatWinPopupFlags::Right;
+        nArrangeAry[1] = FloatWinPopupFlags::Left;
+        nArrangeAry[2] = FloatWinPopupFlags::Up;
+        nArrangeAry[3] = FloatWinPopupFlags::Down;
+        nArrangeAry[4] = FloatWinPopupFlags::Right;
     }
-    else if ( nFlags & FloatWinPopupFlags::Up )
+    else if (nFlags & FloatWinPopupFlags::Up)
     {
-        nArrangeAry[0]  = FloatWinPopupFlags::Up;
-        nArrangeAry[1]  = FloatWinPopupFlags::Down;
+        nArrangeAry[0] = FloatWinPopupFlags::Up;
+        nArrangeAry[1] = FloatWinPopupFlags::Down;
         if (nFlags & FloatWinPopupFlags::NoHorzPlacement)
         {
-            nArrangeAry[2]  = FloatWinPopupFlags::Up;
+            nArrangeAry[2] = FloatWinPopupFlags::Up;
             nArrangeAttempts = 3;
         }
         else
         {
-            nArrangeAry[2]  = FloatWinPopupFlags::Right;
-            nArrangeAry[3]  = FloatWinPopupFlags::Left;
-            nArrangeAry[4]  = FloatWinPopupFlags::Up;
+            nArrangeAry[2] = FloatWinPopupFlags::Right;
+            nArrangeAry[3] = FloatWinPopupFlags::Left;
+            nArrangeAry[4] = FloatWinPopupFlags::Up;
         }
     }
     else
     {
-        nArrangeAry[0]  = FloatWinPopupFlags::Down;
-        nArrangeAry[1]  = FloatWinPopupFlags::Up;
+        nArrangeAry[0] = FloatWinPopupFlags::Down;
+        nArrangeAry[1] = FloatWinPopupFlags::Up;
         if (nFlags & FloatWinPopupFlags::NoHorzPlacement)
         {
-            nArrangeAry[2]  = FloatWinPopupFlags::Down;
+            nArrangeAry[2] = FloatWinPopupFlags::Down;
             nArrangeAttempts = 3;
         }
         else
         {
-            nArrangeAry[2]  = FloatWinPopupFlags::Right;
-            nArrangeAry[3]  = FloatWinPopupFlags::Left;
-            nArrangeAry[4]  = FloatWinPopupFlags::Down;
+            nArrangeAry[2] = FloatWinPopupFlags::Right;
+            nArrangeAry[3] = FloatWinPopupFlags::Left;
+            nArrangeAry[4] = FloatWinPopupFlags::Down;
         }
     }
 
-    sal_uInt16 nArrangeIndex = 0;
+    rArrangeIndex = 0;
     const bool bLOKActive = comphelper::LibreOfficeKit::isActive();
 
-    for ( ; nArrangeIndex < nArrangeAttempts; nArrangeIndex++ )
+    for (; rArrangeIndex < nArrangeAttempts; rArrangeIndex++)
     {
         bool bBreak = true;
-        switch ( nArrangeAry[nArrangeIndex] )
+        switch (nArrangeAry[rArrangeIndex])
         {
-
             case FloatWinPopupFlags::Left:
-                aPos.setX( devRect.Left()-aSize.Width()+1 );
-                aPos.setY( devRect.Top() );
-                aPos.AdjustY( -(pWindow->mpGeometry->mnTopBorder) );
-                if( bRTL )
+                aPos.setX(devRect.Left() - aSize.Width() + 1);
+                aPos.setY(devRect.Top());
+                if (pWindow->ImplGetGeometry())
+                    aPos.AdjustY(-(pWindow->ImplGetGeometry()->mnTopBorder));
+                if (bRTL)
                 {
-                    if( (devRectRTL.Right()+aSize.Width()) > aScreenRect.Right() )
+                    if ((devRectRTL.Right() + aSize.Width()) > aScreenRect.Right())
                         bBreak = false;
                 }
                 else
                 {
-                    if ( aPos.X() < aScreenRect.Left() )
+                    if (aPos.X() < aScreenRect.Left())
                         bBreak = false;
                 }
                 if (bBreak || bLOKActive)
@@ -344,23 +365,24 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
                     e1 = devRect.TopLeft();
                     e2 = devRect.BottomLeft();
                     // set non-zero width
-                    e2.AdjustX( 1 );
+                    e2.AdjustX(1);
                     // don't clip corners
-                    e1.AdjustY( 1 );
-                    e2.AdjustY( -1 );
+                    e1.AdjustY(1);
+                    e2.AdjustY(-1);
                 }
                 break;
             case FloatWinPopupFlags::Right:
-                aPos     = devRect.TopRight();
-                aPos.AdjustY( -(pWindow->mpGeometry->mnTopBorder) );
-                if( bRTL )
+                aPos = devRect.TopRight();
+                if (pWindow->ImplGetGeometry())
+                    aPos.AdjustY(-(pWindow->ImplGetGeometry()->mnTopBorder));
+                if (bRTL)
                 {
-                    if( (devRectRTL.Left() - aSize.Width()) < aScreenRect.Left() )
+                    if ((devRectRTL.Left() - aSize.Width()) < aScreenRect.Left())
                         bBreak = false;
                 }
                 else
                 {
-                    if ( aPos.X()+aSize.Width() > aScreenRect.Right() )
+                    if (aPos.X() + aSize.Width() > aScreenRect.Right())
                         bBreak = false;
                 }
                 if (bBreak || bLOKActive)
@@ -368,44 +390,45 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
                     e1 = devRect.TopRight();
                     e2 = devRect.BottomRight();
                     // set non-zero width
-                    e2.AdjustX( 1 );
+                    e2.AdjustX(1);
                     // don't clip corners
-                    e1.AdjustY( 1 );
-                    e2.AdjustY( -1 );
+                    e1.AdjustY(1);
+                    e2.AdjustY(-1);
                 }
                 break;
             case FloatWinPopupFlags::Up:
-                aPos.setX( devRect.Left() );
-                aPos.setY( devRect.Top()-aSize.Height()+1 );
-                if ( aPos.Y() < aScreenRect.Top() )
+                aPos.setX(devRect.Left());
+                aPos.setY(devRect.Top() - aSize.Height() + 1);
+                if (aPos.Y() < aScreenRect.Top())
                     bBreak = false;
                 if (bBreak || bLOKActive)
                 {
                     e1 = devRect.TopLeft();
                     e2 = devRect.TopRight();
                     // set non-zero height
-                    e2.AdjustY( 1 );
+                    e2.AdjustY(1);
                     // don't clip corners
-                    e1.AdjustX( 1 );
-                    e2.AdjustX( -1 );
+                    e1.AdjustX(1);
+                    e2.AdjustX(-1);
                 }
                 break;
             case FloatWinPopupFlags::Down:
                 aPos = devRect.BottomLeft();
-                if ( aPos.Y()+aSize.Height() > aScreenRect.Bottom() )
+                if (aPos.Y() + aSize.Height() > aScreenRect.Bottom())
                     bBreak = false;
                 if (bBreak || bLOKActive)
                 {
                     e1 = devRect.BottomLeft();
                     e2 = devRect.BottomRight();
                     // set non-zero height
-                    e2.AdjustY( 1 );
+                    e2.AdjustY(1);
                     // don't clip corners
-                    e1.AdjustX( 1 );
-                    e2.AdjustX( -1 );
+                    e1.AdjustX(1);
+                    e2.AdjustX(-1);
                 }
                 break;
-            default: break;
+            default:
+                break;
         }
 
         // no further adjustment for LibreOfficeKit
@@ -413,7 +436,7 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
             break;
 
         // set bBreak true on last attempt
-        if (nArrangeIndex + 1 == nArrangeAttempts)
+        if (rArrangeIndex + 1 == nArrangeAttempts)
             bBreak = true;
 
         // adjust if necessary
@@ -432,47 +455,37 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
             }
             else
             {
-                if( bRTL )
+                if (bRTL)
                 {
-                    if( devRectRTL.Right()-aSize.Width()+1 < aScreenRect.Left() )
-                        aPos.AdjustX( -(aScreenRect.Left() - devRectRTL.Right() + aSize.Width() - 1) );
+                    if (devRectRTL.Right() - aSize.Width() + 1 < aScreenRect.Left())
+                        aPos.AdjustX(-(aScreenRect.Left() - devRectRTL.Right() + aSize.Width() - 1));
                 }
-                else if ( aPos.X()+aSize.Width() > aScreenRect.Right() )
+                else if (aPos.X() + aSize.Width() > aScreenRect.Right())
                 {
-                    aPos.setX( devRect.Right()-aSize.Width()+1 );
-                    if ( aPos.X() < aScreenRect.Left() )
-                        aPos.setX( aScreenRect.Left() );
+                    aPos.setX(devRect.Right() - aSize.Width() + 1);
+                    if (aPos.X() < aScreenRect.Left())
+                        aPos.setX(aScreenRect.Left());
                 }
             }
         }
 
-        if ( bBreak )
+        if (bBreak)
             break;
     }
 
-    rArrangeIndex = nArrangeIndex;
-
-    Point aPosOut = pW->AbsoluteScreenToOutputPixel( aPos );
+    Point aPosOut = pW->AbsoluteScreenToOutputPixel(aPos);
 
     // store a cliprect that can be used to clip the common edge of the itemrect and the floating window
-    if( pFloatingWindow && pFloatingWindow->mpImplData->mpBox )
+    if (pFloatingWindow && pFloatingWindow->mpImplData && pFloatingWindow->mpImplData->mpBox)
     {
         pFloatingWindow->mpImplData->maItemEdgeClipRect =
-            AbsoluteScreenPixelRectangle( e1, e2 );
+            AbsoluteScreenPixelRectangle(e1, e2);
     }
 
     if (bLOKActive && pLOKTwipsPos)
     {
         if (pW->GetMappingPolicy() == vcl::MappingPolicy::ApplyMapMode || pW->GetMapMode().GetMapUnit() == MapUnit::MapPixel)
         {
-            // if we use pW->LogicToLogic(aPos, pW->GetMapMode(), MapMode(MapUnit::MapTwip)),
-            // for pixel conversions when map mode is not enabled, we get
-            // a 20 twips per pixel conversion since LogicToLogic uses
-            // a fixed 72 dpi value, instead of a correctly computed output
-            // device dpi or at least the most commonly used 96 dpi value;
-            // and anyway the following is what we already do in
-            // ScGridWindow::LogicInvalidate when map mode is not enabled.
-
             *pLOKTwipsPos = pW->convertTo<vcl::LogicPoint>(vcl::WindowPoint(aPosOut), MapMode(MapUnit::MapTwip));
         }
         else
@@ -482,7 +495,7 @@ Point FloatingWindow::ImplCalcPos(vcl::Window* pWindow,
     }
 
     // caller expects coordinates relative to top-level win
-    return pW->OutputToScreenPixel( aPosOut );
+    return pW->OutputToScreenPixel(aPosOut);
 }
 
 AbsoluteScreenPixelPoint FloatingWindow::ImplConvertToAbsPos(vcl::Window* pReference, const Point& rPos)
@@ -761,24 +774,34 @@ void FloatingWindow::PopupModeEnd()
     maPopupModeEndHdl.Call( this );
 }
 
-void FloatingWindow::SetTitleType( FloatWinTitleType nTitle )
+void FloatingWindow::SetTitleType(FloatWinTitleType nTitle)
 {
-    if ( (mnTitle == nTitle) || !mpHierarchy->mpBorderWindow )
+    const WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+    vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+
+    if ((mnTitle == nTitle) || !pBorderWindow)
         return;
 
     mnTitle = nTitle;
     Size aOutSize = GetOutputSizePixel();
     BorderWindowTitleType nTitleStyle;
-    if ( nTitle == FloatWinTitleType::Normal )
+    if (nTitle == FloatWinTitleType::Normal)
         nTitleStyle = BorderWindowTitleType::Small;
-    else if ( nTitle == FloatWinTitleType::TearOff )
+    else if (nTitle == FloatWinTitleType::TearOff)
         nTitleStyle = BorderWindowTitleType::Tearoff;
-    else if ( nTitle == FloatWinTitleType::Popup )
+    else if (nTitle == FloatWinTitleType::Popup)
         nTitleStyle = BorderWindowTitleType::Popup;
     else // nTitle == FloatWinTitleType::NONE
         nTitleStyle = BorderWindowTitleType::NONE;
-    static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetTitleType( nTitleStyle, aOutSize );
-    static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
+
+    auto* pBorderWin = static_cast<ImplBorderWindow*>(pBorderWindow);
+    pBorderWin->SetTitleType(nTitleStyle, aOutSize);
+
+    if (mpGeometry)
+    {
+        pBorderWin->GetBorder(mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder,
+                              mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder);
+    }
 }
 
 void FloatingWindow::StartPopupMode( const tools::Rectangle& rRect, FloatWinPopupFlags nFlags )

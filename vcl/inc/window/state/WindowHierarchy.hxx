@@ -29,42 +29,35 @@ namespace vcl
 class Window;
 }
 
-struct WindowHierarchy
+class WindowHierarchy
 {
-    VclPtr<vcl::Window> mpParent; // Parent (includes BorderWindow)
-    VclPtr<vcl::Window> mpRealParent; // Real parent (excludes BorderWindow)
-
-    VclPtr<vcl::Window> mpFirstChild; // First child window
-    VclPtr<vcl::Window> mpLastChild; // Last child window
-
-    VclPtr<vcl::Window> mpFirstOverlap; // First overlap window child
-    VclPtr<vcl::Window> mpLastOverlap; // Last overlap window child
-
-    VclPtr<vcl::Window> mpPrev; // Previous sibling window
-    VclPtr<vcl::Window> mpNext; // Next sibling window
-
-    VclPtr<vcl::Window> mpPrevOverlap; // Previous overlap window of frame
-    VclPtr<vcl::Window> mpNextOverlap; // Next overlap window of frame
-
-    VclPtr<vcl::Window> mpFrameWindow; // window that is the frame for this window
-    VclPtr<vcl::Window> mpOverlapWindow; // first overlap parent
-    VclPtr<vcl::Window> mpBorderWindow; // Border-Window
-    VclPtr<vcl::Window> mpClientWindow; // Client-Window of a FrameWindow
-
-    vcl::Window* getFirstOverlap() const { return mpFirstOverlap; }
-    vcl::Window* getNext() const { return mpNext; }
-
-    bool hasChildren() const { return mpFirstChild != nullptr; }
-
+public:
+    // Getters
     vcl::Window* getParent() const { return mpParent.get(); }
     vcl::Window* getRealParent() const { return mpRealParent.get(); }
+    vcl::Window* getFirstChild() const { return mpFirstChild.get(); }
+    vcl::Window* getLastChild() const { return mpLastChild.get(); }
+    vcl::Window* getFirstOverlap() const { return mpFirstOverlap.get(); }
+    vcl::Window* getLastOverlap() const { return mpLastOverlap.get(); }
+    vcl::Window* getPrevSibling() const { return mpPrev.get(); }
+    vcl::Window* getNextSibling() const { return mpNext.get(); }
+    vcl::Window* getOverlapWindow() const { return mpOverlapWindow.get(); }
+    vcl::Window* getFrameWindow() const { return mpFrameWindow.get(); }
     vcl::Window* getBorderWindow() const { return mpBorderWindow.get(); }
-    vcl::Window* getFrameWindow() const { return mpFrameWindow; }
+    vcl::Window* getClientWindow() const { return mpClientWindow.get(); }
+
+    bool hasChildren() const { return mpFirstChild != nullptr; }
     bool hasBorderWindow() const { return mpBorderWindow != nullptr; }
 
-    vcl::Window* getFirstChild() const { return mpFirstChild; }
-    vcl::Window* getNextSibling() const { return mpNext; }
+    // Mutators
+    void setParent(vcl::Window* p) { mpParent = p; }
+    void setRealParent(vcl::Window* p) { mpRealParent = p; }
+    void setFrameWindow(vcl::Window* p) { mpFrameWindow = p; }
+    void setOverlapWindow(vcl::Window* p) { mpOverlapWindow = p; }
+    void setBorderWindow(vcl::Window* p) { mpBorderWindow = p; }
+    void setClientWindow(vcl::Window* p) { mpClientWindow = p; }
 
+    // Structural operations
     vcl::Window* getTopmostFrameWindow() const;
 
     void insertOverlapWindow(vcl::Window* pWindow, vcl::Window* pParent, ImplFrameData& rFrameData);
@@ -84,13 +77,14 @@ struct WindowHierarchy
     vcl::Window* getBoundarySibling(ZOrderFlags nFlags, bool bOverlap) const;
     static vcl::Window* findOutermostBorderWindow(vcl::Window* pWindow);
 
+    // Visitors
     template <typename Func> static void forEachSibling(vcl::Window* pStart, Func&& rVisitor)
     {
         vcl::Window* pCurrent = pStart;
         while (pCurrent)
         {
             WindowHierarchy* pHierarchy = pCurrent->ImplGetWindowHierarchy();
-            vcl::Window* pNext = pHierarchy ? pHierarchy->mpNext : nullptr;
+            vcl::Window* pNext = pHierarchy ? pHierarchy->mpNext.get() : nullptr;
 
             if constexpr (std::is_same_v<std::invoke_result_t<Func, vcl::Window&>, void>)
             {
@@ -106,19 +100,12 @@ struct WindowHierarchy
         }
     }
 
-    /**
-     * Walks the full sibling chain starting from the first child or first overlap window.
-     */
     template <typename Func> void forEachSibling(bool bOverlap, Func&& rVisitor) const
     {
         forEachSibling(getBoundarySibling(ZOrderFlags::First, bOverlap),
                        std::forward<Func>(rVisitor));
     }
 
-    /**
-     * Walks upward through the parent chain starting at pStart (inclusive)
-     * until reaching the root or until rVisitor returns false.
-     */
     template <typename Func> static void forEachAncestor(vcl::Window* pStart, Func&& rVisitor)
     {
         vcl::Window* pCurrent = pStart;
@@ -141,18 +128,11 @@ struct WindowHierarchy
         }
     }
 
-    /**
-     * Walks upward through the ancestor chain starting from this window's parent.
-     */
     template <typename Func> void forEachAncestor(Func&& rVisitor) const
     {
         forEachAncestor(mpParent, std::forward<Func>(rVisitor));
     }
 
-    /**
-     * Traverses all descendants of pRoot recursively in pre-order.
-     * Returning false stops traversal down that branch and halts the search.
-     */
     template <typename Func> static bool forEachDescendant(vcl::Window* pRoot, Func&& rVisitor)
     {
         if (!pRoot)
@@ -175,7 +155,7 @@ struct WindowHierarchy
                 if (!rVisitor(rChild) || !forEachDescendant(&rChild, rVisitor))
                 {
                     bContinue = false;
-                    return false; // Break sibling loop
+                    return false;
                 }
                 return true;
             }
@@ -203,7 +183,80 @@ struct WindowHierarchy
         }
     }
 
+    template <typename Func>
+    static void forEachPreviousSibling(vcl::Window* pStart, Func&& aFunc)
+    {
+        while (pStart)
+        {
+            WindowHierarchy* pHierarchy = pStart->ImplGetWindowHierarchy();
+            vcl::Window* pPrev = pHierarchy ? pHierarchy->getPrevSibling() : nullptr;
+            aFunc(*pStart);
+            pStart = pPrev;
+        }
+    }
+
+    template <typename Func>
+    static void forEachPreviousSibling(const vcl::Window* pStart, Func&& aFunc)
+    {
+        while (pStart)
+        {
+            const WindowHierarchy* pHierarchy = pStart->ImplGetWindowHierarchy();
+            const vcl::Window* pPrev = pHierarchy ? pHierarchy->getPrevSibling() : nullptr;
+            aFunc(*pStart);
+            pStart = pPrev;
+        }
+    }
+
+    template <typename Func>
+    static void forEachOverlap(vcl::Window* pStart, Func&& aFunc)
+    {
+        while (pStart)
+        {
+            WindowHierarchy* pHierarchy = pStart->ImplGetWindowHierarchy();
+            vcl::Window* pNext = pHierarchy ? pHierarchy->mpNextOverlap : nullptr;
+            aFunc(*pStart);
+            pStart = pNext;
+        }
+    }
+
+    template <typename Func>
+    static void forEachOverlap(const vcl::Window* pStart, Func&& aFunc)
+    {
+        while (pStart)
+        {
+            const WindowHierarchy* pHierarchy = pStart->ImplGetWindowHierarchy();
+            const vcl::Window* pNext = pHierarchy ? pHierarchy->mpNextOverlap : nullptr;
+            aFunc(*pStart);
+            pStart = pNext;
+        }
+    }
+
+    void disposeBorderWindow()
+    {
+        mpBorderWindow.disposeAndClear();
+    }
+
 private:
+    VclPtr<vcl::Window> mpParent;
+    VclPtr<vcl::Window> mpRealParent;
+
+    VclPtr<vcl::Window> mpFirstChild;
+    VclPtr<vcl::Window> mpLastChild;
+
+    VclPtr<vcl::Window> mpFirstOverlap;
+    VclPtr<vcl::Window> mpLastOverlap;
+
+    VclPtr<vcl::Window> mpPrev;
+    VclPtr<vcl::Window> mpNext;
+
+    VclPtr<vcl::Window> mpPrevOverlap;
+    VclPtr<vcl::Window> mpNextOverlap;
+
+    VclPtr<vcl::Window> mpFrameWindow;
+    VclPtr<vcl::Window> mpOverlapWindow;
+    VclPtr<vcl::Window> mpBorderWindow;
+    VclPtr<vcl::Window> mpClientWindow;
+
     void unlinkFromGlobalOverlapChain(ImplFrameData& rFrameData);
     void unlinkFromOverlapChain();
 };

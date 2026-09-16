@@ -44,12 +44,10 @@ void ClipStateBuilder::CollectSiblings(const vcl::Window& rWindow, std::vector<C
     if (!pHierarchy)
         return;
 
-    vcl::Window* pSibling = pHierarchy->mpFirstOverlap;
-    while (pSibling)
-    {
-        rOut.push_back({ pSibling->GetWindowExtentsRelative(rWindow) });
-        pSibling = pSibling->ImplGetWindowHierarchy()->mpNextOverlap;
-    }
+    pHierarchy->forEachSibling(rWindow.ImplIsOverlapWindow(), [&](const vcl::Window& rSibling) {
+        if (&rSibling != &rWindow)
+            rOut.emplace_back(rSibling.GetWindowExtentsRelative(rWindow));
+    });
 }
 
 void ClipStateBuilder::CollectChildren(const vcl::Window& rWindow, std::vector<ClipNode>& rOut)
@@ -58,12 +56,9 @@ void ClipStateBuilder::CollectChildren(const vcl::Window& rWindow, std::vector<C
     if (!pHierarchy)
         return;
 
-    vcl::Window* pChild = pHierarchy->mpFirstChild;
-    while (pChild)
-    {
-        rOut.push_back({ pChild->GetWindowExtentsRelative(rWindow) });
-        pChild = pChild->ImplGetWindowHierarchy()->mpNext;
-    }
+    WindowHierarchy::forEachSibling(pHierarchy->getFirstChild(), [&](const vcl::Window& rChild) {
+        rOut.emplace_back(rChild.GetWindowExtentsRelative(rWindow));
+    });
 }
 } // namespace vcl::clipping
 

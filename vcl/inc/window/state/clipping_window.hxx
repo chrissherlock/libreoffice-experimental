@@ -26,7 +26,7 @@
 class WindowImpl;
 struct WindowPlatformState;
 struct WindowClippingState;
-struct WindowHierarchy;
+class WindowHierarchy;
 
 namespace vcl
 {

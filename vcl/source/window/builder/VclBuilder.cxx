@@ -1676,19 +1676,28 @@ namespace BuilderUtils
         return lcl_extractBoolEntry(rMap, u"dropdown"_ustr, true);
     }
 
-    void reorderWithinParent(vcl::Window &rWindow, sal_uInt16 nNewPosition)
-    {
-        WindowHierarchy *pHierarchy = rWindow.ImplGetWindowHierarchy();
-        if (pHierarchy->mpParent != pHierarchy->mpRealParent)
-        {
-            assert(pHierarchy->mpBorderWindow == pHierarchy->mpParent);
-            assert(pHierarchy->mpBorderWindow->ImplGetWindowHierarchy()->mpParent == pHierarchy->mpRealParent);
+    void reorderWithinParent(vcl::Window& rWindow, sal_uInt16 nNewPosition)
+{
+    WindowHierarchy* pHierarchy = rWindow.ImplGetWindowHierarchy();
+    if (!pHierarchy)
+        return;
 
-            reorderWithinParent(*pHierarchy->mpBorderWindow, nNewPosition);
+    if (pHierarchy->getParent() != pHierarchy->getRealParent())
+    {
+        vcl::Window* pBorderWindow = pHierarchy->getBorderWindow();
+        assert(pBorderWindow == pHierarchy->getParent());
+        assert(pBorderWindow && pBorderWindow->ImplGetWindowHierarchy()
+               && pBorderWindow->ImplGetWindowHierarchy()->getParent() == pHierarchy->getRealParent());
+
+        if (pBorderWindow)
+        {
+            reorderWithinParent(*pBorderWindow, nNewPosition);
             return;
         }
-        rWindow.reorderWithinParent(nNewPosition);
     }
+
+    rWindow.reorderWithinParent(nNewPosition);
+}
 
     void reorderWithinParent(std::vector<vcl::Window*>& rChilds, bool bIsButtonBox)
     {

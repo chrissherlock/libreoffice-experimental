@@ -498,39 +498,46 @@ void OutputDevice::ImplUpdateAllFontData(bool bNewFontLists)
     OutputDevice::ImplRefreshAllFontData(bNewFontLists);
 }
 
-void OutputDevice::ImplUpdateFontDataForAllFrames( const FontUpdateHandler_t pHdl, const bool bNewFontLists )
+void OutputDevice::ImplUpdateFontDataForAllFrames(const FontUpdateHandler_t pHdl, const bool bNewFontLists)
 {
     ImplSVData* const pSVData = ImplGetSVData();
+    if (!pSVData)
+        return;
 
     // update all windows
     vcl::Window* pFrame = pSVData->maFrameData.mpFirstFrame;
-    while ( pFrame )
+    while (pFrame)
     {
-        ( pFrame->GetOutDev()->*pHdl )( bNewFontLists );
+        if (pFrame->GetOutDev())
+            (pFrame->GetOutDev()->*pHdl)(bNewFontLists);
 
-        vcl::Window* pSysWin = pFrame->mpPlatformState->mpFrameData->mpFirstOverlap;
-        while ( pSysWin )
+        const auto* pPlatformState = pFrame->ImplGetPlatformState();
+        vcl::Window* pFirstOverlap = (pPlatformState && pPlatformState->mpFrameData) ? pPlatformState->mpFrameData->mpFirstOverlap : nullptr;
+        if (pFirstOverlap)
         {
-            ( pSysWin->GetOutDev()->*pHdl )( bNewFontLists );
-            pSysWin = pSysWin->mpHierarchy->mpNextOverlap;
+            WindowHierarchy::forEachOverlap(pFirstOverlap, [pHdl, bNewFontLists](vcl::Window& rSysWin) {
+                if (rSysWin.GetOutDev())
+                    (rSysWin.GetOutDev()->*pHdl)(bNewFontLists);
+            });
         }
 
-        pFrame = pFrame->mpPlatformState->mpFrameData->mpNextFrame;
+        const auto* pNextPlatformState = pFrame->ImplGetPlatformState();
+        pFrame = (pNextPlatformState && pNextPlatformState->mpFrameData) ? pNextPlatformState->mpFrameData->mpNextFrame : nullptr;
     }
 
     // update all virtual devices
     VirtualDevice* pVirDev = pSVData->maGDIData.mpFirstVirDev;
-    while ( pVirDev )
+    while (pVirDev)
     {
-        ( pVirDev->*pHdl )( bNewFontLists );
+        (pVirDev->*pHdl)(bNewFontLists);
         pVirDev = pVirDev->mpNext;
     }
 
     // update all printers
     Printer* pPrinter = pSVData->maGDIData.mpFirstPrinter;
-    while ( pPrinter )
+    while (pPrinter)
     {
-        ( pPrinter->*pHdl )( bNewFontLists );
+        (pPrinter->*pHdl)(bNewFontLists);
         pPrinter = pPrinter->mpNext;
     }
 }

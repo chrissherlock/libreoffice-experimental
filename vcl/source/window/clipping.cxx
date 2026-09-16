@@ -90,10 +90,11 @@ vcl::Region Window::GetWindowClipRegionPixel() const
 
 void Window::EnableClipSiblings(bool bClipSiblings)
 {
-    if (mpHierarchy->mpBorderWindow)
-        mpHierarchy->mpBorderWindow->EnableClipSiblings(bClipSiblings);
+    if (mpHierarchy && mpHierarchy->hasBorderWindow())
+        mpHierarchy->getBorderWindow()->EnableClipSiblings(bClipSiblings);
 
-    mpClippingState->mbClipSiblings = bClipSiblings;
+    if (mpClippingState)
+        mpClippingState->mbClipSiblings = bClipSiblings;
 }
 
 } /* namespace vcl */

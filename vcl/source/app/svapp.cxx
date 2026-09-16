@@ -652,26 +652,31 @@ void Application::SetSettings(const AllSettings& rSettings, bool bTemporary)
                 vcl::Window::ImplInitAppFontData(pFirstFrame);
             }
             vcl::Window* pFrame = pFirstFrame;
-            while ( pFrame )
+            while (pFrame)
             {
                 // call UpdateSettings from ClientWindow in order to prevent updating data twice
                 vcl::Window* pClientWin = pFrame;
-                while ( pClientWin->ImplGetClientWindow() )
+                while (pClientWin && pClientWin->ImplGetClientWindow())
                     pClientWin = pClientWin->ImplGetClientWindow();
-                pClientWin->UpdateSettings( rSettings, true );
+                if (pClientWin)
+                    pClientWin->UpdateSettings(rSettings, true);
 
-                vcl::Window* pTempWin = pFrame->mpPlatformState->mpFrameData->mpFirstOverlap;
-                while ( pTempWin )
+                const auto* pPlatformState = pFrame->ImplGetPlatformState();
+                vcl::Window* pFirstOverlap = (pPlatformState && pPlatformState->mpFrameData) ? pPlatformState->mpFrameData->mpFirstOverlap : nullptr;
+                if (pFirstOverlap)
                 {
-                    // call UpdateSettings from ClientWindow in order to prevent updating data twice
-                    pClientWin = pTempWin;
-                    while ( pClientWin->ImplGetClientWindow() )
-                        pClientWin = pClientWin->ImplGetClientWindow();
-                    pClientWin->UpdateSettings( rSettings, true );
-                    pTempWin = pTempWin->mpHierarchy->mpNextOverlap;
+                    WindowHierarchy::forEachOverlap(pFirstOverlap, [&rSettings](vcl::Window& rTempWin) {
+                        // call UpdateSettings from ClientWindow in order to prevent updating data twice
+                        vcl::Window* pOverlapClientWin = &rTempWin;
+                        while (pOverlapClientWin && pOverlapClientWin->ImplGetClientWindow())
+                            pOverlapClientWin = pOverlapClientWin->ImplGetClientWindow();
+                        if (pOverlapClientWin)
+                            pOverlapClientWin->UpdateSettings(rSettings, true);
+                    });
                 }
 
-                pFrame = pFrame->mpPlatformState->mpFrameData->mpNextFrame;
+                const auto* pNextPlatformState = pFrame->ImplGetPlatformState();
+                pFrame = (pNextPlatformState && pNextPlatformState->mpFrameData) ? pNextPlatformState->mpFrameData->mpNextFrame : nullptr;
             }
 
             // if DPI resolution for screen output was changed set the new resolution for all
@@ -736,22 +741,32 @@ void InitSettings(ImplSVData* pSVData)
 
 }
 
-void Application::NotifyAllWindows( DataChangedEvent& rDCEvt )
+void Application::NotifyAllWindows(DataChangedEvent& rDCEvt)
 {
     ImplSVData* pSVData = ImplGetSVData();
-    vcl::Window* pFrame = pSVData->maFrameData.mpFirstFrame;
-    while ( pFrame )
-    {
-        pFrame->NotifyAllChildren( rDCEvt );
+    if (!pSVData)
+        return;
 
-        vcl::Window* pSysWin = pFrame->mpPlatformState->mpFrameData->mpFirstOverlap;
-        while ( pSysWin )
+    vcl::Window* pFrame = pSVData->maFrameData.mpFirstFrame;
+    while (pFrame)
+    {
+        pFrame->NotifyAllChildren(rDCEvt);
+
+        const auto* pPlatformState = pFrame->ImplGetPlatformState();
+        vcl::Window* pFirstOverlap = (pPlatformState && pPlatformState->mpFrameData)
+                                         ? pPlatformState->mpFrameData->mpFirstOverlap
+                                         : nullptr;
+        if (pFirstOverlap)
         {
-            pSysWin->NotifyAllChildren( rDCEvt );
-            pSysWin = pSysWin->mpHierarchy->mpNextOverlap;
+            WindowHierarchy::forEachOverlap(pFirstOverlap, [&rDCEvt](vcl::Window& rSysWin) {
+                rSysWin.NotifyAllChildren(rDCEvt);
+            });
         }
 
-        pFrame = pFrame->mpPlatformState->mpFrameData->mpNextFrame;
+        const auto* pNextPlatformState = pFrame->ImplGetPlatformState();
+        pFrame = (pNextPlatformState && pNextPlatformState->mpFrameData)
+                     ? pNextPlatformState->mpFrameData->mpNextFrame
+                     : nullptr;
     }
 }
 
@@ -1028,22 +1043,31 @@ IMPL_STATIC_LINK( Application, PostEventHandler, void*, pCallData, void )
         break;
     }
 
-    if( pData->mpWin && pData->mpWin->mpHierarchy->mpFrameWindow && pEventData )
-        ImplWindowFrameProc( pData->mpWin->mpHierarchy->mpFrameWindow.get(), nEvent, pEventData );
+    const WindowHierarchy* pHierarchy = (pData && pData->mpWin) ? pData->mpWin->ImplGetWindowHierarchy() : nullptr;
+    vcl::Window* pFrameWindow = pHierarchy ? pHierarchy->getFrameWindow() : nullptr;
+
+    if (pFrameWindow && pEventData)
+        ImplWindowFrameProc(pFrameWindow, nEvent, pEventData);
 
     // remove this event from list of posted events, watch for destruction of internal data
     auto svdata = ImplGetSVData();
-    ::std::vector< ImplPostEventPair >::iterator aIter( svdata->maAppData.maPostedEventList.begin() );
+    if (!svdata)
+        return;
 
-    while( aIter != svdata->maAppData.maPostedEventList.end() )
+    auto& rPostedEvents = svdata->maAppData.maPostedEventList;
+    auto aIter = rPostedEvents.begin();
+
+    while (aIter != rPostedEvents.end())
     {
-        if( nEventId == (*aIter).second->mnEventId )
+        if (nEventId == aIter->second->mnEventId)
         {
-            delete (*aIter).second;
-            aIter = svdata->maAppData.maPostedEventList.erase( aIter );
+            delete aIter->second;
+            aIter = rPostedEvents.erase(aIter);
         }
         else
+        {
             ++aIter;
+        }
     }
 }
 
@@ -1178,13 +1202,18 @@ vcl::Window* Application::GetTopWindow( tools::Long nIndex )
 
 vcl::Window* Application::GetActiveTopWindow()
 {
-    vcl::Window *pWin = ImplGetSVData()->mpWinData->mpFocusWin;
-    while( pWin )
+    ImplSVData* pSVData = ImplGetSVData();
+    vcl::Window* pWin = (pSVData && pSVData->mpWinData) ? pSVData->mpWinData->mpFocusWin : nullptr;
+
+    while (pWin)
     {
-        if( pWin->IsTopWindow() )
+        if (pWin->IsTopWindow())
             return pWin;
-        pWin = pWin->mpHierarchy->mpParent;
+
+        const WindowHierarchy* pHierarchy = pWin->ImplGetWindowHierarchy();
+        pWin = pHierarchy ? pHierarchy->getParent() : nullptr;
     }
+
     return nullptr;
 }
 
@@ -1441,47 +1470,70 @@ vcl::Window* Dialog::GetDefDialogParent()
     // as DefDialogParent
 
     // current focus frame
-    vcl::Window *pWin = pSVData->mpWinData->mpFocusWin;
+    vcl::Window* pWin = (pSVData && pSVData->mpWinData) ? pSVData->mpWinData->mpFocusWin : nullptr;
     if (pWin && !pWin->IsMenuFloatingWindow())
     {
-        while (pWin->mpClassification && pWin->mpHierarchy->mpParent)
-            pWin = pWin->mpHierarchy->mpParent;
+        while (pWin->ImplGetWindowClassification())
+        {
+            const WindowHierarchy* pHierarchy = pWin->ImplGetWindowHierarchy();
+            vcl::Window* pParent = pHierarchy ? pHierarchy->getParent() : nullptr;
+            if (!pParent)
+                break;
+            pWin = pParent;
+        }
 
         // check for corrupted window hierarchy, #122232#, may be we now crash somewhere else
-        if (!pWin->mpClassification)
+        if (!pWin->ImplGetWindowClassification())
         {
-            OSL_FAIL( "Window hierarchy corrupted!" );
-            pSVData->mpWinData->mpFocusWin = nullptr;   // avoid further access
+            OSL_FAIL("Window hierarchy corrupted!");
+            if (pSVData && pSVData->mpWinData)
+                pSVData->mpWinData->mpFocusWin = nullptr; // avoid further access
             return nullptr;
         }
 
-        if ((pWin->mpStyleState->mnStyle & WB_INTROWIN) == 0)
+        if ((pWin->GetStyle() & WB_INTROWIN) == 0)
         {
-            return pWin->mpHierarchy->mpFrameWindow->ImplGetWindow();
+            const WindowHierarchy* pHierarchy = pWin->ImplGetWindowHierarchy();
+            vcl::Window* pFrameWindow = pHierarchy ? pHierarchy->getFrameWindow() : nullptr;
+            return pFrameWindow ? pFrameWindow->ImplGetWindow() : nullptr;
         }
     }
 
     // last active application frame
-    pWin = pSVData->maFrameData.mpActiveApplicationFrame;
+    pWin = pSVData ? pSVData->maFrameData.mpActiveApplicationFrame.get() : nullptr;
     if (pWin)
     {
-        return pWin->mpHierarchy->mpFrameWindow->ImplGetWindow();
+        const WindowHierarchy* pHierarchy = pWin->ImplGetWindowHierarchy();
+        vcl::Window* pFrameWindow = pHierarchy ? pHierarchy->getFrameWindow() : nullptr;
+        return pFrameWindow ? pFrameWindow->ImplGetWindow() : nullptr;
     }
 
     // first visible top window (may be totally wrong...)
-    pWin = pSVData->maFrameData.mpFirstFrame;
+    pWin = pSVData ? pSVData->maFrameData.mpFirstFrame.get() : nullptr;
     while (pWin)
     {
-        if( pWin->ImplGetWindow()->IsTopWindow() &&
-            pWin->mpVisibilityState->mbReallyVisible &&
-            (pWin->mpStyleState->mnStyle & WB_INTROWIN) == 0
-        )
+        if (pWin->ImplGetWindow()->IsTopWindow()
+            && pWin->IsReallyVisible()
+            && (pWin->GetStyle() & WB_INTROWIN) == 0)
         {
-            while( pWin->mpHierarchy->mpParent )
-                pWin = pWin->mpHierarchy->mpParent;
-            return pWin->mpHierarchy->mpFrameWindow->ImplGetWindow();
+            while (pWin)
+            {
+                const WindowHierarchy* pHierarchy = pWin->ImplGetWindowHierarchy();
+                vcl::Window* pParent = pHierarchy ? pHierarchy->getParent() : nullptr;
+                if (!pParent)
+                    break;
+                pWin = pParent;
+            }
+
+            const WindowHierarchy* pHierarchy = pWin ? pWin->ImplGetWindowHierarchy() : nullptr;
+            vcl::Window* pFrameWindow = pHierarchy ? pHierarchy->getFrameWindow() : nullptr;
+            return pFrameWindow ? pFrameWindow->ImplGetWindow() : nullptr;
         }
-        pWin = pWin->mpPlatformState->mpFrameData->mpNextFrame;
+
+        const auto* pPlatformState = pWin->ImplGetPlatformState();
+        pWin = (pPlatformState && pPlatformState->mpFrameData)
+                   ? pPlatformState->mpFrameData->mpNextFrame
+                   : nullptr;
     }
 
     // use the desktop

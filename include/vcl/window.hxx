@@ -400,7 +400,7 @@ struct WindowClippingState;
 struct WindowInvalidation;
 class WindowInput;
 struct WindowLOKData;
-struct WindowHierarchy;
+class WindowHierarchy;
 struct WindowHelpData;
 class WindowEventHandlers;
 struct WindowLayoutData;

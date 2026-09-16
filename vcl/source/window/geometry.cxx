@@ -45,11 +45,17 @@ namespace vcl
 {
 static VclPtr<vcl::Window> lcl_GetTopmostBorderWindow(vcl::Window* pStartWindow)
 {
+    if (!pStartWindow)
+        return nullptr;
+
     vcl::Window* pWindow = pStartWindow;
 
-    while (pWindow->ImplGetWindowHierarchy()->mpBorderWindow)
+    while (WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy())
     {
-        pWindow = pWindow->ImplGetWindowHierarchy()->mpBorderWindow.get();
+        vcl::Window* pBorderWin = pHierarchy->getBorderWindow();
+        if (!pBorderWin)
+            break;
+        pWindow = pBorderWin;
     }
 
     return pWindow; // Implicitly converts back to VclPtr
@@ -355,7 +361,13 @@ Point Window::AbsoluteScreenToOutputPixel(const AbsoluteScreenPixelPoint& rPos) 
 AbsoluteScreenPixelRectangle Window::GetDesktopRectPixel() const
 {
     AbsoluteScreenPixelRectangle rRect;
-    mpHierarchy->mpFrameWindow->mpPlatformState->mpFrame->GetWorkArea(rRect);
+
+    vcl::Window* pFrameWindow = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr;
+    SalFrame* pFrame = (pFrameWindow && pFrameWindow->mpPlatformState) ? pFrameWindow->mpPlatformState->mpFrame : nullptr;
+
+    if (pFrame)
+        pFrame->GetWorkArea(rRect);
+
     return rRect;
 }
 
@@ -364,31 +376,39 @@ tools::Rectangle Window::GetWindowExtentsRelative(const vcl::Window& rRelativeWi
 {
     AbsoluteScreenPixelRectangle aRect = GetWindowExtentsAbsolute();
     // #106399# express coordinates relative to borderwindow
-    const vcl::Window* pRelWin = rRelativeWindow.mpHierarchy->mpBorderWindow
-                                     ? rRelativeWindow.mpHierarchy->mpBorderWindow.get()
-                                     : &rRelativeWindow;
+    const vcl::Window* pRelWin = rRelativeWindow.mpHierarchy ? rRelativeWindow.mpHierarchy->getBorderWindow() : nullptr;
+    if (!pRelWin)
+    {
+        pRelWin = &rRelativeWindow;
+    }
     return tools::Rectangle(pRelWin->AbsoluteScreenToOutputPixel(aRect.GetPos()), aRect.GetSize());
 }
 
 // with decoration
 AbsoluteScreenPixelRectangle Window::GetWindowExtentsAbsolute() const
 {
-    // make sure we use the extent of our border window,
+    // Make sure we use the extent of our border window,
     // otherwise we miss a few pixels
-    const vcl::Window* pWin = mpHierarchy->mpBorderWindow ? mpHierarchy->mpBorderWindow : this;
+    const vcl::Window* pBorderWin = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    const vcl::Window* pWin = pBorderWin ? pBorderWin : this;
 
     AbsoluteScreenPixelPoint aPos(pWin->OutputToAbsoluteScreenPixel(Point(0, 0)));
     Size aSize(pWin->GetSizePixel());
+
     // #104088# do not add decoration to the workwindow to be compatible to java accessibility api
-    if (mpClassification->mbFrame
-        || (mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->mpClassification->mbFrame
-            && GetType() != WindowType::WORKWINDOW))
+    const bool bIsFrame = mpClassification && mpClassification->mbFrame;
+    const bool bBorderIsFrame = pBorderWin && pBorderWin->mpClassification && pBorderWin->mpClassification->mbFrame;
+
+    if (bIsFrame || (pBorderWin && bBorderIsFrame && GetType() != WindowType::WORKWINDOW))
     {
-        SalFrameGeometry g = mpPlatformState->mpFrame->GetGeometry();
-        aPos.AdjustX(-sal_Int32(g.leftDecoration()));
-        aPos.AdjustY(-sal_Int32(g.topDecoration()));
-        aSize.AdjustWidth(g.leftDecoration() + g.rightDecoration());
-        aSize.AdjustHeight(g.topDecoration() + g.bottomDecoration());
+        if (mpPlatformState && mpPlatformState->mpFrame)
+        {
+            SalFrameGeometry g = mpPlatformState->mpFrame->GetGeometry();
+            aPos.AdjustX(-sal_Int32(g.leftDecoration()));
+            aPos.AdjustY(-sal_Int32(g.topDecoration()));
+            aSize.AdjustWidth(g.leftDecoration() + g.rightDecoration());
+            aSize.AdjustHeight(g.topDecoration() + g.bottomDecoration());
+        }
     }
     return AbsoluteScreenPixelRectangle(aPos, aSize);
 }
@@ -411,19 +431,19 @@ Size Window::CalcWindowSize(const Size& rOutputSize) const
 
 tools::Long Window::CalcTitleWidth() const
 {
-    if (mpHierarchy->mpBorderWindow)
+    const vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (pBorderWindow)
     {
-        if (mpHierarchy->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
-            return static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())
-                ->CalcTitleWidth();
+        if (pBorderWindow->GetType() == WindowType::BORDERWINDOW)
+            return static_cast<const ImplBorderWindow*>(pBorderWindow)->CalcTitleWidth();
 
-        return mpHierarchy->mpBorderWindow->CalcTitleWidth();
+        return pBorderWindow->CalcTitleWidth();
     }
 
-    if (!mpClassification->mbFrame || !(mpStyleState->mnStyle & WB_MOVEABLE))
+    if (!mpClassification || !mpClassification->mbFrame || !mpStyleState || !(mpStyleState->mnStyle & WB_MOVEABLE))
         return 0;
 
-    // we guess the width for frame windows as we do not know the
+    // We guess the width for frame windows as we do not know the
     // border of external dialogs
     const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
 
@@ -474,16 +494,24 @@ static bool HasParentDockingWindow(const vcl::Window* pWindow)
 
 WindowClassification* Window::ImplGetEffectiveWindowClassification() const
 {
-    return mpHierarchy->mpBorderWindow ? mpHierarchy->mpBorderWindow->mpClassification.get()
-                                       : mpClassification.get();
+    vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (pBorderWindow && pBorderWindow->mpClassification)
+    {
+        return pBorderWindow->mpClassification.get();
+    }
+
+    return mpClassification ? mpClassification.get() : nullptr;
 }
 
 WindowLayoutData* Window::ImplGetEffectiveWindowLayoutData() const
 {
-    if (mpHierarchy->mpBorderWindow)
-        return mpHierarchy->mpBorderWindow->mpLayoutData.get();
+    vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (pBorderWindow && pBorderWindow->mpLayoutData)
+    {
+        return pBorderWindow->mpLayoutData.get();
+    }
 
-    return mpLayoutData.get();
+    return mpLayoutData ? mpLayoutData.get() : nullptr;
 }
 
 void Window::ImplQueueResizeOnGroup() const
@@ -994,16 +1022,18 @@ bool Window::ImplUpdateOutputSize(PosSizeFlags nFlags, tools::Long nWidth, tools
 
 Size Window::ImplGetClientAvailableSize() const
 {
-    tools::Long nWidth = GetOutDev()->GetOutputWidthPixel();
-    tools::Long nHeight = GetOutDev()->GetOutputHeightPixel();
+    const OutputDevice* pOutDev = GetOutDev();
+    tools::Long nWidth = pOutDev ? pOutDev->GetOutputWidthPixel() : 0;
+    tools::Long nHeight = pOutDev ? pOutDev->GetOutputHeightPixel() : 0;
 
-    if (mpHierarchy->mpClientWindow)
+    vcl::Window* pClientWindow = mpHierarchy ? mpHierarchy->getClientWindow() : nullptr;
+    if (pClientWindow && pClientWindow->mpGeometry)
     {
-        nWidth -= mpHierarchy->mpClientWindow->mpGeometry->mnLeftBorder;
-        nWidth -= mpHierarchy->mpClientWindow->mpGeometry->mnRightBorder;
+        nWidth -= pClientWindow->mpGeometry->mnLeftBorder;
+        nWidth -= pClientWindow->mpGeometry->mnRightBorder;
 
-        nHeight -= mpHierarchy->mpClientWindow->mpGeometry->mnTopBorder;
-        nHeight -= mpHierarchy->mpClientWindow->mpGeometry->mnBottomBorder;
+        nHeight -= pClientWindow->mpGeometry->mnTopBorder;
+        nHeight -= pClientWindow->mpGeometry->mnBottomBorder;
     }
 
     return Size(nWidth, nHeight);
@@ -1011,20 +1041,32 @@ Size Window::ImplGetClientAvailableSize() const
 
 bool Window::ImplHasAntiparallelParent() const
 {
-    return mpHierarchy->mpParent && !mpHierarchy->mpParent->mpClassification->mbFrame
-           && mpHierarchy->mpParent->GetOutDev()->ImplIsAntiparallel();
+    const vcl::Window* pParent = mpHierarchy ? mpHierarchy->getParent() : nullptr;
+    if (!pParent)
+        return false;
+
+    if (pParent->mpClassification && pParent->mpClassification->mbFrame)
+        return false;
+
+    const OutputDevice* pOutDev = pParent->GetOutDev();
+    if (!pOutDev)
+        return false;
+
+    return pOutDev->ImplIsAntiparallel();
 }
 
 void Window::ImplAdjustPosForRTL(tools::Long& rX, tools::Long& rOrgX, Point& rPtDev,
                                  bool bXAlreadyMirrored)
 {
     OutputDevice* pOutDev = GetOutDev();
+    if (!pOutDev)
+        return;
 
-    if (pOutDev->HasMirroredGraphics())
+    if (pOutDev->HasMirroredGraphics() && pOutDev->mpGraphics)
     {
         rPtDev.setX(pOutDev->mpGraphics->mirror2(rPtDev.X(), *pOutDev));
 
-        if (bXAlreadyMirrored && pOutDev->ImplIsAntiparallel())
+        if (bXAlreadyMirrored && pOutDev->ImplIsAntiparallel() && mpGeometry)
         {
             rPtDev.setX(mpGeometry->mnAbsScreenX);
             rOrgX = mpGeometry->maPos.X();
@@ -1035,8 +1077,13 @@ void Window::ImplAdjustPosForRTL(tools::Long& rX, tools::Long& rOrgX, Point& rPt
 
     if (bParentIsAntiparallel)
     {
-        rX = mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel()
-             - pOutDev->GetOutputWidthPixel() - rX;
+        const vcl::Window* pParent = mpHierarchy ? mpHierarchy->getParent() : nullptr;
+        const OutputDevice* pParentOutDev = pParent ? pParent->GetOutDev() : nullptr;
+        if (pParentOutDev)
+        {
+            rX = pParentOutDev->GetOutputWidthPixel()
+                 - pOutDev->GetOutputWidthPixel() - rX;
+        }
     }
 }
 
@@ -1110,28 +1157,30 @@ bool Window::ImplUpdatePosY(tools::Long nY, bool bCopyBits,
 
 void Window::ImplUpdateClientWindow(bool bNewPos)
 {
-    if (!mpHierarchy->mpClientWindow)
+    vcl::Window* pClientWindow = mpHierarchy ? mpHierarchy->getClientWindow() : nullptr;
+    if (!pClientWindow || !pClientWindow->mpGeometry)
         return;
 
-    const Point aClientOrigin(mpHierarchy->mpClientWindow->mpGeometry->mnLeftBorder,
-                              mpHierarchy->mpClientWindow->mpGeometry->mnTopBorder);
+    const Point aClientOrigin(pClientWindow->mpGeometry->mnLeftBorder,
+                              pClientWindow->mpGeometry->mnTopBorder);
     const Size aClientSize = ImplGetClientAvailableSize();
 
-    mpHierarchy->mpClientWindow->ImplPosSizeWindow(
+    pClientWindow->ImplPosSizeWindow(
         aClientOrigin.X(), aClientOrigin.Y(), aClientSize.Width(), aClientSize.Height(),
         PosSizeFlags::X | PosSizeFlags::Y | PosSizeFlags::Width | PosSizeFlags::Height);
 
     // If we have a client window, then this is the position
     // of the Application's floating windows
-    mpHierarchy->mpClientWindow->mpGeometry->maPos = mpGeometry->maPos;
+    if (mpGeometry)
+        pClientWindow->mpGeometry->maPos = mpGeometry->maPos;
 
     if (!bNewPos)
         return;
 
-    if (mpHierarchy->mpClientWindow->IsVisible())
-        mpHierarchy->mpClientWindow->ImplCallMove();
+    if (pClientWindow->IsVisible())
+        pClientWindow->ImplCallMove();
     else
-        mpHierarchy->mpClientWindow->mpGeometry->mbCallMove = true;
+        pClientWindow->mpGeometry->mbCallMove = true;
 }
 
 bool Window::ImplCopyArea(vcl::Region& rRegion, const tools::Rectangle& rInitialWinRect)
@@ -1207,13 +1256,17 @@ void Window::ImplDeferMoveResize(bool bNewPos, bool bNewSize)
 }
 
 void Window::ImplInvalidateMovedWindow(bool bCopyBits, const tools::Rectangle& rInitialWinRect,
-                                       std::unique_ptr<vcl::Region>& rpOverlapRegion)
+                                     std::unique_ptr<vcl::Region>& rpOverlapRegion)
 {
     bool bInvalidate = false;
     bool bParentPaint = true;
 
     if (!ImplIsOverlapWindow())
-        bParentPaint = mpHierarchy->mpParent->IsPaintEnabled();
+    {
+        const vcl::Window* pParent = mpHierarchy ? mpHierarchy->getParent() : nullptr;
+        if (pParent)
+            bParentPaint = pParent->IsPaintEnabled();
+    }
 
     if (bCopyBits && bParentPaint && !HasPaintEvent())
         bInvalidate = ImplCopyBitsRegion(rpOverlapRegion, rInitialWinRect);
@@ -1230,9 +1283,7 @@ void Window::ImplInvalidateGrownWindow(const vcl::Region& rInitialRegion)
     aRegion.Exclude(rInitialRegion);
 
     if (mpClippingState->mbWinRegion)
-    {
         aRegion.Intersect(GetOutDev()->GetMapper().ViewToDevice(mpClippingState->maWinRegion));
-    }
 
     vcl::clipping::clipBoundaries(*this, aRegion, false, true);
 
@@ -1263,12 +1314,13 @@ void Window::ImplInvalidateWindowContent(bool bNewPos, bool bCopyBits,
 void Window::ImplInvalidateParentOrOverlaps(const vcl::Region& rInitialRegion)
 {
     vcl::Region aRegion(rInitialRegion);
-    if (!mpInvalidation->isPaintTransparent())
+    if (mpInvalidation && !mpInvalidation->isPaintTransparent())
         vcl::clipping::excludeWindowRegion(*this, aRegion);
 
     vcl::clipping::clipBoundaries(*this, aRegion, false, true);
 
-    if (!aRegion.IsEmpty() && !mpHierarchy->mpBorderWindow)
+    const vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (!aRegion.IsEmpty() && !pBorderWindow)
         ImplInvalidateParentFrameRegion(aRegion);
 }
 
@@ -1307,23 +1359,30 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     if ((nFlags & PosSizeFlags::Height) && nHeight < 0)
         nHeight = 0;
 
+    const OutputDevice* pOutDev = GetOutDev();
+    if (!pOutDev)
+        return;
+
     const tools::Rectangle aInitialWinRect(
-        Point(GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY()),
-        Size(GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel()));
+        Point(pOutDev->GetDeviceOriginX(), pOutDev->GetDeviceOriginY()),
+        Size(pOutDev->GetOutputWidthPixel(), pOutDev->GetOutputHeightPixel()));
 
     std::unique_ptr<vcl::Region> pInitialRegion;
     if (IsReallyVisible())
     {
         pInitialRegion.reset(new vcl::Region(aInitialWinRect));
-        if (mpClippingState->mbWinRegion)
+        if (mpClippingState && mpClippingState->mbWinRegion)
             pInitialRegion->Intersect(
-                GetOutDev()->GetMapper().ViewToDevice(mpClippingState->maWinRegion));
+                pOutDev->GetMapper().ViewToDevice(mpClippingState->maWinRegion));
     }
 
     bool bXAlreadyMirrored = false;
     if ((nFlags & PosSizeFlags::Width) && !(nFlags & PosSizeFlags::X))
     {
-        nX = mpGeometry->mnX;
+        if (mpGeometry)
+        {
+            nX = mpGeometry->mnX;
+        }
         nFlags |= PosSizeFlags::X;
         bXAlreadyMirrored = true;
     }
@@ -1340,9 +1399,12 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
 
     const bool bNeedsNativePosUpdate = bNewPos && ImplUpdatePos();
 
-    // the borderwindow always specifies the position for its client window
-    if (mpHierarchy->mpBorderWindow)
-        mpGeometry->maPos = mpHierarchy->mpBorderWindow->mpGeometry->maPos;
+    // The borderwindow always specifies the position for its client window
+    const vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (pBorderWindow && pBorderWindow->mpGeometry && mpGeometry)
+    {
+        mpGeometry->maPos = pBorderWindow->mpGeometry->maPos;
+    }
 
     ImplUpdateClientWindow(bNewPos);
 
@@ -1353,7 +1415,6 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     else
         ImplDeferMoveResize(bNewPos, bNewSize);
 
-    // Fix potential null pointer dereference on pInitialRegion
     bool bNeedsNativeClipUpdate = false;
     if (pInitialRegion)
     {
@@ -1368,11 +1429,11 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     if (bNeedsNativePosUpdate)
         ImplUpdateNativeObjectPos();
 
-    if (bNewSize && mpPlatformState->mpSysObj)
+    if (bNewSize && mpPlatformState && mpPlatformState->mpSysObj)
     {
         mpPlatformState->mpSysObj->SetPosSize(
-            GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY(),
-            GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel());
+            pOutDev->GetDeviceOriginX(), pOutDev->GetDeviceOriginY(),
+            pOutDev->GetOutputWidthPixel(), pOutDev->GetOutputHeightPixel());
     }
 }
 
@@ -1380,28 +1441,37 @@ bool Window::ImplUpdatePos()
 {
     bool bSysChild = false;
 
-    if (ImplIsOverlapWindow())
+    OutputDevice* pOutDev = GetOutDev();
+    if (pOutDev && mpGeometry)
     {
-        GetOutDev()->SetDeviceOriginX(mpGeometry->mnX);
-        GetOutDev()->SetDeviceOriginY(mpGeometry->mnY);
+        if (ImplIsOverlapWindow())
+        {
+            pOutDev->SetDeviceOriginX(mpGeometry->mnX);
+            pOutDev->SetDeviceOriginY(mpGeometry->mnY);
+        }
+        else
+        {
+            vcl::Window* pParent = ImplGetParent();
+            const OutputDevice* pParentOutDev = pParent ? pParent->GetOutDev() : nullptr;
+            if (pParentOutDev)
+            {
+                pOutDev->SetDeviceOriginX(mpGeometry->mnX + pParentOutDev->GetDeviceOriginX());
+                pOutDev->SetDeviceOriginY(mpGeometry->mnY + pParentOutDev->GetDeviceOriginY());
+            }
+        }
     }
-    else
-    {
-        vcl::Window* pParent = ImplGetParent();
 
-        GetOutDev()->SetDeviceOriginX(mpGeometry->mnX + pParent->GetOutDev()->GetDeviceOriginX());
-        GetOutDev()->SetDeviceOriginY(mpGeometry->mnY + pParent->GetOutDev()->GetDeviceOriginY());
-    }
-
-    VclPtr<vcl::Window> pChild = mpHierarchy->mpFirstChild;
+    VclPtr<vcl::Window> pChild = mpHierarchy ? mpHierarchy->getFirstChild() : nullptr;
     while (pChild)
     {
         if (pChild->ImplUpdatePos())
             bSysChild = true;
-        pChild = pChild->mpHierarchy->mpNext;
+
+        WindowHierarchy* pChildHierarchy = pChild->ImplGetWindowHierarchy();
+        pChild = pChildHierarchy ? pChildHierarchy->getNextSibling() : nullptr;
     }
 
-    if (mpPlatformState->mpSysObj)
+    if (mpPlatformState && mpPlatformState->mpSysObj)
         bSysChild = true;
 
     return bSysChild;
@@ -1409,23 +1479,32 @@ bool Window::ImplUpdatePos()
 
 void Window::ImplUpdateNativeObjectPos()
 {
-    if (mpPlatformState->mpSysObj)
+    const OutputDevice* pOutDev = GetOutDev();
+    if (mpPlatformState && mpPlatformState->mpSysObj && pOutDev)
+    {
         mpPlatformState->mpSysObj->SetPosSize(
-            GetOutDev()->GetDeviceOriginX(), GetOutDev()->GetDeviceOriginY(),
-            GetOutDev()->GetOutputWidthPixel(), GetOutDev()->GetOutputHeightPixel());
+            pOutDev->GetDeviceOriginX(), pOutDev->GetDeviceOriginY(),
+            pOutDev->GetOutputWidthPixel(), pOutDev->GetOutputHeightPixel());
+    }
 
-    VclPtr<vcl::Window> pChild = mpHierarchy->mpFirstChild;
+    VclPtr<vcl::Window> pChild = mpHierarchy ? mpHierarchy->getFirstChild() : nullptr;
     while (pChild)
     {
         pChild->ImplUpdateNativeObjectPos();
-        pChild = pChild->mpHierarchy->mpNext;
+
+        WindowHierarchy* pChildHierarchy = pChild->ImplGetWindowHierarchy();
+        pChild = pChildHierarchy ? pChildHierarchy->getNextSibling() : nullptr;
     }
 }
 
 tools::Long Window::ImplGetParentDeviceOriginX() const
 {
-    if (mpHierarchy->mpParent)
-        return mpHierarchy->mpParent->GetOutDev()->GetDeviceOriginX();
+    const vcl::Window* pParent = mpHierarchy ? mpHierarchy->getParent() : nullptr;
+    const OutputDevice* pParentOutDev = pParent ? pParent->GetOutDev() : nullptr;
+    if (pParentOutDev)
+    {
+        return pParentOutDev->GetDeviceOriginX();
+    }
 
     return 0;
 }
@@ -1437,8 +1516,12 @@ tools::Long Window::ImplGetParentDeviceOriginX() const
  */
 tools::Long Window::ImplUnmirrorXOffset(tools::Long nMirroredOffset) const
 {
-    const tools::Long nParentWidth = mpHierarchy->mpParent->GetOutDev()->GetOutputWidthPixel();
-    const tools::Long nChildWidth = GetOutDev()->GetOutputWidthPixel();
+    const vcl::Window* pParent = mpHierarchy ? mpHierarchy->getParent() : nullptr;
+    const OutputDevice* pParentOutDev = pParent ? pParent->GetOutDev() : nullptr;
+    const tools::Long nParentWidth = pParentOutDev ? pParentOutDev->GetOutputWidthPixel() : 0;
+
+    const OutputDevice* pOutDev = GetOutDev();
+    const tools::Long nChildWidth = pOutDev ? pOutDev->GetOutputWidthPixel() : 0;
 
     return nParentWidth - nChildWidth - nMirroredOffset;
 }
@@ -1512,11 +1595,19 @@ Size Window::CalcOutputSize(const Size& rWinSz) const
 
 void Window::InvalidateSizeCache()
 {
-    WindowLayoutData* pLayoutData = mpHierarchy->mpBorderWindow
-                                        ? mpHierarchy->mpBorderWindow->mpLayoutData.get()
-                                        : mpLayoutData.get();
-    pLayoutData->mnOptimalWidthCache = -1;
-    pLayoutData->mnOptimalHeightCache = -1;
+    const vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    WindowLayoutData* pLayoutData = nullptr;
+
+    if (pBorderWindow && pBorderWindow->mpLayoutData)
+        pLayoutData = pBorderWindow->mpLayoutData.get();
+    else if (mpLayoutData)
+        pLayoutData = mpLayoutData.get();
+
+    if (pLayoutData)
+    {
+        pLayoutData->mnOptimalWidthCache = -1;
+        pLayoutData->mnOptimalHeightCache = -1;
+    }
 }
 
 tools::Long Window::ImplGetBorderWidth() const
@@ -1531,14 +1622,15 @@ tools::Long Window::ImplGetBorderHeight() const
 
 bool Window::IsScrollable() const
 {
-    // check for scrollbars
-    VclPtr<vcl::Window> pChild = mpHierarchy->mpFirstChild;
+    // Check for scrollbars
+    VclPtr<vcl::Window> pChild = mpHierarchy ? mpHierarchy->getFirstChild() : nullptr;
     while (pChild)
     {
         if (pChild->GetType() == WindowType::SCROLLBAR)
             return true;
 
-        pChild = pChild->mpHierarchy->mpNext;
+        WindowHierarchy* pChildHierarchy = pChild->ImplGetWindowHierarchy();
+        pChild = pChildHierarchy ? pChildHierarchy->getNextSibling() : nullptr;
     }
 
     return false;

@@ -315,66 +315,100 @@ void SystemWindow::Resizing( Size& )
 {
 }
 
-void SystemWindow::SetRepresentedURL( const OUString& i_rURL )
+void SystemWindow::SetRepresentedURL(const OUString& i_rURL)
 {
+    if (!mpImplData)
+        return;
+
     bool bChanged = (i_rURL != mpImplData->maRepresentedURL);
     mpImplData->maRepresentedURL = i_rURL;
-    if ( !mbSysChild && bChanged )
+    if (!mbSysChild && bChanged)
     {
         const vcl::Window* pWindow = this;
-        while ( pWindow->mpHierarchy->mpBorderWindow )
-            pWindow = pWindow->mpHierarchy->mpBorderWindow;
+        while (pWindow)
+        {
+            const WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy();
+            const vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+            if (!pBorderWindow)
+                break;
+            pWindow = pBorderWindow;
+        }
 
-        if ( pWindow->mpClassification->mbFrame )
-            pWindow->mpPlatformState->mpFrame->SetRepresentedURL( i_rURL );
+        if (pWindow)
+        {
+            const auto* pClassification = pWindow->ImplGetWindowClassification();
+            if (pClassification && pClassification->mbFrame)
+            {
+                auto* pPlatformState = pWindow->ImplGetPlatformState();
+                if (pPlatformState && pPlatformState->mpFrame)
+                {
+                    pPlatformState->mpFrame->SetRepresentedURL(i_rURL);
+                }
+            }
+        }
     }
 }
 
-void SystemWindow::SetIcon( sal_uInt16 nIcon )
+void SystemWindow::SetIcon(sal_uInt16 nIcon)
 {
-    if ( mnIcon == nIcon )
+    if (mnIcon == nIcon)
         return;
 
     mnIcon = nIcon;
 
-    if ( !mbSysChild )
+    if (!mbSysChild)
     {
         const vcl::Window* pWindow = this;
-        while ( pWindow->mpHierarchy->mpBorderWindow )
-            pWindow = pWindow->mpHierarchy->mpBorderWindow;
+        while (pWindow)
+        {
+            const WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy();
+            const vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+            if (!pBorderWindow)
+                break;
 
-        if ( pWindow->mpClassification->mbFrame )
-            pWindow->mpPlatformState->mpFrame->SetIcon( nIcon );
+            pWindow = pBorderWindow;
+        }
+
+        if (pWindow)
+        {
+            const auto* pClassification = pWindow->ImplGetWindowClassification();
+            if (pClassification && pClassification->mbFrame)
+            {
+                auto* pPlatformState = pWindow->ImplGetPlatformState();
+                if (pPlatformState && pPlatformState->mpFrame)
+                    pPlatformState->mpFrame->SetIcon(nIcon);
+            }
+        }
     }
 }
 
-void SystemWindow::ShowTitleButton( TitleButton nButton, bool bVisible )
+void SystemWindow::ShowTitleButton(TitleButton nButton, bool bVisible)
 {
-    if ( nButton == TitleButton::Docking )
+    vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+
+    if (nButton == TitleButton::Docking)
     {
-        if ( mbDockBtn != bVisible )
+        if (mbDockBtn != bVisible)
         {
             mbDockBtn = bVisible;
-            if ( mpHierarchy->mpBorderWindow )
-                static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetDockButton( bVisible );
+            if (pBorderWindow)
+                static_cast<ImplBorderWindow*>(pBorderWindow)->SetDockButton(bVisible);
         }
     }
-    else if ( nButton == TitleButton::Hide )
+    else if (nButton == TitleButton::Hide)
     {
-        if ( mbHideBtn != bVisible )
+        if (mbHideBtn != bVisible)
         {
             mbHideBtn = bVisible;
-            if ( mpHierarchy->mpBorderWindow )
-                static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetHideButton( bVisible );
+            if (pBorderWindow)
+                static_cast<ImplBorderWindow*>(pBorderWindow)->SetHideButton(bVisible);
         }
     }
-    else if ( nButton == TitleButton::Menu )
+    else if (nButton == TitleButton::Menu)
     {
-        if ( mpHierarchy->mpBorderWindow )
-            static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMenuButton( bVisible );
+        if (pBorderWindow)
+            static_cast<ImplBorderWindow*>(pBorderWindow)->SetMenuButton(bVisible);
     }
-    else
-        return;
 }
 
 bool SystemWindow::IsTitleButtonVisible( TitleButton nButton ) const
@@ -385,36 +419,81 @@ bool SystemWindow::IsTitleButtonVisible( TitleButton nButton ) const
         return mbHideBtn;
 }
 
-void SystemWindow::SetMinOutputSizePixel( const Size& rSize )
+void SystemWindow::SetMinOutputSizePixel(const Size& rSize)
 {
     maMinOutSize = rSize;
-    if ( mpHierarchy->mpBorderWindow )
+
+    const WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+    vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+
+    if (pBorderWindow)
     {
-        static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMinOutputSize( rSize.Width(), rSize.Height() );
-        if ( mpHierarchy->mpBorderWindow->mpClassification->mbFrame )
-            mpHierarchy->mpBorderWindow->mpPlatformState->mpFrame->SetMinClientSize( rSize.Width(), rSize.Height() );
+        static_cast<ImplBorderWindow*>(pBorderWindow)->SetMinOutputSize(rSize.Width(), rSize.Height());
+
+        const auto* pClassification = pBorderWindow->ImplGetWindowClassification();
+        if (pClassification && pClassification->mbFrame)
+        {
+            auto* pPlatformState = pBorderWindow->ImplGetPlatformState();
+            if (pPlatformState && pPlatformState->mpFrame)
+            {
+                pPlatformState->mpFrame->SetMinClientSize(rSize.Width(), rSize.Height());
+            }
+        }
     }
-    else if ( mpClassification->mbFrame )
-        mpPlatformState->mpFrame->SetMinClientSize( rSize.Width(), rSize.Height() );
+    else
+    {
+        const auto* pClassification = ImplGetWindowClassification();
+        if (pClassification && pClassification->mbFrame)
+        {
+            auto* pPlatformState = ImplGetPlatformState();
+            if (pPlatformState && pPlatformState->mpFrame)
+            {
+                pPlatformState->mpFrame->SetMinClientSize(rSize.Width(), rSize.Height());
+            }
+        }
+    }
 }
 
-void SystemWindow::SetMaxOutputSizePixel( const Size& rSize )
+void SystemWindow::SetMaxOutputSizePixel(const Size& rSize)
 {
-    Size aSize( rSize );
-    if( aSize.Width() > SHRT_MAX || aSize.Width() <= 0 )
-        aSize.setWidth( SHRT_MAX );
-    if( aSize.Height() > SHRT_MAX || aSize.Height() <= 0 )
-        aSize.setHeight( SHRT_MAX );
+    Size aSize(rSize);
+    if (aSize.Width() > SHRT_MAX || aSize.Width() <= 0)
+        aSize.setWidth(SHRT_MAX);
+    if (aSize.Height() > SHRT_MAX || aSize.Height() <= 0)
+        aSize.setHeight(SHRT_MAX);
 
-    mpImplData->maMaxOutSize = aSize;
-    if ( mpHierarchy->mpBorderWindow )
+    if (mpImplData)
+        mpImplData->maMaxOutSize = aSize;
+
+    const WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+    vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+
+    if (pBorderWindow)
     {
-        static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMaxOutputSize( aSize.Width(), aSize.Height() );
-        if ( mpHierarchy->mpBorderWindow->mpClassification->mbFrame )
-            mpHierarchy->mpBorderWindow->mpPlatformState->mpFrame->SetMaxClientSize( aSize.Width(), aSize.Height() );
+        static_cast<ImplBorderWindow*>(pBorderWindow)->SetMaxOutputSize(aSize.Width(), aSize.Height());
+
+        const auto* pClassification = pBorderWindow->ImplGetWindowClassification();
+        if (pClassification && pClassification->mbFrame)
+        {
+            auto* pPlatformState = pBorderWindow->ImplGetPlatformState();
+            if (pPlatformState && pPlatformState->mpFrame)
+            {
+                pPlatformState->mpFrame->SetMaxClientSize(aSize.Width(), aSize.Height());
+            }
+        }
     }
-    else if ( mpClassification->mbFrame )
-        mpPlatformState->mpFrame->SetMaxClientSize( aSize.Width(), aSize.Height() );
+    else
+    {
+        const auto* pClassification = ImplGetWindowClassification();
+        if (pClassification && pClassification->mbFrame)
+        {
+            auto* pPlatformState = ImplGetPlatformState();
+            if (pPlatformState && pPlatformState->mpFrame)
+            {
+                pPlatformState->mpFrame->SetMaxClientSize(aSize.Width(), aSize.Height());
+            }
+        }
+    }
 }
 
 const Size& SystemWindow::GetMaxOutputSizePixel() const
@@ -425,7 +504,7 @@ const Size& SystemWindow::GetMaxOutputSizePixel() const
 vcl::WindowData::WindowData(std::u16string_view rStr)
 {
     vcl::WindowDataMask nValidMask = vcl::WindowDataMask::NONE;
-    sal_Int32 nIndex      = 0;
+    sal_Int32 nIndex = 0;
 
     std::u16string_view aTokenStr = o3tl::getToken(rStr, 0, ',', nIndex);
     if (!aTokenStr.empty())
@@ -438,6 +517,7 @@ vcl::WindowData::WindowData(std::u16string_view rStr)
     }
     else
         setX(0);
+
     aTokenStr = o3tl::getToken(rStr, 0, ',', nIndex);
     if (!aTokenStr.empty())
     {
@@ -449,6 +529,7 @@ vcl::WindowData::WindowData(std::u16string_view rStr)
     }
     else
         setY(0);
+
     aTokenStr = o3tl::getToken(rStr, 0, ',', nIndex);
     if (!aTokenStr.empty())
     {
@@ -464,6 +545,7 @@ vcl::WindowData::WindowData(std::u16string_view rStr)
     }
     else
         setWidth(0);
+
     aTokenStr = o3tl::getToken(rStr, 0, ';', nIndex);
     if (!aTokenStr.empty())
     {
@@ -479,13 +561,13 @@ vcl::WindowData::WindowData(std::u16string_view rStr)
     }
     else
         setHeight(0);
+
     aTokenStr = o3tl::getToken(rStr, 0, ';', nIndex);
     if (!aTokenStr.empty())
     {
         // #94144# allow Minimize again, should be masked out when read from configuration
         // 91625 - ignore Minimize
         vcl::WindowState nState = static_cast<vcl::WindowState>(o3tl::toInt32(aTokenStr));
-        //nState &= ~vcl::WindowState::Minimized;
         setState(nState);
         nValidMask |= vcl::WindowDataMask::State;
     }
@@ -504,6 +586,7 @@ vcl::WindowData::WindowData(std::u16string_view rStr)
     }
     else
         SetMaximizedX(0);
+
     aTokenStr = o3tl::getToken(rStr, 0, ',', nIndex);
     if (!aTokenStr.empty())
     {
@@ -515,6 +598,7 @@ vcl::WindowData::WindowData(std::u16string_view rStr)
     }
     else
         SetMaximizedY(0);
+
     aTokenStr = o3tl::getToken(rStr, 0, ',', nIndex);
     if (!aTokenStr.empty())
     {
@@ -526,6 +610,7 @@ vcl::WindowData::WindowData(std::u16string_view rStr)
     }
     else
         SetMaximizedWidth(0);
+
     aTokenStr = o3tl::getToken(rStr, 0, ';', nIndex);
     if (!aTokenStr.empty())
     {
@@ -646,8 +731,14 @@ void SystemWindow::SetWindowState(const vcl::WindowData& rData)
         return;
 
     vcl::Window* pWindow = this;
-    while ( pWindow->mpHierarchy->mpBorderWindow )
-        pWindow = pWindow->mpHierarchy->mpBorderWindow;
+    while (pWindow)
+    {
+        WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy();
+        vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+        if (!pBorderWindow)
+            break;
+        pWindow = pBorderWindow;
+    }
 
     if ( pWindow->mpClassification->mbFrame )
     {
@@ -789,8 +880,14 @@ vcl::WindowData SystemWindow::GetWindowState(vcl::WindowDataMask nMask) const
     }
 
     const vcl::Window* pWindow = this;
-    while ( pWindow->mpHierarchy->mpBorderWindow )
-        pWindow = pWindow->mpHierarchy->mpBorderWindow;
+    while (pWindow)
+    {
+        const WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy();
+        const vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+        if (!pBorderWindow)
+            break;
+        pWindow = pBorderWindow;
+    }
 
     if ( pWindow->mpClassification->mbFrame )
     {
@@ -849,66 +946,74 @@ vcl::WindowData SystemWindow::GetWindowState(vcl::WindowDataMask nMask) const
 
 void SystemWindow::SetMenuBar(MenuBar* pMenuBar)
 {
-    if ( mpMenuBar == pMenuBar )
+    if (mpMenuBar == pMenuBar)
         return;
 
     MenuBar* pOldMenuBar = mpMenuBar;
-    MenuBarWindow*  pOldWindow = nullptr;
+    MenuBarWindow* pOldWindow = nullptr;
     VclPtr<MenuBarWindow> pNewWindow;
     mpMenuBar = pMenuBar;
 
-    if ( mpHierarchy->mpBorderWindow && (mpHierarchy->mpBorderWindow->GetType() == WindowType::BORDERWINDOW) )
+    const WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+    vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+
+    if (pBorderWindow && (pBorderWindow->GetType() == WindowType::BORDERWINDOW))
     {
-        if ( pOldMenuBar )
+        if (pOldMenuBar)
             pOldWindow = pOldMenuBar->getMenuBarWindow();
         else
             pOldWindow = nullptr;
-        if ( pOldWindow )
+
+        if (pOldWindow)
         {
-            CallEventListeners( VclEventId::WindowMenubarRemoved, static_cast<void*>(pOldMenuBar) );
+            CallEventListeners(VclEventId::WindowMenubarRemoved, static_cast<void*>(pOldMenuBar));
             pOldWindow->SetAccessible({});
         }
-        if ( pMenuBar )
+
+        if (pMenuBar)
         {
-            SAL_WARN_IF( pMenuBar->m_pWindow, "vcl", "SystemWindow::SetMenuBar() - MenuBars can only set in one SystemWindow at time" );
+            SAL_WARN_IF(pMenuBar->m_pWindow, "vcl", "SystemWindow::SetMenuBar() - MenuBars can only set in one SystemWindow at time");
 
-            pNewWindow = pMenuBar->ImplCreate(mpHierarchy->mpBorderWindow, pOldWindow);
-            static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMenuBarWindow(pNewWindow);
+            pNewWindow = pMenuBar->ImplCreate(pBorderWindow, pOldWindow);
+            static_cast<ImplBorderWindow*>(pBorderWindow)->SetMenuBarWindow(pNewWindow);
 
-            CallEventListeners( VclEventId::WindowMenubarAdded, static_cast<void*>(pMenuBar) );
+            CallEventListeners(VclEventId::WindowMenubarAdded, static_cast<void*>(pMenuBar));
         }
         else
-            static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMenuBarWindow( nullptr );
-        ImplToBottomChild();
-        if ( pOldMenuBar )
         {
-            bool bDelete = (pMenuBar == nullptr);
-            if( bDelete && pOldWindow )
-            {
-                if( mpImplData->mpTaskPaneList )
-                    mpImplData->mpTaskPaneList->RemoveWindow( pOldWindow );
-            }
-            pOldMenuBar->ImplDestroy(bDelete);
-            if( bDelete )
-                pOldWindow = nullptr;  // will be deleted in MenuBar::ImplDestroy,
+            static_cast<ImplBorderWindow*>(pBorderWindow)->SetMenuBarWindow(nullptr);
         }
 
+        ImplToBottomChild();
+
+        if (pOldMenuBar)
+        {
+            bool bDelete = (pMenuBar == nullptr);
+            if (bDelete && pOldWindow)
+            {
+                if (mpImplData && mpImplData->mpTaskPaneList)
+                    mpImplData->mpTaskPaneList->RemoveWindow(pOldWindow);
+            }
+            pOldMenuBar->ImplDestroy(bDelete);
+            if (bDelete)
+                pOldWindow = nullptr;  // will be deleted in MenuBar::ImplDestroy,
+        }
     }
     else
     {
-        if( pMenuBar )
+        if (pMenuBar)
             pNewWindow = pMenuBar->getMenuBarWindow();
-        if( pOldMenuBar )
+        if (pOldMenuBar)
             pOldWindow = pOldMenuBar->getMenuBarWindow();
     }
 
     // update taskpane list to make menubar accessible
-    if( mpImplData->mpTaskPaneList )
+    if (mpImplData && mpImplData->mpTaskPaneList)
     {
-        if( pOldWindow )
-            mpImplData->mpTaskPaneList->RemoveWindow( pOldWindow );
-        if( pNewWindow )
-            mpImplData->mpTaskPaneList->AddWindow( pNewWindow );
+        if (pOldWindow)
+            mpImplData->mpTaskPaneList->RemoveWindow(pOldWindow);
+        if (pNewWindow)
+            mpImplData->mpTaskPaneList->AddWindow(pNewWindow);
     }
 }
 
@@ -921,10 +1026,17 @@ void SystemWindow::SetNotebookBar(const OUString& rUIXMLDescription,
 
     if (rUIXMLDescription != maNotebookBarUIFile || bReloadNotebookbar)
     {
-        static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())
-            ->SetNotebookBar(rUIXMLDescription, rFrame, std::move(pNotebookBarAddonsItem));
+        const WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+        vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+
+        if (pBorderWindow)
+        {
+            static_cast<ImplBorderWindow*>(pBorderWindow)
+                ->SetNotebookBar(rUIXMLDescription, rFrame, std::move(pNotebookBarAddonsItem));
+        }
+
         maNotebookBarUIFile = rUIXMLDescription;
-        if(GetNotebookBar())
+        if (GetNotebookBar())
             GetNotebookBar()->SetSystemWindow(this);
     }
 
@@ -933,26 +1045,43 @@ void SystemWindow::SetNotebookBar(const OUString& rUIXMLDescription,
 
 void SystemWindow::CloseNotebookBar()
 {
-    static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->CloseNotebookBar();
+    const WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+    vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+
+    if (pBorderWindow)
+    {
+        static_cast<ImplBorderWindow*>(pBorderWindow)->CloseNotebookBar();
+    }
     maNotebookBarUIFile.clear();
 }
 
 VclPtr<NotebookBar> const & SystemWindow::GetNotebookBar() const
 {
-    return static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->GetNotebookBar();
+    const WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+    vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+
+    if (pBorderWindow && (pBorderWindow->GetType() == WindowType::BORDERWINDOW))
+    {
+        return static_cast<ImplBorderWindow*>(pBorderWindow)->GetNotebookBar();
+    }
+
+    static const VclPtr<NotebookBar> aEmpty;
+    return aEmpty;
 }
 
-void SystemWindow::SetMenuBarMode( MenuBarMode nMode )
+void SystemWindow::SetMenuBarMode(MenuBarMode nMode)
 {
-    if ( mnMenuBarMode != nMode )
+    if (mnMenuBarMode != nMode)
     {
         mnMenuBarMode = nMode;
-        if ( mpHierarchy->mpBorderWindow && (mpHierarchy->mpBorderWindow->GetType() == WindowType::BORDERWINDOW) )
+
+        const WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+        vcl::Window* pBorderWindow = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+
+        if (pBorderWindow && (pBorderWindow->GetType() == WindowType::BORDERWINDOW))
         {
-            if ( nMode == MenuBarMode::Hide )
-                static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMenuBarMode( true );
-            else
-                static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->SetMenuBarMode( false );
+            bool bHide = (nMode == MenuBarMode::Hide);
+            static_cast<ImplBorderWindow*>(pBorderWindow)->SetMenuBarMode(bHide);
         }
     }
 }

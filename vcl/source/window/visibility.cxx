@@ -38,10 +38,13 @@ namespace vcl
 {
 bool Window::ImplShouldTransferFocusOnHide(ShowFlags nFlags) const
 {
-    const bool bIsOverlapWindowAvailable = !mpClassification->mbFrame
-                                           && mpHierarchy->mpOverlapWindow->IsEnabled()
-                                           && mpHierarchy->mpOverlapWindow->IsInputEnabled()
-                                           && !mpHierarchy->mpOverlapWindow->IsInModalMode();
+    const vcl::Window* pOverlapWindow = mpHierarchy ? mpHierarchy->getOverlapWindow() : nullptr;
+
+    const bool bIsOverlapWindowAvailable = mpClassification && !mpClassification->mbFrame
+                                           && pOverlapWindow
+                                           && pOverlapWindow->IsEnabled()
+                                           && pOverlapWindow->IsInputEnabled()
+                                           && !pOverlapWindow->IsInModalMode();
 
     const bool bCanYieldFocus
         = ImplIsOverlapWindow() && !(nFlags & ShowFlags::NoFocusChange) && HasChildPathFocus();
@@ -90,7 +93,7 @@ vcl::Region Window::ImplGetWinClipRegion()
 
 std::optional<bool> Window::ImplHideWindow(ShowFlags nFlags)
 {
-    if (!mpVisibilityState->mbReallyVisible)
+    if (!mpVisibilityState || !mpVisibilityState->mbReallyVisible)
         return false;
 
     VclPtr<vcl::Window> xWindow(this);
@@ -106,7 +109,11 @@ std::optional<bool> Window::ImplHideWindow(ShowFlags nFlags)
     vcl::clipping::setClipFlag(*this);
 
     if (ImplShouldTransferFocusOnHide(nFlags))
-        mpHierarchy->mpOverlapWindow->GrabFocus();
+    {
+        vcl::Window* pOverlapWindow = mpHierarchy ? mpHierarchy->getOverlapWindow() : nullptr;
+        if (pOverlapWindow)
+            pOverlapWindow->GrabFocus();
+    }
 
     if (!mpClassification->mbFrame)
         ImplInvalidateParentOnHide(aInvRegion);
@@ -122,29 +129,32 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
     if (!xWindow->mpClassification)
         return std::nullopt;
 
-    if (mpHierarchy->mpBorderWindow)
+    vcl::Window* pBorderWin = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (pBorderWin)
     {
-        vcl::Window* pBorderWin = mpHierarchy->mpBorderWindow;
-        const bool bOldUpdate = pBorderWin->mpInvalidation->isParentUpdateSuppressed();
+        const bool bOldUpdate = pBorderWin->mpInvalidation ? pBorderWin->mpInvalidation->isParentUpdateSuppressed() : false;
 
-        if (mpInvalidation->isParentUpdateSuppressed())
+        if (mpInvalidation && mpInvalidation->isParentUpdateSuppressed() && pBorderWin->mpInvalidation)
             pBorderWin->mpInvalidation->suppressParentUpdates(true);
 
         pBorderWin->Show(false, nFlags);
-        pBorderWin->mpInvalidation->suppressParentUpdates(bOldUpdate);
+
+        if (pBorderWin->mpInvalidation)
+            pBorderWin->mpInvalidation->suppressParentUpdates(bOldUpdate);
     }
-    else if (mpClassification->mbFrame)
+    else if (mpClassification && mpClassification->mbFrame)
     {
         if (mpAccessibleData)
             mpAccessibleData->suspendEvents();
 
-        mpPlatformState->mpFrame->Show(false);
+        if (mpPlatformState && mpPlatformState->mpFrame)
+            mpPlatformState->mpFrame->Show(false);
     }
 
     CompatStateChanged(StateChangedType::Visible);
 
     bool bRealVisibilityChanged = false;
-    if (mpVisibilityState->mbReallyVisible)
+    if (mpVisibilityState && mpVisibilityState->mbReallyVisible)
     {
         std::optional<bool> bResult = ImplHideWindow(nFlags);
         if (!bResult)
@@ -169,7 +179,10 @@ bool Window::ImplIsMismatchedSubControl() const
 
 vcl::Window* Window::ImplGetVisibilityParent() const
 {
-    return ImplIsOverlapWindow() ? mpHierarchy->mpOverlapWindow.get() : ImplGetParent();
+    if (ImplIsOverlapWindow())
+        return mpHierarchy ? mpHierarchy->getOverlapWindow() : nullptr;
+
+    return ImplGetParent();
 }
 
 void Window::ImplRaiseOverlapWindow(ShowFlags nFlags)
@@ -225,13 +238,14 @@ bool Window::ImplUpdateRealVisibility(ShowFlags nFlags)
 
 bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
 {
-    if (mpHierarchy->mpBorderWindow)
+    vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (pBorderWindow)
     {
-        mpHierarchy->mpBorderWindow->Show(true, nFlags);
+        pBorderWindow->Show(true, nFlags);
         return true;
     }
 
-    if (!mpClassification->mbFrame)
+    if (!mpClassification || !mpClassification->mbFrame)
         return true;
 
     // #106431#, hide SplashScreen
@@ -253,11 +267,12 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
     if (mpAccessibleData)
         mpAccessibleData->resumeEvents();
 
-    mpInvalidation->setPaintFrame(true);
+    if (mpInvalidation)
+        mpInvalidation->setPaintFrame(true);
 
     VclPtr<vcl::Window> xWindow(this);
 
-    if (!Application::IsHeadlessModeEnabled())
+    if (!Application::IsHeadlessModeEnabled() && mpPlatformState && mpPlatformState->mpFrame)
     {
         bool bNoActivate(nFlags & (ShowFlags::NoActivate | ShowFlags::NoFocusChange));
         mpPlatformState->mpFrame->Show(true, bNoActivate);
@@ -269,13 +284,13 @@ bool Window::ImplShowBorderOrFrame(ShowFlags nFlags)
 
     // Query the correct size of the window, if we are waiting for
     // a system resize
-    if (mpGeometry->mbWaitSystemResize)
+    if (mpGeometry && mpGeometry->mbWaitSystemResize && mpPlatformState && mpPlatformState->mpFrame)
     {
         const Size aOutSize = mpPlatformState->mpFrame->GetClientSize();
         ImplHandleResize(this, aOutSize.Width(), aOutSize.Height());
     }
 
-    if (mpPlatformState->mpFrameData->mpBuffer
+    if (mpPlatformState && mpPlatformState->mpFrameData && mpPlatformState->mpFrameData->mpBuffer
         && mpPlatformState->mpFrameData->mpBuffer->GetOutputSizePixel() != GetOutputSizePixel())
     {
         // Make sure that the buffer size matches the window size, even if no resize was needed.
@@ -335,14 +350,19 @@ void Window::ImplSetReallyVisible()
     // #i43594# it is possible that INITSHOW was never send, because the visibility state changed between
     // ImplCallInitShow() and ImplSetReallyVisible() when called from Show()
     // mbReallyShown is a useful indicator
-    if (!mpVisibilityState->mbReallyShown)
+    if (mpVisibilityState && !mpVisibilityState->mbReallyShown)
         ImplCallInitShow();
 
-    bool bBecameReallyVisible = !mpVisibilityState->mbReallyVisible;
+    bool bBecameReallyVisible = mpVisibilityState ? !mpVisibilityState->mbReallyVisible : false;
 
-    GetOutDev()->mbDevOutput = true;
-    mpVisibilityState->mbReallyVisible = true;
-    mpVisibilityState->mbReallyShown = true;
+    if (GetOutDev())
+        GetOutDev()->mbDevOutput = true;
+
+    if (mpVisibilityState)
+    {
+        mpVisibilityState->mbReallyVisible = true;
+        mpVisibilityState->mbReallyShown = true;
+    }
 
     // the SHOW/HIDE events serve as indicators to send child creation/destroy events to the access bridge.
     // For this, the data member of the event must not be NULL.
@@ -355,15 +375,21 @@ void Window::ImplSetReallyVisible()
 
     // Helper to propagate visibility down the intrusive linked lists
     auto propagateToVisible = [](vcl::Window* pStart) {
-        for (vcl::Window* pWin = pStart; pWin; pWin = pWin->mpHierarchy->mpNext)
+        for (vcl::Window* pWin = pStart; pWin; )
         {
-            if (pWin->mpVisibilityState->mbVisible)
+            if (pWin->mpVisibilityState && pWin->mpVisibilityState->mbVisible)
                 pWin->ImplSetReallyVisible();
+
+            const WindowHierarchy* pWinHierarchy = pWin->ImplGetWindowHierarchy();
+            pWin = pWinHierarchy ? pWinHierarchy->getNextSibling() : nullptr;
         }
     };
 
-    propagateToVisible(mpHierarchy->mpFirstOverlap);
-    propagateToVisible(mpHierarchy->mpFirstChild);
+    if (mpHierarchy)
+    {
+        propagateToVisible(mpHierarchy->getFirstOverlap());
+        propagateToVisible(mpHierarchy->getFirstChild());
+    }
 }
 
 } // end vcl namespace

@@ -70,14 +70,22 @@ bool Window::SupportsDoubleBuffering() const
 
 void Window::RequestDoubleBuffering(bool bRequest)
 {
+    ImplFrameData* pFrameData = mpPlatformState ? mpPlatformState->mpFrameData : nullptr;
+    if (!pFrameData)
+        return;
+
     if (bRequest)
     {
-        mpPlatformState->mpFrameData->mpBuffer = VclPtrInstance<VirtualDevice>();
+        pFrameData->mpBuffer = VclPtrInstance<VirtualDevice>();
         // Make sure that the buffer size matches the frame size.
-        mpPlatformState->mpFrameData->mpBuffer->SetOutputSizePixel(mpHierarchy->mpFrameWindow->GetOutputSizePixel());
+        vcl::Window* pFrameWin = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr;
+        if (pFrameWin)
+            pFrameData->mpBuffer->SetOutputSizePixel(pFrameWin->GetOutputSizePixel());
     }
     else
-        mpPlatformState->mpFrameData->mpBuffer.reset();
+    {
+        pFrameData->mpBuffer.reset();
+    }
 }
 
 } /* namespace vcl */

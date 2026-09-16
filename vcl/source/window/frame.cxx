@@ -61,15 +61,22 @@ static bool lcl_IsFloatingWindowDecorated(const vcl::Window* pChildFrame)
 
 bool Window::ImplHasActiveChildFrame(const vcl::Window* pFrameWin) const
 {
-    if (pFrameWin == mpHierarchy->mpFrameWindow)
+    if (!pFrameWin)
+        return false;
+
+    const vcl::Window* pFrameWindow = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr;
+    if (pFrameWin == pFrameWindow)
         return false;
 
     VclPtr<vcl::Window> pChildFrame = pFrameWin->ImplGetWindow();
     if (!pChildFrame)
         return false;
 
+    const WindowStyleState* pStyleState = pFrameWin->mpStyleState.get();
+    const WinBits nStyle = pStyleState ? pStyleState->mnStyle : 0;
+
     const bool bIsDecorated = lcl_IsFloatingWindowDecorated(pChildFrame)
-                              || (pFrameWin->mpStyleState->mnStyle & (WB_MOVEABLE | WB_SIZEABLE));
+                              || (nStyle & (WB_MOVEABLE | WB_SIZEABLE));
     if (!bIsDecorated)
         return false;
 
@@ -81,13 +88,16 @@ bool Window::ImplHasActiveChildFrame(const vcl::Window* pFrameWin) const
 
 bool Window::HasActiveChildFrame() const
 {
-    vcl::Window* pFrameWin = ImplGetSVData()->maFrameData.mpFirstFrame;
-    while (pFrameWin)
-    {
-        if (pFrameWin != mpHierarchy->mpFrameWindow && ImplHasActiveChildFrame(pFrameWin))
-            return true;
+    const vcl::Window* pFrameWindow = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr;
 
-        pFrameWin = pFrameWin->mpPlatformState->mpFrameData->mpNextFrame;
+    for (vcl::Window* pFrameWin = ImplGetSVData()->maFrameData.mpFirstFrame;
+         pFrameWin != nullptr;
+         pFrameWin = (pFrameWin->mpPlatformState && pFrameWin->mpPlatformState->mpFrameData)
+                         ? pFrameWin->mpPlatformState->mpFrameData->mpNextFrame
+                         : nullptr)
+    {
+        if (pFrameWin != pFrameWindow && ImplHasActiveChildFrame(pFrameWin))
+            return true;
     }
 
     return false;
@@ -111,14 +121,20 @@ WinBits Window::ImplApplyBorderAnd3DStyle(WinBits nStyle, const vcl::Window* pPa
 
 bool Window::ImplNeedsSystemChildBorder(WinBits nStyle) const
 {
+    if (!mpClassification || !mpHierarchy)
+        return false;
+
     return !mpClassification->mbFrame && !mpClassification->mbBorderWin
-           && !mpHierarchy->mpBorderWindow && (nStyle & WB_SYSTEMCHILDWINDOW);
+           && !mpHierarchy->getBorderWindow() && (nStyle & WB_SYSTEMCHILDWINDOW);
 }
 
 bool Window::ImplNeedsBorderWindow(WinBits nStyle) const
 {
+    if (!mpClassification || !mpHierarchy)
+        return false;
+
     return !mpClassification->mbFrame && !mpClassification->mbBorderWin
-           && !mpHierarchy->mpBorderWindow && (nStyle & WB_BORDER);
+           && !mpHierarchy->getBorderWindow() && (nStyle & WB_BORDER);
 }
 
 BorderWindowStyle Window::ImplGetBorderWindowStyle(WinBits nStyle) const
@@ -131,19 +147,25 @@ BorderWindowStyle Window::ImplGetBorderWindowStyle(WinBits nStyle) const
 }
 
 vcl::Window* Window::ImplCreateBorderWindow(vcl::Window* pParent, WinBits nStyle,
-                                            BorderWindowStyle nBorderTypeStyle)
+                                           BorderWindowStyle nBorderTypeStyle)
 {
+    if (!mpHierarchy || !mpGeometry)
+        return nullptr;
+
     constexpr WinBits nBorderWinMask = WB_BORDER | WB_DIALOGCONTROL | WB_NODIALOGCONTROL;
 
     VclPtrInstance<ImplBorderWindow> pBorderWin(pParent, nStyle & nBorderWinMask, nBorderTypeStyle);
 
-    static_cast<vcl::Window*>(pBorderWin)->mpHierarchy->mpClientWindow = this;
+    if (pBorderWin && pBorderWin->mpHierarchy)
+        pBorderWin->mpHierarchy->setClientWindow(this);
+
     pBorderWin->GetBorder(mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder,
                           mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder);
-    mpHierarchy->mpBorderWindow = pBorderWin;
+
+    mpHierarchy->setBorderWindow(pBorderWin);
 
     // Return the newly created border window to act as the new parent
-    return mpHierarchy->mpBorderWindow;
+    return mpHierarchy->getBorderWindow();
 }
 
 vcl::Window* Window::ImplInitBorderWindow(vcl::Window* pParent, WinBits nStyle,
@@ -290,14 +312,21 @@ SalFrame* Window::ImplCreateFrame(vcl::Window* pParent, SystemParentData* pSyste
 
 void Window::ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInitialParent)
 {
-    // set window frame data
-    mpPlatformState->mpFrameData = new ImplFrameData(this);
-    mpPlatformState->mpFrame = pFrame;
-    mpHierarchy->mpFrameWindow = this;
-    mpHierarchy->mpOverlapWindow = this;
+    // Set window frame data
+    if (mpPlatformState)
+    {
+        mpPlatformState->mpFrameData = new ImplFrameData(this);
+        mpPlatformState->mpFrame = pFrame;
+    }
+
+    if (mpHierarchy)
+    {
+        mpHierarchy->setFrameWindow(this);
+        mpHierarchy->setOverlapWindow(this);
+    }
 
     auto shouldDoubleBuffer = [nStyle, this]() {
-        return !(nStyle & WB_DEFAULTWIN) && mpInvalidation->isDoubleBufferingRequested();
+        return !(nStyle & WB_DEFAULTWIN) && mpInvalidation && mpInvalidation->isDoubleBufferingRequested();
     };
 
     if (shouldDoubleBuffer())
@@ -305,8 +334,10 @@ void Window::ImplSetupFrame(SalFrame* pFrame, WinBits nStyle, vcl::Window* pInit
 
     if (pInitialParent && IsTopWindow())
     {
-        ImplWinData* pParentWinData = pInitialParent->ImplGetWinData();
-        pParentWinData->maTopWindowChildren.emplace_back(this);
+        if (ImplWinData* pParentWinData = pInitialParent->ImplGetWinData())
+        {
+            pParentWinData->maTopWindowChildren.emplace_back(this);
+        }
     }
 }
 
@@ -456,15 +487,24 @@ void Window::ImplInitAppFontData(vcl::Window const* pWindow)
 
 SalGraphics* Window::ImplGetFrameGraphics() const
 {
-    OutputDevice* pFrameWinOutDev = mpHierarchy->mpFrameWindow->GetOutDev();
+    vcl::Window* pFrameWindow = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr;
+    OutputDevice* pFrameWinOutDev = pFrameWindow ? pFrameWindow->GetOutDev() : nullptr;
+
+    if (!pFrameWinOutDev)
+        return nullptr;
 
     if (pFrameWinOutDev->mpGraphics)
         pFrameWinOutDev->GetClipState().Invalidate();
     else if (!pFrameWinOutDev->AcquireGraphics())
         return nullptr;
 
-    pFrameWinOutDev->mpGraphics->ResetClipRegion();
-    return pFrameWinOutDev->mpGraphics;
+    if (pFrameWinOutDev->mpGraphics)
+    {
+        pFrameWinOutDev->mpGraphics->ResetClipRegion();
+        return pFrameWinOutDev->mpGraphics;
+    }
+
+    return nullptr;
 }
 
 KeyIndicatorState Window::GetIndicatorState() const

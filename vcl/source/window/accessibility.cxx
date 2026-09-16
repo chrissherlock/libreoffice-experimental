@@ -102,23 +102,25 @@ vcl::Window* Window::GetAccessibleParentWindow() const
     if (!mpHierarchy || IsNativeFrame())
         return nullptr;
 
+    vcl::Window* pBorderWindow = mpHierarchy->getBorderWindow();
+
     if (IsTopWindow())
     {
-        // if "top-level" has native border window parent, report it;
+        // If "top-level" has native border window parent, report it;
         // but don't report parent otherwise (which could e.g. be
         // a dialog's parent window that's otherwise a separate window and
         // doesn't consider the top level its a11y child either)
-        if (mpHierarchy->mpBorderWindow && mpHierarchy->mpBorderWindow->IsNativeFrame())
-            return mpHierarchy->mpBorderWindow;
+        if (pBorderWindow && pBorderWindow->IsNativeFrame())
+            return pBorderWindow;
 
         return nullptr;
     }
 
     if (GetType() == WindowType::MENUBARWINDOW)
     {
-        vcl::Window* pParent = mpHierarchy->mpParent;
+        vcl::Window* pParent = mpHierarchy->getParent();
 
-        // report the menubar as a child of THE workwindow
+        // Report the menubar as a child of THE workwindow
         if (vcl::Window* pRealParent = GetParent())
         {
             vcl::Window* pWorkWin = pRealParent->GetWindow(GetWindowType::FirstChild);
@@ -137,38 +139,35 @@ vcl::Window* Window::GetAccessibleParentWindow() const
 
     // If this is a floating window which has a native border window, then that border should be reported as
     // the accessible parent
-    if (GetType() == WindowType::FLOATINGWINDOW && mpHierarchy->mpBorderWindow
-        && mpHierarchy->mpBorderWindow->ImplGetWindowClassification()->mbFrame)
+    if (GetType() == WindowType::FLOATINGWINDOW && pBorderWindow)
     {
-        return mpHierarchy->mpBorderWindow;
+        const WindowClassification* pBorderClassification = pBorderWindow->ImplGetWindowClassification();
+        if (pBorderClassification && pBorderClassification->mbFrame)
+            return pBorderWindow;
     }
 
-    if (vcl::Window* pParent = mpHierarchy->mpParent;
-        pParent && !pParent->ImplIsAccessibleCandidate())
+    vcl::Window* pParent = mpHierarchy->getParent();
+    if (pParent && !pParent->ImplIsAccessibleCandidate())
         return pParent->ImplGetParent();
 
-    return mpHierarchy->mpParent;
+    return pParent;
 }
 
 sal_uInt16 Window::GetAccessibleChildWindowCount()
 {
-    if (!mpClassification)
+    if (!mpClassification || !mpHierarchy)
         return 0;
 
     sal_uInt16 nChildren = 0;
-    vcl::Window* pChild = mpHierarchy->mpFirstChild;
-    while (pChild)
-    {
-        if (pChild->IsVisible())
-            nChildren++;
+    WindowHierarchy::forEachSibling(mpHierarchy->getFirstChild(), [&nChildren](const vcl::Window& rChild) {
+        if (rChild.IsVisible())
+            ++nChildren;
+    });
 
-        pChild = pChild->mpHierarchy->mpNext;
-    }
-
-    // report the menubarwindow as a child of THE workwindow
+    // Report the menubarwindow as a child of THE workwindow
     if (GetType() == WindowType::BORDERWINDOW)
     {
-        ImplBorderWindow* pBorderWindow = static_cast<ImplBorderWindow*>(this);
+        auto* pBorderWindow = static_cast<ImplBorderWindow*>(this);
         if (pBorderWindow->mpMenuBarWindow && pBorderWindow->mpMenuBarWindow->IsVisible())
             --nChildren;
 
@@ -178,12 +177,14 @@ sal_uInt16 Window::GetAccessibleChildWindowCount()
     if (GetType() != WindowType::WORKWINDOW)
         return nChildren;
 
-    WorkWindow* pWorkWindow = static_cast<WorkWindow*>(this);
-
-    if (pWorkWindow->GetMenuBar() && pWorkWindow->GetMenuBar()->GetWindow()
-        && pWorkWindow->GetMenuBar()->GetWindow()->IsVisible())
+    auto* pWorkWindow = static_cast<WorkWindow*>(this);
+    if (MenuBar* pMenuBar = pWorkWindow->GetMenuBar())
     {
-        ++nChildren;
+        if (vcl::Window* pMenuWin = pMenuBar->GetWindow())
+        {
+            if (pMenuWin->IsVisible())
+                ++nChildren;
+        }
     }
 
     return nChildren;
@@ -191,36 +192,42 @@ sal_uInt16 Window::GetAccessibleChildWindowCount()
 
 vcl::Window* Window::GetAccessibleChildWindow(sal_uInt16 n)
 {
-    // report the menubarwindow as the first child of THE workwindow
-    if (GetType() == WindowType::WORKWINDOW && static_cast<WorkWindow*>(this)->GetMenuBar())
+    // Report the menubarwindow as the first child of THE workwindow
+    if (GetType() == WindowType::WORKWINDOW)
     {
-        if (n == 0)
+        auto* pWorkWindow = static_cast<WorkWindow*>(this);
+        if (MenuBar* pMenuBar = pWorkWindow->GetMenuBar())
         {
-            MenuBar* pMenuBar = static_cast<WorkWindow*>(this)->GetMenuBar();
-
-            if (pMenuBar->GetWindow() && pMenuBar->GetWindow()->IsVisible())
-                return pMenuBar->GetWindow();
-        }
-        else
-        {
-            --n;
+            if (vcl::Window* pMenuWin = pMenuBar->GetWindow())
+            {
+                if (pMenuWin->IsVisible())
+                {
+                    if (n == 0)
+                        return pMenuWin;
+                    --n;
+                }
+            }
         }
     }
 
-    // transform n to child number including invisible children
+    if (!mpHierarchy)
+        return nullptr;
+
+    // Transform n to child number including invisible children
     sal_uInt16 nChildren = n;
-    vcl::Window* pChild = mpHierarchy->mpFirstChild;
+    vcl::Window* pChild = mpHierarchy->getFirstChild();
     while (pChild)
     {
         if (pChild->IsVisible())
         {
-            if (!nChildren)
+            if (nChildren == 0)
                 break;
 
-            nChildren--;
+            --nChildren;
         }
 
-        pChild = pChild->mpHierarchy->mpNext;
+        WindowHierarchy* pChildHierarchy = pChild->ImplGetWindowHierarchy();
+        pChild = pChildHierarchy ? pChildHierarchy->getNextSibling() : nullptr;
     }
 
     if (GetType() == WindowType::BORDERWINDOW && pChild
@@ -228,7 +235,8 @@ vcl::Window* Window::GetAccessibleChildWindow(sal_uInt16 n)
     {
         do
         {
-            pChild = pChild->mpHierarchy->mpNext;
+            WindowHierarchy* pChildHierarchy = pChild->ImplGetWindowHierarchy();
+            pChild = pChildHierarchy ? pChildHierarchy->getNextSibling() : nullptr;
         } while (pChild && !pChild->IsVisible());
 
         SAL_WARN_IF(!pChild, "vcl", "GetAccessibleChildWindow(): wrong index in border window");
@@ -274,11 +282,20 @@ void Window::SetAccessibleRole(sal_uInt16 nRole)
 
 static bool lcl_actsAsAccessibleFrame(const vcl::Window* pWindow)
 {
-    const vcl::Window* pBorder = pWindow->ImplGetWindowHierarchy()->mpBorderWindow;
-    bool bBorderIsFrame = pBorder && pBorder->ImplGetWindowClassification()->mbFrame;
+    if (!pWindow)
+        return false;
 
-    return pWindow->ImplGetWindowClassification()->mbFrame || bBorderIsFrame
-           || (pWindow->GetStyle() & WB_OWNERDRAWDECORATION);
+    const WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy();
+    const vcl::Window* pBorder = pHierarchy ? pHierarchy->getBorderWindow() : nullptr;
+
+    const WindowClassification* pBorderClassification = pBorder ? pBorder->ImplGetWindowClassification() : nullptr;
+    const bool bBorderIsFrame = pBorderClassification && pBorderClassification->mbFrame;
+
+    const WindowClassification* pClassification = pWindow->ImplGetWindowClassification();
+    const bool bWindowIsFrame = pClassification && pClassification->mbFrame;
+
+    return bWindowIsFrame || bBorderIsFrame
+           || bool(pWindow->GetStyle() & WB_OWNERDRAWDECORATION);
 }
 
 sal_uInt16 Window::getDefaultAccessibleRole() const

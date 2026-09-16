@@ -1413,9 +1413,10 @@ bool VclGrid::set_property(const OUString &rKey, const OUString &rValue)
     return true;
 }
 
-const vcl::Window *VclBin::get_child() const
+const vcl::Window* VclBin::get_child() const
 {
-    return ImplGetWindowHierarchy()->mpFirstChild;
+    const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
+    return pHierarchy ? pHierarchy->getFirstChild() : nullptr;
 }
 
 vcl::Window *VclBin::get_child()
@@ -1511,16 +1512,19 @@ void VclFrame::designate_label(vcl::Window *pWindow)
         m_pLabel->AddEventListener(LINK(this, VclFrame, WindowEventListener));
 }
 
-const vcl::Window *VclFrame::get_label_widget() const
+const vcl::Window* VclFrame::get_label_widget() const
 {
     if (m_pLabel)
         return m_pLabel;
+
     assert(GetChildCount() <= 2);
-    //The label widget is normally the first (of two) children
+
+    // The label widget is normally the first (of two) children
     const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
-    if (pHierarchy->mpFirstChild == pHierarchy->mpLastChild) //no label exists
+    if (!pHierarchy || pHierarchy->getFirstChild() == pHierarchy->getLastChild()) // No label exists
         return nullptr;
-    return pHierarchy->mpFirstChild;
+
+    return pHierarchy->getFirstChild();
 }
 
 vcl::Window *VclFrame::get_label_widget()
@@ -1528,20 +1532,24 @@ vcl::Window *VclFrame::get_label_widget()
     return const_cast<vcl::Window*>(std::as_const(*this).get_label_widget());
 }
 
-const vcl::Window *VclFrame::get_child() const
+const vcl::Window* VclFrame::get_child() const
 {
-    //The child widget is the normally the last (of two) children
-    const WindowClassification* pWindowClassification = ImplGetWindowClassification();
+    // The child widget is normally the last (of two) children
+    const WindowClassification* pClassification = ImplGetWindowClassification();
     const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
 
-    assert(GetChildCount() == 2 || pWindowClassification->mbInDispose);
+    assert(GetChildCount() == 2 || (pClassification && pClassification->mbInDispose));
 
-    if (!m_pLabel)
-        return pHierarchy->mpLastChild;
-    if (pHierarchy->mpFirstChild == pHierarchy->mpLastChild) //only label exists
+    if (!pHierarchy)
         return nullptr;
 
-    return pHierarchy->mpLastChild;
+    if (!m_pLabel)
+        return pHierarchy->getLastChild();
+
+    if (pHierarchy->getFirstChild() == pHierarchy->getLastChild()) // Only label exists
+        return nullptr;
+
+    return pHierarchy->getLastChild();
 }
 
 vcl::Window *VclFrame::get_child()
@@ -1684,13 +1692,16 @@ void VclExpander::dispose()
     VclBin::dispose();
 }
 
-const vcl::Window *VclExpander::get_child() const
+const vcl::Window* VclExpander::get_child() const
 {
     const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
+    if (!pHierarchy)
+        return nullptr;
 
-    assert(pHierarchy->mpFirstChild == m_pDisclosureButton);
+    const vcl::Window* pFirstChild = pHierarchy->getFirstChild();
+    assert(pFirstChild == m_pDisclosureButton);
 
-    return pHierarchy->mpFirstChild->GetWindow(GetWindowType::Next);
+    return pFirstChild ? pFirstChild->GetWindow(GetWindowType::Next) : nullptr;
 }
 
 vcl::Window *VclExpander::get_child()
@@ -1703,72 +1714,82 @@ Size VclExpander::calculateRequisition() const
     Size aRet(0, 0);
 
     const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
+    if (!pHierarchy)
+        return aRet;
 
-    const vcl::Window *pChild = get_child();
-    const vcl::Window *pLabel = pChild != pHierarchy->mpLastChild ? pHierarchy->mpLastChild.get() : nullptr;
+    const vcl::Window* pChild = get_child();
+    const vcl::Window* pLastChild = pHierarchy->getLastChild();
+    const vcl::Window* pLabel = (pChild != pLastChild) ? pLastChild : nullptr;
 
-    if (pChild && pChild->IsVisible() && m_pDisclosureButton->IsChecked())
+    if (pChild && pChild->IsVisible() && m_pDisclosureButton && m_pDisclosureButton->IsChecked())
         aRet = getLayoutRequisition(*pChild);
 
-    Size aExpanderSize = getLayoutRequisition(*m_pDisclosureButton);
+    Size aExpanderSize(0, 0);
+    if (m_pDisclosureButton)
+        aExpanderSize = getLayoutRequisition(*m_pDisclosureButton);
 
     if (pLabel && pLabel->IsVisible())
     {
         Size aLabelSize = getLayoutRequisition(*pLabel);
-        aExpanderSize.setHeight( std::max(aExpanderSize.Height(), aLabelSize.Height()) );
-        aExpanderSize.AdjustWidth(aLabelSize.Width() );
+        aExpanderSize.setHeight(std::max(aExpanderSize.Height(), aLabelSize.Height()));
+        aExpanderSize.AdjustWidth(aLabelSize.Width());
     }
 
-    aRet.AdjustHeight(aExpanderSize.Height() );
-    aRet.setWidth( std::max(aExpanderSize.Width(), aRet.Width()) );
+    aRet.AdjustHeight(aExpanderSize.Height());
+    aRet.setWidth(std::max(aExpanderSize.Width(), aRet.Width()));
 
     return aRet;
 }
 
-void VclExpander::setAllocation(const Size &rAllocation)
+void VclExpander::setAllocation(const Size& rAllocation)
 {
     Size aAllocation(rAllocation);
     Point aChildPos;
 
     const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
+    if (!pHierarchy || !m_pDisclosureButton)
+        return;
 
-    //The label widget is the last (of two) children
-    vcl::Window *pChild = get_child();
-    vcl::Window *pLabel = pChild != pHierarchy->mpLastChild.get() ? pHierarchy->mpLastChild.get() : nullptr;
+    // The label widget is the last (of two) children
+    vcl::Window* pChild = get_child();
+    vcl::Window* pLastChild = pHierarchy->getLastChild();
+    vcl::Window* pLabel = (pChild != pLastChild) ? pLastChild : nullptr;
 
     Size aButtonSize = getLayoutRequisition(*m_pDisclosureButton);
     Size aLabelSize;
     Size aExpanderSize = aButtonSize;
+
     if (pLabel && pLabel->IsVisible())
     {
         aLabelSize = getLayoutRequisition(*pLabel);
-        aExpanderSize.setHeight( std::max(aExpanderSize.Height(), aLabelSize.Height()) );
-        aExpanderSize.AdjustWidth(aLabelSize.Width() );
+        aExpanderSize.setHeight(std::max(aExpanderSize.Height(), aLabelSize.Height()));
+        aExpanderSize.AdjustWidth(aLabelSize.Width());
     }
 
-    aExpanderSize.setHeight( std::min(aExpanderSize.Height(), aAllocation.Height()) );
-    aExpanderSize.setWidth( std::min(aExpanderSize.Width(), aAllocation.Width()) );
+    aExpanderSize.setHeight(std::min(aExpanderSize.Height(), aAllocation.Height()));
+    aExpanderSize.setWidth(std::min(aExpanderSize.Width(), aAllocation.Width()));
 
-    aButtonSize.setHeight( std::min(aButtonSize.Height(), aExpanderSize.Height()) );
-    aButtonSize.setWidth( std::min(aButtonSize.Width(), aExpanderSize.Width()) );
+    aButtonSize.setHeight(std::min(aButtonSize.Height(), aExpanderSize.Height()));
+    aButtonSize.setWidth(std::min(aButtonSize.Width(), aExpanderSize.Width()));
 
     tools::Long nExtraExpanderHeight = aExpanderSize.Height() - aButtonSize.Height();
-    Point aButtonPos(aChildPos.X(), aChildPos.Y() + nExtraExpanderHeight/2);
+    Point aButtonPos(aChildPos.X(), aChildPos.Y() + nExtraExpanderHeight / 2);
     setLayoutAllocation(*m_pDisclosureButton, aButtonPos, aButtonSize);
 
     if (pLabel && pLabel->IsVisible())
     {
-        aLabelSize.setHeight( std::min(aLabelSize.Height(), aExpanderSize.Height()) );
-        aLabelSize.setWidth( std::min(aLabelSize.Width(),
-            aExpanderSize.Width() - aButtonSize.Width()) );
+        aLabelSize.setHeight(std::min(aLabelSize.Height(), aExpanderSize.Height()));
+        aLabelSize.setWidth(std::min(aLabelSize.Width(),
+                                     aExpanderSize.Width() - aButtonSize.Width()));
 
         tools::Long nExtraLabelHeight = aExpanderSize.Height() - aLabelSize.Height();
-        Point aLabelPos(aChildPos.X() + aButtonSize.Width(), aChildPos.Y() + nExtraLabelHeight/2);
+        Point aLabelPos(aChildPos.X() + aButtonSize.Width(),
+                        aChildPos.Y() + nExtraLabelHeight / 2);
         setLayoutAllocation(*pLabel, aLabelPos, aLabelSize);
     }
 
-    aAllocation.AdjustHeight( -(aExpanderSize.Height()) );
-    aChildPos.AdjustY(aExpanderSize.Height() );
+    aAllocation.AdjustHeight(-aExpanderSize.Height());
+    aChildPos.AdjustY(aExpanderSize.Height());
 
     if (pChild && pChild->IsVisible())
     {
@@ -1891,11 +1912,13 @@ IMPL_LINK_NOARG(VclScrolledWindow, ScrollBarHdl, ScrollBar*, void)
     pChild->SetPosPixel(aWinPos);
 }
 
-const vcl::Window *VclScrolledWindow::get_child() const
+const vcl::Window* VclScrolledWindow::get_child() const
 {
-    const WindowClassification* pWindowClassification = ImplGetWindowClassification();
-    assert(GetChildCount() == 4 || pWindowClassification->mbInDispose);
-    return ImplGetWindowHierarchy()->mpLastChild;
+    const WindowClassification* pClassification = ImplGetWindowClassification();
+    assert(GetChildCount() == 4 || (pClassification && pClassification->mbInDispose));
+
+    const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
+    return pHierarchy ? pHierarchy->getLastChild() : nullptr;
 }
 
 vcl::Window *VclScrolledWindow::get_child()
@@ -2164,13 +2187,16 @@ void VclViewport::setAllocation(const Size &rAllocation)
     setLayoutAllocation(*pChild, aKeepPos, aReq);
 }
 
-const vcl::Window *VclEventBox::get_child() const
+const vcl::Window* VclEventBox::get_child() const
 {
     const WindowHierarchy* pHierarchy = ImplGetWindowHierarchy();
+    if (!pHierarchy)
+        return nullptr;
 
-    assert(pHierarchy->mpFirstChild.get() == m_aEventBoxHelper.get());
+    const vcl::Window* pFirstChild = pHierarchy->getFirstChild();
+    assert(pFirstChild == m_aEventBoxHelper.get());
 
-    return pHierarchy->mpFirstChild->GetWindow(GetWindowType::Next);
+    return pFirstChild ? pFirstChild->GetWindow(GetWindowType::Next) : nullptr;
 }
 
 vcl::Window *VclEventBox::get_child()

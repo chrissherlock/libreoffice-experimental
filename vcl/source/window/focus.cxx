@@ -80,20 +80,31 @@ void Window::ImplTransferFocusToParent()
     vcl::Window* pTarget = GetParent();
 
     // When windows overlap, give focus to the parent of the next FrameWindow
-    if (mpHierarchy->mpBorderWindow)
+    const vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (pBorderWindow)
     {
-        if (mpHierarchy->mpBorderWindow->ImplIsOverlapWindow())
-            pTarget = mpHierarchy->mpBorderWindow->mpHierarchy->mpOverlapWindow;
+        if (pBorderWindow->ImplIsOverlapWindow())
+        {
+            const WindowHierarchy* pBorderHierarchy = pBorderWindow->ImplGetWindowHierarchy();
+            if (pBorderHierarchy)
+                pTarget = pBorderHierarchy->getOverlapWindow();
+        }
     }
-    else if (ImplIsOverlapWindow())
+    else if (ImplIsOverlapWindow() && mpHierarchy)
     {
-        pTarget = mpHierarchy->mpOverlapWindow;
+        pTarget = mpHierarchy->getOverlapWindow();
     }
 
     if (pTarget && pTarget->IsEnabled() && pTarget->IsInputEnabled() && !pTarget->IsInModalMode())
+    {
         pTarget->GrabFocus();
+    }
     else
-        mpHierarchy->mpFrameWindow->GrabFocus();
+    {
+        vcl::Window* pFrameWindow = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr;
+        if (pFrameWindow)
+            pFrameWindow->GrabFocus();
+    }
 }
 
 vcl::Window* Window::ImplTransferFocus()
@@ -599,8 +610,12 @@ void Window::EndSaveFocus(const VclPtr<vcl::Window>& xFocusWin)
 
 static void lcl_ActivateFloatingWindows(vcl::Window const* pWindow, bool bActive)
 {
-    for (vcl::Window* pTempWindow = pWindow->ImplGetWindowHierarchy()->mpFirstOverlap; pTempWindow;
-         pTempWindow = pTempWindow->ImplGetWindowHierarchy()->mpNext)
+    if (!pWindow)
+        return;
+
+    const WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy();
+    vcl::Window* pTempWindow = pHierarchy ? pHierarchy->getFirstOverlap() : nullptr;
+    while (pTempWindow)
     {
         if (pTempWindow->GetActivateMode() == ActivateModeFlags::NONE)
         {
@@ -610,6 +625,9 @@ static void lcl_ActivateFloatingWindows(vcl::Window const* pWindow, bool bActive
         }
 
         lcl_ActivateFloatingWindows(pTempWindow, bActive);
+
+        const WindowHierarchy* pTempHierarchy = pTempWindow->ImplGetWindowHierarchy();
+        pTempWindow = pTempHierarchy ? pTempHierarchy->getNextSibling() : nullptr;
     }
 }
 

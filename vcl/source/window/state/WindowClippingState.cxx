@@ -52,14 +52,14 @@ bool WindowClippingState::initChildRegion(vcl::Window& rWindow)
     // Safely clear the initialization flag on function exit
     comphelper::ScopeGuard aDeinitChildRegion([this]() { mbInitChildRegion = false; });
 
-    if (!pHierarchy->mpFirstChild)
+    if (!pHierarchy || !pHierarchy->hasChildren())
     {
         mpChildClipRegion.reset();
         return false; // No children present; skip downstream clipping
     }
 
     if (!mpChildClipRegion)
-        mpChildClipRegion.reset(new vcl::Region(maWinClipRegion));
+        mpChildClipRegion = std::make_unique<vcl::Region>(maWinClipRegion);
     else
         *mpChildClipRegion = maWinClipRegion;
 

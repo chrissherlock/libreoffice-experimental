@@ -34,21 +34,33 @@ void Window::SetModalHierarchyHdl(const Link<bool, void>& rLink)
 // frame based modal counter (dialogs are not modal to the whole application anymore)
 bool Window::IsInModalMode() const
 {
-    return (mpHierarchy->mpFrameWindow->mpPlatformState->mpFrameData->mnModalMode != 0);
+    const vcl::Window* pFrameWindow = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr;
+    if (pFrameWindow && pFrameWindow->mpPlatformState && pFrameWindow->mpPlatformState->mpFrameData)
+        return pFrameWindow->mpPlatformState->mpFrameData->mnModalMode != 0;
+
+    return false;
 }
 
 void Window::ImplUpdateModalCount(int nDelta)
 {
-    vcl::Window* pFrameWindow = mpHierarchy->mpFrameWindow;
+    vcl::Window* pFrameWindow = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr;
     vcl::Window* pParent = pFrameWindow;
     while (pFrameWindow)
     {
-        pFrameWindow->mpPlatformState->mpFrameData->mnModalMode += nDelta;
-        while (pParent && pParent->mpHierarchy->mpFrameWindow == pFrameWindow)
+        if (pFrameWindow->mpPlatformState && pFrameWindow->mpPlatformState->mpFrameData)
+            pFrameWindow->mpPlatformState->mpFrameData->mnModalMode += nDelta;
+
+        while (pParent)
         {
+            WindowHierarchy* pParentHierarchy = pParent->ImplGetWindowHierarchy();
+            if (!pParentHierarchy || pParentHierarchy->getFrameWindow() != pFrameWindow)
+                break;
+
             pParent = pParent->GetParent();
         }
-        pFrameWindow = pParent ? pParent->mpHierarchy->mpFrameWindow.get() : nullptr;
+
+        WindowHierarchy* pNewParentHierarchy = pParent ? pParent->ImplGetWindowHierarchy() : nullptr;
+        pFrameWindow = pNewParentHierarchy ? pNewParentHierarchy->getFrameWindow() : nullptr;
     }
 }
 

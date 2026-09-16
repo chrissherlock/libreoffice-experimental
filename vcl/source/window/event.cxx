@@ -258,18 +258,21 @@ void Window::NotifyAllChildren(DataChangedEvent& rDCEvt)
 {
     CompatDataChanged(rDCEvt);
 
-    vcl::Window* pChild = mpHierarchy->mpFirstChild;
+    VclPtr<vcl::Window> pChild = mpHierarchy ? mpHierarchy->getFirstChild() : nullptr;
     while (pChild)
     {
         pChild->NotifyAllChildren(rDCEvt);
-        pChild = pChild->mpHierarchy->mpNext;
+
+        WindowHierarchy* pChildHierarchy = pChild->ImplGetWindowHierarchy();
+        pChild = pChildHierarchy ? pChildHierarchy->getNextSibling() : nullptr;
     }
 }
 
 bool Window::ImplDelegatePreNotifyToParent(NotifyEvent& rNEvt)
 {
-    if (mpHierarchy->mpParent && !ImplIsOverlapWindow())
-        return mpHierarchy->mpParent->CompatPreNotify(rNEvt);
+    vcl::Window* pParent = mpHierarchy ? mpHierarchy->getParent() : nullptr;
+    if (pParent && !ImplIsOverlapWindow())
+        return pParent->CompatPreNotify(rNEvt);
 
     return false;
 }
@@ -534,10 +537,11 @@ bool Window::EventNotify(NotifyEvent& rNEvt)
     if (ImplDispatchDialogControlEvent(rNEvt, bIsFloatingMode))
         return true;
 
-    if (!mpHierarchy->mpParent || ImplIsOverlapWindow())
+    vcl::Window* pParent = mpHierarchy ? mpHierarchy->getParent() : nullptr;
+    if (!pParent || ImplIsOverlapWindow())
         return false;
 
-    return mpHierarchy->mpParent->CompatNotify(rNEvt);
+    return pParent->CompatNotify(rNEvt);
 }
 
 void Window::CallEventListeners(VclEventId nEvent, void* pData)
@@ -774,22 +778,33 @@ void Window::ImplNotifyKeyMouseCommandEventListeners(NotifyEvent& rNEvt)
 
 void Window::ImplCallInitShow()
 {
-    mpVisibilityState->mbReallyShown = true;
-    mpVisibilityState->mbInInitShow = true;
+    if (mpVisibilityState)
+    {
+        mpVisibilityState->mbReallyShown = true;
+        mpVisibilityState->mbInInitShow = true;
+    }
+
     CompatStateChanged(StateChangedType::InitShow);
-    mpVisibilityState->mbInInitShow = false;
+
+    if (mpVisibilityState)
+        mpVisibilityState->mbInInitShow = false;
 
     auto initVisibleWindows = [](vcl::Window* pWindow) {
         while (pWindow)
         {
-            if (pWindow->mpVisibilityState->mbVisible)
+            if (pWindow->mpVisibilityState && pWindow->mpVisibilityState->mbVisible)
                 pWindow->ImplCallInitShow();
-            pWindow = pWindow->mpHierarchy->mpNext;
+
+            WindowHierarchy* pWindowHierarchy = pWindow->ImplGetWindowHierarchy();
+            pWindow = pWindowHierarchy ? pWindowHierarchy->getNextSibling() : nullptr;
         }
     };
 
-    initVisibleWindows(mpHierarchy->mpFirstOverlap);
-    initVisibleWindows(mpHierarchy->mpFirstChild);
+    if (mpHierarchy)
+    {
+        initVisibleWindows(mpHierarchy->getFirstOverlap());
+        initVisibleWindows(mpHierarchy->getFirstChild());
+    }
 }
 
 void Window::ImplCallResize()
@@ -839,11 +854,14 @@ void Window::ImplUpdateClientWindowPos()
     // the client window and all its subclients have the same position as the borderframe
     // this is important for floating toolbars where the borderwindow is a floating window
     // which has another borderwindow (ie the system floating window)
-    vcl::Window* pClientWin = mpHierarchy->mpClientWindow;
+    VclPtr<vcl::Window> pClientWin = mpHierarchy ? mpHierarchy->getClientWindow() : nullptr;
     while (pClientWin)
     {
-        pClientWin->mpGeometry->maPos = mpGeometry->maPos;
-        pClientWin = pClientWin->mpHierarchy->mpClientWindow;
+        if (pClientWin->mpGeometry && mpGeometry)
+            pClientWin->mpGeometry->maPos = mpGeometry->maPos;
+
+        WindowHierarchy* pClientHierarchy = pClientWin->ImplGetWindowHierarchy();
+        pClientWin = pClientHierarchy ? pClientHierarchy->getClientWindow() : nullptr;
     }
 }
 
@@ -1267,10 +1285,19 @@ void Window::ImplCallDeactivateListeners(vcl::Window* pNew)
         return;
 
     // #100759#, avoid walking the wrong frame's hierarchy
-    //           eg, undocked docking windows (ImplDockFloatWin)
-    if (ImplGetParent() && ImplGetParent()->mpClassification
-        && mpHierarchy->mpFrameWindow == ImplGetParent()->mpHierarchy->mpFrameWindow)
-        ImplGetParent()->ImplCallDeactivateListeners(pNew);
+    //         eg, undocked docking windows (ImplDockFloatWin)
+    vcl::Window* pParent = ImplGetParent();
+    if (pParent && pParent->mpClassification)
+    {
+        const WindowHierarchy* pHierarchy = mpHierarchy.get();
+        const WindowHierarchy* pParentHierarchy = pParent->ImplGetWindowHierarchy();
+
+        const vcl::Window* pFrameWindow = pHierarchy ? pHierarchy->getFrameWindow() : nullptr;
+        const vcl::Window* pParentFrameWindow = pParentHierarchy ? pParentHierarchy->getFrameWindow() : nullptr;
+
+        if (pFrameWindow && pParentFrameWindow && pFrameWindow == pParentFrameWindow)
+            pParent->ImplCallDeactivateListeners(pNew);
+    }
 }
 
 void Window::ImplCallActivateListeners(vcl::Window* pOld)
@@ -1291,21 +1318,28 @@ void Window::ImplCallActivateListeners(vcl::Window* pOld)
     else if ((mpStyleState->mnStyle & WB_INTROWIN) == 0)
     {
         // top level frame reached: store hint for DefModalDialogParent
-        ImplGetSVData()->maFrameData.mpActiveApplicationFrame = mpHierarchy->mpFrameWindow;
+        if (mpHierarchy)
+            ImplGetSVData()->maFrameData.mpActiveApplicationFrame = mpHierarchy->getFrameWindow();
     }
 }
 
 void Window::ImplNotifyIconifiedState(bool bIconified)
 {
-    mpHierarchy->mpFrameWindow->CallEventListeners(bIconified ? VclEventId::WindowMinimize
-                                                              : VclEventId::WindowNormalize);
+    vcl::Window* pFrameWindow = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr;
+    if (!pFrameWindow)
+        return;
+
+    const VclEventId nEvent = bIconified ? VclEventId::WindowMinimize : VclEventId::WindowNormalize;
+
+    pFrameWindow->CallEventListeners(nEvent);
 
     // #109206# notify client window as well to have toolkit topwindow listeners notified
-    if (mpHierarchy->mpFrameWindow->mpHierarchy->mpClientWindow
-        && mpHierarchy->mpFrameWindow != mpHierarchy->mpFrameWindow->mpHierarchy->mpClientWindow)
+    const WindowHierarchy* pFrameHierarchy = pFrameWindow->ImplGetWindowHierarchy();
+    vcl::Window* pClientWin = pFrameHierarchy ? pFrameHierarchy->getClientWindow() : nullptr;
+
+    if (pClientWin && pFrameWindow != pClientWin)
     {
-        mpHierarchy->mpFrameWindow->mpHierarchy->mpClientWindow->CallEventListeners(
-            bIconified ? VclEventId::WindowMinimize : VclEventId::WindowNormalize);
+        pClientWin->CallEventListeners(nEvent);
     }
 }
 

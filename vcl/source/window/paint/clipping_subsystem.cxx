@@ -25,19 +25,21 @@ namespace vcl::clipping
 bool initChildRegion(vcl::Window& rWindow)
 {
     WindowClippingState* pImpl = rWindow.ImplGetClippingState();
-    WindowHierarchy* pHierarchy = rWindow.ImplGetWindowHierarchy();
+    if (!pImpl)
+        return false;
 
     // Safely clear the initialization flag on function exit
     comphelper::ScopeGuard aDeinitChildRegion([pImpl]() { pImpl->mbInitChildRegion = false; });
 
-    if (!pHierarchy->mpFirstChild)
+    WindowHierarchy* pHierarchy = rWindow.ImplGetWindowHierarchy();
+    if (!pHierarchy || !pHierarchy->hasChildren())
     {
         pImpl->mpChildClipRegion.reset();
         return false; // No children present; skip downstream clipping
     }
 
     if (!pImpl->mpChildClipRegion)
-        pImpl->mpChildClipRegion.reset(new vcl::Region(pImpl->maWinClipRegion));
+        pImpl->mpChildClipRegion = std::make_unique<vcl::Region>(pImpl->maWinClipRegion);
     else
         *pImpl->mpChildClipRegion = pImpl->maWinClipRegion;
 
@@ -94,35 +96,31 @@ bool invalidateParentClipIfRequired(const WindowClippingState& rChildImpl,
     return false;
 }
 
-/** Linearly traverses an intrusive linked list of window nodes following
-    the sibling chain until a terminator null pointer is encountered. */
+/** Linearly traverses the sibling chain starting from pStartWindow until the end. */
 static std::vector<vcl::Window*> lcl_gatherWindowChain(vcl::Window* pStartWindow)
 {
     std::vector<vcl::Window*> aWindows;
-    vcl::Window* pCurrent = pStartWindow;
 
-    while (pCurrent)
-    {
-        aWindows.push_back(pCurrent);
-        pCurrent = pCurrent->ImplGetWindowHierarchy()->mpNext;
-    }
+    WindowHierarchy::forEachSibling(pStartWindow, [&](vcl::Window& rWindow) {
+        aWindows.push_back(&rWindow);
+    });
 
     return aWindows;
 }
 
 std::vector<vcl::Window*> getChildWindows(const WindowHierarchy& rHierarchy)
 {
-    return lcl_gatherWindowChain(rHierarchy.mpFirstChild);
+    return lcl_gatherWindowChain(rHierarchy.getFirstChild());
 }
 
 std::vector<vcl::Window*> getOverlapWindows(const WindowHierarchy& rHierarchy)
 {
-    return lcl_gatherWindowChain(rHierarchy.mpFirstOverlap);
+    return lcl_gatherWindowChain(rHierarchy.getFirstOverlap());
 }
 
 std::vector<vcl::Window*> getFollowingSiblings(const WindowHierarchy& rHierarchy)
 {
-    return lcl_gatherWindowChain(rHierarchy.mpNext);
+    return lcl_gatherWindowChain(rHierarchy.getNextSibling());
 }
 
 std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow)
@@ -131,18 +129,31 @@ std::vector<vcl::Window*> getAncestralOverlapSiblings(vcl::Window* pStartWindow)
     vcl::Window* pCurrentLevel = pStartWindow;
 
     // Traverse up the overlap window hierarchy until we hit the frame boundary
-    while (pCurrentLevel && !pCurrentLevel->ImplGetWindowClassification()->mbFrame)
+    while (pCurrentLevel)
     {
-        vcl::Window* pParentOverlap = pCurrentLevel->ImplGetWindowHierarchy()->mpOverlapWindow;
-        if (!pParentOverlap)
-            break; // Safety guard
+        const WindowClassification* pClassification = pCurrentLevel->ImplGetWindowClassification();
+        if (pClassification && pClassification->mbFrame)
+            break;
 
-        // Gather preceding overlap siblings at this specific tier
-        vcl::Window* pSibling = pParentOverlap->ImplGetWindowHierarchy()->mpFirstOverlap;
-        while (pSibling && (pSibling != pCurrentLevel))
+        const WindowHierarchy* pHierarchy = pCurrentLevel->ImplGetWindowHierarchy();
+        if (!pHierarchy)
+            break;
+
+        vcl::Window* pParentOverlap = pHierarchy->getOverlapWindow();
+        if (!pParentOverlap)
+            break;
+
+        const WindowHierarchy* pParentHierarchy = pParentOverlap->ImplGetWindowHierarchy();
+        if (pParentHierarchy)
         {
-            aTargets.push_back(pSibling);
-            pSibling = pSibling->ImplGetWindowHierarchy()->mpNext;
+            // Gather preceding overlap siblings at this specific tier
+            WindowHierarchy::forEachSibling(pParentHierarchy->getFirstOverlap(), [&](vcl::Window& rSibling) -> bool {
+                if (&rSibling == pCurrentLevel)
+                    return false; // Stop when hitting our branch
+
+                aTargets.push_back(&rSibling);
+                return true;
+            });
         }
 
         // Step up to the next hierarchical level
@@ -173,38 +184,42 @@ void gatherNativeSyncTargets(vcl::Window* pWindow, std::vector<vcl::Window*>& rT
 void accumulateParentBoundaries(vcl::Window& rWindow, const vcl::Region& rInterRegion,
                                 vcl::Region& rRegion)
 {
-    WindowHierarchy* pImpl = rWindow.ImplGetWindowHierarchy();
-    if (!pImpl)
+    WindowHierarchy* pHierarchy = rWindow.ImplGetWindowHierarchy();
+    if (!pHierarchy)
         return;
 
-    vcl::Region aTempRegion;
-    vcl::Window* pWindow = &rWindow;
+    vcl::Window* pBoundaryWindow = &rWindow;
 
     if (!rWindow.ImplIsOverlapWindow())
     {
-        pWindow = rWindow.ImplGetParent();
-        do
-        {
-            aTempRegion = rInterRegion;
-            excludeWindowRegion(*pWindow, aTempRegion);
+        pBoundaryWindow = nullptr;
+        pHierarchy->forEachAncestor([&](vcl::Window& rAncestor) -> bool {
+            vcl::Region aTempRegion = rInterRegion;
+            excludeWindowRegion(rAncestor, aTempRegion);
             rRegion.Union(aTempRegion);
 
-            if (pWindow->ImplIsOverlapWindow())
-                break;
+            if (rAncestor.ImplIsOverlapWindow())
+            {
+                pBoundaryWindow = &rAncestor;
+                return false; // Reached enclosing overlap boundary; stop climbing
+            }
 
-            pWindow = pWindow->ImplGetParent();
-        } while (pWindow);
+            return true;
+        });
     }
 
-    if (pWindow && pWindow->ImplGetWindowClassification()
-        && !pWindow->ImplGetWindowClassification()->mbFrame)
+    if (pBoundaryWindow)
     {
-        if (pImpl->mpFrameWindow)
+        const WindowClassification* pClassification = pBoundaryWindow->ImplGetWindowClassification();
+        if (pClassification && !pClassification->mbFrame)
         {
-            aTempRegion = rInterRegion;
-            aTempRegion.Exclude(
-                tools::Rectangle(Point(0, 0), pImpl->mpFrameWindow->GetOutputSizePixel()));
-            rRegion.Union(aTempRegion);
+            if (vcl::Window* pFrameWindow = pHierarchy->getFrameWindow())
+            {
+                vcl::Region aTempRegion = rInterRegion;
+                aTempRegion.Exclude(
+                    tools::Rectangle(Point(0, 0), pFrameWindow->GetOutputSizePixel()));
+                rRegion.Union(aTempRegion);
+            }
         }
     }
 }
@@ -413,6 +428,8 @@ void excludeOverlapWindows(const vcl::Window& rWindow, vcl::Region& rRegion)
 void clipBoundaries(const vcl::Window& rWindow, vcl::Region& rRegion, bool bThis, bool bOverlaps)
 {
     WindowClippingState* pClippingState = rWindow.ImplGetClippingState();
+    if (!pClippingState)
+        return;
 
     if (bThis)
     {
@@ -429,20 +446,27 @@ void clipBoundaries(const vcl::Window& rWindow, vcl::Region& rRegion, bool bThis
         if (pParent)
         {
             WindowClippingState* pParentClippingState = pParent->ImplGetClippingState();
-            if (pParentClippingState->mbInitWinClipRegion)
-                initWinClipRegion(*pParent);
+            if (pParentClippingState)
+            {
+                if (pParentClippingState->mbInitWinClipRegion)
+                    initWinClipRegion(*pParent);
 
-            rRegion.Intersect(pParentClippingState->maWinClipRegion);
+                rRegion.Intersect(pParentClippingState->maWinClipRegion);
+            }
         }
         return;
     }
 
-    WindowHierarchy* pHierarchy = rWindow.ImplGetWindowHierarchy();
+    const WindowHierarchy* pHierarchy = rWindow.ImplGetWindowHierarchy();
+    const WindowClassification* pClassification = rWindow.ImplGetWindowClassification();
 
-    if (rWindow.ImplGetWindowClassification()->mbFrame)
+    if (pClassification && pClassification->mbFrame)
     {
-        rRegion.Intersect(
-            tools::Rectangle(Point(0, 0), pHierarchy->mpFrameWindow->GetOutputSizePixel()));
+        if (pHierarchy && pHierarchy->getFrameWindow())
+        {
+            rRegion.Intersect(
+                tools::Rectangle(Point(0, 0), pHierarchy->getFrameWindow()->GetOutputSizePixel()));
+        }
     }
 
     if (!bOverlaps || rRegion.IsEmpty())
@@ -450,7 +474,8 @@ void clipBoundaries(const vcl::Window& rWindow, vcl::Region& rRegion, bool bThis
 
     for (vcl::Window* pOverlapWin : getAncestralOverlapSiblings(const_cast<vcl::Window*>(&rWindow)))
     {
-        if (pOverlapWin->ImplGetVisibilityState()->mbReallyVisible)
+        const WindowVisibilityState* pVisState = pOverlapWin->ImplGetVisibilityState();
+        if (pVisState && pVisState->mbReallyVisible)
             excludeWindowRegion(*pOverlapWin, rRegion);
 
         excludeOverlapWindows(*pOverlapWin, rRegion);
@@ -464,42 +489,40 @@ void setParentClipMode(vcl::Window* pWindow, ParentClipMode nMode)
     if (!pWindow)
         return;
 
-    WindowHierarchy* pImpl = pWindow->ImplGetWindowHierarchy();
+    WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy();
+    if (!pHierarchy)
+        return;
 
-    if (pImpl->mpBorderWindow)
+    if (pHierarchy->hasBorderWindow())
     {
-        setParentClipMode(pImpl->mpBorderWindow.get(), nMode);
+        setParentClipMode(pHierarchy->getBorderWindow(), nMode);
         return;
     }
 
-    WindowClassification* pWinImpl = pWindow->ImplGetWindowClassification();
-
-    if (pWinImpl->mbOverlapWin)
+    if (pWindow->ImplIsOverlapWindow())
         return;
 
     WindowClippingState* pClippingState = pWindow->ImplGetClippingState();
+    if (!pClippingState)
+        return;
+
     pClippingState->meParentClipMode = nMode;
 
-    if (nMode & ParentClipMode::Clip)
+    if ((nMode & ParentClipMode::Clip) && pHierarchy->getParent())
     {
-        if (pClippingState && pImpl->mpParent)
-        {
-            WindowClippingState* pParentClippingState = pImpl->mpParent->ImplGetClippingState();
+        if (WindowClippingState* pParentClippingState = pHierarchy->getParent()->ImplGetClippingState())
             pParentClippingState->mbClipChildren = true;
-        }
     }
 }
 
 ParentClipMode getParentClipMode(const vcl::Window& rWindow)
 {
-    WindowHierarchy* pImpl = rWindow.ImplGetWindowHierarchy();
+    const WindowHierarchy* pHierarchy = rWindow.ImplGetWindowHierarchy();
+    if (pHierarchy && pHierarchy->hasBorderWindow())
+        return getParentClipMode(*pHierarchy->getBorderWindow());
 
-    if (pImpl->mpBorderWindow)
-        return getParentClipMode(*pImpl->mpBorderWindow);
-
-    WindowClippingState* pClippingState = rWindow.ImplGetClippingState();
-
-    return pClippingState->meParentClipMode;
+    const WindowClippingState* pClippingState = rWindow.ImplGetClippingState();
+    return pClippingState ? pClippingState->meParentClipMode : ParentClipMode::NoClip;
 }
 
 static void lcl_updateNativeObjectClipRegion(vcl::Window& rWindow, vcl::Region aRegion,
@@ -642,8 +665,8 @@ bool setClipFlag(vcl::Window& rWindow, bool bSysObjOnlySmaller)
 
     if (!rWindow.ImplIsOverlapWindow())
     {
-        if (pHierarchy->mpFrameWindow)
-            return setClipFlagOverlapWindows(*pHierarchy->mpFrameWindow, bSysObjOnlySmaller);
+        if (vcl::Window* pFrameWindow = pHierarchy->getFrameWindow())
+            return setClipFlagOverlapWindows(*pFrameWindow, bSysObjOnlySmaller);
 
         return true;
     }
@@ -653,11 +676,10 @@ bool setClipFlag(vcl::Window& rWindow, bool bSysObjOnlySmaller)
     vcl::Window* pParent = rWindow.ImplGetParent();
     WindowClippingState* pClippingState = rWindow.ImplGetClippingState();
 
-    if (pParent)
+    if (pParent && pClippingState)
     {
         WindowClippingState* pParentClippingState = pParent->ImplGetClippingState();
-        // Explicit return value checking replaces hidden references
-        if (pClippingState
+        if (pParentClippingState
             && invalidateParentClipIfRequired(*pClippingState, *pParentClippingState,
                                               pParent->GetStyle()))
         {
@@ -665,13 +687,12 @@ bool setClipFlag(vcl::Window& rWindow, bool bSysObjOnlySmaller)
         }
     }
 
-    if (pClippingState->mbClipSiblings)
+    if (pClippingState && pClippingState->mbClipSiblings)
     {
-        for (vcl::Window* pSibling : getFollowingSiblings(*pHierarchy))
-        {
-            if (!setClipFlagChildren(*pSibling, bSysObjOnlySmaller))
+        WindowHierarchy::forEachSibling(pHierarchy->getNextSibling(), [&](vcl::Window& rSibling) {
+            if (!setClipFlagChildren(rSibling, bSysObjOnlySmaller))
                 bUpdate = false;
-        }
+        });
     }
 
     return bUpdate;
@@ -697,8 +718,8 @@ bool setClipFlagOverlapWindows(vcl::Window& rWindow, bool bSysObjOnlySmaller)
 void calcOverlapRegionOverlaps(const vcl::Window& rWindow, const vcl::Region& rInterRegion,
                                vcl::Region& rRegion)
 {
-    const WindowHierarchy* pImpl = rWindow.ImplGetWindowHierarchy();
-    if (!pImpl)
+    const WindowHierarchy* pHierarchy = rWindow.ImplGetWindowHierarchy();
+    if (!pHierarchy)
         return;
 
     // High-level ancestral sibling walk
@@ -708,11 +729,11 @@ void calcOverlapRegionOverlaps(const vcl::Window& rWindow, const vcl::Region& rI
     }
 
     // Child overlap window execution
-    WindowClassification* pClassification = rWindow.ImplGetWindowClassification();
-    vcl::Window* pOverlapParent = !pClassification->mbOverlapWin
-                                      ? pImpl->mpOverlapWindow.get()
+    vcl::Window* pOverlapParent = !rWindow.ImplIsOverlapWindow()
+                                      ? pHierarchy->getOverlapWindow()
                                       : const_cast<vcl::Window*>(&rWindow);
-    accumulateChildOverlaps(pOverlapParent, rInterRegion, rRegion);
+    if (pOverlapParent)
+        accumulateChildOverlaps(pOverlapParent, rInterRegion, rRegion);
 }
 
 void calcOverlapRegion(vcl::Window& rWindow, const tools::Rectangle& rSourceRect,

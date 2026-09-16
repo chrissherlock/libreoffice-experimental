@@ -229,17 +229,23 @@ void WindowOutputDevice::CopyDeviceArea( SalTwoRect& aPosAry )
 
 const OutputDevice* WindowOutputDevice::DrawOutDevDirectCheck(const OutputDevice& rSrcDev) const
 {
-    const OutputDevice* pSrcDevChecked;
-    if ( this == &rSrcDev )
-        pSrcDevChecked = nullptr;
-    else if (GetOutDevType() != rSrcDev.GetOutDevType())
-        pSrcDevChecked = &rSrcDev;
-    else if (mxOwnerWindow->mpHierarchy->mpFrameWindow == static_cast<const vcl::WindowOutputDevice&>(rSrcDev).mxOwnerWindow->mpHierarchy->mpFrameWindow)
-        pSrcDevChecked = nullptr;
-    else
-        pSrcDevChecked = &rSrcDev;
+    if (this == &rSrcDev)
+        return nullptr;
 
-    return pSrcDevChecked;
+    if (GetOutDevType() != rSrcDev.GetOutDevType())
+        return &rSrcDev;
+
+    const WindowHierarchy* pThisHierarchy = mxOwnerWindow ? mxOwnerWindow->ImplGetWindowHierarchy() : nullptr;
+    const vcl::Window* pThisFrame = pThisHierarchy ? pThisHierarchy->getFrameWindow() : nullptr;
+
+    const auto& rSrcWinDev = static_cast<const vcl::WindowOutputDevice&>(rSrcDev);
+    const WindowHierarchy* pSrcHierarchy = rSrcWinDev.mxOwnerWindow ? rSrcWinDev.mxOwnerWindow->ImplGetWindowHierarchy() : nullptr;
+    const vcl::Window* pSrcFrame = pSrcHierarchy ? pSrcHierarchy->getFrameWindow() : nullptr;
+
+    if (pThisFrame && pThisFrame == pSrcFrame)
+        return nullptr;
+
+    return &rSrcDev;
 }
 
 void WindowOutputDevice::DrawOutDevDirectProcess( const OutputDevice& rSrcDev, SalTwoRect& rPosAry, SalGraphics* pSrcGraphics )
@@ -367,17 +373,35 @@ void WindowOutputDevice::EnableRTL ( bool bEnable )
 void WindowOutputDevice::ImplClearFontData(bool bNewFontLists)
 {
     OutputDevice::ImplClearFontData(bNewFontLists);
-    for (Window* pChild = mxOwnerWindow->mpHierarchy->mpFirstChild; pChild;
-         pChild = pChild->mpHierarchy->mpNext)
-        pChild->GetOutDev()->ImplClearFontData(bNewFontLists);
+
+    if (!mxOwnerWindow)
+        return;
+
+    const WindowHierarchy* pHierarchy = mxOwnerWindow->ImplGetWindowHierarchy();
+    if (!pHierarchy)
+        return;
+
+    WindowHierarchy::forEachSibling(pHierarchy->getFirstChild(), [bNewFontLists](vcl::Window& rChild) {
+        if (OutputDevice* pChildOutDev = rChild.GetOutDev())
+            pChildOutDev->ImplClearFontData(bNewFontLists);
+    });
 }
 
 void WindowOutputDevice::ImplRefreshFontData(bool bNewFontLists)
 {
     OutputDevice::ImplRefreshFontData(bNewFontLists);
-    for (Window* pChild = mxOwnerWindow->mpHierarchy->mpFirstChild; pChild;
-         pChild = pChild->mpHierarchy->mpNext)
-        pChild->GetOutDev()->ImplRefreshFontData(bNewFontLists);
+
+    if (!mxOwnerWindow)
+        return;
+
+    const WindowHierarchy* pHierarchy = mxOwnerWindow->ImplGetWindowHierarchy();
+    if (!pHierarchy)
+        return;
+
+    WindowHierarchy::forEachSibling(pHierarchy->getFirstChild(), [bNewFontLists](vcl::Window& rChild) {
+        if (OutputDevice* pChildOutDev = rChild.GetOutDev())
+            pChildOutDev->ImplRefreshFontData(bNewFontLists);
+    });
 }
 
 void WindowOutputDevice::SaveBackground(VirtualDevice& rSaveDevice, const Point& rPos, const Size& rSize, const Size&) const
@@ -436,38 +460,51 @@ void WindowOutputDevice::SetSettings( const AllSettings& rSettings )
     SetSettings( rSettings, false );
 }
 
-void WindowOutputDevice::SetSettings( const AllSettings& rSettings, bool bChild )
+void WindowOutputDevice::SetSettings(const AllSettings& rSettings, bool bChild)
 {
+    WindowHierarchy* pHierarchy = mxOwnerWindow ? mxOwnerWindow->ImplGetWindowHierarchy() : nullptr;
 
-    if ( auto pBorderWindow = mxOwnerWindow->mpHierarchy->mpBorderWindow.get() )
+    if (pHierarchy && pHierarchy->hasBorderWindow())
     {
-        static_cast<vcl::WindowOutputDevice*>(pBorderWindow->GetOutDev())->SetSettings( rSettings, false );
-        if ( (pBorderWindow->GetType() == WindowType::BORDERWINDOW) &&
-             static_cast<ImplBorderWindow*>(pBorderWindow)->mpMenuBarWindow )
-            static_cast<vcl::WindowOutputDevice*>(static_cast<ImplBorderWindow*>(pBorderWindow)->mpMenuBarWindow->GetOutDev())->SetSettings( rSettings, true );
-    }
-
-    AllSettings aOldSettings(*moSettings);
-    OutputDevice::SetSettings( rSettings );
-    AllSettingsFlags nChangeFlags = aOldSettings.GetChangeFlags( rSettings );
-
-    // recalculate AppFont-resolution and DPI-resolution
-    mxOwnerWindow->ImplInitResolutionSettings();
-
-    if ( bool(nChangeFlags) )
-    {
-        DataChangedEvent aDCEvt( DataChangedEventType::SETTINGS, &aOldSettings, nChangeFlags );
-        mxOwnerWindow->DataChanged( aDCEvt );
-    }
-
-    if ( bChild )
-    {
-        vcl::Window* pChild = mxOwnerWindow->mpHierarchy->mpFirstChild;
-        while ( pChild )
+        if (vcl::Window* pBorderWindow = pHierarchy->getBorderWindow())
         {
-            static_cast<vcl::WindowOutputDevice*>(pChild->GetOutDev())->SetSettings( rSettings, bChild );
-            pChild = pChild->mpHierarchy->mpNext;
+            if (OutputDevice* pBorderOutDev = pBorderWindow->GetOutDev())
+                static_cast<vcl::WindowOutputDevice*>(pBorderOutDev)->SetSettings(rSettings, false);
+
+            if (pBorderWindow->GetType() == WindowType::BORDERWINDOW)
+            {
+                auto* pImplBorder = static_cast<ImplBorderWindow*>(pBorderWindow);
+                if (pImplBorder->mpMenuBarWindow)
+                {
+                    if (OutputDevice* pMenuOutDev = pImplBorder->mpMenuBarWindow->GetOutDev())
+                        static_cast<vcl::WindowOutputDevice*>(pMenuOutDev)->SetSettings(rSettings, true);
+                }
+            }
         }
+    }
+
+    AllSettings aOldSettings(moSettings ? *moSettings : AllSettings());
+    OutputDevice::SetSettings(rSettings);
+    AllSettingsFlags nChangeFlags = aOldSettings.GetChangeFlags(rSettings);
+
+    if (mxOwnerWindow)
+    {
+        // Recalculate AppFont-resolution and DPI-resolution
+        mxOwnerWindow->ImplInitResolutionSettings();
+
+        if (bool(nChangeFlags))
+        {
+            DataChangedEvent aDCEvt(DataChangedEventType::SETTINGS, &aOldSettings, nChangeFlags);
+            mxOwnerWindow->DataChanged(aDCEvt);
+        }
+    }
+
+    if (bChild && pHierarchy)
+    {
+        WindowHierarchy::forEachSibling(pHierarchy->getFirstChild(), [&rSettings, bChild](vcl::Window& rChild) {
+            if (OutputDevice* pChildOutDev = rChild.GetOutDev())
+                static_cast<vcl::WindowOutputDevice*>(pChildOutDev)->SetSettings(rSettings, bChild);
+        });
     }
 }
 

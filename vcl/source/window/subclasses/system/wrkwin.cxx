@@ -44,27 +44,37 @@ void WorkWindow::ImplInitWorkWindowData()
     mbFullScreenMode        = false;
 }
 
-void WorkWindow::ImplInit( vcl::Window* pParent, WinBits nStyle, SystemParentData* pSystemParentData )
+void WorkWindow::ImplInit(vcl::Window* pParent, WinBits nStyle, SystemParentData* pSystemParentData)
 {
     BorderWindowStyle nFrameStyle = BorderWindowStyle::Frame;
-    if ( nStyle & WB_APP )
+    if (nStyle & WB_APP)
         nFrameStyle |= BorderWindowStyle::App;
 
-    VclPtrInstance<ImplBorderWindow> pBorderWin( pParent, pSystemParentData, nStyle, nFrameStyle );
-    Window::ImplInit( pBorderWin, nStyle & (WB_3DLOOK | WB_CLIPCHILDREN | WB_DIALOGCONTROL | WB_SYSTEMFLOATWIN), nullptr );
-    pBorderWin->mpHierarchy->mpClientWindow = this;
-    pBorderWin->GetBorder( mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder );
-    mpHierarchy->mpBorderWindow = pBorderWin;
+    VclPtrInstance<ImplBorderWindow> pBorderWin(pParent, pSystemParentData, nStyle, nFrameStyle);
+    Window::ImplInit(pBorderWin, nStyle & (WB_3DLOOK | WB_CLIPCHILDREN | WB_DIALOGCONTROL | WB_SYSTEMFLOATWIN), nullptr);
 
-    if ( nStyle & WB_APP )
+    WindowHierarchy* pBorderHierarchy = pBorderWin ? pBorderWin->ImplGetWindowHierarchy() : nullptr;
+    if (pBorderHierarchy)
+        pBorderHierarchy->setClientWindow(this);
+
+    if (mpGeometry)
+        pBorderWin->GetBorder(mpGeometry->mnLeftBorder, mpGeometry->mnTopBorder, mpGeometry->mnRightBorder, mpGeometry->mnBottomBorder);
+
+    if (mpHierarchy)
+        mpHierarchy->setBorderWindow(pBorderWin);
+
+    if (nStyle & WB_APP)
     {
         ImplSVData* pSVData = ImplGetSVData();
-        SAL_WARN_IF(pSVData->maFrameData.mpAppWin, "vcl",
-                    "WorkWindow::WorkWindow(): More than one window with style WB_APP");
-        pSVData->maFrameData.mpAppWin = this;
+        if (pSVData)
+        {
+            SAL_WARN_IF(pSVData->maFrameData.mpAppWin, "vcl",
+                        "WorkWindow::WorkWindow(): More than one window with style WB_APP");
+            pSVData->maFrameData.mpAppWin = this;
+        }
     }
 
-    SetActivateMode( ActivateModeFlags::GrabFocus );
+    SetActivateMode(ActivateModeFlags::GrabFocus);
 }
 
 void WorkWindow::ImplInit( vcl::Window* pParent, WinBits nStyle, const css::uno::Any& aSystemWorkWindowToken )
@@ -132,21 +142,31 @@ void WorkWindow::ShowFullScreenMode( bool bFullScreenMode )
     return ShowFullScreenMode( bFullScreenMode, GetScreenNumber());
 }
 
-void WorkWindow::ShowFullScreenMode( bool bFullScreenMode, sal_Int32 nDisplayScreen )
+void WorkWindow::ShowFullScreenMode(bool bFullScreenMode, sal_Int32 nDisplayScreen)
 {
-    if ( !mbFullScreenMode == !bFullScreenMode )
+    if (!mbFullScreenMode == !bFullScreenMode)
         return;
 
     mbFullScreenMode = bFullScreenMode;
-    if ( mbSysChild )
+    if (mbSysChild)
         return;
 
     // Dispose of the canvas implementation, which might rely on
     // screen-specific system data.
-    GetOutDev()->ImplDisposeCanvas();
+    if (GetOutDev())
+        GetOutDev()->ImplDisposeCanvas();
 
-    mpHierarchy->mpFrameWindow->mpGeometry->mbWaitSystemResize = true;
-    ImplGetFrame()->ShowFullScreen( bFullScreenMode, nDisplayScreen );
+    const WindowHierarchy* pHierarchy = mpHierarchy ? mpHierarchy.get() : nullptr;
+    vcl::Window* pFrameWindow = pHierarchy ? pHierarchy->getFrameWindow() : nullptr;
+    if (pFrameWindow)
+    {
+        auto* pGeometry = pFrameWindow->ImplGetGeometry();
+        if (pGeometry)
+            pGeometry->mbWaitSystemResize = true;
+    }
+
+    if (auto* pFrame = ImplGetFrame())
+        pFrame->ShowFullScreen(bFullScreenMode, nDisplayScreen);
 }
 
 void WorkWindow::StartPresentationMode( PresentationFlags nFlags )

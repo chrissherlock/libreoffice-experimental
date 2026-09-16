@@ -38,10 +38,15 @@ void Window::SetText(const OUString& rStr)
     OUString oldTitle(maText);
     maText = rStr;
 
-    if (mpHierarchy->mpBorderWindow)
-        mpHierarchy->mpBorderWindow->SetText(rStr);
-    else if (mpClassification->mbFrame)
-        mpPlatformState->mpFrame->SetTitle(rStr);
+    if (vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr)
+    {
+        pBorderWindow->SetText(rStr);
+    }
+    else if (mpClassification && mpClassification->mbFrame)
+    {
+        if (mpPlatformState && mpPlatformState->mpFrame)
+            mpPlatformState->mpFrame->SetTitle(rStr);
+    }
 
     CallEventListeners(VclEventId::WindowFrameTitleChanged, &oldTitle);
 

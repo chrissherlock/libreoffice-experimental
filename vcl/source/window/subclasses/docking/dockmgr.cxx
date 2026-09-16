@@ -761,41 +761,55 @@ void ImplDockingWindowWrapper::ShowMenuTitleButton( bool bVisible )
 void ImplDockingWindowWrapper::ImplPreparePopupMode()
 {
     VclPtr<vcl::Window> xWindow = GetWindow();
-    xWindow->Show( false, ShowFlags::NoFocusChange );
+    if (!xWindow)
+        return;
 
-    // prepare reparenting
-    vcl::Window* pRealParent = xWindow->GetWindow( GetWindowType::Parent );
-    mpOldBorderWin = xWindow->GetWindow( GetWindowType::Border );
-    if( mpOldBorderWin.get() == xWindow )
-        mpOldBorderWin = nullptr;  // no border window found
+    xWindow->Show(false, ShowFlags::NoFocusChange);
 
-    // the new parent for popup mode
-    VclPtrInstance<ImplPopupFloatWin> pWin( mpParent, xWindow->GetType() == WindowType::TOOLBOX );
-    pWin->SetPopupModeEndHdl( LINK( this, ImplDockingWindowWrapper, PopupModeEnd ) );
+    // Prepare reparenting
+    vcl::Window* pRealParent = xWindow->GetWindow(GetWindowType::Parent);
+    mpOldBorderWin = xWindow->GetWindow(GetWindowType::Border);
+    if (mpOldBorderWin.get() == xWindow.get())
+        mpOldBorderWin = nullptr; // No border window found
+
+    // The new parent for popup mode
+    VclPtrInstance<ImplPopupFloatWin> pWin(mpParent, xWindow->GetType() == WindowType::TOOLBOX);
+    pWin->SetPopupModeEndHdl(LINK(this, ImplDockingWindowWrapper, PopupModeEnd));
 
     // At least for DockingWindow, GetText() has a side effect of setting deferred
     // properties. This must be done before setting the border window (see below),
     // so that the border width will end up in mpClassification->mnBorderWidth, not in
     // the border window (See DockingWindow::setPosSizeOnContainee() and
     // DockingWindow::GetOptimalSize()).
-    pWin->SetText( xWindow->GetText() );
-    pWin->SetOutputSizePixel( xWindow->GetSizePixel() );
+    pWin->SetText(xWindow->GetText());
+    pWin->SetOutputSizePixel(xWindow->GetSizePixel());
 
-    xWindow->mpHierarchy->mpBorderWindow  = nullptr;
-    xWindow->mpGeometry->mnLeftBorder    = 0;
-    xWindow->mpGeometry->mnTopBorder     = 0;
-    xWindow->mpGeometry->mnRightBorder   = 0;
-    xWindow->mpGeometry->mnBottomBorder  = 0;
+    WindowHierarchy* pWinHierarchy = xWindow->ImplGetWindowHierarchy();
+    if (pWinHierarchy)
+        pWinHierarchy->setBorderWindow(nullptr);
 
-    // reparent borderwindow and window
-    if ( mpOldBorderWin )
-        mpOldBorderWin->SetParent( pWin );
-    xWindow->SetParent( pWin );
+    if (xWindow->mpGeometry)
+    {
+        xWindow->mpGeometry->mnLeftBorder = 0;
+        xWindow->mpGeometry->mnTopBorder = 0;
+        xWindow->mpGeometry->mnRightBorder = 0;
+        xWindow->mpGeometry->mnBottomBorder = 0;
+    }
 
-    // correct border window pointers
-    xWindow->mpHierarchy->mpBorderWindow = pWin;
-    pWin->mpHierarchy->mpClientWindow = xWindow;
-    xWindow->mpHierarchy->mpRealParent = pRealParent;
+    // Reparent borderwindow and window
+    if (mpOldBorderWin)
+        mpOldBorderWin->SetParent(pWin);
+    xWindow->SetParent(pWin);
+
+    // Correct border window pointers
+    if (pWinHierarchy)
+    {
+        pWinHierarchy->setBorderWindow(pWin);
+        pWinHierarchy->setRealParent(pRealParent);
+    }
+
+    if (WindowHierarchy* pFloatHierarchy = pWin->ImplGetWindowHierarchy())
+        pFloatHierarchy->setClientWindow(xWindow);
 
     // set mpFloatWin not until all window positioning is done !!!
     // (SetPosPixel etc. check for valid mpFloatWin pointer)
@@ -852,33 +866,54 @@ void ImplDockingWindowWrapper::StartPopupMode( const tools::Rectangle& rRect, Fl
 IMPL_LINK_NOARG(ImplDockingWindowWrapper, PopupModeEnd, FloatingWindow*, void)
 {
     VclPtr<vcl::Window> xWindow = GetWindow();
-    xWindow->Show( false, ShowFlags::NoFocusChange );
+    if (!xWindow)
+        return;
 
-    // set parameter for handler before destroying floating window
-    EndPopupModeData aData( mpFloatWin->GetWindow( GetWindowType::Border )->GetPosPixel(), mpFloatWin->IsPopupModeTearOff() );
+    xWindow->Show(false, ShowFlags::NoFocusChange);
 
-    // before deleting change parent back, so we can delete the floating window alone
-    vcl::Window* pRealParent = xWindow->GetWindow( GetWindowType::Parent );
-    xWindow->mpHierarchy->mpBorderWindow = nullptr;
-    if ( mpOldBorderWin )
+    // Set parameter for handler before destroying floating window
+    vcl::Window* pFloatBorder = mpFloatWin ? mpFloatWin->GetWindow(GetWindowType::Border) : nullptr;
+    const Point aPos = pFloatBorder ? pFloatBorder->GetPosPixel() : Point();
+    const bool bTearOff = mpFloatWin && mpFloatWin->IsPopupModeTearOff();
+    EndPopupModeData aData(aPos, bTearOff);
+
+    // Before deleting, restore parent hierarchy so the floating window can be cleanly destroyed
+    vcl::Window* pRealParent = xWindow->GetWindow(GetWindowType::Parent);
+    WindowHierarchy* pWinHierarchy = xWindow->ImplGetWindowHierarchy();
+
+    if (pWinHierarchy)
+        pWinHierarchy->setBorderWindow(nullptr);
+
+    if (mpOldBorderWin)
     {
-        xWindow->SetParent( mpOldBorderWin );
-        static_cast<ImplBorderWindow*>(mpOldBorderWin.get())->GetBorder(
-            xWindow->mpGeometry->mnLeftBorder, xWindow->mpGeometry->mnTopBorder,
-            xWindow->mpGeometry->mnRightBorder, xWindow->mpGeometry->mnBottomBorder );
+        xWindow->SetParent(mpOldBorderWin);
+        if (xWindow->mpGeometry)
+        {
+            static_cast<ImplBorderWindow*>(mpOldBorderWin.get())->GetBorder(
+                xWindow->mpGeometry->mnLeftBorder, xWindow->mpGeometry->mnTopBorder,
+                xWindow->mpGeometry->mnRightBorder, xWindow->mpGeometry->mnBottomBorder);
+        }
         mpOldBorderWin->Resize();
     }
-    xWindow->mpHierarchy->mpBorderWindow = mpOldBorderWin;
-    xWindow->SetParent( pRealParent );
-    xWindow->mpHierarchy->mpRealParent = pRealParent;
 
-    // take ownership to local variable to protect against maPopupModeEndHdl destroying this object
+    if (pWinHierarchy)
+    {
+        pWinHierarchy->setBorderWindow(mpOldBorderWin);
+        xWindow->SetParent(pRealParent);
+        pWinHierarchy->setRealParent(pRealParent);
+    }
+    else
+    {
+        xWindow->SetParent(pRealParent);
+    }
+
+    // Take ownership to local variable to protect against maPopupModeEndHdl destroying this object
     auto xFloatWin = std::move(mpFloatWin);
     maPopupModeEndHdl.Call(xFloatWin);
     xFloatWin.disposeAndClear();
 
-    // call handler - which will destroy the window and thus the wrapper as well !
-    xWindow->CallEventListeners( VclEventId::WindowEndPopupMode, &aData );
+    // Call handler - which will destroy the window and thus the wrapper as well
+    xWindow->CallEventListeners(VclEventId::WindowEndPopupMode, &aData);
 }
 
 bool ImplDockingWindowWrapper::IsInPopupMode() const
@@ -889,110 +924,140 @@ bool ImplDockingWindowWrapper::IsInPopupMode() const
         return false;
 }
 
-void ImplDockingWindowWrapper::SetFloatingMode( bool bFloatMode )
+void ImplDockingWindowWrapper::SetFloatingMode(bool bFloatMode)
 {
-    // do nothing if window is docked and locked
-    if( !IsFloatingMode() && IsLocked() )
+    // Do nothing if window is docked and locked
+    if (!IsFloatingMode() && IsLocked())
         return;
 
-    if ( IsFloatingMode() == bFloatMode )
+    if (IsFloatingMode() == bFloatMode)
         return;
 
-    if ( !PrepareToggleFloatingMode() )
+    if (!PrepareToggleFloatingMode())
         return;
 
-    bool bVisible = GetWindow()->IsVisible();
+    VclPtr<vcl::Window> xWindow = GetWindow();
+    if (!xWindow)
+        return;
 
-    if ( bFloatMode )
+    const bool bVisible = xWindow->IsVisible();
+    WindowHierarchy* pWinHierarchy = xWindow->ImplGetWindowHierarchy();
+
+    if (bFloatMode)
     {
-        GetWindow()->Show( false, ShowFlags::NoFocusChange );
+        xWindow->Show(false, ShowFlags::NoFocusChange);
 
-        maDockPos = GetWindow()->GetPosPixel();
+        maDockPos = xWindow->GetPosPixel();
 
-        vcl::Window* pRealParent = GetWindow()->GetWindow( GetWindowType::Parent );
-        mpOldBorderWin = GetWindow()->GetWindow( GetWindowType::Border );
-        if( mpOldBorderWin == mpDockingWindow )
-            mpOldBorderWin = nullptr;  // no border window found
+        vcl::Window* pRealParent = xWindow->GetWindow(GetWindowType::Parent);
+        mpOldBorderWin = xWindow->GetWindow(GetWindowType::Border);
+        if (mpOldBorderWin.get() == mpDockingWindow)
+            mpOldBorderWin = nullptr; // No border window found
 
-        VclPtrInstance<ImplDockFloatWin2> pWin(
-                                 mpParent,
-                                 mnFloatBits & ( WB_MOVEABLE | WB_SIZEABLE | WB_CLOSEABLE ) ?
-                                  mnFloatBits | WB_SYSTEMWINDOW
-                                  | WB_OWNERDRAWDECORATION
-                                  : mnFloatBits,
-                                 this );
+        const WinBits nWinBits = (mnFloatBits & (WB_MOVEABLE | WB_SIZEABLE | WB_CLOSEABLE))
+                                     ? (mnFloatBits | WB_SYSTEMWINDOW | WB_OWNERDRAWDECORATION)
+                                     : mnFloatBits;
+
+        VclPtrInstance<ImplDockFloatWin2> pWin(mpParent, nWinBits, this);
 
         // At least for DockingWindow, GetText() has a side effect of setting deferred
         // properties. This must be done before setting the border window (see below),
         // so that the border width will end up in mpClassification->mnBorderWidth, not in
         // the border window (See DockingWindow::setPosSizeOnContainee() and
         // DockingWindow::GetOptimalSize()).
-        pWin->SetText( GetWindow()->GetText() );
+        pWin->SetText(xWindow->GetText());
 
-        GetWindow()->mpHierarchy->mpBorderWindow  = nullptr;
-        GetWindow()->mpGeometry->mnLeftBorder    = 0;
-        GetWindow()->mpGeometry->mnTopBorder     = 0;
-        GetWindow()->mpGeometry->mnRightBorder   = 0;
-        GetWindow()->mpGeometry->mnBottomBorder  = 0;
+        if (pWinHierarchy)
+            pWinHierarchy->setBorderWindow(nullptr);
 
-        // if the parent gets destroyed, we also have to reset the parent of the BorderWindow
-        if ( mpOldBorderWin )
-            mpOldBorderWin->SetParent( pWin );
-        GetWindow()->SetParent( pWin );
-        pWin->SetPosPixel( Point() );
+        if (xWindow->mpGeometry)
+        {
+            xWindow->mpGeometry->mnLeftBorder = 0;
+            xWindow->mpGeometry->mnTopBorder = 0;
+            xWindow->mpGeometry->mnRightBorder = 0;
+            xWindow->mpGeometry->mnBottomBorder = 0;
+        }
 
-        GetWindow()->mpHierarchy->mpBorderWindow = pWin;
-        pWin->mpHierarchy->mpClientWindow = mpDockingWindow;
-        GetWindow()->mpHierarchy->mpRealParent = pRealParent;
+        // If the parent gets destroyed, we also have to reset the parent of the BorderWindow
+        if (mpOldBorderWin)
+            mpOldBorderWin->SetParent(pWin);
+        xWindow->SetParent(pWin);
+        pWin->SetPosPixel(Point());
 
-        pWin->SetOutputSizePixel( GetWindow()->GetSizePixel() );
-        pWin->SetPosPixel( maFloatPos );
-        // pass on DockingData to FloatingWindow
-        pWin->ShowTitleButton( TitleButton::Docking, mbDockBtn );
-        pWin->ShowTitleButton( TitleButton::Hide, mbHideBtn );
-        pWin->SetMinOutputSizePixel( maMinOutSize );
-        pWin->SetMaxOutputSizePixel( maMaxOutSize );
+        if (pWinHierarchy)
+        {
+            pWinHierarchy->setBorderWindow(pWin);
+            pWinHierarchy->setRealParent(pRealParent);
+        }
 
-        mpFloatWin      = pWin;
+        if (WindowHierarchy* pFloatHierarchy = pWin->ImplGetWindowHierarchy())
+            pFloatHierarchy->setClientWindow(mpDockingWindow);
 
-        if ( bVisible )
-            GetWindow()->Show( true, ShowFlags::NoFocusChange | ShowFlags::NoActivate );
+        pWin->SetOutputSizePixel(xWindow->GetSizePixel());
+        pWin->SetPosPixel(maFloatPos);
+
+        // Pass on DockingData to FloatingWindow
+        pWin->ShowTitleButton(TitleButton::Docking, mbDockBtn);
+        pWin->ShowTitleButton(TitleButton::Hide, mbHideBtn);
+        pWin->SetMinOutputSizePixel(maMinOutSize);
+        pWin->SetMaxOutputSizePixel(maMaxOutSize);
+
+        mpFloatWin = pWin;
+
+        if (bVisible)
+            xWindow->Show(true, ShowFlags::NoFocusChange | ShowFlags::NoActivate);
 
         ToggleFloatingMode();
     }
     else
     {
-        GetWindow()->Show( false, ShowFlags::NoFocusChange );
+        xWindow->Show(false, ShowFlags::NoFocusChange);
 
-        // store FloatingData in FloatingWindow
-        maFloatPos      = mpFloatWin->GetPosPixel();
-        mbDockBtn       = mpFloatWin->IsTitleButtonVisible( TitleButton::Docking );
-        mbHideBtn       = mpFloatWin->IsTitleButtonVisible( TitleButton::Hide );
-        maMinOutSize    = mpFloatWin->GetMinOutputSizePixel();
-        maMaxOutSize    = mpFloatWin->GetMaxOutputSizePixel();
-
-        vcl::Window* pRealParent = GetWindow()->GetWindow( GetWindowType::Parent );
-        GetWindow()->mpHierarchy->mpBorderWindow = nullptr;
-        if ( mpOldBorderWin )
+        if (mpFloatWin)
         {
-            GetWindow()->SetParent( mpOldBorderWin );
-            static_cast<ImplBorderWindow*>(mpOldBorderWin.get())->GetBorder(
-                GetWindow()->mpGeometry->mnLeftBorder, GetWindow()->mpGeometry->mnTopBorder,
-                GetWindow()->mpGeometry->mnRightBorder, GetWindow()->mpGeometry->mnBottomBorder );
+            // Store FloatingData in FloatingWindow
+            maFloatPos = mpFloatWin->GetPosPixel();
+            mbDockBtn = mpFloatWin->IsTitleButtonVisible(TitleButton::Docking);
+            mbHideBtn = mpFloatWin->IsTitleButtonVisible(TitleButton::Hide);
+            maMinOutSize = mpFloatWin->GetMinOutputSizePixel();
+            maMaxOutSize = mpFloatWin->GetMaxOutputSizePixel();
+        }
+
+        vcl::Window* pRealParent = xWindow->GetWindow(GetWindowType::Parent);
+
+        if (pWinHierarchy)
+            pWinHierarchy->setBorderWindow(nullptr);
+
+        if (mpOldBorderWin)
+        {
+            xWindow->SetParent(mpOldBorderWin);
+            if (xWindow->mpGeometry)
+            {
+                static_cast<ImplBorderWindow*>(mpOldBorderWin.get())->GetBorder(
+                    xWindow->mpGeometry->mnLeftBorder, xWindow->mpGeometry->mnTopBorder,
+                    xWindow->mpGeometry->mnRightBorder, xWindow->mpGeometry->mnBottomBorder);
+            }
             mpOldBorderWin->Resize();
         }
-        GetWindow()->mpHierarchy->mpBorderWindow = mpOldBorderWin;
-        GetWindow()->SetParent( pRealParent );
-        GetWindow()->mpHierarchy->mpRealParent = pRealParent;
+
+        if (pWinHierarchy)
+        {
+            pWinHierarchy->setBorderWindow(mpOldBorderWin);
+            xWindow->SetParent(pRealParent);
+            pWinHierarchy->setRealParent(pRealParent);
+        }
+        else
+        {
+            xWindow->SetParent(pRealParent);
+        }
 
         mpFloatWin.disposeAndClear();
-        GetWindow()->SetPosPixel( maDockPos );
+        xWindow->SetPosPixel(maDockPos);
 
-        if ( bVisible )
-            GetWindow()->Show();
+        if (bVisible)
+            xWindow->Show();
 
         ToggleFloatingMode();
-
     }
 }
 

@@ -86,14 +86,20 @@ void Window::SetExtendedStyle(WindowExtendedStyle nExtendedStyle)
 
 bool Window::ImplShouldHaveBorder(WindowBorderStyle nBorderStyle)
 {
+    const vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    const WindowHierarchy* pBorderHierarchy = pBorderWindow ? pBorderWindow->ImplGetWindowHierarchy() : nullptr;
+    const vcl::Window* pBorderParent = pBorderHierarchy ? pBorderHierarchy->getParent() : nullptr;
+
     return nBorderStyle != WindowBorderStyle::REMOVEBORDER
-           || mpHierarchy->mpBorderWindow->mpClassification->mbFrame
-           || !mpHierarchy->mpBorderWindow->mpHierarchy->mpParent;
+        || (pBorderWindow && pBorderWindow->mpClassification && pBorderWindow->mpClassification->mbFrame)
+        || !pBorderParent;
 }
 
 void Window::ImplSetBorderWindowStyle(WindowBorderStyle nBorderStyle)
 {
-    vcl::Window* pBorderWindow = mpHierarchy->mpBorderWindow.get();
+    vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (!pBorderWindow)
+        return;
 
     if (pBorderWindow->GetType() == WindowType::BORDERWINDOW)
         static_cast<ImplBorderWindow*>(pBorderWindow)->SetBorderStyle(nBorderStyle);
@@ -103,7 +109,8 @@ void Window::ImplSetBorderWindowStyle(WindowBorderStyle nBorderStyle)
 
 void Window::SetBorderStyle(WindowBorderStyle nBorderStyle)
 {
-    if (!mpHierarchy->mpBorderWindow)
+    vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (!pBorderWindow)
         return;
 
     if (ImplShouldHaveBorder(nBorderStyle))
@@ -115,15 +122,23 @@ void Window::SetBorderStyle(WindowBorderStyle nBorderStyle)
     // this is a little awkward: some controls (e.g. svtools ProgressBar)
     // cannot avoid getting constructed with WB_BORDER but want to disable
     // borders in case of NWF drawing. So they need a method to remove their border window
-    VclPtr<vcl::Window> pBorderWin = mpHierarchy->mpBorderWindow;
+    VclPtr<vcl::Window> pBorderWin = pBorderWindow;
+    WindowHierarchy* pBorderHierarchy = pBorderWin->ImplGetWindowHierarchy();
 
     // remove us as border window's client
-    pBorderWin->mpHierarchy->mpClientWindow = nullptr;
-    mpHierarchy->mpBorderWindow = nullptr;
-    mpHierarchy->mpRealParent = pBorderWin->mpHierarchy->mpParent;
+    if (pBorderHierarchy)
+        pBorderHierarchy->setClientWindow(nullptr);
+
+    vcl::Window* pBorderParent = pBorderHierarchy ? pBorderHierarchy->getParent() : nullptr;
+
+    if (mpHierarchy)
+    {
+        mpHierarchy->setBorderWindow(nullptr);
+        mpHierarchy->setRealParent(pBorderParent);
+    }
 
     // reparent us above the border window
-    SetParent(pBorderWin->mpHierarchy->mpParent);
+    SetParent(pBorderParent);
 
     // set us to the position and size of our previous border
     Point aBorderPos(pBorderWin->GetPosPixel());
@@ -139,13 +154,14 @@ void Window::SetBorderStyle(WindowBorderStyle nBorderStyle)
 
 WindowBorderStyle Window::GetBorderStyle() const
 {
-    if (!mpHierarchy->mpBorderWindow)
+    vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (!pBorderWindow)
         return WindowBorderStyle::NONE;
 
-    if (mpHierarchy->mpBorderWindow->GetType() == WindowType::BORDERWINDOW)
-        return static_cast<ImplBorderWindow*>(mpHierarchy->mpBorderWindow.get())->GetBorderStyle();
+    if (pBorderWindow->GetType() == WindowType::BORDERWINDOW)
+        return static_cast<ImplBorderWindow*>(pBorderWindow)->GetBorderStyle();
 
-    return mpHierarchy->mpBorderWindow->GetBorderStyle();
+    return pBorderWindow->GetBorderStyle();
 }
 
 void Window::GetBorder(sal_Int32& rLeftBorder, sal_Int32& rTopBorder, sal_Int32& rRightBorder,
@@ -159,8 +175,9 @@ void Window::GetBorder(sal_Int32& rLeftBorder, sal_Int32& rTopBorder, sal_Int32&
 
 bool Window::ImplShouldFallbackToParentBackground(const Wallpaper& rBack) const
 {
+    const vcl::Window* pParent = mpHierarchy ? mpHierarchy->getParent() : nullptr;
     return !rBack.IsBitmap() && !rBack.IsGradient() && rBack.GetColor() == COL_TRANSPARENT
-           && mpHierarchy->mpParent;
+        && pParent;
 }
 
 const Wallpaper& Window::GetDisplayBackground() const
@@ -170,13 +187,14 @@ const Wallpaper& Window::GetDisplayBackground() const
     if (const ToolBox* pTB = dynamic_cast<const ToolBox*>(this); pTB && IsNativeWidgetEnabled())
         return pTB->ImplGetToolBoxPrivateData()->maDisplayBackground;
 
-    if (!HasBackground() && mpHierarchy->mpParent)
-        return mpHierarchy->mpParent->GetDisplayBackground();
+    const vcl::Window* pParent = mpHierarchy ? mpHierarchy->getParent() : nullptr;
+    if (!HasBackground() && pParent)
+        return pParent->GetDisplayBackground();
 
     const Wallpaper& rBack = GetBackground();
 
-    if (ImplShouldFallbackToParentBackground(rBack))
-        return mpHierarchy->mpParent->GetDisplayBackground();
+    if (ImplShouldFallbackToParentBackground(rBack) && pParent)
+        return pParent->GetDisplayBackground();
 
     return rBack;
 }
@@ -206,17 +224,23 @@ void Window::ImplUpdateNativeWidgetState(bool bEnable)
     CompatDataChanged(aDCEvt);
 
     // sometimes the borderwindow is queried, so keep it in sync
-    if (mpHierarchy->mpBorderWindow)
-        mpHierarchy->mpBorderWindow->ImplGetWinData()->mbEnableNativeWidget = bEnable;
+    vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
+    if (pBorderWindow && pBorderWindow->ImplGetWinData())
+    {
+        pBorderWindow->ImplGetWinData()->mbEnableNativeWidget = bEnable;
+    }
 }
 
 void Window::ImplEnableChildNativeWidgets(bool bEnable)
 {
     // push down, useful for compound controls
-    for (VclPtr<vcl::Window> pChild = mpHierarchy->mpFirstChild; pChild != nullptr;
-         pChild = pChild->mpHierarchy->mpNext)
+    VclPtr<vcl::Window> pChild = mpHierarchy ? mpHierarchy->getFirstChild() : nullptr;
+    while (pChild)
     {
         pChild->EnableNativeWidget(bEnable);
+
+        const WindowHierarchy* pChildHierarchy = pChild->ImplGetWindowHierarchy();
+        pChild = pChildHierarchy ? pChildHierarchy->getNextSibling() : nullptr;
     }
 }
 
