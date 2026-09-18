@@ -36,7 +36,6 @@
 #include <window/state/WindowControlState.hxx>
 #include <window/state/WindowPlatformState.hxx>
 #include <window/subclasses/decorations/brdwin.hxx>
-#include <window/state/clipping_window.hxx>
 #include <salframe.hxx>
 #include <salgdi.hxx>
 #include <salobj.hxx>
@@ -363,7 +362,9 @@ AbsoluteScreenPixelRectangle Window::GetDesktopRectPixel() const
     AbsoluteScreenPixelRectangle rRect;
 
     vcl::Window* pFrameWindow = mpHierarchy ? mpHierarchy->getFrameWindow() : nullptr;
-    SalFrame* pFrame = (pFrameWindow && pFrameWindow->mpPlatformState) ? pFrameWindow->mpPlatformState->mpFrame : nullptr;
+    SalFrame* pFrame = (pFrameWindow && pFrameWindow->mpPlatformState)
+                           ? pFrameWindow->mpPlatformState->mpFrame
+                           : nullptr;
 
     if (pFrame)
         pFrame->GetWorkArea(rRect);
@@ -376,7 +377,8 @@ tools::Rectangle Window::GetWindowExtentsRelative(const vcl::Window& rRelativeWi
 {
     AbsoluteScreenPixelRectangle aRect = GetWindowExtentsAbsolute();
     // #106399# express coordinates relative to borderwindow
-    const vcl::Window* pRelWin = rRelativeWindow.mpHierarchy ? rRelativeWindow.mpHierarchy->getBorderWindow() : nullptr;
+    const vcl::Window* pRelWin
+        = rRelativeWindow.mpHierarchy ? rRelativeWindow.mpHierarchy->getBorderWindow() : nullptr;
     if (!pRelWin)
     {
         pRelWin = &rRelativeWindow;
@@ -397,7 +399,8 @@ AbsoluteScreenPixelRectangle Window::GetWindowExtentsAbsolute() const
 
     // #104088# do not add decoration to the workwindow to be compatible to java accessibility api
     const bool bIsFrame = mpClassification && mpClassification->mbFrame;
-    const bool bBorderIsFrame = pBorderWin && pBorderWin->mpClassification && pBorderWin->mpClassification->mbFrame;
+    const bool bBorderIsFrame
+        = pBorderWin && pBorderWin->mpClassification && pBorderWin->mpClassification->mbFrame;
 
     if (bIsFrame || (pBorderWin && bBorderIsFrame && GetType() != WindowType::WORKWINDOW))
     {
@@ -440,7 +443,8 @@ tools::Long Window::CalcTitleWidth() const
         return pBorderWindow->CalcTitleWidth();
     }
 
-    if (!mpClassification || !mpClassification->mbFrame || !mpStyleState || !(mpStyleState->mnStyle & WB_MOVEABLE))
+    if (!mpClassification || !mpClassification->mbFrame || !mpStyleState
+        || !(mpStyleState->mnStyle & WB_MOVEABLE))
         return 0;
 
     // We guess the width for frame windows as we do not know the
@@ -1081,8 +1085,7 @@ void Window::ImplAdjustPosForRTL(tools::Long& rX, tools::Long& rOrgX, Point& rPt
         const OutputDevice* pParentOutDev = pParent ? pParent->GetOutDev() : nullptr;
         if (pParentOutDev)
         {
-            rX = pParentOutDev->GetOutputWidthPixel()
-                 - pOutDev->GetOutputWidthPixel() - rX;
+            rX = pParentOutDev->GetOutputWidthPixel() - pOutDev->GetOutputWidthPixel() - rX;
         }
     }
 }
@@ -1108,24 +1111,29 @@ bool Window::ImplUpdatePos(PosSizeFlags nFlags, tools::Long nX, tools::Long nY,
 bool Window::ImplUpdatePosX(tools::Long nX, bool bXAlreadyMirrored, bool bCopyBits,
                             std::unique_ptr<vcl::Region>& rpOverlapRegion)
 {
+    OutputDevice* pOutDev = GetOutDev();
+    if (!pOutDev || !mpGeometry)
+        return false;
+
     tools::Long nOrgX = nX;
-    Point aPtDev(nX + GetOutDev()->GetDeviceOriginX(), 0);
+    Point aPtDev(nX + pOutDev->GetDeviceOriginX(), 0);
 
     ImplAdjustPosForRTL(nX, nOrgX, aPtDev, bXAlreadyMirrored);
 
-    const bool bPositionUnchanged = [&]() {
-        return mpGeometry->mnAbsScreenX == aPtDev.X() && nX == mpGeometry->mnX
-               && nOrgX == mpGeometry->maPos.X();
-    }();
+    const bool bPositionUnchanged = (mpGeometry->mnAbsScreenX == aPtDev.X() && nX == mpGeometry->mnX
+                                     && nOrgX == mpGeometry->maPos.X());
 
     if (bPositionUnchanged)
         return false;
 
     if (bCopyBits && !rpOverlapRegion)
     {
-        rpOverlapRegion.reset(new vcl::Region());
-        vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *rpOverlapRegion, false,
-                                         true);
+        rpOverlapRegion = std::make_unique<vcl::Region>();
+        if (mpClippingState)
+        {
+            mpClippingState->calcOverlapRegion(*this, GetOutputRectPixel(), *rpOverlapRegion, false,
+                                               true);
+        }
     }
 
     mpGeometry->mnX = nX;
@@ -1138,15 +1146,21 @@ bool Window::ImplUpdatePosX(tools::Long nX, bool bXAlreadyMirrored, bool bCopyBi
 bool Window::ImplUpdatePosY(tools::Long nY, bool bCopyBits,
                             std::unique_ptr<vcl::Region>& rpOverlapRegion)
 {
-    // check maPos as well, as it could have been changed for client windows (ImplCallMove())
+    if (!mpGeometry)
+        return false;
+
+    // Check maPos as well, as it could have been changed for client windows (ImplCallMove())
     if (nY == mpGeometry->mnY && nY == mpGeometry->maPos.Y())
         return false;
 
     if (bCopyBits && !rpOverlapRegion)
     {
-        rpOverlapRegion.reset(new vcl::Region());
-        vcl::clipping::calcOverlapRegion(*this, GetOutputRectPixel(), *rpOverlapRegion, false,
-                                         true);
+        rpOverlapRegion = std::make_unique<vcl::Region>();
+        if (mpClippingState)
+        {
+            mpClippingState->calcOverlapRegion(*this, GetOutputRectPixel(), *rpOverlapRegion, false,
+                                               true);
+        }
     }
 
     mpGeometry->mnY = nY;
@@ -1204,35 +1218,43 @@ bool Window::ImplCopyArea(vcl::Region& rRegion, const tools::Rectangle& rInitial
 bool Window::ImplCopyBitsRegion(std::unique_ptr<vcl::Region>& rpOverlapRegion,
                                 const tools::Rectangle& rInitialWinRect)
 {
+    OutputDevice* pOutDev = GetOutDev();
+    if (!pOutDev)
+        return true;
+
     vcl::Region aRegion(GetOutputRectPixel());
 
-    if (mpClippingState->mbWinRegion)
-        aRegion.Intersect(GetOutDev()->GetMapper().ViewToDevice(mpClippingState->maWinRegion));
-
-    vcl::clipping::clipBoundaries(*this, aRegion, false, true);
-
-    if (!rpOverlapRegion->IsEmpty())
+    if (mpClippingState)
     {
-        rpOverlapRegion->Move(GetOutDev()->GetDeviceOriginX() - rInitialWinRect.Left(),
-                              GetOutDev()->GetDeviceOriginY() - rInitialWinRect.Top());
+        if (mpClippingState->hasWindowRegion())
+        {
+            aRegion.Intersect(
+                pOutDev->GetMapper().ViewToDevice(mpClippingState->getWindowRegion()));
+        }
+
+        mpClippingState->clipBoundaries(*this, aRegion, false, true);
+    }
+
+    const tools::Long nDeltaX = pOutDev->GetDeviceOriginX() - rInitialWinRect.Left();
+    const tools::Long nDeltaY = pOutDev->GetDeviceOriginY() - rInitialWinRect.Top();
+
+    const bool bHasOverlap = rpOverlapRegion && !rpOverlapRegion->IsEmpty();
+    if (bHasOverlap)
+    {
+        rpOverlapRegion->Move(nDeltaX, nDeltaY);
         aRegion.Exclude(*rpOverlapRegion);
     }
 
     if (aRegion.IsEmpty())
         return true; // bInvalidate = true
 
-    // adapt Paint areas
-    ImplMoveAllInvalidateRegions(rInitialWinRect,
-                                 GetOutDev()->GetDeviceOriginX() - rInitialWinRect.Left(),
-                                 GetOutDev()->GetDeviceOriginY() - rInitialWinRect.Top(), true);
+    // Adapt paint areas
+    ImplMoveAllInvalidateRegions(rInitialWinRect, nDeltaX, nDeltaY, true);
 
-    bool bInvalidate = ImplCopyArea(aRegion, rInitialWinRect);
+    const bool bInvalidate = ImplCopyArea(aRegion, rInitialWinRect);
 
-    if (!bInvalidate)
-    {
-        if (!rpOverlapRegion->IsEmpty())
-            ImplInvalidateFrameRegion(rpOverlapRegion.get(), InvalidateFlags::Children);
-    }
+    if (!bInvalidate && bHasOverlap)
+        ImplInvalidateFrameRegion(rpOverlapRegion.get(), InvalidateFlags::Children);
 
     return bInvalidate;
 }
@@ -1256,7 +1278,7 @@ void Window::ImplDeferMoveResize(bool bNewPos, bool bNewSize)
 }
 
 void Window::ImplInvalidateMovedWindow(bool bCopyBits, const tools::Rectangle& rInitialWinRect,
-                                     std::unique_ptr<vcl::Region>& rpOverlapRegion)
+                                       std::unique_ptr<vcl::Region>& rpOverlapRegion)
 {
     bool bInvalidate = false;
     bool bParentPaint = true;
@@ -1282,10 +1304,18 @@ void Window::ImplInvalidateGrownWindow(const vcl::Region& rInitialRegion)
     vcl::Region aRegion(GetOutputRectPixel());
     aRegion.Exclude(rInitialRegion);
 
-    if (mpClippingState->mbWinRegion)
-        aRegion.Intersect(GetOutDev()->GetMapper().ViewToDevice(mpClippingState->maWinRegion));
+    OutputDevice* pOutDev = GetOutDev();
 
-    vcl::clipping::clipBoundaries(*this, aRegion, false, true);
+    if (mpClippingState)
+    {
+        if (pOutDev && mpClippingState->hasWindowRegion())
+        {
+            aRegion.Intersect(
+                pOutDev->GetMapper().ViewToDevice(mpClippingState->getWindowRegion()));
+        }
+
+        mpClippingState->clipBoundaries(*this, aRegion, false, true);
+    }
 
     if (!aRegion.IsEmpty())
         ImplInvalidateFrameRegion(&aRegion, InvalidateFlags::Children);
@@ -1314,13 +1344,17 @@ void Window::ImplInvalidateWindowContent(bool bNewPos, bool bCopyBits,
 void Window::ImplInvalidateParentOrOverlaps(const vcl::Region& rInitialRegion)
 {
     vcl::Region aRegion(rInitialRegion);
-    if (mpInvalidation && !mpInvalidation->isPaintTransparent())
-        vcl::clipping::excludeWindowRegion(*this, aRegion);
 
-    vcl::clipping::clipBoundaries(*this, aRegion, false, true);
+    if (mpClippingState)
+    {
+        if (mpInvalidation && !mpInvalidation->isPaintTransparent())
+            mpClippingState->excludeWindowRegion(*this, aRegion);
 
-    const vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
-    if (!aRegion.IsEmpty() && !pBorderWindow)
+        mpClippingState->clipBoundaries(*this, aRegion, false, true);
+    }
+
+    const bool bHasBorderWindow = mpHierarchy && mpHierarchy->hasBorderWindow();
+    if (!aRegion.IsEmpty() && !bHasBorderWindow)
         ImplInvalidateParentFrameRegion(aRegion);
 }
 
@@ -1333,13 +1367,15 @@ bool Window::ImplInvalidateVisibleRegions(bool bNewPos, bool bNewSize, bool bCop
         return false;
 
     bool bNeedsNativeClipUpdate = false;
-    if (bNewPos || bNewSize)
-        bNeedsNativeClipUpdate = !vcl::clipping::setClipFlag(*this, true);
+    if ((bNewPos || bNewSize) && mpClippingState)
+        bNeedsNativeClipUpdate = !mpClippingState->setClipFlag(*this, /*bSysObjOnlySmaller=*/true);
 
     ImplInvalidateWindowContent(bNewPos, bCopyBits, rInitialWinRect, rpOverlapRegion,
                                 rInitialRegion);
 
     auto HasOutputShrunk = [](const OutputDevice* pOutDev, const Size& rInitialSize) {
+        if (!pOutDev)
+            return false;
         return pOutDev->GetOutputWidthPixel() < rInitialSize.Width()
                || pOutDev->GetOutputHeightPixel() < rInitialSize.Height();
     };
@@ -1370,10 +1406,12 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     std::unique_ptr<vcl::Region> pInitialRegion;
     if (IsReallyVisible())
     {
-        pInitialRegion.reset(new vcl::Region(aInitialWinRect));
-        if (mpClippingState && mpClippingState->mbWinRegion)
+        pInitialRegion = std::make_unique<vcl::Region>(aInitialWinRect);
+        if (mpClippingState && mpClippingState->hasWindowRegion())
+        {
             pInitialRegion->Intersect(
-                pOutDev->GetMapper().ViewToDevice(mpClippingState->maWinRegion));
+                pOutDev->GetMapper().ViewToDevice(mpClippingState->getWindowRegion()));
+        }
     }
 
     bool bXAlreadyMirrored = false;
@@ -1400,10 +1438,13 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     const bool bNeedsNativePosUpdate = bNewPos && ImplUpdatePos();
 
     // The borderwindow always specifies the position for its client window
-    const vcl::Window* pBorderWindow = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
-    if (pBorderWindow && pBorderWindow->mpGeometry && mpGeometry)
+    if (mpHierarchy && mpHierarchy->hasBorderWindow())
     {
-        mpGeometry->maPos = pBorderWindow->mpGeometry->maPos;
+        const vcl::Window* pBorderWindow = mpHierarchy->getBorderWindow();
+        if (pBorderWindow && pBorderWindow->mpGeometry && mpGeometry)
+        {
+            mpGeometry->maPos = pBorderWindow->mpGeometry->maPos;
+        }
     }
 
     ImplUpdateClientWindow(bNewPos);
@@ -1423,8 +1464,8 @@ void Window::ImplPosSizeWindow(tools::Long nX, tools::Long nY, tools::Long nWidt
     }
 
     // Adapt system objects
-    if (bNeedsNativeClipUpdate)
-        vcl::clipping::updateNativeObjectClip(*this);
+    if (bNeedsNativeClipUpdate && mpClippingState)
+        mpClippingState->updateNativeObjectClip(*this);
 
     if (bNeedsNativePosUpdate)
         ImplUpdateNativeObjectPos();

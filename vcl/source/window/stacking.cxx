@@ -37,7 +37,6 @@
 #include <window/state/WindowClippingState.hxx>
 #include <window/state/WindowHierarchy.hxx>
 #include <window/state/WindowFocusState.hxx>
-#include <window/state/clipping_window.hxx>
 
 #include <com/sun/star/awt/XTopWindow.hpp>
 #include <com/sun/star/awt/XVclWindowPeer.hpp>
@@ -128,7 +127,7 @@ void Window::ImplCalcToTop( ImplCalcToTopData* pPrevData )
     // calculate region, where the window overlaps with other windows
     vcl::Region  aRegion( GetOutputRectPixel() );
     vcl::Region  aInvalidateRegion;
-    vcl::clipping::calcOverlapRegionOverlaps(*this, aRegion, aInvalidateRegion);
+    mpClippingState->calcOverlapRegionOverlaps(*this, aRegion, aInvalidateRegion);
 
     if ( !aInvalidateRegion.IsEmpty() )
     {
@@ -151,8 +150,9 @@ void Window::ImplToTop(ToTopFlags nFlags)
 
     if (mpHierarchy && mpHierarchy->toTopOverlap(this, IsAlwaysOnTopEnabled()))
     {
-        if (IsReallyVisible() && mpHierarchy->getOverlapWindow())
-            vcl::clipping::setClipFlagOverlapWindows(*mpHierarchy->getOverlapWindow());
+        vcl::Window* pOverlapWindow = mpHierarchy->getOverlapWindow();
+        if (IsReallyVisible() && pOverlapWindow && mpClippingState)
+            mpClippingState->setClipFlagOverlapWindows(*pOverlapWindow, /*bSysObjOnlySmaller=*/false);
     }
 }
 
@@ -362,7 +362,7 @@ void Window::ImplInvalidateZOrderPeers()
         return;
 
     bool bInitWinClipRegion = mpClippingState->mbInitWinClipRegion;
-    vcl::clipping::setClipFlag(*this);
+    mpClippingState->setClipFlag(*this);
 
     if (bInitWinClipRegion || !mpHierarchy)
         return;

@@ -27,19 +27,18 @@
 #include <window/state/WindowClippingState.hxx>
 #include <window/state/WindowInvalidation.hxx>
 #include <window/state/WindowHierarchy.hxx>
-#include <window/state/clipping_window.hxx>
 #include <salobj.hxx>
 
 namespace vcl {
 
 void Window::SetParentClipMode(ParentClipMode eMode)
 {
-    vcl::clipping::setParentClipMode(this, eMode);
+    mpClippingState->setParentClipMode(*this, eMode);
 }
 
 ParentClipMode Window::GetParentClipMode() const
 {
-    return vcl::clipping::getParentClipMode(*this);
+    return mpClippingState->getParentClipMode(*this);
 }
 
 void Window::ExpandPaintClipRegion(const vcl::Region& rRegion)

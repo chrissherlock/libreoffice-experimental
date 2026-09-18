@@ -245,17 +245,22 @@ void SalInstanceWidget::ensure_mouse_listener()
 
 void SalInstanceWidget::set_background(const Color& rColor)
 {
+    if (!m_xWidget)
+        return;
+
     m_xWidget->SetControlBackground(rColor);
     m_xWidget->SetBackground(m_xWidget->GetControlBackground());
+
     if (m_xWidget->GetStyle() & WB_CLIPCHILDREN)
     {
         // turn off WB_CLIPCHILDREN otherwise the bg won't extend "under"
         // transparent children of the widget e.g. expander in sidebar panel header
         m_xWidget->SetStyle(m_xWidget->GetStyle() & ~WB_CLIPCHILDREN);
+
         // and toggle mbClipChildren on instead otherwise the bg won't fill e.g.
         // deck titlebar header when its width is stretched
-        WindowClippingState* pClippingState = m_xWidget->ImplGetClippingState();
-        pClippingState->mbClipChildren = true;
+        if (vcl::WindowClippingState* pClippingState = m_xWidget->ImplGetClippingState())
+            pClippingState->mbClipChildren = true;
     }
 }
 

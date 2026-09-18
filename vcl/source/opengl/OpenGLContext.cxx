@@ -19,7 +19,7 @@
 #include <osl/thread.hxx>
 #include <sal/log.hxx>
 
-#include <window/state/clipping_window.hxx>
+#include <window/state/WindowClippingState.hxx>
 #include <svdata.hxx>
 #include <salgdi.hxx>
 #include <salinst.hxx>
@@ -302,10 +302,14 @@ void OpenGLContext::adjustToNewSize()
     glViewport(0, 0, rGLWin.Width, rGLWin.Height);
 }
 
-void OpenGLContext::InitChildWindow(SystemChildWindow *pChildWindow)
+void OpenGLContext::InitChildWindow(SystemChildWindow* pChildWindow)
 {
+    if (!pChildWindow)
+        return;
+
     pChildWindow->SetMouseTransparent(true);
-    vcl::clipping::setParentClipMode(pChildWindow, ParentClipMode::Clip);
+    if (auto* pClipState = pChildWindow->ImplGetClippingState())
+        pClipState->setParentClipMode(*pChildWindow, ParentClipMode::Clip);
     pChildWindow->EnableEraseBackground(false);
     pChildWindow->SetControlForeground();
     pChildWindow->SetControlBackground();

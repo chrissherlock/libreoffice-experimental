@@ -34,9 +34,9 @@
 #include <window/state/WindowControlAppearance.hxx>
 #include <window/state/WindowControlState.hxx>
 #include <window/state/WindowHierarchy.hxx>
+#include <window/state/WindowClippingState.hxx>
 #include <window/subclasses/decorations/brdwin.hxx>
 #include <clipping.hxx>
-#include <window/state/clipping_window.hxx>
 #include <salgdi.hxx>
 #include <window/subclasses/controls/scrwnd.hxx>
 #include <svdata.hxx>
@@ -348,6 +348,9 @@ constexpr tools::Long innerHeight(tools::Long nHeight, tools::Long nBorder)
 void Window::InvertTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags)
 {
     OutputDevice* pOutDev = GetOutDev();
+    if (!pOutDev)
+        return;
+
     tools::Rectangle aRect(
         pOutDev->GetMapper().LogicToDevicePixel(rRect, pOutDev->GetMappingPolicy()));
 
@@ -355,52 +358,58 @@ void Window::InvertTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags
         return;
     aRect.Normalize();
 
-    SalGraphics* pGraphics;
+    SalGraphics* pGraphics = nullptr;
 
     if (nFlags & ShowTrackFlags::TrackWindow)
     {
-        if (!GetOutDev()->IsDeviceOutputNecessary())
+        if (!pOutDev->IsDeviceOutputNecessary())
             return;
 
-        // we need a graphics
-        if (!GetOutDev()->mpGraphics)
+        // We need graphics
+        if (!pOutDev->mpGraphics)
         {
             if (!pOutDev->AcquireGraphics())
                 return;
         }
 
-        if (!GetOutDev()->GetClipState().IsReady())
-            vcl::clipping::initDeviceClipRegion(*GetOutDev());
+        if (!pOutDev->GetClipState().IsReady())
+            pOutDev->SelectClipRegion(pOutDev->GetActiveClipRegion());
 
-        if (GetOutDev()->GetClipState().IsClippedOut())
+        if (pOutDev->GetClipState().IsClippedOut())
             return;
 
-        pGraphics = GetOutDev()->mpGraphics;
+        pGraphics = pOutDev->mpGraphics;
     }
     else
     {
         pGraphics = ImplGetFrameGraphics();
+        if (!pGraphics)
+            return;
 
         if (nFlags & ShowTrackFlags::Clip)
         {
             vcl::Region aRegion(GetOutputRectPixel());
-            vcl::clipping::clipBoundaries(*this, aRegion, false, false);
+            if (mpClippingState)
+                mpClippingState->clipBoundaries(*this, aRegion, false, false);
             pOutDev->SelectClipRegion(aRegion, pGraphics);
         }
     }
+
+    if (!pGraphics)
+        return;
 
     ShowTrackFlags nStyle = nFlags & ShowTrackFlags::StyleMask;
     if (nStyle == ShowTrackFlags::Object)
     {
         pGraphics->Invert(aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),
-                          SalInvert::TrackFrame, *GetOutDev());
+                          SalInvert::TrackFrame, *pOutDev);
         return;
     }
 
     if (nStyle == ShowTrackFlags::Split)
     {
         pGraphics->Invert(aRect.Left(), aRect.Top(), aRect.GetWidth(), aRect.GetHeight(),
-                          SalInvert::N50, *GetOutDev());
+                          SalInvert::N50, *pOutDev);
         return;
     }
 
@@ -411,16 +420,16 @@ void Window::InvertTracking(const tools::Rectangle& rRect, ShowTrackFlags nFlags
         = (nStyle == ShowTrackFlags::Big) ? BIG_TRACK_BORDER : DEFAULT_TRACK_BORDER;
 
     pGraphics->Invert(aRect.Left(), aRect.Top(), aRect.GetWidth(), nBorder, SalInvert::N50,
-                      *GetOutDev());
+                      *pOutDev);
 
     pGraphics->Invert(aRect.Left(), innerBottom(aRect.Bottom(), nBorder), aRect.GetWidth(), nBorder,
-                      SalInvert::N50, *GetOutDev());
+                      SalInvert::N50, *pOutDev);
 
     pGraphics->Invert(aRect.Left(), innerTop(aRect.Top(), nBorder), nBorder,
-                      innerHeight(aRect.GetHeight(), nBorder), SalInvert::N50, *GetOutDev());
+                      innerHeight(aRect.GetHeight(), nBorder), SalInvert::N50, *pOutDev);
 
     pGraphics->Invert(innerRight(aRect.Right(), nBorder), innerTop(aRect.Top(), nBorder), nBorder,
-                      innerHeight(aRect.GetHeight(), nBorder), SalInvert::N50, *GetOutDev());
+                      innerHeight(aRect.GetHeight(), nBorder), SalInvert::N50, *pOutDev);
 }
 
 IMPL_LINK(Window, ImplTrackTimerHdl, Timer*, pTimer, void)

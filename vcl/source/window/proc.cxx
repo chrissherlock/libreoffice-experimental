@@ -43,7 +43,7 @@
 #include <window/state/WindowControlAppearance.hxx>
 #include <window/state/WindowHierarchy.hxx>
 #include <window/state/WindowGeometry.hxx>
-#include <window/state/clipping_window.hxx>
+#include <window/state/WindowClippingState.hxx>
 #include <salframe.hxx>
 #include <window/accessibility/accmgr.hxx>
 #include <window/subclasses/floating/helpwin.hxx>
@@ -141,8 +141,7 @@ static void lcl_KillOwnPopups(vcl::Window const* pWindow)
     const WindowHierarchy* pHierarchy = pWindow ? pWindow->ImplGetWindowHierarchy() : nullptr;
     const vcl::Window* pFrameWindow = pHierarchy ? pHierarchy->getFrameWindow() : nullptr;
 
-    if (!lcl_IsValidFrameFloatPopup(pFrameWindow)
-        || lcl_CanCloseOnAppFocus())
+    if (!lcl_IsValidFrameFloatPopup(pFrameWindow) || lcl_CanCloseOnAppFocus())
         return;
 
     lcl_EndPopupMode();
@@ -202,7 +201,7 @@ static bool lcl_ShouldSkipResizePropagation(const vcl::Window* pWindow)
     return !(bIsFrame && pClientWindow);
 }
 
-static void lcl_HandleResizePropagation(vcl::Window* pWindow)
+static void lcl_PropagateResize(vcl::Window* pWindow)
 {
     if (lcl_ShouldSkipResizePropagation(pWindow))
         pWindow->ImplGetGeometry()->mbCallResize = true;
@@ -223,28 +222,44 @@ static bool lcl_HasSizeChanged(const vcl::Window* pWindow, tools::Long nNewWidth
            || (nNewHeight != pWindow->GetOutDev()->GetOutputHeightPixel());
 }
 
-static void lcl_HandleResizeDimensions(vcl::Window* pWindow, tools::Long nNewWidth,
-                                       tools::Long nNewHeight)
+static void lcl_ApplyResizeDimensions(vcl::Window* pWindow, tools::Long nNewWidth,
+                                      tools::Long nNewHeight)
 {
-    if (const bool bChanged = lcl_HasSizeChanged(pWindow, nNewWidth, nNewHeight);
-        !((nNewWidth > 0 && nNewHeight > 0)
-          || (pWindow->ImplGetWindow()->ImplGetGeometry()->mbAllResize && bChanged)))
+    if (!pWindow)
         return;
 
-    pWindow->GetOutDev()->SetOutputWidthPixel(nNewWidth);
-    pWindow->GetOutDev()->SetOutputHeightPixel(nNewHeight);
-    pWindow->ImplGetGeometry()->mbWaitSystemResize = false;
+    WindowGeometry* pGeometry = pWindow->ImplGetGeometry();
+    const bool bChanged = lcl_HasSizeChanged(pWindow, nNewWidth, nNewHeight);
+
+    if (!((nNewWidth > 0 && nNewHeight > 0) || (pGeometry && pGeometry->mbAllResize && bChanged)))
+        return;
+
+    if (OutputDevice* pOutDev = pWindow->GetOutDev())
+    {
+        pOutDev->SetOutputWidthPixel(nNewWidth);
+        pOutDev->SetOutputHeightPixel(nNewHeight);
+    }
+
+    if (pGeometry)
+        pGeometry->mbWaitSystemResize = false;
 
     if (pWindow->IsReallyVisible())
-        vcl::clipping::setClipFlag(*pWindow);
+    {
+        if (auto* pClipState = pWindow->ImplGetClippingState())
+            pClipState->setClipFlag(*pWindow, /*bSysObjOnlySmaller=*/false);
+    }
 
-    lcl_HandleResizePropagation(pWindow);
+    lcl_PropagateResize(pWindow);
 
     if (pWindow->SupportsDoubleBuffering() && pWindow->ImplGetWindowClassification()->mbFrame)
     {
         // Propagate resize for the frame's buffer.
-        pWindow->ImplGetPlatformState()->mpFrameData->mpBuffer->SetOutputSizePixel(
-            pWindow->GetOutputSizePixel());
+        WindowPlatformState* pPlatformState = pWindow->ImplGetPlatformState();
+        if (pPlatformState && pPlatformState->mpFrameData && pPlatformState->mpFrameData->mpBuffer)
+        {
+            pPlatformState->mpFrameData->mpBuffer->SetOutputSizePixel(
+                pWindow->GetOutputSizePixel());
+        }
     }
 }
 
@@ -279,6 +294,9 @@ static void lcl_HandleMinimizedState(vcl::Window* pWindow, tools::Long nNewWidth
 
 void ImplHandleResize(vcl::Window* pWindow, tools::Long nNewWidth, tools::Long nNewHeight)
 {
+    if (!pWindow)
+        return;
+
     if (lcl_CanMoveOrSize(pWindow, nNewWidth, nNewHeight))
     {
         lcl_KillOwnPopups(pWindow);
@@ -287,10 +305,14 @@ void ImplHandleResize(vcl::Window* pWindow, tools::Long nNewWidth, tools::Long n
             ImplDestroyHelpWindow(true);
     }
 
-    lcl_HandleResizeDimensions(pWindow, nNewWidth, nNewHeight);
+    lcl_ApplyResizeDimensions(pWindow, nNewWidth, nNewHeight);
 
-    pWindow->ImplGetPlatformState()->mpFrameData->mbNeedSysWindow
-        = (nNewWidth < IMPL_MIN_NEEDSYSWIN) || (nNewHeight < IMPL_MIN_NEEDSYSWIN);
+    if (auto* pPlatformState = pWindow->ImplGetPlatformState();
+        pPlatformState && pPlatformState->mpFrameData)
+    {
+        pPlatformState->mpFrameData->mbNeedSysWindow
+            = (nNewWidth < IMPL_MIN_NEEDSYSWIN) || (nNewHeight < IMPL_MIN_NEEDSYSWIN);
+    }
 
     lcl_HandleMinimizedState(pWindow, nNewWidth, nNewHeight);
 }
@@ -323,7 +345,8 @@ static void lcl_HandleMove(vcl::Window* pWindow)
     {
         auto* pGeometry = pWindow->ImplGetGeometry();
         if (pGeometry)
-            pGeometry->mbCallMove = true; // make sure the framepos will be updated on the next Show()
+            pGeometry->mbCallMove
+                = true; // make sure the framepos will be updated on the next Show()
     }
 
     const WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy();
@@ -636,7 +659,7 @@ static bool lcl_HandleMenuEvent(vcl::Window const* pWindow, SalMenuEvent* pEvent
 
             case SalEvent::MenuHighlight:
                 return pMenuBar->HandleMenuHighlightEvent(static_cast<Menu*>(pEvent->mpMenu),
-                                                        pEvent->mnId);
+                                                          pEvent->mnId);
 
             case SalEvent::MenuButtonCommand:
                 return pMenuBar->HandleMenuButtonEvent(pEvent->mnId);
@@ -763,13 +786,11 @@ static void lcl_HandleSalKeyMod(vcl::Window* pWindow, SalKeyModEvent const* pEve
     auto* pPlatformState = pWindow->ImplGetPlatformState();
     if (pPlatformState && pPlatformState->mpFrameData)
     {
-        if (sal_uInt16 nOldCode
-            = pPlatformState->mpFrameData->mnMouseCode & MOUSE_MODIFIER_MASK;
+        if (sal_uInt16 nOldCode = pPlatformState->mpFrameData->mnMouseCode & MOUSE_MODIFIER_MASK;
             nOldCode != pEvent->mnCode)
         {
             sal_uInt16 nNewCode = pEvent->mnCode;
-            nNewCode
-                |= pPlatformState->mpFrameData->mnMouseCode & ~MOUSE_MODIFIER_MASK;
+            nNewCode |= pPlatformState->mpFrameData->mnMouseCode & ~MOUSE_MODIFIER_MASK;
 
             const WindowHierarchy* pHierarchy = pWindow->ImplGetWindowHierarchy();
             vcl::Window* pFrameWindow = pHierarchy ? pHierarchy->getFrameWindow() : nullptr;

@@ -21,7 +21,6 @@
 #include <window/window.h>
 #include <window/state/WindowClippingState.hxx>
 #include <window/state/WindowVisibilityState.hxx>
-#include <window/state/clipping_window.hxx>
 
 namespace
 {
@@ -37,12 +36,6 @@ public:
     VclPtr<SystemChildWindow> CreateChildWindow(vcl::Window* pParent)
     {
         // Children should be SystemChildWindow
-        return VclPtr<SystemChildWindow>::Create(pParent, WB_STDWORK);
-    }
-
-    // Helper to create a window that ensures cleanup in test teardown
-    VclPtr<SystemChildWindow> CreateTestWindow(vcl::Window* pParent = nullptr)
-    {
         return VclPtr<SystemChildWindow>::Create(pParent, WB_STDWORK);
     }
 
@@ -81,7 +74,7 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testExcludeWindowRegion_Comprehensive)
 
         vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
 
-        vcl::clipping::excludeWindowRegion(*pChild, aRegion);
+        pChild->ImplGetClippingState()->excludeWindowRegion(*pChild, aRegion);
 
         CPPUNIT_ASSERT_MESSAGE("S1: Point inside the child should be excluded",
                                !aRegion.Contains(Point(15, 15)));
@@ -96,7 +89,7 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testExcludeWindowRegion_Comprehensive)
 
         vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
 
-        vcl::clipping::excludeWindowRegion(*pChild, aRegion);
+        pChild->ImplGetClippingState()->excludeWindowRegion(*pChild, aRegion);
 
         CPPUNIT_ASSERT_MESSAGE("S2: Region should remain completely intact",
                                aRegion.Contains(Point(50, 50)));
@@ -118,7 +111,7 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testExcludeWindowRegion_Comprehensive)
 
         vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
 
-        vcl::clipping::excludeWindowRegion(*pChild, aRegion);
+        pChild->ImplGetClippingState()->excludeWindowRegion(*pChild, aRegion);
 
         // Test math:
         // Parent coord (15, 15) is Child coord (5, 5)   -> INSIDE custom shape -> Excluded (False)
@@ -142,7 +135,7 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testClipChildren_Comprehensive)
     pChild->SetPosSizePixel(Point(50, 50), Size(20, 20));
 
     // Force the child to clip its parent (disable NoClip)
-    pChild->SetParentClipMode(ParentClipMode::NONE);
+    pChild->ImplGetClippingState()->setParentClipMode(*pChild, ParentClipMode::NONE);
 
     pRoot->Show();
     pChild->Show();
@@ -158,7 +151,7 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testClipChildren_Comprehensive)
     // Initialize ALL clipping states (Parent AND Child) via WindowClippingState members
     pRoot->ImplGetClippingState()->initWinClipRegion(*pRoot);
     pRoot->ImplGetClippingState()->initWinChildClipRegion(*pRoot);
-    pRoot->ImplGetClippingState()->initWinClipRegion(*pChild);
+    pChild->ImplGetClippingState()->initWinClipRegion(*pChild);
 
     // ==========================================
     // DIAGNOSTIC ASSERTIONS (The VCL polygraph)
@@ -179,12 +172,13 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testClipChildren_Comprehensive)
 
     // Is the ParentClipMode preventing it? (Should be NONE)
     CPPUNIT_ASSERT_MESSAGE("Fail 5: ParentClipMode is set to NoClip",
-                           pChild->GetParentClipMode() != ParentClipMode::NoClip);
+                           pChild->ImplGetClippingState()->getParentClipMode(*pChild)
+                               != ParentClipMode::NoClip);
 
     // ==========================================
 
     vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
-    bool bIsRegionEmpty = vcl::clipping::clipChildren(*pRoot, aRegion);
+    bool bIsRegionEmpty = pRoot->ImplGetClippingState()->clipChildren(*pRoot, aRegion);
 
     // Because we only punched a 20x20 hole in a 100x100 region, the region is NOT empty.
     // VCL correctly returns false to tell the paint engine to keep drawing.
@@ -230,7 +224,7 @@ CPPUNIT_TEST_FIXTURE(TestClipping, testClipSiblings_Comprehensive)
     pS2->ImplGetClippingState()->initWinClipRegion(*pS2);
 
     vcl::Region aRegion(tools::Rectangle(Point(0, 0), Size(100, 100)));
-    vcl::clipping::clipSiblings(*pS2, aRegion);
+    pS2->ImplGetClippingState()->clipSiblings(*pS2, aRegion);
 
     // Test the Math: S1 (Back) should be punched out
     CPPUNIT_ASSERT_MESSAGE("S1's region (10,10 to 50,50) should be excluded",

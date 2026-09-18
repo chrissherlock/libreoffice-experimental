@@ -182,8 +182,7 @@ $(eval $(call gb_Library_add_exception_objects,vcl,\
     vcl/source/window/builder/VclBuilder \
     vcl/source/window/state/ImplWinData \
     vcl/source/window/state/ImplFrameData \
-	vcl/source/window/state/WindowHierarchy \
-    vcl/source/window/paint/clipping_subsystem \
+    vcl/source/window/state/WindowHierarchy \
     vcl/source/window/subclasses/dialogs/errinf \
     vcl/source/window/state/settings \
     vcl/source/window/events/accel \

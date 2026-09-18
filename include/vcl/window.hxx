@@ -381,6 +381,7 @@ enum class GetDlgWindowType
 namespace vcl
 {
 class Window;
+class WindowClippingState;
 }
 namespace vcl
 {
@@ -396,7 +397,6 @@ class WindowClassification;
 struct WindowPlatformState;
 struct WindowStyleState;
 struct WindowVisibilityState;
-struct WindowClippingState;
 struct WindowInvalidation;
 class WindowInput;
 struct WindowLOKData;

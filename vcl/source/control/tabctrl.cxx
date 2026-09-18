@@ -39,7 +39,6 @@
 #include <vcl/inputctx.hxx>
 
 #include <clipping.hxx>
-#include <window/state/clipping_window.hxx>
 
 #include <bitmaps.hlst>
 #include <svdata.hxx>
@@ -155,43 +154,47 @@ const Color& TabControl::GetCanonicalTextColor( const StyleSettings& _rStyle ) c
     return _rStyle.GetTabTextColor();
 }
 
-void TabControl::ImplInitSettings( bool bBackground )
+void TabControl::ImplInitSettings(bool bBackground)
 {
     Control::ImplInitSettings();
 
-    if ( !bBackground )
+    if (!bBackground)
         return;
 
     vcl::Window* pParent = GetParent();
-    if ( !HasControlBackground() &&
-        (pParent->IsChildTransparentModeEnabled()
-        || IsNativeControlSupported(ControlType::TabPane, ControlPart::Entire)
-        || IsNativeControlSupported(ControlType::TabItem, ControlPart::Entire) ) )
+    const bool bParentTransparent = pParent && pParent->IsChildTransparentModeEnabled();
 
+    if (!HasControlBackground()
+        && (bParentTransparent
+            || IsNativeControlSupported(ControlType::TabPane, ControlPart::Entire)
+            || IsNativeControlSupported(ControlType::TabItem, ControlPart::Entire)))
     {
         // set transparent mode for NWF tabcontrols to have
         // the background always cleared properly
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
-        SetPaintTransparent( true );
+        SetParentClipMode(ParentClipMode::NoClip);
+        SetPaintTransparent(true);
         SetBackground();
 
-        if (ImplGetSVData()->maNWFData.mbNoFocusRects)
-            ImplGetFocusState()->useNativeFocus();
-        else
-            ImplGetFocusState()->clearNativeFocus();
+        if (auto* pFocusState = ImplGetFocusState())
+        {
+            if (ImplGetSVData()->maNWFData.mbNoFocusRects)
+                pFocusState->useNativeFocus();
+            else
+                pFocusState->clearNativeFocus();
+        }
 
         return;
     }
 
-    EnableChildTransparentMode( false );
-    vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
-    SetPaintTransparent( false );
+    EnableChildTransparentMode(false);
+    SetParentClipMode(ParentClipMode::NONE);
+    SetPaintTransparent(false);
 
-    if ( HasControlBackground() )
-        SetBackground( GetControlBackground() );
+    if (HasControlBackground() || !pParent)
+        SetBackground(GetControlBackground());
     else
-        SetBackground( pParent->GetBackground() );
+        SetBackground(pParent->GetBackground());
 }
 
 TabControl::TabControl( vcl::Window* pParent, WinBits nStyle ) :

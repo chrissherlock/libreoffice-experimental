@@ -34,7 +34,6 @@
 #include <window/state/WindowClassification.hxx>
 #include <window/state/WindowInvalidation.hxx>
 #include <window/state/WindowHierarchy.hxx>
-#include <window/state/clipping_window.hxx>
 
 #include "window/paint/PaintHelper.hxx"
 
@@ -65,11 +64,12 @@ PaintHelper::~PaintHelper()
         const WindowHierarchy* pHierarchy = m_pWindow->ImplGetWindowHierarchy();
         if (pHierarchy)
         {
-            WindowHierarchy::forEachPreviousSibling(pHierarchy->getLastChild(), [this](vcl::Window& rChild) {
-                const WindowVisibilityState* pVisibility = rChild.ImplGetVisibilityState();
-                if (pVisibility && pVisibility->mbVisible)
-                    rChild.ImplCallPaint(m_pChildRegion.get(), m_nPaintFlags);
-            });
+            WindowHierarchy::forEachPreviousSibling(
+                pHierarchy->getLastChild(), [this](vcl::Window& rChild) {
+                    const WindowVisibilityState* pVisibility = rChild.ImplGetVisibilityState();
+                    if (pVisibility && pVisibility->mbVisible)
+                        rChild.ImplCallPaint(m_pChildRegion.get(), m_nPaintFlags);
+                });
         }
     }
 
@@ -97,8 +97,8 @@ PaintHelper::~PaintHelper()
     {
         if (OutputDevice* pOutDev = m_pWindow->GetOutDev())
         {
-            pOutDev->DrawSelectionBackground(
-                m_aSelectionRect, m_pWindow->GetBackgroundColor(), 3, false, true);
+            pOutDev->DrawSelectionBackground(m_aSelectionRect, m_pWindow->GetBackgroundColor(), 3,
+                                             false, true);
         }
     }
 }

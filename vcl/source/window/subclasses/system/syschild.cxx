@@ -24,8 +24,8 @@
 
 #include <window/state/WindowPlatformState.hxx>
 #include <window/state/ImplFrameData.hxx>
-#include <window/state/clipping_window.hxx>
 #include <window/state/WindowClassification.hxx>
+#include <window/state/WindowClippingState.hxx>
 #include <salframe.hxx>
 #include <salinst.hxx>
 #include <salobj.hxx>
@@ -87,17 +87,29 @@ static void ImplSysChildProc( SystemChildWindow* pInst, SalObjEvent nEvent )
     }
 }
 
-void SystemChildWindow::ImplInitSysChild( vcl::Window* pParent, WinBits nStyle, SystemWindowData *pData, bool bShow )
+void SystemChildWindow::ImplInitSysChild(vcl::Window* pParent, WinBits nStyle,
+                                         SystemWindowData* pData, bool bShow)
 {
-    mpPlatformState->mpSysObj = GetSalInstance()->CreateObject(pParent->ImplGetFrame(), pData, bShow);
+    if (!pParent)
+        return;
 
-    Window::ImplInit( pParent, nStyle, nullptr );
-
-    // we do not paint if it is the right SysChild
-    if ( GetSystemData() )
+    if (mpPlatformState)
     {
-        mpPlatformState->mpSysObj->SetCallback( this, ImplSysChildProc );
-        vcl::clipping::setParentClipMode(this, ParentClipMode::Clip);
+        SalFrame* pFrame = pParent->ImplGetFrame();
+        mpPlatformState->mpSysObj = GetSalInstance()->CreateObject(pFrame, pData, bShow);
+    }
+
+    Window::ImplInit(pParent, nStyle, nullptr);
+
+    // We do not paint if it is the right SysChild
+    if (GetSystemData())
+    {
+        if (mpPlatformState && mpPlatformState->mpSysObj)
+            mpPlatformState->mpSysObj->SetCallback(this, ImplSysChildProc);
+
+        if (mpClippingState)
+            mpClippingState->setParentClipMode(*this, ParentClipMode::Clip);
+
         SetBackground();
     }
 }

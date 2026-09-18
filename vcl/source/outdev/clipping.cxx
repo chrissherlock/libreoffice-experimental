@@ -29,7 +29,6 @@
 #include <window/state/WindowClippingState.hxx>
 #include <window/state/WindowInvalidation.hxx>
 #include <clipping.hxx>
-#include <window/state/clipping_window.hxx>
 #include <window/state/windowdev.hxx>
 #include <devicedispatcher.hxx>
 #include <salgdi.hxx>

@@ -57,7 +57,6 @@
 #include <window/state/WindowHierarchy.hxx>
 #include <window/state/WindowControlAppearance.hxx>
 #include <ImplOutDevData.hxx>
-#include <window/state/clipping_window.hxx>
 #include <impfontcache.hxx>
 #include <salframe.hxx>
 #include <salobj.hxx>

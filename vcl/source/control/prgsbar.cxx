@@ -26,8 +26,6 @@
 #include <vcl/svapp.hxx>
 #include <vcl/idle.hxx>
 
-#include <window/state/clipping_window.hxx>
-
 #include <tools/json_writer.hxx>
 
 #define PROGRESSBAR_OFFSET          3
@@ -68,58 +66,65 @@ ProgressBar::ProgressBar( vcl::Window* pParent, WinBits nWinStyle, BarStyle eBar
     ImplInitSettings(true, true, true);
 }
 
-void ProgressBar::ImplInitSettings( bool bFont,
-                                    bool bForeground, bool bBackground )
+void ProgressBar::ImplInitSettings(bool bFont, bool bForeground, bool bBackground)
 {
     const StyleSettings& rStyleSettings = GetSettings().GetStyleSettings();
 
 /* FIXME: !!! We do not support text output at the moment
-    if ( bFont )
+    if (bFont)
         ApplyControlFont(*this, rStyleSettings.GetAppFont());
 */
 
-    if ( bBackground )
+    if (bBackground)
     {
+        const ControlType eControlType = (meBarStyle == BarStyle::Progress)
+                                             ? ControlType::Progress
+                                             : ControlType::LevelBar;
+
         if (!HasControlBackground()
-            && IsNativeControlSupported(meBarStyle == BarStyle::Progress ? ControlType::Progress
-                                                                         : ControlType::LevelBar,
-                                        ControlPart::Entire))
+            && IsNativeControlSupported(eControlType, ControlPart::Entire))
         {
-            if( GetStyle() & WB_BORDER )
-                SetBorderStyle( WindowBorderStyle::REMOVEBORDER );
+            if (GetStyle() & WB_BORDER)
+                SetBorderStyle(WindowBorderStyle::REMOVEBORDER);
             EnableChildTransparentMode();
-            SetPaintTransparent( true );
+            SetPaintTransparent(true);
             SetBackground();
-            vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+            SetParentClipMode(ParentClipMode::NoClip);
         }
         else
         {
             Color aColor;
-            if ( HasControlBackground() )
+            if (HasControlBackground())
                 aColor = GetControlBackground();
             else
                 aColor = rStyleSettings.GetFaceColor();
-            SetBackground( aColor );
+            SetBackground(aColor);
         }
     }
 
-    if ( !(bForeground || bFont) )
+    if (!bForeground && !bFont)
         return;
 
     Color aColor = rStyleSettings.GetHighlightColor();
-    if ( HasControlForeground() )
+    if (HasControlForeground())
         aColor = GetControlForeground();
-    if ( aColor.IsRGBEqual( GetBackground().GetColor() ) )
+
+    if (aColor.IsRGBEqual(GetBackground().GetColor()))
     {
-        if ( aColor.GetLuminance() > 100 )
-            aColor.DecreaseLuminance( 64 );
+        if (aColor.GetLuminance() > 100)
+            aColor.DecreaseLuminance(64);
         else
-            aColor.IncreaseLuminance( 64 );
+            aColor.IncreaseLuminance(64);
     }
-    GetOutDev()->SetLineColor();
-    GetOutDev()->SetFillColor( aColor );
+
+    if (OutputDevice* pOutDev = GetOutDev())
+    {
+        pOutDev->SetLineColor();
+        pOutDev->SetFillColor(aColor);
+    }
+
 /* FIXME: !!! We do not support text output at the moment
-    SetTextColor( aColor );
+    SetTextColor(aColor);
     SetTextFillColor();
 */
 }

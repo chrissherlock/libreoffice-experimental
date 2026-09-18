@@ -31,7 +31,6 @@
 #include <vcl/help.hxx>
 #include <vcl/settings.hxx>
 
-#include <window/state/clipping_window.hxx>
 #include <window/subclasses/floating/helpwin.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
@@ -283,6 +282,8 @@ HelpTextWindow::HelpTextWindow( vcl::Window* pParent, const OUString& rText, Hel
 
 void HelpTextWindow::ApplySettings(vcl::RenderContext& rRenderContext)
 {
+    FloatingWindow::ApplySettings(rRenderContext);
+
     const StyleSettings& rStyleSettings = rRenderContext.GetSettings().GetStyleSettings();
     SetPointFont(rRenderContext, rStyleSettings.GetHelpFont());
     rRenderContext.SetTextColor(rStyleSettings.GetHelpTextColor());
@@ -291,17 +292,16 @@ void HelpTextWindow::ApplySettings(vcl::RenderContext& rRenderContext)
     if (rRenderContext.IsNativeControlSupported(ControlType::Tooltip, ControlPart::Entire))
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
+        SetParentClipMode(ParentClipMode::NoClip);
         SetPaintTransparent(true);
         rRenderContext.SetBackground();
     }
     else
+    {
         rRenderContext.SetBackground(Wallpaper(rStyleSettings.GetHelpColor()));
+    }
 
-    if (rStyleSettings.GetHelpColor().IsDark())
-        rRenderContext.SetLineColor(COL_WHITE);
-    else
-        rRenderContext.SetLineColor(COL_BLACK);
+    rRenderContext.SetLineColor(rStyleSettings.GetHelpColor().IsDark() ? COL_WHITE : COL_BLACK);
     rRenderContext.SetFillColor();
 }
 

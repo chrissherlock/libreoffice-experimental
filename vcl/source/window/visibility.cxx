@@ -30,7 +30,6 @@
 #include <window/state/WindowA11y.hxx>
 #include <window/state/WindowInvalidation.hxx>
 #include <window/state/WindowGeometry.hxx>
-#include <window/state/clipping_window.hxx>
 #include <salframe.hxx>
 #include <svdata.hxx>
 
@@ -41,8 +40,7 @@ bool Window::ImplShouldTransferFocusOnHide(ShowFlags nFlags) const
     const vcl::Window* pOverlapWindow = mpHierarchy ? mpHierarchy->getOverlapWindow() : nullptr;
 
     const bool bIsOverlapWindowAvailable = mpClassification && !mpClassification->mbFrame
-                                           && pOverlapWindow
-                                           && pOverlapWindow->IsEnabled()
+                                           && pOverlapWindow && pOverlapWindow->IsEnabled()
                                            && pOverlapWindow->IsInputEnabled()
                                            && !pOverlapWindow->IsInModalMode();
 
@@ -104,14 +102,15 @@ std::optional<bool> Window::ImplHideWindow(ShowFlags nFlags)
     if (!xWindow->mpClassification)
         return std::nullopt;
 
-    bool bRealVisibilityChanged = mpVisibilityState->mbReallyVisible;
+    const bool bRealVisibilityChanged = mpVisibilityState && mpVisibilityState->mbReallyVisible;
     ImplResetReallyVisible();
-    vcl::clipping::setClipFlag(*this);
+
+    if (mpClippingState)
+        mpClippingState->setClipFlag(*this, /*bSysObjOnlySmaller=*/false);
 
     if (ImplShouldTransferFocusOnHide(nFlags))
     {
-        vcl::Window* pOverlapWindow = mpHierarchy ? mpHierarchy->getOverlapWindow() : nullptr;
-        if (pOverlapWindow)
+        if (vcl::Window* pOverlapWindow = mpHierarchy ? mpHierarchy->getOverlapWindow() : nullptr)
             pOverlapWindow->GrabFocus();
     }
 
@@ -132,9 +131,12 @@ std::optional<bool> Window::ImplHideCascade(ShowFlags nFlags)
     vcl::Window* pBorderWin = mpHierarchy ? mpHierarchy->getBorderWindow() : nullptr;
     if (pBorderWin)
     {
-        const bool bOldUpdate = pBorderWin->mpInvalidation ? pBorderWin->mpInvalidation->isParentUpdateSuppressed() : false;
+        const bool bOldUpdate = pBorderWin->mpInvalidation
+                                    ? pBorderWin->mpInvalidation->isParentUpdateSuppressed()
+                                    : false;
 
-        if (mpInvalidation && mpInvalidation->isParentUpdateSuppressed() && pBorderWin->mpInvalidation)
+        if (mpInvalidation && mpInvalidation->isParentUpdateSuppressed()
+            && pBorderWin->mpInvalidation)
             pBorderWin->mpInvalidation->suppressParentUpdates(true);
 
         pBorderWin->Show(false, nFlags);
@@ -203,24 +205,32 @@ void Window::ImplRaiseOverlapWindow(ShowFlags nFlags)
 
 bool Window::ImplUpdateRealVisibility(ShowFlags nFlags)
 {
+    if (!mpClassification || !mpVisibilityState)
+        return false;
+
     vcl::Window* pVisibilityParent = ImplGetVisibilityParent();
 
     // If it's not a frame and the parent isn't actually on screen,
     // we don't need to do any real visibility rendering yet.
-    if (!mpClassification->mbFrame && !pVisibilityParent->mpVisibilityState->mbReallyVisible)
+    if (!mpClassification->mbFrame
+        && (!pVisibilityParent || !pVisibilityParent->mpVisibilityState
+            || !pVisibilityParent->mpVisibilityState->mbReallyVisible))
+    {
         return false;
+    }
 
-    // if a window becomes visible, send all child windows a StateChange,
+    // If a window becomes visible, send all child windows a StateChange,
     // such that these can initialise themselves
     ImplCallInitShow();
     ImplRaiseOverlapWindow(nFlags);
 
-    // adjust mpVisibilityState->mbReallyVisible
-    bool bRealVisibilityChanged = !mpVisibilityState->mbReallyVisible;
+    // Adjust mpVisibilityState->mbReallyVisible
+    const bool bRealVisibilityChanged = !mpVisibilityState->mbReallyVisible;
     ImplSetReallyVisible();
 
-    // assure clip rectangles will be recalculated
-    vcl::clipping::setClipFlag(*this);
+    // Assure clip rectangles will be recalculated
+    if (mpClippingState)
+        mpClippingState->setClipFlag(*this, /*bSysObjOnlySmaller=*/false);
 
     if (!mpClassification->mbFrame)
     {
@@ -375,7 +385,7 @@ void Window::ImplSetReallyVisible()
 
     // Helper to propagate visibility down the intrusive linked lists
     auto propagateToVisible = [](vcl::Window* pStart) {
-        for (vcl::Window* pWin = pStart; pWin; )
+        for (vcl::Window* pWin = pStart; pWin;)
         {
             if (pWin->mpVisibilityState && pWin->mpVisibilityState->mbVisible)
                 pWin->ImplSetReallyVisible();

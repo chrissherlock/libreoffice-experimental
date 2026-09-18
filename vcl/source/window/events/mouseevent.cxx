@@ -54,7 +54,6 @@
 #include <window/window.h>
 #include <window/state/ImplFrameData.hxx>
 #include <window/state/ImplWinData.hxx>
-#include <window/state/clipping_window.hxx>
 #include <svdata.hxx>
 #include <salwtype.hxx>
 #include <salframe.hxx>

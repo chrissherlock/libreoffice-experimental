@@ -35,7 +35,6 @@
 #include <window/state/WindowHierarchy.hxx>
 #include <window/state/WindowInvalidation.hxx>
 #include <clipping.hxx>
-#include <window/state/clipping_window.hxx>
 #include <bitmaps.hlst>
 #include <toolbarvalue.hxx>
 
@@ -1199,7 +1198,7 @@ void ToolBox::ApplyBackgroundSettings(vcl::RenderContext& rRenderContext, const 
     {
         rRenderContext.SetBackground(GetControlBackground());
         SetPaintTransparent(false);
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+        SetParentClipMode(ParentClipMode::NONE);
     }
     else
     {
@@ -1208,19 +1207,17 @@ void ToolBox::ApplyBackgroundSettings(vcl::RenderContext& rRenderContext, const 
             rRenderContext.SetBackground();
             rRenderContext.SetTextColor(rStyleSettings.GetToolTextColor());
             SetPaintTransparent(true);
-            vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
-            mpData->maDisplayBackground = Wallpaper(rStyleSettings.GetFaceColor());
+            SetParentClipMode(ParentClipMode::NoClip);
+            if (mpData)
+                mpData->maDisplayBackground = Wallpaper(rStyleSettings.GetFaceColor());
         }
         else
         {
-            Color aColor;
-            if (Window::GetStyle() & WB_3DLOOK)
-                aColor = rStyleSettings.GetFaceColor();
-            else
-                aColor = rStyleSettings.GetWindowColor();
+            const Color aColor = (GetStyle() & WB_3DLOOK) ? rStyleSettings.GetFaceColor()
+                                                          : rStyleSettings.GetWindowColor();
             rRenderContext.SetBackground(aColor);
             SetPaintTransparent(false);
-            vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+            SetParentClipMode(ParentClipMode::NONE);
         }
     }
 }

@@ -38,8 +38,6 @@
 #include <vcl/uitest/uiobject.hxx>
 #include <vcl/inputctx.hxx>
 
-#include <window/state/clipping_window.hxx>
-
 #include <accessibility/vclxaccessiblebutton.hxx>
 #include <accessibility/vclxaccessiblecheckbox.hxx>
 #include <accessibility/vclxaccessibleradiobutton.hxx>
@@ -648,37 +646,40 @@ const Color& PushButton::GetCanonicalTextColor( const StyleSettings& _rStyle ) c
     return _rStyle.GetButtonTextColor();
 }
 
-void PushButton::ImplInitSettings( bool bBackground )
+void PushButton::ImplInitSettings(bool bBackground)
 {
     Button::ImplInitSettings();
 
-    if ( !bBackground )
+    if (!bBackground)
         return;
 
     SetBackground();
     // #i38498#: do not check for GetParent()->IsChildTransparentModeEnabled()
     // otherwise the formcontrol button will be overdrawn due to ParentClipMode::NoClip
     // for radio and checkbox this is ok as they should appear transparent in documents
-    const bool bIsFlat = (GetStyle() & WB_FLATBUTTON) != 0;
-    if ( IsNativeControlSupported( ControlType::Pushbutton, ControlPart::Entire ) || bIsFlat )
+    const bool bIsFlat = bool(GetStyle() & WB_FLATBUTTON);
+    if (IsNativeControlSupported(ControlType::Pushbutton, ControlPart::Entire) || bIsFlat)
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
-        SetPaintTransparent( true );
+        SetParentClipMode(ParentClipMode::NoClip);
+        SetPaintTransparent(true);
 
         const auto& rNWFData = ImplGetSVData()->maNWFData;
         const bool bNativeFocus = bIsFlat ? rNWFData.mbNoFocusRectsForFlatButtons
                                           : rNWFData.mbNoFocusRects;
-        if (bNativeFocus)
-            ImplGetFocusState()->useNativeFocus();
-        else
-            ImplGetFocusState()->clearNativeFocus();
+        if (auto* pFocusState = ImplGetFocusState())
+        {
+            if (bNativeFocus)
+                pFocusState->useNativeFocus();
+            else
+                pFocusState->clearNativeFocus();
+        }
     }
     else
     {
-        EnableChildTransparentMode( false );
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
-        SetPaintTransparent( false );
+        EnableChildTransparentMode(false);
+        SetParentClipMode(ParentClipMode::NONE);
+        SetPaintTransparent(false);
     }
 }
 
@@ -1882,39 +1883,47 @@ const Color& RadioButton::GetCanonicalTextColor( const StyleSettings& _rStyle ) 
     return _rStyle.GetRadioCheckTextColor();
 }
 
-void RadioButton::ImplInitSettings( bool bBackground )
+void RadioButton::ImplInitSettings(bool bBackground)
 {
     Button::ImplInitSettings();
 
-    if ( !bBackground )
+    if (!bBackground)
         return;
 
     vcl::Window* pParent = GetParent();
-    if ( !HasControlBackground() &&
-        (pParent->IsChildTransparentModeEnabled() || IsNativeControlSupported( ControlType::Radiobutton, ControlPart::Entire ) ) )
+    const bool bNativeSupported
+        = IsNativeControlSupported(ControlType::Radiobutton, ControlPart::Entire);
+    const bool bParentTransparent
+        = pParent && pParent->IsChildTransparentModeEnabled();
+
+    if (!HasControlBackground() && (bParentTransparent || bNativeSupported))
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
-        SetPaintTransparent( true );
+        SetParentClipMode(ParentClipMode::NoClip);
+        SetPaintTransparent(true);
         SetBackground();
-        if( IsNativeControlSupported( ControlType::Radiobutton, ControlPart::Entire ) )
+
+        if (bNativeSupported)
         {
-            if (ImplGetSVData()->maNWFData.mbNoFocusRects)
-                ImplGetFocusState()->useNativeFocus();
-            else
-                ImplGetFocusState()->clearNativeFocus();
+            if (auto* pFocusState = ImplGetFocusState())
+            {
+                if (ImplGetSVData()->maNWFData.mbNoFocusRects)
+                    pFocusState->useNativeFocus();
+                else
+                    pFocusState->clearNativeFocus();
+            }
         }
     }
     else
     {
-        EnableChildTransparentMode( false );
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
-        SetPaintTransparent( false );
+        EnableChildTransparentMode(false);
+        SetParentClipMode(ParentClipMode::NONE);
+        SetPaintTransparent(false);
 
-        if ( HasControlBackground() )
-            SetBackground( GetControlBackground() );
+        if (HasControlBackground() || !pParent)
+            SetBackground(GetControlBackground());
         else
-            SetBackground( pParent->GetBackground() );
+            SetBackground(pParent->GetBackground());
     }
 }
 
@@ -2984,39 +2993,47 @@ const Color& CheckBox::GetCanonicalTextColor( const StyleSettings& _rStyle ) con
     return _rStyle.GetRadioCheckTextColor();
 }
 
-void CheckBox::ImplInitSettings( bool bBackground )
+void CheckBox::ImplInitSettings(bool bBackground)
 {
     Button::ImplInitSettings();
 
-    if ( !bBackground )
+    if (!bBackground)
         return;
 
     vcl::Window* pParent = GetParent();
-    if ( !HasControlBackground() &&
-        (pParent->IsChildTransparentModeEnabled() || IsNativeControlSupported( ControlType::Checkbox, ControlPart::Entire ) ) )
+    const bool bNativeSupported
+        = IsNativeControlSupported(ControlType::Checkbox, ControlPart::Entire);
+    const bool bParentTransparent
+        = pParent && pParent->IsChildTransparentModeEnabled();
+
+    if (!HasControlBackground() && (bParentTransparent || bNativeSupported))
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
-        SetPaintTransparent( true );
+        SetParentClipMode(ParentClipMode::NoClip);
+        SetPaintTransparent(true);
         SetBackground();
-        if( IsNativeControlSupported( ControlType::Checkbox, ControlPart::Entire ) )
+
+        if (bNativeSupported)
         {
-            if (ImplGetSVData()->maNWFData.mbNoFocusRects)
-                ImplGetFocusState()->useNativeFocus();
-            else
-                ImplGetFocusState()->clearNativeFocus();
+            if (auto* pFocusState = ImplGetFocusState())
+            {
+                if (ImplGetSVData()->maNWFData.mbNoFocusRects)
+                    pFocusState->useNativeFocus();
+                else
+                    pFocusState->clearNativeFocus();
+            }
         }
     }
     else
     {
-        EnableChildTransparentMode( false );
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
-        SetPaintTransparent( false );
+        EnableChildTransparentMode(false);
+        SetParentClipMode(ParentClipMode::NONE);
+        SetPaintTransparent(false);
 
-        if ( HasControlBackground() )
-            SetBackground( GetControlBackground() );
+        if (HasControlBackground() || !pParent)
+            SetBackground(GetControlBackground());
         else
-            SetBackground( pParent->GetBackground() );
+            SetBackground(pParent->GetBackground());
     }
 }
 

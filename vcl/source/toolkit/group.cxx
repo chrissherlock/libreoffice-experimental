@@ -22,8 +22,6 @@
 #include <vcl/rendercontext/SystemTextColorFlags.hxx>
 #include <vcl/settings.hxx>
 
-#include <window/state/clipping_window.hxx>
-
 #define GROUP_BORDER            12
 #define GROUP_TEXT_BORDER       2
 
@@ -54,33 +52,34 @@ const Color& GroupBox::GetCanonicalTextColor( const StyleSettings& _rStyle ) con
     return _rStyle.GetGroupTextColor();
 }
 
-void GroupBox::ImplInitSettings( bool bBackground )
+void GroupBox::ImplInitSettings(bool bBackground)
 {
     Control::ImplInitSettings();
 
-    if ( !bBackground )
+    if (!bBackground)
         return;
 
     vcl::Window* pParent = GetParent();
-    if (pParent->IsChildTransparentModeEnabled() ||
-        !(pParent->GetStyle() & WB_CLIPCHILDREN) ||
-        !HasControlBackground())
+    const bool bParentTransparent = pParent && pParent->IsChildTransparentModeEnabled();
+    const bool bParentNoClipChildren = pParent && !(pParent->GetStyle() & WB_CLIPCHILDREN);
+
+    if (bParentTransparent || bParentNoClipChildren || !HasControlBackground())
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
-        SetPaintTransparent( true );
+        SetParentClipMode(ParentClipMode::NoClip);
+        SetPaintTransparent(true);
         SetBackground();
     }
     else
     {
-        EnableChildTransparentMode( false );
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
-        SetPaintTransparent( false );
+        EnableChildTransparentMode(false);
+        SetParentClipMode(ParentClipMode::NONE);
+        SetPaintTransparent(false);
 
-        if ( HasControlBackground() )
-            SetBackground( GetControlBackground() );
+        if (HasControlBackground() || !pParent)
+            SetBackground(GetControlBackground());
         else
-            SetBackground( pParent->GetBackground() );
+            SetBackground(pParent->GetBackground());
     }
 }
 

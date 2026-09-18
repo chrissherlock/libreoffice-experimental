@@ -25,7 +25,6 @@
 #include <vcl/settings.hxx>
 #include <vcl/toolkit/scrbar.hxx>
 
-#include <window/state/clipping_window.hxx>
 #include <svdata.hxx>
 
 void TabPage::ImplInit( vcl::Window* pParent, WinBits nStyle )
@@ -79,20 +78,20 @@ void TabPage::ImplInitSettings()
     if (pParent && pParent->IsChildTransparentModeEnabled() && !HasControlBackground())
     {
         EnableChildTransparentMode();
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NoClip);
-        SetPaintTransparent( true );
+        SetParentClipMode(ParentClipMode::NoClip);
+        SetPaintTransparent(true);
         SetBackground();
     }
     else
     {
-        EnableChildTransparentMode( false );
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
-        SetPaintTransparent( false );
+        EnableChildTransparentMode(false);
+        SetParentClipMode(ParentClipMode::NONE);
+        SetPaintTransparent(false);
 
         if (HasControlBackground() || !pParent)
-            SetBackground( GetControlBackground() );
+            SetBackground(GetControlBackground());
         else
-            SetBackground( pParent->GetBackground() );
+            SetBackground(pParent->GetBackground());
     }
 }
 

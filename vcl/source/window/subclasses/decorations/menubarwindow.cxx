@@ -29,7 +29,7 @@
 #include <sal/log.hxx>
 
 #include <window/state/ImplFrameData.hxx>
-#include <window/state/clipping_window.hxx>
+#include <window/state/WindowClippingState.hxx>
 #include <salframe.hxx>
 #include <salmenu.hxx>
 #include <svdata.hxx>
@@ -114,19 +114,19 @@ void DecoToolBox::SetImages( tools::Long nMaxHeight, bool bForce )
 
 }
 
-MenuBarWindow::MenuBarWindow( vcl::Window* pParent ) :
-    Window( pParent, 0 ),
-    m_aCloseBtn(VclPtr<DecoToolBox>::Create(this)),
-    m_aFloatBtn(VclPtr<PushButton>::Create(this, WB_NOPOINTERFOCUS | WB_SMALLSTYLE | WB_RECTSTYLE)),
-    m_aHideBtn(VclPtr<PushButton>::Create(this, WB_NOPOINTERFOCUS | WB_SMALLSTYLE | WB_RECTSTYLE))
+MenuBarWindow::MenuBarWindow(vcl::Window* pParent)
+    : Window(pParent, 0)
+    , m_pMenu(nullptr)
+    , m_pActivePopup(nullptr)
+    , m_nHighlightedItem(ITEMPOS_INVALID)
+    , m_nRolloveredItem(ITEMPOS_INVALID)
+    , mbAutoPopup(true)
+    , m_bIgnoreFirstMove(true)
+    , m_aCloseBtn(VclPtr<DecoToolBox>::Create(this))
+    , m_aFloatBtn(VclPtr<PushButton>::Create(this, WB_NOPOINTERFOCUS | WB_SMALLSTYLE | WB_RECTSTYLE))
+    , m_aHideBtn(VclPtr<PushButton>::Create(this, WB_NOPOINTERFOCUS | WB_SMALLSTYLE | WB_RECTSTYLE))
 {
     SetType(WindowType::MENUBARWINDOW);
-    m_pMenu = nullptr;
-    m_pActivePopup = nullptr;
-    m_nHighlightedItem = ITEMPOS_INVALID;
-    m_nRolloveredItem = ITEMPOS_INVALID;
-    mbAutoPopup = true;
-    m_bIgnoreFirstMove = true;
     SetMBWHideAccel(ImplGetSVData()->maNWFData.mbAutoAccel);
     SetMBWMenuKey(false);
 
@@ -134,17 +134,19 @@ MenuBarWindow::MenuBarWindow( vcl::Window* pParent ) :
 
     m_aCloseBtn->SetBackground();
     m_aCloseBtn->SetPaintTransparent(true);
-    vcl::clipping::setParentClipMode(m_aCloseBtn, ParentClipMode::NoClip);
+    if (auto* pClipState = m_aCloseBtn->ImplGetClippingState())
+        pClipState->setParentClipMode(*this, ParentClipMode::NoClip);
 
     m_aCloseBtn->InsertItem(ToolBoxItemId(IID_DOCUMENTCLOSE), m_aCloseBtn->maImage);
     m_aCloseBtn->SetSelectHdl(LINK(this, MenuBarWindow, CloseHdl));
     m_aCloseBtn->AddEventListener(LINK(this, MenuBarWindow, ToolboxEventHdl));
-    m_aCloseBtn->SetQuickHelpText(ToolBoxItemId(IID_DOCUMENTCLOSE), VclResId(SV_HELPTEXT_CLOSEDOCUMENT));
+    m_aCloseBtn->SetQuickHelpText(ToolBoxItemId(IID_DOCUMENTCLOSE),
+                                  VclResId(SV_HELPTEXT_CLOSEDOCUMENT));
 
-    m_aFloatBtn->SetSymbol( SymbolType::FLOAT );
+    m_aFloatBtn->SetSymbol(SymbolType::FLOAT);
     m_aFloatBtn->SetQuickHelpText(VclResId(SV_HELPTEXT_RESTORE));
 
-    m_aHideBtn->SetSymbol( SymbolType::HIDE );
+    m_aHideBtn->SetSymbol(SymbolType::HIDE);
     m_aHideBtn->SetQuickHelpText(VclResId(SV_HELPTEXT_MINIMIZE));
 
     ImplInitStyleSettings();
@@ -1055,7 +1057,7 @@ void MenuBarWindow::ApplySettings(vcl::RenderContext& rRenderContext)
         aWallpaper.SetStyle(WallpaperStyle::ApplicationGradient);
         rRenderContext.SetBackground(aWallpaper);
         SetPaintTransparent(false);
-        vcl::clipping::setParentClipMode(this, ParentClipMode::NONE);
+        SetParentClipMode(ParentClipMode::NONE);
     }
 
     rRenderContext.SetTextColor(rStyleSettings.GetMenuBarTextColor());
